@@ -1,0 +1,50 @@
+---
+title: Data Table
+description: Powerful table and datagrids built using TanStack Table.
+originalDocs: https://tanstack.com/table/v8/docs/introduction
+sourceCode: https://github.com/henry-phm/base-stack/blob/main/packages/ui/src/components/DataTable.tsx
+---
+
+## Usage
+
+<ComponentPreview name="DataTableDemo" />
+
+## Examples
+
+### Column Alignment
+
+Control the alignment of column content using the `meta.className` prop on column definitions.
+
+<ComponentPreview name="DataTableColumnAlignment" />
+
+### Loading State
+Displays a loading spinner while the table is fetching data. For optimal user experience, set a fixed table height during loading.
+
+<ComponentPreview name="DataTableLoadingState" />
+
+### Row Selection
+
+Enable row selection with checkboxes and implement bulk actions on selected rows.
+
+<ComponentPreview name="DataTableRowSelection" />
+
+### Sorting
+
+- Enable sorting with `enableSorting`.
+- Manage sort state using `sorting` and `setSorting`.
+- On header click, update `sorting` and send it to your server or data-fetching logic.
+- The table shows sort indicators, but `sorting` is fully handled server-side.
+
+<ComponentPreview name="DataTableSorting" />
+
+### Column Pinning Sticky
+
+Pin columns to the left or right to keep them visible while scrolling horizontally.
+
+<ComponentPreview name="DataTableSticky" />
+
+### Real-world Example
+
+A complete example showing pagination, filtering, sorting, and row selection in a real application.
+
+<ComponentPreview name="DataTableRealworld" />

@@ -1,0 +1,67 @@
+---
+title: Installation
+description: Get started with Base Stack using the CLI tool to create a new project
+---
+
+## Prerequisites
+
+- [Node.js](https://nodejs.org/) - version 18 or higher
+- [pnpm](https://pnpm.io/) - package manager
+- [git](https://git-scm.com/) - version control system
+
+## Quick Start
+
+Create a new Base Stack application using the CLI tool:
+
+```bash
+npx base-stack@latest init
+```
+
+## Project Structure
+
+After running the CLI, you'll get a project with:
+
+```text
+my-project/
+├── apps/
+│   ├── docs/ 
+│   └── [your-app]/  
+├── packages/
+│   ├── eslint-config/
+│   ├── typescript-config/
+│   ├── lib/
+│   └── ui/           
+├── pnpm-workspace.yaml
+└── turbo.json
+```
+- `apps` Contains all application projects in the monorepo.
+- `apps/docs` The documentation site for your project.
+- `apps/[your-app]` A placeholder for your main application(s).
+- `packages` Holds shared code and configuration packages.
+- `packages/eslint-config` Custom shared ESLint configuration for code linting.
+- `packages/typescript-config` Shared TypeScript configuration files.
+- `packages/lib` Contains shared libraries used throughout your applications, like API clients.
+- `packages/ui` A reusable component library for your applications.
+
+## Development
+<MdxTip>If you can't run `pnpm install`, it might be because you haven't initialized `git` or `git`
+isn't installed on your machine. Since this project uses `lefthook` to automatically format code on every commit,
+make sure to initialize a `git` repository before running `pnpm install` </MdxTip>
+
+Navigate to your new project and start development:
+
+```bash
+cd ./my-project
+pnpm install
+pnpm dev
+```
+
+## Building
+
+To build your project for production:
+
+```bash
+pnpm build
+```
+
+For more information on how to use the CLI, you can visit the <Link href="/docs/guide/cli">CLI documentation</Link>.
