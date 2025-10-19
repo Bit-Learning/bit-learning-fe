@@ -1,3 +1,4 @@
+import { motion } from 'framer-motion'
 import MemberGrid from '@/shared/components/MemberGrid'
 import ProductCarousel from '@/shared/components/ProductCarousel'
 import ProductGrid from '@/shared/components/ProductGrid'
@@ -7,35 +8,88 @@ import { Footer } from '@/shared/layouts/Footer'
 import { Header } from '@/shared/layouts/Header'
 import { createFileRoute } from '@tanstack/react-router'
 
+// Define animation variants
+const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0 },
+}
+
 export const Route = createFileRoute('/')({
     component: InnEduHomePage,
 })
 
 function InnEduHomePage() {
     return (
-        <div className="flex flex-col min-h-screen">
+        // === PAGE LOAD ANIMATION ===
+        <motion.div
+            className="flex flex-col min-h-screen"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
             {/* Top background layer */}
             <div className="relative">
-                {/* Purple/Navy curved background */}
                 <div className="absolute inset-0 h-28 bg-[#14244A] rounded-b-3xl" />
-
-                {/* Header sits above */}
                 <div className="relative mt-10 z-10">
                     <Header />
                 </div>
             </div>
 
-            {/* Main content */}
-            <main className="flex-1 bg-[#FFFFFF]">
-                <SlideBanner />
-                <SyllabusGrid title="Giáo Án" badgeText="STEAM" />
-                <MemberGrid title="NHỮNG CHUYÊN GIA INNEDU" badgeText="Giới thiệu" viewMoreLink="hehe" />
-                <ProductGrid title="STEAM, AI, Tâm Lý Học" badgeText="Chuyên đề giáo dục" viewMoreLink="hehe" />
+            {/* === MAIN CONTENT (SCROLL ANIMATED SECTIONS) === */}
+            <main className="flex-1 bg-[#FFFFFF] overflow-hidden">
+                <motion.div
+                    variants={fadeInUp}
+                    initial="hidden"
+                    whileInView="visible"
+                    transition={{ duration: 0.6 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                >
+                    <SlideBanner />
+                </motion.div>
 
-                <ProductCarousel />
+                <motion.div
+                    variants={fadeInUp}
+                    initial="hidden"
+                    whileInView="visible"
+                    transition={{ duration: 0.6, delay: 0.1 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                >
+                    <SyllabusGrid title="Giáo Án" badgeText="STEAM" />
+                </motion.div>
+
+                <motion.div
+                    variants={fadeInUp}
+                    initial="hidden"
+                    whileInView="visible"
+                    transition={{ duration: 0.6, delay: 0.15 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                >
+                    <MemberGrid title="NHỮNG CHUYÊN GIA INNEDU" badgeText="Giới thiệu" viewMoreLink="hehe" />
+                </motion.div>
+
+                <motion.div
+                    variants={fadeInUp}
+                    initial="hidden"
+                    whileInView="visible"
+                    transition={{ duration: 0.6, delay: 0.2 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                >
+                    <ProductGrid title="STEAM, AI, Tâm Lý Học" badgeText="Chuyên đề giáo dục" viewMoreLink="hehe" />
+                </motion.div>
+
+                <motion.div
+                    variants={fadeInUp}
+                    initial="hidden"
+                    whileInView="visible"
+                    transition={{ duration: 0.6, delay: 0.25 }}
+                    viewport={{ once: true, amount: 0.3 }}
+                >
+                    <ProductCarousel />
+                </motion.div>
             </main>
 
+            {/* Footer */}
             <Footer />
-        </div>
+        </motion.div>
     )
 }

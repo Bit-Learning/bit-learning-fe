@@ -7,7 +7,7 @@ import {
     NavigationMenuLink,
 } from '@workspace/ui/components/navigation-menu'
 import { Button } from '@workspace/ui/components/Button'
-import { CountryDropdown } from '@workspace/ui/components/country-dropdown'
+import { CountryDropdown } from '@workspace/ui/components/update/country-dropdown'
 import { useNavigate } from '@tanstack/react-router'
 import { NAV_ITEMS } from '@/shared/data/nav-data'
 

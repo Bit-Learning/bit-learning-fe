@@ -8,7 +8,7 @@ import { Spinner } from '@workspace/ui/components/Spinner'
 import { Icons } from '@workspace/ui/components/icons'
 import { Button } from '@workspace/ui/components/Button'
 import { Input } from '@workspace/ui/components/Input'
-import { Field, FieldGroup, FieldLabel, FieldSeparator } from '@workspace/ui/components/field'
+import { Field, FieldGroup, FieldLabel, FieldSeparator } from '@workspace/ui/components/update/field'
 
 export function UserAuthForm({ className, ...props }: React.ComponentProps<'div'>) {
     const [isLoading, setIsLoading] = React.useState<boolean>(false)

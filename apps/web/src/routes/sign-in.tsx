@@ -7,7 +7,7 @@ export const Route = createFileRoute('/sign-in')({
 import { UserAuthForm } from '@/shared/components/user-auth-form'
 import { cn } from '@workspace/ui/lib/utils'
 import { buttonVariants } from '@workspace/ui/components/Button'
-import { FieldDescription } from '@workspace/ui/components/field'
+import { FieldDescription } from '@workspace/ui/components/update/field'
 
 function SignInPage() {
     return (

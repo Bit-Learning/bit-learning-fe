@@ -1,8 +1,5 @@
-import { Button } from '@workspace/ui/components/Button'
-import { Badge } from '@workspace/ui/components/Badge'
-import { Link } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
-import { MEMBER_ITEMS } from '../data/member-data'
+import { Badge } from '@workspace/ui/components/Badge'
 import { SYLLABUS_ITEMS } from '../data/syllabus-data'
 
 interface Props {
