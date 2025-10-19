@@ -5,8 +5,8 @@
         "paths": {
             "@/*": ["./src/*"],
             "@workspace/ui/*": ["../../packages/ui/src/*"]
-        },
+        }
     },
-    "include": ["**/*.ts", "**/*.tsx"],
+    "include": ["**/*.ts", "**/*.tsx", "../../packages/ui/src/components/icons.tsx"],
     "exclude": ["node_modules"]
 }

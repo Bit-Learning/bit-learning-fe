@@ -1,37 +1,34 @@
-import { ThemeSwitcher } from '@/shared/components/ThemeSwitcher'
+import ProductGrid from '@/shared/components/ProductGrid'
+import SlideBanner from '@/shared/components/SlideBanner'
+import { Footer } from '@/shared/layouts/Footer'
+import { Header } from '@/shared/layouts/Header'
 import { createFileRoute } from '@tanstack/react-router'
-import { Button } from '@workspace/ui/components/Button'
-import { toast } from '@workspace/ui/components/Sonner'
 
 export const Route = createFileRoute('/')({
-    component: WelcomePage,
+    component: InnEduHomePage,
 })
 
-function WelcomePage() {
+function InnEduHomePage() {
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center max-w-2xl mx-auto px-4">
-                <ThemeSwitcher />
+        <div className="flex flex-col min-h-screen">
+            {/* Top background layer */}
+            <div className="relative">
+                {/* Purple/Navy curved background */}
+                <div className="absolute inset-0 h-28 bg-[#14244A] rounded-b-3xl" />
 
-                <h1 className="text-4xl md:text-5xl font-bold my-6">Welcome to Tanstack Router</h1>
-                <p className="text-lg text-muted-foreground">
-                    A powerful routing library for React that enables type-safe, flexible, and scalable navigation in
-                    your applications.
-                </p>
-                <Button
-                    size="lg"
-                    className="mt-6"
-                    onClick={() =>
-                        toast.success({
-                            title: 'Welcome to Tanstack Router',
-                            description:
-                                'You have successfully launched the starter project. Explore and start building your next great idea!',
-                        })
-                    }
-                >
-                    Welcome
-                </Button>
+                {/* Header sits above */}
+                <div className="relative mt-10 z-10">
+                    <Header />
+                </div>
             </div>
+
+            {/* Main content */}
+            <main className="flex-1 bg-[#F5FAFF]">
+                <SlideBanner />
+                <ProductGrid />
+            </main>
+
+            <Footer />
         </div>
     )
 }
