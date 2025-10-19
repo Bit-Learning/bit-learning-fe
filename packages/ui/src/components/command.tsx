@@ -5,7 +5,13 @@ import { Command as CommandPrimitive } from 'cmdk'
 import { SearchIcon } from 'lucide-react'
 
 import { cn } from '@workspace/ui/lib/utils'
-import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@workspace/ui/components/dialog'
+import {
+    Dialog,
+    DialogContent,
+    DialogDescription,
+    DialogHeader,
+    DialogTitle,
+} from '@workspace/ui/components/update/dialog'
 
 function Command({ className, ...props }: React.ComponentProps<typeof CommandPrimitive>) {
     return (

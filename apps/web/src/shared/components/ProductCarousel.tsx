@@ -4,7 +4,7 @@ import {
     CarouselItem,
     CarouselNext,
     CarouselPrevious,
-} from '@workspace/ui/components/carousel'
+} from '@workspace/ui/components/update/carousel'
 import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@workspace/ui/components/Card'
 import { Button } from '@workspace/ui/components/Button'
 import { Badge } from '@workspace/ui/components/Badge'
