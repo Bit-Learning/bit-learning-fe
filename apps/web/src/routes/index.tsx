@@ -1,3 +1,5 @@
+import MemberGrid from '@/shared/components/MemberGrid'
+import ProductCarousel from '@/shared/components/ProductCarousel'
 import ProductGrid from '@/shared/components/ProductGrid'
 import SlideBanner from '@/shared/components/SlideBanner'
 import { Footer } from '@/shared/layouts/Footer'
@@ -23,9 +25,13 @@ function InnEduHomePage() {
             </div>
 
             {/* Main content */}
-            <main className="flex-1 bg-[#F5FAFF]">
+            <main className="flex-1 bg-[#FFFFFF]">
                 <SlideBanner />
-                <ProductGrid />
+                <ProductGrid title="Giáo Án" badgeText="STEAM" />
+                <MemberGrid title="NHỮNG CHUYÊN GIA INNEDU" badgeText="Giới thiệu" viewMoreLink="hehe" />
+                <ProductGrid title="STEAM, AI, Tâm Lý Học" badgeText="Chuyên đề giáo dục" viewMoreLink="hehe" />
+
+                <ProductCarousel />
             </main>
 
             <Footer />
