@@ -13,177 +13,153 @@ import { Route as TermsRouteImport } from './routes/terms'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PresentationRouteImport } from './routes/presentation'
+import { Route as PresentationsRouteImport } from './routes/presentations'
 import { Route as DemoRouteImport } from './routes/Demo'
 import { Route as IndexRouteImport } from './routes/index'
 
 const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
-  getParentRoute: () => rootRouteImport,
+    id: '/terms',
+    path: '/terms',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const SignUpRoute = SignUpRouteImport.update({
-  id: '/sign-up',
-  path: '/sign-up',
-  getParentRoute: () => rootRouteImport,
+    id: '/sign-up',
+    path: '/sign-up',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const SignInRoute = SignInRouteImport.update({
-  id: '/sign-in',
-  path: '/sign-in',
-  getParentRoute: () => rootRouteImport,
+    id: '/sign-in',
+    path: '/sign-in',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
+    id: '/privacy',
+    path: '/privacy',
+    getParentRoute: () => rootRouteImport,
 } as any)
-const PresentationRoute = PresentationRouteImport.update({
-  id: '/presentation',
-  path: '/presentation',
-  getParentRoute: () => rootRouteImport,
+const PresentationsRoute = PresentationsRouteImport.update({
+    id: '/presentations',
+    path: '/presentations',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const DemoRoute = DemoRouteImport.update({
-  id: '/Demo',
-  path: '/Demo',
-  getParentRoute: () => rootRouteImport,
+    id: '/Demo',
+    path: '/Demo',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
-  id: '/',
-  path: '/',
-  getParentRoute: () => rootRouteImport,
+    id: '/',
+    path: '/',
+    getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
-  '/Demo': typeof DemoRoute
-  '/presentation': typeof PresentationRoute
-  '/privacy': typeof PrivacyRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/terms': typeof TermsRoute
+    '/': typeof IndexRoute
+    '/Demo': typeof DemoRoute
+    '/presentations': typeof PresentationsRoute
+    '/privacy': typeof PrivacyRoute
+    '/sign-in': typeof SignInRoute
+    '/sign-up': typeof SignUpRoute
+    '/terms': typeof TermsRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/Demo': typeof DemoRoute
-  '/presentation': typeof PresentationRoute
-  '/privacy': typeof PrivacyRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/terms': typeof TermsRoute
+    '/': typeof IndexRoute
+    '/Demo': typeof DemoRoute
+    '/presentations': typeof PresentationsRoute
+    '/privacy': typeof PrivacyRoute
+    '/sign-in': typeof SignInRoute
+    '/sign-up': typeof SignUpRoute
+    '/terms': typeof TermsRoute
 }
 export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/Demo': typeof DemoRoute
-  '/presentation': typeof PresentationRoute
-  '/privacy': typeof PrivacyRoute
-  '/sign-in': typeof SignInRoute
-  '/sign-up': typeof SignUpRoute
-  '/terms': typeof TermsRoute
+    __root__: typeof rootRouteImport
+    '/': typeof IndexRoute
+    '/Demo': typeof DemoRoute
+    '/presentations': typeof PresentationsRoute
+    '/privacy': typeof PrivacyRoute
+    '/sign-in': typeof SignInRoute
+    '/sign-up': typeof SignUpRoute
+    '/terms': typeof TermsRoute
 }
 export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/Demo'
-    | '/presentation'
-    | '/privacy'
-    | '/sign-in'
-    | '/sign-up'
-    | '/terms'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/Demo'
-    | '/presentation'
-    | '/privacy'
-    | '/sign-in'
-    | '/sign-up'
-    | '/terms'
-  id:
-    | '__root__'
-    | '/'
-    | '/Demo'
-    | '/presentation'
-    | '/privacy'
-    | '/sign-in'
-    | '/sign-up'
-    | '/terms'
-  fileRoutesById: FileRoutesById
+    fileRoutesByFullPath: FileRoutesByFullPath
+    fullPaths: '/' | '/Demo' | '/presentations' | '/privacy' | '/sign-in' | '/sign-up' | '/terms'
+    fileRoutesByTo: FileRoutesByTo
+    to: '/' | '/Demo' | '/presentations' | '/privacy' | '/sign-in' | '/sign-up' | '/terms'
+    id: '__root__' | '/' | '/Demo' | '/presentations' | '/privacy' | '/sign-in' | '/sign-up' | '/terms'
+    fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  DemoRoute: typeof DemoRoute
-  PresentationRoute: typeof PresentationRoute
-  PrivacyRoute: typeof PrivacyRoute
-  SignInRoute: typeof SignInRoute
-  SignUpRoute: typeof SignUpRoute
-  TermsRoute: typeof TermsRoute
+    IndexRoute: typeof IndexRoute
+    DemoRoute: typeof DemoRoute
+    PresentationsRoute: typeof PresentationsRoute
+    PrivacyRoute: typeof PrivacyRoute
+    SignInRoute: typeof SignInRoute
+    SignUpRoute: typeof SignUpRoute
+    TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
+    interface FileRoutesByPath {
+        '/terms': {
+            id: '/terms'
+            path: '/terms'
+            fullPath: '/terms'
+            preLoaderRoute: typeof TermsRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/sign-up': {
+            id: '/sign-up'
+            path: '/sign-up'
+            fullPath: '/sign-up'
+            preLoaderRoute: typeof SignUpRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/sign-in': {
+            id: '/sign-in'
+            path: '/sign-in'
+            fullPath: '/sign-in'
+            preLoaderRoute: typeof SignInRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/privacy': {
+            id: '/privacy'
+            path: '/privacy'
+            fullPath: '/privacy'
+            preLoaderRoute: typeof PrivacyRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/presentations': {
+            id: '/presentations'
+            path: '/presentations'
+            fullPath: '/presentations'
+            preLoaderRoute: typeof PresentationsRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/Demo': {
+            id: '/Demo'
+            path: '/Demo'
+            fullPath: '/Demo'
+            preLoaderRoute: typeof DemoRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/': {
+            id: '/'
+            path: '/'
+            fullPath: '/'
+            preLoaderRoute: typeof IndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
     }
-    '/sign-up': {
-      id: '/sign-up'
-      path: '/sign-up'
-      fullPath: '/sign-up'
-      preLoaderRoute: typeof SignUpRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/sign-in': {
-      id: '/sign-in'
-      path: '/sign-in'
-      fullPath: '/sign-in'
-      preLoaderRoute: typeof SignInRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentation': {
-      id: '/presentation'
-      path: '/presentation'
-      fullPath: '/presentation'
-      preLoaderRoute: typeof PresentationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/Demo': {
-      id: '/Demo'
-      path: '/Demo'
-      fullPath: '/Demo'
-      preLoaderRoute: typeof DemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-  }
 }
 
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
-  DemoRoute: DemoRoute,
-  PresentationRoute: PresentationRoute,
-  PrivacyRoute: PrivacyRoute,
-  SignInRoute: SignInRoute,
-  SignUpRoute: SignUpRoute,
-  TermsRoute: TermsRoute,
+    IndexRoute: IndexRoute,
+    DemoRoute: DemoRoute,
+    PresentationsRoute: PresentationsRoute,
+    PrivacyRoute: PrivacyRoute,
+    SignInRoute: SignInRoute,
+    SignUpRoute: SignUpRoute,
+    TermsRoute: TermsRoute,
 }
-export const routeTree = rootRouteImport
-  ._addFileChildren(rootRouteChildren)
-  ._addFileTypes<FileRouteTypes>()
+export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()

@@ -10,18 +10,18 @@ import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { CountryDropdown } from '@workspace/ui/components/update/country-dropdown'
 import { Button } from '@workspace/ui/components/update/button'
 import { User, UserPlus } from 'lucide-react'
+import PresentationBanner from '@/shared/components/PresentationBanner'
 
-// Define animation variants
 const fadeInUp = {
     hidden: { opacity: 0, y: 40 },
     visible: { opacity: 1, y: 0 },
 }
 
-export const Route = createFileRoute('/')({
-    component: InnEduHomePage,
+export const Route = createFileRoute('/presentations')({
+    component: PresentationRoute,
 })
 
-function InnEduHomePage() {
+function PresentationRoute() {
     const navigate = useNavigate()
 
     return (
@@ -32,7 +32,6 @@ function InnEduHomePage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
         >
-            {/* Top background layer */}
             <FullHeader />
 
             {/* === MAIN CONTENT (SCROLL ANIMATED SECTIONS) === */}
@@ -44,27 +43,7 @@ function InnEduHomePage() {
                     transition={{ duration: 0.6 }}
                     viewport={{ once: true, amount: 0.3 }}
                 >
-                    <SlideBanner />
-                </motion.div>
-
-                <motion.div
-                    variants={fadeInUp}
-                    initial="hidden"
-                    whileInView="visible"
-                    transition={{ duration: 0.6, delay: 0.1 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                >
-                    <SyllabusGrid title="Giáo Án" badgeText="STEAM" />
-                </motion.div>
-
-                <motion.div
-                    variants={fadeInUp}
-                    initial="hidden"
-                    whileInView="visible"
-                    transition={{ duration: 0.6, delay: 0.15 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                >
-                    <MemberGrid title="NHỮNG CHUYÊN GIA INNEDU" badgeText="Giới thiệu" viewMoreLink="hehe" />
+                    <PresentationBanner />
                 </motion.div>
 
                 <motion.div
@@ -75,16 +54,6 @@ function InnEduHomePage() {
                     viewport={{ once: true, amount: 0.3 }}
                 >
                     <ProductGrid title="STEAM, AI, Tâm Lý Học" badgeText="Chuyên đề giáo dục" viewMoreLink="hehe" />
-                </motion.div>
-
-                <motion.div
-                    variants={fadeInUp}
-                    initial="hidden"
-                    whileInView="visible"
-                    transition={{ duration: 0.6, delay: 0.25 }}
-                    viewport={{ once: true, amount: 0.3 }}
-                >
-                    <ProductCarousel />
                 </motion.div>
             </main>
 

@@ -10,6 +10,7 @@ import { Button } from '@workspace/ui/components/Button'
 import { CountryDropdown } from '@workspace/ui/components/update/country-dropdown'
 import { useNavigate } from '@tanstack/react-router'
 import { NAV_ITEMS } from '@/shared/data/nav-data'
+import { User, UserPlus } from 'lucide-react'
 
 export function Header() {
     const navigate = useNavigate()
@@ -84,5 +85,33 @@ function ListItem({
             </div>
             {children && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{children}</p>}
         </li>
+    )
+}
+
+export function FullHeader() {
+    const navigate = useNavigate()
+
+    return (
+        <div className="relative">
+            {/* Purple/Navy curved background */}
+            <div className="absolute inset-0 h-28 bg-[#14244A] rounded-b-3xl" />
+
+            {/* Right-side actions */}
+            <div className="absolute top-2 right-5 z-20 flex items-center gap-3">
+                {/* <CountryDropdown placeholder="Select country" defaultValue="VNM" onChange={() => {}} slim /> */}
+                <Button variant="link" onClick={() => navigate({ to: '/sign-in' })} className="text-white">
+                    <User /> Đăng nhập
+                </Button>
+                <Button variant="link" onClick={() => navigate({ to: '/sign-in' })} className="text-white">
+                    <UserPlus />
+                    Đăng ký
+                </Button>
+            </div>
+
+            {/* Header sits below */}
+            <div className="relative mt-10 z-100">
+                <Header />
+            </div>
+        </div>
     )
 }

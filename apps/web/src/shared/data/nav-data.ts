@@ -23,15 +23,15 @@ export type NavItem = NavSingle | NavDropdown
 
 export const NAV_ITEMS: NavItem[] = [
     {
-        label: 'Home',
+        label: 'Trang chủ',
         to: '/',
     },
     {
-        label: 'About',
+        label: 'Về chúng tôi',
         to: '/about',
     },
     {
-        label: 'Products',
+        label: 'Các sản phẩm',
         type: 'dropdown',
         items: [
             {
@@ -45,6 +45,11 @@ export const NAV_ITEMS: NavItem[] = [
                 description: 'Check out the latest additions.',
             },
             {
+                title: 'Presentations',
+                to: '/presentations',
+                description: 'Explore our range of presentation products.',
+            },
+            {
                 title: 'On Sale',
                 to: '/products/sale',
                 description: 'Grab the best deals while they last!',
@@ -52,11 +57,11 @@ export const NAV_ITEMS: NavItem[] = [
         ],
     },
     {
-        label: 'Blog',
+        label: 'Bài viết',
         to: '/blog',
     },
     {
-        label: 'Contact',
+        label: 'Liên hệ',
         to: '/contact',
     },
 ]
