@@ -13,7 +13,13 @@ import { Route as SignInRouteImport } from './routes/sign-in'
 import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UploadRouteImport } from './routes/upload'
+import { Route as UserProfileRouteImport } from './routes/user-profile'
 
+const UserProfileRoute = UserProfileRouteImport.update({
+    id: '/user-profile',
+    path: '/user-profile',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const UploadRoute = UploadRouteImport.update({
     id: '/upload',
     path: '/upload',
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
     '/sign-up': typeof SignUpRoute
     '/terms': typeof TermsRoute
     '/upload': typeof UploadRoute
+    '/user-profile': typeof UserProfileRoute
 }
 export interface FileRoutesByTo {
     '/': typeof IndexRoute
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
     '/sign-up': typeof SignUpRoute
     '/terms': typeof TermsRoute
     '/upload': typeof UploadRoute
+    '/user-profile': typeof UserProfileRoute
 }
 export interface FileRoutesById {
     __root__: typeof rootRouteImport
@@ -85,13 +93,33 @@ export interface FileRoutesById {
     '/sign-up': typeof SignUpRoute
     '/terms': typeof TermsRoute
     '/upload': typeof UploadRoute
+    '/user-profile': typeof UserProfileRoute
 }
 export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath
-    fullPaths: '/' | '/Demo' | '/presentations' | '/privacy' | '/sign-in' | '/sign-up' | '/terms' | '/upload'
+    fullPaths:
+        | '/'
+        | '/Demo'
+        | '/presentations'
+        | '/privacy'
+        | '/sign-in'
+        | '/sign-up'
+        | '/terms'
+        | '/upload'
+        | '/user-profile'
     fileRoutesByTo: FileRoutesByTo
-    to: '/' | '/Demo' | '/presentations' | '/privacy' | '/sign-in' | '/sign-up' | '/terms' | '/upload'
-    id: '__root__' | '/' | '/Demo' | '/presentations' | '/privacy' | '/sign-in' | '/sign-up' | '/terms' | '/upload'
+    to: '/' | '/Demo' | '/presentations' | '/privacy' | '/sign-in' | '/sign-up' | '/terms' | '/upload' | '/user-profile'
+    id:
+        | '__root__'
+        | '/'
+        | '/Demo'
+        | '/presentations'
+        | '/privacy'
+        | '/sign-in'
+        | '/sign-up'
+        | '/terms'
+        | '/upload'
+        | '/user-profile'
     fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -103,10 +131,18 @@ export interface RootRouteChildren {
     SignUpRoute: typeof SignUpRoute
     TermsRoute: typeof TermsRoute
     UploadRoute: typeof UploadRoute
+    UserProfileRoute: typeof UserProfileRoute
 }
 
 declare module '@tanstack/react-router' {
     interface FileRoutesByPath {
+        '/user-profile': {
+            id: '/user-profile'
+            path: '/user-profile'
+            fullPath: '/user-profile'
+            preLoaderRoute: typeof UserProfileRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/upload': {
             id: '/upload'
             path: '/upload'
@@ -175,5 +211,6 @@ const rootRouteChildren: RootRouteChildren = {
     SignUpRoute: SignUpRoute,
     TermsRoute: TermsRoute,
     UploadRoute: UploadRoute,
+    UserProfileRoute: UserProfileRoute,
 }
 export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()

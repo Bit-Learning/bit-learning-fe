@@ -1,5 +1,6 @@
-import { AxiosInstance } from 'axios'
+import { AuthApi } from './sdk/auth.api'
 import { ExampleApi } from './sdk/example.api'
+import { AxiosInstance } from 'axios'
 
 /**
  * API class for the application
@@ -13,8 +14,10 @@ import { ExampleApi } from './sdk/example.api'
  */
 export class Api {
     example: ExampleApi
+    auth: AuthApi
 
     constructor(private readonly client: AxiosInstance) {
         this.example = new ExampleApi(this.client)
+        this.auth = new AuthApi(this.client)
     }
 }

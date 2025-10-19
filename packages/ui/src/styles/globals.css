@@ -45,6 +45,7 @@
   --sidebar-accent-foreground: oklch(0.205 0 0);
   --sidebar-border: oklch(0.922 0 0);
   --sidebar-ring: oklch(0.708 0 0);
+  --sidebar-primary-foreground: hsl(0 0% 98%);
 }
 
 .dark {
@@ -82,6 +83,7 @@
   --sidebar-accent-foreground: oklch(0.985 0 0);
   --sidebar-border: oklch(0.269 0 0);
   --sidebar-ring: oklch(0.439 0 0);
+  --sidebar-primary-foreground: hsl(0 0% 100%);
 }
 
 @theme inline {
@@ -124,6 +126,7 @@
   --color-sidebar-ring: var(--sidebar-ring);
   --shadow-sm: 0px 1px 2px 0px oklch(0 0 0 / 5%);
   --shadow-popover: var(--popover-shadow);
+  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
 }
 
 @layer base {
