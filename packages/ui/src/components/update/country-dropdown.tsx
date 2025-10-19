@@ -10,9 +10,9 @@ import {
     CommandItem,
     CommandList,
 } from '@workspace/ui/components/command'
-import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/components/popover'
+import { Popover, PopoverContent, PopoverTrigger } from '@workspace/ui/components/update/popover'
 // utils
-import { cn } from '../lib/utils'
+import { cn } from '../../lib/utils'
 
 // assets
 import { ChevronDown, CheckIcon, Globe } from 'lucide-react'

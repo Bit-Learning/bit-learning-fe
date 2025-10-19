@@ -6,7 +6,10 @@ import SlideBanner from '@/shared/components/SlideBanner'
 import SyllabusGrid from '@/shared/components/SyllabusGrid'
 import { Footer } from '@/shared/layouts/Footer'
 import { Header } from '@/shared/layouts/Header'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute, useNavigate } from '@tanstack/react-router'
+import { CountryDropdown } from '@workspace/ui/components/update/country-dropdown'
+import { Button } from '@workspace/ui/components/update/button'
+import { User, UserPlus } from 'lucide-react'
 
 // Define animation variants
 const fadeInUp = {
@@ -19,6 +22,8 @@ export const Route = createFileRoute('/')({
 })
 
 function InnEduHomePage() {
+    const navigate = useNavigate()
+
     return (
         // === PAGE LOAD ANIMATION ===
         <motion.div
@@ -29,7 +34,22 @@ function InnEduHomePage() {
         >
             {/* Top background layer */}
             <div className="relative">
+                {/* Purple/Navy curved background */}
                 <div className="absolute inset-0 h-28 bg-[#14244A] rounded-b-3xl" />
+
+                {/* Right-side actions */}
+                <div className="absolute top-1 right-2 z-20 flex items-center">
+                    {/* <CountryDropdown placeholder="Select country" defaultValue="VNM" onChange={() => {}} slim /> */}
+                    <Button variant="link" onClick={() => navigate({ to: '/sign-in' })} className="text-white">
+                        <User /> Đăng nhập
+                    </Button>
+                    <Button variant="link" onClick={() => navigate({ to: '/sign-in' })} className="text-white">
+                        <UserPlus />
+                        Đăng ký
+                    </Button>
+                </div>
+
+                {/* Header sits below */}
                 <div className="relative mt-10 z-10">
                     <Header />
                 </div>

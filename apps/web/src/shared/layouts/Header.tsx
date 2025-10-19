@@ -60,14 +60,6 @@ export function Header() {
                         ))}
                     </NavigationMenuList>
                 </NavigationMenu>
-
-                {/* Right-side actions */}
-                <div className="flex items-center gap-3">
-                    <CountryDropdown placeholder="Select country" defaultValue="VNM" onChange={() => {}} slim />
-                    <Button variant="outline" onClick={() => navigate({ to: '/sign-in' })}>
-                        Sign in
-                    </Button>
-                </div>
             </div>
         </header>
     )
