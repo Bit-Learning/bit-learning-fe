@@ -24,7 +24,7 @@
         "react-dom": "^19.1.1",
         "react-hook-form": "^7.62.0",
         "tailwind-merge": "^3.3.1",
-        "zod": "^3.24.2"
+        "zod": "^4.1.12"
     },
     "devDependencies": {
         "@types/react": "^19.1.9",

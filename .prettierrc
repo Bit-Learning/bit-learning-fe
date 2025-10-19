@@ -9,5 +9,6 @@
     "bracketSameLine": false,
     "jsxBracketSameLine": false,
     "jsxSingleQuote": false,
-    "arrowParens": "avoid"
+    "arrowParens": "avoid",
+    "plugins": ["@trivago/prettier-plugin-sort-imports", "prettier-plugin-tailwindcss"]
 }

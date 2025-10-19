@@ -36,7 +36,7 @@
         "sonner": "^2.0.7",
         "unist-util-visit": "^5.0.0",
         "xstate": "^5.19.0",
-        "zod": "^3.25.76",
+        "zod": "^4.1.12",
         "axios": "^1.12.2"
     },
     "devDependencies": {
