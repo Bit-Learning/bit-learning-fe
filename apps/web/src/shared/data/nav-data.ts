@@ -50,9 +50,9 @@ export const NAV_ITEMS: NavItem[] = [
                 description: 'Explore our range of presentation products.',
             },
             {
-                title: 'On Sale',
-                to: '/products/sale',
-                description: 'Grab the best deals while they last!',
+                title: 'AI Powered Slide Generator',
+                to: '/chat',
+                description: 'Create slides quickly with AI assistance.',
             },
         ],
     },

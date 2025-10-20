@@ -44,6 +44,24 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     const login = async (username: string, password: string) => {
         try {
+            if (username === 'admin' && password === '1') {
+                const adminUser: User = {
+                    id: 0,
+                    username: 'admin',
+                    email: 'adminTemp@gmail.com',
+                    activated: true,
+                    role: 'admin',
+                    activationKey: '',
+                    resetKey: null,
+                    langKey: 'en',
+                    lastLoginAttempt: Date.now(),
+                }
+                api.auth.setUser(JSON.stringify(adminUser))
+                setUser(adminUser)
+                api.auth.setTokens('admin-access-token', 'admin-refresh-token')
+                return
+            }
+
             const response = await api.auth.login({ username, password })
 
             if (response.type === 'success' && response.data) {

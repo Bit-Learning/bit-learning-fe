@@ -2,10 +2,10 @@
 
 import { Slot } from '@radix-ui/react-slot'
 import { Skeleton } from '@workspace/ui/components/Skeleton'
-import { Separator } from '@workspace/ui/components/separator'
 import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle } from '@workspace/ui/components/sheet'
 import { Button } from '@workspace/ui/components/update/button'
 import { Input } from '@workspace/ui/components/update/input'
+import { Separator } from '@workspace/ui/components/update/separator'
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@workspace/ui/components/update/tooltip'
 import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 import { cn } from '@workspace/ui/lib/utils'
