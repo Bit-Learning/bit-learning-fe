@@ -1,6 +1,6 @@
 import ProfileContent from '@/shared/components/profile-page/profile-content'
 import { useAuth } from '@/shared/context/AuthContext'
-import { createFileRoute, Link, Navigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -25,11 +25,12 @@ import { Camera, Calendar, Mail, MapPin, Home, User, Settings, Bell, Shield, Key
 import * as React from 'react'
 
 function UserProfilePage() {
-    const { user, isAuthenticated, logout } = useAuth()
+    const { user, logout } = useAuth()
     const [activeSection, setActiveSection] = React.useState('overview')
 
-    if (!isAuthenticated || !user) {
-        return <Navigate to="/sign-in" />
+    // User is guaranteed to exist here because of route-level protection
+    if (!user) {
+        return null // This should never happen due to beforeLoad
     }
 
     const handleLogout = () => {
