@@ -35,24 +35,29 @@ export const NAV_ITEMS: NavItem[] = [
         type: 'dropdown',
         items: [
             {
-                title: 'All Products',
+                title: 'Tất cả sản phẩm',
                 to: '/products',
-                description: 'Browse our full product catalog.',
+                description: 'Xem toàn bộ danh mục sản phẩm của chúng tôi.',
             },
             {
-                title: 'New Arrivals',
+                title: 'Sản phẩm mới',
                 to: '/products/new',
-                description: 'Check out the latest additions.',
+                description: 'Khám phá những sản phẩm vừa được ra mắt.',
             },
             {
-                title: 'Presentations',
+                title: 'Bài thuyết trình',
                 to: '/presentations',
-                description: 'Explore our range of presentation products.',
+                description: 'Khám phá các sản phẩm và công cụ hỗ trợ thuyết trình.',
             },
             {
-                title: 'AI Powered Slide Generator',
+                title: 'Trình tạo slide bằng AI',
                 to: '/chat',
-                description: 'Create slides quickly with AI assistance.',
+                description: 'Tạo slide nhanh chóng với sự hỗ trợ của AI.',
+            },
+            {
+                title: 'Mẫu slide có sẵn',
+                to: '/templates/dashboard',
+                description: 'Khám phá các mẫu slide được thiết kế chuyên nghiệp.',
             },
         ],
     },
@@ -63,5 +68,28 @@ export const NAV_ITEMS: NavItem[] = [
     {
         label: 'Liên hệ',
         to: '/contact',
+    },
+]
+
+export const PRESENTATION_ITEMS: NavItem[] = [
+    {
+        label: 'Tạo template',
+        to: '/custom-template',
+    },
+    // {
+    //     label: 'API Docs',
+    //     to: '/templates/docs',
+    // },
+    {
+        label: 'Các mẫu có sẵn',
+        to: '/templates/template-preview',
+    },
+    {
+        label: 'Thống kê',
+        to: '/templates/dashboard',
+    },
+    {
+        label: 'Tài khoản',
+        to: '/user-profile',
     },
 ]

@@ -3,18 +3,18 @@ import { createFileRoute } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { toast } from '@workspace/ui/components/Sonner'
 
-export const Route = createFileRoute('/Demo')({
+export const Route = createFileRoute('/demo')({
     component: WelcomePage,
 })
 
 function WelcomePage() {
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center max-w-2xl mx-auto px-4">
+        <div className="flex min-h-screen items-center justify-center">
+            <div className="mx-auto max-w-2xl px-4 text-center">
                 <ThemeSwitcher />
 
-                <h1 className="text-4xl md:text-5xl font-bold my-6">Welcome to Tanstack Router</h1>
-                <p className="text-lg text-muted-foreground">
+                <h1 className="my-6 text-4xl font-bold md:text-5xl">Welcome to Tanstack Router</h1>
+                <p className="text-muted-foreground text-lg">
                     A powerful routing library for React that enables type-safe, flexible, and scalable navigation in
                     your applications.
                 </p>
