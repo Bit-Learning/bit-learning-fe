@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuth } from '@/shared/context/AuthContext'
-import { useNavigate } from '@tanstack/react-router'
+import { useNavigate, useSearch } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Input } from '@workspace/ui/components/Input'
 import { Spinner } from '@workspace/ui/components/Spinner'
@@ -19,6 +19,7 @@ export function UserAuthForm({ className, ...props }: React.ComponentProps<'div'
     const [showPassword, setShowPassword] = React.useState<boolean>(false)
     const { login } = useAuth()
     const navigate = useNavigate()
+    const search = useSearch({ strict: false }) as { redirect?: string }
 
     async function onSubmit(event: React.SyntheticEvent) {
         event.preventDefault()
@@ -27,8 +28,9 @@ export function UserAuthForm({ className, ...props }: React.ComponentProps<'div'
 
         try {
             await login(username, password)
-            // Redirect to user profile or home page after successful login
-            navigate({ to: '/user-profile' })
+            // Redirect to the original page or user profile
+            const redirectTo = search.redirect || '/user-profile'
+            window.location.href = redirectTo
         } catch (err) {
             setError(err instanceof Error ? err.message : 'Login failed. Please try again.')
             console.error('Login error:', err)

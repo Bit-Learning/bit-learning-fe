@@ -1,5 +1,5 @@
 import { useAuth } from '@/shared/context/AuthContext'
-import { NAV_ITEMS } from '@/shared/data/nav-data'
+import { NAV_ITEMS, PRESENTATION_ITEMS } from '@/shared/data/nav-data'
 import { useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
@@ -175,5 +175,59 @@ export function FullHeader() {
                 <Header />
             </div>
         </div>
+    )
+}
+
+export function PresentationHeader() {
+    const navigate = useNavigate()
+
+    return (
+        <header className="bg-background sticky top-0 z-50 rounded-t-3xl border-b shadow-sm">
+            <div className="container mx-auto flex items-center justify-between py-4">
+                {/* Logo */}
+                <div
+                    onClick={() => navigate({ to: '/' })}
+                    className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
+                >
+                    <img src="/logo-innedu-b.png" alt="InnEdu Logo" className="h-10 object-contain" />
+                </div>
+
+                {/* Navigation */}
+                <NavigationMenu>
+                    <NavigationMenuList className="flex-wrap">
+                        {PRESENTATION_ITEMS.map(item => (
+                            <NavigationMenuItem key={item.label}>
+                                {item.type === 'dropdown' ? (
+                                    <>
+                                        <NavigationMenuTrigger>{item.label}</NavigationMenuTrigger>
+                                        <NavigationMenuContent>
+                                            <ul className="grid gap-2 p-3 hover:cursor-pointer md:w-[400px] md:grid-cols-2 lg:w-[500px]">
+                                                {item.items.map(subItem => (
+                                                    <ListItem
+                                                        key={subItem.title}
+                                                        title={subItem.title}
+                                                        icon={subItem.icon ? <subItem.icon size={16} /> : undefined}
+                                                        onClick={() => subItem.to && navigate({ to: subItem.to })}
+                                                    >
+                                                        {subItem.description}
+                                                    </ListItem>
+                                                ))}
+                                            </ul>
+                                        </NavigationMenuContent>
+                                    </>
+                                ) : (
+                                    <NavigationMenuLink
+                                        onClick={() => navigate({ to: item.to })}
+                                        className="hover:text-primary px-3 py-2 font-medium transition-colors hover:cursor-pointer"
+                                    >
+                                        {item.label}
+                                    </NavigationMenuLink>
+                                )}
+                            </NavigationMenuItem>
+                        ))}
+                    </NavigationMenuList>
+                </NavigationMenu>
+            </div>
+        </header>
     )
 }
