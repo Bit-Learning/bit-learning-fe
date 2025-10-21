@@ -1,12 +1,11 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { toast } from '@workspace/ui/components/Sonner'
 import { z } from '@workspace/lib/validation'
-
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
+import { toast } from '@workspace/ui/components/Sonner'
 import { Input, PasswordInput } from '@workspace/ui/components/Textfield'
+import { useForm } from 'react-hook-form'
 
 interface FormInputs {
     email: string
@@ -27,7 +26,7 @@ export function RecDependantValidation() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
                 <h2 className="text-xl font-semibold">Register</h2>
                 <FormField
                     control={form.control}
@@ -64,11 +63,9 @@ export function RecDependantValidation() {
                         validate: z
                             .string()
                             .min(6)
-                            .and(
-                                z.literal(form.watch('password'), {
-                                    errorMap: () => ({ message: "Passwords don't match" }),
-                                }),
-                            )
+                            .refine(val => val === form.watch('password'), {
+                                message: "Passwords don't match",
+                            })
                             .validateFn(),
                     }}
                     render={({ field }) => (

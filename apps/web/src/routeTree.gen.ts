@@ -16,6 +16,9 @@ import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
 import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
+import { Route as TemplatesSlidevIdEditRouteImport } from './routes/templates/slidev/$id/edit'
+import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
+import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
 import { Route as TemplatesTemplatePreviewRouteImport } from './routes/templates/template-preview'
 import { Route as TermsRouteImport } from './routes/terms'
 import { Route as UploadRouteImport } from './routes/upload'
@@ -96,6 +99,21 @@ const TemplatesIdRoute = TemplatesIdRouteImport.update({
     path: '/templates/$id',
     getParentRoute: () => rootRouteImport,
 } as any)
+const TemplatesSlidevIndexRoute = TemplatesSlidevIndexRouteImport.update({
+    id: '/templates/slidev/',
+    path: '/templates/slidev/',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
+    id: '/templates/slidev/create',
+    path: '/templates/slidev/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
+    id: '/templates/slidev/$id/edit',
+    path: '/templates/slidev/$id/edit',
+    getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
     '/': typeof IndexRoute
@@ -113,6 +131,9 @@ export interface FileRoutesByFullPath {
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/templates': typeof TemplatesIndexRoute
+    '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+    '/templates/slidev': typeof TemplatesSlidevIndexRoute
+    '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
 }
 export interface FileRoutesByTo {
     '/': typeof IndexRoute
@@ -130,6 +151,9 @@ export interface FileRoutesByTo {
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/templates': typeof TemplatesIndexRoute
+    '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+    '/templates/slidev': typeof TemplatesSlidevIndexRoute
+    '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
 }
 export interface FileRoutesById {
     __root__: typeof rootRouteImport
@@ -148,6 +172,9 @@ export interface FileRoutesById {
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/templates/': typeof TemplatesIndexRoute
+    '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+    '/templates/slidev/': typeof TemplatesSlidevIndexRoute
+    '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
 }
 export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath
@@ -167,6 +194,9 @@ export interface FileRouteTypes {
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/templates'
+        | '/templates/slidev/create'
+        | '/templates/slidev'
+        | '/templates/slidev/$id/edit'
     fileRoutesByTo: FileRoutesByTo
     to:
         | '/'
@@ -184,6 +214,9 @@ export interface FileRouteTypes {
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/templates'
+        | '/templates/slidev/create'
+        | '/templates/slidev'
+        | '/templates/slidev/$id/edit'
     id:
         | '__root__'
         | '/'
@@ -201,6 +234,9 @@ export interface FileRouteTypes {
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/templates/'
+        | '/templates/slidev/create'
+        | '/templates/slidev/'
+        | '/templates/slidev/$id/edit'
     fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -219,6 +255,9 @@ export interface RootRouteChildren {
     TemplatesDashboardRoute: typeof TemplatesDashboardRoute
     TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
     TemplatesIndexRoute: typeof TemplatesIndexRoute
+    TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
+    TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
+    TemplatesSlidevIdEditRoute: typeof TemplatesSlidevIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -328,6 +367,27 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesIdRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/templates/slidev/': {
+            id: '/templates/slidev/'
+            path: '/templates/slidev'
+            fullPath: '/templates/slidev'
+            preLoaderRoute: typeof TemplatesSlidevIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/templates/slidev/create': {
+            id: '/templates/slidev/create'
+            path: '/templates/slidev/create'
+            fullPath: '/templates/slidev/create'
+            preLoaderRoute: typeof TemplatesSlidevCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/templates/slidev/$id/edit': {
+            id: '/templates/slidev/$id/edit'
+            path: '/templates/slidev/$id/edit'
+            fullPath: '/templates/slidev/$id/edit'
+            preLoaderRoute: typeof TemplatesSlidevIdEditRouteImport
+            parentRoute: typeof rootRouteImport
+        }
     }
 }
 
@@ -347,5 +407,8 @@ const rootRouteChildren: RootRouteChildren = {
     TemplatesDashboardRoute: TemplatesDashboardRoute,
     TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
     TemplatesIndexRoute: TemplatesIndexRoute,
+    TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
+    TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
+    TemplatesSlidevIdEditRoute: TemplatesSlidevIdEditRoute,
 }
 export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()
