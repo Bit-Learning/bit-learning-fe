@@ -17,6 +17,7 @@
         "@types/prismjs": "^1.26.5",
         "@workspace/lib": "workspace:*",
         "@workspace/ui": "workspace:*",
+        "@hookform/resolvers": "^5.2.2",
         "axios": "^1.12.2",
         "clsx": "^2.1.1",
         "framer-motion": "^12.23.24",

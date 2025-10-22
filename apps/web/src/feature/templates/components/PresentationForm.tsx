@@ -195,7 +195,7 @@ export const PresentationForm = ({ presentation, onSubmit, onCancel, isLoading }
                                                 type="button"
                                                 variant="destructive"
                                                 size="sm"
-                                                className="absolute top-2 right-2"
+                                                className="absolute right-2 top-2"
                                                 onClick={() => {
                                                     form.setValue('thumbnail', '')
                                                     setThumbnailPreview('')
