@@ -31,7 +31,7 @@ export function UploaderIcon({ extension = 'txt', className }: UploaderIconProps
     const fill = iconColors[extension] || '#1D4ED8'
 
     return (
-        <div className={cn('relative w-fit h-fit', className)}>
+        <div className={cn('relative h-fit w-fit', className)}>
             <svg
                 className="size-8"
                 xmlns="http://www.w3.org/2000/svg"
@@ -59,7 +59,7 @@ export function UploaderIcon({ extension = 'txt', className }: UploaderIconProps
                 </defs>
             </svg>
             <div
-                className="absolute top-[40%] text-[7px] leading-[7px] font-bold rounded-xs px-0.5 py-0.5 text-white"
+                className="absolute top-[40%] rounded-xs px-0.5 py-0.5 text-[7px] leading-[7px] font-bold text-white"
                 style={{ background: fill }}
             >
                 {extension.toUpperCase()}

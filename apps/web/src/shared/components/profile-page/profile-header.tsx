@@ -2,7 +2,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Av
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
-import { Camera, Calendar, Mail, MapPin } from 'lucide-react'
+import { Calendar, Camera, Mail, MapPin } from 'lucide-react'
 
 export default function ProfileHeader() {
     return (

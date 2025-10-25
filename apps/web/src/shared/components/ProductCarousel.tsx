@@ -1,3 +1,6 @@
+import { Badge } from '@workspace/ui/components/Badge'
+import { Button } from '@workspace/ui/components/Button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import {
     Carousel,
     CarouselContent,
@@ -5,9 +8,6 @@ import {
     CarouselNext,
     CarouselPrevious,
 } from '@workspace/ui/components/update/carousel'
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@workspace/ui/components/Card'
-import { Button } from '@workspace/ui/components/Button'
-import { Badge } from '@workspace/ui/components/Badge'
 
 const mockProducts = [
     { id: 1, name: 'Minimal Chair', desc: 'Elegant and comfy', price: '$89', img: 'https://picsum.photos/300/200' },
@@ -19,18 +19,18 @@ const mockProducts = [
 
 export default function ProductCarousel() {
     return (
-        <section className="container mx-auto py-12 px-6">
-            <div className="flex flex-col items-center mb-8 space-y-4 text-center">
+        <section className="container mx-auto px-6 py-12">
+            <div className="mb-8 flex flex-col items-center space-y-4 text-center">
                 <Badge variant="default">Featured</Badge>
                 <h2 className="text-3xl font-semibold">Shop Highlights</h2>
             </div>
 
-            <Carousel className="w-full relative">
+            <Carousel className="relative w-full">
                 <CarouselContent className="-ml-4 flex gap-6">
                     {mockProducts.map(p => (
-                        <CarouselItem key={p.id} className="basis-[250px] flex-shrink-0">
-                            <Card className="overflow-hidden hover:shadow-md transition-shadow">
-                                <img src={p.img} alt={p.name} className="w-full h-48 object-cover" />
+                        <CarouselItem key={p.id} className="flex-shrink-0 basis-[250px]">
+                            <Card className="overflow-hidden transition-shadow hover:shadow-md">
+                                <img src={p.img} alt={p.name} className="h-48 w-full object-cover" />
                                 <CardHeader>
                                     <CardTitle>{p.name}</CardTitle>
                                     <CardDescription>{p.desc}</CardDescription>
@@ -43,8 +43,8 @@ export default function ProductCarousel() {
                         </CarouselItem>
                     ))}
                 </CarouselContent>
-                <CarouselPrevious className="absolute left-2 top-1/2 transform -translate-y-1/2" />
-                <CarouselNext className="absolute right-2 top-1/2 transform -translate-y-1/2" />
+                <CarouselPrevious className="absolute top-1/2 left-2 -translate-y-1/2 transform" />
+                <CarouselNext className="absolute top-1/2 right-2 -translate-y-1/2 transform" />
             </Carousel>
         </section>
     )

@@ -1,12 +1,12 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { toast } from '@workspace/ui/components/Sonner'
+import { useForm } from 'react-hook-form'
 
+import { z } from '@workspace/lib/validation'
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { BsSelect } from '@workspace/ui/components/Select'
-import { z } from '@workspace/lib/validation'
 
 interface FormValues {
     languages: Array<string>
@@ -46,7 +46,7 @@ export function SelectForm() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-3 w-full">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-3">
                 <FormField
                     control={form.control}
                     name="role"

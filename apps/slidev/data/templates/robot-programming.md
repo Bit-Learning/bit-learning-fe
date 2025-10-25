@@ -5,10 +5,10 @@ class: text-center
 highlighter: shiki
 lineNumbers: true
 info: |
-  ## Robot Programming Course
-  Learn programming through robotics
+    ## Robot Programming Course
+    Learn programming through robotics
 drawings:
-  persist: false
+    persist: false
 transition: slide-left
 title: Robot Programming - PC10
 mdc: true

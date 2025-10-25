@@ -1,5 +1,5 @@
 import { Button } from '@workspace/ui/components/Button'
-import { MenuTrigger, MenuItem, MenuKeyboard, MenuPopover, Menu } from '@workspace/ui/components/Menu'
+import { Menu, MenuItem, MenuKeyboard, MenuPopover, MenuTrigger } from '@workspace/ui/components/Menu'
 
 export function MenuWithKeyboard() {
     return (

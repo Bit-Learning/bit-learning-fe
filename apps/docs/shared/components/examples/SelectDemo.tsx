@@ -1,7 +1,6 @@
 'use client'
 
 import { BsSelect } from '@workspace/ui/components/Select'
-import React from 'react'
 
 const languages = [
     { id: 1, name: 'English' },
@@ -13,7 +12,7 @@ const languages = [
 
 export function SelectDemo() {
     return (
-        <div className="space-y-4 w-full">
+        <div className="w-full space-y-4">
             <BsSelect options={languages} selectionMode="single" />
         </div>
     )

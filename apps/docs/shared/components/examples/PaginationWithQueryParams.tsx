@@ -1,7 +1,7 @@
 'use client'
 
 import { Pagination } from '@workspace/ui/components/Pagination'
-import { useQueryState, parseAsInteger } from 'nuqs'
+import { parseAsInteger, useQueryState } from 'nuqs'
 import { Suspense } from 'react'
 
 /**

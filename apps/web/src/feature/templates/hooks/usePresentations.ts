@@ -1,6 +1,6 @@
+import { useCallback, useState } from 'react'
 import { slidevPresentations } from '../data/slidev-presentations'
 import { SlidevPresentation } from '../types'
-import { useState, useCallback } from 'react'
 
 export const usePresentations = () => {
     const [presentations, setPresentations] = useState<SlidevPresentation[]>(slidevPresentations)

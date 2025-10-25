@@ -1,5 +1,5 @@
-import { LoginRequest, LoginResponse } from './auth.type'
 import { AxiosInstance } from 'axios'
+import { LoginRequest, LoginResponse } from './auth.type'
 
 export class AuthApi {
     constructor(private readonly client: AxiosInstance) {}

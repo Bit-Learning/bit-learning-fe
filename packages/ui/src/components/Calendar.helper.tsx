@@ -28,7 +28,7 @@ export function RangeCalendarCell({ date }: AriaCalendarCellProps) {
         <AriaCalendarCell
             date={date}
             className={cn(
-                'group text-sm outline outline-0 cursor-pointer data-[outside-month=true]:hidden',
+                'group cursor-pointer text-sm outline outline-0 data-[outside-month=true]:hidden',
                 '[td:first-child_&_div]:rounded-s-full [td:last-child_&_div]:rounded-e-full',
             )}
         >
@@ -43,7 +43,7 @@ export function RangeCalendarCell({ date }: AriaCalendarCellProps) {
                 return (
                     <div
                         className={cn(
-                            'w-8 h-8 cursor-pointer',
+                            'h-8 w-8 cursor-pointer',
                             isDisabled && 'cursor-default',
                             isSelected && 'bg-neutral-400/15',
                             isSelectionStart && 'rounded-s-full',

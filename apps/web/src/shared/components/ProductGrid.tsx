@@ -1,8 +1,8 @@
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@workspace/ui/components/Card'
-import { Button } from '@workspace/ui/components/Button'
-import { Badge } from '@workspace/ui/components/Badge'
-import { Link } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
+import { Badge } from '@workspace/ui/components/Badge'
+import { Button } from '@workspace/ui/components/Button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
+import { Link } from 'lucide-react'
 
 const mockProducts = [
     { id: 1, name: 'Minimal Chair', desc: 'Elegant and comfy', price: '$89', img: 'https://picsum.photos/300/200' },
@@ -27,15 +27,15 @@ export default function ProductGrid({
     const navigate = useNavigate()
 
     return (
-        <section className="container mx-auto py-12 px-6">
-            <div className="flex flex-col items-center mb-8 space-y-4">
+        <section className="container mx-auto px-6 py-12">
+            <div className="mb-8 flex flex-col items-center space-y-4">
                 <Badge variant="default">{badgeText}</Badge>
-                <h2 className="text-3xl font-semibold  text-center">{title}</h2>
+                <h2 className="text-center text-3xl font-semibold">{title}</h2>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
                 {mockProducts.map(p => (
-                    <Card key={p.id} className="overflow-hidden hover:shadow-md transition-shadow">
-                        <img src={p.img} alt={p.name} className="w-full h-48 object-cover" />
+                    <Card key={p.id} className="overflow-hidden transition-shadow hover:shadow-md">
+                        <img src={p.img} alt={p.name} className="h-48 w-full object-cover" />
                         <CardHeader>
                             <CardTitle>{p.name}</CardTitle>
                             <CardDescription>{p.desc}</CardDescription>
@@ -48,7 +48,7 @@ export default function ProductGrid({
                 ))}
             </div>
             {viewMoreLink && (
-                <div className="flex flex-col items-center mb-8 space-y-4 mt-12">
+                <div className="mt-12 mb-8 flex flex-col items-center space-y-4">
                     <Button size="lg" variant="default" onClick={() => navigate({ to: viewMoreLink })}>
                         <Link size={16} /> Xem thêm
                     </Button>

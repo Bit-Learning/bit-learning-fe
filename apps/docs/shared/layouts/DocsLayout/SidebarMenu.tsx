@@ -289,8 +289,8 @@ export function SidebarMenu() {
     const groups = getMenuGroups(selectedModule.value)
 
     return (
-        <div className="relative h-full z-[1]">
-            <div className="absolute z-[1] top-0 left-0 right-6 h-7 bg-gradient-to-b from-background to-transparent pointer-events-none"></div>
+        <div className="relative z-[1] h-full">
+            <div className="from-background pointer-events-none absolute top-0 right-6 left-0 z-[1] h-7 bg-gradient-to-b to-transparent"></div>
             <div className="absolute inset-0">
                 <ScrollArea className="h-full -translate-x-px">
                     <div className="">
@@ -300,7 +300,7 @@ export function SidebarMenu() {
                                 <div className="mb-6 space-y-1" key={group.title}>
                                     {group.title && (
                                         <div>
-                                            <h3 className="px-6 flex items-center text-xs uppercase tracking-wide text-muted-foreground/70">
+                                            <h3 className="text-muted-foreground/70 flex items-center px-6 text-xs tracking-wide uppercase">
                                                 {group.title}
                                             </h3>
                                         </div>
@@ -327,7 +327,7 @@ function MenuItem({ title, href, icon, createdAt }: MenuItem) {
     return (
         <Link
             className={cn(
-                'flex items-center gap-2 text-sm px-[23px] h-8 transition-colors text-muted-foreground border-l border-transparent focus-visible:outline-none focus-visible:bg-background-secondary',
+                'text-muted-foreground focus-visible:bg-background-secondary flex h-8 items-center gap-2 border-l border-transparent px-[23px] text-sm transition-colors focus-visible:outline-none',
                 isActive
                     ? 'text-foreground border-foreground font-medium'
                     : 'hover:text-foreground hover:border-foreground/20',
@@ -336,7 +336,7 @@ function MenuItem({ title, href, icon, createdAt }: MenuItem) {
         >
             {icon}
             {title}
-            {isNew && <span className="text-xs bg-primary text-white px-1 py-0.5 rounded">new</span>}
+            {isNew && <span className="bg-primary rounded px-1 py-0.5 text-xs text-white">new</span>}
         </Link>
     )
 }

@@ -41,14 +41,14 @@ export function ModulePicker() {
     const selectedModule = useModulePicker()
 
     return (
-        <div className="pt-6 pb-2 px-6 z-[2] relative">
+        <div className="relative z-[2] px-6 pt-6 pb-2">
             <PopoverTrigger>
-                <Button variant="unstyled" className="text-start w-full transition-colors flex items-center gap-2 p-0">
+                <Button variant="unstyled" className="flex w-full items-center gap-2 p-0 text-start transition-colors">
                     <ModuleItem module={selectedModule} />
-                    <ChevronDown className="ml-auto w-4 h-4 text-neutral-500" />
+                    <ChevronDown className="ml-auto h-4 w-4 text-neutral-500" />
                 </Button>
                 <Popover offset={8} className="rounded-[12px]">
-                    <PopoverDialog className="p-1 w-(--trigger-width)">
+                    <PopoverDialog className="w-(--trigger-width) p-1">
                         {({ close }) => (
                             <div className="flex flex-col gap-1">
                                 {modules.map(item => {
@@ -60,7 +60,7 @@ export function ModulePicker() {
                                             key={item.value}
                                             href={`/docs/${item.value}`}
                                             className={cn(
-                                                'text-start w-full flex items-center gap-2 p-1 hover:bg-neutral-400/5 rounded-md',
+                                                'flex w-full items-center gap-2 rounded-md p-1 text-start hover:bg-neutral-400/5',
                                                 isSelected && 'bg-neutral-400/10!',
                                             )}
                                         >
@@ -80,12 +80,12 @@ export function ModulePicker() {
 function ModuleItem({ module }: { module: Module }) {
     return (
         <>
-            <div className={cn('grid place-items-center w-9 h-9 rounded-sm bg-neutral-400/10', module.className)}>
+            <div className={cn('grid h-9 w-9 place-items-center rounded-sm bg-neutral-400/10', module.className)}>
                 {module.icon}
             </div>
             <div>
                 <p className="text-sm font-semibold">{module.label}</p>
-                <p className="text-xs text-muted-foreground whitespace-nowrap">{module.description}</p>
+                <p className="text-muted-foreground text-xs whitespace-nowrap">{module.description}</p>
             </div>
         </>
     )

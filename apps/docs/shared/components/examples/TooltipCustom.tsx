@@ -10,7 +10,7 @@ export function TooltipCustom() {
                 <Button variant="outline">Custom Tooltip</Button>
                 <Tooltip className="max-w-sm rounded-md">
                     <div className="p-1">
-                        <h4 className="font-semibold text-sm mb-1">Custom Tooltip</h4>
+                        <h4 className="mb-1 text-sm font-semibold">Custom Tooltip</h4>
                         <p className="text-xs">This tooltip has custom styling with a title and description.</p>
                     </div>
                 </Tooltip>
@@ -19,8 +19,8 @@ export function TooltipCustom() {
                 <Button variant="outline">Rich Content</Button>
                 <Tooltip className="max-w-sm rounded-md">
                     <div className="p-1">
-                        <div className="flex items-center space-x-2 mb-1">
-                            <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                        <div className="mb-1 flex items-center space-x-2">
+                            <div className="h-2 w-2 rounded-full bg-green-500"></div>
                             <span className="text-sm font-medium">Status: Active</span>
                         </div>
                         <p className="text-xs">

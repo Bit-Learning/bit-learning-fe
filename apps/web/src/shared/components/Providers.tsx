@@ -3,6 +3,9 @@ import { AuthProvider } from '@/shared/context/AuthContext'
 import { matchQuery, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BsProvider } from '@workspace/ui/components/Provider'
+import { HelmetProvider } from 'react-helmet-async'
+import { Provider } from 'react-redux'
+import store from '../redux/store'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -28,14 +31,18 @@ const queryClient = new QueryClient({
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
         <BsProvider>
-            <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
-                <QueryClientProvider client={queryClient}>
-                    <AuthProvider>
-                        {children}
-                        <ReactQueryDevtools initialIsOpen={false} />
-                    </AuthProvider>
-                </QueryClientProvider>
-            </ThemeProvider>
+            <Provider store={store}>
+                <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
+                    <HelmetProvider>
+                        <QueryClientProvider client={queryClient}>
+                            <AuthProvider>
+                                {children}
+                                <ReactQueryDevtools initialIsOpen={false} />
+                            </AuthProvider>
+                        </QueryClientProvider>
+                    </HelmetProvider>
+                </ThemeProvider>
+            </Provider>
         </BsProvider>
     )
 }

@@ -16,21 +16,21 @@ function Toast(props: ToastProps) {
     const { title, description, id, variant = 'neutral' } = props
 
     return (
-        <div className="group relative flex items-center gap-3 rounded-xl bg-popover shadow-popover border w-full md:w-[364px] py-2.5 px-4 pr-7 min-h-[64px]">
+        <div className="group bg-popover shadow-popover relative flex min-h-[64px] w-full items-center gap-3 rounded-xl border px-4 py-2.5 pr-7 md:w-[364px]">
             <ToastIcon variant={variant} />
             <div className="flex flex-1 items-center">
                 <div className="w-full">
-                    <p className="text-sm font-semibold text-foreground">{title}</p>
-                    {description && <div className="mt-0.5 text-sm text-muted-foreground">{description}</div>}
+                    <p className="text-foreground text-sm font-semibold">{title}</p>
+                    {description && <div className="text-muted-foreground mt-0.5 text-sm">{description}</div>}
                 </div>
             </div>
             <Button
                 size="iconSm"
                 variant="ghost"
                 onClick={() => sonnerToast.dismiss(id)}
-                className="absolute right-1.5 top-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                className="absolute top-1.5 right-1.5 opacity-0 transition-opacity group-hover:opacity-100"
             >
-                <XIcon className="w-4 h-4 text-muted-foreground" />
+                <XIcon className="text-muted-foreground h-4 w-4" />
             </Button>
         </div>
     )
@@ -44,7 +44,7 @@ function ToastIcon({ variant }: { variant: ToastProps['variant'] }) {
     return (
         <>
             {variant === 'success' && <CircleCheckIcon className="size-5 text-green-500 dark:text-green-400" />}
-            {variant === 'error' && <CircleXIcon className="size-5 text-destructive-foreground" />}
+            {variant === 'error' && <CircleXIcon className="text-destructive-foreground size-5" />}
             {variant === 'info' && <InfoIcon className="size-5 text-blue-500 dark:text-blue-400" />}
             {variant === 'warning' && <AlertTriangleIcon className="size-5 text-yellow-500 dark:text-yellow-400" />}
         </>

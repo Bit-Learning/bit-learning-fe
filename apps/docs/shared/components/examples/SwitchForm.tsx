@@ -1,12 +1,12 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { toast } from '@workspace/ui/components/Sonner'
+import { useForm } from 'react-hook-form'
 
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel } from '@workspace/ui/components/Form'
-import { Switch } from '@workspace/ui/components/Switch'
 import { Separator } from '@workspace/ui/components/Separator'
+import { Switch } from '@workspace/ui/components/Switch'
 
 interface FormValues {
     airplaneMode: boolean

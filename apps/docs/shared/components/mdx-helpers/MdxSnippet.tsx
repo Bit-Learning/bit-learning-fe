@@ -25,8 +25,8 @@ export async function MdxSnippet({ children, className, lang = 'bash' }: MdxSnip
 
     return (
         <div>
-            <div className="p-1.5 space-y-1.5 border rounded-lg bg-background mt-4">
-                <div className={cn('pl-1 flex items-center gap-1 not-prose text-[13px]', className)}>
+            <div className="bg-background mt-4 space-y-1.5 rounded-lg border p-1.5">
+                <div className={cn('not-prose flex items-center gap-1 pl-1 text-[13px]', className)}>
                     {lang === 'bash' ? (
                         <SquareTerminal size={16} strokeWidth={1.5} />
                     ) : (
@@ -35,8 +35,8 @@ export async function MdxSnippet({ children, className, lang = 'bash' }: MdxSnip
                     <div>{lang}</div>
                 </div>
 
-                <div className="relative border rounded-sm overflow-hidden ">
-                    <CopyToClipboard text={code} className="absolute right-2 top-2 z-[1]" />
+                <div className="relative overflow-hidden rounded-sm border">
+                    <CopyToClipboard text={code} className="absolute top-2 right-2 z-[1]" />
                     <div className="">
                         <ScrollArea className="grid">
                             <div

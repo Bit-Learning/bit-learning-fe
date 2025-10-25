@@ -21,7 +21,7 @@ import {
     SidebarRail,
     SidebarTrigger,
 } from '@workspace/ui/components/sidebar'
-import { Camera, Calendar, Mail, MapPin, Home, User, Settings, Bell, Shield, Key, LogOut, Activity } from 'lucide-react'
+import { Activity, Bell, Calendar, Camera, Home, Key, LogOut, Mail, MapPin, Settings, Shield, User } from 'lucide-react'
 import * as React from 'react'
 
 function UserProfilePage() {

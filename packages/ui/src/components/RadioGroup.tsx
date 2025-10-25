@@ -1,5 +1,6 @@
 'use client'
 
+import { labelVariants } from '@workspace/ui/components/Field'
 import { Circle } from 'lucide-react'
 import {
     Radio as AriaRadio,
@@ -8,7 +9,6 @@ import {
     RadioProps as AriaRadioProps,
     composeRenderProps,
 } from 'react-aria-components'
-import { labelVariants } from '@workspace/ui/components/Field'
 
 import { cn } from '@workspace/ui/lib/utils'
 
@@ -33,7 +33,7 @@ const Radio = ({ className, children, ...props }: AriaRadioProps) => {
         <AriaRadio
             className={composeRenderProps(className, className =>
                 cn(
-                    'group/radio flex items-center gap-x-2 text-sm cursor-pointer',
+                    'group/radio flex cursor-pointer items-center gap-x-2 text-sm',
                     /* Disabled */
                     'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-70',
                     labelVariants,
@@ -46,11 +46,11 @@ const Radio = ({ className, children, ...props }: AriaRadioProps) => {
                 <>
                     <span
                         className={cn(
-                            'flex aspect-square size-4 items-center justify-center rounded-full border bg-background-secondary text-white ring-offset-background',
+                            'bg-background-secondary ring-offset-background flex aspect-square size-4 items-center justify-center rounded-full border text-white',
                             /* Focus */
                             'group-data-[focused]/radio:outline-none',
                             /* Focus Visible */
-                            'group-data-[focus-visible]/radio:ring-2 group-data-[focus-visible]/radio:ring-primary/40 group-data-[focus-visible]/radio:ring-offset-2',
+                            'group-data-[focus-visible]/radio:ring-primary/40 group-data-[focus-visible]/radio:ring-2 group-data-[focus-visible]/radio:ring-offset-2',
                             /* Selected */
                             'group-data-[selected]/radio:bg-primary group-data-[selected]/radio:border-black/10 group-data-[selected]/radio:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)]',
                             /* Selected Dark */
@@ -91,5 +91,5 @@ function BsRadioGroup({ options, className, ...props }: BsRadioGroupProps) {
     )
 }
 
-export { Radio, RadioGroup, BsRadioGroup }
-export type { BsRadioGroupProps, BsRadioGroupOption }
+export { BsRadioGroup, Radio, RadioGroup }
+export type { BsRadioGroupOption, BsRadioGroupProps }

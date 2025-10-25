@@ -2,19 +2,17 @@ import { useAuth } from '@/shared/context/AuthContext'
 import { NAV_ITEMS, PRESENTATION_ITEMS } from '@/shared/data/nav-data'
 import { useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
-import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
-import { Menu, MenuItem, MenuTrigger, MenuPopover, MenuSeparator } from '@workspace/ui/components/Menu'
+import { Menu, MenuItem, MenuPopover, MenuSeparator, MenuTrigger } from '@workspace/ui/components/Menu'
 import {
     NavigationMenu,
-    NavigationMenuList,
-    NavigationMenuItem,
-    NavigationMenuTrigger,
     NavigationMenuContent,
+    NavigationMenuItem,
     NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuTrigger,
 } from '@workspace/ui/components/navigation-menu'
-import { CountryDropdown } from '@workspace/ui/components/update/country-dropdown'
-import { User, UserPlus, LogOut, UserCircle, Settings } from 'lucide-react'
+import { LogOut, Settings, User, UserCircle, UserPlus } from 'lucide-react'
 
 export function Header() {
     const navigate = useNavigate()
@@ -27,7 +25,7 @@ export function Header() {
                     onClick={() => navigate({ to: '/' })}
                     className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
                 >
-                    <img src="/logo-innedu-b.png" alt="InnEdu Logo" className="h-10 object-contain" />
+                    <img src="/Logo.png" alt="InnEdu Logo" className="h-10 object-contain" />
                 </div>
 
                 {/* Navigation */}
@@ -189,7 +187,7 @@ export function PresentationHeader() {
                     onClick={() => navigate({ to: '/' })}
                     className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
                 >
-                    <img src="/logo-innedu-b.png" alt="InnEdu Logo" className="h-10 object-contain" />
+                    <img src="/Logo.png" alt="InnEdu Logo" className="h-10 object-contain" />
                 </div>
 
                 {/* Navigation */}

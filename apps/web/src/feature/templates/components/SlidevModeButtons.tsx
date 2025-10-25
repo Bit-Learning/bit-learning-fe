@@ -1,6 +1,6 @@
-import { SlidevMode } from '../types'
 import { Button } from '@workspace/ui/components/Button'
 import { ExternalLink, Eye, Grid3x3, Monitor, Share2 } from 'lucide-react'
+import { SlidevMode } from '../types'
 
 interface SlidevModeButtonsProps {
     fileName: string

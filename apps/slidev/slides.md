@@ -7,15 +7,15 @@ background: https://cover.sli.dev
 # some information about your slides (markdown enabled)
 title: Welcome to Slidev
 info: |
-  ## Slidev Starter Template
-  Presentation slides for developers.
+    ## Slidev Starter Template
+    Presentation slides for developers.
 
-  Learn more at [Sli.dev](https://sli.dev)
+    Learn more at [Sli.dev](https://sli.dev)
 # apply UnoCSS classes to the current slide
 class: text-center
 # https://sli.dev/features/drawing
 drawings:
-  persist: false
+    persist: false
 # slide transition: https://sli.dev/guide/animations.html#slide-transitions
 transition: slide-left
 # enable MDC Syntax: https://sli.dev/features/mdc
@@ -44,8 +44,8 @@ The last comment block of each slide will be treated as slide notes. It will be 
 -->
 
 ---
-transition: fade-out
----
+
+## transition: fade-out
 
 # What is Slidev?
 
@@ -58,8 +58,8 @@ Slidev is a slides maker and presenter designed for developers, consist of the f
 - 🎥 **Recording** - built-in recording and camera view
 - 📤 **Portable** - export to PDF, PPTX, PNGs, or even a hostable SPA
 - 🛠 **Hackable** - virtually anything that's possible on a webpage is possible in Slidev
-<br>
-<br>
+  <br>
+  <br>
 
 Read more about [Why Slidev?](https://sli.dev/guide/why)
 
@@ -85,8 +85,10 @@ Here is another comment.
 -->
 
 ---
+
 transition: slide-up
 level: 2
+
 ---
 
 # Navigation
@@ -95,25 +97,29 @@ Hover on the bottom-left corner to see the navigation's controls panel, [learn m
 
 ## Keyboard Shortcuts
 
-|                                                     |                             |
-| --------------------------------------------------- | --------------------------- |
-| <kbd>right</kbd> / <kbd>space</kbd>                 | next animation or slide     |
-| <kbd>left</kbd>  / <kbd>shift</kbd><kbd>space</kbd> | previous animation or slide |
-| <kbd>up</kbd>                                       | previous slide              |
-| <kbd>down</kbd>                                     | next slide                  |
+|                                                    |                             |
+| -------------------------------------------------- | --------------------------- |
+| <kbd>right</kbd> / <kbd>space</kbd>                | next animation or slide     |
+| <kbd>left</kbd> / <kbd>shift</kbd><kbd>space</kbd> | previous animation or slide |
+| <kbd>up</kbd>                                      | previous slide              |
+| <kbd>down</kbd>                                    | next slide                  |
 
 <!-- https://sli.dev/guide/animations.html#click-animation -->
+
 <img
   v-click
   class="absolute -bottom-9 -left-7 w-80 opacity-50"
   src="https://sli.dev/assets/arrow-bottom-left.svg"
   alt=""
 />
+
 <p v-after class="absolute bottom-23 left-45 opacity-30 transform -rotate-10">Here!</p>
 
 ---
+
 layout: two-cols
 layoutClass: gap-16
+
 ---
 
 # Table of contents
@@ -131,8 +137,10 @@ The title will be inferred from your slide content, or you can override it with 
 <Toc text-sm minDepth="1" maxDepth="2" />
 
 ---
+
 layout: image-right
 image: https://cover.sli.dev
+
 ---
 
 # Code
@@ -154,6 +162,7 @@ doubled.value = 2
 <arrow v-click="[4, 5]" x1="350" y1="310" x2="195" y2="342" color="#953" width="2" arrowSize="1" />
 
 <!-- This allow you to embed external code blocks -->
+
 <<< @/snippets/external.ts#snippet
 
 <!-- Footer -->
@@ -184,8 +193,8 @@ Notes can also sync with clicks
 -->
 
 ---
-level: 2
----
+
+## level: 2
 
 # Shiki Magic Move
 
@@ -197,46 +206,34 @@ Add multiple code blocks and wrap them with <code>````md magic-move</code> (four
 ```ts {*|2|*}
 // step 1
 const author = reactive({
-  name: 'John Doe',
-  books: [
-    'Vue 2 - Advanced Guide',
-    'Vue 3 - Basic Guide',
-    'Vue 4 - The Mystery'
-  ]
+    name: 'John Doe',
+    books: ['Vue 2 - Advanced Guide', 'Vue 3 - Basic Guide', 'Vue 4 - The Mystery'],
 })
 ```
 
 ```ts {*|1-2|3-4|3-4,8}
 // step 2
 export default {
-  data() {
-    return {
-      author: {
-        name: 'John Doe',
-        books: [
-          'Vue 2 - Advanced Guide',
-          'Vue 3 - Basic Guide',
-          'Vue 4 - The Mystery'
-        ]
-      }
-    }
-  }
+    data() {
+        return {
+            author: {
+                name: 'John Doe',
+                books: ['Vue 2 - Advanced Guide', 'Vue 3 - Basic Guide', 'Vue 4 - The Mystery'],
+            },
+        }
+    },
 }
 ```
 
 ```ts
 // step 3
 export default {
-  data: () => ({
-    author: {
-      name: 'John Doe',
-      books: [
-        'Vue 2 - Advanced Guide',
-        'Vue 3 - Basic Guide',
-        'Vue 4 - The Mystery'
-      ]
-    }
-  })
+    data: () => ({
+        author: {
+            name: 'John Doe',
+            books: ['Vue 2 - Advanced Guide', 'Vue 3 - Basic Guide', 'Vue 4 - The Mystery'],
+        },
+    }),
 }
 ```
 
@@ -246,12 +243,8 @@ Non-code blocks are ignored.
 <!-- step 4 -->
 <script setup>
 const author = {
-  name: 'John Doe',
-  books: [
-    'Vue 2 - Advanced Guide',
-    'Vue 3 - Basic Guide',
-    'Vue 4 - The Mystery'
-  ]
+    name: 'John Doe',
+    books: ['Vue 2 - Advanced Guide', 'Vue 3 - Basic Guide', 'Vue 4 - The Mystery'],
 }
 </script>
 ```
@@ -300,8 +293,8 @@ Also, HTML elements are valid:
 -->
 
 ---
-class: px-20
----
+
+## class: px-20
 
 # Themes
 
@@ -374,15 +367,7 @@ also allows you to add
 Motion animations are powered by [@vueuse/motion](https://motion.vueuse.org/), triggered by `v-motion` directive.
 
 ```html
-<div
-  v-motion
-  :initial="{ x: -80 }"
-  :enter="{ x: 0 }"
-  :click-3="{ x: 80 }"
-  :leave="{ x: 1000 }"
->
-  Slidev
-</div>
+<div v-motion :initial="{ x: -80 }" :enter="{ x: 0 }" :click-3="{ x: 80 }" :leave="{ x: 1000 }">Slidev</div>
 ```
 
 <div class="w-60 relative">
@@ -458,7 +443,9 @@ LaTeX is supported out-of-box. Powered by [KaTeX](https://katex.org/).
 Inline $\sqrt{3x-1}+(1+x)^2$
 
 Block
-$$ {1|3|all}
+
+$$
+{1|3|all}
 \begin{aligned}
 \nabla \cdot \vec{E} &= \frac{\rho}{\varepsilon_0} \\
 \nabla \cdot \vec{B} &= 0 \\
@@ -548,9 +535,11 @@ database "MySql" {
 Learn more: [Mermaid Diagrams](https://sli.dev/features/mermaid) and [PlantUML Diagrams](https://sli.dev/features/plantuml)
 
 ---
+
 foo: bar
 dragPos:
-  square: 691,32,167,_,-16
+square: 691,32,167,\_,-16
+
 ---
 
 # Draggable Elements
@@ -593,8 +582,10 @@ Double-click on the draggable elements to edit their positions.
 <v-drag-arrow pos="67,452,253,46" two-way op70 />
 
 ---
+
 src: ./pages/imported-slides.md
 hide: false
+
 ---
 
 ---
@@ -624,8 +615,10 @@ console.log(emptyArray<number>(10).reduce(fib => [...fib, fib.at(-1)! + fib.at(-
 ```
 
 ---
+
 layout: center
 class: text-center
+
 ---
 
 # Learn More

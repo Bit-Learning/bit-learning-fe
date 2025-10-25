@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
-import { DataTable } from '@workspace/ui/components/DataTable'
 import { Button } from '@workspace/ui/components/Button'
+import { DataTable } from '@workspace/ui/components/DataTable'
+import React from 'react'
 
 interface Product {
     id: string

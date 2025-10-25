@@ -3,12 +3,12 @@
 import { Button } from '@workspace/ui/components/Button'
 import {
     DialogContent,
+    DialogDescription,
     DialogFooter,
     DialogHeader,
     DialogOverlay,
     DialogTitle,
     DialogTrigger,
-    DialogDescription,
 } from '@workspace/ui/components/Dialog'
 import { Label } from '@workspace/ui/components/Field'
 import { Input } from '@workspace/ui/components/Textfield'

@@ -25,7 +25,7 @@ const Slider = ({ className, orientation = 'horizontal', ...props }: AriaSliderP
     <AriaSlider
         className={composeRenderProps(className, className =>
             cn(
-                'relative flex touch-none select-none items-center',
+                'relative flex touch-none items-center select-none',
                 {
                     'h-full': orientation === 'vertical',
                     'w-full': orientation === 'horizontal',
@@ -46,7 +46,7 @@ const SliderTrack = ({ className, ...props }: AriaSliderTrackProps) => (
                     'h-2 w-full': renderProps.orientation === 'horizontal',
                     'h-full w-2': renderProps.orientation === 'vertical',
                 },
-                'relative grow rounded-full bg-secondary',
+                'bg-secondary relative grow rounded-full',
                 /* Disabled */
                 'data-[disabled]:opacity-50',
                 className,
@@ -63,10 +63,10 @@ const SliderFillTrack = ({ className, ...props }: React.HTMLAttributes<HTMLDivEl
         <div
             style={{ [orientation]: state.getThumbPercent(0) * 100 + '%' }}
             className={cn(
-                'absolute rounded-full bg-primary',
+                'bg-primary absolute rounded-full',
                 {
                     'h-full': state.orientation === 'horizontal',
-                    'w-full bottom-0': state.orientation === 'vertical',
+                    'bottom-0 w-full': state.orientation === 'vertical',
                 },
                 className,
             )}
@@ -79,11 +79,11 @@ const SliderThumb = ({ className }: AriaSliderThumbProps) => (
     <AriaSliderThumb
         className={composeRenderProps(className, className =>
             cn(
-                'left-1/2 top-1/2 block size-5 rounded-full border-2 border-primary bg-background ring-offset-background transition-colors',
+                'border-primary bg-background ring-offset-background top-1/2 left-1/2 block size-5 rounded-full border-2 transition-colors',
                 /* Disabled */
                 'data-[disabled]:pointer-events-none',
                 /* Focus Visible */
-                'data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2',
+                'data-[focus-visible]:ring-ring data-[focus-visible]:ring-2 data-[focus-visible]:ring-offset-2 data-[focus-visible]:outline-none',
                 className,
             ),
         )}

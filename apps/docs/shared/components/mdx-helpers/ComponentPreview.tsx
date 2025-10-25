@@ -17,14 +17,14 @@ export async function ComponentPreview({ name, className }: ComponentPreviewProp
     const out = await highlightCode(code)
 
     return (
-        <div className="border-b p-5! lg:p-10! pt-0! lg:pt-0! w-full mt-4">
-            <div className="p-1.5 space-y-1.5 border rounded-xl bg-background">
-                <div className={cn('p-5 min-h-[100px] not-prose flex items-center justify-center', className)}>
+        <div className="mt-4 w-full border-b p-5! pt-0! lg:p-10! lg:pt-0!">
+            <div className="bg-background space-y-1.5 rounded-xl border p-1.5">
+                <div className={cn('not-prose flex min-h-[100px] items-center justify-center p-5', className)}>
                     <Preview name={name} />
                 </div>
 
-                <div className="relative border rounded-md overflow-hidden ">
-                    <CopyToClipboard text={code} className="absolute right-2 top-2 z-[1]" />
+                <div className="relative overflow-hidden rounded-md border">
+                    <CopyToClipboard text={code} className="absolute top-2 right-2 z-[1]" />
                     <div className="">
                         <ScrollArea className="grid" showVerticalScrollbar={false}>
                             <ComponentPreviewCollapsible html={out} />

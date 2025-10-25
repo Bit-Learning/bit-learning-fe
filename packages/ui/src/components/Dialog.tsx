@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
 import { X } from 'lucide-react'
+import React from 'react'
 import {
     Dialog as AriaDialog,
     DialogProps as AriaDialogProps,
@@ -14,8 +14,8 @@ import {
     composeRenderProps,
 } from 'react-aria-components'
 
-import { cn } from '@workspace/ui/lib/utils'
 import { Button } from '@workspace/ui/components/Button'
+import { cn } from '@workspace/ui/lib/utils'
 
 const Dialog = AriaDialog
 
@@ -28,9 +28,9 @@ const DialogOverlay = ({ className, isDismissable = true, ...props }: AriaModalO
             cn(
                 'fixed inset-0 z-50 bg-black/70',
                 /* Exiting */
-                'data-[exiting]:animate-out max-md:data-[exiting]:duration-300 data-[exiting]:fade-out-0',
+                'data-[exiting]:animate-out data-[exiting]:fade-out-0 max-md:data-[exiting]:duration-300',
                 /* Entering */
-                'data-[entering]:animate-in max-md:data-[entering]:duration-300 data-[entering]:fade-in-0',
+                'data-[entering]:animate-in data-[entering]:fade-in-0 max-md:data-[entering]:duration-300',
                 className,
             ),
         )}
@@ -45,20 +45,14 @@ interface DialogContentProps extends Omit<React.ComponentProps<typeof AriaModal>
     isFullscreenOnMobile?: boolean
 }
 
-const DialogContent = ({
-    className,
-    children,
-    role,
-    closeButton = true,
-    ...props
-}: DialogContentProps) => (
+const DialogContent = ({ className, children, role, closeButton = true, ...props }: DialogContentProps) => (
     <AriaModal
         className={composeRenderProps(className, className =>
             cn(
-                'fixed left-[50vw] top-1/2 z-50 -translate-x-1/2 -translate-y-1/2 bg-background p-5 shadow-2xl w-full max-w-[calc(100vw-40px)] rounded-xl md:max-w-lg dark:border',
+                'bg-background fixed top-1/2 left-[50vw] z-50 w-full max-w-[calc(100vw-40px)] -translate-x-1/2 -translate-y-1/2 rounded-xl p-5 shadow-2xl md:max-w-lg dark:border',
                 'data-[entering]:animate-in data-[exiting]:animate-out data-[entering]:fade-in-0 data-[exiting]:fade-out-0',
                 'md:data-[entering]:zoom-in-97 md:data-[exiting]:zoom-out-97',
-                'max-md:data-[exiting]:duration-300 max-md:data-[entering]:slide-in-from-bottom-5 max-md:data-[exiting]:slide-out-to-bottom-5',
+                'max-md:data-[entering]:slide-in-from-bottom-5 max-md:data-[exiting]:slide-out-to-bottom-5 max-md:data-[exiting]:duration-300',
                 className,
             ),
         )}
@@ -73,9 +67,9 @@ const DialogContent = ({
                             onClick={renderProps.close}
                             size="icon"
                             variant="ghost"
-                            className="absolute right-2.5 top-2.5"
+                            className="absolute top-2.5 right-2.5"
                         >
-                            <X className="size-4! text-muted-foreground" />
+                            <X className="text-muted-foreground size-4!" />
                             <span className="sr-only">Close</span>
                         </Button>
                     )}
@@ -90,20 +84,20 @@ const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivEleme
 )
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-    <div className={cn('flex flex-col-reverse sm:flex-row sm:justify-end gap-2', className)} {...props} />
+    <div className={cn('flex flex-col-reverse gap-2 sm:flex-row sm:justify-end', className)} {...props} />
 )
 
 const DialogTitle = ({ className, ...props }: AriaHeadingProps) => (
     <AriaHeading
         slot="title"
-        className={cn('text-lg font-semibold leading-none tracking-tight', className)}
+        className={cn('text-lg leading-none font-semibold tracking-tight', className)}
         {...props}
     />
 )
 
 const DialogDescription = ({ className, ...props }: React.HTMLAttributes<HTMLParagraphElement>) => (
     <p
-        className={cn('flex flex-col space-y-1.5 text-center text-sm sm:text-left text-muted-foreground', className)}
+        className={cn('text-muted-foreground flex flex-col space-y-1.5 text-center text-sm sm:text-left', className)}
         {...props}
     />
 )

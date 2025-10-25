@@ -38,7 +38,7 @@ const components = {
     ),
     code: ({ ...props }: React.HTMLAttributes<HTMLElement>) => (
         <code
-            className="before:content-[''] after:content-[''] py-0.5 px-1.5 bg-background-tertiary rounded"
+            className="bg-background-tertiary rounded px-1.5 py-0.5 before:content-[''] after:content-['']"
             {...props}
         />
     ),

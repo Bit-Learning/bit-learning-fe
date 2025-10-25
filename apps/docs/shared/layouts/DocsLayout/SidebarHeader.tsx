@@ -1,9 +1,8 @@
-import React from 'react'
 import { Logo } from '@/shared/components/Logo'
 
 export function SidebarHeader() {
     return (
-        <div className="h-full flex items-center px-6">
+        <div className="flex h-full items-center px-6">
             <Logo />
         </div>
     )

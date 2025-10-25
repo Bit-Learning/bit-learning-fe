@@ -1,11 +1,11 @@
-import PresentationLayout from '../layout'
-import { Template } from '../types'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Card, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Separator } from '@workspace/ui/components/Separator'
 import { Spinner } from '@workspace/ui/components/Spinner'
 import axios from 'axios'
+import PresentationLayout from '../layout'
+import { Template } from '../types'
 
 const TemplatePreviewPage = () => {
     const {

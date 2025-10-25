@@ -1,11 +1,11 @@
 import { Logo } from '@/shared/components/Logo'
+import { ModulePicker } from '@/shared/layouts/DocsLayout/ModulePicker'
+import { SidebarMenu } from '@/shared/layouts/DocsLayout/SidebarMenu'
 import { Button } from '@workspace/ui/components/Button'
 import { DialogContent, DialogOverlay, DialogTrigger } from '@workspace/ui/components/Dialog'
 import { MenuIcon } from 'lucide-react'
 import { usePathname } from 'next/navigation'
 import React from 'react'
-import { SidebarMenu } from '@/shared/layouts/DocsLayout/SidebarMenu'
-import { ModulePicker } from '@/shared/layouts/DocsLayout/ModulePicker'
 
 export function HamburgerMenu() {
     const [isOpen, setIsOpen] = React.useState(false)

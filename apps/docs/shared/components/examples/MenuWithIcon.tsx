@@ -2,7 +2,7 @@
 
 import { Button } from '@workspace/ui/components/Button'
 import { Menu, MenuItem, MenuPopover, MenuTrigger } from '@workspace/ui/components/Menu'
-import { MenuIcon, FolderOpen, Pencil, Copy, Share2, Trash2 } from 'lucide-react'
+import { Copy, FolderOpen, MenuIcon, Pencil, Share2, Trash2 } from 'lucide-react'
 
 export function MenuWithIcon() {
     return (

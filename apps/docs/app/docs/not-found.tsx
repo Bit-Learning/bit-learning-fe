@@ -3,7 +3,7 @@ import Link from 'next/link'
 
 export default function NotFound() {
     return (
-        <div className="flex flex-col items-center justify-center mt-10">
+        <div className="mt-10 flex flex-col items-center justify-center">
             <h2 className="text-2xl font-bold">Not Found</h2>
             <p className="text-muted-foreground">Could not find document</p>
             <Button variant={'outline'} className="mt-4" asChild>

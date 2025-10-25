@@ -1,7 +1,7 @@
-import { Button } from '@workspace/ui/components/Button'
-import { Badge } from '@workspace/ui/components/Badge'
-import { Link } from 'lucide-react'
 import { useNavigate } from '@tanstack/react-router'
+import { Badge } from '@workspace/ui/components/Badge'
+import { Button } from '@workspace/ui/components/Button'
+import { Link } from 'lucide-react'
 import { MEMBER_ITEMS } from '../data/member-data'
 
 interface Props {
@@ -20,35 +20,35 @@ export default function MemberGrid({
     const navigate = useNavigate()
 
     return (
-        <section className="container mx-auto py-12 px-6">
+        <section className="container mx-auto px-6 py-12">
             {/* Header */}
-            <div className="flex flex-col items-center mb-8 space-y-2">
+            <div className="mb-8 flex flex-col items-center space-y-2">
                 <Badge
                     variant="outline"
-                    className="text-[#F08701] border-[#F08701] font-semibold tracking-wide uppercase"
+                    className="border-[#F08701] font-semibold tracking-wide text-[#F08701] uppercase"
                 >
                     {badgeText}
                 </Badge>
-                <h2 className="text-3xl font-extrabold text-center text-[#0C1D37] uppercase tracking-tight">{title}</h2>
+                <h2 className="text-center text-3xl font-extrabold tracking-tight text-[#0C1D37] uppercase">{title}</h2>
             </div>
 
             {/* Grid */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
                 {MEMBER_ITEMS.map(p => (
-                    <div key={p.name} className="group flex flex-col items-center text-center cursor-pointer">
+                    <div key={p.name} className="group flex cursor-pointer flex-col items-center text-center">
                         <div className="relative w-full overflow-hidden rounded-2xl">
                             <img
                                 src={p.img}
                                 alt={p.name}
-                                className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                                className="h-64 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                             />
                             {/* Optional overlay (if you want subtle effect) */}
-                            <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors"></div>
+                            <div className="absolute inset-0 bg-black/0 transition-colors group-hover:bg-black/10"></div>
                         </div>
 
                         <div className="mt-4">
                             <h3 className="text-lg font-semibold text-[#0C1D37]">{p.name}</h3>
-                            <p className="text-gray-500 text-sm">{p.role}</p>
+                            <p className="text-sm text-gray-500">{p.role}</p>
                         </div>
                     </div>
                 ))}
@@ -56,11 +56,11 @@ export default function MemberGrid({
 
             {/* View More Button */}
             {viewMoreLink && (
-                <div className="flex justify-center mt-10">
+                <div className="mt-10 flex justify-center">
                     <Button
                         size="lg"
                         onClick={() => navigate({ to: viewMoreLink })}
-                        className="bg-[#F08701] hover:bg-[#d87500] text-white rounded-full px-8 py-5 font-medium shadow-sm transition-colors"
+                        className="rounded-full bg-[#F08701] px-8 py-5 font-medium text-white shadow-sm transition-colors hover:bg-[#d87500]"
                     >
                         <Link size={16} className="mr-2" /> Xem thêm
                     </Button>

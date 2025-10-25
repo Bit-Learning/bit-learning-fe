@@ -1,5 +1,5 @@
+import { createContext, ReactNode, useContext, useEffect, useState } from 'react'
 import { api } from '../lib/api'
-import { createContext, useContext, useState, useEffect, ReactNode } from 'react'
 
 // User type based on API response
 export interface User {

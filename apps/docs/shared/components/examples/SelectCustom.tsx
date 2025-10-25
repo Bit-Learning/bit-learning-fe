@@ -44,7 +44,7 @@ export function SelectCustom() {
                     </Avatar>
                     <div className="flex flex-col">
                         <span>{value.name}</span>
-                        <span className="opacity-60 text-xs">{value.email}</span>
+                        <span className="text-xs opacity-60">{value.email}</span>
                     </div>
                 </div>
             )}

@@ -1,9 +1,9 @@
 'use client'
 
-import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
-import { toast } from '@workspace/ui/components/Sonner'
 import { z } from '@workspace/lib/validation'
+import { toast } from '@workspace/ui/components/Sonner'
 import { PlusCircleIcon, Trash } from 'lucide-react'
+import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
 
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
@@ -39,7 +39,7 @@ export function RecFormFieldArray() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full max-w-[600px]">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full max-w-[600px] space-y-4">
                 <h2 className="text-xl font-semibold">Add Users</h2>
                 {/* FormField is used here just to display validation errors for the entire users array */}
                 <FormField

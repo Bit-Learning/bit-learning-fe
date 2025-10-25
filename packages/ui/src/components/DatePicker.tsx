@@ -1,4 +1,11 @@
 'use client'
+import { parseDate } from '@internationalized/date'
+import { Button } from '@workspace/ui/components/Button'
+import { DateInput } from '@workspace/ui/components/Datefield'
+import { FieldGroup } from '@workspace/ui/components/Field'
+import { Popover } from '@workspace/ui/components/Popover'
+import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
+import { cn } from '@workspace/ui/lib/utils'
 import { CalendarIcon } from 'lucide-react'
 import React from 'react'
 import {
@@ -9,10 +16,6 @@ import {
     PopoverProps as AriaPopoverProps,
     composeRenderProps,
 } from 'react-aria-components'
-import { cn } from '@workspace/ui/lib/utils'
-import { parseDate } from '@internationalized/date'
-import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
-import { Button } from '@workspace/ui/components/Button'
 import {
     Calendar,
     CalendarCell,
@@ -23,9 +26,6 @@ import {
     CalendarHeading,
     RangeCalendar,
 } from './Calendar'
-import { DateInput } from '@workspace/ui/components/Datefield'
-import { FieldGroup } from '@workspace/ui/components/Field'
-import { Popover } from '@workspace/ui/components/Popover'
 
 const DatePicker = AriaDatePicker
 
@@ -36,12 +36,10 @@ const DatePickerContent = ({
     popoverClassName,
     ...props
 }: AriaDialogProps & { popoverClassName?: AriaPopoverProps['className'] }) => (
-    <Popover
-        className={composeRenderProps(popoverClassName, className => cn('w-auto p-1', className))}
-    >
+    <Popover className={composeRenderProps(popoverClassName, className => cn('w-auto p-1', className))}>
         <AriaDialog
             className={cn(
-                'flex w-full flex-col space-y-4 outline-none sm:flex-row sm:space-x-4 sm:space-y-0',
+                'flex w-full flex-col space-y-4 outline-none sm:flex-row sm:space-y-0 sm:space-x-4',
                 className,
             )}
             {...props}
@@ -89,7 +87,7 @@ function BsDatePicker({
             <FieldGroup>
                 <DateInput className="flex-1" variant="ghost" />
                 <Button variant="ghost" size="icon" className="-mr-1 size-6 data-[focus-visible]:ring-offset-0">
-                    <CalendarIcon aria-hidden className="size-4 text-muted-foreground" />
+                    <CalendarIcon aria-hidden className="text-muted-foreground size-4" />
                 </Button>
             </FieldGroup>
             <DatePickerContent>
@@ -158,19 +156,19 @@ function BsDateRangePicker({
         >
             <FieldGroup>
                 <DateInput variant="ghost" slot={'start'} />
-                <span aria-hidden className="px-2 text-sm text-muted-foreground">
+                <span aria-hidden className="text-muted-foreground px-2 text-sm">
                     -
                 </span>
                 <DateInput className="flex-1" variant="ghost" slot={'end'} />
 
                 <Button variant="ghost" size="icon" className="-mr-1 size-6 data-[focus-visible]:ring-offset-0">
-                    <CalendarIcon aria-hidden className="size-4 text-muted-foreground" />
+                    <CalendarIcon aria-hidden className="text-muted-foreground size-4" />
                 </Button>
             </FieldGroup>
             <DatePickerContent>
                 <RangeCalendar visibleDuration={{ months }}>
                     <CalendarHeading />
-                    <div className="flex gap-3 items-start">
+                    <div className="flex items-start gap-3">
                         {Array.from({ length: months }).map((_, index) => (
                             <CalendarGrid key={index} offset={{ months: index }}>
                                 <CalendarGridHeader>

@@ -1,6 +1,6 @@
-import { Card, CardHeader, CardContent, CardTitle, CardDescription } from '@workspace/ui/components/Card'
-import { Button } from '@workspace/ui/components/Button'
 import { Badge } from '@workspace/ui/components/Badge'
+import { Button } from '@workspace/ui/components/Button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Carousel, CarouselItem } from '@workspace/ui/components/EmblaCarousel'
 
 const mockProducts = [
@@ -13,17 +13,17 @@ const mockProducts = [
 
 export default function ProductCarouselEmbla() {
     return (
-        <section className="container mx-auto py-12 px-6">
-            <div className="flex flex-col items-center mb-8 space-y-4">
+        <section className="container mx-auto px-6 py-12">
+            <div className="mb-8 flex flex-col items-center space-y-4">
                 <Badge>Featured</Badge>
-                <h2 className="text-3xl font-semibold text-center">Shop Highlights</h2>
+                <h2 className="text-center text-3xl font-semibold">Shop Highlights</h2>
             </div>
 
             <Carousel className="pb-6">
                 {mockProducts.map(p => (
                     <CarouselItem key={p.id}>
-                        <Card className="overflow-hidden hover:shadow-md transition-shadow">
-                            <img src={p.img} alt={p.name} className="w-full h-48 object-cover" />
+                        <Card className="overflow-hidden transition-shadow hover:shadow-md">
+                            <img src={p.img} alt={p.name} className="h-48 w-full object-cover" />
                             <CardHeader>
                                 <CardTitle>{p.name}</CardTitle>
                                 <CardDescription>{p.desc}</CardDescription>

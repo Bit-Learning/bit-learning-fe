@@ -1,9 +1,9 @@
 'use client'
 
-import React from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
-import { DataTable } from '@workspace/ui/components/DataTable'
 import { Button } from '@workspace/ui/components/Button'
+import { DataTable } from '@workspace/ui/components/DataTable'
+import React from 'react'
 
 interface User {
     id: string
@@ -76,8 +76,8 @@ export function DataTableRowSelection() {
 
     return (
         <div className="w-full space-y-3">
-            <div className="flex items-center justify-between h-8">
-                <span className="text-sm text-muted-foreground">
+            <div className="flex h-8 items-center justify-between">
+                <span className="text-muted-foreground text-sm">
                     {selectedCount} of {data.length} selected
                 </span>
 

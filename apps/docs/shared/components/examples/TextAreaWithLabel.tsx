@@ -1,7 +1,7 @@
 'use client'
 
-import { TextArea } from '@workspace/ui/components/Textfield'
 import { Label } from '@workspace/ui/components/Field'
+import { TextArea } from '@workspace/ui/components/Textfield'
 
 export function TextAreaWithLabel() {
     return (
