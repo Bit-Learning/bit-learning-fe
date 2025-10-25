@@ -1,6 +1,6 @@
+import { AxiosInstance } from 'axios'
 import { AuthApi } from './sdk/auth.api'
 import { ExampleApi } from './sdk/example.api'
-import { AxiosInstance } from 'axios'
 
 /**
  * API class for the application

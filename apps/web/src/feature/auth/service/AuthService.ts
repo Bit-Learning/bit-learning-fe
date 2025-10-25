@@ -1,3 +1,7 @@
+import api from '@/shared/api/api'
+import { endpoints } from '@/shared/constants/endpoints'
+import { ApiResponse } from 'AppModels'
+import type { AxiosResponse } from 'axios'
 import type {
     TForgotPasswordRequest,
     TLoginRequest,
@@ -5,10 +9,6 @@ import type {
     TRegisterRequest,
     TResetPasswordRequest,
 } from '../type/authState'
-import api from '@/shared/api/api'
-import { endpoints } from '@/shared/constants/endpoints'
-import { ApiResponse } from 'AppModels'
-import type { AxiosResponse } from 'axios'
 
 export function Login(requestBody: TLoginRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/login`, requestBody)

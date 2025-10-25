@@ -1,11 +1,11 @@
 'use client'
 
+import { Label, labelVariants } from '@workspace/ui/components/Field'
 import {
     ProgressBar as AriaProgressBar,
     ProgressBarProps as AriaProgressBarProps,
     composeRenderProps,
 } from 'react-aria-components'
-import { Label, labelVariants } from '@workspace/ui/components/Field'
 
 import { cn } from '@workspace/ui/lib/utils'
 
@@ -25,7 +25,7 @@ const Progress = ({ className, barClassName, fillClassName, children, ...props }
                 {children}
                 <div className={cn('relative h-4 w-full overflow-hidden rounded-full bg-neutral-500/15', barClassName)}>
                     <div
-                        className={cn('size-full flex-1 bg-primary-foreground transition-all', fillClassName)}
+                        className={cn('bg-primary-foreground size-full flex-1 transition-all', fillClassName)}
                         style={{
                             transform: `translateX(-${100 - (renderProps.percentage || 0)}%)`,
                         }}
@@ -101,5 +101,5 @@ function BsProgressBar({ label, className, showValue = true, ...props }: BsProgr
     )
 }
 
-export { Progress, CircleProgress, BsProgressBar }
-export type { ProgressProps, BsProgressBarProps }
+export { BsProgressBar, CircleProgress, Progress }
+export type { BsProgressBarProps, ProgressProps }

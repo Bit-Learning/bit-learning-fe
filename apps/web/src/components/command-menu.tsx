@@ -1,4 +1,4 @@
-import { useSearch } from '@/contexts/search-context'
+import { useSearch } from '@/shared/context/search-context'
 import { ScrollArea } from '@workspace/ui/components/ScrollArea'
 import {
     CommandDialog,

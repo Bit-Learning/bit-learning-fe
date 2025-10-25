@@ -13,7 +13,7 @@ export function LoadingOverlay({ children, isLoading }: LoadingOverlayProps) {
             <Slottable>{children}</Slottable>
             {isLoading && (
                 <div className="absolute inset-0 flex items-center justify-center">
-                    <Spinner className="size-7 text-primary" />
+                    <Spinner className="text-primary size-7" />
                 </div>
             )}
         </Slot>

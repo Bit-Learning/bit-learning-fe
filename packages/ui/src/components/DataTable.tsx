@@ -11,17 +11,17 @@ import {
     SortingState as TanstackSortingState,
     useReactTable,
 } from '@tanstack/react-table'
-import { Spinner } from '@workspace/ui/components/Spinner'
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/Table'
-import { cn } from '@workspace/ui/lib/utils'
-import { ArrowDownIcon, ArrowUpIcon, FileSearch } from 'lucide-react'
-import React from 'react'
 import {
     DataTableSorting,
     DataTableSortingSchema,
     getCheckboxColumnDef,
     getCommonPinningStyles,
 } from '@workspace/ui/components/DataTable.utils'
+import { Spinner } from '@workspace/ui/components/Spinner'
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@workspace/ui/components/Table'
+import { cn } from '@workspace/ui/lib/utils'
+import { ArrowDownIcon, ArrowUpIcon, FileSearch } from 'lucide-react'
+import React from 'react'
 
 declare module '@tanstack/react-table' {
     interface ColumnMeta<TData extends RowData, TValue> {
@@ -203,7 +203,7 @@ function DataTable<TData extends Identifiable, TValue>({
                                         >
                                             {flexRender(header.column.columnDef.header, header.getContext())}
                                             {header.column.getCanSort() && (
-                                                <div className="inline-block ml-0.5 -translate-y-px">
+                                                <div className="ml-0.5 inline-block -translate-y-px">
                                                     {{
                                                         asc: <ArrowUpIcon className="inline-block size-4!" />,
                                                         desc: <ArrowDownIcon className="inline-block size-4!" />,
@@ -244,7 +244,7 @@ function DataTable<TData extends Identifiable, TValue>({
                     ))
                 ) : (
                     <tr className="h-20">
-                        <td className="flex flex-col items-center justify-center gap-2 absolute inset-0 top-10">
+                        <td className="absolute inset-0 top-10 flex flex-col items-center justify-center gap-2">
                             {isLoading && <Spinner className="text-primary-foreground size-6" />}
                             {!isLoading && <EmptyState />}
                         </td>
@@ -261,7 +261,7 @@ function EmptyState() {
             <div className="bg-background-tertiary rounded-lg p-3">
                 <FileSearch />
             </div>
-            <span className="text-foreground font-medium text-base">No results</span>
+            <span className="text-foreground text-base font-medium">No results</span>
         </>
     )
 }

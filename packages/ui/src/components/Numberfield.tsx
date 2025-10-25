@@ -1,5 +1,6 @@
 'use client'
 
+import { FieldGroup } from '@workspace/ui/components/Field'
 import { ChevronDown, ChevronUp } from 'lucide-react'
 import {
     Button as AriaButton,
@@ -10,10 +11,9 @@ import {
     NumberFieldProps as AriaNumberFieldProps,
     composeRenderProps,
 } from 'react-aria-components'
-import { FieldGroup } from '@workspace/ui/components/Field'
 
-import { cn } from '@workspace/ui/lib/utils'
 import { Separator } from '@workspace/ui/components/Separator'
+import { cn } from '@workspace/ui/lib/utils'
 
 const NumberField = AriaNumberField
 
@@ -22,7 +22,7 @@ function NumberFieldInput({ className, ...props }: AriaInputProps) {
         <AriaInput
             className={composeRenderProps(className, className =>
                 cn(
-                    'w-fit min-w-0 flex-1 border-r border-transparent pr-2 outline outline-0 placeholder:text-muted-foreground [&::-webkit-search-cancel-button]:hidden',
+                    'placeholder:text-muted-foreground w-fit min-w-0 flex-1 border-r border-transparent pr-2 outline outline-0 [&::-webkit-search-cancel-button]:hidden',
                     className,
                 ),
             )}
@@ -53,7 +53,7 @@ function NumberFieldStepper({ className, ...props }: AriaButtonProps) {
             className={composeRenderProps(className, className =>
                 cn(
                     'flex items-center justify-center',
-                    'w-auto grow rounded-none px-0.5 text-muted-foreground size-4 data-[hovered]:text-foreground cursor-pointer',
+                    'text-muted-foreground data-[hovered]:text-foreground size-4 w-auto grow cursor-pointer rounded-none px-0.5',
                     className,
                 ),
             )}

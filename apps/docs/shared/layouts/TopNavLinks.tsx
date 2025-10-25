@@ -1,9 +1,9 @@
 'use client'
 
-import { usePathname } from 'next/navigation'
-import { cn } from '@workspace/ui/lib/utils'
 import { Button } from '@workspace/ui/components/Button'
+import { cn } from '@workspace/ui/lib/utils'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 
 const navLinks = [
     {

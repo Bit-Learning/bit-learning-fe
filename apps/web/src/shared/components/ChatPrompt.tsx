@@ -1,10 +1,9 @@
-import { mockMessages } from '../data/chat-data'
-import { PrismCodeBlock } from './PrismCodeBlock'
-import { Avatar, AvatarFallback } from '@workspace/ui/components/Avatar'
 import { Button } from '@workspace/ui/components/update/button'
 import { Input } from '@workspace/ui/components/update/input'
-import { Globe, MoreHorizontal, Plus, ArrowUp } from 'lucide-react'
+import { ArrowUp, Globe, MoreHorizontal, Plus } from 'lucide-react'
 import { useEffect, useRef, useState } from 'react'
+import { mockMessages } from '../data/chat-data'
+import { PrismCodeBlock } from './PrismCodeBlock'
 
 // Parse message content to handle code blocks and markdown
 const parseMessageContent = (content: string) => {

@@ -88,7 +88,7 @@ function ConfirmDialog() {
                         <div className="mb-2">
                             {variant === 'default' && <InfoIcon className="size-6 text-blue-500 dark:text-blue-400" />}
                             {variant === 'destructive' && (
-                                <CircleXIcon className="size-6 text-destructive-foreground" />
+                                <CircleXIcon className="text-destructive-foreground size-6" />
                             )}
                         </div>
                         <DialogTitle>{data?.title || 'Confirm'}</DialogTitle>

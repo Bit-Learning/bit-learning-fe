@@ -1,12 +1,12 @@
-import { LoadingOverlay } from '@workspace/ui/components/LoadingOverlay'
 import { Button } from '@workspace/ui/components/Button'
-import { Input } from '@workspace/ui/components/Textfield'
 import { Label } from '@workspace/ui/components/Field'
+import { LoadingOverlay } from '@workspace/ui/components/LoadingOverlay'
+import { Input } from '@workspace/ui/components/Textfield'
 
 export function LoadingOverlayDemo() {
     return (
         <LoadingOverlay isLoading={true}>
-            <div className="space-y-4 w-full max-w-[350px]">
+            <div className="w-full max-w-[350px] space-y-4">
                 <div className="space-y-2">
                     <div>
                         <Label>Email</Label>

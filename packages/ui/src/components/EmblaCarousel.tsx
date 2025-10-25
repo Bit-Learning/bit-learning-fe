@@ -1,10 +1,10 @@
 'use client'
 
-import * as React from 'react'
-import useEmblaCarousel from 'embla-carousel-react'
-import Autoplay from 'embla-carousel-autoplay'
-import { cn } from '../lib/utils'
 import { EmblaOptionsType } from 'embla-carousel'
+import Autoplay from 'embla-carousel-autoplay'
+import useEmblaCarousel from 'embla-carousel-react'
+import * as React from 'react'
+import { cn } from '../lib/utils'
 
 interface CarouselProps extends React.PropsWithChildren {
     options?: EmblaOptionsType

@@ -1,5 +1,5 @@
-import React from 'react'
 import NProgressJs from 'nprogress'
+import React from 'react'
 
 NProgressJs.configure({
     showSpinner: false,

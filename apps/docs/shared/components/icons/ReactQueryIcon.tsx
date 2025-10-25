@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 export function ReactQueryIcon({ className }: { className?: string }) {
     return (
         <svg version="1" viewBox="0 0 633 633" className={className}>

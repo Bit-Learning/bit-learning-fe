@@ -1,8 +1,8 @@
-import { SlidevPresentation } from '../types'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
-import { Calendar, Edit, Tag, Trash2, Copy } from 'lucide-react'
+import { Calendar, Copy, Edit, Tag, Trash2 } from 'lucide-react'
+import { SlidevPresentation } from '../types'
 
 interface PresentationCardProps {
     presentation: SlidevPresentation

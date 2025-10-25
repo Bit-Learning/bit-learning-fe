@@ -76,7 +76,7 @@ export function UploaderItem({
     // card variant
     if (variant === 'card') {
         return (
-            <div className="shrink-0 group relative size-22 grid place-items-center bg-background-secondary rounded-lg">
+            <div className="group bg-background-secondary relative grid size-22 shrink-0 place-items-center rounded-lg">
                 {isUploading && <CircleProgress value={uploaderFile.percent} className="absolute top-1 right-1" />}
 
                 {/* content */}
@@ -85,7 +85,7 @@ export function UploaderItem({
                         src={getUrl()}
                         alt={uploaderFile.name}
                         className={cn(
-                            'size-full object-cover shadow-sm rounded-lg overflow-hidden',
+                            'size-full overflow-hidden rounded-lg object-cover shadow-sm',
                             isUploading && 'opacity-30',
                         )}
                     />
@@ -96,7 +96,7 @@ export function UploaderItem({
                 {/* actions */}
                 <div
                     className={cn(
-                        'absolute inset-[-1px] rounded-lg bg-background-secondary/80 backdrop-blur-[3px] transition-opacity flex items-center justify-center',
+                        'bg-background-secondary/80 absolute inset-[-1px] flex items-center justify-center rounded-lg backdrop-blur-[3px] transition-opacity',
                         'opacity-0 group-hover:opacity-100',
                     )}
                 >
@@ -111,7 +111,7 @@ export function UploaderItem({
                 {/* border */}
                 <div
                     className={cn(
-                        'absolute inset-[-1px] border rounded-lg pointer-events-none',
+                        'pointer-events-none absolute inset-[-1px] rounded-lg border',
                         uploaderFile.status === 'error' && 'border-destructive-foreground',
                     )}
                 ></div>
@@ -123,18 +123,18 @@ export function UploaderItem({
     return (
         <div
             className={cn(
-                'relative border transition-colors bg-background-secondary rounded-lg p-1.5 w-full',
+                'bg-background-secondary relative w-full rounded-lg border p-1.5 transition-colors',
                 uploaderFile.status === 'error' && 'border-destructive-foreground bg-destructive/10',
             )}
         >
-            <div className="flex gap-1 items-center">
+            <div className="flex items-center gap-1">
                 {/* preview  */}
-                <div className={cn('size-11 rounded grid place-items-center', isUploading && 'opacity-60')}>
+                <div className={cn('grid size-11 place-items-center rounded', isUploading && 'opacity-60')}>
                     {isImage ? (
                         <img
                             src={getUrl()}
                             alt={uploaderFile.name}
-                            className="size-10 object-cover rounded-sm overflow-hidden shadow-sm dark:border"
+                            className="size-10 overflow-hidden rounded-sm object-cover shadow-sm dark:border"
                         />
                     ) : (
                         <UploaderIcon extension={uploaderFile.extension} />
@@ -142,21 +142,21 @@ export function UploaderItem({
                 </div>
 
                 {/* file info */}
-                <div className="relative flex-1 flex flex-col gap-0.5">
-                    <span className={cn('text-sm font-medium leading-3.5', isUploading && 'opacity-60')}>
+                <div className="relative flex flex-1 flex-col gap-0.5">
+                    <span className={cn('text-sm leading-3.5 font-medium', isUploading && 'opacity-60')}>
                         {shortenFilename(uploaderFile.name)}
                     </span>
 
                     {uploaderFile.error && (
-                        <span className="text-xs text-destructive-foreground">{uploaderFile.error}</span>
+                        <span className="text-destructive-foreground text-xs">{uploaderFile.error}</span>
                     )}
                     {!uploaderFile.error && (
-                        <span className={cn('text-xs text-muted-foreground', isUploading && 'opacity-60')}>
+                        <span className={cn('text-muted-foreground text-xs', isUploading && 'opacity-60')}>
                             {formatFileSize(uploaderFile.size)}
                         </span>
                     )}
 
-                    <div className="absolute -bottom-[5px] left-0 right-0">
+                    <div className="absolute right-0 -bottom-[5px] left-0">
                         <Progress
                             value={uploaderFile.percent}
                             barClassName={cn('h-1 opacity-0', isUploading && 'opacity-100')}

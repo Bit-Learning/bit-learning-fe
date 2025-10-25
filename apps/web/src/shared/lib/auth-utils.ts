@@ -1,5 +1,5 @@
-import { api } from './api'
 import { redirect } from '@tanstack/react-router'
+import { api } from './api'
 
 /**
  * Check if user is authenticated

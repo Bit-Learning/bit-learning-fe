@@ -1,8 +1,8 @@
 'use client'
-import React from 'react'
-import { cn } from '@workspace/ui/lib/utils'
 import { Button } from '@workspace/ui/components/Button'
+import { cn } from '@workspace/ui/lib/utils'
 import { ChevronDown, ChevronUp } from 'lucide-react'
+import React from 'react'
 
 interface ComponentPreviewCollapsibleProps {
     html: string
@@ -32,7 +32,7 @@ export function ComponentPreviewCollapsible({ html }: ComponentPreviewCollapsibl
                 className={cn('relative [&>pre]:my-0 [&>pre]:rounded-none [&>pre]:pb-8', !isOpen && 'max-h-[200px]')}
             />
             {showCollapseButton && (
-                <div className="absolute bottom-0 right-0 left-0 h-16 flex items-center justify-center bg-gradient-to-t from-background-secondary to-transparent pointer-events-none">
+                <div className="from-background-secondary pointer-events-none absolute right-0 bottom-0 left-0 flex h-16 items-center justify-center bg-gradient-to-t to-transparent">
                     <Button variant="outline" onClick={() => setIsOpen(!isOpen)} className="pointer-events-auto">
                         {isOpen ? (
                             <>

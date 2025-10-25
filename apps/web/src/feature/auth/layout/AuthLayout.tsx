@@ -3,7 +3,7 @@ import React from 'react'
 
 export default function AuthLayout({ children }: { children: React.ReactNode }) {
     return (
-        <div className="z-1 relative bg-white p-6 sm:p-0 dark:bg-gray-900">
+        <div className="relative z-1 bg-white p-6 sm:p-0 dark:bg-gray-900">
             <div className="relative flex h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
                 {children}
                 <div
@@ -17,7 +17,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                         backgroundBlendMode: 'overlay, normal',
                     }}
                 >
-                    <div className="z-1 relative flex items-center justify-center">
+                    <div className="relative z-1 flex items-center justify-center">
                         <div className="flex max-w-xs flex-col items-center">
                             <Link to="/" className="mb-4 block">
                                 <div className="flex items-center space-x-2">
@@ -27,7 +27,7 @@ export default function AuthLayout({ children }: { children: React.ReactNode }) 
                         </div>
                     </div>
                 </div>
-                <div className="fixed bottom-6 right-6 z-50 hidden sm:block"></div>
+                <div className="fixed right-6 bottom-6 z-50 hidden sm:block"></div>
             </div>
         </div>
     )

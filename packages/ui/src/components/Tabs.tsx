@@ -34,7 +34,7 @@ const TabList = <T extends object>({ className, ...props }: AriaTabListProps<T>)
     <AriaTabList
         className={composeRenderProps(className, className =>
             cn(
-                'inline-flex h-10 items-center justify-center rounded-md bg-muted p-1 text-muted-foreground',
+                'bg-muted text-muted-foreground inline-flex h-10 items-center justify-center rounded-md p-1',
                 /* Orientation */
                 'data-[orientation=vertical]:h-auto data-[orientation=vertical]:flex-col',
                 className,
@@ -48,13 +48,13 @@ const Tab = ({ className, ...props }: AriaTabProps) => (
     <AriaTab
         className={composeRenderProps(className, className =>
             cn(
-                'inline-flex cursor-pointer justify-center whitespace-nowrap rounded-sm px-3 py-1.5 text-sm font-medium outline-none ring-offset-background transition-all',
+                'ring-offset-background inline-flex cursor-pointer justify-center rounded-sm px-3 py-1.5 text-sm font-medium whitespace-nowrap transition-all outline-none',
                 /* Focus Visible */
-                'data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2',
+                'data-[focus-visible]:ring-ring data-[focus-visible]:ring-2 data-[focus-visible]:ring-offset-2',
                 /* Disabled */
                 'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                 /* Selected */
-                'data-[selected]:bg-background data-[selected]:text-foreground data-[selected]:shadow-sm ',
+                'data-[selected]:bg-background data-[selected]:text-foreground data-[selected]:shadow-sm',
                 /* Orientation */
                 'group-data-[orientation=vertical]:w-full',
                 className,
@@ -68,9 +68,9 @@ const TabPanel = ({ className, ...props }: AriaTabPanelProps) => (
     <AriaTabPanel
         className={composeRenderProps(className, className =>
             cn(
-                'mt-2 ring-offset-background',
+                'ring-offset-background mt-2',
                 /* Focus Visible */
-                'data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2',
+                'data-[focus-visible]:ring-ring data-[focus-visible]:ring-2 data-[focus-visible]:ring-offset-2 data-[focus-visible]:outline-none',
                 className,
             ),
         )}
@@ -78,4 +78,4 @@ const TabPanel = ({ className, ...props }: AriaTabPanelProps) => (
     />
 )
 
-export { Tabs, TabList, TabPanel, Tab }
+export { Tab, TabList, TabPanel, Tabs }

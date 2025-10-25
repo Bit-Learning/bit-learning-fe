@@ -1,11 +1,4 @@
 import { CommandMenu } from '@/components/command-menu'
-import {
-    CommandDialog,
-    CommandEmpty,
-    CommandInput,
-    CommandList,
-    CommandSeparator,
-} from '@workspace/ui/components/command'
 import React from 'react'
 
 interface SearchContextType {

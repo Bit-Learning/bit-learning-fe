@@ -7,7 +7,7 @@ import { Switch } from '@workspace/ui/components/Switch'
 import { Textarea } from '@workspace/ui/components/Textarea'
 import { Label } from '@workspace/ui/components/label'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/update/tabs'
-import { Shield, Key, Trash2 } from 'lucide-react'
+import { Key, Shield, Trash2 } from 'lucide-react'
 
 export default function ProfileContent() {
     return (

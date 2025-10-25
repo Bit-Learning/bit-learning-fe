@@ -2,19 +2,17 @@ import { useAuth } from '@/shared/context/AuthContext'
 import { NAV_ITEMS, PRESENTATION_ITEMS } from '@/shared/data/nav-data'
 import { useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
-import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
-import { Menu, MenuItem, MenuTrigger, MenuPopover, MenuSeparator } from '@workspace/ui/components/Menu'
+import { Menu, MenuItem, MenuPopover, MenuSeparator, MenuTrigger } from '@workspace/ui/components/Menu'
 import {
     NavigationMenu,
-    NavigationMenuList,
-    NavigationMenuItem,
-    NavigationMenuTrigger,
     NavigationMenuContent,
+    NavigationMenuItem,
     NavigationMenuLink,
+    NavigationMenuList,
+    NavigationMenuTrigger,
 } from '@workspace/ui/components/navigation-menu'
-import { CountryDropdown } from '@workspace/ui/components/update/country-dropdown'
-import { User, UserPlus, LogOut, UserCircle, Settings } from 'lucide-react'
+import { LogOut, Settings, User, UserCircle, UserPlus } from 'lucide-react'
 
 export function Header() {
     const navigate = useNavigate()
@@ -25,7 +23,7 @@ export function Header() {
                 {/* Logo */}
                 <div
                     onClick={() => navigate({ to: '/' })}
-                    className="flex cursor-pointer select-none items-center gap-2 transition-transform hover:scale-[1.02]"
+                    className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
                 >
                     <img src="/Logo.png" alt="InnEdu Logo" className="h-10 object-contain" />
                 </div>
@@ -82,7 +80,7 @@ function ListItem({
     onClick?: () => void
 }) {
     return (
-        <li onClick={onClick} className="hover:bg-muted cursor-pointer select-none rounded-md p-2 transition-colors">
+        <li onClick={onClick} className="hover:bg-muted cursor-pointer rounded-md p-2 transition-colors select-none">
             <div className="flex items-center gap-2">
                 {icon && <span className="text-muted-foreground">{icon}</span>}
                 <div className="text-sm font-medium">{title}</div>
@@ -107,7 +105,7 @@ export function FullHeader() {
             <div className="absolute inset-0 h-28 rounded-b-3xl bg-[#14244A]" />
 
             {/* Right-side actions */}
-            <div className="absolute right-5 top-1 z-20 flex items-center gap-3">
+            <div className="absolute top-1 right-5 z-20 flex items-center gap-3">
                 {/* <CountryDropdown placeholder="Select country" defaultValue="VNM" onChange={() => {}} slim /> */}
 
                 {!isLoading && (
@@ -171,7 +169,7 @@ export function FullHeader() {
             </div>
 
             {/* Header sits below */}
-            <div className="z-100 relative mt-10">
+            <div className="relative z-100 mt-10">
                 <Header />
             </div>
         </div>
@@ -187,7 +185,7 @@ export function PresentationHeader() {
                 {/* Logo */}
                 <div
                     onClick={() => navigate({ to: '/' })}
-                    className="flex cursor-pointer select-none items-center gap-2 transition-transform hover:scale-[1.02]"
+                    className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
                 >
                     <img src="/Logo.png" alt="InnEdu Logo" className="h-10 object-contain" />
                 </div>

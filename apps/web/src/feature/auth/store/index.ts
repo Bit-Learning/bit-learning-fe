@@ -1,6 +1,6 @@
+import { createSlice } from '@reduxjs/toolkit'
 import { authInitialState } from './auth.initialState'
 import { setErrorMsg, setIsAuthenticated, setIsLoading, setUserInfo } from './auth.reducers'
-import { createSlice } from '@reduxjs/toolkit'
 
 const auth = createSlice({
     name: 'auth',

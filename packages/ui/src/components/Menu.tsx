@@ -1,8 +1,7 @@
 'use client'
 
-import * as React from 'react'
-import { VariantProps } from 'class-variance-authority'
 import { Check, ChevronRight, Circle } from 'lucide-react'
+import * as React from 'react'
 import {
     Header as AriaHeader,
     Keyboard as AriaKeyboard,
@@ -11,7 +10,6 @@ import {
     MenuItemProps as AriaMenuItemProps,
     MenuProps as AriaMenuProps,
     MenuTrigger as AriaMenuTrigger,
-    MenuTriggerProps as AriaMenuTriggerProps,
     Separator as AriaSeparator,
     SeparatorProps as AriaSeparatorProps,
     SubmenuTrigger as AriaSubmenuTrigger,
@@ -21,9 +19,8 @@ import {
 
 import { cn } from '@workspace/ui/lib/utils'
 
-import { Button, buttonVariants } from './Button'
-import { ListBoxCollection, ListBoxSection } from './ListBox'
 import { Popover } from '@workspace/ui/components/Popover'
+import { ListBoxCollection, ListBoxSection } from './ListBox'
 
 const MenuTrigger = AriaMenuTrigger
 
@@ -52,7 +49,7 @@ const MenuItem = ({ children, className, ...props }: AriaMenuItemProps) => (
         textValue={props.textValue || (typeof children === 'string' ? children : undefined)}
         className={composeRenderProps(className, className =>
             cn(
-                'relative flex cursor-default select-none items-center gap-2.5 rounded-sm py-1.5 px-2 text-sm outline-none',
+                'relative flex cursor-default items-center gap-2.5 rounded-sm px-2 py-1.5 text-sm outline-none select-none',
                 /* Disabled */
                 'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                 /* Focused */
@@ -93,7 +90,7 @@ const MenuHeader = ({ className, inset, separator = true, ...props }: MenuHeader
         className={cn(
             'px-3 py-1.5 text-sm font-semibold',
             inset && 'pl-8',
-            separator && '-mx-1 mb-1 border-b border-b-border pb-2.5',
+            separator && 'border-b-border -mx-1 mb-1 border-b pb-2.5',
             className,
         )}
         {...props}
@@ -101,7 +98,7 @@ const MenuHeader = ({ className, inset, separator = true, ...props }: MenuHeader
 )
 
 const MenuSeparator = ({ className, ...props }: AriaSeparatorProps) => (
-    <AriaSeparator className={cn('-mx-1 my-1 h-px bg-muted', className)} {...props} />
+    <AriaSeparator className={cn('bg-muted -mx-1 my-1 h-px', className)} {...props} />
 )
 
 const MenuKeyboard = ({ className, ...props }: React.ComponentProps<typeof AriaKeyboard>) => {
@@ -109,15 +106,15 @@ const MenuKeyboard = ({ className, ...props }: React.ComponentProps<typeof AriaK
 }
 
 export {
-    MenuTrigger,
     Menu,
-    MenuPopover,
-    MenuItem,
-    MenuHeader,
-    MenuSeparator,
-    MenuKeyboard,
-    MenuSection,
-    MenuSubTrigger,
     MenuCollection,
+    MenuHeader,
+    MenuItem,
+    MenuKeyboard,
+    MenuPopover,
+    MenuSection,
+    MenuSeparator,
+    MenuSubTrigger,
+    MenuTrigger,
 }
 export type { MenuHeaderProps }

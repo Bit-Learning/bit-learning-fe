@@ -175,7 +175,7 @@ const News: React.FC = () => {
                     <div className="flex flex-col items-center justify-between gap-4 md:flex-row">
                         <div className="max-w-md flex-1">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                                 <Input
                                     placeholder="Tìm kiếm tin tức..."
                                     value={searchTerm}
@@ -220,7 +220,7 @@ const News: React.FC = () => {
                                             alt={news.title}
                                             className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
-                                        <div className="absolute left-4 top-4">
+                                        <div className="absolute top-4 left-4">
                                             <Badge className="bg-yellow-500 text-white">
                                                 <Star className="mr-1 h-3 w-3" />
                                                 Nổi bật
@@ -298,7 +298,7 @@ const News: React.FC = () => {
                                             alt={news.title}
                                             className="h-40 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                         />
-                                        <div className="absolute left-3 top-3">
+                                        <div className="absolute top-3 left-3">
                                             <Badge className="bg-orange-500 text-white">
                                                 <TrendingUp className="mr-1 h-3 w-3" />
                                                 Trending
@@ -342,7 +342,7 @@ const News: React.FC = () => {
                                         alt={news.title}
                                         className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
                                     />
-                                    <div className="absolute left-3 top-3">
+                                    <div className="absolute top-3 left-3">
                                         <Badge className="bg-blue-700 text-white">
                                             {categories.find(cat => cat.value === news.category)?.label}
                                         </Badge>

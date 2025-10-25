@@ -1,14 +1,14 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
-import { Input } from '@/components/ui/input'
-import { Label } from '@/components/ui/label'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select'
-import { Textarea } from '@/components/ui/textarea'
 import { Checkbox } from '@radix-ui/react-checkbox'
-import { Calendar, Clock, MapPin, Users, Star, BookOpen, GraduationCap, Award } from 'lucide-react'
+import { Link } from '@tanstack/react-router'
+import { Badge } from '@workspace/ui/components/Badge'
+import { Button } from '@workspace/ui/components/Button'
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
+import { Input } from '@workspace/ui/components/Input'
+import { Textarea } from '@workspace/ui/components/Textarea'
+import { Label } from '@workspace/ui/components/label'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/update/select'
+import { Award, BookOpen, Calendar, Clock, GraduationCap, MapPin, Star, Users } from 'lucide-react'
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
 interface CourseOption {
@@ -372,7 +372,7 @@ const OfflineCourseForm: React.FC = () => {
                                     <Button
                                         type="submit"
                                         className="w-full rounded-lg bg-gradient-to-r from-blue-700 to-blue-800 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
-                                        disabled={isSubmitting}
+                                        isDisabled={isSubmitting}
                                     >
                                         {isSubmitting ? 'Đang gửi...' : 'Đăng Ký Khóa Học'}
                                     </Button>

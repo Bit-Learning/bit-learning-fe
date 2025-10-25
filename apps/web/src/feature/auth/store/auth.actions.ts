@@ -1,9 +1,9 @@
-import { setUserInfoAction, setErrorAction, setIsAuthenticatedAction, setIsLoadingAction } from '.'
-import { ForgotPassword, GetAccountProfile, Login, Register, ResetPassword } from '../service/AuthService'
-import type { TForgotPasswordRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
-import { TAppThunk } from '@/app/type/AppState'
+import { TAppThunk } from '@/feature/app/type/AppState'
 import { Roles } from '@/shared/constants/enums'
 import { setAuthTokens } from '@/shared/lib/cookies'
+import { setErrorAction, setIsAuthenticatedAction, setIsLoadingAction, setUserInfoAction } from '.'
+import { ForgotPassword, GetAccountProfile, Login, Register, ResetPassword } from '../service/AuthService'
+import type { TForgotPasswordRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
 
 export const requestLogin = ({ email, password }: { email: string; password: string }): TAppThunk => {
     return async (dispatch: any) => {

@@ -1,6 +1,6 @@
+import PageMeta from '@/components/seo/page-meta'
 import SignUpForm from '../component/SignUpForm'
 import AuthLayout from '../layout/AuthLayout'
-import PageMeta from '@/components/seo/page-meta'
 
 const SignUpPage: React.FC = () => {
     return (

@@ -1,9 +1,14 @@
+import MainLayout from '@/components/layouts/main-layout'
+import { Providers } from '@/shared/components/Providers'
 import { Outlet, createRootRoute } from '@tanstack/react-router'
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
-import { Providers } from '@/shared/components/Providers'
 
 export const Route = createRootRoute({
-    component: RootComponent,
+    component: () => (
+        <MainLayout>
+            <RootComponent />
+        </MainLayout>
+    ),
 })
 
 function RootComponent() {

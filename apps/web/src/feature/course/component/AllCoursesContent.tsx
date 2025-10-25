@@ -4,23 +4,23 @@ import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
 import {
-    Search,
-    Filter,
-    Star,
-    Play,
-    ChevronLeft,
-    BookOpen,
-    Code,
-    Globe,
-    Smartphone,
-    Database,
-    Shield,
-    Zap,
-    TrendingUp,
     Award,
+    BookOpen,
+    ChevronLeft,
+    Code,
+    Database,
+    Filter,
+    Globe,
+    Play,
+    Search,
+    Shield,
+    Smartphone,
+    Star,
     Target,
+    TrendingUp,
+    Zap,
 } from 'lucide-react'
-import React, { useState, useMemo } from 'react'
+import React, { useMemo, useState } from 'react'
 
 interface Course {
     id: string
@@ -276,7 +276,7 @@ const AllCoursesContent: React.FC = () => {
                         {/* Search */}
                         <div className="flex-1">
                             <div className="relative">
-                                <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                <Search className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                                 <Input
                                     placeholder="Tìm kiếm khóa học, giảng viên..."
                                     value={searchTerm}
@@ -359,7 +359,7 @@ const AllCoursesContent: React.FC = () => {
                 {/* Courses Grid */}
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     {filteredCourses.map(course => (
-                        <Link key={course.id} to={`/course/${course.id}`}>
+                        <Link key={course.id} to="/courses/$id" params={{ id: course.id }}>
                             <Card className="group cursor-pointer overflow-hidden p-0 transition-all duration-300 hover:shadow-xl">
                                 {/* Course Image */}
                                 <div className="relative h-48 overflow-hidden">
@@ -371,7 +371,7 @@ const AllCoursesContent: React.FC = () => {
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
 
                                     {/* Badges */}
-                                    <div className="absolute left-3 top-3 flex flex-col gap-2">
+                                    <div className="absolute top-3 left-3 flex flex-col gap-2">
                                         {course.isBestseller && (
                                             <Badge className="bg-yellow-500 text-xs text-white">Bestseller</Badge>
                                         )}

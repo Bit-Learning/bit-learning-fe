@@ -1,6 +1,6 @@
-import AllCoursesContent from '../component/AllCoursesContent'
 import PageMeta from '@/components/seo/page-meta'
 import React from 'react'
+import AllCoursesContent from '../component/AllCoursesContent'
 
 const AllCoursesPage: React.FC = () => {
     return (

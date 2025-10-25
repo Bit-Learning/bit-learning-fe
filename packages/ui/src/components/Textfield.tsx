@@ -6,15 +6,15 @@ import {
     InputProps as AriaInputProps,
     TextArea as AriaTextArea,
     TextAreaProps as AriaTextAreaProps,
-    composeRenderProps,
     TextField as AriaTextField,
     TextFieldProps as AriaTextFieldProps,
+    composeRenderProps,
 } from 'react-aria-components'
 
-import { cn } from '@workspace/ui/lib/utils'
 import { FieldGroup } from '@workspace/ui/components/Field'
-import { Button } from './Button'
+import { cn } from '@workspace/ui/lib/utils'
 import { EyeIcon, EyeOffIcon } from 'lucide-react'
+import { Button } from './Button'
 
 const Input = ({ className, ...props }: AriaInputProps) => {
     return (
@@ -22,10 +22,10 @@ const Input = ({ className, ...props }: AriaInputProps) => {
             autoComplete="off"
             className={composeRenderProps(className, className =>
                 cn(
-                    'shadow-sm flex h-8 w-full rounded-sm bg-background-secondary px-3 py-1.5 ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground md:text-sm',
-                    'ring-inset ring ring-input',
+                    'bg-background-secondary ring-offset-background placeholder:text-muted-foreground flex h-8 w-full rounded-sm px-3 py-1.5 shadow-sm file:border-0 file:bg-transparent file:text-sm file:font-medium md:text-sm',
+                    'ring-input ring ring-inset',
                     /* Focus Within */
-                    'transition-all data-[focused]:ring-primary data-[focused]:ring-2 aria-invalid:ring-destructive',
+                    'data-[focused]:ring-primary aria-invalid:ring-destructive transition-all data-[focused]:ring-2',
                     /* Disabled */
                     'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-80',
                     /* Resets */
@@ -47,10 +47,10 @@ const PasswordInput = ({ className, ...props }: PasswordInputProps) => {
 
     return (
         <AriaTextField {...props} isInvalid={(props as any)['aria-invalid']}>
-            <FieldGroup className={cn('pl-3 pr-1 py-0', className)}>
+            <FieldGroup className={cn('py-0 pr-1 pl-3', className)}>
                 <AriaInput
                     type={isVisible ? 'text' : 'password'}
-                    className="h-full focus-visible:outline-none flex-1"
+                    className="h-full flex-1 focus-visible:outline-none"
                 />
                 <Button variant="ghost" size="iconSm" onClick={() => setIsVisible(!isVisible)}>
                     {isVisible ? <EyeIcon /> : <EyeOffIcon />}
@@ -65,10 +65,10 @@ const TextArea = ({ className, ...props }: AriaTextAreaProps) => {
         <AriaTextArea
             className={composeRenderProps(className, className =>
                 cn(
-                    'shadow-sm flex min-h-[80px] w-full rounded-sm bg-background-secondary px-3 py-2 ring-offset-background placeholder:text-muted-foreground md:text-sm',
-                    'ring-inset ring ring-input',
+                    'bg-background-secondary ring-offset-background placeholder:text-muted-foreground flex min-h-[80px] w-full rounded-sm px-3 py-2 shadow-sm md:text-sm',
+                    'ring-input ring ring-inset',
                     /* Focus Within */
-                    'transition-all data-[focused]:ring-primary data-[focused]:ring-2 aria-invalid:ring-destructive',
+                    'data-[focused]:ring-primary aria-invalid:ring-destructive transition-all data-[focused]:ring-2',
                     /* Disabled */
                     'data-[disabled]:cursor-not-allowed data-[disabled]:opacity-80',
                     /* Resets */
@@ -81,4 +81,4 @@ const TextArea = ({ className, ...props }: AriaTextAreaProps) => {
     )
 }
 
-export { Input, TextArea, PasswordInput }
+export { Input, PasswordInput, TextArea }

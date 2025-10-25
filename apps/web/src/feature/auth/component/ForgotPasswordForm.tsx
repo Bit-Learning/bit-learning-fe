@@ -1,12 +1,7 @@
-import { setErrorAction } from '../../auth/store'
-import { requestForgotPassword, requestLogin, requestRegister } from '../../auth/store/auth.actions'
-import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
-import type { TForgotPasswordRequest } from '../type/authState'
 import { useAppDispatch } from '@/shared/redux/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
-import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { Input } from '@workspace/ui/components/Input'
 import { toast } from '@workspace/ui/components/Sonner'
@@ -15,6 +10,10 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
+import { setErrorAction } from '../../auth/store'
+import { requestForgotPassword } from '../../auth/store/auth.actions'
+import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
+import type { TForgotPasswordRequest } from '../type/authState'
 
 const formSchema = z.object({
     email: z
@@ -38,13 +37,13 @@ const ForgotPasswordForm: React.FC = () => {
     React.useEffect(() => {
         if (isAuthenticated) {
             navigate({ to: '/' })
-            toast.success('Đăng nhập thành công!')
+            toast.success({ title: 'Đăng nhập thành công!' })
         }
     }, [isAuthenticated, navigate])
 
     React.useEffect(() => {
         if (errorMsg) {
-            toast.error(errorMsg)
+            toast.error({ title: errorMsg })
             dispatch(setErrorAction(null))
         }
     }, [errorMsg, dispatch])

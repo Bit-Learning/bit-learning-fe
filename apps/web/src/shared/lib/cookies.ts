@@ -1,5 +1,5 @@
-import { ACCESS_TOKEN, REFRESH_TOKEN } from './keys'
 import Cookies from 'js-cookie'
+import { ACCESS_TOKEN, REFRESH_TOKEN } from './keys'
 
 export const setAuthTokens = (accessToken: string, refreshToken: string) => {
     Cookies.set(ACCESS_TOKEN, accessToken, {

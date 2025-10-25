@@ -1,6 +1,6 @@
 import PageMeta from '@/components/seo/page-meta'
-import News from '@/features/post/component/News'
 import React from 'react'
+import News from '../component/News'
 
 const NewsPage: React.FC = () => {
     return (

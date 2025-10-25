@@ -1,6 +1,6 @@
+import PageMeta from '@/components/seo/page-meta'
 import ResetPasswordForm from '../component/ResetPasswordForm'
 import AuthLayout from '../layout/AuthLayout'
-import PageMeta from '@/components/seo/page-meta'
 
 const ResetPasswordPage: React.FC = () => {
     return (

@@ -9,7 +9,7 @@ export function RangeCalendarControlled() {
     return (
         <div className="flex flex-col gap-2">
             <BsRangeCalendar value={value} onChange={setValue} />
-            <pre className="font-mono text-xs bg-background-secondary p-2 rounded-md border">
+            <pre className="bg-background-secondary rounded-md border p-2 font-mono text-xs">
                 {value ? JSON.stringify(value, null, 2) : 'No value'}
             </pre>
         </div>

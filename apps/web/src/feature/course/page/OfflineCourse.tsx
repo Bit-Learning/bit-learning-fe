@@ -1,26 +1,26 @@
-import OfflineCourseForm from '../component/OfflineCourseForm'
 import PageMeta from '@/components/seo/page-meta'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
 import {
-    BookOpen,
-    Users,
-    Clock,
-    MapPin,
-    Star,
-    Calendar,
-    GraduationCap,
-    Award,
-    ChevronRight,
-    Play,
-    CheckCircle,
     ArrowLeft,
+    Award,
+    BookOpen,
     Building,
-    Phone,
+    Calendar,
+    CheckCircle,
+    ChevronRight,
+    Clock,
+    GraduationCap,
     Mail,
+    MapPin,
+    Phone,
+    Play,
+    Star,
+    Users,
 } from 'lucide-react'
 import React, { useState } from 'react'
+import OfflineCourseForm from '../component/OfflineCourseForm'
 
 interface Course {
     id: string
@@ -195,7 +195,7 @@ const OfflineCoursePage: React.FC = () => {
             {/* Hero Section */}
             <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-orange-600 py-20 text-white">
                 <div className="absolute inset-0 bg-black/20"></div>
-                <div className="container relative z-10 mx-auto px-4">
+                <div className="relative z-10 container mx-auto px-4">
                     <div className="mx-auto max-w-4xl text-center">
                         <div className="mb-6 flex items-center justify-center space-x-2">
                             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
@@ -203,7 +203,7 @@ const OfflineCoursePage: React.FC = () => {
                             </div>
                             <span className="text-2xl font-bold">BithubLearning</span>
                         </div>
-                        <h1 className="mb-6 text-5xl font-bold leading-tight">Khóa Học Lập Trình Offline</h1>
+                        <h1 className="mb-6 text-5xl leading-tight font-bold">Khóa Học Lập Trình Offline</h1>
                         <p className="mb-8 text-xl leading-relaxed opacity-90">
                             Học trực tiếp với giảng viên chuyên nghiệp, tương tác và thực hành ngay tại lớp học. Xây
                             dựng nền tảng vững chắc cho sự nghiệp lập trình của bạn.
@@ -299,15 +299,15 @@ const OfflineCoursePage: React.FC = () => {
                                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                                     />
                                     <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                    <div className="absolute left-4 top-4">
+                                    <div className="absolute top-4 left-4">
                                         <Badge className="bg-orange-600 text-white">{course.level}</Badge>
                                     </div>
-                                    <div className="absolute right-4 top-4">
+                                    <div className="absolute top-4 right-4">
                                         <Badge variant="secondary" className="bg-white/90 text-gray-900">
                                             {course.duration}
                                         </Badge>
                                     </div>
-                                    <div className="absolute bottom-4 left-4 right-4">
+                                    <div className="absolute right-4 bottom-4 left-4">
                                         <button className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/30">
                                             <Play className="ml-1 h-5 w-5 text-white" />
                                         </button>
@@ -396,7 +396,7 @@ const OfflineCoursePage: React.FC = () => {
                                         alt={post.title}
                                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                                     />
-                                    <div className="absolute left-4 top-4">
+                                    <div className="absolute top-4 left-4">
                                         <Badge className="bg-blue-600 text-white">{post.category}</Badge>
                                     </div>
                                 </div>

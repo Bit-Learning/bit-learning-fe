@@ -1,7 +1,7 @@
 'use client'
 
-import React from 'react'
 import { ChevronDownIcon } from 'lucide-react'
+import React from 'react'
 import {
     Disclosure as AriaDisclosure,
     DisclosureGroup as AriaDisclosureGroup,
@@ -48,9 +48,9 @@ function DisclosureHeader({ children, className }: DisclosureHeaderProps) {
                 slot="trigger"
                 className={composeRenderProps(className, className => {
                     return cn(
-                        'group flex flex-1 items-center justify-between rounded-md py-4 font-medium ring-offset-background transition-all hover:underline',
+                        'group ring-offset-background flex flex-1 items-center justify-between rounded-md py-4 font-medium transition-all hover:underline',
                         'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
-                        'data-[focus-visible]:outline-none data-[focus-visible]:ring-2 data-[focus-visible]:ring-ring data-[focus-visible]:ring-offset-2',
+                        'data-[focus-visible]:ring-ring data-[focus-visible]:ring-2 data-[focus-visible]:ring-offset-2 data-[focus-visible]:outline-none',
                         'outline-none',
                         className,
                     )
@@ -77,7 +77,7 @@ export interface DisclosurePanelProps extends AriaDisclosurePanelProps {
 function DisclosurePanel({ children, className, ...props }: DisclosurePanelProps) {
     return (
         <AriaDisclosurePanel {...props} className={'overflow-hidden text-sm transition-all'}>
-            <div className={cn('pb-4 pt-0', className)}>{children}</div>
+            <div className={cn('pt-0 pb-4', className)}>{children}</div>
         </AriaDisclosurePanel>
     )
 }
@@ -97,4 +97,4 @@ function DisclosureGroup({ children, className, ...props }: DisclosureGroupProps
     )
 }
 
-export { Disclosure, DisclosureHeader, DisclosurePanel, DisclosureGroup }
+export { Disclosure, DisclosureGroup, DisclosureHeader, DisclosurePanel }

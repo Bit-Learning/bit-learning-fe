@@ -1,7 +1,7 @@
 'use client'
 
-import * as React from 'react'
 import { Slot } from '@radix-ui/react-slot'
+import * as React from 'react'
 import {
     Controller,
     FormProvider,
@@ -13,8 +13,8 @@ import {
     type FieldValues,
 } from 'react-hook-form'
 
-import { cn } from '@workspace/ui/lib/utils'
 import { Label } from '@workspace/ui/components/Field'
+import { cn } from '@workspace/ui/lib/utils'
 import { LabelProps } from 'react-aria-components'
 
 const Form = FormProvider
@@ -139,7 +139,12 @@ function FormMessage({ className, ...props }: React.ComponentProps<'p'>) {
     }
 
     return (
-        <p data-slot="form-message" id={formMessageId} className={cn('text-destructive-foreground text-xs', className)} {...props}>
+        <p
+            data-slot="form-message"
+            id={formMessageId}
+            className={cn('text-destructive-foreground text-xs', className)}
+            {...props}
+        >
             {body}
         </p>
     )
@@ -159,13 +164,13 @@ function setSubmitErrors(form: UseFormReturn<any>, error: Record<string, string>
 }
 
 export {
-    useFormField,
     Form,
-    FormItem,
-    FormLabel,
     FormControl,
     FormDescription,
-    FormMessage,
     FormField,
+    FormItem,
+    FormLabel,
+    FormMessage,
     setSubmitErrors,
+    useFormField,
 }

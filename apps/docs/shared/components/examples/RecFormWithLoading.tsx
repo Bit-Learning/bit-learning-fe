@@ -1,12 +1,12 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
-import { toast } from '@workspace/ui/components/Sonner'
+import { useMutation } from '@tanstack/react-query'
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
-import { Input } from '@workspace/ui/components/Textfield'
 import { LoadingOverlay } from '@workspace/ui/components/LoadingOverlay'
-import { useMutation } from '@tanstack/react-query'
+import { toast } from '@workspace/ui/components/Sonner'
+import { Input } from '@workspace/ui/components/Textfield'
+import { useForm } from 'react-hook-form'
 
 interface FormValues {
     email: string
@@ -45,7 +45,7 @@ export function RecFormWithLoading() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 container max-w-[500px]">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="container max-w-[500px] space-y-4">
                 <h2 className="text-xl font-semibold">Sign up</h2>
                 <LoadingOverlay isLoading={mutation.isPending}>
                     <div className="grid gap-4">

@@ -1,5 +1,3 @@
-import * as React from 'react'
-
 export function ReactAriaIcon({ className }: { className?: string }) {
     return (
         <svg fill="#E1251B" viewBox="0 0 30 26" className={className}>

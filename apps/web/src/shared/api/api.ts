@@ -1,12 +1,11 @@
-import { getAccessToken, getRefreshToken, setAuthTokens, clearAuthTokens } from '@/shared/lib/cookies'
-import {
+import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from '@/shared/lib/cookies'
+import axios, {
     AxiosError,
     type AxiosInstance,
     type AxiosRequestConfig,
     type AxiosResponse,
     type InternalAxiosRequestConfig,
 } from 'axios'
-import axios from 'axios'
 
 const api: AxiosInstance = axios.create({
     baseURL: 'http://localhost:6979/api/v1',

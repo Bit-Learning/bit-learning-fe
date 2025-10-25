@@ -1,4 +1,4 @@
-import { Header, PresentationHeader } from '@/shared/layouts/Header'
+import { PresentationHeader } from '@/shared/layouts/Header'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
 import { Spinner } from '@workspace/ui/components/Spinner'

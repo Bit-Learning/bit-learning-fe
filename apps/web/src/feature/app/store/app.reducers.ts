@@ -1,5 +1,5 @@
-import type { TAppState } from '../type/AppState'
 import type { PayloadAction } from '@reduxjs/toolkit'
+import type { TAppState } from '../type/AppState'
 
 export const setTheme = (state: TAppState, action: PayloadAction<'light' | 'dark'>) => {
     state.theme = action.payload

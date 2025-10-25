@@ -1,7 +1,5 @@
 'use client'
 
-import { toast } from '@workspace/ui/components/Sonner'
-import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
 import { Button } from '@workspace/ui/components/Button'
 import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { BsDatePicker } from '@workspace/ui/components/DatePicker'
@@ -16,9 +14,11 @@ import {
 } from '@workspace/ui/components/Form'
 import { BsRadioGroup } from '@workspace/ui/components/RadioGroup'
 import { BsSelect } from '@workspace/ui/components/Select'
+import { toast } from '@workspace/ui/components/Sonner'
 import { Switch } from '@workspace/ui/components/Switch'
 import { Input, TextArea } from '@workspace/ui/components/Textfield'
 import { PlusIcon, TrashIcon } from 'lucide-react'
+import { useFieldArray, useForm, useFormContext } from 'react-hook-form'
 
 interface Language {
     name: string
@@ -196,8 +196,8 @@ function Header() {
     const form = useFormContext<FormValues>()
 
     return (
-        <div className="flex justify-between items-center">
-            <h2 className="uppercase text-muted-foreground text-sm font-semibold">Profile</h2>
+        <div className="flex items-center justify-between">
+            <h2 className="text-muted-foreground text-sm font-semibold uppercase">Profile</h2>
             <FormField
                 control={form.control}
                 name="isPublic"
@@ -224,12 +224,12 @@ function WorkHistory() {
 
     return (
         <div className="space-y-2 py-6">
-            <h2 className="uppercase text-muted-foreground text-sm font-semibold">Work History</h2>
+            <h2 className="text-muted-foreground text-sm font-semibold uppercase">Work History</h2>
             {fields.length > 0 && (
                 <div className="space-y-3">
                     {fields.map((field, index) => (
-                        <div key={field.id} className="border rounded-md p-4">
-                            <div className="grid grid-cols-2 gap-2.5 flex-1">
+                        <div key={field.id} className="rounded-md border p-4">
+                            <div className="grid flex-1 grid-cols-2 gap-2.5">
                                 <FormField
                                     control={form.control}
                                     name={`works.${index}.position`}
@@ -320,7 +320,7 @@ function NotifyType() {
 
     return (
         <div className="space-y-4 py-6">
-            <h2 className="uppercase text-muted-foreground text-sm font-semibold">Notification</h2>
+            <h2 className="text-muted-foreground text-sm font-semibold uppercase">Notification</h2>
             <FormField
                 control={form.control}
                 name="enableNotify"

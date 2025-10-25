@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { createColumnHelper } from '@tanstack/react-table'
 import { DataTable } from '@workspace/ui/components/DataTable'
 

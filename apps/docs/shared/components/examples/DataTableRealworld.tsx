@@ -1,6 +1,5 @@
 'use client'
 
-import React from 'react'
 import { getPayments, Payment } from '@/shared/actions/examples/payments'
 import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { createColumnHelper } from '@tanstack/react-table'
@@ -10,11 +9,12 @@ import { Pagination, PaginationPageSizeSelector } from '@workspace/ui/components
 import { BsSearchField } from '@workspace/ui/components/Searchfield'
 import { BsSelect } from '@workspace/ui/components/Select'
 import { CreditCardIcon, EditIcon, TrashIcon, XIcon } from 'lucide-react'
+import React from 'react'
 
-import { cn } from '@workspace/ui/lib/utils'
-import { toast } from '@workspace/ui/components/Sonner'
 import { confirm } from '@workspace/ui/components/ConfirmDialog'
 import { useNProgress } from '@workspace/ui/components/NProgress'
+import { toast } from '@workspace/ui/components/Sonner'
+import { cn } from '@workspace/ui/lib/utils'
 
 const columnHelper = createColumnHelper<Payment>()
 
@@ -56,10 +56,10 @@ export const columns = [
         header: 'Actions',
         cell: () => (
             <div className="space-x-1">
-                <Button variant="ghost" size="icon" aria-label='edit'>
+                <Button variant="ghost" size="icon" aria-label="edit">
                     <EditIcon className="text-primary-foreground" />
                 </Button>
-                <Button variant="ghost" size="icon" aria-label='delete'>
+                <Button variant="ghost" size="icon" aria-label="delete">
                     <TrashIcon className="text-destructive-foreground" />
                 </Button>
             </div>
@@ -162,7 +162,7 @@ export function DataTableRealworld() {
                 data={payments.data?.items ?? []}
                 isLoading={payments.isLoading}
             />
-            <div className="flex gap-4 justify-between">
+            <div className="flex justify-between gap-4">
                 <PaginationPageSizeSelector
                     value={pageSize}
                     onChange={value => {

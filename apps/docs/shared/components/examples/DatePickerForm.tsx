@@ -1,11 +1,11 @@
 'use client'
 
-import { useForm } from 'react-hook-form'
 import { toast } from '@workspace/ui/components/Sonner'
+import { useForm } from 'react-hook-form'
 
 import { Button } from '@workspace/ui/components/Button'
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { BsDatePicker } from '@workspace/ui/components/DatePicker'
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 
 interface FormValues {
     startDate: string
@@ -31,7 +31,7 @@ export function DatePickerForm() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 w-full">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="w-full space-y-4">
                 <FormField
                     control={form.control}
                     name="startDate"

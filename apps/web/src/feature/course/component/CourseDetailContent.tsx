@@ -1,24 +1,24 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Link } from '@tanstack/react-router'
+import { Badge } from '@workspace/ui/components/Badge'
+import { Button } from '@workspace/ui/components/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/Card'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/update/tabs'
 import {
+    Award,
+    BookOpen,
+    CheckCircle,
     ChevronLeft,
     Clock,
-    Users,
-    Star,
-    Play,
-    BookOpen,
-    Award,
-    CheckCircle,
-    Heart,
-    Share2,
-    Video,
-    MessageCircle,
     Download,
+    Heart,
+    MessageCircle,
+    Play,
+    Share2,
+    Star,
+    Users,
+    Video,
 } from 'lucide-react'
 import React, { useState } from 'react'
-import { Link } from 'react-router-dom'
 import { toast } from 'sonner'
 
 interface Course {
@@ -148,6 +148,14 @@ const CourseDetailContent: React.FC<{ courseId?: string }> = ({ courseId }) => {
         toast.success('Đăng ký khóa học thành công!')
     }
 
+    if (!course) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <p className="text-lg text-gray-700">Không tìm thấy thông tin khóa học.</p>
+            </div>
+        )
+    }
+
     const handleLike = () => {
         setIsLiked(!isLiked)
         toast.success(isLiked ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích')
@@ -175,17 +183,17 @@ const CourseDetailContent: React.FC<{ courseId?: string }> = ({ courseId }) => {
                             <div className="relative h-64 md:h-80">
                                 <img src={course.image} alt={course.title} className="h-full w-full object-cover" />
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                <div className="absolute left-4 top-4">
+                                <div className="absolute top-4 left-4">
                                     <Badge variant="secondary" className="bg-orange-600 text-white">
                                         {course.category}
                                     </Badge>
                                 </div>
-                                <div className="absolute right-4 top-4">
+                                <div className="absolute top-4 right-4">
                                     <Badge variant="secondary" className="bg-blue-700 text-white">
                                         {course.level}
                                     </Badge>
                                 </div>
-                                <div className="absolute bottom-4 left-4 right-4">
+                                <div className="absolute right-4 bottom-4 left-4">
                                     <button className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/30">
                                         <Play className="ml-1 h-5 w-5 text-white" />
                                     </button>

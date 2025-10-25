@@ -1,6 +1,6 @@
+import PageMeta from '@/components/seo/page-meta'
 import ForgotPasswordForm from '../component/ForgotPasswordForm'
 import AuthLayout from '../layout/AuthLayout'
-import PageMeta from '@/components/seo/page-meta'
 
 const ForgotPasswordPage: React.FC = () => {
     return (

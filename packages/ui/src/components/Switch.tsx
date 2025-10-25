@@ -8,7 +8,7 @@ const Switch = ({ children, className, ...props }: AriaSwitchProps) => (
     <AriaSwitch
         className={composeRenderProps(className, className =>
             cn(
-                'group inline-flex items-center gap-2 text-sm font-medium leading-none data-[disabled]:cursor-not-allowed data-[disabled]:opacity-70',
+                'group inline-flex items-center gap-2 text-sm leading-none font-medium data-[disabled]:cursor-not-allowed data-[disabled]:opacity-70',
                 className,
             ),
         )}
@@ -20,7 +20,7 @@ const Switch = ({ children, className, ...props }: AriaSwitchProps) => (
                     className={cn(
                         'peer inline-flex h-5 w-8 shrink-0 cursor-pointer items-center rounded-full border-3 border-transparent transition-colors',
                         /* Focus Visible */
-                        'group-data-[focus-visible]:outline-none group-data-[focus-visible]:ring-2 group-data-[focus-visible]:ring-primary/40 group-data-[focus-visible]:ring-offset-2 group-data-[focus-visible]:ring-offset-background',
+                        'group-data-[focus-visible]:ring-primary/40 group-data-[focus-visible]:ring-offset-background group-data-[focus-visible]:ring-2 group-data-[focus-visible]:ring-offset-2 group-data-[focus-visible]:outline-none',
                         /* Disabled */
                         'group-data-[disabled]:cursor-not-allowed group-data-[disabled]:opacity-50',
                         /* Selected */

@@ -24,7 +24,7 @@ function ListBox<T extends object>({ className, ...props }: AriaListBoxProps<T>)
             className={composeRenderProps(className, className =>
                 cn(
                     className,
-                    'group overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md outline-none',
+                    'group bg-popover text-popover-foreground overflow-auto rounded-md border p-1 shadow-md outline-none',
                     /* Empty */
                     'data-[empty]:p-6 data-[empty]:text-center data-[empty]:text-sm',
                 ),
@@ -40,7 +40,7 @@ const ListBoxItem = <T extends object>({ className, children, ...props }: AriaLi
             textValue={props.textValue || (typeof children === 'string' ? children : undefined)}
             className={composeRenderProps(className, className =>
                 cn(
-                    'relative flex w-full cursor-default select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
+                    'relative flex w-full cursor-default items-center rounded-sm px-2 py-1.5 text-sm outline-none select-none',
                     /* Disabled */
                     'data-[disabled]:pointer-events-none data-[disabled]:opacity-50',
                     /* Focused */
@@ -69,7 +69,7 @@ const ListBoxItem = <T extends object>({ className, children, ...props }: AriaLi
 }
 
 function ListBoxHeader({ className, ...props }: React.ComponentProps<typeof AriaHeader>) {
-    return <AriaHeader className={cn('py-1.5 pl-8 pr-2 text-sm font-semibold', className)} {...props} />
+    return <AriaHeader className={cn('py-1.5 pr-2 pl-8 text-sm font-semibold', className)} {...props} />
 }
 
 export { ListBox, ListBoxCollection, ListBoxHeader, ListBoxItem, ListBoxSection }

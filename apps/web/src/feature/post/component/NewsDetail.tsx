@@ -1,27 +1,27 @@
-import { Badge } from '@/components/ui/badge'
-import { Button } from '@/components/ui/button'
-import { Card, CardContent } from '@/components/ui/card'
 import { useNavigate, useParams } from '@tanstack/react-router'
+import { Badge } from '@workspace/ui/components/Badge'
+import { Button } from '@workspace/ui/components/Button'
+import { Card, CardContent } from '@workspace/ui/components/Card'
 import {
-    Calendar,
-    Eye,
-    Clock,
     ArrowLeft,
-    Share2,
-    Heart,
     Bookmark,
-    Tag,
-    Facebook,
-    Twitter,
-    Linkedin,
-    Copy,
+    Calendar,
     CheckCircle,
+    Clock,
+    Copy,
+    Eye,
+    Facebook,
+    Heart,
+    Linkedin,
+    Share2,
+    Tag,
+    Twitter,
 } from 'lucide-react'
 import React from 'react'
 import { toast } from 'sonner'
 
 const NewsDetail: React.FC = () => {
-    const { id } = useParams<{ id: string }>()
+    const { id } = useParams({ from: '/news/$id' })
     const navigate = useNavigate()
     const [isLiked, setIsLiked] = React.useState(false)
     const [isBookmarked, setIsBookmarked] = React.useState(false)
@@ -226,7 +226,7 @@ test('renders learn react link', () =&gt; {
             <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-orange-50">
                 <div className="text-center">
                     <h1 className="mb-4 text-2xl font-bold text-gray-900">Không tìm thấy bài viết</h1>
-                    <Button onClick={() => navigate('/news')}>
+                    <Button onClick={() => navigate({ to: '/news' })}>
                         <ArrowLeft className="mr-2 h-4 w-4" />
                         Quay lại tin tức
                     </Button>
@@ -286,7 +286,11 @@ test('renders learn react link', () =&gt; {
             <div className="sticky top-0 z-10 border-b bg-white">
                 <div className="container mx-auto max-w-4xl px-4 py-4">
                     <div className="flex items-center justify-between">
-                        <Button variant="ghost" onClick={() => navigate('/news')} className="flex items-center gap-2">
+                        <Button
+                            variant="ghost"
+                            onClick={() => navigate({ to: '/news' })}
+                            className="flex items-center gap-2"
+                        >
                             <ArrowLeft className="h-4 w-4" />
                             Quay lại tin tức
                         </Button>
@@ -339,7 +343,7 @@ test('renders learn react link', () =&gt; {
                         {currentNews.trending && <Badge className="bg-orange-500 text-white">Trending</Badge>}
                     </div>
 
-                    <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+                    <h1 className="mb-6 text-3xl leading-tight font-bold text-gray-900 md:text-4xl">
                         {currentNews.title}
                     </h1>
 
@@ -468,7 +472,7 @@ test('renders learn react link', () =&gt; {
                                 <Card
                                     key={news.id}
                                     className="cursor-pointer transition-shadow hover:shadow-md"
-                                    onClick={() => navigate(`/news/${news.id}`)}
+                                    onClick={() => navigate({ to: '/news/$id', params: { id: news.id.toString() } })}
                                 >
                                     <CardContent className="p-4">
                                         <div className="flex gap-3">

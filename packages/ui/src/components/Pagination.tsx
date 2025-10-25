@@ -1,11 +1,11 @@
 'use client'
 
+import { BsSelect } from '@workspace/ui/components/Select'
+import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
+import { cn } from '@workspace/ui/lib/utils'
 import { ChevronLeft, ChevronRight } from 'lucide-react'
 import React from 'react'
 import ReactPaginate from 'react-paginate'
-import { cn } from '@workspace/ui/lib/utils'
-import { BsSelect } from '@workspace/ui/components/Select'
-import { useIsMobile } from '@workspace/ui/hooks/use-mobile'
 
 const baseClass =
     'cursor-pointer select-none text-[13px] font-medium flex w-8 h-8 items-center justify-center rounded-sm hover:bg-background-secondary'
@@ -40,8 +40,8 @@ function Pagination({ value: controlledValue, onChange: controlledOnChange, page
             forcePage={(value || 1) - 1}
             onPageChange={data => onChange?.(data.selected + 1)}
             pageCount={pageCount}
-            previousLabel={<ChevronLeft className="w-4 h-4" />}
-            nextLabel={<ChevronRight className="w-4 h-4" />}
+            previousLabel={<ChevronLeft className="h-4 w-4" />}
+            nextLabel={<ChevronRight className="h-4 w-4" />}
             pageRangeDisplayed={isMobile ? 0 : 2}
             marginPagesDisplayed={isMobile ? 0 : 1}
             containerClassName="flex items-center justify-center gap-1"
@@ -104,7 +104,7 @@ function PaginationPageSizeSelector({
                 className="min-w-[66px]"
                 popoverClassName="w-[90px]"
             />
-            <span className="text-xs text-muted-foreground whitespace-nowrap">Items per page</span>
+            <span className="text-muted-foreground text-xs whitespace-nowrap">Items per page</span>
         </div>
     )
 }

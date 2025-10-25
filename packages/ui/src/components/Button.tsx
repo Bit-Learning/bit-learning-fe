@@ -1,8 +1,8 @@
 'use client'
 
-import { cva, type VariantProps } from 'class-variance-authority'
-import { cn } from '@workspace/ui/lib/utils'
 import { Slot } from '@radix-ui/react-slot'
+import { cn } from '@workspace/ui/lib/utils'
+import { cva, type VariantProps } from 'class-variance-authority'
 import { Button as AriaButton, type ButtonProps as AriaButtonProps } from 'react-aria-components'
 
 const buttonVariants = cva(

@@ -1,6 +1,6 @@
+import { createSlice } from '@reduxjs/toolkit'
 import { appInitialState } from './app.initialState'
 import { setIsLoading, setLanguage, setSidebarOpen, setTheme } from './app.reducers'
-import { createSlice } from '@reduxjs/toolkit'
 
 const app = createSlice({
     name: 'app',

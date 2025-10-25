@@ -1,7 +1,7 @@
 import { Column, ColumnDef } from '@tanstack/react-table'
-import { Checkbox } from './Checkbox'
-import { z } from 'zod'
 import { cn } from '@workspace/ui/lib/utils'
+import { z } from 'zod'
+import { Checkbox } from './Checkbox'
 
 function getCheckboxColumnDef<T>(): ColumnDef<T> {
     return {
@@ -53,5 +53,5 @@ const DataTableSortingSchema = z.object({
 
 type DataTableSorting = z.infer<typeof DataTableSortingSchema>
 
-export { getCheckboxColumnDef, getCommonPinningStyles, DataTableSortingSchema }
+export { DataTableSortingSchema, getCheckboxColumnDef, getCommonPinningStyles }
 export type { DataTableSorting }

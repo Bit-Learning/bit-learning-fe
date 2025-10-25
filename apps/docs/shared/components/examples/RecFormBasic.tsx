@@ -28,7 +28,7 @@ export function RecFormBasic() {
 
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4 container max-w-[500px]">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="container max-w-[500px] space-y-4">
                 <h2 className="text-xl font-semibold">Sign up</h2>
                 <FormField
                     control={form.control}

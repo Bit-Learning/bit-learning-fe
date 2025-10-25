@@ -1,5 +1,4 @@
 import { cn } from '@workspace/ui/lib/utils'
-import * as React from 'react'
 
 export function ShadcnIcon({ className }: { className?: string }) {
     return (

@@ -1,4 +1,3 @@
-import { SlidevPresentation } from '../types'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Button } from '@workspace/ui/components/Button'
 import {
@@ -17,6 +16,7 @@ import { Upload, X } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import * as z from 'zod'
+import { SlidevPresentation } from '../types'
 
 const presentationSchema = z.object({
     title: z.string().min(3, 'Title must be at least 3 characters'),
@@ -195,7 +195,7 @@ export const PresentationForm = ({ presentation, onSubmit, onCancel, isLoading }
                                                 type="button"
                                                 variant="destructive"
                                                 size="sm"
-                                                className="absolute right-2 top-2"
+                                                className="absolute top-2 right-2"
                                                 onClick={() => {
                                                     form.setValue('thumbnail', '')
                                                     setThumbnailPreview('')

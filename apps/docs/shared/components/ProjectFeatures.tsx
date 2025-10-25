@@ -15,7 +15,7 @@ export function ProjectFeatures({ className, variant = 'landing' }: FeaturesProp
     return (
         <div
             className={cn(
-                'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 not-prose',
+                'not-prose grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3',
                 variant === 'docs' && 'gap-4',
                 className,
             )}
@@ -45,7 +45,7 @@ export function ProjectFeatures({ className, variant = 'landing' }: FeaturesProp
             <FeatureCard
                 variant={variant}
                 icons={
-                    <FeatureIcon className="text-green-500 bg-green-500/10">
+                    <FeatureIcon className="bg-green-500/10 text-green-500">
                         <PackageIcon strokeWidth={1.5} />
                     </FeatureIcon>
                 }
@@ -56,7 +56,7 @@ export function ProjectFeatures({ className, variant = 'landing' }: FeaturesProp
             <FeatureCard
                 variant={variant}
                 icons={
-                    <FeatureIcon className="text-cyan-500 bg-cyan-500/10">
+                    <FeatureIcon className="bg-cyan-500/10 text-cyan-500">
                         <SquareTerminal strokeWidth={1.5} />
                     </FeatureIcon>
                 }
@@ -67,7 +67,7 @@ export function ProjectFeatures({ className, variant = 'landing' }: FeaturesProp
             <FeatureCard
                 variant={variant}
                 icons={
-                    <FeatureIcon className="text-purple-500 bg-purple-500/10">
+                    <FeatureIcon className="bg-purple-500/10 text-purple-500">
                         <SwatchBook strokeWidth={1.5} />
                     </FeatureIcon>
                 }
@@ -78,7 +78,7 @@ export function ProjectFeatures({ className, variant = 'landing' }: FeaturesProp
             <FeatureCard
                 variant={variant}
                 icons={
-                    <FeatureIcon className="text-orange-500 bg-orange-500/10">
+                    <FeatureIcon className="bg-orange-500/10 text-orange-500">
                         <FormInput strokeWidth={1.5} />
                     </FeatureIcon>
                 }
@@ -89,7 +89,7 @@ export function ProjectFeatures({ className, variant = 'landing' }: FeaturesProp
             <FeatureCard
                 variant={variant}
                 icons={
-                    <FeatureIcon className="text-red-500 bg-red-500/10">
+                    <FeatureIcon className="bg-red-500/10 text-red-500">
                         <Database strokeWidth={1.5} />
                     </FeatureIcon>
                 }
@@ -115,12 +115,12 @@ function FeatureCard({ icons, title, description, url = '#', variant = 'landing'
         <Link
             href={url}
             className={cn(
-                'group relative flex flex-col justify-between gap-5 p-3 transition-colors h-full bg-background hover:bg-background-secondary md:p-8',
+                'group bg-background hover:bg-background-secondary relative flex h-full flex-col justify-between gap-5 p-3 transition-colors md:p-8',
                 variant === 'landing' && 'border-t border-r',
-                variant === 'docs' && 'border rounded-lg md:p-4',
+                variant === 'docs' && 'rounded-lg border md:p-4',
             )}
         >
-            <ArrowUpRightIcon className="transition-transform size-6 stroke-1 absolute top-3 right-3 opacity-0 group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-100" />
+            <ArrowUpRightIcon className="absolute top-3 right-3 size-6 stroke-1 opacity-0 transition-transform group-hover:translate-x-1 group-hover:-translate-y-1 group-hover:opacity-100" />
             <div>
                 <h2 className="font-medium">{title}</h2>
                 <p className="text-muted-foreground text-sm">{description}</p>
@@ -138,7 +138,7 @@ interface FeatureIconProps {
 function FeatureIcon({ children, className }: FeatureIconProps) {
     return (
         <div
-            className={cn('w-11 h-11 bg-background-tertiary/90 rounded-lg flex items-center justify-center', className)}
+            className={cn('bg-background-tertiary/90 flex h-11 w-11 items-center justify-center rounded-lg', className)}
         >
             {children}
         </div>

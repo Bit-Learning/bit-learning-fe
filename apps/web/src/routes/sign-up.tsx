@@ -6,10 +6,10 @@ export const Route = createFileRoute('/sign-up')({
 
 function SignUpPage() {
     return (
-        <div className="flex items-center justify-center min-h-screen">
-            <div className="text-center max-w-md mx-auto px-4">
-                <h1 className="text-4xl md:text-5xl font-bold my-6">Sign In</h1>
-                <p className="text-lg text-muted-foreground">
+        <div className="flex min-h-screen items-center justify-center">
+            <div className="mx-auto max-w-md px-4 text-center">
+                <h1 className="my-6 text-4xl font-bold md:text-5xl">Sign In</h1>
+                <p className="text-muted-foreground text-lg">
                     This is a placeholder for the Sign In page. Implement your sign-in logic here.
                 </p>
             </div>

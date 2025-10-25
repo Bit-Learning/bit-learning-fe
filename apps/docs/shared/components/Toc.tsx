@@ -30,7 +30,7 @@ export function DashboardTableOfContents({ toc }: TocProps) {
 
     return (
         <div>
-            <h3 className="text-sm px-4 mb-2 font-semibold">Table of contents</h3>
+            <h3 className="mb-2 px-4 text-sm font-semibold">Table of contents</h3>
             <Tree tree={toc} activeItem={activeHeading} />
         </div>
     )
@@ -86,7 +86,7 @@ function Tree({ tree, level = 1, activeItem }: TreeProps) {
                         <a
                             href={item.url}
                             className={cn(
-                                'flex text-[13px] items-center min-h-7 py-0.5 text-muted-foreground border-l border-transparent',
+                                'text-muted-foreground flex min-h-7 items-center border-l border-transparent py-0.5 text-[13px]',
                                 item.url === `#${activeItem}`
                                     ? 'text-foreground border-foreground'
                                     : 'hover:text-foreground hover:border-foreground/20',

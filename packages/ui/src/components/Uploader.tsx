@@ -217,7 +217,7 @@ export function Uploader({
     }
 
     return (
-        <div className="w-full flex flex-col gap-2">
+        <div className="flex w-full flex-col gap-2">
             <UploaderTrigger
                 onDrop={onDrop}
                 triggerType={triggerType}
@@ -228,7 +228,7 @@ export function Uploader({
                 isInvalid={isInvalid}
             />
             {uploaderFiles.length > 0 && (
-                <div className={cn('flex gap-2 flex-wrap', listType === 'list' && 'flex-col')}>
+                <div className={cn('flex flex-wrap gap-2', listType === 'list' && 'flex-col')}>
                     {uploaderFiles.map(uploaderFile => (
                         <UploaderItem
                             key={uploaderFile.id}
