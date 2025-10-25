@@ -16,6 +16,8 @@
         "lib": "@/lib",
         "utils": "@workspace/ui/lib/utils",
         "ui": "@workspace/ui/components",
-        "ui_update": "@workspace/ui/components/update"
+        "ui_update": "@workspace/ui/components/update",
+        "shared": "@workspace/shared",
+        "shared_constant": "@workspace/shared/constants"
     }
 }

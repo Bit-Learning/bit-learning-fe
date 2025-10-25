@@ -2,11 +2,11 @@ import { Separator } from '@workspace/ui/components/Separator'
 
 export function Footer() {
     return (
-        <footer className="border-t bg-muted/20 text-muted-foreground text-sm mt-20">
-            <div className="container mx-auto px-6 py-12 space-y-10">
+        <footer className="bg-muted/20 text-muted-foreground mt-20 border-t text-sm">
+            <div className="container mx-auto space-y-10 px-6 py-12">
                 {/* Top section */}
                 <div className="space-y-4">
-                    <img src="/logo-innedu-b.png" alt="InnEdu Logo" className="h-8 object-contain" />
+                    <img src="/Logo.png" alt="InnEdu Logo" className="h-8 object-contain" />
                     <p className="max-w-2xl text-xs leading-relaxed">
                         Chủ sở hữu: CÔNG TY TNHH TƯ VẤN VÀ PHÁT TRIỂN GIÁO DỤC INNEDU
                         <br />
@@ -25,16 +25,16 @@ export function Footer() {
 
                 {/* Middle section */}
                 <div className="space-y-2">
-                    <h2 className="text-lg font-semibold text-foreground">
+                    <h2 className="text-foreground text-lg font-semibold">
                         Dự Án STEAM - Phát triển tư duy và kỹ năng giải quyết vấn đề
                     </h2>
                 </div>
 
                 {/* Links grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-sm">
+                <div className="grid grid-cols-1 gap-6 text-sm sm:grid-cols-3">
                     {/* Column 1 */}
                     <div>
-                        <h3 className="font-semibold text-foreground mb-2">Cộng đồng</h3>
+                        <h3 className="text-foreground mb-2 font-semibold">Cộng đồng</h3>
                         <ul className="space-y-1">
                             <li>
                                 <a href="#" className="hover:underline">
@@ -61,7 +61,7 @@ export function Footer() {
 
                     {/* Column 2 */}
                     <div>
-                        <h3 className="font-semibold text-foreground mb-2">InnEdu</h3>
+                        <h3 className="text-foreground mb-2 font-semibold">InnEdu</h3>
                         <ul className="space-y-1">
                             <li>
                                 <a href="#" className="hover:underline">
@@ -88,7 +88,7 @@ export function Footer() {
 
                     {/* Column 3 */}
                     <div>
-                        <h3 className="font-semibold text-foreground mb-2">Phòng bán hàng</h3>
+                        <h3 className="text-foreground mb-2 font-semibold">Phòng bán hàng</h3>
                         <ul className="space-y-1">
                             <li>
                                 <a href="mailto:sale@innedu.org" className="hover:underline">
@@ -103,7 +103,7 @@ export function Footer() {
                 <Separator className="my-6" />
 
                 {/* Bottom row */}
-                <div className="flex flex-col md:flex-row justify-between items-center text-xs gap-2">
+                <div className="flex flex-col items-center justify-between gap-2 text-xs md:flex-row">
                     <p>Copyright © 2025. All Rights Reserved by InnEdu</p>
                     <div className="flex gap-3">
                         <a href="#" className="hover:underline">

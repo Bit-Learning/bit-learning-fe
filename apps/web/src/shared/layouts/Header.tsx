@@ -25,9 +25,9 @@ export function Header() {
                 {/* Logo */}
                 <div
                     onClick={() => navigate({ to: '/' })}
-                    className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
+                    className="flex cursor-pointer select-none items-center gap-2 transition-transform hover:scale-[1.02]"
                 >
-                    <img src="/logo-innedu-b.png" alt="InnEdu Logo" className="h-10 object-contain" />
+                    <img src="/Logo.png" alt="InnEdu Logo" className="h-10 object-contain" />
                 </div>
 
                 {/* Navigation */}
@@ -82,7 +82,7 @@ function ListItem({
     onClick?: () => void
 }) {
     return (
-        <li onClick={onClick} className="hover:bg-muted cursor-pointer rounded-md p-2 transition-colors select-none">
+        <li onClick={onClick} className="hover:bg-muted cursor-pointer select-none rounded-md p-2 transition-colors">
             <div className="flex items-center gap-2">
                 {icon && <span className="text-muted-foreground">{icon}</span>}
                 <div className="text-sm font-medium">{title}</div>
@@ -107,7 +107,7 @@ export function FullHeader() {
             <div className="absolute inset-0 h-28 rounded-b-3xl bg-[#14244A]" />
 
             {/* Right-side actions */}
-            <div className="absolute top-1 right-5 z-20 flex items-center gap-3">
+            <div className="absolute right-5 top-1 z-20 flex items-center gap-3">
                 {/* <CountryDropdown placeholder="Select country" defaultValue="VNM" onChange={() => {}} slim /> */}
 
                 {!isLoading && (
@@ -171,7 +171,7 @@ export function FullHeader() {
             </div>
 
             {/* Header sits below */}
-            <div className="relative z-100 mt-10">
+            <div className="z-100 relative mt-10">
                 <Header />
             </div>
         </div>
@@ -187,9 +187,9 @@ export function PresentationHeader() {
                 {/* Logo */}
                 <div
                     onClick={() => navigate({ to: '/' })}
-                    className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
+                    className="flex cursor-pointer select-none items-center gap-2 transition-transform hover:scale-[1.02]"
                 >
-                    <img src="/logo-innedu-b.png" alt="InnEdu Logo" className="h-10 object-contain" />
+                    <img src="/Logo.png" alt="InnEdu Logo" className="h-10 object-contain" />
                 </div>
 
                 {/* Navigation */}
