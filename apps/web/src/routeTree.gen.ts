@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -146,6 +147,11 @@ const ChatRoute = ChatRouteImport.update({
     path: '/chat',
     getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+    id: '/about',
+    path: '/about',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
     id: '/',
     path: '/',
@@ -229,6 +235,7 @@ const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -267,6 +274,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -306,6 +314,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
     __root__: typeof rootRouteImport
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -346,6 +355,7 @@ export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath
     fullPaths:
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -384,6 +394,7 @@ export interface FileRouteTypes {
     fileRoutesByTo: FileRoutesByTo
     to:
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -422,6 +433,7 @@ export interface FileRouteTypes {
     id:
         | '__root__'
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -461,6 +473,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute
+    AboutRoute: typeof AboutRoute
     ChatRoute: typeof ChatRoute
     ConsultationRoute: typeof ConsultationRoute
     ContactRoute: typeof ContactRoute
@@ -640,6 +653,13 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof ChatRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/about': {
+            id: '/about'
+            path: '/about'
+            fullPath: '/about'
+            preLoaderRoute: typeof AboutRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/': {
             id: '/'
             path: '/'
@@ -757,6 +777,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
+    AboutRoute: AboutRoute,
     ChatRoute: ChatRoute,
     ConsultationRoute: ConsultationRoute,
     ContactRoute: ContactRoute,
