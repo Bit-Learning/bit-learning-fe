@@ -4,12 +4,12 @@ import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
+import { toast } from '@workspace/ui/components/Sonner'
 import { Textarea } from '@workspace/ui/components/Textarea'
 import { Label } from '@workspace/ui/components/label'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/update/select'
 import { Award, BookOpen, Calendar, Clock, GraduationCap, MapPin, Star, Users } from 'lucide-react'
 import React, { useState } from 'react'
-import { toast } from 'sonner'
 
 interface CourseOption {
     id: string
@@ -113,12 +113,12 @@ const OfflineCourseForm: React.FC = () => {
         e.preventDefault()
 
         if (!selectedCourse) {
-            toast.error('Vui lòng chọn khóa học')
+            toast.error({ title: 'Vui lòng chọn khóa học' })
             return
         }
 
         if (!formData.agreeToTerms) {
-            toast.error('Vui lòng đồng ý với điều khoản')
+            toast.error({ title: 'Vui lòng đồng ý với điều khoản' })
             return
         }
 
@@ -126,7 +126,7 @@ const OfflineCourseForm: React.FC = () => {
 
         // Simulate API call
         setTimeout(() => {
-            toast.success('Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn trong vòng 24h.')
+            toast.success({ title: 'Đăng ký thành công! Chúng tôi sẽ liên hệ với bạn trong vòng 24h.' })
             setIsSubmitting(false)
             // Reset form
             setSelectedCourse('')

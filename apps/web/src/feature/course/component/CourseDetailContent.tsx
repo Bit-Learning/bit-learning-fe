@@ -2,6 +2,7 @@ import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/Card'
+import { toast } from '@workspace/ui/components/Sonner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@workspace/ui/components/update/tabs'
 import {
     Award,
@@ -19,7 +20,6 @@ import {
     Video,
 } from 'lucide-react'
 import React, { useState } from 'react'
-import { toast } from 'sonner'
 
 interface Course {
     id: string
@@ -145,7 +145,7 @@ const CourseDetailContent: React.FC<{ courseId?: string }> = ({ courseId }) => {
     const course = courses.find(c => c.id === courseId) || courses[0]
 
     const handleEnroll = () => {
-        toast.success('Đăng ký khóa học thành công!')
+        toast.success({ title: 'Đăng ký khóa học thành công!' })
     }
 
     if (!course) {
@@ -158,7 +158,7 @@ const CourseDetailContent: React.FC<{ courseId?: string }> = ({ courseId }) => {
 
     const handleLike = () => {
         setIsLiked(!isLiked)
-        toast.success(isLiked ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích')
+        toast.success({ title: isLiked ? 'Đã bỏ yêu thích' : 'Đã thêm vào yêu thích' })
     }
 
     return (

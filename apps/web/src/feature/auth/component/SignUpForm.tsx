@@ -4,11 +4,11 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { Input } from '@workspace/ui/components/Input'
+import { toast } from '@workspace/ui/components/Sonner'
 import { ChevronLeftIcon, EyeClosedIcon, EyeIcon, Mail, User } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import { setErrorAction } from '../../auth/store'
 import { requestRegister } from '../../auth/store/auth.actions'
@@ -67,7 +67,7 @@ const SignUpForm: React.FC = () => {
 
     React.useEffect(() => {
         if (errorMsg) {
-            toast.error(errorMsg)
+            toast.error({ title: errorMsg })
             dispatch(setErrorAction(null))
         }
     }, [errorMsg, dispatch])
@@ -80,7 +80,7 @@ const SignUpForm: React.FC = () => {
         }
         const result = await dispatch(requestRegister(body))
         if (result !== undefined) {
-            toast.success('Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.')
+            toast.success({ title: 'Đăng ký thành công! Vui lòng kiểm tra email để xác nhận tài khoản.' })
         }
     }
 

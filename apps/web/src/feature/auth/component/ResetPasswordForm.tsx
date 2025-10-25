@@ -4,11 +4,11 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { Input } from '@workspace/ui/components/Input'
+import { toast } from '@workspace/ui/components/Sonner'
 import { ChevronLeftIcon, EyeClosedIcon, EyeIcon } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import { setErrorAction } from '../../auth/store'
 import { requestResetPassword } from '../../auth/store/auth.actions'
@@ -53,7 +53,7 @@ const ResetPasswordForm: React.FC = () => {
 
     React.useEffect(() => {
         if (errorMsg) {
-            toast.error(errorMsg)
+            toast.error({ title: errorMsg })
             dispatch(setErrorAction(null))
         }
     }, [errorMsg, dispatch])
@@ -62,7 +62,7 @@ const ResetPasswordForm: React.FC = () => {
         const token = new URLSearchParams(window.location.search).get('token') || ''
         const email = new URLSearchParams(window.location.search).get('email') || ''
         if (!token || !email) {
-            toast.error('Yêu cầu không hợp lệ. Vui lòng thử lại.')
+            toast.error({ title: 'Yêu cầu không hợp lệ. Vui lòng thử lại.' })
             return
         }
         const body: TResetPasswordRequest = {
@@ -74,7 +74,7 @@ const ResetPasswordForm: React.FC = () => {
         const result = await dispatch(requestResetPassword(body))
         if (result !== undefined) {
             navigate({ to: '/signin' })
-            toast.success('Đặt lại mật khẩu thành công! Vui lòng đăng nhập.')
+            toast.success({ title: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập.' })
         }
     }
 

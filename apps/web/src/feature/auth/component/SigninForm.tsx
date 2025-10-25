@@ -6,12 +6,12 @@ import { Button } from '@workspace/ui/components/Button'
 import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { Input } from '@workspace/ui/components/Input'
+import { toast } from '@workspace/ui/components/Sonner'
 import { Label } from '@workspace/ui/components/label'
 import { ChevronLeftIcon, EyeClosedIcon, EyeIcon, Mail } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import { setErrorAction } from '../../auth/store'
 import { requestLogin } from '../../auth/store/auth.actions'
@@ -51,7 +51,7 @@ const SignInForm: React.FC = () => {
 
     React.useEffect(() => {
         if (errorMsg) {
-            toast.error(errorMsg)
+            toast.error({ title: errorMsg })
             dispatch(setErrorAction(null))
         }
     }, [errorMsg, dispatch])

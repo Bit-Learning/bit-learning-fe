@@ -2,6 +2,7 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
+import { toast } from '@workspace/ui/components/Sonner'
 import {
     ArrowLeft,
     Bookmark,
@@ -18,7 +19,6 @@ import {
     Twitter,
 } from 'lucide-react'
 import React from 'react'
-import { toast } from 'sonner'
 
 const NewsDetail: React.FC = () => {
     const { id } = useParams({ from: '/news/$id' })
@@ -39,7 +39,7 @@ const NewsDetail: React.FC = () => {
 
         <h2>1. Trí tuệ nhân tạo và Machine Learning</h2>
         <p>AI và ML tiếp tục là xu hướng nổi bật nhất trong năm 2024. Với sự phát triển của các mô hình ngôn ngữ lớn như GPT-4, Claude, và các công cụ AI coding như GitHub Copilot, việc phát triển phần mềm đang trở nên hiệu quả hơn bao giờ hết.</p>
-        
+
         <p>Các framework như TensorFlow, PyTorch, và các thư viện mới như Hugging Face Transformers đang được sử dụng rộng rãi để xây dựng các ứng dụng AI thông minh.</p>
 
         <h2>2. Web3 và Blockchain</h2>
@@ -120,7 +120,7 @@ const NewsDetail: React.FC = () => {
 
 function Counter() {
   const [count, setCount] = useState(0);
-  
+
   return (
     &lt;div&gt;
       &lt;p&gt;You clicked {count} times&lt;/p&gt;
@@ -157,11 +157,11 @@ function Example() {
         <p>Custom hooks cho phép bạn tái sử dụng logic giữa các components:</p>
         <pre><code>function useCounter(initialValue = 0) {
   const [count, setCount] = useState(initialValue);
-  
+
   const increment = () =&gt; setCount(count + 1);
   const decrement = () =&gt; setCount(count - 1);
   const reset = () =&gt; setCount(initialValue);
-  
+
   return { count, increment, decrement, reset };
 }</code></pre>
 
@@ -264,7 +264,7 @@ test('renders learn react link', () =&gt; {
             case 'copy':
                 navigator.clipboard.writeText(url)
                 setCopied(true)
-                toast.success('Đã sao chép link!')
+                toast.success({ title: 'Đã sao chép link!' })
                 setTimeout(() => setCopied(false), 2000)
                 break
         }
@@ -272,12 +272,12 @@ test('renders learn react link', () =&gt; {
 
     const handleLike = () => {
         setIsLiked(!isLiked)
-        toast.success(isLiked ? 'Đã bỏ thích' : 'Đã thích bài viết!')
+        toast.success({ title: isLiked ? 'Đã bỏ thích' : 'Đã thích bài viết!' })
     }
 
     const handleBookmark = () => {
         setIsBookmarked(!isBookmarked)
-        toast.success(isBookmarked ? 'Đã bỏ lưu' : 'Đã lưu bài viết!')
+        toast.success({ title: isBookmarked ? 'Đã bỏ lưu' : 'Đã lưu bài viết!' })
     }
 
     return (
