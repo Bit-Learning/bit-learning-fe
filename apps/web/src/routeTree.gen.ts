@@ -27,7 +27,11 @@ import { Route as MentorshipRouteImport } from './routes/mentorship'
 import { Route as NewsIdRouteImport } from './routes/news/$id'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
 import { Route as OfflineCourseRouteImport } from './routes/offline-course'
-import { Route as PresentationsRouteImport } from './routes/presentations'
+import { Route as PresentationsIdRouteImport } from './routes/presentations/$id'
+import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
+import { Route as PresentationsIdPresenterRouteImport } from './routes/presentations/$id/presenter'
+import { Route as PresentationsIdViewRouteImport } from './routes/presentations/$id/view'
+import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SignInRouteImport } from './routes/sign-in'
@@ -96,11 +100,6 @@ const PrivacyRoute = PrivacyRouteImport.update({
     path: '/privacy',
     getParentRoute: () => rootRouteImport,
 } as any)
-const PresentationsRoute = PresentationsRouteImport.update({
-    id: '/presentations',
-    path: '/presentations',
-    getParentRoute: () => rootRouteImport,
-} as any)
 const OfflineCourseRoute = OfflineCourseRouteImport.update({
     id: '/offline-course',
     path: '/offline-course',
@@ -156,6 +155,11 @@ const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
     path: '/templates/',
     getParentRoute: () => rootRouteImport,
 } as any)
+const PresentationsIndexRoute = PresentationsIndexRouteImport.update({
+    id: '/presentations/',
+    path: '/presentations/',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const NewsIndexRoute = NewsIndexRouteImport.update({
     id: '/news/',
     path: '/news/',
@@ -179,6 +183,11 @@ const TemplatesDashboardRoute = TemplatesDashboardRouteImport.update({
 const TemplatesIdRoute = TemplatesIdRouteImport.update({
     id: '/templates/$id',
     path: '/templates/$id',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const PresentationsIdRoute = PresentationsIdRouteImport.update({
+    id: '/presentations/$id',
+    path: '/presentations/$id',
     getParentRoute: () => rootRouteImport,
 } as any)
 const NewsIdRoute = NewsIdRouteImport.update({
@@ -221,6 +230,21 @@ const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
     path: '/templates/slidev/create',
     getParentRoute: () => rootRouteImport,
 } as any)
+const PresentationsIdViewRoute = PresentationsIdViewRouteImport.update({
+    id: '/view',
+    path: '/view',
+    getParentRoute: () => PresentationsIdRoute,
+} as any)
+const PresentationsIdPresenterRoute = PresentationsIdPresenterRouteImport.update({
+    id: '/presenter',
+    path: '/presenter',
+    getParentRoute: () => PresentationsIdRoute,
+} as any)
+const PresentationsIdOverviewRoute = PresentationsIdOverviewRouteImport.update({
+    id: '/overview',
+    path: '/overview',
+    getParentRoute: () => PresentationsIdRoute,
+} as any)
 const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
     id: '/templates/slidev/$id/edit',
     path: '/templates/slidev/$id/edit',
@@ -238,7 +262,6 @@ export interface FileRoutesByFullPath {
     '/forgot-password': typeof ForgotPasswordRoute
     '/mentorship': typeof MentorshipRoute
     '/offline-course': typeof OfflineCourseRoute
-    '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
     '/sign-in': typeof SignInRoute
@@ -255,12 +278,17 @@ export interface FileRoutesByFullPath {
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/news/$id': typeof NewsIdRoute
+    '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses': typeof CoursesIndexRoute
     '/news': typeof NewsIndexRoute
+    '/presentations': typeof PresentationsIndexRoute
     '/templates': typeof TemplatesIndexRoute
+    '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
+    '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
+    '/presentations/$id/view': typeof PresentationsIdViewRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -276,7 +304,6 @@ export interface FileRoutesByTo {
     '/forgot-password': typeof ForgotPasswordRoute
     '/mentorship': typeof MentorshipRoute
     '/offline-course': typeof OfflineCourseRoute
-    '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
     '/sign-in': typeof SignInRoute
@@ -293,12 +320,17 @@ export interface FileRoutesByTo {
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/news/$id': typeof NewsIdRoute
+    '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses': typeof CoursesIndexRoute
     '/news': typeof NewsIndexRoute
+    '/presentations': typeof PresentationsIndexRoute
     '/templates': typeof TemplatesIndexRoute
+    '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
+    '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
+    '/presentations/$id/view': typeof PresentationsIdViewRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -315,7 +347,6 @@ export interface FileRoutesById {
     '/forgot-password': typeof ForgotPasswordRoute
     '/mentorship': typeof MentorshipRoute
     '/offline-course': typeof OfflineCourseRoute
-    '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
     '/sign-in': typeof SignInRoute
@@ -332,12 +363,17 @@ export interface FileRoutesById {
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/news/$id': typeof NewsIdRoute
+    '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses/': typeof CoursesIndexRoute
     '/news/': typeof NewsIndexRoute
+    '/presentations/': typeof PresentationsIndexRoute
     '/templates/': typeof TemplatesIndexRoute
+    '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
+    '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
+    '/presentations/$id/view': typeof PresentationsIdViewRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev/': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -355,7 +391,6 @@ export interface FileRouteTypes {
         | '/forgot-password'
         | '/mentorship'
         | '/offline-course'
-        | '/presentations'
         | '/privacy'
         | '/reset-password'
         | '/sign-in'
@@ -372,12 +407,17 @@ export interface FileRouteTypes {
         | '/courses/mobile-development'
         | '/courses/web-development'
         | '/news/$id'
+        | '/presentations/$id'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses'
         | '/news'
+        | '/presentations'
         | '/templates'
+        | '/presentations/$id/overview'
+        | '/presentations/$id/presenter'
+        | '/presentations/$id/view'
         | '/templates/slidev/create'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
@@ -393,7 +433,6 @@ export interface FileRouteTypes {
         | '/forgot-password'
         | '/mentorship'
         | '/offline-course'
-        | '/presentations'
         | '/privacy'
         | '/reset-password'
         | '/sign-in'
@@ -410,12 +449,17 @@ export interface FileRouteTypes {
         | '/courses/mobile-development'
         | '/courses/web-development'
         | '/news/$id'
+        | '/presentations/$id'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses'
         | '/news'
+        | '/presentations'
         | '/templates'
+        | '/presentations/$id/overview'
+        | '/presentations/$id/presenter'
+        | '/presentations/$id/view'
         | '/templates/slidev/create'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
@@ -431,7 +475,6 @@ export interface FileRouteTypes {
         | '/forgot-password'
         | '/mentorship'
         | '/offline-course'
-        | '/presentations'
         | '/privacy'
         | '/reset-password'
         | '/sign-in'
@@ -448,12 +491,17 @@ export interface FileRouteTypes {
         | '/courses/mobile-development'
         | '/courses/web-development'
         | '/news/$id'
+        | '/presentations/$id'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses/'
         | '/news/'
+        | '/presentations/'
         | '/templates/'
+        | '/presentations/$id/overview'
+        | '/presentations/$id/presenter'
+        | '/presentations/$id/view'
         | '/templates/slidev/create'
         | '/templates/slidev/'
         | '/templates/slidev/$id/edit'
@@ -470,7 +518,6 @@ export interface RootRouteChildren {
     ForgotPasswordRoute: typeof ForgotPasswordRoute
     MentorshipRoute: typeof MentorshipRoute
     OfflineCourseRoute: typeof OfflineCourseRoute
-    PresentationsRoute: typeof PresentationsRoute
     PrivacyRoute: typeof PrivacyRoute
     ResetPasswordRoute: typeof ResetPasswordRoute
     SignInRoute: typeof SignInRoute
@@ -487,11 +534,13 @@ export interface RootRouteChildren {
     CoursesMobileDevelopmentRoute: typeof CoursesMobileDevelopmentRoute
     CoursesWebDevelopmentRoute: typeof CoursesWebDevelopmentRoute
     NewsIdRoute: typeof NewsIdRoute
+    PresentationsIdRoute: typeof PresentationsIdRouteWithChildren
     TemplatesIdRoute: typeof TemplatesIdRoute
     TemplatesDashboardRoute: typeof TemplatesDashboardRoute
     TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
     CoursesIndexRoute: typeof CoursesIndexRoute
     NewsIndexRoute: typeof NewsIndexRoute
+    PresentationsIndexRoute: typeof PresentationsIndexRoute
     TemplatesIndexRoute: typeof TemplatesIndexRoute
     TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
     TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
@@ -568,13 +617,6 @@ declare module '@tanstack/react-router' {
             path: '/privacy'
             fullPath: '/privacy'
             preLoaderRoute: typeof PrivacyRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/presentations': {
-            id: '/presentations'
-            path: '/presentations'
-            fullPath: '/presentations'
-            preLoaderRoute: typeof PresentationsRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/offline-course': {
@@ -654,6 +696,13 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/presentations/': {
+            id: '/presentations/'
+            path: '/presentations'
+            fullPath: '/presentations'
+            preLoaderRoute: typeof PresentationsIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/news/': {
             id: '/news/'
             path: '/news'
@@ -687,6 +736,13 @@ declare module '@tanstack/react-router' {
             path: '/templates/$id'
             fullPath: '/templates/$id'
             preLoaderRoute: typeof TemplatesIdRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/presentations/$id': {
+            id: '/presentations/$id'
+            path: '/presentations/$id'
+            fullPath: '/presentations/$id'
+            preLoaderRoute: typeof PresentationsIdRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/news/$id': {
@@ -745,6 +801,27 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesSlidevCreateRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/presentations/$id/view': {
+            id: '/presentations/$id/view'
+            path: '/view'
+            fullPath: '/presentations/$id/view'
+            preLoaderRoute: typeof PresentationsIdViewRouteImport
+            parentRoute: typeof PresentationsIdRoute
+        }
+        '/presentations/$id/presenter': {
+            id: '/presentations/$id/presenter'
+            path: '/presenter'
+            fullPath: '/presentations/$id/presenter'
+            preLoaderRoute: typeof PresentationsIdPresenterRouteImport
+            parentRoute: typeof PresentationsIdRoute
+        }
+        '/presentations/$id/overview': {
+            id: '/presentations/$id/overview'
+            path: '/overview'
+            fullPath: '/presentations/$id/overview'
+            preLoaderRoute: typeof PresentationsIdOverviewRouteImport
+            parentRoute: typeof PresentationsIdRoute
+        }
         '/templates/slidev/$id/edit': {
             id: '/templates/slidev/$id/edit'
             path: '/templates/slidev/$id/edit'
@@ -754,6 +831,20 @@ declare module '@tanstack/react-router' {
         }
     }
 }
+
+interface PresentationsIdRouteChildren {
+    PresentationsIdOverviewRoute: typeof PresentationsIdOverviewRoute
+    PresentationsIdPresenterRoute: typeof PresentationsIdPresenterRoute
+    PresentationsIdViewRoute: typeof PresentationsIdViewRoute
+}
+
+const PresentationsIdRouteChildren: PresentationsIdRouteChildren = {
+    PresentationsIdOverviewRoute: PresentationsIdOverviewRoute,
+    PresentationsIdPresenterRoute: PresentationsIdPresenterRoute,
+    PresentationsIdViewRoute: PresentationsIdViewRoute,
+}
+
+const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(PresentationsIdRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
@@ -766,7 +857,6 @@ const rootRouteChildren: RootRouteChildren = {
     ForgotPasswordRoute: ForgotPasswordRoute,
     MentorshipRoute: MentorshipRoute,
     OfflineCourseRoute: OfflineCourseRoute,
-    PresentationsRoute: PresentationsRoute,
     PrivacyRoute: PrivacyRoute,
     ResetPasswordRoute: ResetPasswordRoute,
     SignInRoute: SignInRoute,
@@ -783,11 +873,13 @@ const rootRouteChildren: RootRouteChildren = {
     CoursesMobileDevelopmentRoute: CoursesMobileDevelopmentRoute,
     CoursesWebDevelopmentRoute: CoursesWebDevelopmentRoute,
     NewsIdRoute: NewsIdRoute,
+    PresentationsIdRoute: PresentationsIdRouteWithChildren,
     TemplatesIdRoute: TemplatesIdRoute,
     TemplatesDashboardRoute: TemplatesDashboardRoute,
     TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
     CoursesIndexRoute: CoursesIndexRoute,
     NewsIndexRoute: NewsIndexRoute,
+    PresentationsIndexRoute: PresentationsIndexRoute,
     TemplatesIndexRoute: TemplatesIndexRoute,
     TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
     TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
