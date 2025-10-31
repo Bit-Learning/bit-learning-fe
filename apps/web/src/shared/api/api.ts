@@ -8,7 +8,7 @@ import axios, {
 } from 'axios'
 
 const api: AxiosInstance = axios.create({
-    baseURL: 'http://localhost:6979/api/v1',
+    baseURL: 'http://localhost:4000',
     headers: {
         'Content-Type': 'application/json',
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',

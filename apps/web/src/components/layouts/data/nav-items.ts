@@ -121,4 +121,8 @@ export const navItems = [
         title: 'Về chúng tôi',
         to: '/about',
     },
+    {
+        title: 'Ma trận đề thi',
+        to: '/matrices',
+    },
 ]
