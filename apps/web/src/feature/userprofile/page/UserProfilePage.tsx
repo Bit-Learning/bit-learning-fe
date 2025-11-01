@@ -35,7 +35,7 @@ function UserProfilePage() {
 
     const handleLogout = () => {
         logout()
-        window.location.href = '/sign-in'
+        window.location.href = '/signin'
     }
 
     const menuItems = [

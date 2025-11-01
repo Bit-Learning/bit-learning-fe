@@ -32,7 +32,7 @@ export function isLoggedIn(): boolean {
 export function requireAuth(location?: { href: string }) {
     if (!isLoggedIn()) {
         throw redirect({
-            to: '/sign-in',
+            to: '/signin',
             search: location ? { redirect: location.href } : undefined,
         })
     }
@@ -46,7 +46,7 @@ export function requireAuth(location?: { href: string }) {
 export function requireRole(requiredRole: string, location?: { href: string }) {
     if (!isLoggedIn()) {
         throw redirect({
-            to: '/sign-in',
+            to: '/signin',
             search: location ? { redirect: location.href } : undefined,
         })
     }
@@ -60,7 +60,7 @@ export function requireRole(requiredRole: string, location?: { href: string }) {
             }
         } catch {
             api.auth.logout()
-            throw redirect({ to: '/sign-in' })
+            throw redirect({ to: '/signin' })
         }
     }
 }

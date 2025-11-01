@@ -149,14 +149,14 @@ export function FullHeader() {
                             <>
                                 <Button
                                     variant="link"
-                                    onClick={() => navigate({ to: '/sign-in' })}
+                                    onClick={() => navigate({ to: '/signin' })}
                                     className="text-white"
                                 >
                                     <User /> Đăng nhập
                                 </Button>
                                 <Button
                                     variant="link"
-                                    onClick={() => navigate({ to: '/sign-up' })}
+                                    onClick={() => navigate({ to: '/signup' })}
                                     className="text-white"
                                 >
                                     <UserPlus />

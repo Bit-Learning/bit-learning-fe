@@ -30,12 +30,12 @@ const ChatPromptPage = () => {
     const [currentConversationIndex, setCurrentConversationIndex] = React.useState(0)
 
     if (!isAuthenticated || !user) {
-        return <Navigate to="/sign-in" />
+        return <Navigate to="/signin" />
     }
 
     const handleLogout = () => {
         logout()
-        window.location.href = '/sign-in'
+        window.location.href = '/signin'
     }
 
     const menuItems = [
