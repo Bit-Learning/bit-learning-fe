@@ -13,7 +13,8 @@ export type TLoginRequest = {
 export type TRegisterRequest = {
     email: string
     password: string
-    name: string
+    firstName: string
+    lastName: string
 }
 export type TRefreshTokenRequest = {
     refreshToken: string
@@ -29,11 +30,18 @@ export type TResetPasswordRequest = {
     confirmNewPassword: string
 }
 export type TUserProfile = {
-    id: string
+    id: number
+    username: string
+    firstName: string
+    lastName: string
+    avatar: string
     email: string
-    name: string
+    activated: boolean
     role: string
-    avatar?: string
+    activationKey: string | null
+    resetKey: string | null
+    langKey: string
+    lastLoginAttempt: number | null
     createdAt: string
     updatedAt: string
 }

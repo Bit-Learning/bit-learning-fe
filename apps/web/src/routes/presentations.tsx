@@ -1,7 +1,7 @@
+import Footer from '@/components/layouts/footer'
+import Header from '@/components/layouts/header'
 import PresentationBanner from '@/shared/components/PresentationBanner'
 import ProductGrid from '@/shared/components/ProductGrid'
-import { Footer } from '@/shared/layouts/Footer'
-import { FullHeader } from '@/shared/layouts/Header'
 import { createFileRoute, useNavigate } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 
@@ -25,7 +25,7 @@ function PresentationRoute() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, ease: 'easeOut' }}
         >
-            <FullHeader />
+            <Header />
 
             {/* === MAIN CONTENT (SCROLL ANIMATED SECTIONS) === */}
             <main className="flex-1 overflow-hidden bg-[#FFFFFF]">

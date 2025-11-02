@@ -76,7 +76,8 @@ const SignUpForm: React.FC = () => {
         const body: TRegisterRequest = {
             email: values.email,
             password: values.password,
-            name: `${values.firstName} ${values.lastName}`,
+            firstName: values.firstName,
+            lastName: values.lastName,
         }
         const result = await dispatch(requestRegister(body))
         if (result !== undefined) {
