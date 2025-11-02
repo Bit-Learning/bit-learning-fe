@@ -31,8 +31,6 @@ import { Route as OfflineCourseRouteImport } from './routes/offline-course'
 import { Route as PresentationsRouteImport } from './routes/presentations'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
@@ -75,16 +73,6 @@ const SignupRoute = SignupRouteImport.update({
 const SigninRoute = SigninRouteImport.update({
     id: '/signin',
     path: '/signin',
-    getParentRoute: () => rootRouteImport,
-} as any)
-const SignUpRoute = SignUpRouteImport.update({
-    id: '/sign-up',
-    path: '/sign-up',
-    getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-    id: '/sign-in',
-    path: '/sign-in',
     getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -248,8 +236,6 @@ export interface FileRoutesByFullPath {
     '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -287,8 +273,6 @@ export interface FileRoutesByTo {
     '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -327,8 +311,6 @@ export interface FileRoutesById {
     '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -368,8 +350,6 @@ export interface FileRouteTypes {
         | '/presentations'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -407,8 +387,6 @@ export interface FileRouteTypes {
         | '/presentations'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -446,8 +424,6 @@ export interface FileRouteTypes {
         | '/presentations'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -486,8 +462,6 @@ export interface RootRouteChildren {
     PresentationsRoute: typeof PresentationsRoute
     PrivacyRoute: typeof PrivacyRoute
     ResetPasswordRoute: typeof ResetPasswordRoute
-    SignInRoute: typeof SignInRoute
-    SignUpRoute: typeof SignUpRoute
     SigninRoute: typeof SigninRoute
     SignupRoute: typeof SignupRoute
     TermsRoute: typeof TermsRoute
@@ -553,20 +527,6 @@ declare module '@tanstack/react-router' {
             path: '/signin'
             fullPath: '/signin'
             preLoaderRoute: typeof SigninRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/sign-up': {
-            id: '/sign-up'
-            path: '/sign-up'
-            fullPath: '/sign-up'
-            preLoaderRoute: typeof SignUpRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/sign-in': {
-            id: '/sign-in'
-            path: '/sign-in'
-            fullPath: '/sign-in'
-            preLoaderRoute: typeof SignInRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/reset-password': {
@@ -790,8 +750,6 @@ const rootRouteChildren: RootRouteChildren = {
     PresentationsRoute: PresentationsRoute,
     PrivacyRoute: PrivacyRoute,
     ResetPasswordRoute: ResetPasswordRoute,
-    SignInRoute: SignInRoute,
-    SignUpRoute: SignUpRoute,
     SigninRoute: SigninRoute,
     SignupRoute: SignupRoute,
     TermsRoute: TermsRoute,

@@ -1,7 +1,10 @@
+import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { ChatPrompt } from '@/shared/components/ChatPrompt'
-import { useAuth } from '@/shared/context/AuthContext'
 import { mockConversations } from '@/shared/data/chat-data'
-import { Link, Navigate } from '@tanstack/react-router'
+import { clearAuthTokens } from '@/shared/lib/cookies'
+import { useAppDispatch } from '@/shared/redux/store'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -23,20 +26,14 @@ import {
 } from '@workspace/ui/components/sidebar'
 import { BookImage, ChevronLeft, ChevronRight, ClipboardPlus, Home, LogOut, Search, SquarePen } from 'lucide-react'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 
 const ChatPromptPage = () => {
-    const { user, isAuthenticated, logout } = useAuth()
     const [activeSection, setActiveSection] = React.useState('newChat')
     const [currentConversationIndex, setCurrentConversationIndex] = React.useState(0)
-
-    if (!isAuthenticated || !user) {
-        return <Navigate to="/signin" />
-    }
-
-    const handleLogout = () => {
-        logout()
-        window.location.href = '/signin'
-    }
+    const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate()
 
     const menuItems = [
         { id: 'newChat', label: 'Đoạn hội thoại mới', icon: SquarePen },
@@ -53,6 +50,24 @@ const ChatPromptPage = () => {
         setCurrentConversationIndex(prev => (prev < mockConversations.length - 1 ? prev + 1 : 0))
     }
 
+    if (isLoading || !userInfo) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+                    <p className="text-gray-600">Loading profile...</p>
+                </div>
+            </div>
+        )
+    }
+
+    const handleLogout = () => {
+        clearAuthTokens()
+        dispatch(setIsAuthenticatedAction(false))
+        dispatch(setUserInfoAction(null))
+        navigate({ to: '/signin' })
+    }
+
     return (
         <SidebarProvider defaultOpen>
             <div className="flex min-h-screen w-full">
@@ -60,16 +75,15 @@ const ChatPromptPage = () => {
                     <SidebarHeader>
                         <div className="flex items-center gap-3 px-2 py-3">
                             <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                    src="https://bundui-images.netlify.app/avatars/08.png"
-                                    alt={user.username || 'Profile'}
-                                />
-                                <AvatarFallback>{user.username?.slice(0, 2).toUpperCase() || '??'}</AvatarFallback>
+                                {userInfo.avatar && <AvatarImage src={userInfo.avatar} alt={userInfo.username} />}
+                                <AvatarFallback className="bg-blue-600 text-white">
+                                    {userInfo.username?.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                                <span className="text-sm font-semibold">{user.username}</span>
-                                <Badge variant={user.role === 'ADMIN' ? 'default' : 'secondary'} className="w-fit">
-                                    {user.role}
+                                <span className="text-sm font-semibold">{userInfo.username}</span>
+                                <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'} className="w-fit">
+                                    {userInfo.role}
                                 </Badge>
                             </div>
                         </div>

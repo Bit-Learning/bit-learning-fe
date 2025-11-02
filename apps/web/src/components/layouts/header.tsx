@@ -1,7 +1,12 @@
 import { navItems } from '@/components/layouts/data/nav-items'
+import { logout } from '@/feature/auth/store/auth.actions'
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { SearchProvider, useSearch } from '@/shared/context/search-context'
+import { useAppDispatch } from '@/shared/redux/store'
 import { Link, useNavigate } from '@tanstack/react-router'
+import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Button } from '@workspace/ui/components/Button'
+import { Menu as DropdownMenu, MenuItem, MenuPopover, MenuSeparator, MenuTrigger } from '@workspace/ui/components/Menu'
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -12,18 +17,26 @@ import {
     navigationMenuTriggerStyle,
 } from '@workspace/ui/components/navigation-menu'
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@workspace/ui/components/sheet'
-import { Menu, Search } from 'lucide-react'
+import { LogOut, Menu, Search, Settings, User } from 'lucide-react'
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
 import MobileSheetMenu from './mobile-sheet-menu'
 
 const Header: React.FC = () => {
     const navigate = useNavigate()
+    const dispatch = useAppDispatch()
     const [isSheetOpen, setIsSheetOpen] = useState(false)
     const { setOpen } = useSearch()
+    const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo)
 
     const handleNavigate = (path: string) => {
         navigate({ to: path })
         setIsSheetOpen(false)
+    }
+
+    const handleLogout = () => {
+        dispatch(logout())
+        navigate({ to: '/signin' })
     }
 
     return (
@@ -86,28 +99,57 @@ const Header: React.FC = () => {
                     </NavigationMenu>
 
                     <div className="hidden items-center space-x-4 md:flex">
-                        {/* <div className="border-r pr-4 dark:border-gray-700">
-              <button
-                className="relative cursor-pointer mt-[6px] text-gray-600 hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400 transition-colors"
-                onClick={() => setOpen(true)}
-              >
-                <Search size={18} />
-              </button>
-            </div> */}
-                        <Button
-                            variant="outline"
-                            onClick={() => navigate({ to: '/signin' })}
-                            className="bithub-button-outline"
-                        >
-                            Đăng nhập
-                        </Button>
-                        <Button onClick={() => navigate({ to: '/signup' })} className="bithub-button-primary">
-                            Đăng ký
-                        </Button>
+                        {isAuthenticated && userInfo ? (
+                            <MenuTrigger>
+                                <Button variant="ghost" className="flex items-center gap-2 px-2">
+                                    <Avatar className="h-8 w-8">
+                                        <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
+                                        <AvatarFallback>{userInfo.avatar?.slice(0, 2).toUpperCase()}</AvatarFallback>
+                                    </Avatar>
+                                    <div className="flex flex-col items-start">
+                                        <span className="text-sm font-medium">{userInfo.username}</span>
+                                        <span className="text-xs text-gray-500">{userInfo.email}</span>
+                                    </div>
+                                </Button>
+                                <MenuPopover placement="bottom end">
+                                    <DropdownMenu>
+                                        <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
+                                            <User className="mr-2 h-4 w-4" />
+                                            <span>Hồ sơ cá nhân</span>
+                                        </MenuItem>
+                                        <MenuItem isDisabled>
+                                            <Settings className="mr-2 h-4 w-4" />
+                                            <span>Cài đặt</span>
+                                        </MenuItem>
+                                        <MenuItem isDisabled>
+                                            <span>Presame (Sắp ra mắt)</span>
+                                        </MenuItem>
+                                        <MenuSeparator />
+                                        <MenuItem onAction={handleLogout}>
+                                            <LogOut className="mr-2 h-4 w-4" />
+                                            <span>Đăng xuất</span>
+                                        </MenuItem>
+                                    </DropdownMenu>
+                                </MenuPopover>
+                            </MenuTrigger>
+                        ) : (
+                            <>
+                                <Button
+                                    variant="outline"
+                                    onClick={() => navigate({ to: '/signin' })}
+                                    className="bithub-button-outline"
+                                >
+                                    Đăng nhập
+                                </Button>
+                                <Button onClick={() => navigate({ to: '/signup' })} className="bithub-button-primary">
+                                    Đăng ký
+                                </Button>
+                            </>
+                        )}
                     </div>
 
-                    <div className="flex hidden items-center gap-2 max-[776px]:flex">
-                        <div className="hidden border-r pr-4 max-[776px]:block dark:border-gray-700">
+                    <div className="flex items-center gap-2 md:hidden">
+                        <div className="border-r pr-4 max-[776px]:block dark:border-gray-700">
                             <button
                                 type="button"
                                 onClick={() => setOpen(true)}

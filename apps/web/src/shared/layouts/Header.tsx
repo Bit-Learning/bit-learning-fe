@@ -1,9 +1,5 @@
-import { useAuth } from '@/shared/context/AuthContext'
 import { NAV_ITEMS, PRESENTATION_ITEMS } from '@/shared/data/nav-data'
 import { useNavigate } from '@tanstack/react-router'
-import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
-import { Button } from '@workspace/ui/components/Button'
-import { Menu, MenuItem, MenuPopover, MenuSeparator, MenuTrigger } from '@workspace/ui/components/Menu'
 import {
     NavigationMenu,
     NavigationMenuContent,
@@ -12,7 +8,6 @@ import {
     NavigationMenuList,
     NavigationMenuTrigger,
 } from '@workspace/ui/components/navigation-menu'
-import { LogOut, Settings, User, UserCircle, UserPlus } from 'lucide-react'
 
 export function Header() {
     const navigate = useNavigate()
@@ -87,92 +82,6 @@ function ListItem({
             </div>
             {children && <p className="text-muted-foreground mt-1 line-clamp-2 text-xs">{children}</p>}
         </li>
-    )
-}
-
-export function FullHeader() {
-    const navigate = useNavigate()
-    const { user, isAuthenticated, logout, isLoading } = useAuth()
-
-    const handleLogout = () => {
-        logout()
-        navigate({ to: '/' })
-    }
-
-    return (
-        <div className="relative">
-            {/* Purple/Navy curved background */}
-            <div className="absolute inset-0 h-28 rounded-b-3xl bg-[#14244A]" />
-
-            {/* Right-side actions */}
-            <div className="absolute top-1 right-5 z-20 flex items-center gap-3">
-                {/* <CountryDropdown placeholder="Select country" defaultValue="VNM" onChange={() => {}} slim /> */}
-
-                {!isLoading && (
-                    <>
-                        {isAuthenticated && user ? (
-                            <MenuTrigger>
-                                <Button
-                                    variant="unstyled"
-                                    className="flex items-center gap-2 text-white hover:bg-white/10"
-                                >
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage
-                                            src="https://bundui-images.netlify.app/avatars/08.png"
-                                            alt={user.username}
-                                        />
-                                        <AvatarFallback className="text-xs">
-                                            {user.username?.slice(0, 2).toUpperCase()}
-                                        </AvatarFallback>
-                                    </Avatar>
-                                    <span className="text-sm font-medium">{user.username}</span>
-                                </Button>
-                                <MenuPopover placement="bottom end">
-                                    <Menu className="min-w-[200px]">
-                                        <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
-                                            <UserCircle className="h-4 w-4" />
-                                            <span>Profile</span>
-                                        </MenuItem>
-                                        <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
-                                            <Settings className="h-4 w-4" />
-                                            <span>Settings</span>
-                                        </MenuItem>
-                                        <MenuSeparator />
-                                        <MenuItem onAction={handleLogout} className="text-red-600">
-                                            <LogOut className="h-4 w-4" />
-                                            <span>Logout</span>
-                                        </MenuItem>
-                                    </Menu>
-                                </MenuPopover>
-                            </MenuTrigger>
-                        ) : (
-                            <>
-                                <Button
-                                    variant="link"
-                                    onClick={() => navigate({ to: '/signin' })}
-                                    className="text-white"
-                                >
-                                    <User /> Đăng nhập
-                                </Button>
-                                <Button
-                                    variant="link"
-                                    onClick={() => navigate({ to: '/signup' })}
-                                    className="text-white"
-                                >
-                                    <UserPlus />
-                                    Đăng ký
-                                </Button>
-                            </>
-                        )}
-                    </>
-                )}
-            </div>
-
-            {/* Header sits below */}
-            <div className="relative z-100 mt-10">
-                <Header />
-            </div>
-        </div>
     )
 }
 
