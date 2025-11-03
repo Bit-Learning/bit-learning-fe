@@ -1,3 +1,4 @@
+import { API_CONFIG } from '@/shared/config/api.config'
 import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from '@/shared/lib/cookies'
 import axios, {
     AxiosError,
@@ -8,9 +9,10 @@ import axios, {
 } from 'axios'
 
 const api: AxiosInstance = axios.create({
-    baseURL: 'http://localhost:4000',
+    baseURL: API_CONFIG.BASE_URL,
+    timeout: API_CONFIG.TIMEOUT,
     headers: {
-        'Content-Type': 'application/json',
+        ...API_CONFIG.DEFAULT_HEADERS,
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',
     },
 })

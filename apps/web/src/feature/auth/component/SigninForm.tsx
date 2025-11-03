@@ -1,4 +1,3 @@
-import { Roles } from '@/shared/constants/enums'
 import { useAppDispatch } from '@/shared/redux/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
@@ -61,7 +60,6 @@ const SignInForm: React.FC = () => {
         const body: TLoginRequest = {
             email: values.email,
             password: values.password,
-            role: Roles.USER,
         }
         const result: any = await dispatch(requestLogin(body))
 

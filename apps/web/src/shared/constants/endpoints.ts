@@ -1,11 +1,17 @@
+import { API_CONFIG } from '@/shared/config/api.config'
+
 export const endpoints = {
-    AUTH: '/auth',
+    AUTH: '/api/auth',
     ACCOUNT: '/users',
 }
 
+/**
+ * @deprecated Use API_CONFIG from @/shared/config/api.config instead
+ * This will be removed in future versions
+ */
 export const API_PATH = {
     BASE_URL: {
-        DEVELOPMENT: 'http://localhost:4000/api/',
-        PRODUCTION: 'https://api.example.com',
+        DEVELOPMENT: API_CONFIG.BASE_URL + '/api/',
+        PRODUCTION: API_CONFIG.BASE_URL,
     },
 }

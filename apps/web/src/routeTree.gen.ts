@@ -741,18 +741,18 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
-        '/news/': {
-            id: '/news/'
-            path: '/news'
-            fullPath: '/news'
-            preLoaderRoute: typeof NewsIndexRouteImport
-            parentRoute: typeof rootRouteImport
-        }
         '/presentations/': {
             id: '/presentations/'
             path: '/presentations'
             fullPath: '/presentations'
             preLoaderRoute: typeof PresentationsIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/news/': {
+            id: '/news/'
+            path: '/news'
+            fullPath: '/news'
+            preLoaderRoute: typeof NewsIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/matrices/': {
@@ -867,27 +867,6 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesSlidevCreateRouteImport
             parentRoute: typeof rootRouteImport
         }
-        '/matrices/$id/generate': {
-            id: '/matrices/$id/generate'
-            path: '/matrices/$id/generate'
-            fullPath: '/matrices/$id/generate'
-            preLoaderRoute: typeof MatricesIdGenerateRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/matrices/$id/edit': {
-            id: '/matrices/$id/edit'
-            path: '/matrices/$id/edit'
-            fullPath: '/matrices/$id/edit'
-            preLoaderRoute: typeof MatricesIdEditRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/templates/slidev/$id/edit': {
-            id: '/templates/slidev/$id/edit'
-            path: '/templates/slidev/$id/edit'
-            fullPath: '/templates/slidev/$id/edit'
-            preLoaderRoute: typeof TemplatesSlidevIdEditRouteImport
-            parentRoute: typeof rootRouteImport
-        }
         '/presentations/$id/view': {
             id: '/presentations/$id/view'
             path: '/view'
@@ -908,6 +887,27 @@ declare module '@tanstack/react-router' {
             fullPath: '/presentations/$id/overview'
             preLoaderRoute: typeof PresentationsIdOverviewRouteImport
             parentRoute: typeof PresentationsIdRoute
+        }
+        '/matrices/$id/generate': {
+            id: '/matrices/$id/generate'
+            path: '/matrices/$id/generate'
+            fullPath: '/matrices/$id/generate'
+            preLoaderRoute: typeof MatricesIdGenerateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/$id/edit': {
+            id: '/matrices/$id/edit'
+            path: '/matrices/$id/edit'
+            fullPath: '/matrices/$id/edit'
+            preLoaderRoute: typeof MatricesIdEditRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/templates/slidev/$id/edit': {
+            id: '/templates/slidev/$id/edit'
+            path: '/templates/slidev/$id/edit'
+            fullPath: '/templates/slidev/$id/edit'
+            preLoaderRoute: typeof TemplatesSlidevIdEditRouteImport
+            parentRoute: typeof rootRouteImport
         }
     }
 }

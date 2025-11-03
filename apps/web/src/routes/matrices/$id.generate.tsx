@@ -1,6 +1,11 @@
 import GenerateExam from '@/feature/matrix/page/GenerateExam'
+import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { createFileRoute } from '@tanstack/react-router'
 
 export const Route = createFileRoute('/matrices/$id/generate')({
-    component: GenerateExam,
+    component: () => (
+        <ProtectedRoute>
+            <GenerateExam />
+        </ProtectedRoute>
+    ),
 })
