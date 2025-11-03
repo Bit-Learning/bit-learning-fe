@@ -1,4 +1,4 @@
-import { PresentationHeader } from '@/shared/layouts/Header'
+import Header from '@/components/layouts/header'
 import React, { memo } from 'react'
 
 interface Props {
@@ -8,7 +8,7 @@ interface Props {
 const PresentationLayoutInner: React.FC<Props> = ({ children }) => {
     return (
         <div className="mx-auto">
-            <PresentationHeader />
+            <Header />
             {children}
         </div>
     )

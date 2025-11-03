@@ -1,7 +1,8 @@
-import { PresentationHeader } from '@/shared/layouts/Header'
+import { NotFoundErrorPage } from '@/feature/app/page/NotFound'
+import { PresentationHeader } from '@/feature/templates/components/PresentationHeader'
 import { useQuery } from '@tanstack/react-query'
 import { createFileRoute } from '@tanstack/react-router'
-import { Spinner } from '@workspace/ui/components/Spinner'
+import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
 import axios from 'axios'
 
 export const Route = createFileRoute('/templates/')({
@@ -9,7 +10,11 @@ export const Route = createFileRoute('/templates/')({
 })
 
 function TemplatesPage() {
-    const { data: templates, isLoading } = useQuery({
+    const {
+        data: templates,
+        isLoading,
+        error,
+    } = useQuery({
         queryKey: ['templates'],
         queryFn: async () => {
             const res = await axios.get('http://localhost:8080/api/templates')
@@ -17,14 +22,15 @@ function TemplatesPage() {
         },
     })
 
-    if (isLoading) return <Spinner />
+    if (isLoading) return <SpinnerLoader />
+    if (error) return <NotFoundErrorPage />
 
     return (
         <div className="">
             <PresentationHeader />
             <h1 className="mb-4 text-2xl font-semibold">Templates</h1>
             <ul className="grid gap-3">
-                {templates.map((t: any) => (
+                {templates?.map((t: any) => (
                     <li key={t.id} className="rounded-md border p-3 hover:bg-gray-50">
                         <a href={`/templates/${t.id}`} className="text-blue-600 hover:underline">
                             {t.displayName}

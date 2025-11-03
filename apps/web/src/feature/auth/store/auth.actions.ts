@@ -17,9 +17,13 @@ export const requestUserProfile = (): TAppThunk => {
         } catch (error: any) {
             const errorMessage = error?.response?.data?.message || 'Failed to fetch user profile'
             dispatch(setErrorAction(errorMessage))
-            // Clear auth state if profile fetch fails
-            dispatch(setIsAuthenticatedAction(false))
-            dispatch(setUserInfoAction(null))
+
+            // Only clear auth state if it's not a 401 (token will be refreshed automatically)
+            // or if the refresh token has also failed (no tokens left)
+            if (error?.response?.status !== 401) {
+                dispatch(setIsAuthenticatedAction(false))
+                dispatch(setUserInfoAction(null))
+            }
             return { success: false, message: errorMessage }
         }
     }
