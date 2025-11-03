@@ -1,4 +1,5 @@
 import MainLayout from '@/components/layouts/main-layout'
+import { LayoutProvider } from '@/context/layout-context'
 import NotFoundError from '@/feature/app/page/NotFound'
 import AutoSmoothScrollToTop from '@/shared/components/AutoSmoothScrollToTop'
 import { Providers } from '@/shared/components/Providers'
@@ -8,11 +9,13 @@ import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
 export const Route = createRootRoute({
     component: () => (
         <Providers>
-            <MainLayout>
-                <AutoSmoothScrollToTop />
-                <Outlet />
-                <TanStackRouterDevtools position="bottom-right" />
-            </MainLayout>
+            <LayoutProvider>
+                <MainLayout>
+                    <AutoSmoothScrollToTop />
+                    <Outlet />
+                    <TanStackRouterDevtools position="bottom-right" />
+                </MainLayout>
+            </LayoutProvider>
         </Providers>
     ),
     notFoundComponent: () => <NotFoundError />,
