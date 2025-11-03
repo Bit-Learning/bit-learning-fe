@@ -1,6 +1,6 @@
 import MainLayout from '@/components/layouts/main-layout'
 import { LayoutProvider } from '@/context/layout-context'
-import NotFoundError from '@/feature/app/page/NotFound'
+import { NotFoundErrorPage } from '@/feature/app/page/NotFound'
 import AutoSmoothScrollToTop from '@/shared/components/AutoSmoothScrollToTop'
 import { Providers } from '@/shared/components/Providers'
 import { Outlet, createRootRoute } from '@tanstack/react-router'
@@ -18,5 +18,5 @@ export const Route = createRootRoute({
             </LayoutProvider>
         </Providers>
     ),
-    notFoundComponent: () => <NotFoundError />,
+    notFoundComponent: () => <NotFoundErrorPage />,
 })
