@@ -8,7 +8,7 @@ import axios, {
 } from 'axios'
 
 const api: AxiosInstance = axios.create({
-    baseURL: 'http://localhost:6979/api/v1',
+    baseURL: 'http://localhost:4000/api/',
     headers: {
         'Content-Type': 'application/json',
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',
@@ -94,7 +94,19 @@ async function onResponseError(error: AxiosError): Promise<any> {
         _retry?: boolean
     }
 
-    if (error.response?.status === 401 && !originalRequest._retry && originalRequest.url !== '/auth/refresh-token') {
+    // Don't try to refresh token for auth endpoints
+    const authEndpoints = [
+        '/auth/login',
+        '/auth/login-user',
+        '/auth/register',
+        '/auth/refresh-token',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+        '/auth/activate',
+    ]
+    const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))
+
+    if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
         originalRequest._retry = true
         const refreshToken = getRefreshToken()
 

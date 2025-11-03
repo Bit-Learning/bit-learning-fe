@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -34,8 +35,6 @@ import { Route as PresentationsIdViewRouteImport } from './routes/presentations/
 import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
@@ -78,16 +77,6 @@ const SignupRoute = SignupRouteImport.update({
 const SigninRoute = SigninRouteImport.update({
     id: '/signin',
     path: '/signin',
-    getParentRoute: () => rootRouteImport,
-} as any)
-const SignUpRoute = SignUpRouteImport.update({
-    id: '/sign-up',
-    path: '/sign-up',
-    getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-    id: '/sign-in',
-    path: '/sign-in',
     getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
@@ -143,6 +132,11 @@ const ConsultationRoute = ConsultationRouteImport.update({
 const ChatRoute = ChatRouteImport.update({
     id: '/chat',
     path: '/chat',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+    id: '/about',
+    path: '/about',
     getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -253,6 +247,7 @@ const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -264,8 +259,6 @@ export interface FileRoutesByFullPath {
     '/offline-course': typeof OfflineCourseRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -295,6 +288,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -306,8 +300,6 @@ export interface FileRoutesByTo {
     '/offline-course': typeof OfflineCourseRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -338,6 +330,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
     __root__: typeof rootRouteImport
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -349,8 +342,6 @@ export interface FileRoutesById {
     '/offline-course': typeof OfflineCourseRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -382,6 +373,7 @@ export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath
     fullPaths:
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -393,8 +385,6 @@ export interface FileRouteTypes {
         | '/offline-course'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -424,6 +414,7 @@ export interface FileRouteTypes {
     fileRoutesByTo: FileRoutesByTo
     to:
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -435,8 +426,6 @@ export interface FileRouteTypes {
         | '/offline-course'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -466,6 +455,7 @@ export interface FileRouteTypes {
     id:
         | '__root__'
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -477,8 +467,6 @@ export interface FileRouteTypes {
         | '/offline-course'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -509,6 +497,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute
+    AboutRoute: typeof AboutRoute
     ChatRoute: typeof ChatRoute
     ConsultationRoute: typeof ConsultationRoute
     ContactRoute: typeof ContactRoute
@@ -520,8 +509,6 @@ export interface RootRouteChildren {
     OfflineCourseRoute: typeof OfflineCourseRoute
     PrivacyRoute: typeof PrivacyRoute
     ResetPasswordRoute: typeof ResetPasswordRoute
-    SignInRoute: typeof SignInRoute
-    SignUpRoute: typeof SignUpRoute
     SigninRoute: typeof SigninRoute
     SignupRoute: typeof SignupRoute
     TermsRoute: typeof TermsRoute
@@ -589,20 +576,6 @@ declare module '@tanstack/react-router' {
             path: '/signin'
             fullPath: '/signin'
             preLoaderRoute: typeof SigninRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/sign-up': {
-            id: '/sign-up'
-            path: '/sign-up'
-            fullPath: '/sign-up'
-            preLoaderRoute: typeof SignUpRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/sign-in': {
-            id: '/sign-in'
-            path: '/sign-in'
-            fullPath: '/sign-in'
-            preLoaderRoute: typeof SignInRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/reset-password': {
@@ -680,6 +653,13 @@ declare module '@tanstack/react-router' {
             path: '/chat'
             fullPath: '/chat'
             preLoaderRoute: typeof ChatRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/about': {
+            id: '/about'
+            path: '/about'
+            fullPath: '/about'
+            preLoaderRoute: typeof AboutRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/': {
@@ -848,6 +828,7 @@ const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(P
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
+    AboutRoute: AboutRoute,
     ChatRoute: ChatRoute,
     ConsultationRoute: ConsultationRoute,
     ContactRoute: ContactRoute,
@@ -859,8 +840,6 @@ const rootRouteChildren: RootRouteChildren = {
     OfflineCourseRoute: OfflineCourseRoute,
     PrivacyRoute: PrivacyRoute,
     ResetPasswordRoute: ResetPasswordRoute,
-    SignInRoute: SignInRoute,
-    SignUpRoute: SignUpRoute,
     SigninRoute: SigninRoute,
     SignupRoute: SignupRoute,
     TermsRoute: TermsRoute,

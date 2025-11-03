@@ -1,11 +1,12 @@
+import { initializeAuth } from '@/feature/auth/store/auth.actions'
 import { ThemeProvider } from '@/shared/components/ThemeProvider'
-import { AuthProvider } from '@/shared/context/AuthContext'
 import { matchQuery, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { BsProvider } from '@workspace/ui/components/Provider'
+import { useEffect } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
-import { Provider } from 'react-redux'
-import store from '../redux/store'
+import { Provider, useDispatch } from 'react-redux'
+import store, { AppDispatch } from '../redux/store'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -28,6 +29,17 @@ const queryClient = new QueryClient({
     }),
 })
 
+const AuthInitializer = () => {
+    const dispatch = useDispatch<AppDispatch>()
+
+    useEffect(() => {
+        // Initialize auth state on app load
+        dispatch(initializeAuth())
+    }, [dispatch])
+
+    return null
+}
+
 export const Providers = ({ children }: { children: React.ReactNode }) => {
     return (
         <BsProvider>
@@ -35,10 +47,9 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
                 <ThemeProvider defaultTheme="light" storageKey="vite-ui-theme">
                     <HelmetProvider>
                         <QueryClientProvider client={queryClient}>
-                            <AuthProvider>
-                                {children}
-                                <ReactQueryDevtools initialIsOpen={false} />
-                            </AuthProvider>
+                            <AuthInitializer />
+                            {children}
+                            <ReactQueryDevtools initialIsOpen={false} />
                         </QueryClientProvider>
                     </HelmetProvider>
                 </ThemeProvider>

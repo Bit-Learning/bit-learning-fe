@@ -1,27 +1,36 @@
+import store from '@/shared/redux/store'
 import { redirect } from '@tanstack/react-router'
-import { api } from './api'
+import { clearAuthTokens, getAccessToken } from './cookies'
 
 /**
  * Check if user is authenticated
  * @returns true if user has valid authentication tokens and data
  */
+// export function isLoggedIn(): boolean {
+//     const accessToken = api.auth.getAccessToken()
+//     const userStr = api.auth.getUser()
+
+//     if (!accessToken || !userStr) {
+//         return false
+//     }
+
+//     // Verify user data is valid JSON
+//     try {
+//         JSON.parse(userStr)
+//         return true
+//     } catch {
+//         // Invalid user data, clear auth
+//         api.auth.logout()
+//         return false
+//     }
+// }
+
 export function isLoggedIn(): boolean {
-    const accessToken = api.auth.getAccessToken()
-    const userStr = api.auth.getUser()
+    const accessToken = getAccessToken()
+    const authState = store.getState().auth
 
-    if (!accessToken || !userStr) {
-        return false
-    }
-
-    // Verify user data is valid JSON
-    try {
-        JSON.parse(userStr)
-        return true
-    } catch {
-        // Invalid user data, clear auth
-        api.auth.logout()
-        return false
-    }
+    // Check both cookie token and Redux state
+    return !!(accessToken && authState.isAuthenticated && authState.userInfo)
 }
 
 /**
@@ -32,7 +41,7 @@ export function isLoggedIn(): boolean {
 export function requireAuth(location?: { href: string }) {
     if (!isLoggedIn()) {
         throw redirect({
-            to: '/sign-in',
+            to: '/signin',
             search: location ? { redirect: location.href } : undefined,
         })
     }
@@ -43,25 +52,46 @@ export function requireAuth(location?: { href: string }) {
  * @param requiredRole - The role required to access the route
  * @param location - Optional location to redirect back to after login
  */
+
+// export function requireRole(requiredRole: string, location?: { href: string }) {
+//     if (!isLoggedIn()) {
+//         throw redirect({
+//             to: '/sign-in',
+//             search: location ? { redirect: location.href } : undefined,
+//         })
+//     }
+
+//     const userStr = api.auth.getUser()
+//     if (userStr) {
+//         try {
+//             const user = JSON.parse(userStr)
+//             if (user.role !== requiredRole) {
+//                 throw redirect({ to: '/' }) // Redirect to home if role doesn't match
+//             }
+//         } catch {
+//             api.auth.logout()
+//             throw redirect({ to: '/sign-in' })
+//         }
+//     }
+// }
+
 export function requireRole(requiredRole: string, location?: { href: string }) {
     if (!isLoggedIn()) {
         throw redirect({
-            to: '/sign-in',
+            to: '/signin',
             search: location ? { redirect: location.href } : undefined,
         })
     }
 
-    const userStr = api.auth.getUser()
-    if (userStr) {
-        try {
-            const user = JSON.parse(userStr)
-            if (user.role !== requiredRole) {
-                throw redirect({ to: '/' }) // Redirect to home if role doesn't match
-            }
-        } catch {
-            api.auth.logout()
-            throw redirect({ to: '/sign-in' })
+    const authState = store.getState().auth
+    const user = authState.userInfo
+
+    if (!user || user.role !== requiredRole) {
+        if (!user) {
+            clearAuthTokens()
+            throw redirect({ to: '/signin' })
         }
+        throw redirect({ to: '/' }) // Redirect to home if role doesn't match
     }
 }
 

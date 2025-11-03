@@ -30,7 +30,7 @@ const formSchema = z.object({
 })
 
 const SignInForm: React.FC = () => {
-    const { isLoading, isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
+    const { isLoading, isAuthenticated } = useSelector(selectAuthStateInfo)
     const [showPassword, setShowPassword] = React.useState(false)
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
@@ -50,19 +50,32 @@ const SignInForm: React.FC = () => {
     }, [isAuthenticated, navigate])
 
     React.useEffect(() => {
-        if (errorMsg) {
-            toast.error({ title: errorMsg })
-            dispatch(setErrorAction(null))
-        }
-    }, [errorMsg, dispatch])
+        // Don't show error toast here - let onSubmit handle it
+        // This prevents double toasts
+    }, [])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        // Clear any previous errors
+        dispatch(setErrorAction(null))
+
         const body: TLoginRequest = {
             email: values.email,
             password: values.password,
             role: Roles.USER,
         }
-        await dispatch(requestLogin(body))
+        const result: any = await dispatch(requestLogin(body))
+
+        if (result?.needsActivation) {
+            toast.warning({
+                title: 'Tài khoản chưa kích hoạt',
+                description: result.message,
+            })
+        } else if (result?.success === false) {
+            toast.error({
+                title: 'Đăng nhập thất bại',
+                description: result.message,
+            })
+        }
     }
 
     return (

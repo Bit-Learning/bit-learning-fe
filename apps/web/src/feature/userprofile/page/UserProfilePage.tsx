@@ -1,6 +1,10 @@
+import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
+import { requestUserProfile } from '@/feature/auth/store/auth.actions'
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import ProfileContent from '@/shared/components/profile-page/profile-content'
-import { useAuth } from '@/shared/context/AuthContext'
-import { Link } from '@tanstack/react-router'
+import { clearAuthTokens } from '@/shared/lib/cookies'
+import { useAppDispatch } from '@/shared/redux/store'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -23,19 +27,38 @@ import {
 } from '@workspace/ui/components/sidebar'
 import { Activity, Bell, Calendar, Camera, Home, Key, LogOut, Mail, MapPin, Settings, Shield, User } from 'lucide-react'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 
 function UserProfilePage() {
-    const { user, logout } = useAuth()
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate()
+    const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const [activeSection, setActiveSection] = React.useState('overview')
 
+    React.useEffect(() => {
+        // Fetch user profile on mount if not already loaded
+        if (!userInfo) {
+            dispatch(requestUserProfile())
+        }
+    }, [dispatch, userInfo])
+
     // User is guaranteed to exist here because of route-level protection
-    if (!user) {
-        return null // This should never happen due to beforeLoad
+    if (isLoading || !userInfo) {
+        return (
+            <div className="flex min-h-screen items-center justify-center">
+                <div className="text-center">
+                    <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+                    <p className="text-gray-600">Loading profile...</p>
+                </div>
+            </div>
+        )
     }
 
     const handleLogout = () => {
-        logout()
-        window.location.href = '/sign-in'
+        clearAuthTokens()
+        dispatch(setIsAuthenticatedAction(false))
+        dispatch(setUserInfoAction(null))
+        navigate({ to: '/signin' })
     }
 
     const menuItems = [
@@ -53,16 +76,15 @@ function UserProfilePage() {
                     <SidebarHeader>
                         <div className="flex items-center gap-3 px-2 py-3">
                             <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                    src="https://bundui-images.netlify.app/avatars/08.png"
-                                    alt={user.username || 'Profile'}
-                                />
-                                <AvatarFallback>{user.username?.slice(0, 2).toUpperCase() || '??'}</AvatarFallback>
+                                {userInfo.avatar && <AvatarImage src={userInfo.avatar} alt={userInfo.username} />}
+                                <AvatarFallback className="bg-blue-600 text-white">
+                                    {userInfo.username?.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                                <span className="text-sm font-semibold">{user.username}</span>
-                                <Badge variant={user.role === 'ADMIN' ? 'default' : 'secondary'} className="w-fit">
-                                    {user.role}
+                                <span className="text-sm font-semibold">{userInfo.username}</span>
+                                <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'} className="w-fit">
+                                    {userInfo.role}
                                 </Badge>
                             </div>
                         </div>
@@ -149,12 +171,11 @@ function UserProfilePage() {
                                 <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
                                     <div className="relative">
                                         <Avatar className="h-24 w-24">
-                                            <AvatarImage
-                                                src="https://bundui-images.netlify.app/avatars/08.png"
-                                                alt={user.username || 'Profile'}
-                                            />
-                                            <AvatarFallback className="text-2xl">
-                                                {user.username?.slice(0, 2).toUpperCase() || '??'}
+                                            {userInfo.avatar && (
+                                                <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
+                                            )}
+                                            <AvatarFallback className="bg-blue-600 text-2xl text-white">
+                                                {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
                                             </AvatarFallback>
                                         </Avatar>
                                         <Button
@@ -167,30 +188,35 @@ function UserProfilePage() {
                                     </div>
 
                                     <div className="flex-1 space-y-2">
+                                        <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p>
+
                                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                                            <h2 className="text-2xl font-bold">{user.username}</h2>
-                                            <Badge variant={user.role === 'ADMIN' ? 'default' : 'secondary'}>
-                                                {user.role}
-                                            </Badge>
-                                            <Badge variant={user.activated ? 'default' : 'destructive'}>
-                                                {user.activated ? 'Active' : 'Inactive'}
+                                            <h2 className="text-2xl font-bold">{userInfo.username}</h2>
+                                            {/* <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'}>
+                                                {userInfo.role}
+                                            </Badge> */}
+                                            <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
+                                                {userInfo.activated ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </div>
-                                        <p className="text-muted-foreground">Member since March 2023</p>
+                                        <p className="text-muted-foreground">
+                                            Thành viên kể từ
+                                            {' ' + userInfo.createdAt.slice(0, 10) || 'N/A'}
+                                        </p>
                                         <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
                                             <div className="flex items-center gap-1">
                                                 <Mail className="size-4" />
-                                                {user.email}
+                                                {userInfo.email}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <MapPin className="size-4" />
-                                                {user.langKey?.toUpperCase() || 'N/A'}
+                                                {userInfo.langKey?.toUpperCase() || 'N/A'}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="size-4" />
                                                 Last login:{' '}
-                                                {user.lastLoginAttempt
-                                                    ? new Date(user.lastLoginAttempt * 1000).toLocaleString()
+                                                {userInfo.lastLoginAttempt
+                                                    ? new Date(userInfo.lastLoginAttempt * 1000).toLocaleString()
                                                     : 'N/A'}
                                             </div>
                                         </div>
@@ -208,15 +234,19 @@ function UserProfilePage() {
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <div>
                                                 <label className="text-muted-foreground text-sm font-medium">
-                                                    User ID
+                                                    Họ và tên
                                                 </label>
-                                                <p className="text-base">{user.id}</p>
+                                                <p className="text-base">
+                                                    {userInfo.firstName + ' ' + userInfo.lastName}
+                                                </p>
                                             </div>
                                             <div>
                                                 <label className="text-muted-foreground text-sm font-medium">
-                                                    Activation Key
+                                                    Ngày tham gia
                                                 </label>
-                                                <p className="font-mono text-xs break-all">{user.activationKey}</p>
+                                                <p className="font-mono text-xs break-all">
+                                                    {userInfo.createdAt.slice(0, 10) || 'N/A'}
+                                                </p>
                                             </div>
                                         </div>
                                     </CardContent>
@@ -265,7 +295,7 @@ function UserProfilePage() {
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="text-sm font-medium">Language</label>
-                                                <p className="text-base">{user.langKey?.toUpperCase() || 'EN'}</p>
+                                                <p className="text-base">{userInfo.langKey?.toUpperCase() || 'EN'}</p>
                                             </div>
                                             <Button variant="outline">Update Settings</Button>
                                         </div>
