@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -32,11 +33,13 @@ import { Route as MentorshipRouteImport } from './routes/mentorship'
 import { Route as NewsIdRouteImport } from './routes/news/$id'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
 import { Route as OfflineCourseRouteImport } from './routes/offline-course'
-import { Route as PresentationsRouteImport } from './routes/presentations'
+import { Route as PresentationsIdRouteImport } from './routes/presentations/$id'
+import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
+import { Route as PresentationsIdPresenterRouteImport } from './routes/presentations/$id/presenter'
+import { Route as PresentationsIdViewRouteImport } from './routes/presentations/$id/view'
+import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SignInRouteImport } from './routes/sign-in'
-import { Route as SignUpRouteImport } from './routes/sign-up'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
@@ -81,16 +84,6 @@ const SigninRoute = SigninRouteImport.update({
     path: '/signin',
     getParentRoute: () => rootRouteImport,
 } as any)
-const SignUpRoute = SignUpRouteImport.update({
-    id: '/sign-up',
-    path: '/sign-up',
-    getParentRoute: () => rootRouteImport,
-} as any)
-const SignInRoute = SignInRouteImport.update({
-    id: '/sign-in',
-    path: '/sign-in',
-    getParentRoute: () => rootRouteImport,
-} as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
     id: '/reset-password',
     path: '/reset-password',
@@ -99,11 +92,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const PrivacyRoute = PrivacyRouteImport.update({
     id: '/privacy',
     path: '/privacy',
-    getParentRoute: () => rootRouteImport,
-} as any)
-const PresentationsRoute = PresentationsRouteImport.update({
-    id: '/presentations',
-    path: '/presentations',
     getParentRoute: () => rootRouteImport,
 } as any)
 const OfflineCourseRoute = OfflineCourseRouteImport.update({
@@ -151,6 +139,11 @@ const ChatRoute = ChatRouteImport.update({
     path: '/chat',
     getParentRoute: () => rootRouteImport,
 } as any)
+const AboutRoute = AboutRouteImport.update({
+    id: '/about',
+    path: '/about',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
     id: '/',
     path: '/',
@@ -159,6 +152,11 @@ const IndexRoute = IndexRouteImport.update({
 const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
     id: '/templates/',
     path: '/templates/',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const PresentationsIndexRoute = PresentationsIndexRouteImport.update({
+    id: '/presentations/',
+    path: '/presentations/',
     getParentRoute: () => rootRouteImport,
 } as any)
 const NewsIndexRoute = NewsIndexRouteImport.update({
@@ -189,6 +187,11 @@ const TemplatesDashboardRoute = TemplatesDashboardRouteImport.update({
 const TemplatesIdRoute = TemplatesIdRouteImport.update({
     id: '/templates/$id',
     path: '/templates/$id',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const PresentationsIdRoute = PresentationsIdRouteImport.update({
+    id: '/presentations/$id',
+    path: '/presentations/$id',
     getParentRoute: () => rootRouteImport,
 } as any)
 const NewsIdRoute = NewsIdRouteImport.update({
@@ -241,6 +244,21 @@ const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
     path: '/templates/slidev/create',
     getParentRoute: () => rootRouteImport,
 } as any)
+const PresentationsIdViewRoute = PresentationsIdViewRouteImport.update({
+    id: '/view',
+    path: '/view',
+    getParentRoute: () => PresentationsIdRoute,
+} as any)
+const PresentationsIdPresenterRoute = PresentationsIdPresenterRouteImport.update({
+    id: '/presenter',
+    path: '/presenter',
+    getParentRoute: () => PresentationsIdRoute,
+} as any)
+const PresentationsIdOverviewRoute = PresentationsIdOverviewRouteImport.update({
+    id: '/overview',
+    path: '/overview',
+    getParentRoute: () => PresentationsIdRoute,
+} as any)
 const MatricesIdGenerateRoute = MatricesIdGenerateRouteImport.update({
     id: '/matrices/$id/generate',
     path: '/matrices/$id/generate',
@@ -259,6 +277,7 @@ const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -268,11 +287,8 @@ export interface FileRoutesByFullPath {
     '/forgot-password': typeof ForgotPasswordRoute
     '/mentorship': typeof MentorshipRoute
     '/offline-course': typeof OfflineCourseRoute
-    '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -287,21 +303,27 @@ export interface FileRoutesByFullPath {
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/news/$id': typeof NewsIdRoute
+    '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses': typeof CoursesIndexRoute
     '/matrices': typeof MatricesIndexRoute
     '/news': typeof NewsIndexRoute
+    '/presentations': typeof PresentationsIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/matrices/$id/edit': typeof MatricesIdEditRoute
     '/matrices/$id/generate': typeof MatricesIdGenerateRoute
+    '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
+    '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
+    '/presentations/$id/view': typeof PresentationsIdViewRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
 }
 export interface FileRoutesByTo {
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -311,11 +333,8 @@ export interface FileRoutesByTo {
     '/forgot-password': typeof ForgotPasswordRoute
     '/mentorship': typeof MentorshipRoute
     '/offline-course': typeof OfflineCourseRoute
-    '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -330,15 +349,20 @@ export interface FileRoutesByTo {
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/news/$id': typeof NewsIdRoute
+    '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses': typeof CoursesIndexRoute
     '/matrices': typeof MatricesIndexRoute
     '/news': typeof NewsIndexRoute
+    '/presentations': typeof PresentationsIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/matrices/$id/edit': typeof MatricesIdEditRoute
     '/matrices/$id/generate': typeof MatricesIdGenerateRoute
+    '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
+    '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
+    '/presentations/$id/view': typeof PresentationsIdViewRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -346,6 +370,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
     __root__: typeof rootRouteImport
     '/': typeof IndexRoute
+    '/about': typeof AboutRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -355,11 +380,8 @@ export interface FileRoutesById {
     '/forgot-password': typeof ForgotPasswordRoute
     '/mentorship': typeof MentorshipRoute
     '/offline-course': typeof OfflineCourseRoute
-    '/presentations': typeof PresentationsRoute
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
-    '/sign-in': typeof SignInRoute
-    '/sign-up': typeof SignUpRoute
     '/signin': typeof SigninRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
@@ -374,15 +396,20 @@ export interface FileRoutesById {
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/news/$id': typeof NewsIdRoute
+    '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses/': typeof CoursesIndexRoute
     '/matrices/': typeof MatricesIndexRoute
     '/news/': typeof NewsIndexRoute
+    '/presentations/': typeof PresentationsIndexRoute
     '/templates/': typeof TemplatesIndexRoute
     '/matrices/$id/edit': typeof MatricesIdEditRoute
     '/matrices/$id/generate': typeof MatricesIdGenerateRoute
+    '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
+    '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
+    '/presentations/$id/view': typeof PresentationsIdViewRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev/': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -391,6 +418,7 @@ export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath
     fullPaths:
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -400,11 +428,8 @@ export interface FileRouteTypes {
         | '/forgot-password'
         | '/mentorship'
         | '/offline-course'
-        | '/presentations'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -419,21 +444,27 @@ export interface FileRouteTypes {
         | '/matrices/create'
         | '/matrices/import'
         | '/news/$id'
+        | '/presentations/$id'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses'
         | '/matrices'
         | '/news'
+        | '/presentations'
         | '/templates'
         | '/matrices/$id/edit'
         | '/matrices/$id/generate'
+        | '/presentations/$id/overview'
+        | '/presentations/$id/presenter'
+        | '/presentations/$id/view'
         | '/templates/slidev/create'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
     fileRoutesByTo: FileRoutesByTo
     to:
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -443,11 +474,8 @@ export interface FileRouteTypes {
         | '/forgot-password'
         | '/mentorship'
         | '/offline-course'
-        | '/presentations'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -462,21 +490,27 @@ export interface FileRouteTypes {
         | '/matrices/create'
         | '/matrices/import'
         | '/news/$id'
+        | '/presentations/$id'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses'
         | '/matrices'
         | '/news'
+        | '/presentations'
         | '/templates'
         | '/matrices/$id/edit'
         | '/matrices/$id/generate'
+        | '/presentations/$id/overview'
+        | '/presentations/$id/presenter'
+        | '/presentations/$id/view'
         | '/templates/slidev/create'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
     id:
         | '__root__'
         | '/'
+        | '/about'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -486,11 +520,8 @@ export interface FileRouteTypes {
         | '/forgot-password'
         | '/mentorship'
         | '/offline-course'
-        | '/presentations'
         | '/privacy'
         | '/reset-password'
-        | '/sign-in'
-        | '/sign-up'
         | '/signin'
         | '/signup'
         | '/terms'
@@ -505,15 +536,20 @@ export interface FileRouteTypes {
         | '/matrices/create'
         | '/matrices/import'
         | '/news/$id'
+        | '/presentations/$id'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses/'
         | '/matrices/'
         | '/news/'
+        | '/presentations/'
         | '/templates/'
         | '/matrices/$id/edit'
         | '/matrices/$id/generate'
+        | '/presentations/$id/overview'
+        | '/presentations/$id/presenter'
+        | '/presentations/$id/view'
         | '/templates/slidev/create'
         | '/templates/slidev/'
         | '/templates/slidev/$id/edit'
@@ -521,6 +557,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute
+    AboutRoute: typeof AboutRoute
     ChatRoute: typeof ChatRoute
     ConsultationRoute: typeof ConsultationRoute
     ContactRoute: typeof ContactRoute
@@ -530,11 +567,8 @@ export interface RootRouteChildren {
     ForgotPasswordRoute: typeof ForgotPasswordRoute
     MentorshipRoute: typeof MentorshipRoute
     OfflineCourseRoute: typeof OfflineCourseRoute
-    PresentationsRoute: typeof PresentationsRoute
     PrivacyRoute: typeof PrivacyRoute
     ResetPasswordRoute: typeof ResetPasswordRoute
-    SignInRoute: typeof SignInRoute
-    SignUpRoute: typeof SignUpRoute
     SigninRoute: typeof SigninRoute
     SignupRoute: typeof SignupRoute
     TermsRoute: typeof TermsRoute
@@ -549,12 +583,14 @@ export interface RootRouteChildren {
     MatricesCreateRoute: typeof MatricesCreateRoute
     MatricesImportRoute: typeof MatricesImportRoute
     NewsIdRoute: typeof NewsIdRoute
+    PresentationsIdRoute: typeof PresentationsIdRouteWithChildren
     TemplatesIdRoute: typeof TemplatesIdRoute
     TemplatesDashboardRoute: typeof TemplatesDashboardRoute
     TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
     CoursesIndexRoute: typeof CoursesIndexRoute
     MatricesIndexRoute: typeof MatricesIndexRoute
     NewsIndexRoute: typeof NewsIndexRoute
+    PresentationsIndexRoute: typeof PresentationsIndexRoute
     TemplatesIndexRoute: typeof TemplatesIndexRoute
     MatricesIdEditRoute: typeof MatricesIdEditRoute
     MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
@@ -607,20 +643,6 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof SigninRouteImport
             parentRoute: typeof rootRouteImport
         }
-        '/sign-up': {
-            id: '/sign-up'
-            path: '/sign-up'
-            fullPath: '/sign-up'
-            preLoaderRoute: typeof SignUpRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/sign-in': {
-            id: '/sign-in'
-            path: '/sign-in'
-            fullPath: '/sign-in'
-            preLoaderRoute: typeof SignInRouteImport
-            parentRoute: typeof rootRouteImport
-        }
         '/reset-password': {
             id: '/reset-password'
             path: '/reset-password'
@@ -633,13 +655,6 @@ declare module '@tanstack/react-router' {
             path: '/privacy'
             fullPath: '/privacy'
             preLoaderRoute: typeof PrivacyRouteImport
-            parentRoute: typeof rootRouteImport
-        }
-        '/presentations': {
-            id: '/presentations'
-            path: '/presentations'
-            fullPath: '/presentations'
-            preLoaderRoute: typeof PresentationsRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/offline-course': {
@@ -705,6 +720,13 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof ChatRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/about': {
+            id: '/about'
+            path: '/about'
+            fullPath: '/about'
+            preLoaderRoute: typeof AboutRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/': {
             id: '/'
             path: '/'
@@ -724,6 +746,13 @@ declare module '@tanstack/react-router' {
             path: '/news'
             fullPath: '/news'
             preLoaderRoute: typeof NewsIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/presentations/': {
+            id: '/presentations/'
+            path: '/presentations'
+            fullPath: '/presentations'
+            preLoaderRoute: typeof PresentationsIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/matrices/': {
@@ -759,6 +788,13 @@ declare module '@tanstack/react-router' {
             path: '/templates/$id'
             fullPath: '/templates/$id'
             preLoaderRoute: typeof TemplatesIdRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/presentations/$id': {
+            id: '/presentations/$id'
+            path: '/presentations/$id'
+            fullPath: '/presentations/$id'
+            preLoaderRoute: typeof PresentationsIdRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/news/$id': {
@@ -852,11 +888,47 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesSlidevIdEditRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/presentations/$id/view': {
+            id: '/presentations/$id/view'
+            path: '/view'
+            fullPath: '/presentations/$id/view'
+            preLoaderRoute: typeof PresentationsIdViewRouteImport
+            parentRoute: typeof PresentationsIdRoute
+        }
+        '/presentations/$id/presenter': {
+            id: '/presentations/$id/presenter'
+            path: '/presenter'
+            fullPath: '/presentations/$id/presenter'
+            preLoaderRoute: typeof PresentationsIdPresenterRouteImport
+            parentRoute: typeof PresentationsIdRoute
+        }
+        '/presentations/$id/overview': {
+            id: '/presentations/$id/overview'
+            path: '/overview'
+            fullPath: '/presentations/$id/overview'
+            preLoaderRoute: typeof PresentationsIdOverviewRouteImport
+            parentRoute: typeof PresentationsIdRoute
+        }
     }
 }
 
+interface PresentationsIdRouteChildren {
+    PresentationsIdOverviewRoute: typeof PresentationsIdOverviewRoute
+    PresentationsIdPresenterRoute: typeof PresentationsIdPresenterRoute
+    PresentationsIdViewRoute: typeof PresentationsIdViewRoute
+}
+
+const PresentationsIdRouteChildren: PresentationsIdRouteChildren = {
+    PresentationsIdOverviewRoute: PresentationsIdOverviewRoute,
+    PresentationsIdPresenterRoute: PresentationsIdPresenterRoute,
+    PresentationsIdViewRoute: PresentationsIdViewRoute,
+}
+
+const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(PresentationsIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
+    AboutRoute: AboutRoute,
     ChatRoute: ChatRoute,
     ConsultationRoute: ConsultationRoute,
     ContactRoute: ContactRoute,
@@ -866,11 +938,8 @@ const rootRouteChildren: RootRouteChildren = {
     ForgotPasswordRoute: ForgotPasswordRoute,
     MentorshipRoute: MentorshipRoute,
     OfflineCourseRoute: OfflineCourseRoute,
-    PresentationsRoute: PresentationsRoute,
     PrivacyRoute: PrivacyRoute,
     ResetPasswordRoute: ResetPasswordRoute,
-    SignInRoute: SignInRoute,
-    SignUpRoute: SignUpRoute,
     SigninRoute: SigninRoute,
     SignupRoute: SignupRoute,
     TermsRoute: TermsRoute,
@@ -885,12 +954,14 @@ const rootRouteChildren: RootRouteChildren = {
     MatricesCreateRoute: MatricesCreateRoute,
     MatricesImportRoute: MatricesImportRoute,
     NewsIdRoute: NewsIdRoute,
+    PresentationsIdRoute: PresentationsIdRouteWithChildren,
     TemplatesIdRoute: TemplatesIdRoute,
     TemplatesDashboardRoute: TemplatesDashboardRoute,
     TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
     CoursesIndexRoute: CoursesIndexRoute,
     MatricesIndexRoute: MatricesIndexRoute,
     NewsIndexRoute: NewsIndexRoute,
+    PresentationsIndexRoute: PresentationsIndexRoute,
     TemplatesIndexRoute: TemplatesIndexRoute,
     MatricesIdEditRoute: MatricesIdEditRoute,
     MatricesIdGenerateRoute: MatricesIdGenerateRoute,

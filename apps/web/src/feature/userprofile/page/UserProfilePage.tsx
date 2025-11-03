@@ -1,10 +1,17 @@
+import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
+import { requestUserProfile } from '@/feature/auth/store/auth.actions'
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
 import ProfileContent from '@/shared/components/profile-page/profile-content'
-import { useAuth } from '@/shared/context/AuthContext'
-import { Link } from '@tanstack/react-router'
+import { clearAuthTokens } from '@/shared/lib/cookies'
+import { formatDateTime } from '@/shared/lib/date-time-utils'
+import { useAppDispatch } from '@/shared/redux/store'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
+import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
 import {
     Sidebar,
     SidebarContent,
@@ -21,25 +28,53 @@ import {
     SidebarRail,
     SidebarTrigger,
 } from '@workspace/ui/components/sidebar'
-import { Activity, Bell, Calendar, Camera, Home, Key, LogOut, Mail, MapPin, Settings, Shield, User } from 'lucide-react'
+import {
+    Activity,
+    Bell,
+    Calendar,
+    Camera,
+    Home,
+    Key,
+    LogOut,
+    Mail,
+    MapPin,
+    Presentation,
+    Settings,
+    Shield,
+    User,
+} from 'lucide-react'
 import * as React from 'react'
+import { useSelector } from 'react-redux'
 
 function UserProfilePage() {
-    const { user, logout } = useAuth()
+    const dispatch = useAppDispatch()
+    const navigate = useNavigate()
+    const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const [activeSection, setActiveSection] = React.useState('overview')
+    const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
+
+    React.useEffect(() => {
+        // Fetch user profile on mount if not already loaded
+        if (!userInfo) {
+            dispatch(requestUserProfile())
+        }
+    }, [dispatch, userInfo])
 
     // User is guaranteed to exist here because of route-level protection
-    if (!user) {
-        return null // This should never happen due to beforeLoad
+    if (isLoading || !userInfo) {
+        return <SpinnerLoader />
     }
 
     const handleLogout = () => {
-        logout()
-        window.location.href = '/sign-in'
+        clearAuthTokens()
+        dispatch(setIsAuthenticatedAction(false))
+        dispatch(setUserInfoAction(null))
+        navigate({ to: '/signin' })
     }
 
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: User },
+        { id: 'presentations', label: 'My Presentations', icon: Presentation },
         { id: 'activity', label: 'Activity', icon: Activity },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'security', label: 'Security', icon: Shield },
@@ -53,16 +88,15 @@ function UserProfilePage() {
                     <SidebarHeader>
                         <div className="flex items-center gap-3 px-2 py-3">
                             <Avatar className="h-10 w-10">
-                                <AvatarImage
-                                    src="https://bundui-images.netlify.app/avatars/08.png"
-                                    alt={user.username || 'Profile'}
-                                />
-                                <AvatarFallback>{user.username?.slice(0, 2).toUpperCase() || '??'}</AvatarFallback>
+                                {userInfo.avatar && <AvatarImage src={userInfo.avatar} alt={userInfo.username} />}
+                                <AvatarFallback className="bg-blue-600 text-white">
+                                    {userInfo.username?.slice(0, 2).toUpperCase()}
+                                </AvatarFallback>
                             </Avatar>
                             <div className="flex flex-col">
-                                <span className="text-sm font-semibold">{user.username}</span>
-                                <Badge variant={user.role === 'ADMIN' ? 'default' : 'secondary'} className="w-fit">
-                                    {user.role}
+                                <span className="text-sm font-semibold">{userInfo.username}</span>
+                                <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'} className="w-fit">
+                                    {userInfo.role}
                                 </Badge>
                             </div>
                         </div>
@@ -149,48 +183,52 @@ function UserProfilePage() {
                                 <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
                                     <div className="relative">
                                         <Avatar className="h-24 w-24">
-                                            <AvatarImage
-                                                src="https://bundui-images.netlify.app/avatars/08.png"
-                                                alt={user.username || 'Profile'}
-                                            />
-                                            <AvatarFallback className="text-2xl">
-                                                {user.username?.slice(0, 2).toUpperCase() || '??'}
+                                            {userInfo.avatar && (
+                                                <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
+                                            )}
+                                            <AvatarFallback className="bg-blue-600 text-2xl text-white">
+                                                {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
                                             </AvatarFallback>
                                         </Avatar>
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full"
+                                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
                                         >
                                             <Camera className="h-4 w-4" />
                                         </Button>
                                     </div>
 
                                     <div className="flex-1 space-y-2">
+                                        <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p>
+
                                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                                            <h2 className="text-2xl font-bold">{user.username}</h2>
-                                            <Badge variant={user.role === 'ADMIN' ? 'default' : 'secondary'}>
-                                                {user.role}
-                                            </Badge>
-                                            <Badge variant={user.activated ? 'default' : 'destructive'}>
-                                                {user.activated ? 'Active' : 'Inactive'}
+                                            <h2 className="text-2xl font-bold">{userInfo.username}</h2>
+                                            {/* <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'}>
+                                                {userInfo.role}
+                                            </Badge> */}
+                                            <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
+                                                {userInfo.activated ? 'Active' : 'Inactive'}
                                             </Badge>
                                         </div>
-                                        <p className="text-muted-foreground">Member since March 2023</p>
+                                        <p className="text-muted-foreground">
+                                            Thành viên kể từ
+                                            {' ' + userInfo.createdAt.slice(0, 10) || 'N/A'}
+                                        </p>
                                         <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
                                             <div className="flex items-center gap-1">
                                                 <Mail className="size-4" />
-                                                {user.email}
+                                                {userInfo.email}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <MapPin className="size-4" />
-                                                {user.langKey?.toUpperCase() || 'N/A'}
+                                                {userInfo.langKey?.toUpperCase() || 'N/A'}
                                             </div>
                                             <div className="flex items-center gap-1">
                                                 <Calendar className="size-4" />
                                                 Last login:{' '}
-                                                {user.lastLoginAttempt
-                                                    ? new Date(user.lastLoginAttempt * 1000).toLocaleString()
+                                                {userInfo.lastLoginAttempt
+                                                    ? new Date(userInfo.lastLoginAttempt * 1000).toLocaleString()
                                                     : 'N/A'}
                                             </div>
                                         </div>
@@ -208,17 +246,89 @@ function UserProfilePage() {
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <div>
                                                 <label className="text-muted-foreground text-sm font-medium">
-                                                    User ID
+                                                    Họ và tên
                                                 </label>
-                                                <p className="text-base">{user.id}</p>
+                                                <p className="text-base">
+                                                    {userInfo.firstName + ' ' + userInfo.lastName}
+                                                </p>
                                             </div>
                                             <div>
                                                 <label className="text-muted-foreground text-sm font-medium">
-                                                    Activation Key
+                                                    Ngày tham gia
                                                 </label>
-                                                <p className="font-mono text-xs break-all">{user.activationKey}</p>
+                                                <p className="break-all font-mono text-xs">
+                                                    {userInfo.createdAt.slice(0, 10) || 'N/A'}
+                                                </p>
                                             </div>
                                         </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {activeSection === 'presentations' && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="mb-6 flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">My Presentations</h3>
+                                            <Link to="/presentations">
+                                                <Button variant="outline" size="sm">
+                                                    View All
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                        {presentationsLoading ? (
+                                            <div className="flex justify-center py-8">
+                                                <SpinnerLoader />
+                                            </div>
+                                        ) : userPresentations && userPresentations.length > 0 ? (
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                {userPresentations.map(pres => (
+                                                    <Card key={pres.id} className="p-4">
+                                                        <div className="mb-2 flex items-start justify-between">
+                                                            <div className="flex-1">
+                                                                <p className="font-semibold">{pres.name}</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    {pres.type}
+                                                                </p>
+                                                                <p>{formatDateTime(pres.createdAt ?? '')}</p>
+                                                            </div>
+                                                            <Badge
+                                                                variant={pres.processing ? 'secondary' : 'secondary'}
+                                                            >
+                                                                {pres.processing ? 'Processing' : ''}
+                                                            </Badge>
+                                                        </div>
+                                                        {!pres.processing && (
+                                                            <div className="mt-3 flex gap-2">
+                                                                <Link
+                                                                    to="/presentations/$id/presenter"
+                                                                    params={{ id: pres.id.toString() }}
+                                                                >
+                                                                    <Button size="sm" variant="default">
+                                                                        Present
+                                                                    </Button>
+                                                                </Link>
+                                                            </div>
+                                                        )}
+                                                        {pres.processing && (
+                                                            <p className="text-muted-foreground mt-2 text-xs">
+                                                                Your presentation is being generated. This may take a
+                                                                few moments...
+                                                            </p>
+                                                        )}
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-muted-foreground py-8 text-center">
+                                                <p>You haven&apos;t created any presentations yet.</p>
+                                                <Link to="/presentations">
+                                                    <Button variant="outline" className="mt-4">
+                                                        Browse Templates
+                                                    </Button>
+                                                </Link>
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             )}
@@ -265,7 +375,7 @@ function UserProfilePage() {
                                         <div className="space-y-4">
                                             <div>
                                                 <label className="text-sm font-medium">Language</label>
-                                                <p className="text-base">{user.langKey?.toUpperCase() || 'EN'}</p>
+                                                <p className="text-base">{userInfo.langKey?.toUpperCase() || 'EN'}</p>
                                             </div>
                                             <Button variant="outline">Update Settings</Button>
                                         </div>

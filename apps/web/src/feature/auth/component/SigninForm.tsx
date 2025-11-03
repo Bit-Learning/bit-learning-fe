@@ -30,7 +30,7 @@ const formSchema = z.object({
 })
 
 const SignInForm: React.FC = () => {
-    const { isLoading, isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
+    const { isLoading, isAuthenticated } = useSelector(selectAuthStateInfo)
     const [showPassword, setShowPassword] = React.useState(false)
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
@@ -50,19 +50,32 @@ const SignInForm: React.FC = () => {
     }, [isAuthenticated, navigate])
 
     React.useEffect(() => {
-        if (errorMsg) {
-            toast.error({ title: errorMsg })
-            dispatch(setErrorAction(null))
-        }
-    }, [errorMsg, dispatch])
+        // Don't show error toast here - let onSubmit handle it
+        // This prevents double toasts
+    }, [])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
+        // Clear any previous errors
+        dispatch(setErrorAction(null))
+
         const body: TLoginRequest = {
             email: values.email,
             password: values.password,
             role: Roles.USER,
         }
-        await dispatch(requestLogin(body))
+        const result: any = await dispatch(requestLogin(body))
+
+        if (result?.needsActivation) {
+            toast.warning({
+                title: 'Tài khoản chưa kích hoạt',
+                description: result.message,
+            })
+        } else if (result?.success === false) {
+            toast.error({
+                title: 'Đăng nhập thất bại',
+                description: result.message,
+            })
+        }
     }
 
     return (
@@ -156,7 +169,7 @@ const SignInForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                                    <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                                                     <Input
                                                         placeholder="Nhập email của bạn"
                                                         {...field}
@@ -179,19 +192,19 @@ const SignInForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <div className="absolute top-1/2 left-3 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
+                                                    <div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
                                                         <div className="h-2 w-2 rounded-full bg-white"></div>
                                                     </div>
                                                     <Input
                                                         type={showPassword ? 'text' : 'password'}
                                                         placeholder="Nhập mật khẩu của bạn"
                                                         {...field}
-                                                        className="h-11 rounded-xl border-2 border-gray-200 pr-12 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                                                        className="h-11 rounded-xl border-2 border-gray-200 pl-10 pr-12 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                                                     />
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
                                                     >
                                                         {showPassword ? (
                                                             <EyeIcon className="h-5 w-5" />

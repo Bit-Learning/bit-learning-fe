@@ -11,7 +11,7 @@ import type {
 } from '../type/authState'
 
 export function Login(requestBody: TLoginRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
-    return api.post(`${endpoints.AUTH}/login`, requestBody)
+    return api.post(`${endpoints.AUTH}/login-user`, requestBody)
 }
 
 export function Register(requestBody: TRegisterRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
@@ -26,10 +26,18 @@ export function GetAccountProfile(): Promise<AxiosResponse<ApiResponse<any>, any
     return api.get(`${endpoints.ACCOUNT}/profile`)
 }
 
+export function GetUserProfile(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.get(`${endpoints.ACCOUNT}/profile`)
+}
+
 export function ForgotPassword(requestBody: TForgotPasswordRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/forgot-password`, requestBody)
 }
 
 export function ResetPassword(requestBody: TResetPasswordRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/reset-password`, requestBody)
+}
+
+export function Logout(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/logout`)
 }
