@@ -1,69 +1,64 @@
 // src/components/PresentationList.js
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardHeader } from '@workspace/ui/components/Card'
-import { useEffect, useState } from 'react'
-
-export enum PresentationType {
-    SLIDEV = 'SLIDEV',
-    REVEALJS = 'REVEALJS',
-    MARKDOWN_RAW = 'MARKDOWN_RAW',
-    PPTX = 'PPTX',
-}
-
-export interface Presentation {
-    id: number
-    name: string
-    price: number
-    isActive: boolean
-    type: PresentationType
-    storagePath: string
-    publicUrl: string
-    folderKey: string
-    revision: number
-    description?: string | null
-    ownerId: number
-    processing: boolean
-
-    // Optional: common BaseEntity fields
-    createdAt?: string
-    updatedAt?: string
-}
+import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
+import { toast } from '@workspace/ui/components/Sonner'
+import { Loader2 } from 'lucide-react'
+import { useState } from 'react'
+import { useSelector } from 'react-redux'
+import { useCreatePresentation, usePresentationTemplates, useUserPresentations } from '../hooks/usePresentations'
 
 function PresentationList() {
-    const [presentations, setPresentations] = useState<Presentation[]>([])
-    const [loading, setLoading] = useState(true)
+    const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
+    const { data, isLoading: templateLoading, error } = usePresentationTemplates()
+    const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
+    const createPresentation = useCreatePresentation()
+    const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null)
 
-    // Replace '1' with your actual logged-in user's ID from auth
-    const userId = 1
-
-    useEffect(() => {
-        // Fetch presentations from your Spring Boot API
-        fetch(`http://localhost:4004/api/products/presentations/${userId}/list`)
-            .then(res => res.json())
-            .then(apiResponse => {
-                if (apiResponse.status === 200) {
-                    setPresentations(apiResponse.data)
-                }
-                setLoading(false)
+    const handleUseTemplate = async (templateName: string) => {
+        if (!userInfo?.id) {
+            toast.error({
+                title: 'Authentication Required',
+                description: 'Please login to use templates',
             })
-            .catch(err => {
-                console.error('Failed to fetch presentations:', err)
-                setLoading(false)
-            })
-    }, [userId])
+            return
+        }
 
-    if (loading) {
-        return <div>Loading presentations...</div>
+        try {
+            setCreatingTemplate(templateName)
+            await createPresentation.mutateAsync({
+                name: templateName.replace(/_/g, ' '),
+                description: `Presentation created from ${templateName} template`,
+                type: 'SLIDEV',
+                templateUrl: `classpath:static/markdown/${templateName}.md`,
+                ownerId: userInfo.id,
+            })
+            toast.success({
+                title: 'Success',
+                description: 'Presentation created successfully! It is being processed...',
+            })
+        } catch (error: any) {
+            toast.error({
+                title: 'Error',
+                description: error?.response?.data?.message || 'Failed to create presentation',
+            })
+        } finally {
+            setCreatingTemplate(null)
+        }
     }
+
+    if (isLoading || templateLoading || presentationsLoading) return <SpinnerLoader />
+    if (error) return <div>Error loading templates.</div>
 
     return (
         <div className="container mx-auto px-6 py-12">
             <h1 className="text-2xl font-bold">My Presentations</h1>
 
             <div className="grid grid-cols-1 gap-6 space-y-3 sm:grid-cols-2 lg:grid-cols-4">
-                {presentations.map(pres => (
+                {userPresentations?.map(pres => (
                     <Card key={pres.id} className="p-4">
                         <CardHeader className="flex flex-row items-center justify-between p-0">
                             <span className="font-semibold">
@@ -106,6 +101,37 @@ function PresentationList() {
                         )}
                     </Card>
                 ))}
+            </div>
+
+            <div>
+                <h2 className="mt-12 mb-4 text-2xl font-bold">Available Presentation Templates</h2>
+
+                <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    {data?.map((fileName: string) => {
+                        const name = fileName.replace('.md', '')
+                        const isCreating = creatingTemplate === name
+
+                        return (
+                            <Card key={fileName} className="p-4">
+                                <CardHeader className="flex flex-row items-center justify-between p-0">
+                                    <span className="font-semibold capitalize">{name.replace(/_/g, ' ')}</span>
+                                    {isCreating && <Badge variant="secondary">Creating...</Badge>}
+                                </CardHeader>
+
+                                <CardContent className="mt-3 flex gap-2 p-0">
+                                    <Button
+                                        size="sm"
+                                        onClick={() => handleUseTemplate(name)}
+                                        isDisabled={isCreating || !userInfo}
+                                    >
+                                        {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                        Use Template
+                                    </Button>
+                                </CardContent>
+                            </Card>
+                        )
+                    })}
+                </div>
             </div>
         </div>
     )

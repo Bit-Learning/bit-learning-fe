@@ -1,14 +1,17 @@
 import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
 import { requestUserProfile } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
 import ProfileContent from '@/shared/components/profile-page/profile-content'
 import { clearAuthTokens } from '@/shared/lib/cookies'
+import { formatDateTime } from '@/shared/lib/date-time-utils'
 import { useAppDispatch } from '@/shared/redux/store'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
+import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
 import {
     Sidebar,
     SidebarContent,
@@ -25,7 +28,21 @@ import {
     SidebarRail,
     SidebarTrigger,
 } from '@workspace/ui/components/sidebar'
-import { Activity, Bell, Calendar, Camera, Home, Key, LogOut, Mail, MapPin, Settings, Shield, User } from 'lucide-react'
+import {
+    Activity,
+    Bell,
+    Calendar,
+    Camera,
+    Home,
+    Key,
+    LogOut,
+    Mail,
+    MapPin,
+    Presentation,
+    Settings,
+    Shield,
+    User,
+} from 'lucide-react'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 
@@ -34,6 +51,7 @@ function UserProfilePage() {
     const navigate = useNavigate()
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const [activeSection, setActiveSection] = React.useState('overview')
+    const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
 
     React.useEffect(() => {
         // Fetch user profile on mount if not already loaded
@@ -44,14 +62,7 @@ function UserProfilePage() {
 
     // User is guaranteed to exist here because of route-level protection
     if (isLoading || !userInfo) {
-        return (
-            <div className="flex min-h-screen items-center justify-center">
-                <div className="text-center">
-                    <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-                    <p className="text-gray-600">Loading profile...</p>
-                </div>
-            </div>
-        )
+        return <SpinnerLoader />
     }
 
     const handleLogout = () => {
@@ -63,6 +74,7 @@ function UserProfilePage() {
 
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: User },
+        { id: 'presentations', label: 'My Presentations', icon: Presentation },
         { id: 'activity', label: 'Activity', icon: Activity },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'security', label: 'Security', icon: Shield },
@@ -249,6 +261,74 @@ function UserProfilePage() {
                                                 </p>
                                             </div>
                                         </div>
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {activeSection === 'presentations' && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="mb-6 flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">My Presentations</h3>
+                                            <Link to="/presentations">
+                                                <Button variant="outline" size="sm">
+                                                    View All
+                                                </Button>
+                                            </Link>
+                                        </div>
+                                        {presentationsLoading ? (
+                                            <div className="flex justify-center py-8">
+                                                <SpinnerLoader />
+                                            </div>
+                                        ) : userPresentations && userPresentations.length > 0 ? (
+                                            <div className="grid gap-4 sm:grid-cols-2">
+                                                {userPresentations.map(pres => (
+                                                    <Card key={pres.id} className="p-4">
+                                                        <div className="mb-2 flex items-start justify-between">
+                                                            <div className="flex-1">
+                                                                <p className="font-semibold">{pres.name}</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    {pres.type}
+                                                                </p>
+                                                                <p>{formatDateTime(pres.createdAt ?? '')}</p>
+                                                            </div>
+                                                            <Badge
+                                                                variant={pres.processing ? 'secondary' : 'secondary'}
+                                                            >
+                                                                {pres.processing ? 'Processing' : ''}
+                                                            </Badge>
+                                                        </div>
+                                                        {!pres.processing && (
+                                                            <div className="mt-3 flex gap-2">
+                                                                <Link
+                                                                    to="/presentations/$id/presenter"
+                                                                    params={{ id: pres.id.toString() }}
+                                                                >
+                                                                    <Button size="sm" variant="default">
+                                                                        Present
+                                                                    </Button>
+                                                                </Link>
+                                                            </div>
+                                                        )}
+                                                        {pres.processing && (
+                                                            <p className="text-muted-foreground mt-2 text-xs">
+                                                                Your presentation is being generated. This may take a
+                                                                few moments...
+                                                            </p>
+                                                        )}
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-muted-foreground py-8 text-center">
+                                                <p>You haven&apos;t created any presentations yet.</p>
+                                                <Link to="/presentations">
+                                                    <Button variant="outline" className="mt-4">
+                                                        Browse Templates
+                                                    </Button>
+                                                </Link>
+                                            </div>
+                                        )}
                                     </CardContent>
                                 </Card>
                             )}
