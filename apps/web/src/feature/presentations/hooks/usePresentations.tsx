@@ -1,6 +1,11 @@
 import api from '@/shared/api/api'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { CreatePresentationRequest, CreatePresentationResponse, Presentation } from '../types/presentation.types'
+import {
+    CreatePresentationRequest,
+    CreatePresentationResponse,
+    Presentation,
+    Template,
+} from '../types/presentation.types'
 
 export const PRESENTATION_QUERY_KEYS = {
     all: ['presentations'] as const,
@@ -19,7 +24,7 @@ export const usePresentations = () => {
 }
 
 export const usePresentationTemplates = (page: number = 0, size: number = 20) => {
-    return useQuery<string[]>({
+    return useQuery<Template[]>({
         queryKey: ['presentationTemplates', page, size],
         queryFn: () => fetchAllTemplates(page, size),
     })
@@ -37,7 +42,7 @@ export const fetchPresentations = async (): Promise<Presentation[]> => {
     return response.data.data || []
 }
 
-export const fetchAllTemplates = async (page: number = 0, size: number = 20): Promise<string[]> => {
+export const fetchAllTemplates = async (page: number = 0, size: number = 20): Promise<Template[]> => {
     const response = await api.get(`/products/presentations/public/templates?page=${page}size=${size}`)
     return response.data.data.content || []
 }
