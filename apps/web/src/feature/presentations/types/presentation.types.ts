@@ -29,3 +29,9 @@ export type CreatePresentationRequest = {
 }
 
 export type CreatePresentationResponse = ApiResponse<Presentation>
+
+export type Template = {
+    id: number
+    name: string
+    price: number
+}

@@ -10,6 +10,7 @@ import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import { useCreatePresentation, usePresentationTemplates, useUserPresentations } from '../hooks/usePresentations'
+import { Template } from '../types/presentation.types'
 
 function PresentationList() {
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
@@ -18,7 +19,7 @@ function PresentationList() {
     const createPresentation = useCreatePresentation()
     const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null)
 
-    const handleUseTemplate = async (templateName: string) => {
+    const handleBuyTemplate = async (template: Template) => {
         if (!userInfo?.id) {
             toast.error({
                 title: 'Authentication Required',
@@ -27,13 +28,21 @@ function PresentationList() {
             return
         }
 
+        if (template.price > userInfo.wallet.balance) {
+            toast.error({
+                title: 'Insufficient Funds',
+                description: 'You do not have enough funds in your wallet to buy this template.',
+            })
+            return
+        }
+
         try {
-            setCreatingTemplate(templateName)
+            setCreatingTemplate(template.name)
             await createPresentation.mutateAsync({
-                name: templateName.replace(/_/g, ' '),
-                description: `Presentation created from ${templateName} template`,
+                name: template.name.replace(/_/g, ' '),
+                description: `Presentation created from ${template.name} template`,
                 type: 'SLIDEV',
-                templateUrl: `classpath:static/markdown/${templateName}.md`,
+                templateUrl: `classpath:static/markdown/${template.name}.md`,
                 ownerId: userInfo.id,
             })
             toast.success({
@@ -104,28 +113,38 @@ function PresentationList() {
             </div>
 
             <div>
-                <h2 className="mt-12 mb-4 text-2xl font-bold">Available Presentation Templates</h2>
+                <h2 className="mb-4 mt-12 text-2xl font-bold">Available Presentation Templates</h2>
 
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                    {data?.map((fileName: string) => {
-                        const name = fileName.replace('.md', '')
-                        const isCreating = creatingTemplate === name
+                    {data?.map((template: Template) => {
+                        template.name = template.name.replace('.md', '')
+                        const isCreating = creatingTemplate === template.name
 
                         return (
-                            <Card key={fileName} className="p-4">
+                            <Card key={template.id} className="p-4">
                                 <CardHeader className="flex flex-row items-center justify-between p-0">
-                                    <span className="font-semibold capitalize">{name.replace(/_/g, ' ')}</span>
-                                    {isCreating && <Badge variant="secondary">Creating...</Badge>}
+                                    <span className="font-semibold capitalize">{template.name.replace(/_/g, ' ')}</span>
+                                    <div className="flex items-center gap-2">
+                                        {template.price && (
+                                            <span className="text-sm font-medium text-gray-500">
+                                                {template.price.toLocaleString('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND',
+                                                })}
+                                            </span>
+                                        )}
+                                        {isCreating && <Badge variant="secondary">Creating...</Badge>}
+                                    </div>
                                 </CardHeader>
 
                                 <CardContent className="mt-3 flex gap-2 p-0">
                                     <Button
                                         size="sm"
-                                        onClick={() => handleUseTemplate(name)}
+                                        onClick={() => handleBuyTemplate(template)}
                                         isDisabled={isCreating || !userInfo}
                                     >
                                         {isCreating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                                        Use Template
+                                        Buy Template
                                     </Button>
                                 </CardContent>
                             </Card>
