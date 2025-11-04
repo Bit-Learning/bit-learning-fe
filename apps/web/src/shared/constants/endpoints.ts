@@ -1,6 +1,7 @@
 export const endpoints = {
     AUTH: '/auth',
     ACCOUNT: '/users',
+    PAYMENT: '/payment',
 }
 
 export const API_PATH = {

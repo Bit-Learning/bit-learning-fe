@@ -44,4 +44,10 @@ export type TUserProfile = {
     lastLoginAttempt: number | null
     createdAt: string
     updatedAt: string
+    wallet: TWalletInfo
+}
+
+export type TWalletInfo = {
+    id: number
+    balance: number
 }
