@@ -1,6 +1,7 @@
 import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
 import { requestUserProfile } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { CreatePaymentURL } from '@/feature/payment/service/paymentService'
 import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
 import ProfileContent from '@/shared/components/profile-page/profile-content'
 import { clearAuthTokens } from '@/shared/lib/cookies'
@@ -45,12 +46,14 @@ import {
 } from 'lucide-react'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
+import { AddFundsDialog } from '../components/AddFundsDialog'
 
 function UserProfilePage() {
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const [activeSection, setActiveSection] = React.useState('overview')
+    const [openAddFunds, setOpenAddFunds] = React.useState(false)
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
 
     React.useEffect(() => {
@@ -80,6 +83,15 @@ function UserProfilePage() {
         { id: 'security', label: 'Security', icon: Shield },
         { id: 'settings', label: 'Settings', icon: Settings },
     ]
+
+    const handleAddFunds = async (amount: number) => {
+        const res = await CreatePaymentURL({
+            amount: amount,
+            description: 'Add funds to wallet',
+            walletId: userInfo.wallet.id,
+        })
+        window.location.href = res.data.data.url
+    }
 
     return (
         <SidebarProvider defaultOpen>
@@ -193,7 +205,7 @@ function UserProfilePage() {
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute -right-2 -bottom-2 h-8 w-8 rounded-full"
+                                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
                                         >
                                             <Camera className="h-4 w-4" />
                                         </Button>
@@ -232,6 +244,7 @@ function UserProfilePage() {
                                                     : 'N/A'}
                                             </div>
                                         </div>
+                                        <Button onClick={() => setOpenAddFunds(true)}>Add Funds to Wallet</Button>
                                     </div>
                                 </div>
                             </CardContent>
@@ -256,7 +269,7 @@ function UserProfilePage() {
                                                 <label className="text-muted-foreground text-sm font-medium">
                                                     Ngày tham gia
                                                 </label>
-                                                <p className="font-mono text-xs break-all">
+                                                <p className="break-all font-mono text-xs">
                                                     {userInfo.createdAt.slice(0, 10) || 'N/A'}
                                                 </p>
                                             </div>
@@ -387,6 +400,11 @@ function UserProfilePage() {
                         {/* Profile Tabs Content */}
                         <ProfileContent />
                     </main>
+                    <AddFundsDialog
+                        open={openAddFunds}
+                        onOpenChange={setOpenAddFunds}
+                        onConfirm={amount => handleAddFunds(amount)}
+                    />
                 </SidebarInset>
             </div>
         </SidebarProvider>
