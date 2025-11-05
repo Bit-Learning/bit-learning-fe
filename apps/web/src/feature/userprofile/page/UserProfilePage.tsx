@@ -190,40 +190,53 @@ function UserProfilePage() {
                         </div>
                     </header>
 
-                    <main className="flex-1 space-y-6 p-6">
-                        {/* Profile Header Card */}
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-                                    <div className="relative">
-                                        <Avatar className="h-24 w-24">
-                                            {userInfo.avatar && (
-                                                <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
-                                            )}
-                                            <AvatarFallback className="bg-blue-600 text-2xl text-white">
-                                                {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
-                                            </AvatarFallback>
-                                        </Avatar>
+                    <main className="flex-1">
+                        {/* Profile Header Card with Banner */}
+                        <Card className="overflow-hidden rounded-none border-x-0 border-t-0">
+                            {/* Cover Photo Banner */}
+                            <div className="relative h-48 w-full md:h-64 lg:h-80">
+                                <img
+                                    src="https://images.unsplash.com/photo-1480796927426-f609979314bd?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop"
+                                    alt="Cover"
+                                    className="h-full w-full object-cover"
+                                />
+                                <Button size="sm" variant="secondary" className="absolute bottom-4 right-4 gap-2">
+                                    <Camera className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Chỉnh sửa ảnh bìa</span>
+                                </Button>
+                            </div>
+
+                            <CardContent className="relative bg-white p-6">
+                                <div className="flex flex-col items-start gap-6 md:flex-row md:items-end">
+                                    <div className="relative -mt-20 md:-mt-24">
+                                        <div className="rounded-full bg-white p-1">
+                                            <Avatar className="h-32 w-32 border-4 border-white shadow-xl md:h-40 md:w-40">
+                                                {userInfo.avatar && (
+                                                    <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
+                                                )}
+                                                <AvatarFallback className="bg-blue-600 text-2xl text-white md:text-3xl">
+                                                    {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </div>
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
+                                            className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
                                         >
                                             <Camera className="h-4 w-4" />
                                         </Button>
                                     </div>
 
                                     <div className="flex-1 space-y-4">
-                                        {/* <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p> */}
-
                                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                                            <h2 className="text-2xl font-bold">{userInfo.username}</h2>
                                             {/* <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'}>
                                                 {userInfo.role}
                                             </Badge> */}
                                             {/* <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
                                                 {userInfo.activated ? 'Active' : 'Inactive'}
                                             </Badge> */}
+                                            <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p>
                                         </div>
 
                                         <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
@@ -250,7 +263,7 @@ function UserProfilePage() {
                         </Card>
 
                         {/* Dynamic Content Based on Active Section */}
-                        <div className="space-y-4">
+                        <div className="space-y-4 p-6">
                             {activeSection === 'overview' && (
                                 <Card>
                                     <CardContent className="p-6">
