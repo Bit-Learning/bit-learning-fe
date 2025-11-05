@@ -1,6 +1,7 @@
 import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
 import { requestUserProfile } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { useFetchOrdersByUserId } from '@/feature/order/hook/useOrder'
 import { CreatePaymentURL } from '@/feature/payment/service/paymentService'
 import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
 import ProfileContent from '@/shared/components/profile-page/profile-content'
@@ -39,6 +40,7 @@ import {
     LogOut,
     Mail,
     MapPin,
+    Package,
     Presentation,
     Settings,
     Shield,
@@ -55,6 +57,7 @@ function UserProfilePage() {
     const [activeSection, setActiveSection] = React.useState('overview')
     const [openAddFunds, setOpenAddFunds] = React.useState(false)
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
+    const { data: userOrders, isLoading: ordersLoading } = useFetchOrdersByUserId(userInfo?.id || 0)
 
     React.useEffect(() => {
         // Fetch user profile on mount if not already loaded
@@ -78,6 +81,7 @@ function UserProfilePage() {
     const menuItems = [
         { id: 'overview', label: 'Overview', icon: User },
         { id: 'presentations', label: 'My Presentations', icon: Presentation },
+        { id: 'orders', label: 'My Orders', icon: Package },
         { id: 'activity', label: 'Activity', icon: Activity },
         { id: 'notifications', label: 'Notifications', icon: Bell },
         { id: 'security', label: 'Security', icon: Shield },
@@ -340,6 +344,136 @@ function UserProfilePage() {
                                                         Browse Templates
                                                     </Button>
                                                 </Link>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {activeSection === 'orders' && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="mb-6 flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">My Orders</h3>
+                                            <Badge variant="secondary">
+                                                {userOrders?.length || 0}{' '}
+                                                {userOrders?.length === 1 ? 'Order' : 'Orders'}
+                                            </Badge>
+                                        </div>
+                                        {ordersLoading ? (
+                                            <div className="flex justify-center py-8">
+                                                <SpinnerLoader />
+                                            </div>
+                                        ) : userOrders && userOrders.length > 0 ? (
+                                            <div className="space-y-4">
+                                                {userOrders.map(order => (
+                                                    <Card key={order.id} className="border-l-4 border-l-blue-500">
+                                                        <CardContent className="p-4">
+                                                            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                                <div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <h4 className="font-semibold">
+                                                                            Order #{order.id}
+                                                                        </h4>
+                                                                        <Badge
+                                                                            variant={
+                                                                                order.status === 'COMPLETED'
+                                                                                    ? 'default'
+                                                                                    : order.status === 'PENDING'
+                                                                                      ? 'secondary'
+                                                                                      : 'destructive'
+                                                                            }
+                                                                        >
+                                                                            {order.status}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <p className="text-muted-foreground text-sm">
+                                                                        {new Date(order.createdAt).toLocaleDateString(
+                                                                            'en-US',
+                                                                            {
+                                                                                year: 'numeric',
+                                                                                month: 'long',
+                                                                                day: 'numeric',
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit',
+                                                                            },
+                                                                        )}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <p className="text-sm text-gray-600">
+                                                                        Total Amount
+                                                                    </p>
+                                                                    <p className="text-xl font-bold text-blue-600">
+                                                                        {order.totalAmount.toLocaleString('vi-VN')} ₫
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-2">
+                                                                <p className="text-sm font-medium">Order Details:</p>
+                                                                <div className="space-y-2">
+                                                                    {order.orderDetails.map(detail => (
+                                                                        <div
+                                                                            key={detail.id}
+                                                                            className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                                                                        >
+                                                                            <div className="flex-1">
+                                                                                <p className="font-medium">
+                                                                                    {detail.productName}
+                                                                                </p>
+                                                                                <p className="text-muted-foreground text-sm">
+                                                                                    Quantity: {detail.quantity} × Unit
+                                                                                    Price:{' '}
+                                                                                    {detail.unitPrice.toLocaleString(
+                                                                                        'vi-VN',
+                                                                                    )}{' '}
+                                                                                    ₫
+                                                                                </p>
+                                                                            </div>
+                                                                            <div className="text-right">
+                                                                                <p className="font-semibold">
+                                                                                    {detail.amount.toLocaleString(
+                                                                                        'vi-VN',
+                                                                                    )}{' '}
+                                                                                    ₫
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="mt-4 flex items-center justify-between border-t pt-3">
+                                                                <p className="text-muted-foreground text-xs">
+                                                                    Last updated:{' '}
+                                                                    {new Date(order.updatedAt).toLocaleString('en-US', {
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                    })}
+                                                                </p>
+                                                                {order.status === 'COMPLETED' && (
+                                                                    <Button variant="outline" size="sm">
+                                                                        View Receipt
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-muted-foreground py-8 text-center">
+                                                <Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                                                <p className="mb-2 text-lg font-medium">No orders yet</p>
+                                                <p className="text-sm">
+                                                    Your order history will appear here once you make a purchase.
+                                                </p>
+                                                <Button variant="outline" className="mt-4">
+                                                    Browse Templates
+                                                </Button>
                                             </div>
                                         )}
                                     </CardContent>
