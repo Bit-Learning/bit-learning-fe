@@ -17,7 +17,7 @@ import {
     navigationMenuTriggerStyle,
 } from '@workspace/ui/components/navigation-menu'
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@workspace/ui/components/sheet'
-import { LogOut, Menu, Search, Settings, User } from 'lucide-react'
+import { LogOut, Menu, Search, Settings, User, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import MobileSheetMenu from './mobile-sheet-menu'
@@ -65,9 +65,9 @@ const Header: React.FC = () => {
                                                             <NavigationMenuLink asChild>
                                                                 <Link
                                                                     to={subItem.to}
-                                                                    className="block space-y-1 rounded-md p-2 leading-none no-underline transition-colors outline-none select-none hover:bg-blue-50 dark:hover:bg-gray-700"
+                                                                    className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-blue-50 dark:hover:bg-gray-700"
                                                                 >
-                                                                    <div className="text-sm leading-none font-medium hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
+                                                                    <div className="text-sm font-medium leading-none hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
                                                                         {subItem.title}
                                                                     </div>
                                                                     <p className="text-muted-foreground line-clamp-2 text-sm leading-snug dark:text-gray-400">
@@ -116,6 +116,15 @@ const Header: React.FC = () => {
                                         <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
                                             <User className="mr-2 h-4 w-4" />
                                             <span>Hồ sơ cá nhân</span>
+                                        </MenuItem>
+                                        <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
+                                            <Wallet className="mr-2 h-4 w-4" />
+                                            <span>
+                                                {userInfo.wallet.balance.toLocaleString('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND',
+                                                })}
+                                            </span>
                                         </MenuItem>
                                         <MenuItem isDisabled>
                                             <Settings className="mr-2 h-4 w-4" />
