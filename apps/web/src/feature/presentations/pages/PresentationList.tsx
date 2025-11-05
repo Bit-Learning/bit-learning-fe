@@ -1,5 +1,8 @@
 // src/components/PresentationList.js
+import { requestUserProfile } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { useCreateOrder } from '@/feature/order/hook/useOrder'
+import { useAppDispatch } from '@/shared/redux/store'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -13,10 +16,12 @@ import { useCreatePresentation, usePresentationTemplates, useUserPresentations }
 import { Template } from '../types/presentation.types'
 
 function PresentationList() {
+    const dispatch = useAppDispatch()
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const { data, isLoading: templateLoading, error } = usePresentationTemplates()
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
     const createPresentation = useCreatePresentation()
+    const createOrder = useCreateOrder()
     const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null)
 
     const handleBuyTemplate = async (template: Template) => {
@@ -38,6 +43,15 @@ function PresentationList() {
 
         try {
             setCreatingTemplate(template.name)
+            await createOrder.mutateAsync({
+                orderDetails: [
+                    {
+                        productId: template.id,
+                        quantity: 1,
+                    },
+                ],
+            })
+            dispatch(requestUserProfile())
             await createPresentation.mutateAsync({
                 name: template.name.replace(/_/g, ' '),
                 description: `Presentation created from ${template.name} template`,
@@ -52,11 +66,31 @@ function PresentationList() {
         } catch (error: any) {
             toast.error({
                 title: 'Error',
-                description: error?.response?.data?.message || 'Failed to create presentation',
+                description: error?.response?.data?.message || 'Failed to purchase template',
             })
-        } finally {
-            setCreatingTemplate(null)
         }
+
+        // try {
+        //     setCreatingTemplate(template.name)
+        //     await createPresentation.mutateAsync({
+        //         name: template.name.replace(/_/g, ' '),
+        //         description: `Presentation created from ${template.name} template`,
+        //         type: 'SLIDEV',
+        //         templateUrl: `classpath:static/markdown/${template.name}.md`,
+        //         ownerId: userInfo.id,
+        //     })
+        //     toast.success({
+        //         title: 'Success',
+        //         description: 'Presentation created successfully! It is being processed...',
+        //     })
+        // } catch (error: any) {
+        //     toast.error({
+        //         title: 'Error',
+        //         description: error?.response?.data?.message || 'Failed to create presentation',
+        //     })
+        // } finally {
+        //     setCreatingTemplate(null)
+        // }
     }
 
     if (isLoading || templateLoading || presentationsLoading) return <SpinnerLoader />
