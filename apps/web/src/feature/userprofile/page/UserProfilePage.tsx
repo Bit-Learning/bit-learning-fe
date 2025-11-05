@@ -4,7 +4,6 @@ import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { useFetchOrdersByUserId } from '@/feature/order/hook/useOrder'
 import { CreatePaymentURL } from '@/feature/payment/service/paymentService'
 import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
-import ProfileContent from '@/shared/components/profile-page/profile-content'
 import { clearAuthTokens } from '@/shared/lib/cookies'
 import { formatDateTime } from '@/shared/lib/date-time-utils'
 import { useAppDispatch } from '@/shared/redux/store'
@@ -38,7 +37,6 @@ import {
     Home,
     Key,
     LogOut,
-    Mail,
     MapPin,
     Package,
     Presentation,
@@ -79,19 +77,19 @@ function UserProfilePage() {
     }
 
     const menuItems = [
-        { id: 'overview', label: 'Overview', icon: User },
-        { id: 'presentations', label: 'My Presentations', icon: Presentation },
-        { id: 'orders', label: 'My Orders', icon: Package },
-        { id: 'activity', label: 'Activity', icon: Activity },
-        { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'security', label: 'Security', icon: Shield },
-        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'overview', label: 'Tổng quan', icon: User },
+        { id: 'presentations', label: 'Bài thuyết trình', icon: Presentation },
+        { id: 'orders', label: 'Đơn hàng', icon: Package },
+        { id: 'activity', label: 'Hoạt động', icon: Activity },
+        { id: 'notifications', label: 'Thông báo', icon: Bell },
+        { id: 'security', label: 'Bảo mật', icon: Shield },
+        { id: 'settings', label: 'Cài đặt', icon: Settings },
     ]
 
     const handleAddFunds = async (amount: number) => {
         const res = await CreatePaymentURL({
             amount: amount,
-            description: 'Add funds to wallet',
+            description: 'Nạp tiền vào ví',
             walletId: userInfo.wallet.id,
         })
         window.location.href = res.data.data.url
@@ -120,14 +118,14 @@ function UserProfilePage() {
 
                     <SidebarContent>
                         <SidebarGroup>
-                            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+                            <SidebarGroupLabel>Điều hướng</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     <SidebarMenuItem>
                                         <SidebarMenuButton asChild tooltip="Home">
                                             <Link to="/">
                                                 <Home />
-                                                <span>Home</span>
+                                                <span>Trang chủ</span>
                                             </Link>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
@@ -136,7 +134,7 @@ function UserProfilePage() {
                         </SidebarGroup>
 
                         <SidebarGroup>
-                            <SidebarGroupLabel>Profile</SidebarGroupLabel>
+                            <SidebarGroupLabel>Hồ sơ</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     {menuItems.map(item => (
@@ -156,13 +154,13 @@ function UserProfilePage() {
                         </SidebarGroup>
 
                         <SidebarGroup>
-                            <SidebarGroupLabel>Account</SidebarGroupLabel>
+                            <SidebarGroupLabel>Tài khoản</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     <SidebarMenuItem>
                                         <SidebarMenuButton tooltip="Password">
                                             <Key />
-                                            <span>Change Password</span>
+                                            <span>Đổi mật khẩu</span>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                 </SidebarMenu>
@@ -175,7 +173,7 @@ function UserProfilePage() {
                             <SidebarMenuItem>
                                 <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
                                     <LogOut />
-                                    <span>Logout</span>
+                                    <span>Đăng xuất</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -188,7 +186,7 @@ function UserProfilePage() {
                     <header className="border-sidebar-border bg-background sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b px-4">
                         <SidebarTrigger className="-ml-1" />
                         <div className="flex flex-1 items-center justify-between">
-                            <h1 className="text-xl font-semibold">User Profile</h1>
+                            <h1 className="text-xl font-semibold">Hồ sơ người dùng</h1>
                         </div>
                     </header>
 
@@ -215,25 +213,22 @@ function UserProfilePage() {
                                         </Button>
                                     </div>
 
-                                    <div className="flex-1 space-y-2">
-                                        <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p>
+                                    <div className="flex-1 space-y-4">
+                                        {/* <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p> */}
 
                                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
                                             <h2 className="text-2xl font-bold">{userInfo.username}</h2>
                                             {/* <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'}>
                                                 {userInfo.role}
                                             </Badge> */}
-                                            <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
+                                            {/* <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
                                                 {userInfo.activated ? 'Active' : 'Inactive'}
-                                            </Badge>
+                                            </Badge> */}
                                         </div>
-                                        <p className="text-muted-foreground">
-                                            Thành viên kể từ
-                                            {' ' + userInfo.createdAt.slice(0, 10) || 'N/A'}
-                                        </p>
+
                                         <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
                                             <div className="flex items-center gap-1">
-                                                <Mail className="size-4" />
+                                                {/* <Mail className="size-4" /> */}
                                                 {userInfo.email}
                                             </div>
                                             <div className="flex items-center gap-1">
@@ -248,7 +243,7 @@ function UserProfilePage() {
                                                     : 'N/A'}
                                             </div>
                                         </div>
-                                        <Button onClick={() => setOpenAddFunds(true)}>Add Funds to Wallet</Button>
+                                        <Button onClick={() => setOpenAddFunds(true)}>Nạp tiền</Button>
                                     </div>
                                 </div>
                             </CardContent>
@@ -259,7 +254,7 @@ function UserProfilePage() {
                             {activeSection === 'overview' && (
                                 <Card>
                                     <CardContent className="p-6">
-                                        <h3 className="mb-4 text-lg font-semibold">Account Overview</h3>
+                                        <h3 className="mb-4 text-lg font-semibold">Tổng quan tài khoản</h3>
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <div>
                                                 <label className="text-muted-foreground text-sm font-medium">
@@ -286,12 +281,7 @@ function UserProfilePage() {
                                 <Card>
                                     <CardContent className="p-6">
                                         <div className="mb-6 flex items-center justify-between">
-                                            <h3 className="text-lg font-semibold">My Presentations</h3>
-                                            <Link to="/presentations">
-                                                <Button variant="outline" size="sm">
-                                                    View All
-                                                </Button>
-                                            </Link>
+                                            <h3 className="text-lg font-semibold">Bài thuyết trình</h3>
                                         </div>
                                         {presentationsLoading ? (
                                             <div className="flex justify-center py-8">
@@ -312,7 +302,7 @@ function UserProfilePage() {
                                                             <Badge
                                                                 variant={pres.processing ? 'secondary' : 'secondary'}
                                                             >
-                                                                {pres.processing ? 'Processing' : ''}
+                                                                {pres.processing ? 'Đang xử lí, xin vui lòng đợi' : ''}
                                                             </Badge>
                                                         </div>
                                                         {!pres.processing && (
@@ -322,15 +312,15 @@ function UserProfilePage() {
                                                                     params={{ id: pres.id.toString() }}
                                                                 >
                                                                     <Button size="sm" variant="default">
-                                                                        Present
+                                                                        Trình chiếu
                                                                     </Button>
                                                                 </Link>
                                                             </div>
                                                         )}
                                                         {pres.processing && (
                                                             <p className="text-muted-foreground mt-2 text-xs">
-                                                                Your presentation is being generated. This may take a
-                                                                few moments...
+                                                                Bài thuyết trình của bạn đang được tạo. Quá trình này có
+                                                                thể mất vài phút...
                                                             </p>
                                                         )}
                                                     </Card>
@@ -338,10 +328,10 @@ function UserProfilePage() {
                                             </div>
                                         ) : (
                                             <div className="text-muted-foreground py-8 text-center">
-                                                <p>You haven&apos;t created any presentations yet.</p>
+                                                <p>Không có dữ liệu</p>
                                                 <Link to="/presentations">
                                                     <Button variant="outline" className="mt-4">
-                                                        Browse Templates
+                                                        Xem các mẫu có sẵn
                                                     </Button>
                                                 </Link>
                                             </div>
@@ -357,7 +347,7 @@ function UserProfilePage() {
                                             <h3 className="text-lg font-semibold">My Orders</h3>
                                             <Badge variant="secondary">
                                                 {userOrders?.length || 0}{' '}
-                                                {userOrders?.length === 1 ? 'Order' : 'Orders'}
+                                                {userOrders?.length === 1 ? 'Đơn hàng' : 'Đơn hàng'}
                                             </Badge>
                                         </div>
                                         {ordersLoading ? (
@@ -402,7 +392,7 @@ function UserProfilePage() {
                                                                 </div>
                                                                 <div className="text-right">
                                                                     <p className="text-sm text-gray-600">
-                                                                        Total Amount
+                                                                        Tổng số tiền
                                                                     </p>
                                                                     <p className="text-xl font-bold text-blue-600">
                                                                         {order.totalAmount.toLocaleString('vi-VN')} ₫
@@ -411,7 +401,9 @@ function UserProfilePage() {
                                                             </div>
 
                                                             <div className="space-y-2">
-                                                                <p className="text-sm font-medium">Order Details:</p>
+                                                                <p className="text-sm font-medium">
+                                                                    Chi tiết đơn hàng:
+                                                                </p>
                                                                 <div className="space-y-2">
                                                                     {order.orderDetails.map(detail => (
                                                                         <div
@@ -446,7 +438,7 @@ function UserProfilePage() {
 
                                                             <div className="mt-4 flex items-center justify-between border-t pt-3">
                                                                 <p className="text-muted-foreground text-xs">
-                                                                    Last updated:{' '}
+                                                                    Cập nhật lần cuối:{' '}
                                                                     {new Date(order.updatedAt).toLocaleString('en-US', {
                                                                         month: 'short',
                                                                         day: 'numeric',
@@ -456,7 +448,7 @@ function UserProfilePage() {
                                                                 </p>
                                                                 {order.status === 'COMPLETED' && (
                                                                     <Button variant="outline" size="sm">
-                                                                        View Receipt
+                                                                        Xem hóa đơn
                                                                     </Button>
                                                                 )}
                                                             </div>
@@ -467,12 +459,12 @@ function UserProfilePage() {
                                         ) : (
                                             <div className="text-muted-foreground py-8 text-center">
                                                 <Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
-                                                <p className="mb-2 text-lg font-medium">No orders yet</p>
+                                                <p className="mb-2 text-lg font-medium">Chưa có dữ liệu</p>
                                                 <p className="text-sm">
-                                                    Your order history will appear here once you make a purchase.
+                                                    Lịch sử đặt hàng của bạn sẽ xuất hiện ở đây sau khi bạn mua hàng.
                                                 </p>
                                                 <Button variant="outline" className="mt-4">
-                                                    Browse Templates
+                                                    Xem các sản phẩm
                                                 </Button>
                                             </div>
                                         )}
@@ -532,7 +524,7 @@ function UserProfilePage() {
                         </div>
 
                         {/* Profile Tabs Content */}
-                        <ProfileContent />
+                        {/* <ProfileContent /> */}
                     </main>
                     <AddFundsDialog
                         open={openAddFunds}

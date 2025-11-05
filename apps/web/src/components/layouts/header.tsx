@@ -2,6 +2,7 @@ import { navItems } from '@/components/layouts/data/nav-items'
 import { logout } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { SearchProvider, useSearch } from '@/shared/context/search-context'
+import { mergeName } from '@/shared/lib/string-utils'
 import { useAppDispatch } from '@/shared/redux/store'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
@@ -107,8 +108,10 @@ const Header: React.FC = () => {
                                         <AvatarFallback>{userInfo.avatar?.slice(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex flex-col items-start">
-                                        <span className="text-sm font-medium">{userInfo.username}</span>
-                                        <span className="text-xs text-gray-500">{userInfo.email}</span>
+                                        <span className="text-md font-medium">
+                                            {mergeName(userInfo.firstName, userInfo.lastName)}
+                                        </span>
+                                        {/* <span className="text-xs text-gray-500">{userInfo.email}</span> */}
                                     </div>
                                 </Button>
                                 <MenuPopover placement="bottom end">
@@ -120,7 +123,7 @@ const Header: React.FC = () => {
                                         <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
                                             <Wallet className="mr-2 h-4 w-4" />
                                             <span>
-                                                {userInfo.wallet.balance.toLocaleString('vi-VN', {
+                                                {(userInfo.wallet?.balance ?? 0).toLocaleString('vi-VN', {
                                                     style: 'currency',
                                                     currency: 'VND',
                                                 })}
@@ -129,9 +132,6 @@ const Header: React.FC = () => {
                                         <MenuItem isDisabled>
                                             <Settings className="mr-2 h-4 w-4" />
                                             <span>Cài đặt</span>
-                                        </MenuItem>
-                                        <MenuItem isDisabled>
-                                            <span>Presame (Sắp ra mắt)</span>
                                         </MenuItem>
                                         <MenuSeparator />
                                         <MenuItem onAction={handleLogout}>
