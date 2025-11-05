@@ -61,36 +61,16 @@ function PresentationList() {
             })
             toast.success({
                 title: 'Success',
-                description: 'Presentation created successfully! It is being processed...',
+                description: 'Buy template successfully! Presentation is being processed...',
             })
         } catch (error: any) {
             toast.error({
                 title: 'Error',
                 description: error?.response?.data?.message || 'Failed to purchase template',
             })
+        } finally {
+            setCreatingTemplate(null)
         }
-
-        // try {
-        //     setCreatingTemplate(template.name)
-        //     await createPresentation.mutateAsync({
-        //         name: template.name.replace(/_/g, ' '),
-        //         description: `Presentation created from ${template.name} template`,
-        //         type: 'SLIDEV',
-        //         templateUrl: `classpath:static/markdown/${template.name}.md`,
-        //         ownerId: userInfo.id,
-        //     })
-        //     toast.success({
-        //         title: 'Success',
-        //         description: 'Presentation created successfully! It is being processed...',
-        //     })
-        // } catch (error: any) {
-        //     toast.error({
-        //         title: 'Error',
-        //         description: error?.response?.data?.message || 'Failed to create presentation',
-        //     })
-        // } finally {
-        //     setCreatingTemplate(null)
-        // }
     }
 
     if (isLoading || templateLoading || presentationsLoading) return <SpinnerLoader />
