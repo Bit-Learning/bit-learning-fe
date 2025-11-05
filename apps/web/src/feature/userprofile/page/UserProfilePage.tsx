@@ -47,6 +47,7 @@ import {
 import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { AddFundsDialog } from '../components/AddFundsDialog'
+import { ChangePasswordDialog } from '../components/ChangePasswordDialog'
 
 function UserProfilePage() {
     const dispatch = useAppDispatch()
@@ -54,6 +55,7 @@ function UserProfilePage() {
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const [activeSection, setActiveSection] = React.useState('overview')
     const [openAddFunds, setOpenAddFunds] = React.useState(false)
+    const [openChangePassword, setOpenChangePassword] = React.useState(false)
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
     const { data: userOrders, isLoading: ordersLoading } = useFetchOrdersByUserId(userInfo?.id || 0)
 
@@ -158,7 +160,10 @@ function UserProfilePage() {
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     <SidebarMenuItem>
-                                        <SidebarMenuButton tooltip="Password">
+                                        <SidebarMenuButton
+                                            tooltip="Password"
+                                            onClick={() => setOpenChangePassword(true)}
+                                        >
                                             <Key />
                                             <span>Đổi mật khẩu</span>
                                         </SidebarMenuButton>
@@ -544,6 +549,7 @@ function UserProfilePage() {
                         onOpenChange={setOpenAddFunds}
                         onConfirm={amount => handleAddFunds(amount)}
                     />
+                    <ChangePasswordDialog open={openChangePassword} onOpenChange={setOpenChangePassword} />
                 </SidebarInset>
             </div>
         </SidebarProvider>

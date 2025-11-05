@@ -24,11 +24,18 @@ export type TForgotPasswordRequest = {
 }
 
 export type TResetPasswordRequest = {
-    token: string
     email: string
+    key: string
     newPassword: string
     confirmNewPassword: string
 }
+
+export type TChangePasswordRequest = {
+    currentPassword: string
+    newPassword: string
+    confirmNewPassword: string
+}
+
 export type TUserProfile = {
     id: number
     username: string

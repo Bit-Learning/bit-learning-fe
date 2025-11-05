@@ -2,8 +2,16 @@ import { TAppThunk } from '@/feature/app/type/AppState'
 import { Roles } from '@/shared/constants/enums'
 import { clearAuthTokens, getAccessToken, setAuthTokens } from '@/shared/lib/cookies'
 import { setErrorAction, setIsAuthenticatedAction, setIsLoadingAction, setUserInfoAction } from '.'
-import { ForgotPassword, GetUserProfile, Login, Register, ResetPassword } from '../service/AuthService'
-import type { TForgotPasswordRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
+import {
+    ChangePassword,
+    FinishPasswordReset,
+    GetUserProfile,
+    Login,
+    Register,
+    RequestPasswordReset,
+    VerifyResetKey,
+} from '../service/AuthService'
+import type { TChangePasswordRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
 
 export const requestUserProfile = (): TAppThunk => {
     return async (dispatch: any) => {
@@ -111,34 +119,80 @@ export const requestRegister = (body: TRegisterRequest): TAppThunk => {
     }
 }
 
-export const requestForgotPassword = (body: TForgotPasswordRequest): TAppThunk => {
+export const requestPasswordResetInit = (email: string): TAppThunk => {
     return async (dispatch: any) => {
         dispatch(setIsLoadingAction(true))
         try {
-            const response = await ForgotPassword(body)
-            if (response.data.success) {
-                return true
+            const response = await RequestPasswordReset(email)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Password reset link sent to your email' }
             }
+            return { success: false, message: 'Failed to send reset email' }
         } catch (error: any) {
-            const errorMessage = error?.response?.data.message || error.message
+            const errorMessage = error?.response?.data?.message || error.message
             dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
         } finally {
             dispatch(setIsLoadingAction(false))
         }
     }
 }
 
-export const requestResetPassword = (body: TResetPasswordRequest): TAppThunk => {
+export const verifyPasswordResetKey = (key: string): TAppThunk => {
     return async (dispatch: any) => {
         dispatch(setIsLoadingAction(true))
         try {
-            const response = await ResetPassword(body)
-            if (response.data.success) {
-                return true
+            const response = await VerifyResetKey(key)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Reset key is valid' }
             }
+            return { success: false, message: 'Invalid reset key' }
         } catch (error: any) {
-            const errorMessage = error?.response?.data.message || error.message
+            const errorMessage = error?.response?.data?.message || error.message
             dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
+        } finally {
+            dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const finishPasswordReset = (body: TResetPasswordRequest): TAppThunk => {
+    return async (dispatch: any) => {
+        dispatch(setIsLoadingAction(true))
+        try {
+            const response = await FinishPasswordReset(body)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Password has been reset successfully' }
+            }
+            return { success: false, message: 'Failed to reset password' }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error.message
+            dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
+        } finally {
+            dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const changePassword = (body: TChangePasswordRequest): TAppThunk => {
+    return async (dispatch: any) => {
+        dispatch(setIsLoadingAction(true))
+        try {
+            const response = await ChangePassword(body)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Password changed successfully' }
+            }
+            return { success: false, message: 'Failed to change password' }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error.message
+            dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
         } finally {
             dispatch(setIsLoadingAction(false))
         }
