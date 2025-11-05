@@ -29,7 +29,7 @@ import { type SidebarData } from '../types'
 export const sidebarData: SidebarData = {
   user: {
     name: 'Bithub',
-    email: 'bihubadmin@gmail.com',
+    email: 'admin@gmail.com',
     avatar: '/avatars/shadcn.jpg',
   },
   teams: [

@@ -1,10 +1,11 @@
 import { type ColumnDef } from '@tanstack/react-table'
 import { cn } from '@/lib/utils'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { LongText } from '@/components/long-text'
-import { callTypes, roles } from '../data/data'
+import { activatedStatuses, roles } from '../data/data'
 import { type User } from '../data/schema'
 import { DataTableRowActions } from './data-table-row-actions'
 
@@ -37,13 +38,11 @@ export const usersColumns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    accessorKey: 'username',
+    accessorKey: 'id',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Username' />
+      <DataTableColumnHeader column={column} title='ID' />
     ),
-    cell: ({ row }) => (
-      <LongText className='max-w-36 ps-3'>{row.getValue('username')}</LongText>
-    ),
+    cell: ({ row }) => <div className='w-16 ps-3'>{row.getValue('id')}</div>,
     meta: {
       className: cn(
         'drop-shadow-[0_1px_2px_rgb(0_0_0_/_0.1)] dark:drop-shadow-[0_1px_2px_rgb(255_255_255_/_0.1)]',
@@ -53,16 +52,25 @@ export const usersColumns: ColumnDef<User>[] = [
     enableHiding: false,
   },
   {
-    id: 'fullName',
+    id: 'user',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Name' />
+      <DataTableColumnHeader column={column} title='User' />
     ),
     cell: ({ row }) => {
-      const { firstName, lastName } = row.original
+      const { firstName, lastName, avatar } = row.original
       const fullName = `${firstName} ${lastName}`
-      return <LongText className='max-w-36'>{fullName}</LongText>
+      const initials = `${firstName[0]}${lastName[0]}`.toUpperCase()
+      return (
+        <div className='flex items-center gap-2'>
+          <Avatar className='h-8 w-8'>
+            <AvatarImage src={avatar} alt={fullName} />
+            <AvatarFallback>{initials}</AvatarFallback>
+          </Avatar>
+          <LongText className='max-w-36'>{fullName}</LongText>
+        </div>
+      )
     },
-    meta: { className: 'w-36' },
+    meta: { className: 'w-48' },
   },
   {
     accessorKey: 'email',
@@ -74,31 +82,25 @@ export const usersColumns: ColumnDef<User>[] = [
     ),
   },
   {
-    accessorKey: 'phoneNumber',
-    header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Phone Number' />
-    ),
-    cell: ({ row }) => <div>{row.getValue('phoneNumber')}</div>,
-    enableSorting: false,
-  },
-  {
-    accessorKey: 'status',
+    accessorKey: 'activated',
     header: ({ column }) => (
       <DataTableColumnHeader column={column} title='Status' />
     ),
     cell: ({ row }) => {
-      const { status } = row.original
-      const badgeColor = callTypes.get(status)
+      const activated = row.getValue('activated') as boolean
+      const badgeColor = activatedStatuses.get(activated)
       return (
         <div className='flex space-x-2'>
           <Badge variant='outline' className={cn('capitalize', badgeColor)}>
-            {row.getValue('status')}
+            {activated ? 'Active' : 'Inactive'}
           </Badge>
         </div>
       )
     },
     filterFn: (row, id, value) => {
-      return value.includes(row.getValue(id))
+      // Convert boolean to string for comparison with filter values
+      const activated = row.getValue(id) as boolean
+      return value.includes(String(activated))
     },
     enableHiding: false,
     enableSorting: false,
@@ -121,7 +123,7 @@ export const usersColumns: ColumnDef<User>[] = [
           {userType.icon && (
             <userType.icon size={16} className='text-muted-foreground' />
           )}
-          <span className='text-sm capitalize'>{row.getValue('role')}</span>
+          <span className='text-sm'>{userType.label}</span>
         </div>
       )
     },
@@ -130,6 +132,38 @@ export const usersColumns: ColumnDef<User>[] = [
     },
     enableSorting: false,
     enableHiding: false,
+  },
+  {
+    accessorKey: 'wallet',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Balance' />
+    ),
+    cell: ({ row }) => {
+      const wallet = row.getValue('wallet') as { id: number; balance: number }
+      return (
+        <div className='text-right font-medium'>
+          ${wallet.balance.toFixed(2)}
+        </div>
+      )
+    },
+    enableSorting: false,
+  },
+  {
+    accessorKey: 'lastLoginAttempt',
+    header: ({ column }) => (
+      <DataTableColumnHeader column={column} title='Last Login' />
+    ),
+    cell: ({ row }) => {
+      const lastLogin = row.getValue('lastLoginAttempt') as string | null
+      if (!lastLogin) return <div className='text-muted-foreground'>Never</div>
+      const date = new Date(lastLogin)
+      return (
+        <div className='text-nowrap'>
+          {date.toLocaleDateString()} {date.toLocaleTimeString()}
+        </div>
+      )
+    },
+    enableSorting: false,
   },
   {
     id: 'actions',

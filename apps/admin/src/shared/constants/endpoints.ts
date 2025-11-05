@@ -6,7 +6,7 @@ export const endpoints = {
 
 export const API_PATH = {
   BASE_URL: {
-    DEVELOPMENT: 'https://5ef9101433fa.ngrok-free.app/api',
+    DEVELOPMENT: 'http://localhost:4000/api',
     PRODUCTION: 'https://api.example.com',
   },
 }
