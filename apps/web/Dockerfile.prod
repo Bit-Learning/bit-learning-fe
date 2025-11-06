@@ -1,0 +1,52 @@
+# ============================
+# 1️⃣ BUILD STAGE
+# ============================
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy workspace configuration from monorepo root
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Copy all package.json files to establish workspace structure
+COPY apps/web/package.json ./apps/web/
+COPY packages/lib/package.json ./packages/lib/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/eslint-config/package.json ./packages/eslint-config/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+
+# Install ALL dependencies at root level (simplest approach for Docker builds)
+# This ensures workspace packages get their devDependencies (@tailwindcss/postcss, etc.)
+RUN pnpm install --frozen-lockfile
+
+# Copy source code for workspace packages (needed for build)
+COPY packages/lib ./packages/lib
+COPY packages/ui ./packages/ui
+COPY packages/eslint-config ./packages/eslint-config
+COPY packages/typescript-config ./packages/typescript-config
+
+# Copy web app source code
+COPY apps/web ./apps/web
+
+# Copy turbo.json if using Turbo
+COPY turbo.json ./turbo.json
+
+# Build web app
+RUN pnpm --filter ./apps/web run build
+
+# ============================
+# 2️⃣ RUNTIME STAGE (NGINX)
+# ============================
+FROM nginx:alpine AS runtime
+
+# Copy build output
+COPY --from=builder /app/apps/web/dist /usr/share/nginx/html
+
+# Copy nginx config
+COPY apps/web/nginx.conf /etc/nginx/conf.d/default.conf
+
+EXPOSE 5173
+CMD ["nginx", "-g", "daemon off;"]

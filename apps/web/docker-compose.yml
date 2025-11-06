@@ -1,0 +1,23 @@
+services:
+  # Development environment
+  bithub-web-dev:
+    container_name: bithub-web-dev
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile.dev
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=development
+    command: npm run dev -- --host
+
+  # Production environment
+  bithub-web-prod:
+    container_name: bithub-web-prod
+    build:
+      context: ../..
+      dockerfile: apps/web/Dockerfile.prod
+    ports:
+      - "5173:5173"
+    environment:
+      - NODE_ENV=production
