@@ -9,7 +9,7 @@ import axios, {
 import { API_PATH } from '../constants/endpoints'
 
 const api: AxiosInstance = axios.create({
-    baseURL: API_PATH.BASE_URL.DEVELOPMENT,
+    baseURL: API_PATH.BASE_URL,
     headers: {
         'Content-Type': 'application/json',
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',
