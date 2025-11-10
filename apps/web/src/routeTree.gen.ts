@@ -28,6 +28,7 @@ import { Route as CorporateTrainingRouteImport } from './routes/corporate-traini
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConsultationRouteImport } from './routes/consultation'
 import { Route as ChatRouteImport } from './routes/chat'
+import { Route as AiChatbotRouteImport } from './routes/ai-chatbot'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
@@ -144,6 +145,11 @@ const ConsultationRoute = ConsultationRouteImport.update({
 const ChatRoute = ChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AiChatbotRoute = AiChatbotRouteImport.update({
+  id: '/ai-chatbot',
+  path: '/ai-chatbot',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
@@ -264,6 +270,7 @@ const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-chatbot': typeof AiChatbotRoute
   '/chat': typeof ChatRoute
   '/consultation': typeof ConsultationRoute
   '/contact': typeof ContactRoute
@@ -307,6 +314,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-chatbot': typeof AiChatbotRoute
   '/chat': typeof ChatRoute
   '/consultation': typeof ConsultationRoute
   '/contact': typeof ContactRoute
@@ -351,6 +359,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/about': typeof AboutRoute
+  '/ai-chatbot': typeof AiChatbotRoute
   '/chat': typeof ChatRoute
   '/consultation': typeof ConsultationRoute
   '/contact': typeof ContactRoute
@@ -396,6 +405,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/'
     | '/about'
+    | '/ai-chatbot'
     | '/chat'
     | '/consultation'
     | '/contact'
@@ -439,6 +449,7 @@ export interface FileRouteTypes {
   to:
     | '/'
     | '/about'
+    | '/ai-chatbot'
     | '/chat'
     | '/consultation'
     | '/contact'
@@ -482,6 +493,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/'
     | '/about'
+    | '/ai-chatbot'
     | '/chat'
     | '/consultation'
     | '/contact'
@@ -526,6 +538,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AboutRoute: typeof AboutRoute
+  AiChatbotRoute: typeof AiChatbotRoute
   ChatRoute: typeof ChatRoute
   ConsultationRoute: typeof ConsultationRoute
   ContactRoute: typeof ContactRoute
@@ -697,6 +710,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof ChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/ai-chatbot': {
+      id: '/ai-chatbot'
+      path: '/ai-chatbot'
+      fullPath: '/ai-chatbot'
+      preLoaderRoute: typeof AiChatbotRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/about': {
@@ -875,6 +895,7 @@ const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
+  AiChatbotRoute: AiChatbotRoute,
   ChatRoute: ChatRoute,
   ConsultationRoute: ConsultationRoute,
   ContactRoute: ContactRoute,
