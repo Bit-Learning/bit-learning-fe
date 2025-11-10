@@ -4,13 +4,13 @@ import { ACCESS_TOKEN, REFRESH_TOKEN } from './keys'
 export const setAuthTokens = (accessToken: string, refreshToken: string) => {
     Cookies.set(ACCESS_TOKEN, accessToken, {
         expires: 7, // 7 days
-        secure: true,
+        secure: window.location.protocol === 'https:',
         sameSite: 'Strict',
     })
 
     Cookies.set(REFRESH_TOKEN, refreshToken, {
         expires: 30, // 30 days
-        secure: true,
+        secure: window.location.protocol === 'https:',
         sameSite: 'Strict',
     })
 }

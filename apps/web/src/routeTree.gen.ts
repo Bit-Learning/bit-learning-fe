@@ -29,6 +29,7 @@ import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.ge
 import { Route as MatricesCreateRouteImport } from './routes/matrices/create'
 import { Route as MatricesImportRouteImport } from './routes/matrices/import'
 import { Route as MatricesIndexRouteImport } from './routes/matrices/index'
+import { Route as MatricesMyRouteImport } from './routes/matrices/my'
 import { Route as MentorshipRouteImport } from './routes/mentorship'
 import { Route as NewsIdRouteImport } from './routes/news/$id'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
@@ -39,9 +40,17 @@ import { Route as PresentationsIdPresenterRouteImport } from './routes/presentat
 import { Route as PresentationsIdViewRouteImport } from './routes/presentations/$id/view'
 import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as QuestionsIdRouteImport } from './routes/questions/$id'
+import { Route as QuestionsIdEditRouteImport } from './routes/questions/$id.edit'
+import { Route as QuestionsCreateRouteImport } from './routes/questions/create'
+import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
+import { Route as QuestionsMyRouteImport } from './routes/questions/my'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SyllabusesCreateRouteImport } from './routes/syllabuses/create'
+import { Route as SyllabusesIndexRouteImport } from './routes/syllabuses/index'
+import { Route as SyllabusesMyRouteImport } from './routes/syllabuses/my'
 import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
 import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
@@ -154,6 +163,16 @@ const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
     path: '/templates/',
     getParentRoute: () => rootRouteImport,
 } as any)
+const SyllabusesIndexRoute = SyllabusesIndexRouteImport.update({
+    id: '/syllabuses/',
+    path: '/syllabuses/',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIndexRoute = QuestionsIndexRouteImport.update({
+    id: '/questions/',
+    path: '/questions/',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const PresentationsIndexRoute = PresentationsIndexRouteImport.update({
     id: '/presentations/',
     path: '/presentations/',
@@ -189,6 +208,31 @@ const TemplatesIdRoute = TemplatesIdRouteImport.update({
     path: '/templates/$id',
     getParentRoute: () => rootRouteImport,
 } as any)
+const SyllabusesMyRoute = SyllabusesMyRouteImport.update({
+    id: '/syllabuses/my',
+    path: '/syllabuses/my',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesCreateRoute = SyllabusesCreateRouteImport.update({
+    id: '/syllabuses/create',
+    path: '/syllabuses/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsMyRoute = QuestionsMyRouteImport.update({
+    id: '/questions/my',
+    path: '/questions/my',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsCreateRoute = QuestionsCreateRouteImport.update({
+    id: '/questions/create',
+    path: '/questions/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIdRoute = QuestionsIdRouteImport.update({
+    id: '/questions/$id',
+    path: '/questions/$id',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const PresentationsIdRoute = PresentationsIdRouteImport.update({
     id: '/presentations/$id',
     path: '/presentations/$id',
@@ -197,6 +241,11 @@ const PresentationsIdRoute = PresentationsIdRouteImport.update({
 const NewsIdRoute = NewsIdRouteImport.update({
     id: '/news/$id',
     path: '/news/$id',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesMyRoute = MatricesMyRouteImport.update({
+    id: '/matrices/my',
+    path: '/matrices/my',
     getParentRoute: () => rootRouteImport,
 } as any)
 const MatricesImportRoute = MatricesImportRouteImport.update({
@@ -243,6 +292,11 @@ const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
     id: '/templates/slidev/create',
     path: '/templates/slidev/create',
     getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIdEditRoute = QuestionsIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => QuestionsIdRoute,
 } as any)
 const PresentationsIdViewRoute = PresentationsIdViewRouteImport.update({
     id: '/view',
@@ -302,8 +356,14 @@ export interface FileRoutesByFullPath {
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
+    '/matrices/my': typeof MatricesMyRoute
     '/news/$id': typeof NewsIdRoute
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
+    '/questions/$id': typeof QuestionsIdRouteWithChildren
+    '/questions/create': typeof QuestionsCreateRoute
+    '/questions/my': typeof QuestionsMyRoute
+    '/syllabuses/create': typeof SyllabusesCreateRoute
+    '/syllabuses/my': typeof SyllabusesMyRoute
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
@@ -311,12 +371,15 @@ export interface FileRoutesByFullPath {
     '/matrices': typeof MatricesIndexRoute
     '/news': typeof NewsIndexRoute
     '/presentations': typeof PresentationsIndexRoute
+    '/questions': typeof QuestionsIndexRoute
+    '/syllabuses': typeof SyllabusesIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/matrices/$id/edit': typeof MatricesIdEditRoute
     '/matrices/$id/generate': typeof MatricesIdGenerateRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
+    '/questions/$id/edit': typeof QuestionsIdEditRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -348,8 +411,14 @@ export interface FileRoutesByTo {
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
+    '/matrices/my': typeof MatricesMyRoute
     '/news/$id': typeof NewsIdRoute
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
+    '/questions/$id': typeof QuestionsIdRouteWithChildren
+    '/questions/create': typeof QuestionsCreateRoute
+    '/questions/my': typeof QuestionsMyRoute
+    '/syllabuses/create': typeof SyllabusesCreateRoute
+    '/syllabuses/my': typeof SyllabusesMyRoute
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
@@ -357,12 +426,15 @@ export interface FileRoutesByTo {
     '/matrices': typeof MatricesIndexRoute
     '/news': typeof NewsIndexRoute
     '/presentations': typeof PresentationsIndexRoute
+    '/questions': typeof QuestionsIndexRoute
+    '/syllabuses': typeof SyllabusesIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/matrices/$id/edit': typeof MatricesIdEditRoute
     '/matrices/$id/generate': typeof MatricesIdGenerateRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
+    '/questions/$id/edit': typeof QuestionsIdEditRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -395,8 +467,14 @@ export interface FileRoutesById {
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
+    '/matrices/my': typeof MatricesMyRoute
     '/news/$id': typeof NewsIdRoute
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
+    '/questions/$id': typeof QuestionsIdRouteWithChildren
+    '/questions/create': typeof QuestionsCreateRoute
+    '/questions/my': typeof QuestionsMyRoute
+    '/syllabuses/create': typeof SyllabusesCreateRoute
+    '/syllabuses/my': typeof SyllabusesMyRoute
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
@@ -404,12 +482,15 @@ export interface FileRoutesById {
     '/matrices/': typeof MatricesIndexRoute
     '/news/': typeof NewsIndexRoute
     '/presentations/': typeof PresentationsIndexRoute
+    '/questions/': typeof QuestionsIndexRoute
+    '/syllabuses/': typeof SyllabusesIndexRoute
     '/templates/': typeof TemplatesIndexRoute
     '/matrices/$id/edit': typeof MatricesIdEditRoute
     '/matrices/$id/generate': typeof MatricesIdGenerateRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
+    '/questions/$id/edit': typeof QuestionsIdEditRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
     '/templates/slidev/': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
@@ -443,8 +524,14 @@ export interface FileRouteTypes {
         | '/courses/web-development'
         | '/matrices/create'
         | '/matrices/import'
+        | '/matrices/my'
         | '/news/$id'
         | '/presentations/$id'
+        | '/questions/$id'
+        | '/questions/create'
+        | '/questions/my'
+        | '/syllabuses/create'
+        | '/syllabuses/my'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
@@ -452,12 +539,15 @@ export interface FileRouteTypes {
         | '/matrices'
         | '/news'
         | '/presentations'
+        | '/questions'
+        | '/syllabuses'
         | '/templates'
         | '/matrices/$id/edit'
         | '/matrices/$id/generate'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
+        | '/questions/$id/edit'
         | '/templates/slidev/create'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
@@ -489,8 +579,14 @@ export interface FileRouteTypes {
         | '/courses/web-development'
         | '/matrices/create'
         | '/matrices/import'
+        | '/matrices/my'
         | '/news/$id'
         | '/presentations/$id'
+        | '/questions/$id'
+        | '/questions/create'
+        | '/questions/my'
+        | '/syllabuses/create'
+        | '/syllabuses/my'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
@@ -498,12 +594,15 @@ export interface FileRouteTypes {
         | '/matrices'
         | '/news'
         | '/presentations'
+        | '/questions'
+        | '/syllabuses'
         | '/templates'
         | '/matrices/$id/edit'
         | '/matrices/$id/generate'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
+        | '/questions/$id/edit'
         | '/templates/slidev/create'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
@@ -535,8 +634,14 @@ export interface FileRouteTypes {
         | '/courses/web-development'
         | '/matrices/create'
         | '/matrices/import'
+        | '/matrices/my'
         | '/news/$id'
         | '/presentations/$id'
+        | '/questions/$id'
+        | '/questions/create'
+        | '/questions/my'
+        | '/syllabuses/create'
+        | '/syllabuses/my'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
@@ -544,12 +649,15 @@ export interface FileRouteTypes {
         | '/matrices/'
         | '/news/'
         | '/presentations/'
+        | '/questions/'
+        | '/syllabuses/'
         | '/templates/'
         | '/matrices/$id/edit'
         | '/matrices/$id/generate'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
+        | '/questions/$id/edit'
         | '/templates/slidev/create'
         | '/templates/slidev/'
         | '/templates/slidev/$id/edit'
@@ -582,8 +690,14 @@ export interface RootRouteChildren {
     CoursesWebDevelopmentRoute: typeof CoursesWebDevelopmentRoute
     MatricesCreateRoute: typeof MatricesCreateRoute
     MatricesImportRoute: typeof MatricesImportRoute
+    MatricesMyRoute: typeof MatricesMyRoute
     NewsIdRoute: typeof NewsIdRoute
     PresentationsIdRoute: typeof PresentationsIdRouteWithChildren
+    QuestionsIdRoute: typeof QuestionsIdRouteWithChildren
+    QuestionsCreateRoute: typeof QuestionsCreateRoute
+    QuestionsMyRoute: typeof QuestionsMyRoute
+    SyllabusesCreateRoute: typeof SyllabusesCreateRoute
+    SyllabusesMyRoute: typeof SyllabusesMyRoute
     TemplatesIdRoute: typeof TemplatesIdRoute
     TemplatesDashboardRoute: typeof TemplatesDashboardRoute
     TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
@@ -591,6 +705,8 @@ export interface RootRouteChildren {
     MatricesIndexRoute: typeof MatricesIndexRoute
     NewsIndexRoute: typeof NewsIndexRoute
     PresentationsIndexRoute: typeof PresentationsIndexRoute
+    QuestionsIndexRoute: typeof QuestionsIndexRoute
+    SyllabusesIndexRoute: typeof SyllabusesIndexRoute
     TemplatesIndexRoute: typeof TemplatesIndexRoute
     MatricesIdEditRoute: typeof MatricesIdEditRoute
     MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
@@ -741,6 +857,20 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/syllabuses/': {
+            id: '/syllabuses/'
+            path: '/syllabuses'
+            fullPath: '/syllabuses'
+            preLoaderRoute: typeof SyllabusesIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/': {
+            id: '/questions/'
+            path: '/questions'
+            fullPath: '/questions'
+            preLoaderRoute: typeof QuestionsIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/presentations/': {
             id: '/presentations/'
             path: '/presentations'
@@ -790,6 +920,41 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesIdRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/syllabuses/my': {
+            id: '/syllabuses/my'
+            path: '/syllabuses/my'
+            fullPath: '/syllabuses/my'
+            preLoaderRoute: typeof SyllabusesMyRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/syllabuses/create': {
+            id: '/syllabuses/create'
+            path: '/syllabuses/create'
+            fullPath: '/syllabuses/create'
+            preLoaderRoute: typeof SyllabusesCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/my': {
+            id: '/questions/my'
+            path: '/questions/my'
+            fullPath: '/questions/my'
+            preLoaderRoute: typeof QuestionsMyRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/create': {
+            id: '/questions/create'
+            path: '/questions/create'
+            fullPath: '/questions/create'
+            preLoaderRoute: typeof QuestionsCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/$id': {
+            id: '/questions/$id'
+            path: '/questions/$id'
+            fullPath: '/questions/$id'
+            preLoaderRoute: typeof QuestionsIdRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/presentations/$id': {
             id: '/presentations/$id'
             path: '/presentations/$id'
@@ -802,6 +967,13 @@ declare module '@tanstack/react-router' {
             path: '/news/$id'
             fullPath: '/news/$id'
             preLoaderRoute: typeof NewsIdRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/my': {
+            id: '/matrices/my'
+            path: '/matrices/my'
+            fullPath: '/matrices/my'
+            preLoaderRoute: typeof MatricesMyRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/matrices/import': {
@@ -867,6 +1039,13 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesSlidevCreateRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/questions/$id/edit': {
+            id: '/questions/$id/edit'
+            path: '/edit'
+            fullPath: '/questions/$id/edit'
+            preLoaderRoute: typeof QuestionsIdEditRouteImport
+            parentRoute: typeof QuestionsIdRoute
+        }
         '/presentations/$id/view': {
             id: '/presentations/$id/view'
             path: '/view'
@@ -926,6 +1105,16 @@ const PresentationsIdRouteChildren: PresentationsIdRouteChildren = {
 
 const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(PresentationsIdRouteChildren)
 
+interface QuestionsIdRouteChildren {
+    QuestionsIdEditRoute: typeof QuestionsIdEditRoute
+}
+
+const QuestionsIdRouteChildren: QuestionsIdRouteChildren = {
+    QuestionsIdEditRoute: QuestionsIdEditRoute,
+}
+
+const QuestionsIdRouteWithChildren = QuestionsIdRoute._addFileChildren(QuestionsIdRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
     AboutRoute: AboutRoute,
@@ -953,8 +1142,14 @@ const rootRouteChildren: RootRouteChildren = {
     CoursesWebDevelopmentRoute: CoursesWebDevelopmentRoute,
     MatricesCreateRoute: MatricesCreateRoute,
     MatricesImportRoute: MatricesImportRoute,
+    MatricesMyRoute: MatricesMyRoute,
     NewsIdRoute: NewsIdRoute,
     PresentationsIdRoute: PresentationsIdRouteWithChildren,
+    QuestionsIdRoute: QuestionsIdRouteWithChildren,
+    QuestionsCreateRoute: QuestionsCreateRoute,
+    QuestionsMyRoute: QuestionsMyRoute,
+    SyllabusesCreateRoute: SyllabusesCreateRoute,
+    SyllabusesMyRoute: SyllabusesMyRoute,
     TemplatesIdRoute: TemplatesIdRoute,
     TemplatesDashboardRoute: TemplatesDashboardRoute,
     TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
@@ -962,6 +1157,8 @@ const rootRouteChildren: RootRouteChildren = {
     MatricesIndexRoute: MatricesIndexRoute,
     NewsIndexRoute: NewsIndexRoute,
     PresentationsIndexRoute: PresentationsIndexRoute,
+    QuestionsIndexRoute: QuestionsIndexRoute,
+    SyllabusesIndexRoute: SyllabusesIndexRoute,
     TemplatesIndexRoute: TemplatesIndexRoute,
     MatricesIdEditRoute: MatricesIdEditRoute,
     MatricesIdGenerateRoute: MatricesIdGenerateRoute,

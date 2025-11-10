@@ -1,7 +1,7 @@
 import { apiClient } from '@/shared/lib/apiClient'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
-import type { MatrixDetailRequest } from '@workspace/lib/api/sdk/matrix.type'
+import type { SyllabusDetailRequest } from '@workspace/lib/api/sdk/syllabus.type'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
@@ -9,30 +9,28 @@ import { Textarea } from '@workspace/ui/components/Textarea'
 import { Label } from '@workspace/ui/components/label'
 import { ArrowLeft, ArrowRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { MatrixDetailTable } from '../components/MatrixDetailTable'
+import { SyllabusDetailTable } from '../components/SyllabusDetailTable'
 
-export default function CreateMatrix() {
+export default function CreateSyllabus() {
     const navigate = useNavigate()
     const params = useParams({ strict: false })
-    const matrixId = (params as any).id ? Number((params as any).id) : undefined
+    const syllabusId = (params as any).id ? Number((params as any).id) : undefined
     const queryClient = useQueryClient()
 
     // Step control: 1 = Basic Info, 2 = Version Configuration
     const [step, setStep] = useState(1)
-    const [createdMatrixId, setCreatedMatrixId] = useState<number | undefined>(matrixId)
+    const [createdSyllabusId, setCreatedSyllabusId] = useState<number | undefined>(syllabusId)
 
-    // Step 1: Matrix Basic Info
-    const [matrixName, setMatrixName] = useState('')
-    const [matrixCode, setMatrixCode] = useState('')
+    // Step 1: Syllabus Basic Info
+    const [syllabusName, setSyllabusName] = useState('')
+    const [syllabusCode, setSyllabusCode] = useState('')
     const [subjectId, setSubjectId] = useState<number | undefined>()
     const [description, setDescription] = useState('')
-    const [totalTime, setTotalTime] = useState(60)
-    const [totalScore, setTotalScore] = useState(10)
 
     // Step 2: Version Info
     const [versionName, setVersionName] = useState('Version 1.0')
     const [versionNotes, setVersionNotes] = useState('Initial version')
-    const [matrixDetails, setMatrixDetails] = useState<MatrixDetailRequest[]>([])
+    const [syllabusDetails, setSyllabusDetails] = useState<SyllabusDetailRequest[]>([])
 
     // Load subjects for dropdown
     const { data: subjects } = useQuery(apiClient.subject.getAllSubjects())
@@ -48,63 +46,64 @@ export default function CreateMatrix() {
         queryKey: ['lessons', 'all', subjectId],
         queryFn: async () => {
             if (!chapters) return []
-            const lessonPromises = chapters.map(chapter => apiClient.lesson.getLessonsByChapter(chapter.id).queryFn())
+            const lessonPromises = chapters.map(async chapter => {
+                const queryOpts = apiClient.lesson.getLessonsByChapter(chapter.id)
+                return await queryOpts.queryFn?.({ queryKey: queryOpts.queryKey } as any)
+            })
             const lessonArrays = await Promise.all(lessonPromises)
-            return lessonArrays.flat()
+            return lessonArrays.flat().filter((lesson): lesson is NonNullable<typeof lesson> => lesson != null)
         },
         enabled: !!chapters && chapters.length > 0,
     })
 
-    // Load matrix data if editing
-    const { data: matrixData } = useQuery({
-        ...apiClient.matrix.getMatrixById(matrixId!),
-        enabled: !!matrixId,
+    // Load syllabus data if editing
+    const { data: syllabusData } = useQuery({
+        ...apiClient.syllabus.getSyllabusById(syllabusId!),
+        enabled: !!syllabusId,
     })
 
     // Populate form when editing
     useEffect(() => {
-        if (matrixData) {
-            setMatrixName(matrixData.name)
-            setMatrixCode(matrixData.code)
-            setSubjectId(matrixData.subject.id)
-            setDescription(matrixData.description || '')
-            setTotalTime(matrixData.duration)
-            setTotalScore(matrixData.totalScore)
-            setCreatedMatrixId(matrixData.id)
+        if (syllabusData) {
+            setSyllabusName(syllabusData.name)
+            setSyllabusCode(syllabusData.code)
+            setSubjectId(syllabusData.subject.id)
+            setDescription(syllabusData.description || '')
+            setCreatedSyllabusId(syllabusData.id)
         }
-    }, [matrixData])
+    }, [syllabusData])
 
-    // Step 1: Create Matrix
-    const createMatrixMutation = useMutation({
-        ...apiClient.matrix.createMatrix(),
+    // Step 1: Create Syllabus
+    const createSyllabusMutation = useMutation({
+        ...apiClient.syllabus.createSyllabus(),
         onSuccess: data => {
-            setCreatedMatrixId(data.id)
+            setCreatedSyllabusId(data.id)
             setStep(2)
         },
         onError: (error: any) => {
-            alert(`Lỗi khi tạo ma trận: ${error.message}`)
+            alert(`Lỗi khi tạo giáo trình: ${error.message}`)
         },
     })
 
     // Step 2: Create Version
     const createVersionMutation = useMutation({
-        ...apiClient.matrix.createVersion(),
+        ...apiClient.syllabus.createVersion(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['matrices'] })
-            alert('Ma trận đã được tạo thành công!')
-            navigate({ to: '/matrices' })
+            queryClient.invalidateQueries({ queryKey: ['syllabuses'] })
+            alert('Giáo trình đã được tạo thành công!')
+            navigate({ to: '/syllabuses' })
         },
         onError: (error: any) => {
             alert(`Lỗi khi tạo version: ${error.message}`)
         },
     })
 
-    const updateMatrixMutation = useMutation({
-        ...apiClient.matrix.updateMatrix(),
+    const updateSyllabusMutation = useMutation({
+        ...apiClient.syllabus.updateSyllabus(),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: ['matrices'] })
-            alert('Ma trận đã được cập nhật!')
-            navigate({ to: '/matrices' })
+            queryClient.invalidateQueries({ queryKey: ['syllabuses'] })
+            alert('Giáo trình đã được cập nhật!')
+            navigate({ to: '/syllabuses' })
         },
     })
 
@@ -117,21 +116,19 @@ export default function CreateMatrix() {
             return
         }
 
-        const matrixRequest = {
-            name: matrixName,
-            code: matrixCode,
+        const syllabusRequest = {
+            name: syllabusName,
+            code: syllabusCode,
             description,
-            duration: totalTime,
-            totalScore,
             subjectId,
         }
 
-        if (matrixId) {
-            // Update existing matrix
-            updateMatrixMutation.mutate({ id: matrixId, data: matrixRequest })
+        if (syllabusId) {
+            // Update existing syllabus
+            updateSyllabusMutation.mutate({ id: syllabusId, data: syllabusRequest })
         } else {
-            // Create new matrix
-            createMatrixMutation.mutate(matrixRequest)
+            // Create new syllabus
+            createSyllabusMutation.mutate(syllabusRequest)
         }
     }
 
@@ -139,65 +136,47 @@ export default function CreateMatrix() {
     const handleStep2Submit = (e: React.FormEvent) => {
         e.preventDefault()
 
-        if (!createdMatrixId) {
-            alert('Lỗi: Không tìm thấy ma trận')
+        if (!createdSyllabusId) {
+            alert('Lỗi: Không tìm thấy giáo trình')
             return
         }
 
-        if (matrixDetails.length === 0) {
-            alert('Vui lòng thêm ít nhất một bài học vào ma trận')
-            return
-        }
-
-        // Validate total score
-        const calculatedTotal = matrixDetails.reduce((sum, detail) => {
-            return (
-                sum +
-                (detail.easyMCQ || 0) * (detail.easyMCQScore || 0) +
-                (detail.mediumMCQ || 0) * (detail.mediumMCQScore || 0) +
-                (detail.hardMCQ || 0) * (detail.hardMCQScore || 0) +
-                (detail.easyEssay || 0) * (detail.easyEssayScore || 0) +
-                (detail.mediumEssay || 0) * (detail.mediumEssayScore || 0) +
-                (detail.hardEssay || 0) * (detail.hardEssayScore || 0)
-            )
-        }, 0)
-
-        if (Math.abs(calculatedTotal - totalScore) > 0.01) {
-            alert(`Tổng điểm không khớp! Hiện tại: ${calculatedTotal.toFixed(1)}, Yêu cầu: ${totalScore}`)
+        if (syllabusDetails.length === 0) {
+            alert('Vui lòng thêm ít nhất một bài học vào giáo trình')
             return
         }
 
         createVersionMutation.mutate({
-            matrixId: createdMatrixId,
+            syllabusId: createdSyllabusId,
             name: versionName,
             notes: versionNotes,
-            matrixDetails: matrixDetails.filter(detail => detail.lessonId),
+            syllabusDetails,
         })
     }
 
     const isLoading =
-        createMatrixMutation.isPending || createVersionMutation.isPending || updateMatrixMutation.isPending
+        createSyllabusMutation.isPending || createVersionMutation.isPending || updateSyllabusMutation.isPending
 
     return (
         <div className="container mx-auto max-w-6xl px-4 py-8">
             {/* Header */}
             <div className="mb-8">
-                <Button variant="ghost" onClick={() => navigate({ to: '/matrices' })} className="mb-4 gap-2">
+                <Button variant="ghost" onClick={() => navigate({ to: '/syllabuses' })} className="mb-4 gap-2">
                     <ArrowLeft className="h-4 w-4" />
                     Quay lại danh sách
                 </Button>
                 <h1 className="mb-2 text-4xl font-bold">
-                    {matrixId ? 'Chỉnh sửa ma trận đề thi' : `Tạo ma trận đề thi mới - Bước ${step}/2`}
+                    {syllabusId ? 'Chỉnh sửa giáo trình' : `Tạo giáo trình mới - Bước ${step}/2`}
                 </h1>
                 <p className="text-muted-foreground">
                     {step === 1
-                        ? 'Bước 1: Thiết lập thông tin cơ bản cho ma trận đề thi'
-                        : 'Bước 2: Cấu hình phân bổ câu hỏi theo từng bài học'}
+                        ? 'Bước 1: Thiết lập thông tin cơ bản cho giáo trình'
+                        : 'Bước 2: Cấu hình chi tiết từng bài học'}
                 </p>
             </div>
 
             {/* Progress indicator */}
-            {!matrixId && (
+            {!syllabusId && (
                 <div className="mb-8 flex items-center justify-center gap-4">
                     <div
                         className={`flex items-center gap-2 ${step === 1 ? 'font-bold text-blue-600' : 'text-gray-400'}`}
@@ -218,7 +197,7 @@ export default function CreateMatrix() {
                         >
                             2
                         </div>
-                        <span>Cấu hình phân bổ</span>
+                        <span>Cấu hình bài học</span>
                     </div>
                 </div>
             )}
@@ -229,37 +208,37 @@ export default function CreateMatrix() {
                     <Card className="mb-6">
                         <CardHeader>
                             <CardTitle>Thông tin cơ bản</CardTitle>
-                            <CardDescription>Nhập thông tin chung về ma trận đề thi</CardDescription>
+                            <CardDescription>Nhập thông tin chung về giáo trình</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                                 <div className="space-y-2">
-                                    <Label htmlFor="matrixName">
-                                        Tên ma trận <span className="text-red-500">*</span>
+                                    <Label htmlFor="syllabusName">
+                                        Tên giáo trình <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
-                                        id="matrixName"
-                                        placeholder="VD: Ma trận Toán học lớp 10 - HK1"
-                                        value={matrixName}
-                                        onChange={e => setMatrixName(e.target.value)}
+                                        id="syllabusName"
+                                        placeholder="VD: Giáo trình Toán học lớp 10 - HK1"
+                                        value={syllabusName}
+                                        onChange={e => setSyllabusName(e.target.value)}
                                         required
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="matrixCode">
-                                        Mã ma trận <span className="text-red-500">*</span>
+                                    <Label htmlFor="syllabusCode">
+                                        Mã giáo trình <span className="text-red-500">*</span>
                                     </Label>
                                     <Input
-                                        id="matrixCode"
-                                        placeholder="VD: MT-TOAN-10-HK1"
-                                        value={matrixCode}
-                                        onChange={e => setMatrixCode(e.target.value)}
+                                        id="syllabusCode"
+                                        placeholder="VD: GT-TOAN-10-HK1"
+                                        value={syllabusCode}
+                                        onChange={e => setSyllabusCode(e.target.value)}
                                         required
                                     />
                                 </div>
                             </div>
 
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                            <div className="grid grid-cols-1 gap-4">
                                 <div className="space-y-2">
                                     <Label htmlFor="subjectId">
                                         Môn học <span className="text-red-500">*</span>
@@ -281,37 +260,13 @@ export default function CreateMatrix() {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="space-y-2">
-                                    <Label htmlFor="totalTime">Thời gian làm bài (phút)</Label>
-                                    <Input
-                                        id="totalTime"
-                                        type="number"
-                                        value={totalTime}
-                                        onChange={e => setTotalTime(Number(e.target.value))}
-                                        min={1}
-                                    />
-                                </div>
-                            </div>
-
-                            <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
-                                <div className="space-y-2">
-                                    <Label htmlFor="totalScore">Tổng điểm</Label>
-                                    <Input
-                                        id="totalScore"
-                                        type="number"
-                                        step="0.5"
-                                        value={totalScore}
-                                        onChange={e => setTotalScore(Number(e.target.value))}
-                                        min={0}
-                                    />
-                                </div>
                             </div>
 
                             <div className="space-y-2">
                                 <Label htmlFor="description">Mô tả</Label>
                                 <Textarea
                                     id="description"
-                                    placeholder="Mô tả về ma trận đề thi này..."
+                                    placeholder="Mô tả về giáo trình này..."
                                     value={description}
                                     onChange={e => setDescription(e.target.value)}
                                     rows={3}
@@ -322,7 +277,7 @@ export default function CreateMatrix() {
 
                     {/* Actions */}
                     <div className="flex justify-end gap-4">
-                        <Button type="button" variant="outline" onClick={() => navigate({ to: '/matrices' })}>
+                        <Button type="button" variant="outline" onClick={() => navigate({ to: '/syllabuses' })}>
                             Hủy
                         </Button>
                         <Button type="submit" className="gap-2" isDisabled={isLoading}>
@@ -340,7 +295,7 @@ export default function CreateMatrix() {
                     <Card className="mb-6">
                         <CardHeader>
                             <CardTitle>Thông tin version</CardTitle>
-                            <CardDescription>Đặt tên và mô tả cho version ma trận này</CardDescription>
+                            <CardDescription>Đặt tên và mô tả cho version giáo trình này</CardDescription>
                         </CardHeader>
                         <CardContent className="space-y-4">
                             <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
@@ -350,7 +305,7 @@ export default function CreateMatrix() {
                                     </Label>
                                     <Input
                                         id="versionName"
-                                        placeholder="VD: Version 1.0, Đề cương HK1"
+                                        placeholder="VD: Version 1.0, Giáo trình HK1"
                                         value={versionName}
                                         onChange={e => setVersionName(e.target.value)}
                                         required
@@ -369,20 +324,19 @@ export default function CreateMatrix() {
                         </CardContent>
                     </Card>
 
-                    {/* Matrix Detail Configuration */}
+                    {/* Syllabus Detail Configuration */}
                     <Card className="mb-6">
                         <CardHeader>
-                            <CardTitle>Cấu hình phân bổ câu hỏi</CardTitle>
+                            <CardTitle>Cấu hình chi tiết bài học</CardTitle>
                             <CardDescription>
-                                Chọn các bài học và cấu hình số lượng câu hỏi, điểm số cho từng độ khó
+                                Chọn các bài học và cấu hình thời lượng, mục tiêu, tài liệu cho từng bài
                             </CardDescription>
                         </CardHeader>
                         <CardContent>
-                            <MatrixDetailTable
+                            <SyllabusDetailTable
                                 lessons={allLessons || []}
-                                value={matrixDetails}
-                                onChange={setMatrixDetails}
-                                targetTotalScore={totalScore}
+                                value={syllabusDetails}
+                                onChange={setSyllabusDetails}
                             />
                         </CardContent>
                     </Card>
