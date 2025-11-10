@@ -1,4 +1,4 @@
-import { usePresentationTemplates } from '@/feature/presentations/hooks/usePresentations'
+import { useTemplates } from '@/feature/aichat/hooks/useTemplates'
 import { Button } from '@workspace/ui/components/Button'
 import { Card } from '@workspace/ui/components/Card'
 import { ScrollArea } from '@workspace/ui/components/ScrollArea'
@@ -10,9 +10,7 @@ interface TemplateGalleryProps {
 }
 
 export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onSelectTemplate }) => {
-    const [page] = React.useState(0)
-    const [size] = React.useState(20)
-    const { data: templates, isLoading, error } = usePresentationTemplates(page, size)
+    const { data: templates, isLoading, error } = useTemplates()
 
     if (isLoading) {
         return (
@@ -47,14 +45,31 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onSelectTempla
                         className="group cursor-pointer overflow-hidden border transition-all hover:shadow-lg"
                     >
                         <div className="flex flex-col p-4">
-                            <div className="mb-3 flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100">
-                                <FileText className="h-16 w-16 text-blue-600" />
+                            {/* Template thumbnail or icon */}
+                            <div className="mb-3 flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 overflow-hidden">
+                                {template.thumbnailUrl ? (
+                                    <img
+                                        src={template.thumbnailUrl}
+                                        alt={template.name}
+                                        className="h-full w-full object-cover"
+                                    />
+                                ) : (
+                                    <FileText className="h-16 w-16 text-blue-600" />
+                                )}
                             </div>
+
+                            {/* Template info */}
                             <h3 className="mb-2 line-clamp-2 text-sm font-semibold">{template.name}</h3>
-                            <div className="mt-auto flex items-center justify-between">
-                                <span className="text-sm font-bold text-blue-600">
-                                    {template.price > 0 ? `${template.price.toLocaleString()} VND` : 'Miễn phí'}
-                                </span>
+
+                            {/* Description */}
+                            {template.description && (
+                                <p className="mb-2 line-clamp-2 text-xs text-gray-500">
+                                    {template.description}
+                                </p>
+                            )}
+
+                            {/* Action button */}
+                            <div className="mt-auto flex items-center justify-end">
                                 <Button
                                     size="sm"
                                     onClick={() => onSelectTemplate(template.id, template.name)}

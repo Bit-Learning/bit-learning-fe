@@ -36,6 +36,7 @@ import {
     Presentation,
     Search,
     SquarePen,
+    Sparkles
 } from 'lucide-react'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
@@ -118,14 +119,7 @@ const AIChatbotPage = () => {
     const [currentConversationIndex, setCurrentConversationIndex] = React.useState(0)
     const [showSlidePanel, setShowSlidePanel] = React.useState(false)
     const [message, setMessage] = React.useState('')
-    const [messages, setMessages] = React.useState<Message[]>([
-        {
-            id: '1',
-            role: 'assistant',
-            content: 'Xin chào! Tôi là AI chatbot. Tôi có thể giúp bạn:\n\n**1. Trả lời câu hỏi** về các chủ đề khác nhau\n**2. Tạo slide** từ cuộc trò chuyện của chúng ta\n**3. Giải thích code** và thuật toán\n\nBạn cần giúp đỡ gì hôm nay?',
-            timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-        },
-    ])
+    const [messages, setMessages] = React.useState<Message[]>([])
 
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const dispatch = useAppDispatch()
@@ -303,106 +297,194 @@ const AIChatbotPage = () => {
 
                 <SidebarInset className="flex flex-col">
                     {/* Header */}
-                    <header className="bg-background sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-2 border-b px-4">
-                        <div className="flex items-center gap-2">
+                    <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center justify-between gap-4 border-b bg-white px-6 shadow-sm">
+                        <div className="flex items-center gap-3">
                             <SidebarTrigger className="-ml-1" />
+                            <div className="flex items-center gap-2">
+                                <div>
+                                    <h1 className="text-sm font-bold text-gray-900">AI Chatbot</h1>
+                                    <p className="text-xs text-gray-500">Trợ lý ảo thông minh</p>
+                                </div>
+                            </div>
                         </div>
 
-                        <div className="flex items-center gap-2">
-                            <Button variant="ghost" size="icon" onClick={handlePrevConversation} className="h-8 w-8">
+                        <div className="flex items-center gap-2 rounded-lg border border-gray-200 bg-gray-50 px-3 py-1.5">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handlePrevConversation}
+                                className="h-7 w-7 rounded-md hover:bg-white"
+                            >
                                 <ChevronLeft size={16} />
                             </Button>
 
-                            <div className="min-w-[200px] text-center">
-                                <p className="truncate text-sm font-semibold">
-                                    {mockConversations[currentConversationIndex]?.title ?? 'AI Chatbot'}
+                            <div className="min-w-[180px] text-center">
+                                <p className="truncate text-xs font-semibold text-gray-900">
+                                    {mockConversations[currentConversationIndex]?.title ?? 'Cuộc trò chuyện mới'}
                                 </p>
-                                <p className="text-muted-foreground text-xs">
+                                <p className="text-xs text-gray-500">
                                     {mockConversations[currentConversationIndex]?.date ??
                                         new Date().toLocaleDateString('vi-VN')}
                                 </p>
                             </div>
 
-                            <Button variant="ghost" size="icon" onClick={handleNextConversation} className="h-8 w-8">
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                onClick={handleNextConversation}
+                                className="h-7 w-7 rounded-md hover:bg-white"
+                            >
                                 <ChevronRight size={16} />
                             </Button>
                         </div>
 
-                        <div className="w-10" />
+                        <Button
+                            variant={showSlidePanel ? 'default' : 'outline'}
+                            size="sm"
+                            onClick={() => setShowSlidePanel(!showSlidePanel)}
+                            className="gap-2"
+                        >
+                            <Presentation size={16} />
+                            {showSlidePanel ? 'Ẩn panel' : 'Tạo slide'}
+                        </Button>
                     </header>
 
                     {/* Main Content */}
-                    <main className="relative flex flex-1 overflow-hidden">
+                    <main className="flex flex-1 overflow-hidden">
                         {/* Chat Panel */}
-                        <div className={`flex h-full flex-col transition-all ${showSlidePanel ? 'w-3/5' : 'w-full'}`}>
-                            {/* Messages Area */}
-                            <div className="flex-1 overflow-y-auto pb-32">
-                                <div className="mx-auto max-w-3xl space-y-6 px-4 py-6">
-                                    {messages.map(msg => (
-                                        <div
-                                            key={msg.id}
-                                            className={`flex gap-4 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
-                                        >
-                                            <div
-                                                className={`rounded-2xl px-4 py-3 ${
-                                                    msg.role === 'user'
-                                                        ? 'text-accent-foreground max-w-[80%] bg-[#9EC6F3]'
-                                                        : 'bg-muted max-w-[85%]'
-                                                }`}
-                                            >
-                                                {msg.role === 'assistant' ? (
-                                                    <MessageContent content={msg.content} />
-                                                ) : (
-                                                    <p className="whitespace-pre-wrap text-sm">{msg.content}</p>
-                                                )}
-                                                <span className="mt-2 block text-xs opacity-70">{msg.timestamp}</span>
+                        <div className={`flex h-full flex-col bg-gradient-to-b from-gray-50 to-white transition-all duration-300 ${showSlidePanel ? 'w-3/5' : 'w-full'}`}>
+                            {/* Messages Area - Scrollable */}
+                            <div className="flex-1 overflow-y-auto">
+                                {messages.length === 0 ? (
+                                    /* Empty State - Welcome Screen */
+                                    <div className="flex h-full items-center justify-center px-4">
+                                        <div className="max-w-2xl text-center">
+                                            <div className="mb-6 inline-flex h-20 w-20 items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-blue-600 shadow-lg">
+                                                <Sparkles className="h-10 w-10 text-white" />
                                             </div>
+                                            <h2 className="mb-3 text-3xl font-bold text-gray-900">
+                                                Xin chào! Tôi là AI Chatbot
+                                            </h2>
+                                            <p className="mb-8 text-lg text-gray-600">
+                                                Tôi có thể giúp bạn với nhiều tác vụ khác nhau
+                                            </p>
+
+                                            <div className="grid gap-4 sm:grid-cols-3">
+                                                <div className="rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:shadow-md">
+                                                    <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                                                        <FileText className="h-5 w-5 text-blue-600" />
+                                                    </div>
+                                                    <h3 className="mb-1 font-semibold text-gray-900">Trả lời câu hỏi</h3>
+                                                    <p className="text-sm text-gray-600">
+                                                        Hỏi tôi bất cứ điều gì về lập trình, học tập
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:shadow-md">
+                                                    <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                                                        <Presentation className="h-5 w-5 text-green-600" />
+                                                    </div>
+                                                    <h3 className="mb-1 font-semibold text-gray-900">Tạo slide AI</h3>
+                                                    <p className="text-sm text-gray-600">
+                                                        Tạo bài thuyết trình từ nội dung chat
+                                                    </p>
+                                                </div>
+
+                                                <div className="rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:shadow-md">
+                                                    <div className="mb-2 inline-flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+                                                        <BookImage className="h-5 w-5 text-purple-600" />
+                                                    </div>
+                                                    <h3 className="mb-1 font-semibold text-gray-900">Giải thích code</h3>
+                                                    <p className="text-sm text-gray-600">
+                                                        Phân tích và giải thích thuật toán
+                                                    </p>
+                                                </div>
+                                            </div>
+
+                                            <p className="mt-8 text-sm text-gray-500">
+                                                Bắt đầu bằng cách nhập câu hỏi của bạn bên dưới
+                                            </p>
                                         </div>
-                                    ))}
-                                    <div ref={messagesEndRef} />
-                                </div>
+                                    </div>
+                                ) : (
+                                    /* Messages List */
+                                    <div className="mx-auto max-w-3xl space-y-4 px-4 py-8 pb-4">
+                                        {messages.map(msg => (
+                                            <div
+                                                key={msg.id}
+                                                className={`flex gap-3 ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}
+                                            >
+                                                <div
+                                                    className={`rounded-2xl px-4 py-3 shadow-sm transition-all hover:shadow-md ${
+                                                        msg.role === 'user'
+                                                            ? 'max-w-[80%] bg-[#9EC6F3] text-gray-900'
+                                                            : 'max-w-[85%] border border-gray-200 bg-white'
+                                                    }`}
+                                                >
+                                                    {msg.role === 'assistant' ? (
+                                                        <MessageContent content={msg.content} />
+                                                    ) : (
+                                                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                                                    )}
+                                                    <span className="mt-2 block text-xs opacity-60">{msg.timestamp}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        <div ref={messagesEndRef} />
+                                    </div>
+                                )}
                             </div>
 
-                            {/* Input Area */}
-                            <div className="bg-background fixed bottom-0 border-t py-3 transition-all" style={{ width: showSlidePanel ? '60%' : 'calc(100% - var(--sidebar-width, 0px))' }}>
-                                <div className="bg-muted/50 mx-auto flex max-w-3xl items-center gap-2 rounded-2xl border px-4 py-2 shadow-sm">
-                                    <Input
-                                        type="text"
-                                        placeholder="Nhập tin nhắn..."
-                                        value={message}
-                                        onChange={e => setMessage(e.target.value)}
-                                        onKeyDown={handleKeyDown}
-                                        className="flex-1 border-0 bg-transparent focus-visible:ring-0"
-                                    />
+                            {/* Input Area - Sticky Bottom */}
+                            <div className="border-t bg-white px-4 py-4 shadow-lg">
+                                <div className="mx-auto max-w-3xl">
+                                    <div className="flex items-end gap-3 rounded-2xl border border-gray-300 bg-gray-50 px-4 py-3 transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100">
+                                        <Input
+                                            type="text"
+                                            placeholder="Nhập tin nhắn của bạn..."
+                                            value={message}
+                                            onChange={e => setMessage(e.target.value)}
+                                            onKeyDown={handleKeyDown}
+                                            className="flex-1 border-0 bg-transparent text-sm focus-visible:ring-0 focus-visible:ring-offset-0"
+                                        />
 
-                                    <Button
-                                        type="button"
-                                        size="icon"
-                                        onClick={handleSubmit}
-                                        disabled={!message.trim()}
-                                        className="text-primary-foreground h-8 w-8 shrink-0 rounded-full bg-[#9EC6F3] hover:bg-[#CBE1F9] disabled:opacity-50"
-                                    >
-                                        <ArrowUp color="black" size={18} />
-                                    </Button>
+                                        <Button
+                                            type="button"
+                                            size="icon"
+                                            onClick={handleSubmit}
+                                            disabled={!message.trim()}
+                                            className="h-9 w-9 shrink-0 rounded-full bg-[#9EC6F3] text-gray-900 transition-all hover:bg-[#7DB4EC] disabled:opacity-40"
+                                        >
+                                            <ArrowUp size={20} strokeWidth={2.5} />
+                                        </Button>
+                                    </div>
+                                    <p className="mt-2 text-center text-xs text-gray-500">
+                                        Nhấn Enter để gửi, Shift + Enter để xuống dòng
+                                    </p>
                                 </div>
                             </div>
                         </div>
 
                         {/* Slide Generation Panel */}
                         {showSlidePanel && (
-                            <div className="h-full w-2/5 border-l bg-background">
-                                <div className="flex items-center justify-between border-b p-2">
-                                    <h3 className="font-semibold">Tạo Slide</h3>
+                            <div className="flex h-full w-2/5 flex-col border-l bg-gray-50 shadow-xl transition-all duration-300">
+                                <div className="flex items-center justify-between border-b bg-white px-4 py-3 shadow-sm">
+                                    <div className="flex items-center gap-2">
+                                        <Presentation className="h-5 w-5 text-blue-600" />
+                                        <h3 className="font-semibold text-gray-900">Tạo Slide AI</h3>
+                                    </div>
                                     <Button
                                         variant="ghost"
                                         size="icon"
                                         onClick={() => setShowSlidePanel(false)}
-                                        className="h-8 w-8"
+                                        className="h-8 w-8 rounded-full hover:bg-gray-100"
                                     >
-                                        <X size={16} />
+                                        <X size={18} />
                                     </Button>
                                 </div>
-                                <SlideGenerationPanel chatContext={chatContext} />
+                                <div className="flex-1 overflow-hidden">
+                                    <SlideGenerationPanel chatContext={chatContext} />
+                                </div>
                             </div>
                         )}
                     </main>

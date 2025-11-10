@@ -1,6 +1,3 @@
-import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
-import { useCreatePresentation } from '@/feature/presentations/hooks/usePresentations'
-import { PresentationType } from '@/feature/presentations/types/presentation.types'
 import { Button } from '@workspace/ui/components/Button'
 import { Input } from '@workspace/ui/components/update/input'
 import { Label } from '@workspace/ui/components/label'
@@ -11,27 +8,41 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@workspace/ui/components/update/select'
-import { Textarea } from '@workspace/ui/components/Textarea'
-import { Loader2, Presentation, Sparkles } from 'lucide-react'
+import { Checkbox } from '@workspace/ui/components/Checkbox'
+import { Loader2, Presentation, Sparkles, FileDown } from 'lucide-react'
 import React from 'react'
-import { useSelector } from 'react-redux'
 import { toast } from 'sonner'
 import { TemplateGallery } from './TemplateGallery'
+import { useSlideGeneration } from '../hooks/useSlideGeneration'
+import type { CollectionName } from '../type'
 
 interface SlideGenerationPanelProps {
     chatContext?: string
 }
 
 export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chatContext }) => {
-    const [name, setName] = React.useState('')
-    const [description, setDescription] = React.useState('')
-    const [type, setType] = React.useState<PresentationType>('SLIDEV')
+    const [topic, setTopic] = React.useState('')
+    const [grade, setGrade] = React.useState<number>(10)
+    const [slideCount, setSlideCount] = React.useState<number>(5)
+    const [collectionName, setCollectionName] = React.useState<CollectionName>('sgk_tin_kntt')
+    const [includeExamples, setIncludeExamples] = React.useState(true)
+    const [includeExercises, setIncludeExercises] = React.useState(false)
     const [selectedTemplateId, setSelectedTemplateId] = React.useState<number | null>(null)
     const [selectedTemplateName, setSelectedTemplateName] = React.useState<string>('')
     const [showTemplates, setShowTemplates] = React.useState(false)
 
-    const { userInfo } = useSelector(selectAuthStateInfo)
-    const createMutation = useCreatePresentation()
+    const { generateSlides, isGenerating } = useSlideGeneration()
+
+    // Auto-fill topic from chat context if available
+    React.useEffect(() => {
+        if (chatContext && !topic) {
+            // Use the first meaningful user message as topic
+            const lines = chatContext.split('\n').filter(line => line.trim().length > 0)
+            if (lines.length > 0) {
+                setTopic(lines[0].substring(0, 100)) // Limit to 100 chars
+            }
+        }
+    }, [chatContext])
 
     const handleSelectTemplate = (templateId: number, templateName: string) => {
         setSelectedTemplateId(templateId)
@@ -40,9 +51,9 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
         toast.success(`Đã chọn template: ${templateName}`)
     }
 
-    const handleGenerateSlide = async () => {
-        if (!name.trim()) {
-            toast.error('Vui lòng nhập tên slide')
+    const handleGenerateSlide = () => {
+        if (!topic.trim()) {
+            toast.error('Vui lòng nhập chủ đề')
             return
         }
 
@@ -51,31 +62,21 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
             return
         }
 
-        if (!userInfo?.id) {
-            toast.error('Vui lòng đăng nhập')
-            return
-        }
+        generateSlides({
+            templateId: selectedTemplateId,
+            request: {
+                topic: topic.trim(),
+                grade,
+                slide_count: slideCount,
+                format: 'json',
+                include_examples: includeExamples,
+                include_exercises: includeExercises,
+                collection_name: collectionName
+            }
+        })
 
-        try {
-            const templateUrl = `template-${selectedTemplateId}.zip` // Adjust based on actual API requirements
-
-            await createMutation.mutateAsync({
-                name,
-                description: description || chatContext || 'Slide được tạo từ AI chatbot',
-                type,
-                templateUrl,
-                ownerId: userInfo.id,
-            })
-
-            toast.success('Tạo slide thành công!')
-            setName('')
-            setDescription('')
-            setSelectedTemplateId(null)
-            setSelectedTemplateName('')
-        } catch (error) {
-            toast.error('Không thể tạo slide. Vui lòng thử lại.')
-            console.error('Create slide error:', error)
-        }
+        // Optionally reset form after generation
+        // setTopic('')
     }
 
     if (showTemplates) {
@@ -95,56 +96,36 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
     }
 
     return (
-        <div className="flex h-full flex-col gap-4 p-4">
+        <div className="flex h-full flex-col gap-4 overflow-y-auto p-4">
             <div className="flex items-center gap-2">
                 <Presentation className="h-6 w-6 text-blue-600" />
-                <h3 className="text-lg font-semibold">Tạo Slide</h3>
+                <h3 className="text-lg font-semibold">Tạo Slide AI</h3>
             </div>
 
             <div className="space-y-4">
+                {/* Topic Input */}
                 <div className="space-y-2">
-                    <Label htmlFor="slideName">Tên slide</Label>
+                    <Label htmlFor="topic">
+                        Chủ đề <span className="text-red-500">*</span>
+                    </Label>
                     <Input
-                        id="slideName"
-                        placeholder="Nhập tên slide..."
-                        value={name}
-                        onChange={e => setName(e.target.value)}
+                        id="topic"
+                        placeholder="Ví dụ: Lập trình Python, Vòng lặp trong C++"
+                        value={topic}
+                        onChange={e => setTopic(e.target.value)}
+                        disabled={isGenerating}
                     />
+                    <p className="text-xs text-gray-500">Nhập chủ đề cho bài thuyết trình</p>
                 </div>
 
-                <div className="space-y-2">
-                    <Label htmlFor="slideDescription">Mô tả (tùy chọn)</Label>
-                    <Textarea
-                        id="slideDescription"
-                        placeholder="Nhập mô tả slide..."
-                        value={description}
-                        onChange={e => setDescription(e.target.value)}
-                        rows={3}
-                    />
-                </div>
-
-                <div className="space-y-2">
-                    <Label htmlFor="slideType">Loại slide</Label>
-                    <Select value={type} onValueChange={(value: PresentationType) => setType(value)}>
-                        <SelectTrigger id="slideType">
-                            <SelectValue placeholder="Chọn loại slide" />
-                        </SelectTrigger>
-                        <SelectContent>
-                            <SelectItem value="SLIDEV">Slidev</SelectItem>
-                            <SelectItem value="REVEALJS">Reveal.js</SelectItem>
-                            <SelectItem value="MARKDOWN_RAW">Markdown</SelectItem>
-                            <SelectItem value="PPTX">PowerPoint</SelectItem>
-                        </SelectContent>
-                    </Select>
-                </div>
-
+                {/* Template Selection */}
                 <div className="space-y-2">
                     <Label>Template</Label>
                     {selectedTemplateName ? (
                         <div className="flex items-center justify-between rounded-md border p-3">
-                            <span className="text-sm">{selectedTemplateName}</span>
+                            <span className="text-sm font-medium">{selectedTemplateName}</span>
                             <Button variant="outline" size="sm" onClick={() => setShowTemplates(true)}>
-                                Đổi template
+                                Đổi
                             </Button>
                         </div>
                     ) : (
@@ -154,33 +135,129 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
                     )}
                 </div>
 
+                {/* Grade Selection */}
+                <div className="space-y-2">
+                    <Label htmlFor="grade">Cấp độ lớp</Label>
+                    <Select
+                        value={grade.toString()}
+                        onValueChange={value => setGrade(Number(value))}
+                        disabled={isGenerating}
+                    >
+                        <SelectTrigger id="grade">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            {Array.from({ length: 10 }, (_, i) => i + 3).map(g => (
+                                <SelectItem key={g} value={g.toString()}>
+                                    Lớp {g}
+                                </SelectItem>
+                            ))}
+                        </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500">Nội dung sẽ phù hợp với cấp độ này (3-12)</p>
+                </div>
+
+                {/* Slide Count */}
+                <div className="space-y-2">
+                    <Label htmlFor="slideCount">Số lượng slide</Label>
+                    <Input
+                        id="slideCount"
+                        type="number"
+                        min={1}
+                        max={20}
+                        value={slideCount}
+                        onChange={e => setSlideCount(Number(e.target.value))}
+                        disabled={isGenerating}
+                    />
+                    <p className="text-xs text-gray-500">Số slide muốn tạo (1-20)</p>
+                </div>
+
+                {/* Collection Selection */}
+                <div className="space-y-2">
+                    <Label htmlFor="collection">Nguồn kiến thức</Label>
+                    <Select
+                        value={collectionName}
+                        onValueChange={(value: CollectionName) => setCollectionName(value)}
+                        disabled={isGenerating}
+                    >
+                        <SelectTrigger id="collection">
+                            <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                            <SelectItem value="sgk_tin_kntt">SGK Tin học - Kết nối tri thức</SelectItem>
+                            <SelectItem value="sgk_tin_cd">SGK Tin học - Cánh diều</SelectItem>
+                            <SelectItem value="sgk_tin_ctst">SGK Tin học - Chân trời sáng tạo</SelectItem>
+                        </SelectContent>
+                    </Select>
+                    <p className="text-xs text-gray-500">Chọn nguồn sách giáo khoa</p>
+                </div>
+
+                {/* Options */}
+                <div className="space-y-3">
+                    <Label>Tùy chọn</Label>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="includeExamples"
+                            checked={includeExamples}
+                            onCheckedChange={checked => setIncludeExamples(checked as boolean)}
+                            disabled={isGenerating}
+                        />
+                        <Label htmlFor="includeExamples" className="cursor-pointer text-sm font-normal">
+                            Bao gồm ví dụ
+                        </Label>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                        <Checkbox
+                            id="includeExercises"
+                            checked={includeExercises}
+                            onCheckedChange={checked => setIncludeExercises(checked as boolean)}
+                            disabled={isGenerating}
+                        />
+                        <Label htmlFor="includeExercises" className="cursor-pointer text-sm font-normal">
+                            Bao gồm bài tập
+                        </Label>
+                    </div>
+                </div>
+
+                {/* Info Box */}
                 {chatContext && (
                     <div className="rounded-md bg-blue-50 p-3">
-                        <p className="text-xs text-blue-900">
-                            <Sparkles className="mr-1 inline h-3 w-3" />
-                            Nội dung chat sẽ được sử dụng làm ngữ cảnh cho slide
-                        </p>
+                        <div className="flex gap-2">
+                            <Sparkles className="h-4 w-4 flex-shrink-0 text-blue-600" />
+                            <div>
+                                <p className="text-xs font-medium text-blue-900">AI sẽ tạo nội dung tự động</p>
+                                <p className="mt-1 text-xs text-blue-700">
+                                    Nội dung chat của bạn sẽ được sử dụng làm ngữ cảnh để AI tạo slide phù hợp hơn
+                                </p>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>
 
+            {/* Generate Button */}
             <Button
                 className="mt-auto w-full"
                 onClick={handleGenerateSlide}
-                disabled={createMutation.isPending || !name.trim() || !selectedTemplateId}
+                disabled={isGenerating || !topic.trim() || !selectedTemplateId}
+                size="lg"
             >
-                {createMutation.isPending ? (
+                {isGenerating ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Đang tạo...
+                        Đang tạo slide...
                     </>
                 ) : (
                     <>
-                        <Sparkles className="mr-2 h-4 w-4" />
-                        Tạo slide
+                        <FileDown className="mr-2 h-4 w-4" />
+                        Tạo & Tải xuống Slide
                     </>
                 )}
             </Button>
+
+            {!topic.trim() && !isGenerating && (
+                <p className="text-center text-xs text-gray-500">Nhập chủ đề để bắt đầu</p>
+            )}
         </div>
     )
 }
