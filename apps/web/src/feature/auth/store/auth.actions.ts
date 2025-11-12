@@ -1,6 +1,7 @@
 import { TAppThunk } from '@/feature/app/type/AppState'
 import { Roles } from '@/shared/constants/enums'
 import { clearAuthTokens, getAccessToken, setAuthTokens } from '@/shared/lib/cookies'
+import { toast } from '@workspace/ui/components/Sonner'
 import { setErrorAction, setIsAuthenticatedAction, setIsLoadingAction, setUserInfoAction } from '.'
 import {
     ChangePassword,
@@ -77,6 +78,13 @@ export const requestLogin = ({ email, password }: { email: string; password: str
                 setAuthTokens(payload.accessToken, payload.refreshToken)
                 dispatch(setIsAuthenticatedAction(true))
                 dispatch(setUserInfoAction(payload.user))
+
+                // Show success notification
+                toast.success({
+                    title: 'Đăng nhập thành công',
+                    description: `Chào mừng ${payload.user.username || 'bạn'} trở lại!`,
+                })
+
                 return { success: true }
             }
         } catch (error: any) {
@@ -108,11 +116,24 @@ export const requestRegister = (body: TRegisterRequest): TAppThunk => {
         try {
             const response = await Register(body)
             if (response.data.success) {
-                return true
+                // Show success notification
+                toast.success({
+                    title: 'Đăng ký thành công!',
+                    description: 'Vui lòng kiểm tra email để kích hoạt tài khoản của bạn.',
+                })
+                return { success: true }
             }
         } catch (error: any) {
             const errorMessage = error?.response?.data.Message || error?.response?.data.message || error.message
             dispatch(setErrorAction(errorMessage))
+
+            // Show error notification
+            toast.error({
+                title: 'Đăng ký thất bại',
+                description: errorMessage,
+            })
+
+            return { success: false, message: errorMessage }
         } finally {
             dispatch(setIsLoadingAction(false))
         }

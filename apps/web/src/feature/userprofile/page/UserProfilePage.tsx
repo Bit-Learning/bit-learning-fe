@@ -4,6 +4,7 @@ import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { useFetchOrdersByUserId } from '@/feature/order/hook/useOrder'
 import { CreatePaymentURL } from '@/feature/payment/service/paymentService'
 import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
+import { useFetchTransactionsByWalletId } from '@/feature/transaction/hook/useTransaction'
 import { clearAuthTokens } from '@/shared/lib/cookies'
 import { formatDateTime } from '@/shared/lib/date-time-utils'
 import { useAppDispatch } from '@/shared/redux/store'
@@ -31,9 +32,12 @@ import {
 } from '@workspace/ui/components/sidebar'
 import {
     Activity,
+    ArrowDownLeft,
+    ArrowUpRight,
     Bell,
     Calendar,
     Camera,
+    CreditCard,
     Home,
     Key,
     LogOut,
@@ -43,6 +47,7 @@ import {
     Settings,
     Shield,
     User,
+    Wallet,
 } from 'lucide-react'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
@@ -58,6 +63,9 @@ function UserProfilePage() {
     const [openChangePassword, setOpenChangePassword] = React.useState(false)
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
     const { data: userOrders, isLoading: ordersLoading } = useFetchOrdersByUserId(userInfo?.id || 0)
+    const { data: userTransactions, isLoading: transactionsLoading } = useFetchTransactionsByWalletId(
+        userInfo?.wallet?.id || 0,
+    )
 
     React.useEffect(() => {
         // Fetch user profile on mount if not already loaded
@@ -82,6 +90,7 @@ function UserProfilePage() {
         { id: 'overview', label: 'Tổng quan', icon: User },
         { id: 'presentations', label: 'Bài thuyết trình', icon: Presentation },
         { id: 'orders', label: 'Đơn hàng', icon: Package },
+        { id: 'wallet', label: 'Ví & Giao dịch', icon: Wallet },
         { id: 'activity', label: 'Hoạt động', icon: Activity },
         { id: 'notifications', label: 'Thông báo', icon: Bell },
         { id: 'security', label: 'Bảo mật', icon: Shield },
@@ -484,6 +493,133 @@ function UserProfilePage() {
                                                 <Button variant="outline" className="mt-4">
                                                     Xem các sản phẩm
                                                 </Button>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {activeSection === 'wallet' && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="mb-6 flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">Lịch sử giao dịch</h3>
+                                            <Badge variant="secondary">{userTransactions?.length || 0} Giao dịch</Badge>
+                                        </div>
+                                        {transactionsLoading ? (
+                                            <div className="flex justify-center py-8">
+                                                <SpinnerLoader />
+                                            </div>
+                                        ) : userTransactions && userTransactions.length > 0 ? (
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full">
+                                                    <thead>
+                                                        <tr className="border-b">
+                                                            <th className="pb-3 text-left text-sm font-semibold">
+                                                                Mã GD
+                                                            </th>
+                                                            <th className="pb-3 text-left text-sm font-semibold">
+                                                                Loại giao dịch
+                                                            </th>
+                                                            <th className="pb-3 text-right text-sm font-semibold">
+                                                                Số tiền
+                                                            </th>
+                                                            <th className="pb-3 text-center text-sm font-semibold">
+                                                                Trạng thái
+                                                            </th>
+                                                            <th className="pb-3 text-right text-sm font-semibold">
+                                                                Thời gian
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody>
+                                                        {userTransactions.map(transaction => (
+                                                            <tr key={transaction.id} className="border-b">
+                                                                <td className="py-4 text-sm font-medium">
+                                                                    #{transaction.id}
+                                                                </td>
+                                                                <td className="py-4">
+                                                                    <div className="flex items-center gap-2">
+                                                                        {transaction.type === 'PURCHASE' ? (
+                                                                            <CreditCard className="h-4 w-4 text-blue-600" />
+                                                                        ) : transaction.type === 'DEPOSIT' ? (
+                                                                            <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                                                                        ) : (
+                                                                            <ArrowUpRight className="h-4 w-4 text-purple-600" />
+                                                                        )}
+                                                                        <span className="text-sm">
+                                                                            {transaction.type === 'PURCHASE'
+                                                                                ? 'Mua hàng'
+                                                                                : transaction.type === 'DEPOSIT'
+                                                                                  ? 'Nạp tiền'
+                                                                                  : 'Sử dụng AI'}
+                                                                        </span>
+                                                                    </div>
+                                                                </td>
+                                                                <td className="py-4 text-right font-semibold">
+                                                                    <span
+                                                                        className={
+                                                                            transaction.type === 'DEPOSIT'
+                                                                                ? 'text-green-600'
+                                                                                : 'text-red-600'
+                                                                        }
+                                                                    >
+                                                                        {transaction.type === 'DEPOSIT' ? '+' : '-'}
+                                                                        {Math.abs(transaction.amount).toLocaleString(
+                                                                            'vi-VN',
+                                                                        )}{' '}
+                                                                        ₫
+                                                                    </span>
+                                                                </td>
+                                                                <td className="py-4 text-center">
+                                                                    <Badge
+                                                                        variant={
+                                                                            transaction.status === 'COMPLETED'
+                                                                                ? 'default'
+                                                                                : transaction.status === 'PENDING'
+                                                                                  ? 'secondary'
+                                                                                  : 'destructive'
+                                                                        }
+                                                                        className={
+                                                                            transaction.status === 'COMPLETED'
+                                                                                ? 'bg-green-100 text-green-800'
+                                                                                : transaction.status === 'PENDING'
+                                                                                  ? 'bg-yellow-100 text-yellow-800'
+                                                                                  : 'bg-red-100 text-red-800'
+                                                                        }
+                                                                    >
+                                                                        {transaction.status === 'COMPLETED'
+                                                                            ? 'Hoàn thành'
+                                                                            : transaction.status === 'PENDING'
+                                                                              ? 'Đang xử lý'
+                                                                              : 'Thất bại'}
+                                                                    </Badge>
+                                                                </td>
+                                                                <td className="text-muted-foreground py-4 text-right text-sm">
+                                                                    {new Date(transaction.createdAt).toLocaleString(
+                                                                        'vi-VN',
+                                                                        {
+                                                                            year: 'numeric',
+                                                                            month: '2-digit',
+                                                                            day: '2-digit',
+                                                                            hour: '2-digit',
+                                                                            minute: '2-digit',
+                                                                        },
+                                                                    )}
+                                                                </td>
+                                                            </tr>
+                                                        ))}
+                                                    </tbody>
+                                                </table>
+                                            </div>
+                                        ) : (
+                                            <div className="text-muted-foreground py-8 text-center">
+                                                <Wallet className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                                                <p className="mb-2 text-lg font-medium">Chưa có giao dịch</p>
+                                                <p className="text-sm">
+                                                    Lịch sử giao dịch của bạn sẽ xuất hiện ở đây sau khi bạn thực hiện
+                                                    giao dịch đầu tiên.
+                                                </p>
                                             </div>
                                         )}
                                     </CardContent>
