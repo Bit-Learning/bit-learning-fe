@@ -17,7 +17,7 @@ export const useFetchTransactionsByWalletId = (walletId: number) => {
 }
 
 export const fetchTransactionsByWalletId = async (walletId: number): Promise<Transaction[]> => {
-    const response = await api.get(`/api/transactions`, {
+    const response = await api.get(`/payment/transactions`, {
         params: { walletId },
     })
     return response.data.data || []
