@@ -1,9 +1,10 @@
 import { apiClient } from '@/shared/lib/apiClient'
-import { useQuery, useQueryClient } from '@tanstack/react-query'
-import { useNavigate, useParams } from '@tanstack/react-router'
+import { useNavigate, useParams } from '@tanstack/router'
+import { useQuery, useQueryClient } from '@tanstack:react-query'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
+import { toast } from '@workspace/ui/components/Sonner'
 import { ArrowLeft, Download } from 'lucide-react'
 
 export default function ExamDetail() {
@@ -24,7 +25,7 @@ export default function ExamDetail() {
 
     const handleDownload = async (format: 'pdf' | 'docx') => {
         if (!examId) {
-            alert('Không tìm thấy ID đề thi')
+            toast.error({ title: 'Không tìm thấy ID đề thi' })
             return
         }
 
@@ -39,8 +40,9 @@ export default function ExamDetail() {
             link.click()
             document.body.removeChild(link)
             window.URL.revokeObjectURL(url)
+            toast.success({ title: 'Tải xuống thành công!' })
         } catch (error: any) {
-            alert(`Lỗi khi tải xuống: ${error.message}`)
+            toast.error({ title: 'Lỗi khi tải xuống', description: error.message })
         }
     }
 
@@ -118,7 +120,9 @@ export default function ExamDetail() {
                 </CardHeader>
                 <CardContent>
                     {/* Exam Info */}
-                    <div className="mb-6 grid grid-cols-2 gap-4 rounded-lg border p-4 md:grid-cols-4">
+                    <div
+                        className={`mb-6 grid gap-4 rounded-lg border p-4 ${examData.subject ? 'grid-cols-2 md:grid-cols-4' : 'grid-cols-2 md:grid-cols-3'}`}
+                    >
                         <div className="text-center">
                             <div className="text-2xl font-bold text-blue-600">{examData.examQuestions.length}</div>
                             <div className="text-muted-foreground text-sm">Câu hỏi</div>
@@ -131,10 +135,12 @@ export default function ExamDetail() {
                             <div className="text-2xl font-bold text-purple-600">{examData.durationInMinutes}</div>
                             <div className="text-muted-foreground text-sm">Phút</div>
                         </div>
-                        <div className="text-center">
-                            <div className="text-2xl font-bold text-orange-600">{examData.subject.name}</div>
-                            <div className="text-muted-foreground text-sm">Môn học</div>
-                        </div>
+                        {examData.subject && (
+                            <div className="text-center">
+                                <div className="text-2xl font-bold text-orange-600">{examData.subject.name}</div>
+                                <div className="text-muted-foreground text-sm">Môn học</div>
+                            </div>
+                        )}
                     </div>
 
                     {/* Questions List */}

@@ -5,8 +5,9 @@ import type { MatrixDetailRequest } from '@workspace/lib/api/sdk/matrix.type'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
-import { Textarea } from '@workspace/ui/components/Textarea'
 import { Label } from '@workspace/ui/components/label'
+import { toast } from '@workspace/ui/components/Sonner'
+import { Textarea } from '@workspace/ui/components/Textarea'
 import { ArrowLeft, ArrowRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { MatrixDetailTable } from '../components/MatrixDetailTable'
@@ -82,7 +83,7 @@ export default function CreateMatrix() {
             setStep(2)
         },
         onError: (error: any) => {
-            alert(`Lỗi khi tạo ma trận: ${error.message}`)
+            toast.error({ title: 'Lỗi khi tạo ma trận', description: error.message })
         },
     })
 
@@ -91,11 +92,11 @@ export default function CreateMatrix() {
         ...apiClient.matrix.createVersion(),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['matrices'] })
-            alert('Ma trận đã được tạo thành công!')
+            toast.success({ title: 'Ma trận đã được tạo thành công!' })
             navigate({ to: '/matrices' })
         },
         onError: (error: any) => {
-            alert(`Lỗi khi tạo version: ${error.message}`)
+            toast.error({ title: 'Lỗi khi tạo version', description: error.message })
         },
     })
 
@@ -103,7 +104,7 @@ export default function CreateMatrix() {
         ...apiClient.matrix.updateMatrix(),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['matrices'] })
-            alert('Ma trận đã được cập nhật!')
+            toast.success({ title: 'Ma trận đã được cập nhật!' })
             navigate({ to: '/matrices' })
         },
     })
@@ -113,7 +114,7 @@ export default function CreateMatrix() {
         e.preventDefault()
 
         if (!subjectId) {
-            alert('Vui lòng chọn môn học')
+            toast.warning({ title: 'Vui lòng chọn môn học' })
             return
         }
 
@@ -140,12 +141,12 @@ export default function CreateMatrix() {
         e.preventDefault()
 
         if (!createdMatrixId) {
-            alert('Lỗi: Không tìm thấy ma trận')
+            toast.error({ title: 'Lỗi: Không tìm thấy ma trận' })
             return
         }
 
         if (matrixDetails.length === 0) {
-            alert('Vui lòng thêm ít nhất một bài học vào ma trận')
+            toast.warning({ title: 'Vui lòng thêm ít nhất một bài học vào ma trận' })
             return
         }
 
@@ -163,7 +164,10 @@ export default function CreateMatrix() {
         }, 0)
 
         if (Math.abs(calculatedTotal - totalScore) > 0.01) {
-            alert(`Tổng điểm không khớp! Hiện tại: ${calculatedTotal.toFixed(1)}, Yêu cầu: ${totalScore}`)
+            toast.warning({
+                title: 'Tổng điểm không khớp!',
+                description: `Hiện tại: ${calculatedTotal.toFixed(1)}, Yêu cầu: ${totalScore}`,
+            })
             return
         }
 

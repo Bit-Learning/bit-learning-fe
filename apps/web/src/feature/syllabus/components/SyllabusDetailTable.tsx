@@ -1,8 +1,9 @@
 import type { SyllabusDetailRequest } from '@workspace/lib/api/sdk/syllabus.type'
 import { Button } from '@workspace/ui/components/Button'
 import { Input } from '@workspace/ui/components/Input'
-import { Textarea } from '@workspace/ui/components/Textarea'
 import { Label } from '@workspace/ui/components/label'
+import { toast } from '@workspace/ui/components/Sonner'
+import { Textarea } from '@workspace/ui/components/Textarea'
 import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -27,7 +28,7 @@ export function SyllabusDetailTable({ lessons, value, onChange }: Props) {
 
         const lessonId = Number(selectedLessonId)
         if (details.find(d => d.lessonId === lessonId)) {
-            alert('Bài học này đã được thêm')
+            toast.warning({ title: 'Bài học này đã được thêm' })
             return
         }
 

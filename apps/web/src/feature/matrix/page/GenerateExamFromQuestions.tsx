@@ -8,6 +8,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { Input } from '@workspace/ui/components/Input'
 import { Label } from '@workspace/ui/components/label'
+import { toast } from '@workspace/ui/components/Sonner'
 import { ArrowLeft, Download, Eye, FileText, Search, Settings, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -73,19 +74,19 @@ export default function GenerateExamFromQuestions() {
             console.log('[GenerateExamFromQuestions] Success:', data)
             setGeneratedExamId(data.id)
             queryClient.invalidateQueries({ queryKey: ['exams'] })
-            alert('Đề thi đã được tạo thành công!')
+            toast.success({ title: 'Đề thi đã được tạo thành công!' })
         },
         onError: (error: any) => {
             console.error('[GenerateExamFromQuestions] Error:', error)
             const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định'
-            alert(`Lỗi khi tạo đề thi: ${errorMessage}`)
+            toast.error({ title: 'Lỗi khi tạo đề thi', description: errorMessage })
         },
     })
 
     // Download mutation
     const handleDownload = async (format: 'pdf' | 'docx') => {
         if (!generatedExamId) {
-            alert('Chưa có đề thi để tải xuống')
+            toast.warning({ title: 'Chưa có đề thi để tải xuống' })
             return
         }
 
@@ -100,19 +101,20 @@ export default function GenerateExamFromQuestions() {
             link.click()
             document.body.removeChild(link)
             window.URL.revokeObjectURL(url)
+            toast.success({ title: 'Tải xuống thành công!' })
         } catch (error: any) {
-            alert(`Lỗi khi tải xuống: ${error.message}`)
+            toast.error({ title: 'Lỗi khi tải xuống', description: error.message })
         }
     }
 
     const handleGenerate = () => {
         if (!examName || !examCode) {
-            alert('Vui lòng nhập tên và mã đề thi')
+            toast.warning({ title: 'Vui lòng nhập tên và mã đề thi' })
             return
         }
 
         if (selectedQuestions.size === 0) {
-            alert('Vui lòng chọn ít nhất 1 câu hỏi')
+            toast.warning({ title: 'Vui lòng chọn ít nhất 1 câu hỏi' })
             return
         }
 
@@ -131,7 +133,7 @@ export default function GenerateExamFromQuestions() {
 
     const handleViewFullExam = () => {
         if (!generatedExamId) {
-            alert('Chưa có đề thi để xem')
+            toast.warning({ title: 'Chưa có đề thi để xem' })
             return
         }
         navigate({ to: `/exams/${generatedExamId}` as any })

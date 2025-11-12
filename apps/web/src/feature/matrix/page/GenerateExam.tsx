@@ -9,6 +9,7 @@ import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { Input } from '@workspace/ui/components/Input'
 import { Label } from '@workspace/ui/components/label'
 import { Radio, RadioGroup } from '@workspace/ui/components/RadioGroup'
+import { toast } from '@workspace/ui/components/Sonner'
 import { ArrowLeft, Download, Eye, FileText, Settings, Sparkles } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
@@ -62,20 +63,20 @@ export default function GenerateExam() {
             console.log('[GenerateExam] Success response:', data)
             setGeneratedExamId(data.id)
             queryClient.invalidateQueries({ queryKey: ['exams'] })
-            alert('Đề thi đã được tạo thành công!')
+            toast.success({ title: 'Đề thi đã được tạo thành công!' })
         },
         onError: (error: any) => {
             console.error('[GenerateExam] Error:', error)
             console.error('[GenerateExam] Error response:', error.response?.data)
             const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định'
-            alert(`Lỗi khi tạo đề thi: ${errorMessage}`)
+            toast.error({ title: 'Lỗi khi tạo đề thi', description: errorMessage })
         },
     })
 
     // Download mutation
     const handleDownload = async (format: 'pdf' | 'docx') => {
         if (!generatedExamId) {
-            alert('Chưa có đề thi để tải xuống')
+            toast.warning({ title: 'Chưa có đề thi để tải xuống' })
             return
         }
 
@@ -91,19 +92,20 @@ export default function GenerateExam() {
             link.click()
             document.body.removeChild(link)
             window.URL.revokeObjectURL(url)
+            toast.success({ title: 'Tải xuống thành công!' })
         } catch (error: any) {
-            alert(`Lỗi khi tải xuống: ${error.message}`)
+            toast.error({ title: 'Lỗi khi tải xuống', description: error.message })
         }
     }
 
     const handleGenerate = () => {
         if (!latestVersion) {
-            alert('Không tìm thấy version của ma trận')
+            toast.error({ title: 'Không tìm thấy version của ma trận' })
             return
         }
 
         if (!examName || !examCode) {
-            alert('Vui lòng nhập tên và mã đề thi')
+            toast.warning({ title: 'Vui lòng nhập tên và mã đề thi' })
             return
         }
 
@@ -118,7 +120,7 @@ export default function GenerateExam() {
         // If user questions, add createdBy field
         if (questionSource === 'user') {
             if (!userId) {
-                alert('Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.')
+                toast.error({ title: 'Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.' })
                 return
             }
             payload.createdBy = userId
@@ -130,7 +132,7 @@ export default function GenerateExam() {
 
     const handleViewFullExam = () => {
         if (!generatedExamId) {
-            alert('Chưa có đề thi để xem')
+            toast.warning({ title: 'Chưa có đề thi để xem' })
             return
         }
         // Navigate to exam detail page
@@ -354,7 +356,8 @@ export default function GenerateExam() {
                                     <div className="border-b pb-4 text-center">
                                         <h2 className="mb-2 text-2xl font-bold">{examData.name}</h2>
                                         <p className="text-muted-foreground">
-                                            Môn: {examData.subject.name} - Mã đề: {examData.code}
+                                            {examData.subject ? `Môn: ${examData.subject.name} - ` : ''}Mã đề:{' '}
+                                            {examData.code}
                                         </p>
                                         <p className="text-muted-foreground text-sm">
                                             Thời gian: {examData.durationInMinutes} phút | Tổng điểm:{' '}

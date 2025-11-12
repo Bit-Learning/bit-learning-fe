@@ -5,8 +5,9 @@ import type { SyllabusDetailRequest } from '@workspace/lib/api/sdk/syllabus.type
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
-import { Textarea } from '@workspace/ui/components/Textarea'
 import { Label } from '@workspace/ui/components/label'
+import { toast } from '@workspace/ui/components/Sonner'
+import { Textarea } from '@workspace/ui/components/Textarea'
 import { ArrowLeft, ArrowRight, Save } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { SyllabusDetailTable } from '../components/SyllabusDetailTable'
@@ -81,7 +82,7 @@ export default function CreateSyllabus() {
             setStep(2)
         },
         onError: (error: any) => {
-            alert(`Lỗi khi tạo giáo trình: ${error.message}`)
+            toast.error({ title: 'Lỗi khi tạo giáo trình', description: error.message })
         },
     })
 
@@ -90,11 +91,11 @@ export default function CreateSyllabus() {
         ...apiClient.syllabus.createVersion(),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['syllabuses'] })
-            alert('Giáo trình đã được tạo thành công!')
+            toast.success({ title: 'Giáo trình đã được tạo thành công!' })
             navigate({ to: '/syllabuses' })
         },
         onError: (error: any) => {
-            alert(`Lỗi khi tạo version: ${error.message}`)
+            toast.error({ title: 'Lỗi khi tạo version', description: error.message })
         },
     })
 
@@ -102,7 +103,7 @@ export default function CreateSyllabus() {
         ...apiClient.syllabus.updateSyllabus(),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: ['syllabuses'] })
-            alert('Giáo trình đã được cập nhật!')
+            toast.success({ title: 'Giáo trình đã được cập nhật!' })
             navigate({ to: '/syllabuses' })
         },
     })
@@ -112,7 +113,7 @@ export default function CreateSyllabus() {
         e.preventDefault()
 
         if (!subjectId) {
-            alert('Vui lòng chọn môn học')
+            toast.warning({ title: 'Vui lòng chọn môn học' })
             return
         }
 
@@ -137,12 +138,12 @@ export default function CreateSyllabus() {
         e.preventDefault()
 
         if (!createdSyllabusId) {
-            alert('Lỗi: Không tìm thấy giáo trình')
+            toast.error({ title: 'Lỗi: Không tìm thấy giáo trình' })
             return
         }
 
         if (syllabusDetails.length === 0) {
-            alert('Vui lòng thêm ít nhất một bài học vào giáo trình')
+            toast.warning({ title: 'Vui lòng thêm ít nhất một bài học vào giáo trình' })
             return
         }
 

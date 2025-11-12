@@ -4,6 +4,7 @@ import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Progress } from '@workspace/ui/components/Progress'
+import { toast } from '@workspace/ui/components/Sonner'
 import { AlertCircle, ArrowLeft, CheckCircle, Download, FileSpreadsheet, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 
@@ -23,11 +24,11 @@ export default function ImportQuestionBank() {
             setUploadProgress(100)
             setImportSuccess(true)
             queryClient.invalidateQueries({ queryKey: ['questions'] })
-            alert('Import câu hỏi thành công!')
+            toast.success({ title: 'Import câu hỏi thành công!' })
         },
         onError: (error: any) => {
             setUploadProgress(0)
-            alert(`Lỗi khi import: ${error.message}`)
+            toast.error({ title: 'Lỗi khi import', description: error.message })
         },
     })
 

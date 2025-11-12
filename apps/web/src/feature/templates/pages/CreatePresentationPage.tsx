@@ -1,6 +1,7 @@
 import { useNavigate } from '@tanstack/react-router'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Separator } from '@workspace/ui/components/Separator'
+import { toast } from '@workspace/ui/components/Sonner'
 import { FileText, Lightbulb } from 'lucide-react'
 import { useState } from 'react'
 import { PresentationForm } from '../components/PresentationForm'
@@ -19,7 +20,7 @@ const CreatePresentationPage = () => {
 
         if (result.success) {
             // Show success message (you can use a toast library here)
-            alert('✅ Tạo bài thuyết trình thành công!')
+            toast.success({ title: 'Tạo bài thuyết trình thành công!' })
             navigate({ to: '/templates/slidev' })
         } else {
             setError(result.error || 'Có lỗi xảy ra')

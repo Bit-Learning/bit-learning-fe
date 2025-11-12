@@ -1,6 +1,7 @@
 import type { MatrixDetailRequest } from '@workspace/lib/api/sdk/matrix.type'
 import { Button } from '@workspace/ui/components/Button'
 import { Input } from '@workspace/ui/components/Input'
+import { toast } from '@workspace/ui/components/Sonner'
 import { Plus, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
@@ -26,7 +27,7 @@ export function MatrixDetailTable({ lessons, value, onChange, targetTotalScore }
 
         const lessonId = Number(selectedLessonId)
         if (details.find(d => d.lessonId === lessonId)) {
-            alert('Bài học này đã được thêm')
+            toast.warning({ title: 'Bài học này đã được thêm' })
             return
         }
 
