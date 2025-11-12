@@ -4,6 +4,8 @@ import {
   Bug,
   Command,
   Construction,
+  CreditCard,
+  FileText,
   FileX,
   GalleryVerticalEnd,
   HelpCircle,
@@ -83,6 +85,16 @@ export const sidebarData: SidebarData = {
           title: 'Orders',
           url: '/orders',
           icon: PackageOpen,
+        },
+        {
+          title: 'Templates',
+          url: '/templates',
+          icon: FileText,
+        },
+        {
+          title: 'Transactions',
+          url: '/transactions',
+          icon: CreditCard,
         },
         {
           title: 'Secured by Clerk',

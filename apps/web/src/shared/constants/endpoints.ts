@@ -6,8 +6,5 @@ export const endpoints = {
 }
 
 export const API_PATH = {
-    BASE_URL: {
-        DEVELOPMENT: 'http://localhost:4000/api',
-        PRODUCTION: 'https://api.example.com',
-    },
+    BASE_URL: import.meta.env.VITE_API_BASE_URL ?? '/api',
 }

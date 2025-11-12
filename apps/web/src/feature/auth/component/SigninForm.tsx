@@ -65,6 +65,7 @@ const SignInForm: React.FC = () => {
         }
         const result: any = await dispatch(requestLogin(body))
 
+        // Only show warning for activation - success/error toasts are handled in actions
         if (result?.needsActivation) {
             toast.warning({
                 title: 'Tài khoản chưa kích hoạt',
@@ -169,7 +170,7 @@ const SignInForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                                    <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                                                     <Input
                                                         placeholder="Nhập email của bạn"
                                                         {...field}
@@ -192,19 +193,19 @@ const SignInForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <div className="absolute top-1/2 left-3 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
+                                                    <div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
                                                         <div className="h-2 w-2 rounded-full bg-white"></div>
                                                     </div>
                                                     <Input
                                                         type={showPassword ? 'text' : 'password'}
                                                         placeholder="Nhập mật khẩu của bạn"
                                                         {...field}
-                                                        className="h-11 rounded-xl border-2 border-gray-200 pr-12 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                                                        className="h-11 rounded-xl border-2 border-gray-200 pl-10 pr-12 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                                                     />
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
                                                     >
                                                         {showPassword ? (
                                                             <EyeIcon className="h-5 w-5" />

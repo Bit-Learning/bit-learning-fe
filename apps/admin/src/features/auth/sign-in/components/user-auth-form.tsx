@@ -2,10 +2,10 @@ import { z } from 'zod'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { useNavigate } from '@tanstack/react-router'
 import { Loader2, LogIn } from 'lucide-react'
 import { toast } from 'sonner'
-import { IconFacebook, IconGithub } from '@/assets/brand-icons'
+// import { IconFacebook, IconGithub } from '@/assets/brand-icons'
 import { useAuthStore } from '@/stores/auth-store'
 import { setAuthTokens } from '@/lib/cookies'
 import { cn } from '@/lib/utils'
@@ -119,11 +119,47 @@ export function UserAuthForm({
     })
   }
 
+  // Mock account for quick login (development only)
+  const fillMockAccount = () => {
+    form.setValue('email', 'admin@gmail.com')
+    form.setValue('password', '123456')
+    toast.info('Mock admin credentials filled')
+  }
+
+  // Bypass login - fake authentication (development only)
+  const bypassLogin = () => {
+    // Create fake tokens
+    const fakeAccessToken = 'fake-access-token-' + Date.now()
+    const fakeRefreshToken = 'fake-refresh-token-' + Date.now()
+
+    // Set fake tokens in cookies
+    setAuthTokens(fakeAccessToken, fakeRefreshToken)
+
+    // Set fake user data in store
+    auth.setAccessToken(fakeAccessToken)
+    auth.setRefreshToken(fakeRefreshToken)
+    auth.setUser({
+      accountNo: '1',
+      email: 'admin@example.com',
+      role: ['ADMIN'],
+      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+      firstName: 'Admin',
+      lastName: 'User',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
+    })
+
+    toast.success('🚀 Bypassed login - Welcome Admin!')
+
+    // Redirect to dashboard
+    const targetPath = redirectTo || '/'
+    navigate({ to: targetPath, replace: true })
+  }
+
   return (
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-3', className)}
+        className={cn('grid gap-5 px-2', className)}
         {...props}
       >
         <FormField
@@ -131,9 +167,13 @@ export function UserAuthForm({
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className='text-[#aaa]'>Email</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input
+                  placeholder='name@gmail.com'
+                  className='border-[#0f0]/30 bg-[#333] text-white placeholder:text-gray-500 focus:border-[#0f0] focus:ring-[#0f0]'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,21 +184,29 @@ export function UserAuthForm({
           name='password'
           render={({ field }) => (
             <FormItem className='relative'>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className='text-[#aaa]'>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder='********' {...field} />
+                <PasswordInput
+                  placeholder='********'
+                  className='border-[#0f0]/30 bg-[#333] text-white placeholder:text-gray-500 focus:border-[#0f0] focus:ring-[#0f0]'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
-              <Link
+              {/* <Link
                 to='/forgot-password'
-                className='text-muted-foreground absolute end-0 -top-0.5 text-sm font-medium hover:opacity-75'
+                className='absolute end-0 -top-0.5 text-sm font-medium text-white hover:opacity-75'
               >
                 Forgot password?
-              </Link>
+              </Link> */}
             </FormItem>
           )}
         />
-        <Button className='mt-2' disabled={loginMutation.isPending}>
+        <Button
+          size={'lg'}
+          className='mt-2 bg-[#0f0] text-black hover:bg-[#00ff00]/80'
+          disabled={loginMutation.isPending}
+        >
           {loginMutation.isPending ? (
             <Loader2 className='animate-spin' />
           ) : (
@@ -167,7 +215,33 @@ export function UserAuthForm({
           Sign in
         </Button>
 
-        <div className='relative my-2'>
+        {/* Development: Quick login with mock account */}
+        {import.meta.env.DEV && (
+          <div className='grid grid-cols-2 gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={fillMockAccount}
+              className='border-[#0f0]/30 text-[#0f0] hover:bg-[#0f0]/10 hover:text-[#0f0]'
+              disabled={loginMutation.isPending}
+            >
+              � Fill Mock
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={bypassLogin}
+              className='border-[#0f0]/50 bg-[#0f0]/10 text-[#0f0] hover:bg-[#0f0]/20 hover:text-[#0f0]'
+              disabled={loginMutation.isPending}
+            >
+              🚀 Bypass Login
+            </Button>
+          </div>
+        )}
+
+        {/* <div className='relative my-2'>
           <div className='absolute inset-0 flex items-center'>
             <span className='w-full border-t' />
           </div>
@@ -193,7 +267,7 @@ export function UserAuthForm({
           >
             <IconFacebook className='h-4 w-4' /> Facebook
           </Button>
-        </div>
+        </div> */}
       </form>
     </Form>
   )

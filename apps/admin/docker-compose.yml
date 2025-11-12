@@ -1,10 +1,10 @@
 services:
   # Development environment
-  bithub-web-dev:
-    container_name: bithub-web-dev
+  bithub-admin-dev:
+    container_name: bithub-admin-dev
     build:
       context: ../..
-      dockerfile: apps/web/Dockerfile.dev
+      dockerfile: apps/admin/Dockerfile.dev
     ports:
       - "5173:5173"
     environment:
@@ -14,14 +14,14 @@ services:
     command: npm run dev -- --host
 
   # Production environment
-  bithub-web-prod:
-    container_name: bithub-web-prod
-    image: lcaohoanq/bithub-web:serve-nginx
+  bithub-admin-prod:
+    container_name: bithub-admin-prod
+    image: lcaohoanq/bithub-admin:serve-nginx
     build:
       context: ../..
-      dockerfile: apps/web/Dockerfile.prod
+      dockerfile: apps/admin/Dockerfile.prod
     ports:
-      - "5174:5173"
+      - "5174:8386"
     environment:
       - NODE_ENV=production
     networks:
@@ -29,4 +29,5 @@ services:
 
 networks:
   app-net:
+    name: mss-innedu-be_app-net
     external: true

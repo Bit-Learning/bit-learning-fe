@@ -4,6 +4,7 @@ import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { useFetchOrdersByUserId } from '@/feature/order/hook/useOrder'
 import { CreatePaymentURL } from '@/feature/payment/service/paymentService'
 import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
+import { useFetchTransactionsByWalletId } from '@/feature/transaction/hook/useTransaction'
 import { clearAuthTokens } from '@/shared/lib/cookies'
 import { formatDateTime } from '@/shared/lib/date-time-utils'
 import { useAppDispatch } from '@/shared/redux/store'
@@ -11,7 +12,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
-import { Card, CardContent } from '@workspace/ui/components/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
 import {
     Sidebar,
@@ -31,9 +32,15 @@ import {
 } from '@workspace/ui/components/sidebar'
 import {
     Activity,
+    ArrowDownLeft,
+    ArrowUpRight,
     Bell,
     Calendar,
     Camera,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Filter,
     Home,
     Key,
     LogOut,
@@ -42,7 +49,11 @@ import {
     Presentation,
     Settings,
     Shield,
+    TrendingDown,
+    TrendingUp,
     User,
+    Wallet,
+    XCircle,
 } from 'lucide-react'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
@@ -56,8 +67,13 @@ function UserProfilePage() {
     const [activeSection, setActiveSection] = React.useState('overview')
     const [openAddFunds, setOpenAddFunds] = React.useState(false)
     const [openChangePassword, setOpenChangePassword] = React.useState(false)
+    const [transactionTypeFilter, setTransactionTypeFilter] = React.useState<string>('ALL')
+    const [transactionStatusFilter, setTransactionStatusFilter] = React.useState<string>('ALL')
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
     const { data: userOrders, isLoading: ordersLoading } = useFetchOrdersByUserId(userInfo?.id || 0)
+    const { data: userTransactions, isLoading: transactionsLoading } = useFetchTransactionsByWalletId(
+        userInfo?.wallet?.id || 0,
+    )
 
     React.useEffect(() => {
         // Fetch user profile on mount if not already loaded
@@ -65,6 +81,58 @@ function UserProfilePage() {
             dispatch(requestUserProfile())
         }
     }, [dispatch, userInfo])
+
+    // Filter transactions based on selected filters
+    const filteredTransactions = React.useMemo(() => {
+        if (!userTransactions) return []
+
+        return userTransactions.filter(transaction => {
+            const typeMatch = transactionTypeFilter === 'ALL' || transaction.type === transactionTypeFilter
+            const statusMatch = transactionStatusFilter === 'ALL' || transaction.status === transactionStatusFilter
+            return typeMatch && statusMatch
+        })
+    }, [userTransactions, transactionTypeFilter, transactionStatusFilter])
+
+    // Calculate transaction statistics
+    const transactionStats = React.useMemo(() => {
+        if (!userTransactions || userTransactions.length === 0) {
+            return {
+                totalDeposit: 0,
+                totalSpent: 0,
+                totalTransactions: 0,
+                completedCount: 0,
+                pendingCount: 0,
+                failedCount: 0,
+            }
+        }
+
+        return userTransactions.reduce(
+            (acc, transaction) => {
+                if (transaction.type === 'DEPOSIT' && transaction.status === 'COMPLETED') {
+                    acc.totalDeposit += transaction.amount
+                }
+                if (
+                    (transaction.type === 'PURCHASE' || transaction.type === 'AI_REQUEST') &&
+                    transaction.status === 'COMPLETED'
+                ) {
+                    acc.totalSpent += transaction.amount
+                }
+                if (transaction.status === 'COMPLETED') acc.completedCount++
+                if (transaction.status === 'PENDING') acc.pendingCount++
+                if (transaction.status === 'FAILED') acc.failedCount++
+                acc.totalTransactions++
+                return acc
+            },
+            {
+                totalDeposit: 0,
+                totalSpent: 0,
+                totalTransactions: 0,
+                completedCount: 0,
+                pendingCount: 0,
+                failedCount: 0,
+            },
+        )
+    }, [userTransactions])
 
     // User is guaranteed to exist here because of route-level protection
     if (isLoading || !userInfo) {
@@ -82,6 +150,7 @@ function UserProfilePage() {
         { id: 'overview', label: 'Tổng quan', icon: User },
         { id: 'presentations', label: 'Bài thuyết trình', icon: Presentation },
         { id: 'orders', label: 'Đơn hàng', icon: Package },
+        { id: 'wallet', label: 'Ví & Giao dịch', icon: Wallet },
         { id: 'activity', label: 'Hoạt động', icon: Activity },
         { id: 'notifications', label: 'Thông báo', icon: Bell },
         { id: 'security', label: 'Bảo mật', icon: Shield },
@@ -488,6 +557,350 @@ function UserProfilePage() {
                                         )}
                                     </CardContent>
                                 </Card>
+                            )}
+
+                            {activeSection === 'wallet' && (
+                                <>
+                                    {/* Summary Cards */}
+                                    <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                        <Card className="border-l-4 border-l-green-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Tổng nạp</span>
+                                                    <TrendingUp className="h-4 w-4 text-green-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-green-600">
+                                                    {transactionStats.totalDeposit.toLocaleString('vi-VN')} ₫
+                                                </div>
+                                                <p className="text-muted-foreground mt-1 text-xs">
+                                                    Tổng tiền đã nạp vào ví
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="border-l-4 border-l-red-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Tổng chi</span>
+                                                    <TrendingDown className="h-4 w-4 text-red-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-red-600">
+                                                    {transactionStats.totalSpent.toLocaleString('vi-VN')} ₫
+                                                </div>
+                                                <p className="text-muted-foreground mt-1 text-xs">
+                                                    Tổng chi tiêu & sử dụng
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="border-l-4 border-l-blue-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Số dư hiện tại</span>
+                                                    <Wallet className="h-4 w-4 text-blue-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-blue-600">
+                                                    {userInfo.wallet?.balance?.toLocaleString('vi-VN') || 0} ₫
+                                                </div>
+                                                <p className="text-muted-foreground mt-1 text-xs">
+                                                    Số dư khả dụng trong ví
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="border-l-4 border-l-purple-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Giao dịch</span>
+                                                    <Activity className="h-4 w-4 text-purple-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-purple-600">
+                                                    {transactionStats.totalTransactions}
+                                                </div>
+                                                <div className="mt-1 flex gap-2 text-xs">
+                                                    <span className="flex items-center gap-1 text-green-600">
+                                                        <CheckCircle className="h-3 w-3" />
+                                                        {transactionStats.completedCount}
+                                                    </span>
+                                                    <span className="flex items-center gap-1 text-yellow-600">
+                                                        <Clock className="h-3 w-3" />
+                                                        {transactionStats.pendingCount}
+                                                    </span>
+                                                    <span className="flex items-center gap-1 text-red-600">
+                                                        <XCircle className="h-3 w-3" />
+                                                        {transactionStats.failedCount}
+                                                    </span>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+
+                                    {/* Transaction History */}
+                                    <Card>
+                                        <CardContent className="p-6">
+                                            <div className="mb-6 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-lg font-semibold">Lịch sử giao dịch</h3>
+                                                    <Badge variant="outline" className="text-sm">
+                                                        {filteredTransactions.length} / {userTransactions?.length || 0}{' '}
+                                                        giao dịch
+                                                    </Badge>
+                                                </div>
+
+                                                {/* Filters */}
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <Filter className="text-muted-foreground h-4 w-4" />
+                                                        <span className="text-muted-foreground text-sm font-medium">
+                                                            Loại giao dịch:
+                                                        </span>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'ALL'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('ALL')}
+                                                            >
+                                                                Tất cả
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'DEPOSIT'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('DEPOSIT')}
+                                                                className="gap-1"
+                                                            >
+                                                                <ArrowDownLeft className="h-3 w-3" />
+                                                                Nạp tiền
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'PURCHASE'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('PURCHASE')}
+                                                                className="gap-1"
+                                                            >
+                                                                <CreditCard className="h-3 w-3" />
+                                                                Mua hàng
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'AI_REQUEST'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('AI_REQUEST')}
+                                                                className="gap-1"
+                                                            >
+                                                                <ArrowUpRight className="h-3 w-3" />
+                                                                Sử dụng AI
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Filter className="text-muted-foreground h-4 w-4" />
+                                                        <span className="text-muted-foreground text-sm font-medium">
+                                                            Trạng thái:
+                                                        </span>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'ALL'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('ALL')}
+                                                            >
+                                                                Tất cả
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'COMPLETED'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('COMPLETED')}
+                                                                className="gap-1"
+                                                            >
+                                                                <CheckCircle className="h-3 w-3" />
+                                                                Hoàn thành
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'PENDING'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('PENDING')}
+                                                                className="gap-1"
+                                                            >
+                                                                <Clock className="h-3 w-3" />
+                                                                Đang xử lý
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'FAILED'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('FAILED')}
+                                                                className="gap-1"
+                                                            >
+                                                                <XCircle className="h-3 w-3" />
+                                                                Thất bại
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {transactionsLoading ? (
+                                                <div className="flex justify-center py-8">
+                                                    <SpinnerLoader />
+                                                </div>
+                                            ) : filteredTransactions && filteredTransactions.length > 0 ? (
+                                                <div className="overflow-x-auto">
+                                                    <table className="w-full">
+                                                        <thead>
+                                                            <tr className="border-b">
+                                                                <th className="pb-3 text-left text-sm font-semibold">
+                                                                    Mã GD
+                                                                </th>
+                                                                <th className="pb-3 text-left text-sm font-semibold">
+                                                                    Loại giao dịch
+                                                                </th>
+                                                                <th className="pb-3 text-right text-sm font-semibold">
+                                                                    Số tiền
+                                                                </th>
+                                                                <th className="pb-3 text-center text-sm font-semibold">
+                                                                    Trạng thái
+                                                                </th>
+                                                                <th className="pb-3 text-right text-sm font-semibold">
+                                                                    Thời gian
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {filteredTransactions.map(transaction => (
+                                                                <tr key={transaction.id} className="border-b">
+                                                                    <td className="py-4 text-sm font-medium">
+                                                                        #{transaction.id}
+                                                                    </td>
+                                                                    <td className="py-4">
+                                                                        <div className="flex items-center gap-2">
+                                                                            {transaction.type === 'PURCHASE' ? (
+                                                                                <CreditCard className="h-4 w-4 text-blue-600" />
+                                                                            ) : transaction.type === 'DEPOSIT' ? (
+                                                                                <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                                                                            ) : (
+                                                                                <ArrowUpRight className="h-4 w-4 text-purple-600" />
+                                                                            )}
+                                                                            <span className="text-sm">
+                                                                                {transaction.type === 'PURCHASE'
+                                                                                    ? 'Mua hàng'
+                                                                                    : transaction.type === 'DEPOSIT'
+                                                                                      ? 'Nạp tiền'
+                                                                                      : 'Sử dụng AI'}
+                                                                            </span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="py-4 text-right font-semibold">
+                                                                        <span
+                                                                            className={
+                                                                                transaction.type === 'DEPOSIT'
+                                                                                    ? 'text-green-600'
+                                                                                    : 'text-red-600'
+                                                                            }
+                                                                        >
+                                                                            {transaction.type === 'DEPOSIT' ? '+' : '-'}
+                                                                            {Math.abs(
+                                                                                transaction.amount,
+                                                                            ).toLocaleString('vi-VN')}{' '}
+                                                                            ₫
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="py-4 text-center">
+                                                                        <Badge
+                                                                            variant={
+                                                                                transaction.status === 'COMPLETED'
+                                                                                    ? 'default'
+                                                                                    : transaction.status === 'PENDING'
+                                                                                      ? 'secondary'
+                                                                                      : 'destructive'
+                                                                            }
+                                                                            className={
+                                                                                transaction.status === 'COMPLETED'
+                                                                                    ? 'bg-green-100 text-green-800'
+                                                                                    : transaction.status === 'PENDING'
+                                                                                      ? 'bg-yellow-100 text-yellow-800'
+                                                                                      : 'bg-red-100 text-red-800'
+                                                                            }
+                                                                        >
+                                                                            {transaction.status === 'COMPLETED'
+                                                                                ? 'Hoàn thành'
+                                                                                : transaction.status === 'PENDING'
+                                                                                  ? 'Đang xử lý'
+                                                                                  : 'Thất bại'}
+                                                                        </Badge>
+                                                                    </td>
+                                                                    <td className="text-muted-foreground py-4 text-right text-sm">
+                                                                        {new Date(transaction.createdAt).toLocaleString(
+                                                                            'vi-VN',
+                                                                            {
+                                                                                year: 'numeric',
+                                                                                month: '2-digit',
+                                                                                day: '2-digit',
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit',
+                                                                            },
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            ) : (
+                                                <div className="text-muted-foreground py-8 text-center">
+                                                    <Wallet className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                                                    <p className="mb-2 text-lg font-medium">
+                                                        {userTransactions && userTransactions.length > 0
+                                                            ? 'Không tìm thấy giao dịch phù hợp'
+                                                            : 'Chưa có giao dịch'}
+                                                    </p>
+                                                    <p className="text-sm">
+                                                        {userTransactions && userTransactions.length > 0
+                                                            ? 'Thử thay đổi bộ lọc để xem các giao dịch khác'
+                                                            : 'Lịch sử giao dịch của bạn sẽ xuất hiện ở đây sau khi bạn thực hiện giao dịch đầu tiên.'}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </>
                             )}
 
                             {activeSection === 'activity' && (
