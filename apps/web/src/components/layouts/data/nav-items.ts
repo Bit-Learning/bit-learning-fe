@@ -63,6 +63,16 @@ export const navItems = [
             },
         ],
     },
+    {
+        title: 'Kho ứng dụng & Công cụ',
+        items: [
+            {
+                title: 'Bài giảng dạy học',
+                to: '/presentations',
+                description: 'Tải về các bài giảng và tài liệu học tập miễn phí chất lượng từ BithubLearning.',
+            },
+        ],
+    },
     // {
     //   title: "Dịch vụ",
     //   items: [
