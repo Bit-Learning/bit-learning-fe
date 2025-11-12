@@ -452,7 +452,7 @@ const AIChatbotPage = () => {
                                             type="button"
                                             size="icon"
                                             onClick={handleSubmit}
-                                            disabled={!message.trim()}
+                                            // disabled={!message.trim()}
                                             className="h-9 w-9 shrink-0 rounded-full bg-[#9EC6F3] text-gray-900 transition-all hover:bg-[#7DB4EC] disabled:opacity-40"
                                         >
                                             <ArrowUp size={20} strokeWidth={2.5} />

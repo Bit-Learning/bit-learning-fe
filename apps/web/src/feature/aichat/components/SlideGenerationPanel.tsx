@@ -11,7 +11,7 @@ import {
 import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { Loader2, Presentation, Sparkles, FileDown } from 'lucide-react'
 import React from 'react'
-import { toast } from 'sonner'
+import { toast } from '@workspace/ui/components/Sonner'
 import { TemplateGallery } from './TemplateGallery'
 import { useSlideGeneration } from '../hooks/useSlideGeneration'
 import type { CollectionName } from '../type'
@@ -38,7 +38,7 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
         if (chatContext && !topic) {
             // Use the first meaningful user message as topic
             const lines = chatContext.split('\n').filter(line => line.trim().length > 0)
-            if (lines.length > 0) {
+            if (lines.length > 0 && lines[0]) {
                 setTopic(lines[0].substring(0, 100)) // Limit to 100 chars
             }
         }
@@ -48,17 +48,23 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
         setSelectedTemplateId(templateId)
         setSelectedTemplateName(templateName)
         setShowTemplates(false)
-        toast.success(`Đã chọn template: ${templateName}`)
+        toast.success({
+            title: `Đã chọn template: ${templateName}`
+        })
     }
 
     const handleGenerateSlide = () => {
         if (!topic.trim()) {
-            toast.error('Vui lòng nhập chủ đề')
+            toast.error({
+                title: 'Vui lòng nhập chủ đề'
+            })
             return
         }
 
         if (!selectedTemplateId) {
-            toast.error('Vui lòng chọn template')
+            toast.error({
+                title: 'Vui lòng chọn template'
+            })
             return
         }
 
@@ -198,9 +204,9 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             id="includeExamples"
-                            checked={includeExamples}
-                            onCheckedChange={checked => setIncludeExamples(checked as boolean)}
-                            disabled={isGenerating}
+                            isSelected={includeExamples}
+                            onChange={setIncludeExamples}
+                            isDisabled={isGenerating}
                         />
                         <Label htmlFor="includeExamples" className="cursor-pointer text-sm font-normal">
                             Bao gồm ví dụ
@@ -209,9 +215,9 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
                     <div className="flex items-center space-x-2">
                         <Checkbox
                             id="includeExercises"
-                            checked={includeExercises}
-                            onCheckedChange={checked => setIncludeExercises(checked as boolean)}
-                            disabled={isGenerating}
+                            isSelected={includeExercises}
+                            onChange={setIncludeExercises}
+                            isDisabled={isGenerating}
                         />
                         <Label htmlFor="includeExercises" className="cursor-pointer text-sm font-normal">
                             Bao gồm bài tập
@@ -239,7 +245,7 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
             <Button
                 className="mt-auto w-full"
                 onClick={handleGenerateSlide}
-                disabled={isGenerating || !topic.trim() || !selectedTemplateId}
+                isDisabled={isGenerating || !topic.trim() || !selectedTemplateId}
                 size="lg"
             >
                 {isGenerating ? (
