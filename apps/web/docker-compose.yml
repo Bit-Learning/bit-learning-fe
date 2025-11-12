@@ -29,5 +29,4 @@ services:
 
 networks:
   app-net:
-    name: mss-innedu-be_app-net
     external: true

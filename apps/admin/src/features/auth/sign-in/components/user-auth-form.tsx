@@ -123,7 +123,7 @@ export function UserAuthForm({
     <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className={cn('grid gap-3', className)}
+        className={cn('grid gap-5 px-2', className)}
         {...props}
       >
         <FormField
@@ -131,9 +131,13 @@ export function UserAuthForm({
           name='email'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className='text-[#aaa]'>Email</FormLabel>
               <FormControl>
-                <Input placeholder='name@example.com' {...field} />
+                <Input
+                  placeholder='name@gmail.com'
+                  className='border-[#0f0]/30 bg-[#333] text-white placeholder:text-gray-500 focus:border-[#0f0] focus:ring-[#0f0]'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
@@ -144,21 +148,29 @@ export function UserAuthForm({
           name='password'
           render={({ field }) => (
             <FormItem className='relative'>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className='text-[#aaa]'>Password</FormLabel>
               <FormControl>
-                <PasswordInput placeholder='********' {...field} />
+                <PasswordInput
+                  placeholder='********'
+                  className='border-[#0f0]/30 bg-[#333] text-white placeholder:text-gray-500 focus:border-[#0f0] focus:ring-[#0f0]'
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
-              <Link
+              {/* <Link
                 to='/forgot-password'
-                className='text-muted-foreground absolute end-0 -top-0.5 text-sm font-medium hover:opacity-75'
+                className='absolute end-0 -top-0.5 text-sm font-medium text-white hover:opacity-75'
               >
                 Forgot password?
-              </Link>
+              </Link> */}
             </FormItem>
           )}
         />
-        <Button className='mt-2' disabled={loginMutation.isPending}>
+        <Button
+          size={'lg'}
+          className='mt-2 bg-[#0f0] text-black hover:bg-[#00ff00]/80'
+          disabled={loginMutation.isPending}
+        >
           {loginMutation.isPending ? (
             <Loader2 className='animate-spin' />
           ) : (
@@ -167,7 +179,7 @@ export function UserAuthForm({
           Sign in
         </Button>
 
-        <div className='relative my-2'>
+        {/* <div className='relative my-2'>
           <div className='absolute inset-0 flex items-center'>
             <span className='w-full border-t' />
           </div>
@@ -193,7 +205,7 @@ export function UserAuthForm({
           >
             <IconFacebook className='h-4 w-4' /> Facebook
           </Button>
-        </div>
+        </div> */}
       </form>
     </Form>
   )

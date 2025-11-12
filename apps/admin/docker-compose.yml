@@ -4,7 +4,7 @@ services:
     container_name: bithub-admin-dev
     build:
       context: ../..
-      dockerfile: apps/web/Dockerfile.dev
+      dockerfile: apps/admin/Dockerfile.dev
     ports:
       - "5173:5173"
     environment:
@@ -19,9 +19,9 @@ services:
     image: lcaohoanq/bithub-admin:serve-nginx
     build:
       context: ../..
-      dockerfile: apps/web/Dockerfile.prod
+      dockerfile: apps/admin/Dockerfile.prod
     ports:
-      - "8386:8386"
+      - "5174:8386"
     environment:
       - NODE_ENV=production
     networks:
