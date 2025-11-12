@@ -119,6 +119,42 @@ export function UserAuthForm({
     })
   }
 
+  // Mock account for quick login (development only)
+  const fillMockAccount = () => {
+    form.setValue('email', 'admin@gmail.com')
+    form.setValue('password', '123456')
+    toast.info('Mock admin credentials filled')
+  }
+
+  // Bypass login - fake authentication (development only)
+  const bypassLogin = () => {
+    // Create fake tokens
+    const fakeAccessToken = 'fake-access-token-' + Date.now()
+    const fakeRefreshToken = 'fake-refresh-token-' + Date.now()
+
+    // Set fake tokens in cookies
+    setAuthTokens(fakeAccessToken, fakeRefreshToken)
+
+    // Set fake user data in store
+    auth.setAccessToken(fakeAccessToken)
+    auth.setRefreshToken(fakeRefreshToken)
+    auth.setUser({
+      accountNo: '1',
+      email: 'admin@example.com',
+      role: ['ADMIN'],
+      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
+      firstName: 'Admin',
+      lastName: 'User',
+      avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Admin',
+    })
+
+    toast.success('🚀 Bypassed login - Welcome Admin!')
+
+    // Redirect to dashboard
+    const targetPath = redirectTo || '/'
+    navigate({ to: targetPath, replace: true })
+  }
+
   return (
     <Form {...form}>
       <form
@@ -178,6 +214,32 @@ export function UserAuthForm({
           )}
           Sign in
         </Button>
+
+        {/* Development: Quick login with mock account */}
+        {import.meta.env.DEV && (
+          <div className='grid grid-cols-2 gap-2'>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={fillMockAccount}
+              className='border-[#0f0]/30 text-[#0f0] hover:bg-[#0f0]/10 hover:text-[#0f0]'
+              disabled={loginMutation.isPending}
+            >
+              � Fill Mock
+            </Button>
+            <Button
+              type='button'
+              variant='outline'
+              size='sm'
+              onClick={bypassLogin}
+              className='border-[#0f0]/50 bg-[#0f0]/10 text-[#0f0] hover:bg-[#0f0]/20 hover:text-[#0f0]'
+              disabled={loginMutation.isPending}
+            >
+              🚀 Bypass Login
+            </Button>
+          </div>
+        )}
 
         {/* <div className='relative my-2'>
           <div className='absolute inset-0 flex items-center'>
