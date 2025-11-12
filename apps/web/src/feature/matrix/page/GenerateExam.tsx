@@ -1,3 +1,4 @@
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { apiClient } from '@/shared/lib/apiClient'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { useNavigate, useParams } from '@tanstack/react-router'
@@ -7,18 +8,23 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { Input } from '@workspace/ui/components/Input'
 import { Label } from '@workspace/ui/components/label'
+import { Radio, RadioGroup } from '@workspace/ui/components/RadioGroup'
 import { ArrowLeft, Download, Eye, FileText, Settings, Sparkles } from 'lucide-react'
 import { useState } from 'react'
+import { useSelector } from 'react-redux'
 
 export default function GenerateExam() {
     const navigate = useNavigate()
     const params = useParams({ strict: false })
     const matrixId = (params as any).id ? Number((params as any).id) : undefined
     const queryClient = useQueryClient()
+    const { userInfo } = useSelector(selectAuthStateInfo)
+    const userId = userInfo?.id
 
     const [examName, setExamName] = useState('')
     const [examCode, setExamCode] = useState('')
     const [shuffleOptions, setShuffleOptions] = useState(true)
+    const [questionSource, setQuestionSource] = useState<'system' | 'user'>('system')
     const [generatedExamId, setGeneratedExamId] = useState<number | null>(null)
 
     // Load matrix data
@@ -39,16 +45,30 @@ export default function GenerateExam() {
         enabled: !!generatedExamId,
     })
 
-    // Generate exam mutation
+    // Generate exam mutation - dynamically choose API based on questionSource
     const generateMutation = useMutation({
-        ...apiClient.exam.generateExam(),
+        mutationFn: async (payload: any) => {
+            if (questionSource === 'user') {
+                // Use generateExamFromUserQuestions API
+                const response = await apiClient.exam.generateExamFromUserQuestions().mutationFn(payload)
+                return response
+            } else {
+                // Use default generateExam API
+                const response = await apiClient.exam.generateExam().mutationFn(payload)
+                return response
+            }
+        },
         onSuccess: data => {
+            console.log('[GenerateExam] Success response:', data)
             setGeneratedExamId(data.id)
             queryClient.invalidateQueries({ queryKey: ['exams'] })
             alert('Đề thi đã được tạo thành công!')
         },
         onError: (error: any) => {
-            alert(`Lỗi khi tạo đề thi: ${error.message}`)
+            console.error('[GenerateExam] Error:', error)
+            console.error('[GenerateExam] Error response:', error.response?.data)
+            const errorMessage = error.response?.data?.message || error.message || 'Lỗi không xác định'
+            alert(`Lỗi khi tạo đề thi: ${errorMessage}`)
         },
     })
 
@@ -87,12 +107,34 @@ export default function GenerateExam() {
             return
         }
 
-        generateMutation.mutate({
+        // Build payload based on question source
+        let payload: any = {
             matrixVersionId: latestVersion.id,
             name: examName,
             code: examCode,
             shuffleOptions,
-        })
+        }
+
+        // If user questions, add createdBy field
+        if (questionSource === 'user') {
+            if (!userId) {
+                alert('Không tìm thấy thông tin người dùng. Vui lòng đăng nhập lại.')
+                return
+            }
+            payload.createdBy = userId
+        }
+
+        console.log('[GenerateExam] Sending request:', { source: questionSource, payload })
+        generateMutation.mutate(payload)
+    }
+
+    const handleViewFullExam = () => {
+        if (!generatedExamId) {
+            alert('Chưa có đề thi để xem')
+            return
+        }
+        // Navigate to exam detail page
+        navigate({ to: `/exams/${generatedExamId}` as any })
     }
 
     const getLevelBadgeColor = (level: string) => {
@@ -201,12 +243,33 @@ export default function GenerateExam() {
                                 />
                             </div>
 
+                            <div className="space-y-3 border-t pt-4">
+                                <Label>Nguồn câu hỏi</Label>
+                                <RadioGroup
+                                    value={questionSource}
+                                    onChange={(value: string) => setQuestionSource(value as 'system' | 'user')}
+                                    aria-label="Chọn nguồn câu hỏi"
+                                >
+                                    <Radio value="system">
+                                        <span className="text-sm">
+                                            Câu hỏi hệ thống (tất cả câu hỏi trong ngân hàng)
+                                        </span>
+                                    </Radio>
+                                    <Radio value="user">
+                                        <span className="text-sm">Câu hỏi của tôi (chỉ câu hỏi do tôi tạo)</span>
+                                    </Radio>
+                                </RadioGroup>
+                            </div>
+
                             <div className="space-y-3 border-t pt-2">
                                 <div className="flex items-center gap-2">
                                     <Checkbox
                                         id="shuffleOptions"
                                         isSelected={shuffleOptions}
-                                        onChange={(e: any) => setShuffleOptions(e.target.checked)}
+                                        onChange={(isSelected: boolean) => {
+                                            console.log('[GenerateExam] Shuffle options changed:', isSelected)
+                                            setShuffleOptions(isSelected)
+                                        }}
                                     />
                                     <Label htmlFor="shuffleOptions" className="cursor-pointer text-sm">
                                         Xáo trộn thứ tự đáp án
@@ -241,7 +304,12 @@ export default function GenerateExam() {
                                 </div>
                                 {examData && (
                                     <div className="flex gap-2">
-                                        <Button variant="outline" size="sm" className="gap-2">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="gap-2"
+                                            onClick={handleViewFullExam}
+                                        >
                                             <Eye className="h-4 w-4" />
                                             Xem đầy đủ
                                         </Button>

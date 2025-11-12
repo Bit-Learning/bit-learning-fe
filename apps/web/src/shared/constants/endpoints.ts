@@ -2,7 +2,7 @@ import { API_CONFIG } from '@/shared/config/api.config'
 
 export const endpoints = {
     AUTH: '/api/auth',
-    ACCOUNT: '/users',
+    ACCOUNT: '/api/users',
 }
 
 /**

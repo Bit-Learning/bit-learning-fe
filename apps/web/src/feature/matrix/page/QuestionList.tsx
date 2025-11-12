@@ -1,29 +1,47 @@
 import { apiClient } from '@/shared/lib/apiClient'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardHeader } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
-import { Edit, Eye, FileQuestion, Plus, Search, Trash2, Upload } from 'lucide-react'
+import { Edit, Eye, FileQuestion, FileText, Plus, Search, Trash2, Upload } from 'lucide-react'
 import { useState } from 'react'
 
 export default function QuestionList() {
     const [searchTerm, setSearchTerm] = useState('')
     const [currentPage, setCurrentPage] = useState(0)
     const [pageSize, setPageSize] = useState(20)
+    const queryClient = useQueryClient()
 
-    // Fetch all questions
+    // Fetch all questions using search with empty filter
     const {
         data: questions,
         isLoading,
         error,
-    } = useQuery(
-        apiClient.question.getAllQuestions({
-            page: currentPage,
-            size: pageSize,
-        }),
-    )
+    } = useQuery({
+        ...apiClient.question.searchQuestions(
+            {}, // Empty filter to get all questions
+            {
+                page: currentPage,
+                size: pageSize,
+            },
+        ),
+    })
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        ...apiClient.question.deleteQuestion(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['questions'] })
+        },
+    })
+
+    const handleDelete = (id: number, content: string) => {
+        if (confirm(`Bạn có chắc chắn muốn xóa câu hỏi:\n"${content.substring(0, 50)}..."`)) {
+            deleteMutation.mutate(id)
+        }
+    }
 
     // Safely access content array from paginated response
     const questionsList = Array.isArray(questions?.content) ? questions.content : []
@@ -91,19 +109,25 @@ export default function QuestionList() {
                     />
                 </div>
                 <div className="flex gap-2">
-                    <Link to="/matrices/import">
+                    <Link to={'/questions/generate-from-questions' as any}>
+                        <Button variant="default" className="gap-2">
+                            <FileText className="h-4 w-4" />
+                            Generate đề thi
+                        </Button>
+                    </Link>
+                    <Link to={'/matrices/import' as any}>
                         <Button variant="outline" className="gap-2">
                             <Upload className="h-4 w-4" />
                             Import
                         </Button>
                     </Link>
-                    <Link to="/questions/my">
+                    <Link to={'/questions/my' as any}>
                         <Button variant="outline" className="gap-2">
                             <FileQuestion className="h-4 w-4" />
                             Câu hỏi của tôi
                         </Button>
                     </Link>
-                    <Link to="/questions/create">
+                    <Link to={'/questions/create' as any}>
                         <Button className="gap-2">
                             <Plus className="h-4 w-4" />
                             Tạo câu hỏi mới
@@ -119,7 +143,7 @@ export default function QuestionList() {
                         <FileQuestion className="mb-4 h-16 w-16 text-gray-400" />
                         <h3 className="mb-2 text-xl font-medium">Chưa có câu hỏi nào</h3>
                         <p className="text-muted-foreground mb-4">Bắt đầu tạo câu hỏi đầu tiên</p>
-                        <Link to="/questions/create">
+                        <Link to={'/questions/create' as any}>
                             <Button className="gap-2">
                                 <Plus className="h-4 w-4" />
                                 Tạo câu hỏi mới
@@ -161,12 +185,12 @@ export default function QuestionList() {
                                             <td className="px-4 py-3 text-sm">{question.lesson?.name || '-'}</td>
                                             <td className="px-4 py-3">
                                                 <div className="flex justify-end gap-2">
-                                                    <Link to={`/questions/${question.id}`}>
+                                                    <Link to={`/questions/${question.id}` as any}>
                                                         <Button variant="ghost" size="sm" className="gap-1">
                                                             <Eye className="h-4 w-4" />
                                                         </Button>
                                                     </Link>
-                                                    <Link to={`/questions/${question.id}/edit`}>
+                                                    <Link to={`/questions/${question.id}/edit` as any}>
                                                         <Button variant="ghost" size="sm" className="gap-1">
                                                             <Edit className="h-4 w-4" />
                                                         </Button>
@@ -175,6 +199,8 @@ export default function QuestionList() {
                                                         variant="ghost"
                                                         size="sm"
                                                         className="gap-1 text-red-600 hover:bg-red-50"
+                                                        onClick={() => handleDelete(question.id, question.content)}
+                                                        isDisabled={deleteMutation.isPending}
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>

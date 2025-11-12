@@ -61,7 +61,7 @@ export default function QuestionDetail() {
         <div className="container mx-auto max-w-4xl px-4 py-8">
             {/* Header */}
             <div className="mb-8">
-                <Link to="/questions">
+                <Link to={'/questions/my' as any}>
                     <Button variant="ghost" className="mb-4 gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         Quay lại danh sách
@@ -69,7 +69,7 @@ export default function QuestionDetail() {
                 </Link>
                 <div className="flex items-center justify-between">
                     <h1 className="text-4xl font-bold">Chi tiết câu hỏi</h1>
-                    <Link to={`/questions/${questionId}/edit`}>
+                    <Link to={`/questions/${questionId}/edit` as any}>
                         <Button className="gap-2">
                             <Edit className="h-4 w-4" />
                             Chỉnh sửa

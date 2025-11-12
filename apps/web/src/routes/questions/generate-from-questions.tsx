@@ -1,11 +1,11 @@
-import CreateQuestion from '@/feature/matrix/page/CreateQuestion'
+import GenerateExamFromQuestions from '@/feature/matrix/page/GenerateExamFromQuestions'
 import { ProtectedRoute } from '@/shared/components/ProtectedRoute'
 import { createFileRoute } from '@tanstack/react-router'
 
-export const Route = createFileRoute('/questions/create')({
+export const Route = createFileRoute('/questions/generate-from-questions')({
     component: () => (
         <ProtectedRoute>
-            <CreateQuestion />
+            <GenerateExamFromQuestions />
         </ProtectedRoute>
     ),
 })

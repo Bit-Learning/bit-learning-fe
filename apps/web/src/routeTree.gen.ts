@@ -22,6 +22,8 @@ import { Route as CoursesMobileDevelopmentRouteImport } from './routes/courses/m
 import { Route as CoursesWebDevelopmentRouteImport } from './routes/courses/web-development'
 import { Route as CustomTemplateRouteImport } from './routes/custom-template'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as ExamsIdRouteImport } from './routes/exams/$id'
+import { Route as ExamsGenerateRouteImport } from './routes/exams/generate'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
@@ -43,6 +45,7 @@ import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as QuestionsIdRouteImport } from './routes/questions/$id'
 import { Route as QuestionsIdEditRouteImport } from './routes/questions/$id.edit'
 import { Route as QuestionsCreateRouteImport } from './routes/questions/create'
+import { Route as QuestionsGenerateFromQuestionsRouteImport } from './routes/questions/generate-from-questions'
 import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
 import { Route as QuestionsMyRouteImport } from './routes/questions/my'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
@@ -223,6 +226,11 @@ const QuestionsMyRoute = QuestionsMyRouteImport.update({
     path: '/questions/my',
     getParentRoute: () => rootRouteImport,
 } as any)
+const QuestionsGenerateFromQuestionsRoute = QuestionsGenerateFromQuestionsRouteImport.update({
+    id: '/questions/generate-from-questions',
+    path: '/questions/generate-from-questions',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const QuestionsCreateRoute = QuestionsCreateRouteImport.update({
     id: '/questions/create',
     path: '/questions/create',
@@ -256,6 +264,16 @@ const MatricesImportRoute = MatricesImportRouteImport.update({
 const MatricesCreateRoute = MatricesCreateRouteImport.update({
     id: '/matrices/create',
     path: '/matrices/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsGenerateRoute = ExamsGenerateRouteImport.update({
+    id: '/exams/generate',
+    path: '/exams/generate',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsIdRoute = ExamsIdRouteImport.update({
+    id: '/exams/$id',
+    path: '/exams/$id',
     getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesWebDevelopmentRoute = CoursesWebDevelopmentRouteImport.update({
@@ -354,6 +372,8 @@ export interface FileRoutesByFullPath {
     '/courses/data-science': typeof CoursesDataScienceRoute
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
+    '/exams/$id': typeof ExamsIdRoute
+    '/exams/generate': typeof ExamsGenerateRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/matrices/my': typeof MatricesMyRoute
@@ -361,6 +381,7 @@ export interface FileRoutesByFullPath {
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/questions/$id': typeof QuestionsIdRouteWithChildren
     '/questions/create': typeof QuestionsCreateRoute
+    '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
     '/questions/my': typeof QuestionsMyRoute
     '/syllabuses/create': typeof SyllabusesCreateRoute
     '/syllabuses/my': typeof SyllabusesMyRoute
@@ -409,6 +430,8 @@ export interface FileRoutesByTo {
     '/courses/data-science': typeof CoursesDataScienceRoute
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
+    '/exams/$id': typeof ExamsIdRoute
+    '/exams/generate': typeof ExamsGenerateRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/matrices/my': typeof MatricesMyRoute
@@ -416,6 +439,7 @@ export interface FileRoutesByTo {
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/questions/$id': typeof QuestionsIdRouteWithChildren
     '/questions/create': typeof QuestionsCreateRoute
+    '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
     '/questions/my': typeof QuestionsMyRoute
     '/syllabuses/create': typeof SyllabusesCreateRoute
     '/syllabuses/my': typeof SyllabusesMyRoute
@@ -465,6 +489,8 @@ export interface FileRoutesById {
     '/courses/data-science': typeof CoursesDataScienceRoute
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
+    '/exams/$id': typeof ExamsIdRoute
+    '/exams/generate': typeof ExamsGenerateRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/matrices/my': typeof MatricesMyRoute
@@ -472,6 +498,7 @@ export interface FileRoutesById {
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
     '/questions/$id': typeof QuestionsIdRouteWithChildren
     '/questions/create': typeof QuestionsCreateRoute
+    '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
     '/questions/my': typeof QuestionsMyRoute
     '/syllabuses/create': typeof SyllabusesCreateRoute
     '/syllabuses/my': typeof SyllabusesMyRoute
@@ -522,6 +549,8 @@ export interface FileRouteTypes {
         | '/courses/data-science'
         | '/courses/mobile-development'
         | '/courses/web-development'
+        | '/exams/$id'
+        | '/exams/generate'
         | '/matrices/create'
         | '/matrices/import'
         | '/matrices/my'
@@ -529,6 +558,7 @@ export interface FileRouteTypes {
         | '/presentations/$id'
         | '/questions/$id'
         | '/questions/create'
+        | '/questions/generate-from-questions'
         | '/questions/my'
         | '/syllabuses/create'
         | '/syllabuses/my'
@@ -577,6 +607,8 @@ export interface FileRouteTypes {
         | '/courses/data-science'
         | '/courses/mobile-development'
         | '/courses/web-development'
+        | '/exams/$id'
+        | '/exams/generate'
         | '/matrices/create'
         | '/matrices/import'
         | '/matrices/my'
@@ -584,6 +616,7 @@ export interface FileRouteTypes {
         | '/presentations/$id'
         | '/questions/$id'
         | '/questions/create'
+        | '/questions/generate-from-questions'
         | '/questions/my'
         | '/syllabuses/create'
         | '/syllabuses/my'
@@ -632,6 +665,8 @@ export interface FileRouteTypes {
         | '/courses/data-science'
         | '/courses/mobile-development'
         | '/courses/web-development'
+        | '/exams/$id'
+        | '/exams/generate'
         | '/matrices/create'
         | '/matrices/import'
         | '/matrices/my'
@@ -639,6 +674,7 @@ export interface FileRouteTypes {
         | '/presentations/$id'
         | '/questions/$id'
         | '/questions/create'
+        | '/questions/generate-from-questions'
         | '/questions/my'
         | '/syllabuses/create'
         | '/syllabuses/my'
@@ -688,6 +724,8 @@ export interface RootRouteChildren {
     CoursesDataScienceRoute: typeof CoursesDataScienceRoute
     CoursesMobileDevelopmentRoute: typeof CoursesMobileDevelopmentRoute
     CoursesWebDevelopmentRoute: typeof CoursesWebDevelopmentRoute
+    ExamsIdRoute: typeof ExamsIdRoute
+    ExamsGenerateRoute: typeof ExamsGenerateRoute
     MatricesCreateRoute: typeof MatricesCreateRoute
     MatricesImportRoute: typeof MatricesImportRoute
     MatricesMyRoute: typeof MatricesMyRoute
@@ -695,6 +733,7 @@ export interface RootRouteChildren {
     PresentationsIdRoute: typeof PresentationsIdRouteWithChildren
     QuestionsIdRoute: typeof QuestionsIdRouteWithChildren
     QuestionsCreateRoute: typeof QuestionsCreateRoute
+    QuestionsGenerateFromQuestionsRoute: typeof QuestionsGenerateFromQuestionsRoute
     QuestionsMyRoute: typeof QuestionsMyRoute
     SyllabusesCreateRoute: typeof SyllabusesCreateRoute
     SyllabusesMyRoute: typeof SyllabusesMyRoute
@@ -941,6 +980,13 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof QuestionsMyRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/questions/generate-from-questions': {
+            id: '/questions/generate-from-questions'
+            path: '/questions/generate-from-questions'
+            fullPath: '/questions/generate-from-questions'
+            preLoaderRoute: typeof QuestionsGenerateFromQuestionsRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/questions/create': {
             id: '/questions/create'
             path: '/questions/create'
@@ -988,6 +1034,20 @@ declare module '@tanstack/react-router' {
             path: '/matrices/create'
             fullPath: '/matrices/create'
             preLoaderRoute: typeof MatricesCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/exams/generate': {
+            id: '/exams/generate'
+            path: '/exams/generate'
+            fullPath: '/exams/generate'
+            preLoaderRoute: typeof ExamsGenerateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/exams/$id': {
+            id: '/exams/$id'
+            path: '/exams/$id'
+            fullPath: '/exams/$id'
+            preLoaderRoute: typeof ExamsIdRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/courses/web-development': {
@@ -1140,6 +1200,8 @@ const rootRouteChildren: RootRouteChildren = {
     CoursesDataScienceRoute: CoursesDataScienceRoute,
     CoursesMobileDevelopmentRoute: CoursesMobileDevelopmentRoute,
     CoursesWebDevelopmentRoute: CoursesWebDevelopmentRoute,
+    ExamsIdRoute: ExamsIdRoute,
+    ExamsGenerateRoute: ExamsGenerateRoute,
     MatricesCreateRoute: MatricesCreateRoute,
     MatricesImportRoute: MatricesImportRoute,
     MatricesMyRoute: MatricesMyRoute,
@@ -1147,6 +1209,7 @@ const rootRouteChildren: RootRouteChildren = {
     PresentationsIdRoute: PresentationsIdRouteWithChildren,
     QuestionsIdRoute: QuestionsIdRouteWithChildren,
     QuestionsCreateRoute: QuestionsCreateRoute,
+    QuestionsGenerateFromQuestionsRoute: QuestionsGenerateFromQuestionsRoute,
     QuestionsMyRoute: QuestionsMyRoute,
     SyllabusesCreateRoute: SyllabusesCreateRoute,
     SyllabusesMyRoute: SyllabusesMyRoute,

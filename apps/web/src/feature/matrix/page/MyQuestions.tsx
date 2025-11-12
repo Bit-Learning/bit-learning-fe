@@ -1,12 +1,12 @@
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { apiClient } from '@/shared/lib/apiClient'
-import { useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
-import { ArrowLeft, Edit, Eye, FileQuestion, Plus, Search, Trash2 } from 'lucide-react'
+import { ArrowLeft, Edit, Eye, FileQuestion, FileText, Plus, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -15,6 +15,11 @@ export default function MyQuestions() {
     const [currentPage, setCurrentPage] = useState(0)
     const [pageSize, setPageSize] = useState(20)
     const { userInfo } = useSelector(selectAuthStateInfo)
+    const queryClient = useQueryClient()
+
+    // Debug: Check if userInfo exists
+    console.log('[MyQuestions] userInfo:', userInfo)
+    console.log('[MyQuestions] userId:', userInfo?.id)
 
     // Fetch my questions
     const {
@@ -24,7 +29,27 @@ export default function MyQuestions() {
     } = useQuery({
         ...apiClient.question.getMyQuestions(userInfo?.id || 0, { page: currentPage, size: pageSize }),
         enabled: !!userInfo?.id,
+        retry: false,
+        onError: (err: any) => {
+            console.error('[MyQuestions] API Error:', err)
+            console.error('[MyQuestions] Response:', err?.response)
+            console.error('[MyQuestions] Status:', err?.response?.status)
+        },
     })
+
+    // Delete mutation
+    const deleteMutation = useMutation({
+        ...apiClient.question.deleteQuestion(),
+        onSuccess: () => {
+            queryClient.invalidateQueries({ queryKey: ['questions', 'my'] })
+        },
+    })
+
+    const handleDelete = (id: number, content: string) => {
+        if (confirm(`Bạn có chắc chắn muốn xóa câu hỏi:\n"${content.substring(0, 50)}..."`)) {
+            deleteMutation.mutate(id)
+        }
+    }
 
     // Safely access content array from paginated response
     const questionsList = Array.isArray(questions?.content) ? questions.content : []
@@ -75,7 +100,7 @@ export default function MyQuestions() {
         <div className="container mx-auto max-w-7xl px-4 py-8">
             {/* Header */}
             <div className="mb-8">
-                <Link to="/questions">
+                <Link to="/questions/my">
                     <Button variant="ghost" className="mb-4 gap-2">
                         <ArrowLeft className="h-4 w-4" />
                         Quay lại danh sách
@@ -97,12 +122,20 @@ export default function MyQuestions() {
                         className="pl-10"
                     />
                 </div>
-                <Link to="/questions/create">
-                    <Button className="gap-2">
-                        <Plus className="h-4 w-4" />
-                        Tạo câu hỏi mới
-                    </Button>
-                </Link>
+                <div className="flex gap-2">
+                    <Link to="/questions/generate-from-questions">
+                        <Button variant="outline" className="gap-2">
+                            <FileText className="h-4 w-4" />
+                            Generate đề thi
+                        </Button>
+                    </Link>
+                    <Link to="/questions/create">
+                        <Button className="gap-2">
+                            <Plus className="h-4 w-4" />
+                            Tạo câu hỏi mới
+                        </Button>
+                    </Link>
+                </div>
             </div>
 
             {/* Questions Table */}
@@ -151,12 +184,12 @@ export default function MyQuestions() {
                                             <td className="px-4 py-3 text-sm">{question.lesson?.name || '-'}</td>
                                             <td className="px-4 py-3">
                                                 <div className="flex justify-end gap-2">
-                                                    <Link to={`/questions/${question.id}`}>
+                                                    <Link to={`/questions/${question.id}` as any}>
                                                         <Button variant="ghost" size="sm" className="gap-1">
                                                             <Eye className="h-4 w-4" />
                                                         </Button>
                                                     </Link>
-                                                    <Link to={`/questions/${question.id}/edit`}>
+                                                    <Link to={`/questions/${question.id}/edit` as any}>
                                                         <Button variant="ghost" size="sm" className="gap-1">
                                                             <Edit className="h-4 w-4" />
                                                         </Button>
@@ -165,6 +198,8 @@ export default function MyQuestions() {
                                                         variant="ghost"
                                                         size="sm"
                                                         className="gap-1 text-red-600 hover:bg-red-50"
+                                                        onClick={() => handleDelete(question.id, question.content)}
+                                                        isDisabled={deleteMutation.isPending}
                                                     >
                                                         <Trash2 className="h-4 w-4" />
                                                     </Button>
