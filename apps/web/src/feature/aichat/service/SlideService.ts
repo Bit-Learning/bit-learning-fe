@@ -2,189 +2,178 @@ import api from '@/shared/api/api'
 import { endpoints } from '@/shared/constants/endpoints'
 import { AxiosResponse } from 'axios'
 import type {
-  ApiResponse,
-  TemplateResponse,
-  PageTemplateResponse,
-  CreateTemplateRequest,
-  UpdateTemplateRequest,
-  ValidateTemplateResponse,
-  ExtractPlaceholdersResponse,
-  SlideRequest,
-  JsonSlideResponse,
-  GeneratePPTXRequest,
-  GenerateCustomPPTXRequest,
-  QuestionRequest,
-  QuestionResponse,
-  BatchQuestionRequest,
-  BatchQuestionResponse,
-  MindmapRequest,
-  MindmapResponse,
-  HealthResponse,
-  ConvertToPlaceholdersResponse,
-  SlideGenerationResponse,
-  SlideHistoryPageResponse,
+    ApiResponse,
+    BatchQuestionRequest,
+    BatchQuestionResponse,
+    ConvertToPlaceholdersResponse,
+    ExtractPlaceholdersResponse,
+    JsonSlideResponse,
+    MindmapRequest,
+    MindmapResponse,
+    QuestionRequest,
+    QuestionResponse,
+    SlideGenerationResponse,
+    SlideHistoryPageResponse,
+    SlideRequest,
+    TemplateResponse,
+    ValidateTemplateResponse,
 } from '../type'
 
 export const SlideService = {
- 
+    getAllTemplates: (): Promise<AxiosResponse<ApiResponse<TemplateResponse[]>>> => {
+        return api.get(`${endpoints.SLIDE}/templates/all`)
+    },
 
-  getAllTemplates: (): Promise<AxiosResponse<ApiResponse<TemplateResponse[]>>> => {
-    return api.get(`${endpoints.SLIDE}/templates/all`)
-  },
+    getTemplateById: (id: number): Promise<AxiosResponse<ApiResponse<TemplateResponse>>> => {
+        return api.get(`${endpoints.SLIDE}/templates/${id}`)
+    },
 
-  getTemplateById: (id: number): Promise<AxiosResponse<ApiResponse<TemplateResponse>>> => {
-    return api.get(`${endpoints.SLIDE}/templates/${id}`)
-  },
+    uploadFile: (file: File): Promise<AxiosResponse<ApiResponse<string>>> => {
+        const formData = new FormData()
+        formData.append('file', file)
 
-  uploadFile: (file: File): Promise<AxiosResponse<ApiResponse<string>>> => {
-    const formData = new FormData()
-    formData.append('file', file)
+        return api.post(`${endpoints.SLIDE}/templates/upload`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        })
+    },
 
-    return api.post(`${endpoints.SLIDE}/templates/upload`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-  },
+    downloadTemplate: (url: string, filename: string): Promise<AxiosResponse<Blob>> => {
+        return api.get(`${endpoints.SLIDE}/templates/download`, {
+            params: { url, filename },
+            responseType: 'blob',
+        })
+    },
 
-  downloadTemplate: (url: string, filename: string): Promise<AxiosResponse<Blob>> => {
-    return api.get(`${endpoints.SLIDE}/templates/download`, {
-      params: { url, filename },
-      responseType: 'blob',
-    })
-  },
+    validateTemplate: (
+        template: File,
+        requiredPlaceholders?: string[],
+    ): Promise<AxiosResponse<ApiResponse<ValidateTemplateResponse>>> => {
+        const formData = new FormData()
+        formData.append('template', template)
 
-  validateTemplate: (
-    template: File,
-    requiredPlaceholders?: string[]
-  ): Promise<AxiosResponse<ApiResponse<ValidateTemplateResponse>>> => {
-    const formData = new FormData()
-    formData.append('template', template)
+        return api.post(`${endpoints.SLIDE}/validate-template`, formData, {
+            params: requiredPlaceholders ? { requiredPlaceholders } : {},
+            headers: { 'Content-Type': 'multipart/form-data' },
+        })
+    },
 
-    return api.post(`${endpoints.SLIDE}/validate-template`, formData, {
-      params: requiredPlaceholders ? { requiredPlaceholders } : {},
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-  },
+    extractPlaceholders: (template: File): Promise<AxiosResponse<ApiResponse<ExtractPlaceholdersResponse>>> => {
+        const formData = new FormData()
+        formData.append('template', template)
 
-  extractPlaceholders: (
-    template: File
-  ): Promise<AxiosResponse<ApiResponse<ExtractPlaceholdersResponse>>> => {
-    const formData = new FormData()
-    formData.append('template', template)
+        return api.post(`${endpoints.SLIDE}/extract-placeholders`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+        })
+    },
+    generatePPTX: (
+        templateId: number,
+        request: SlideRequest,
+    ): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
+        const formData = new FormData()
+        formData.append('request', JSON.stringify(request))
 
-    return api.post(`${endpoints.SLIDE}/extract-placeholders`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-  },
-  generatePPTX: (templateId: number, request: SlideRequest): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
-    const formData = new FormData()
-    formData.append('request', JSON.stringify(request))
+        return api.post(`${endpoints.SLIDE}/generate`, formData, {
+            params: { templateId },
+            headers: { 'Content-Type': 'multipart/form-data' },
+        })
+    },
 
-    return api.post(`${endpoints.SLIDE}/generate`, formData, {
-      params: { templateId },
-      headers: { 'Content-Type': 'multipart/form-data' },
-    })
-  },
+    generateJSON: (request: SlideRequest): Promise<AxiosResponse<ApiResponse<JsonSlideResponse>>> => {
+        return api.post(`${endpoints.SLIDE}/generate/json`, request)
+    },
 
-  generateJSON: (request: SlideRequest): Promise<AxiosResponse<ApiResponse<JsonSlideResponse>>> => {
-    return api.post(`${endpoints.SLIDE}/generate/json`, request)
-  },
+    generateCustomPPTX: (template: File, placeholders: Record<string, string>): Promise<AxiosResponse<Blob>> => {
+        const formData = new FormData()
+        formData.append('template', template)
+        formData.append('placeholders', JSON.stringify(placeholders))
 
-  generateCustomPPTX: (template: File, placeholders: Record<string, string>): Promise<AxiosResponse<Blob>> => {
-    const formData = new FormData()
-    formData.append('template', template)
-    formData.append('placeholders', JSON.stringify(placeholders))
+        return api.post(`${endpoints.SLIDE}/generate-custom`, formData, {
+            headers: { 'Content-Type': 'multipart/form-data' },
+            responseType: 'blob',
+        })
+    },
 
-    return api.post(`${endpoints.SLIDE}/generate-custom`, formData, {
-      headers: { 'Content-Type': 'multipart/form-data' },
-      responseType: 'blob',
-    })
-  },
+    convertToPlaceholders: (
+        jsonResponse: JsonSlideResponse,
+    ): Promise<AxiosResponse<ApiResponse<ConvertToPlaceholdersResponse>>> => {
+        return api.post(`${endpoints.SLIDE}/convert-to-placeholders`, jsonResponse)
+    },
 
-  convertToPlaceholders: (
-    jsonResponse: JsonSlideResponse
-  ): Promise<AxiosResponse<ApiResponse<ConvertToPlaceholdersResponse>>> => {
-    return api.post(`${endpoints.SLIDE}/convert-to-placeholders`, jsonResponse)
-  },
+    askQuestion: (request: QuestionRequest): Promise<AxiosResponse<ApiResponse<QuestionResponse>>> => {
+        return api.post(`${endpoints.SLIDE}/ask`, request)
+    },
 
-  askQuestion: (request: QuestionRequest): Promise<AxiosResponse<ApiResponse<QuestionResponse>>> => {
-    return api.post(`${endpoints.SLIDE}/ask`, request)
-  },
+    askBatchQuestions: (request: BatchQuestionRequest): Promise<AxiosResponse<ApiResponse<BatchQuestionResponse>>> => {
+        return api.post(`${endpoints.SLIDE}/ask/batch`, request)
+    },
 
-  askBatchQuestions: (request: BatchQuestionRequest): Promise<AxiosResponse<ApiResponse<BatchQuestionResponse>>> => {
-    return api.post(`${endpoints.SLIDE}/ask/batch`, request)
-  },
+    generateMindmap: (request: MindmapRequest): Promise<AxiosResponse<ApiResponse<MindmapResponse>>> => {
+        return api.post(`${endpoints.SLIDE}/mindmap/generate`, request)
+    },
 
-  generateMindmap: (request: MindmapRequest): Promise<AxiosResponse<ApiResponse<MindmapResponse>>> => {
-    return api.post(`${endpoints.SLIDE}/mindmap/generate`, request)
-  },
+    downloadFromUrl: async (url: string, filename: string): Promise<void> => {
+        const response = await fetch(url)
+        if (!response.ok) {
+            throw new Error(`Failed to download file from ${url}`)
+        }
+        const blob = await response.blob()
+        downloadBlob(blob, filename)
+    },
 
-  downloadFromUrl: async (url: string, filename: string): Promise<void> => {
-    const response = await fetch(url)
-    if (!response.ok) {
-      throw new Error(`Failed to download file from ${url}`)
-    }
-    const blob = await response.blob()
-    downloadBlob(blob, filename)
-  },
+    /**
+     * Get user's slide generation history with pagination
+     *
+     * @param page - Page number (0-indexed)
+     * @param size - Page size (default: 10)
+     * @param sortBy - Sort field (default: 'createdAt')
+     * @param sortDir - Sort direction ('asc' or 'desc', default: 'desc')
+     * @returns Promise with paginated slide history
+     *
+     * @example
+     * ```typescript
+     * SlideService.getSlideHistory(0, 10, 'createdAt', 'desc')
+     * ```
+     */
+    getSlideHistory: (
+        page: number = 0,
+        size: number = 10,
+        sortBy: string = 'createdAt',
+        sortDir: 'asc' | 'desc' = 'desc',
+    ): Promise<AxiosResponse<ApiResponse<SlideHistoryPageResponse>>> => {
+        return api.get(`${endpoints.SLIDE}/history`, {
+            params: { page, size, sortBy, sortDir },
+        })
+    },
 
-  /**
-   * Get user's slide generation history with pagination
-   *
-   * @param page - Page number (0-indexed)
-   * @param size - Page size (default: 10)
-   * @param sortBy - Sort field (default: 'createdAt')
-   * @param sortDir - Sort direction ('asc' or 'desc', default: 'desc')
-   * @returns Promise with paginated slide history
-   *
-   * @example
-   * ```typescript
-   * SlideService.getSlideHistory(0, 10, 'createdAt', 'desc')
-   * ```
-   */
-  getSlideHistory: (
-    page: number = 0,
-    size: number = 10,
-    sortBy: string = 'createdAt',
-    sortDir: 'asc' | 'desc' = 'desc'
-  ): Promise<AxiosResponse<ApiResponse<SlideHistoryPageResponse>>> => {
-    return api.get(`${endpoints.SLIDE}/history`, {
-      params: { page, size, sortBy, sortDir },
-    })
-  },
-
-  /**
-   * Get specific generated slide by ID
-   *
-   * @param id - Slide ID
-   * @returns Promise with slide details
-   *
-   * @example
-   * ```typescript
-   * SlideService.getSlideById(123)
-   * ```
-   */
-  getSlideById: (
-    id: number
-  ): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
-    return api.get(`${endpoints.SLIDE}/history/${id}`)
-  },
+    /**
+     * Get specific generated slide by ID
+     *
+     * @param id - Slide ID
+     * @returns Promise with slide details
+     *
+     * @example
+     * ```typescript
+     * SlideService.getSlideById(123)
+     * ```
+     */
+    getSlideById: (id: number): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
+        return api.get(`${endpoints.SLIDE}/history/${id}`)
+    },
 }
-
 
 export const downloadBlob = (blob: Blob, filename: string) => {
-  const url = window.URL.createObjectURL(blob)
-  const link = document.createElement('a')
-  link.href = url
-  link.download = filename
-  document.body.appendChild(link)
-  link.click()
-  document.body.removeChild(link)
-  window.URL.revokeObjectURL(url)
+    const url = window.URL.createObjectURL(blob)
+    const link = document.createElement('a')
+    link.href = url
+    link.download = filename
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+    window.URL.revokeObjectURL(url)
 }
 
-
 export const generatePPTXFilename = (topic: string): string => {
-  const sanitizedTopic = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase()
-  const timestamp = new Date().toISOString().split('T')[0]
-  return `${sanitizedTopic}_${timestamp}.pptx`
+    const sanitizedTopic = topic.replace(/[^a-z0-9]/gi, '_').toLowerCase()
+    const timestamp = new Date().toISOString().split('T')[0]
+    return `${sanitizedTopic}_${timestamp}.pptx`
 }

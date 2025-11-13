@@ -12,26 +12,26 @@
 
 // Slide Generation Hooks
 export {
-  useSlideGeneration,
-  useSlidePreview,
-  useCustomSlideGeneration,
-  useAskQuestion,
-  useMindmapGeneration,
-  useSlideHistory,
-  useSlideById,
+    useAskQuestion,
+    useCustomSlideGeneration,
+    useMindmapGeneration,
+    useSlideById,
+    useSlideGeneration,
+    useSlideHistory,
+    useSlidePreview,
 } from './useSlideGeneration'
 
 // Template Hooks
-export { useTemplates, useTemplate } from './useTemplates'
+export { useTemplate, useTemplates } from './useTemplates'
 
 // Conversation Hooks
 export {
-  useCreateConversation,
-  useConversation,
-  useConversations,
-  useConversationMessages,
-  useDeleteConversation,
-  conversationKeys,
+    conversationKeys,
+    useConversation,
+    useConversationMessages,
+    useConversations,
+    useCreateConversation,
+    useDeleteConversation,
 } from './useChatConversation'
 
 // Message Hooks

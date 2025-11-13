@@ -46,7 +46,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onSelectTempla
                     >
                         <div className="flex flex-col p-4">
                             {/* Template thumbnail or icon */}
-                            <div className="mb-3 flex h-32 items-center justify-center rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100 overflow-hidden">
+                            <div className="mb-3 flex h-32 items-center justify-center overflow-hidden rounded-lg bg-gradient-to-br from-blue-100 to-indigo-100">
                                 {template.thumbnailUrl ? (
                                     <img
                                         src={template.thumbnailUrl}
@@ -63,9 +63,7 @@ export const TemplateGallery: React.FC<TemplateGalleryProps> = ({ onSelectTempla
 
                             {/* Description */}
                             {template.description && (
-                                <p className="mb-2 line-clamp-2 text-xs text-gray-500">
-                                    {template.description}
-                                </p>
+                                <p className="mb-2 line-clamp-2 text-xs text-gray-500">{template.description}</p>
                             )}
 
                             {/* Action button */}

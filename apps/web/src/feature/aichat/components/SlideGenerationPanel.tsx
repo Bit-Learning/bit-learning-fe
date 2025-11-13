@@ -1,20 +1,14 @@
 import { Button } from '@workspace/ui/components/Button'
-import { Input } from '@workspace/ui/components/update/input'
-import { Label } from '@workspace/ui/components/label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@workspace/ui/components/update/select'
 import { Checkbox } from '@workspace/ui/components/Checkbox'
-import { Loader2, Presentation, Sparkles, FileDown } from 'lucide-react'
-import React from 'react'
+import { Label } from '@workspace/ui/components/label'
 import { toast } from '@workspace/ui/components/Sonner'
-import { TemplateGallery } from './TemplateGallery'
+import { Input } from '@workspace/ui/components/update/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/update/select'
+import { FileDown, Loader2, Presentation, Sparkles } from 'lucide-react'
+import React from 'react'
 import { useSlideGeneration } from '../hooks/useSlideGeneration'
 import type { CollectionName } from '../type'
+import { TemplateGallery } from './TemplateGallery'
 
 interface SlideGenerationPanelProps {
     chatContext?: string
@@ -49,21 +43,21 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
         setSelectedTemplateName(templateName)
         setShowTemplates(false)
         toast.success({
-            title: `Đã chọn template: ${templateName}`
+            title: `Đã chọn template: ${templateName}`,
         })
     }
 
     const handleGenerateSlide = () => {
         if (!topic.trim()) {
             toast.error({
-                title: 'Vui lòng nhập chủ đề'
+                title: 'Vui lòng nhập chủ đề',
             })
             return
         }
 
         if (!selectedTemplateId) {
             toast.error({
-                title: 'Vui lòng chọn template'
+                title: 'Vui lòng chọn template',
             })
             return
         }
@@ -77,8 +71,8 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
                 format: 'json',
                 include_examples: includeExamples,
                 include_exercises: includeExercises,
-                collection_name: collectionName
-            }
+                collection_name: collectionName,
+            },
         })
 
         // Optionally reset form after generation

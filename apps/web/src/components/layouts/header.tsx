@@ -66,9 +66,9 @@ const Header: React.FC = () => {
                                                             <NavigationMenuLink asChild>
                                                                 <Link
                                                                     to={subItem.to}
-                                                                    className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-blue-50 dark:hover:bg-gray-700"
+                                                                    className="block space-y-1 rounded-md p-2 leading-none no-underline transition-colors outline-none select-none hover:bg-blue-50 dark:hover:bg-gray-700"
                                                                 >
-                                                                    <div className="text-sm font-medium leading-none hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
+                                                                    <div className="text-sm leading-none font-medium hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
                                                                         {subItem.title}
                                                                     </div>
                                                                     <p className="text-muted-foreground line-clamp-2 text-sm leading-snug dark:text-gray-400">

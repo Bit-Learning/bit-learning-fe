@@ -274,7 +274,7 @@ function UserProfilePage() {
                                     alt="Cover"
                                     className="h-full w-full object-cover"
                                 />
-                                <Button size="sm" variant="secondary" className="absolute bottom-4 right-4 gap-2">
+                                <Button size="sm" variant="secondary" className="absolute right-4 bottom-4 gap-2">
                                     <Camera className="h-4 w-4" />
                                     <span className="hidden sm:inline">Chỉnh sửa ảnh bìa</span>
                                 </Button>
@@ -296,7 +296,7 @@ function UserProfilePage() {
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
+                                            className="absolute right-2 bottom-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
                                         >
                                             <Camera className="h-4 w-4" />
                                         </Button>
@@ -355,7 +355,7 @@ function UserProfilePage() {
                                                 <label className="text-muted-foreground text-sm font-medium">
                                                     Ngày tham gia
                                                 </label>
-                                                <p className="break-all font-mono text-xs">
+                                                <p className="font-mono text-xs break-all">
                                                     {userInfo.createdAt.slice(0, 10) || 'N/A'}
                                                 </p>
                                             </div>

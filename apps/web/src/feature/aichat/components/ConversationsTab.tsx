@@ -1,28 +1,3 @@
-import { useConversations, useDeleteConversation, useCreateConversation } from '../hooks'
-import { Button } from '@workspace/ui/components/Button'
-import { Input } from '@workspace/ui/components/update/input'
-import { Label } from '@workspace/ui/components/label'
-import {
-    Dialog,
-    DialogTrigger,
-    DialogOverlay,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@workspace/ui/components/Dialog'
-import {
-    MessageSquare,
-    Trash2,
-    Archive,
-    Clock,
-    Plus,
-    Loader2,
-    AlertCircle,
-    ChevronLeft,
-    ChevronRight,
-} from 'lucide-react'
-import * as React from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -33,6 +8,30 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@workspace/ui/components/alert-dialog'
+import { Button } from '@workspace/ui/components/Button'
+import {
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogOverlay,
+    DialogTitle,
+    DialogTrigger,
+} from '@workspace/ui/components/Dialog'
+import { Label } from '@workspace/ui/components/label'
+import { Input } from '@workspace/ui/components/update/input'
+import {
+    AlertCircle,
+    Archive,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Loader2,
+    MessageSquare,
+    Plus,
+    Trash2,
+} from 'lucide-react'
+import * as React from 'react'
+import { useConversations, useCreateConversation, useDeleteConversation } from '../hooks'
 
 interface ConversationsTabProps {
     onSelectConversation?: (id: string) => void
@@ -61,18 +60,15 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
 
     const handleCreateConversation = () => {
         const title = newTitle.trim()
-        createConversation(
-            title ? { title } : {},
-            {
-                onSuccess: data => {
-                    setShowCreateDialog(false)
-                    setNewTitle('')
-                    if (onSelectConversation) {
-                        onSelectConversation(data.id)
-                    }
-                },
-            }
-        )
+        createConversation(title ? { title } : {}, {
+            onSuccess: data => {
+                setShowCreateDialog(false)
+                setNewTitle('')
+                if (onSelectConversation) {
+                    onSelectConversation(data.id)
+                }
+            },
+        })
     }
 
     if (isLoading) {
@@ -109,10 +105,7 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                             {data?.total || 0} conversations • Page {page}
                         </p>
                     </div>
-                    <Button
-                        onClick={() => setShowCreateDialog(true)}
-                        className="gap-2 bg-blue-600 hover:bg-blue-700"
-                    >
+                    <Button onClick={() => setShowCreateDialog(true)} className="gap-2 bg-blue-600 hover:bg-blue-700">
                         <Plus className="h-4 w-4" />
                         New Conversation
                     </Button>
@@ -138,12 +131,13 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                         {data.conversations.map(conv => (
                             <div
                                 key={conv.id}
-                                className={`group relative rounded-xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${currentConversationId === conv.id ? 'border-blue-500 ring-2 ring-blue-100' : ''
-                                    }`}
+                                className={`group relative rounded-xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${
+                                    currentConversationId === conv.id ? 'border-blue-500 ring-2 ring-blue-100' : ''
+                                }`}
                             >
                                 {/* Archived Badge */}
                                 {conv.is_archived && (
-                                    <div className="absolute right-2 top-2">
+                                    <div className="absolute top-2 right-2">
                                         <Archive className="h-4 w-4 text-gray-400" />
                                     </div>
                                 )}

@@ -6,7 +6,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
-import { Tabs, Tab, TabList, TabPanel } from '@workspace/ui/components/Tabs'
+import { TabPanel, Tabs } from '@workspace/ui/components/Tabs'
 import {
     Sidebar,
     SidebarContent,

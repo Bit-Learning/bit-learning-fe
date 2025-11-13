@@ -73,6 +73,27 @@ export const navItems = [
             },
         ],
     },
+
+    {
+        title: 'Quản lý đề thi',
+        items: [
+            {
+                title: 'Ma trận đề thi',
+                to: '/matrices',
+                description: 'Quản lý ma trận đề thi và tạo đề thi tự động',
+            },
+            {
+                title: 'Giáo trình (Syllabus)',
+                to: '/syllabuses',
+                description: 'Quản lý giáo trình và đề cương môn học',
+            },
+            {
+                title: 'Ngân hàng câu hỏi',
+                to: '/questions/my',
+                description: 'Quản lý câu hỏi của bạn',
+            },
+        ],
+    },
     // {
     //   title: "Dịch vụ",
     //   items: [

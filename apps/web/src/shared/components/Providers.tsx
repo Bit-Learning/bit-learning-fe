@@ -2,6 +2,7 @@ import { initializeAuth } from '@/feature/auth/store/auth.actions'
 import { ThemeProvider } from '@/shared/components/ThemeProvider'
 import { matchQuery, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
+import { ConfirmDialog } from '@workspace/ui/components/ConfirmDialog'
 import { BsProvider } from '@workspace/ui/components/Provider'
 import { useEffect } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
@@ -49,6 +50,7 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
                         <QueryClientProvider client={queryClient}>
                             <AuthInitializer />
                             {children}
+                            <ConfirmDialog />
                             <ReactQueryDevtools initialIsOpen={false} />
                         </QueryClientProvider>
                     </HelmetProvider>
