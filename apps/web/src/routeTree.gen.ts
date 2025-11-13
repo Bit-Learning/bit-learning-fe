@@ -24,6 +24,7 @@ import { Route as CustomTemplateRouteImport } from './routes/custom-template'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ExamsIdRouteImport } from './routes/exams/$id'
 import { Route as ExamsGenerateRouteImport } from './routes/exams/generate'
+import { Route as ExamsMyExamsRouteImport } from './routes/exams/my-exams'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
@@ -266,6 +267,11 @@ const MatricesCreateRoute = MatricesCreateRouteImport.update({
     path: '/matrices/create',
     getParentRoute: () => rootRouteImport,
 } as any)
+const ExamsMyExamsRoute = ExamsMyExamsRouteImport.update({
+    id: '/exams/my-exams',
+    path: '/exams/my-exams',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const ExamsGenerateRoute = ExamsGenerateRouteImport.update({
     id: '/exams/generate',
     path: '/exams/generate',
@@ -374,6 +380,7 @@ export interface FileRoutesByFullPath {
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/exams/$id': typeof ExamsIdRoute
     '/exams/generate': typeof ExamsGenerateRoute
+    '/exams/my-exams': typeof ExamsMyExamsRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/matrices/my': typeof MatricesMyRoute
@@ -432,6 +439,7 @@ export interface FileRoutesByTo {
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/exams/$id': typeof ExamsIdRoute
     '/exams/generate': typeof ExamsGenerateRoute
+    '/exams/my-exams': typeof ExamsMyExamsRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/matrices/my': typeof MatricesMyRoute
@@ -491,6 +499,7 @@ export interface FileRoutesById {
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
     '/exams/$id': typeof ExamsIdRoute
     '/exams/generate': typeof ExamsGenerateRoute
+    '/exams/my-exams': typeof ExamsMyExamsRoute
     '/matrices/create': typeof MatricesCreateRoute
     '/matrices/import': typeof MatricesImportRoute
     '/matrices/my': typeof MatricesMyRoute
@@ -551,6 +560,7 @@ export interface FileRouteTypes {
         | '/courses/web-development'
         | '/exams/$id'
         | '/exams/generate'
+        | '/exams/my-exams'
         | '/matrices/create'
         | '/matrices/import'
         | '/matrices/my'
@@ -609,6 +619,7 @@ export interface FileRouteTypes {
         | '/courses/web-development'
         | '/exams/$id'
         | '/exams/generate'
+        | '/exams/my-exams'
         | '/matrices/create'
         | '/matrices/import'
         | '/matrices/my'
@@ -667,6 +678,7 @@ export interface FileRouteTypes {
         | '/courses/web-development'
         | '/exams/$id'
         | '/exams/generate'
+        | '/exams/my-exams'
         | '/matrices/create'
         | '/matrices/import'
         | '/matrices/my'
@@ -726,6 +738,7 @@ export interface RootRouteChildren {
     CoursesWebDevelopmentRoute: typeof CoursesWebDevelopmentRoute
     ExamsIdRoute: typeof ExamsIdRoute
     ExamsGenerateRoute: typeof ExamsGenerateRoute
+    ExamsMyExamsRoute: typeof ExamsMyExamsRoute
     MatricesCreateRoute: typeof MatricesCreateRoute
     MatricesImportRoute: typeof MatricesImportRoute
     MatricesMyRoute: typeof MatricesMyRoute
@@ -1036,6 +1049,13 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof MatricesCreateRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/exams/my-exams': {
+            id: '/exams/my-exams'
+            path: '/exams/my-exams'
+            fullPath: '/exams/my-exams'
+            preLoaderRoute: typeof ExamsMyExamsRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/exams/generate': {
             id: '/exams/generate'
             path: '/exams/generate'
@@ -1202,6 +1222,7 @@ const rootRouteChildren: RootRouteChildren = {
     CoursesWebDevelopmentRoute: CoursesWebDevelopmentRoute,
     ExamsIdRoute: ExamsIdRoute,
     ExamsGenerateRoute: ExamsGenerateRoute,
+    ExamsMyExamsRoute: ExamsMyExamsRoute,
     MatricesCreateRoute: MatricesCreateRoute,
     MatricesImportRoute: MatricesImportRoute,
     MatricesMyRoute: MatricesMyRoute,

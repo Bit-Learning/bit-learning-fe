@@ -96,16 +96,10 @@ export default function MatrixList() {
                     />
                 </div>
                 <div className="flex gap-2">
-                    <Link to="/matrices/import">
+                    <Link to="/exams/my-exams">
                         <Button variant="outline" className="gap-2">
-                            <Upload className="h-4 w-4" />
-                            Import Question Bank
-                        </Button>
-                    </Link>
-                    <Link to="/matrices/create">
-                        <Button className="gap-2">
-                            <Plus className="h-4 w-4" />
-                            Tạo ma trận mới
+                            <FileText className="h-4 w-4" />
+                            Đề Thi Của Tôi
                         </Button>
                     </Link>
                 </div>

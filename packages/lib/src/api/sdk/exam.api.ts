@@ -23,6 +23,33 @@ export class ExamApi {
         })
     }
 
+    // Get user's exams with pagination
+    getMyExams(userId: number, params?: { page?: number; size?: number; search?: string }) {
+        return queryOptions({
+            queryKey: ['my-exams', userId, params],
+            queryFn: async () => {
+                // Build clean params object, exclude empty search
+                const cleanParams: any = {
+                    page: params?.page ?? 0,
+                    size: params?.size ?? 10,
+                }
+
+                // Only add search if it's not empty
+                if (params?.search && params.search.trim()) {
+                    cleanParams.search = params.search
+                }
+
+                const response = await this.client.get<ApiResponse<PageExamBriefResponse>>('/api/v1/exams/my-exams', {
+                    params: cleanParams,
+                    headers: {
+                        'X-User-Id': userId.toString(),
+                    },
+                })
+                return response.data.data
+            },
+        })
+    }
+
     // Get exam by ID
     getExamById(id: number) {
         return queryOptions({
