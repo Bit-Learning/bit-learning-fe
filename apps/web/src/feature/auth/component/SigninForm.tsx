@@ -32,6 +32,7 @@ const formSchema = z.object({
 const SignInForm: React.FC = () => {
     const { isLoading, isAuthenticated } = useSelector(selectAuthStateInfo)
     const [showPassword, setShowPassword] = React.useState(false)
+    const [hasRedirected, setHasRedirected] = React.useState(false)
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
 
@@ -47,10 +48,13 @@ const SignInForm: React.FC = () => {
     })
 
     React.useEffect(() => {
-        if (isAuthenticated) {
+        console.log('SignInForm: isAuthenticated changed:', isAuthenticated, 'hasRedirected:', hasRedirected)
+        if (isAuthenticated && !hasRedirected) {
+            console.log('SignInForm: Redirecting to home...')
+            setHasRedirected(true)
             navigate({ to: '/' })
         }
-    }, [isAuthenticated, navigate])
+    }, [isAuthenticated, navigate, hasRedirected])
 
     React.useEffect(() => {
         // Don't show error toast here - let onSubmit handle it
