@@ -9,11 +9,11 @@ import axios, {
 } from 'axios'
 
 const api: AxiosInstance = axios.create({
-    baseURL: API_CONFIG.BASE_URL,
-    timeout: API_CONFIG.TIMEOUT,
+    baseURL: API_PATH.BASE_URL,
     headers: {
         ...API_CONFIG.DEFAULT_HEADERS,
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',
+        'ngrok-skip-browser-warning': 'true',
     },
 })
 

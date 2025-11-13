@@ -1,8 +1,9 @@
-import { API_CONFIG } from '@/shared/config/api.config'
-
 export const endpoints = {
-    AUTH: '/api/auth',
-    ACCOUNT: '/api/users',
+    AUTH: '/auth',
+    ACCOUNT: '/users',
+    PAYMENT: '/payment',
+    SLIDE: '/slides',
+    CHAT: '/slides/chat',
 }
 
 /**
@@ -10,8 +11,5 @@ export const endpoints = {
  * This will be removed in future versions
  */
 export const API_PATH = {
-    BASE_URL: {
-        DEVELOPMENT: API_CONFIG.BASE_URL + '/api/',
-        PRODUCTION: API_CONFIG.BASE_URL,
-    },
+    BASE_URL: import.meta.env.VITE_API_BASE_URL ?? '/api',
 }

@@ -15,6 +15,7 @@ import { z } from 'zod'
 import { setErrorAction } from '../../auth/store'
 import { requestLogin } from '../../auth/store/auth.actions'
 import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
+import { useGoogleOAuth2Config } from '../hook/useOAuth2'
 import type { TLoginRequest } from '../type/authState'
 
 const formSchema = z.object({
@@ -33,6 +34,9 @@ const SignInForm: React.FC = () => {
     const [showPassword, setShowPassword] = React.useState(false)
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
+
+    // Fetch Google OAuth2 configuration using TanStack Query
+    const { data: googleOAuth2Config, isError: isOAuth2Error } = useGoogleOAuth2Config()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -63,6 +67,7 @@ const SignInForm: React.FC = () => {
         }
         const result: any = await dispatch(requestLogin(body))
 
+        // Only show warning for activation - success/error toasts are handled in actions
         if (result?.needsActivation) {
             toast.warning({
                 title: 'Tài khoản chưa kích hoạt',
@@ -116,7 +121,20 @@ const SignInForm: React.FC = () => {
                         <div className="mb-6 flex items-center justify-center">
                             <button
                                 type="button"
-                                className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white px-7 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
+                                onClick={() => {
+                                    if (googleOAuth2Config?.authorizationUrl) {
+                                        window.location.href = googleOAuth2Config.authorizationUrl
+                                    } else {
+                                        toast.error({
+                                            title: 'Lỗi',
+                                            description: isOAuth2Error
+                                                ? 'Không thể tải cấu hình Google OAuth2. Vui lòng thử lại sau.'
+                                                : 'Đang tải cấu hình Google. Vui lòng thử lại trong giây lát.',
+                                        })
+                                    }
+                                }}
+                                disabled={!googleOAuth2Config?.authorizationUrl}
+                                className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white px-7 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <svg
                                     width="20"
@@ -167,7 +185,7 @@ const SignInForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                                    <Mail className="absolute top-1/2 left-3 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
                                                     <Input
                                                         placeholder="Nhập email của bạn"
                                                         {...field}
@@ -190,19 +208,19 @@ const SignInForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
+                                                    <div className="absolute top-1/2 left-3 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
                                                         <div className="h-2 w-2 rounded-full bg-white"></div>
                                                     </div>
                                                     <Input
                                                         type={showPassword ? 'text' : 'password'}
                                                         placeholder="Nhập mật khẩu của bạn"
                                                         {...field}
-                                                        className="h-11 rounded-xl border-2 border-gray-200 pl-10 pr-12 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+                                                        className="h-11 rounded-xl border-2 border-gray-200 pr-12 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
                                                     />
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
+                                                        className="absolute top-1/2 right-3 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
                                                     >
                                                         {showPassword ? (
                                                             <EyeIcon className="h-5 w-5" />

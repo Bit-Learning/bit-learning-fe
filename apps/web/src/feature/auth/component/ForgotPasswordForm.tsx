@@ -11,9 +11,8 @@ import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 import { setErrorAction } from '../../auth/store'
-import { requestForgotPassword } from '../../auth/store/auth.actions'
+import { requestPasswordResetInit } from '../../auth/store/auth.actions'
 import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
-import type { TForgotPasswordRequest } from '../type/authState'
 
 const formSchema = z.object({
     email: z
@@ -48,11 +47,22 @@ const ForgotPasswordForm: React.FC = () => {
         }
     }, [errorMsg, dispatch])
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        const body: TForgotPasswordRequest = {
-            email: values.email,
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        dispatch(setErrorAction(null))
+        const result: any = await dispatch(requestPasswordResetInit(values.email))
+
+        if (result?.success) {
+            toast.success({
+                title: 'Email đã được gửi!',
+                description: 'Vui lòng kiểm tra email của bạn để đặt lại mật khẩu.',
+            })
+            form.reset()
+        } else {
+            toast.error({
+                title: 'Gửi email thất bại',
+                description: result?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+            })
         }
-        dispatch(requestForgotPassword(body))
     }
 
     return (

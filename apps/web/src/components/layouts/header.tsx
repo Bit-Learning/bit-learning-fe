@@ -2,6 +2,7 @@ import { navItems } from '@/components/layouts/data/nav-items'
 import { logout } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { SearchProvider, useSearch } from '@/shared/context/search-context'
+import { mergeName } from '@/shared/lib/string-utils'
 import { useAppDispatch } from '@/shared/redux/store'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
@@ -17,7 +18,7 @@ import {
     navigationMenuTriggerStyle,
 } from '@workspace/ui/components/navigation-menu'
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@workspace/ui/components/sheet'
-import { LogOut, Menu, Search, Settings, User } from 'lucide-react'
+import { LogOut, Menu, Search, Settings, User, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import MobileSheetMenu from './mobile-sheet-menu'
@@ -65,9 +66,9 @@ const Header: React.FC = () => {
                                                             <NavigationMenuLink asChild>
                                                                 <Link
                                                                     to={subItem.to}
-                                                                    className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-blue-50 dark:hover:bg-gray-700"
+                                                                    className="block space-y-1 rounded-md p-2 leading-none no-underline transition-colors outline-none select-none hover:bg-blue-50 dark:hover:bg-gray-700"
                                                                 >
-                                                                    <div className="text-sm font-medium leading-none hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
+                                                                    <div className="text-sm leading-none font-medium hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
                                                                         {subItem.title}
                                                                     </div>
                                                                     <p className="text-muted-foreground line-clamp-2 text-sm leading-snug dark:text-gray-400">
@@ -107,8 +108,10 @@ const Header: React.FC = () => {
                                         <AvatarFallback>{userInfo.avatar?.slice(0, 2).toUpperCase()}</AvatarFallback>
                                     </Avatar>
                                     <div className="flex flex-col items-start">
-                                        <span className="text-sm font-medium">{userInfo.username}</span>
-                                        <span className="text-xs text-gray-500">{userInfo.email}</span>
+                                        <span className="text-md font-medium">
+                                            {mergeName(userInfo.firstName, userInfo.lastName)}
+                                        </span>
+                                        {/* <span className="text-xs text-gray-500">{userInfo.email}</span> */}
                                     </div>
                                 </Button>
                                 <MenuPopover placement="bottom end">
@@ -117,12 +120,18 @@ const Header: React.FC = () => {
                                             <User className="mr-2 h-4 w-4" />
                                             <span>Hồ sơ cá nhân</span>
                                         </MenuItem>
+                                        <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
+                                            <Wallet className="mr-2 h-4 w-4" />
+                                            <span>
+                                                {(userInfo.wallet?.balance ?? 0).toLocaleString('vi-VN', {
+                                                    style: 'currency',
+                                                    currency: 'VND',
+                                                })}
+                                            </span>
+                                        </MenuItem>
                                         <MenuItem isDisabled>
                                             <Settings className="mr-2 h-4 w-4" />
                                             <span>Cài đặt</span>
-                                        </MenuItem>
-                                        <MenuItem isDisabled>
-                                            <span>Presame (Sắp ra mắt)</span>
                                         </MenuItem>
                                         <MenuSeparator />
                                         <MenuItem onAction={handleLogout}>

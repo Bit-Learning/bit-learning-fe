@@ -1,5 +1,4 @@
 import { useLayout } from '@/context/layout-context'
-import { Outlet } from '@tanstack/react-router'
 import { motion } from 'framer-motion'
 import { memo } from 'react'
 import Footer from './footer'
@@ -31,15 +30,13 @@ function MainLayoutInner({ children, applyMotions = true }: Props) {
                 >
                     {showHeader && <Header />}
                     {/* === MAIN CONTENT (SCROLL ANIMATED SECTIONS) === */}
-                    <main className="flex-1 overflow-hidden bg-[#FFFFFF]">
+                    <main className="flex-1 bg-[#FFFFFF]">
                         <motion.div
-                            variants={fadeInUp}
-                            initial="hidden"
-                            whileInView="visible"
-                            transition={{ duration: 0.6 }}
-                            viewport={{ once: true, amount: 0.3 }}
+                            initial={{ opacity: 0, y: 40 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ duration: 0.6, delay: 0.2 }}
                         >
-                            {children || <Outlet />}
+                            {children}
                         </motion.div>
                     </main>
                     <ScrollToTop />
@@ -48,7 +45,7 @@ function MainLayoutInner({ children, applyMotions = true }: Props) {
             ) : (
                 <div className="flex min-h-screen flex-col">
                     {showHeader && <Header />}
-                    <main>{children || <Outlet />}</main>
+                    <main className="flex-1 bg-[#FFFFFF]">{children}</main>
                     <ScrollToTop />
                     {showFooter && <Footer />}
                 </div>

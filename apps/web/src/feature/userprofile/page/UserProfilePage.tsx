@@ -1,8 +1,10 @@
 import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
 import { requestUserProfile } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { useFetchOrdersByUserId } from '@/feature/order/hook/useOrder'
+import { CreatePaymentURL } from '@/feature/payment/service/paymentService'
 import { useUserPresentations } from '@/feature/presentations/hooks/usePresentations'
-import ProfileContent from '@/shared/components/profile-page/profile-content'
+import { useFetchTransactionsByWalletId } from '@/feature/transaction/hook/useTransaction'
 import { clearAuthTokens } from '@/shared/lib/cookies'
 import { formatDateTime } from '@/shared/lib/date-time-utils'
 import { useAppDispatch } from '@/shared/redux/store'
@@ -10,7 +12,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
-import { Card, CardContent } from '@workspace/ui/components/Card'
+import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
 import {
     Sidebar,
@@ -30,28 +32,48 @@ import {
 } from '@workspace/ui/components/sidebar'
 import {
     Activity,
+    ArrowDownLeft,
+    ArrowUpRight,
     Bell,
     Calendar,
     Camera,
+    CheckCircle,
+    Clock,
+    CreditCard,
+    Filter,
     Home,
     Key,
     LogOut,
-    Mail,
     MapPin,
+    Package,
     Presentation,
     Settings,
     Shield,
+    TrendingDown,
+    TrendingUp,
     User,
+    Wallet,
+    XCircle,
 } from 'lucide-react'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
+import { AddFundsDialog } from '../components/AddFundsDialog'
+import { ChangePasswordDialog } from '../components/ChangePasswordDialog'
 
 function UserProfilePage() {
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const [activeSection, setActiveSection] = React.useState('overview')
+    const [openAddFunds, setOpenAddFunds] = React.useState(false)
+    const [openChangePassword, setOpenChangePassword] = React.useState(false)
+    const [transactionTypeFilter, setTransactionTypeFilter] = React.useState<string>('ALL')
+    const [transactionStatusFilter, setTransactionStatusFilter] = React.useState<string>('ALL')
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
+    const { data: userOrders, isLoading: ordersLoading } = useFetchOrdersByUserId(userInfo?.id || 0)
+    const { data: userTransactions, isLoading: transactionsLoading } = useFetchTransactionsByWalletId(
+        userInfo?.wallet?.id || 0,
+    )
 
     React.useEffect(() => {
         // Fetch user profile on mount if not already loaded
@@ -59,6 +81,58 @@ function UserProfilePage() {
             dispatch(requestUserProfile())
         }
     }, [dispatch, userInfo])
+
+    // Filter transactions based on selected filters
+    const filteredTransactions = React.useMemo(() => {
+        if (!userTransactions) return []
+
+        return userTransactions.filter(transaction => {
+            const typeMatch = transactionTypeFilter === 'ALL' || transaction.type === transactionTypeFilter
+            const statusMatch = transactionStatusFilter === 'ALL' || transaction.status === transactionStatusFilter
+            return typeMatch && statusMatch
+        })
+    }, [userTransactions, transactionTypeFilter, transactionStatusFilter])
+
+    // Calculate transaction statistics
+    const transactionStats = React.useMemo(() => {
+        if (!userTransactions || userTransactions.length === 0) {
+            return {
+                totalDeposit: 0,
+                totalSpent: 0,
+                totalTransactions: 0,
+                completedCount: 0,
+                pendingCount: 0,
+                failedCount: 0,
+            }
+        }
+
+        return userTransactions.reduce(
+            (acc, transaction) => {
+                if (transaction.type === 'DEPOSIT' && transaction.status === 'COMPLETED') {
+                    acc.totalDeposit += transaction.amount
+                }
+                if (
+                    (transaction.type === 'PURCHASE' || transaction.type === 'AI_REQUEST') &&
+                    transaction.status === 'COMPLETED'
+                ) {
+                    acc.totalSpent += transaction.amount
+                }
+                if (transaction.status === 'COMPLETED') acc.completedCount++
+                if (transaction.status === 'PENDING') acc.pendingCount++
+                if (transaction.status === 'FAILED') acc.failedCount++
+                acc.totalTransactions++
+                return acc
+            },
+            {
+                totalDeposit: 0,
+                totalSpent: 0,
+                totalTransactions: 0,
+                completedCount: 0,
+                pendingCount: 0,
+                failedCount: 0,
+            },
+        )
+    }, [userTransactions])
 
     // User is guaranteed to exist here because of route-level protection
     if (isLoading || !userInfo) {
@@ -73,13 +147,24 @@ function UserProfilePage() {
     }
 
     const menuItems = [
-        { id: 'overview', label: 'Overview', icon: User },
-        { id: 'presentations', label: 'My Presentations', icon: Presentation },
-        { id: 'activity', label: 'Activity', icon: Activity },
-        { id: 'notifications', label: 'Notifications', icon: Bell },
-        { id: 'security', label: 'Security', icon: Shield },
-        { id: 'settings', label: 'Settings', icon: Settings },
+        { id: 'overview', label: 'Tổng quan', icon: User },
+        { id: 'presentations', label: 'Bài thuyết trình', icon: Presentation },
+        { id: 'orders', label: 'Đơn hàng', icon: Package },
+        { id: 'wallet', label: 'Ví & Giao dịch', icon: Wallet },
+        { id: 'activity', label: 'Hoạt động', icon: Activity },
+        { id: 'notifications', label: 'Thông báo', icon: Bell },
+        { id: 'security', label: 'Bảo mật', icon: Shield },
+        { id: 'settings', label: 'Cài đặt', icon: Settings },
     ]
+
+    const handleAddFunds = async (amount: number) => {
+        const res = await CreatePaymentURL({
+            amount: amount,
+            description: 'Nạp tiền vào ví',
+            walletId: userInfo.wallet.id,
+        })
+        window.location.href = res.data.data.url
+    }
 
     return (
         <SidebarProvider defaultOpen>
@@ -104,14 +189,14 @@ function UserProfilePage() {
 
                     <SidebarContent>
                         <SidebarGroup>
-                            <SidebarGroupLabel>Navigation</SidebarGroupLabel>
+                            <SidebarGroupLabel>Điều hướng</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     <SidebarMenuItem>
                                         <SidebarMenuButton asChild tooltip="Home">
                                             <Link to="/">
                                                 <Home />
-                                                <span>Home</span>
+                                                <span>Trang chủ</span>
                                             </Link>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
@@ -120,7 +205,7 @@ function UserProfilePage() {
                         </SidebarGroup>
 
                         <SidebarGroup>
-                            <SidebarGroupLabel>Profile</SidebarGroupLabel>
+                            <SidebarGroupLabel>Hồ sơ</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     {menuItems.map(item => (
@@ -140,13 +225,16 @@ function UserProfilePage() {
                         </SidebarGroup>
 
                         <SidebarGroup>
-                            <SidebarGroupLabel>Account</SidebarGroupLabel>
+                            <SidebarGroupLabel>Tài khoản</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     <SidebarMenuItem>
-                                        <SidebarMenuButton tooltip="Password">
+                                        <SidebarMenuButton
+                                            tooltip="Password"
+                                            onClick={() => setOpenChangePassword(true)}
+                                        >
                                             <Key />
-                                            <span>Change Password</span>
+                                            <span>Đổi mật khẩu</span>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                 </SidebarMenu>
@@ -159,7 +247,7 @@ function UserProfilePage() {
                             <SidebarMenuItem>
                                 <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
                                     <LogOut />
-                                    <span>Logout</span>
+                                    <span>Đăng xuất</span>
                                 </SidebarMenuButton>
                             </SidebarMenuItem>
                         </SidebarMenu>
@@ -172,52 +260,62 @@ function UserProfilePage() {
                     <header className="border-sidebar-border bg-background sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b px-4">
                         <SidebarTrigger className="-ml-1" />
                         <div className="flex flex-1 items-center justify-between">
-                            <h1 className="text-xl font-semibold">User Profile</h1>
+                            <h1 className="text-xl font-semibold">Hồ sơ người dùng</h1>
                         </div>
                     </header>
 
-                    <main className="flex-1 space-y-6 p-6">
-                        {/* Profile Header Card */}
-                        <Card>
-                            <CardContent className="p-6">
-                                <div className="flex flex-col items-start gap-6 md:flex-row md:items-center">
-                                    <div className="relative">
-                                        <Avatar className="h-24 w-24">
-                                            {userInfo.avatar && (
-                                                <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
-                                            )}
-                                            <AvatarFallback className="bg-blue-600 text-2xl text-white">
-                                                {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
-                                            </AvatarFallback>
-                                        </Avatar>
+                    <main className="flex-1">
+                        {/* Profile Header Card with Banner */}
+                        <Card className="overflow-hidden rounded-none border-x-0 border-t-0">
+                            {/* Cover Photo Banner */}
+                            <div className="relative h-48 w-full md:h-64 lg:h-80">
+                                <img
+                                    src="https://images.unsplash.com/photo-1480796927426-f609979314bd?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop"
+                                    alt="Cover"
+                                    className="h-full w-full object-cover"
+                                />
+                                <Button size="sm" variant="secondary" className="absolute right-4 bottom-4 gap-2">
+                                    <Camera className="h-4 w-4" />
+                                    <span className="hidden sm:inline">Chỉnh sửa ảnh bìa</span>
+                                </Button>
+                            </div>
+
+                            <CardContent className="relative bg-white p-6">
+                                <div className="flex flex-col items-start gap-6 md:flex-row md:items-end">
+                                    <div className="relative -mt-20 md:-mt-24">
+                                        <div className="rounded-full bg-white p-1">
+                                            <Avatar className="h-32 w-32 border-4 border-white shadow-xl md:h-40 md:w-40">
+                                                {userInfo.avatar && (
+                                                    <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
+                                                )}
+                                                <AvatarFallback className="bg-blue-600 text-2xl text-white md:text-3xl">
+                                                    {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
+                                                </AvatarFallback>
+                                            </Avatar>
+                                        </div>
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute -bottom-2 -right-2 h-8 w-8 rounded-full"
+                                            className="absolute right-2 bottom-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
                                         >
                                             <Camera className="h-4 w-4" />
                                         </Button>
                                     </div>
 
-                                    <div className="flex-1 space-y-2">
-                                        <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p>
-
+                                    <div className="flex-1 space-y-4">
                                         <div className="flex flex-col gap-2 md:flex-row md:items-center">
-                                            <h2 className="text-2xl font-bold">{userInfo.username}</h2>
                                             {/* <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'}>
                                                 {userInfo.role}
                                             </Badge> */}
-                                            <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
+                                            {/* <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
                                                 {userInfo.activated ? 'Active' : 'Inactive'}
-                                            </Badge>
+                                            </Badge> */}
+                                            <p className="text-base">{userInfo.firstName + ' ' + userInfo.lastName}</p>
                                         </div>
-                                        <p className="text-muted-foreground">
-                                            Thành viên kể từ
-                                            {' ' + userInfo.createdAt.slice(0, 10) || 'N/A'}
-                                        </p>
+
                                         <div className="text-muted-foreground flex flex-wrap gap-4 text-sm">
                                             <div className="flex items-center gap-1">
-                                                <Mail className="size-4" />
+                                                {/* <Mail className="size-4" /> */}
                                                 {userInfo.email}
                                             </div>
                                             <div className="flex items-center gap-1">
@@ -232,17 +330,18 @@ function UserProfilePage() {
                                                     : 'N/A'}
                                             </div>
                                         </div>
+                                        <Button onClick={() => setOpenAddFunds(true)}>Nạp tiền</Button>
                                     </div>
                                 </div>
                             </CardContent>
                         </Card>
 
                         {/* Dynamic Content Based on Active Section */}
-                        <div className="space-y-4">
+                        <div className="space-y-4 p-6">
                             {activeSection === 'overview' && (
                                 <Card>
                                     <CardContent className="p-6">
-                                        <h3 className="mb-4 text-lg font-semibold">Account Overview</h3>
+                                        <h3 className="mb-4 text-lg font-semibold">Tổng quan tài khoản</h3>
                                         <div className="grid gap-4 md:grid-cols-2">
                                             <div>
                                                 <label className="text-muted-foreground text-sm font-medium">
@@ -256,7 +355,7 @@ function UserProfilePage() {
                                                 <label className="text-muted-foreground text-sm font-medium">
                                                     Ngày tham gia
                                                 </label>
-                                                <p className="break-all font-mono text-xs">
+                                                <p className="font-mono text-xs break-all">
                                                     {userInfo.createdAt.slice(0, 10) || 'N/A'}
                                                 </p>
                                             </div>
@@ -269,12 +368,7 @@ function UserProfilePage() {
                                 <Card>
                                     <CardContent className="p-6">
                                         <div className="mb-6 flex items-center justify-between">
-                                            <h3 className="text-lg font-semibold">My Presentations</h3>
-                                            <Link to="/presentations">
-                                                <Button variant="outline" size="sm">
-                                                    View All
-                                                </Button>
-                                            </Link>
+                                            <h3 className="text-lg font-semibold">Bài thuyết trình</h3>
                                         </div>
                                         {presentationsLoading ? (
                                             <div className="flex justify-center py-8">
@@ -295,7 +389,7 @@ function UserProfilePage() {
                                                             <Badge
                                                                 variant={pres.processing ? 'secondary' : 'secondary'}
                                                             >
-                                                                {pres.processing ? 'Processing' : ''}
+                                                                {pres.processing ? 'Đang xử lí, xin vui lòng đợi' : ''}
                                                             </Badge>
                                                         </div>
                                                         {!pres.processing && (
@@ -305,15 +399,15 @@ function UserProfilePage() {
                                                                     params={{ id: pres.id.toString() }}
                                                                 >
                                                                     <Button size="sm" variant="default">
-                                                                        Present
+                                                                        Trình chiếu
                                                                     </Button>
                                                                 </Link>
                                                             </div>
                                                         )}
                                                         {pres.processing && (
                                                             <p className="text-muted-foreground mt-2 text-xs">
-                                                                Your presentation is being generated. This may take a
-                                                                few moments...
+                                                                Bài thuyết trình của bạn đang được tạo. Quá trình này có
+                                                                thể mất vài phút...
                                                             </p>
                                                         )}
                                                     </Card>
@@ -321,16 +415,492 @@ function UserProfilePage() {
                                             </div>
                                         ) : (
                                             <div className="text-muted-foreground py-8 text-center">
-                                                <p>You haven&apos;t created any presentations yet.</p>
+                                                <p>Không có dữ liệu</p>
                                                 <Link to="/presentations">
                                                     <Button variant="outline" className="mt-4">
-                                                        Browse Templates
+                                                        Xem các mẫu có sẵn
                                                     </Button>
                                                 </Link>
                                             </div>
                                         )}
                                     </CardContent>
                                 </Card>
+                            )}
+
+                            {activeSection === 'orders' && (
+                                <Card>
+                                    <CardContent className="p-6">
+                                        <div className="mb-6 flex items-center justify-between">
+                                            <h3 className="text-lg font-semibold">My Orders</h3>
+                                            <Badge variant="secondary">
+                                                {userOrders?.length || 0}{' '}
+                                                {userOrders?.length === 1 ? 'Đơn hàng' : 'Đơn hàng'}
+                                            </Badge>
+                                        </div>
+                                        {ordersLoading ? (
+                                            <div className="flex justify-center py-8">
+                                                <SpinnerLoader />
+                                            </div>
+                                        ) : userOrders && userOrders.length > 0 ? (
+                                            <div className="space-y-4">
+                                                {userOrders.map(order => (
+                                                    <Card key={order.id} className="border-l-4 border-l-blue-500">
+                                                        <CardContent className="p-4">
+                                                            <div className="mb-4 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                                                                <div>
+                                                                    <div className="flex items-center gap-2">
+                                                                        <h4 className="font-semibold">
+                                                                            Order #{order.id}
+                                                                        </h4>
+                                                                        <Badge
+                                                                            variant={
+                                                                                order.status === 'COMPLETED'
+                                                                                    ? 'default'
+                                                                                    : order.status === 'PENDING'
+                                                                                      ? 'secondary'
+                                                                                      : 'destructive'
+                                                                            }
+                                                                        >
+                                                                            {order.status}
+                                                                        </Badge>
+                                                                    </div>
+                                                                    <p className="text-muted-foreground text-sm">
+                                                                        {new Date(order.createdAt).toLocaleDateString(
+                                                                            'en-US',
+                                                                            {
+                                                                                year: 'numeric',
+                                                                                month: 'long',
+                                                                                day: 'numeric',
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit',
+                                                                            },
+                                                                        )}
+                                                                    </p>
+                                                                </div>
+                                                                <div className="text-right">
+                                                                    <p className="text-sm text-gray-600">
+                                                                        Tổng số tiền
+                                                                    </p>
+                                                                    <p className="text-xl font-bold text-blue-600">
+                                                                        {order.totalAmount.toLocaleString('vi-VN')} ₫
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="space-y-2">
+                                                                <p className="text-sm font-medium">
+                                                                    Chi tiết đơn hàng:
+                                                                </p>
+                                                                <div className="space-y-2">
+                                                                    {order.orderDetails.map(detail => (
+                                                                        <div
+                                                                            key={detail.id}
+                                                                            className="flex items-center justify-between rounded-lg bg-gray-50 p-3"
+                                                                        >
+                                                                            <div className="flex-1">
+                                                                                <p className="font-medium">
+                                                                                    {detail.productName}
+                                                                                </p>
+                                                                                <p className="text-muted-foreground text-sm">
+                                                                                    Quantity: {detail.quantity} × Unit
+                                                                                    Price:{' '}
+                                                                                    {detail.unitPrice.toLocaleString(
+                                                                                        'vi-VN',
+                                                                                    )}{' '}
+                                                                                    ₫
+                                                                                </p>
+                                                                            </div>
+                                                                            <div className="text-right">
+                                                                                <p className="font-semibold">
+                                                                                    {detail.amount.toLocaleString(
+                                                                                        'vi-VN',
+                                                                                    )}{' '}
+                                                                                    ₫
+                                                                                </p>
+                                                                            </div>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                            <div className="mt-4 flex items-center justify-between border-t pt-3">
+                                                                <p className="text-muted-foreground text-xs">
+                                                                    Cập nhật lần cuối:{' '}
+                                                                    {new Date(order.updatedAt).toLocaleString('en-US', {
+                                                                        month: 'short',
+                                                                        day: 'numeric',
+                                                                        hour: '2-digit',
+                                                                        minute: '2-digit',
+                                                                    })}
+                                                                </p>
+                                                                {order.status === 'COMPLETED' && (
+                                                                    <Button variant="outline" size="sm">
+                                                                        Xem hóa đơn
+                                                                    </Button>
+                                                                )}
+                                                            </div>
+                                                        </CardContent>
+                                                    </Card>
+                                                ))}
+                                            </div>
+                                        ) : (
+                                            <div className="text-muted-foreground py-8 text-center">
+                                                <Package className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                                                <p className="mb-2 text-lg font-medium">Chưa có dữ liệu</p>
+                                                <p className="text-sm">
+                                                    Lịch sử đặt hàng của bạn sẽ xuất hiện ở đây sau khi bạn mua hàng.
+                                                </p>
+                                                <Button variant="outline" className="mt-4">
+                                                    Xem các sản phẩm
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </CardContent>
+                                </Card>
+                            )}
+
+                            {activeSection === 'wallet' && (
+                                <>
+                                    {/* Summary Cards */}
+                                    <div className="mb-6 grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+                                        <Card className="border-l-4 border-l-green-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Tổng nạp</span>
+                                                    <TrendingUp className="h-4 w-4 text-green-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-green-600">
+                                                    {transactionStats.totalDeposit.toLocaleString('vi-VN')} ₫
+                                                </div>
+                                                <p className="text-muted-foreground mt-1 text-xs">
+                                                    Tổng tiền đã nạp vào ví
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="border-l-4 border-l-red-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Tổng chi</span>
+                                                    <TrendingDown className="h-4 w-4 text-red-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-red-600">
+                                                    {transactionStats.totalSpent.toLocaleString('vi-VN')} ₫
+                                                </div>
+                                                <p className="text-muted-foreground mt-1 text-xs">
+                                                    Tổng chi tiêu & sử dụng
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="border-l-4 border-l-blue-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Số dư hiện tại</span>
+                                                    <Wallet className="h-4 w-4 text-blue-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-blue-600">
+                                                    {userInfo.wallet?.balance?.toLocaleString('vi-VN') || 0} ₫
+                                                </div>
+                                                <p className="text-muted-foreground mt-1 text-xs">
+                                                    Số dư khả dụng trong ví
+                                                </p>
+                                            </CardContent>
+                                        </Card>
+
+                                        <Card className="border-l-4 border-l-purple-500">
+                                            <CardHeader className="pb-3">
+                                                <CardTitle className="flex items-center justify-between text-sm font-medium">
+                                                    <span className="text-muted-foreground">Giao dịch</span>
+                                                    <Activity className="h-4 w-4 text-purple-600" />
+                                                </CardTitle>
+                                            </CardHeader>
+                                            <CardContent>
+                                                <div className="text-2xl font-bold text-purple-600">
+                                                    {transactionStats.totalTransactions}
+                                                </div>
+                                                <div className="mt-1 flex gap-2 text-xs">
+                                                    <span className="flex items-center gap-1 text-green-600">
+                                                        <CheckCircle className="h-3 w-3" />
+                                                        {transactionStats.completedCount}
+                                                    </span>
+                                                    <span className="flex items-center gap-1 text-yellow-600">
+                                                        <Clock className="h-3 w-3" />
+                                                        {transactionStats.pendingCount}
+                                                    </span>
+                                                    <span className="flex items-center gap-1 text-red-600">
+                                                        <XCircle className="h-3 w-3" />
+                                                        {transactionStats.failedCount}
+                                                    </span>
+                                                </div>
+                                            </CardContent>
+                                        </Card>
+                                    </div>
+
+                                    {/* Transaction History */}
+                                    <Card>
+                                        <CardContent className="p-6">
+                                            <div className="mb-6 space-y-4">
+                                                <div className="flex items-center justify-between">
+                                                    <h3 className="text-lg font-semibold">Lịch sử giao dịch</h3>
+                                                    <Badge variant="outline" className="text-sm">
+                                                        {filteredTransactions.length} / {userTransactions?.length || 0}{' '}
+                                                        giao dịch
+                                                    </Badge>
+                                                </div>
+
+                                                {/* Filters */}
+                                                <div className="flex flex-col gap-3">
+                                                    <div className="flex items-center gap-2">
+                                                        <Filter className="text-muted-foreground h-4 w-4" />
+                                                        <span className="text-muted-foreground text-sm font-medium">
+                                                            Loại giao dịch:
+                                                        </span>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'ALL'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('ALL')}
+                                                            >
+                                                                Tất cả
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'DEPOSIT'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('DEPOSIT')}
+                                                                className="gap-1"
+                                                            >
+                                                                <ArrowDownLeft className="h-3 w-3" />
+                                                                Nạp tiền
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'PURCHASE'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('PURCHASE')}
+                                                                className="gap-1"
+                                                            >
+                                                                <CreditCard className="h-3 w-3" />
+                                                                Mua hàng
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionTypeFilter === 'AI_REQUEST'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionTypeFilter('AI_REQUEST')}
+                                                                className="gap-1"
+                                                            >
+                                                                <ArrowUpRight className="h-3 w-3" />
+                                                                Sử dụng AI
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className="flex items-center gap-2">
+                                                        <Filter className="text-muted-foreground h-4 w-4" />
+                                                        <span className="text-muted-foreground text-sm font-medium">
+                                                            Trạng thái:
+                                                        </span>
+                                                        <div className="flex flex-wrap gap-2">
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'ALL'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('ALL')}
+                                                            >
+                                                                Tất cả
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'COMPLETED'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('COMPLETED')}
+                                                                className="gap-1"
+                                                            >
+                                                                <CheckCircle className="h-3 w-3" />
+                                                                Hoàn thành
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'PENDING'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('PENDING')}
+                                                                className="gap-1"
+                                                            >
+                                                                <Clock className="h-3 w-3" />
+                                                                Đang xử lý
+                                                            </Button>
+                                                            <Button
+                                                                size="sm"
+                                                                variant={
+                                                                    transactionStatusFilter === 'FAILED'
+                                                                        ? 'default'
+                                                                        : 'outline'
+                                                                }
+                                                                onClick={() => setTransactionStatusFilter('FAILED')}
+                                                                className="gap-1"
+                                                            >
+                                                                <XCircle className="h-3 w-3" />
+                                                                Thất bại
+                                                            </Button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+                                            {transactionsLoading ? (
+                                                <div className="flex justify-center py-8">
+                                                    <SpinnerLoader />
+                                                </div>
+                                            ) : filteredTransactions && filteredTransactions.length > 0 ? (
+                                                <div className="overflow-x-auto">
+                                                    <table className="w-full">
+                                                        <thead>
+                                                            <tr className="border-b">
+                                                                <th className="pb-3 text-left text-sm font-semibold">
+                                                                    Mã GD
+                                                                </th>
+                                                                <th className="pb-3 text-left text-sm font-semibold">
+                                                                    Loại giao dịch
+                                                                </th>
+                                                                <th className="pb-3 text-right text-sm font-semibold">
+                                                                    Số tiền
+                                                                </th>
+                                                                <th className="pb-3 text-center text-sm font-semibold">
+                                                                    Trạng thái
+                                                                </th>
+                                                                <th className="pb-3 text-right text-sm font-semibold">
+                                                                    Thời gian
+                                                                </th>
+                                                            </tr>
+                                                        </thead>
+                                                        <tbody>
+                                                            {filteredTransactions.map(transaction => (
+                                                                <tr key={transaction.id} className="border-b">
+                                                                    <td className="py-4 text-sm font-medium">
+                                                                        #{transaction.id}
+                                                                    </td>
+                                                                    <td className="py-4">
+                                                                        <div className="flex items-center gap-2">
+                                                                            {transaction.type === 'PURCHASE' ? (
+                                                                                <CreditCard className="h-4 w-4 text-blue-600" />
+                                                                            ) : transaction.type === 'DEPOSIT' ? (
+                                                                                <ArrowDownLeft className="h-4 w-4 text-green-600" />
+                                                                            ) : (
+                                                                                <ArrowUpRight className="h-4 w-4 text-purple-600" />
+                                                                            )}
+                                                                            <span className="text-sm">
+                                                                                {transaction.type === 'PURCHASE'
+                                                                                    ? 'Mua hàng'
+                                                                                    : transaction.type === 'DEPOSIT'
+                                                                                      ? 'Nạp tiền'
+                                                                                      : 'Sử dụng AI'}
+                                                                            </span>
+                                                                        </div>
+                                                                    </td>
+                                                                    <td className="py-4 text-right font-semibold">
+                                                                        <span
+                                                                            className={
+                                                                                transaction.type === 'DEPOSIT'
+                                                                                    ? 'text-green-600'
+                                                                                    : 'text-red-600'
+                                                                            }
+                                                                        >
+                                                                            {transaction.type === 'DEPOSIT' ? '+' : '-'}
+                                                                            {Math.abs(
+                                                                                transaction.amount,
+                                                                            ).toLocaleString('vi-VN')}{' '}
+                                                                            ₫
+                                                                        </span>
+                                                                    </td>
+                                                                    <td className="py-4 text-center">
+                                                                        <Badge
+                                                                            variant={
+                                                                                transaction.status === 'COMPLETED'
+                                                                                    ? 'default'
+                                                                                    : transaction.status === 'PENDING'
+                                                                                      ? 'secondary'
+                                                                                      : 'destructive'
+                                                                            }
+                                                                            className={
+                                                                                transaction.status === 'COMPLETED'
+                                                                                    ? 'bg-green-100 text-green-800'
+                                                                                    : transaction.status === 'PENDING'
+                                                                                      ? 'bg-yellow-100 text-yellow-800'
+                                                                                      : 'bg-red-100 text-red-800'
+                                                                            }
+                                                                        >
+                                                                            {transaction.status === 'COMPLETED'
+                                                                                ? 'Hoàn thành'
+                                                                                : transaction.status === 'PENDING'
+                                                                                  ? 'Đang xử lý'
+                                                                                  : 'Thất bại'}
+                                                                        </Badge>
+                                                                    </td>
+                                                                    <td className="text-muted-foreground py-4 text-right text-sm">
+                                                                        {new Date(transaction.createdAt).toLocaleString(
+                                                                            'vi-VN',
+                                                                            {
+                                                                                year: 'numeric',
+                                                                                month: '2-digit',
+                                                                                day: '2-digit',
+                                                                                hour: '2-digit',
+                                                                                minute: '2-digit',
+                                                                            },
+                                                                        )}
+                                                                    </td>
+                                                                </tr>
+                                                            ))}
+                                                        </tbody>
+                                                    </table>
+                                                </div>
+                                            ) : (
+                                                <div className="text-muted-foreground py-8 text-center">
+                                                    <Wallet className="mx-auto mb-4 h-12 w-12 text-gray-400" />
+                                                    <p className="mb-2 text-lg font-medium">
+                                                        {userTransactions && userTransactions.length > 0
+                                                            ? 'Không tìm thấy giao dịch phù hợp'
+                                                            : 'Chưa có giao dịch'}
+                                                    </p>
+                                                    <p className="text-sm">
+                                                        {userTransactions && userTransactions.length > 0
+                                                            ? 'Thử thay đổi bộ lọc để xem các giao dịch khác'
+                                                            : 'Lịch sử giao dịch của bạn sẽ xuất hiện ở đây sau khi bạn thực hiện giao dịch đầu tiên.'}
+                                                    </p>
+                                                </div>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+                                </>
                             )}
 
                             {activeSection === 'activity' && (
@@ -385,8 +955,14 @@ function UserProfilePage() {
                         </div>
 
                         {/* Profile Tabs Content */}
-                        <ProfileContent />
+                        {/* <ProfileContent /> */}
                     </main>
+                    <AddFundsDialog
+                        open={openAddFunds}
+                        onOpenChange={setOpenAddFunds}
+                        onConfirm={amount => handleAddFunds(amount)}
+                    />
+                    <ChangePasswordDialog open={openChangePassword} onOpenChange={setOpenChangePassword} />
                 </SidebarInset>
             </div>
         </SidebarProvider>

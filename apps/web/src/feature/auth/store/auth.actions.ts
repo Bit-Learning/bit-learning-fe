@@ -1,8 +1,19 @@
 import { TAppThunk } from '@/feature/app/type/AppState'
 import { clearAuthTokens, getAccessToken, setAuthTokens } from '@/shared/lib/cookies'
+import { toast } from '@workspace/ui/components/Sonner'
 import { setErrorAction, setIsAuthenticatedAction, setIsLoadingAction, setUserInfoAction } from '.'
-import { ForgotPassword, GetUserProfile, Login, Register, ResetPassword } from '../service/AuthService'
-import type { TForgotPasswordRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
+import {
+    ChangePassword,
+    FinishPasswordReset,
+    GetGoogleOAuth2Config,
+    GetUserProfile,
+    GoogleOAuth2Login,
+    Login,
+    Register,
+    RequestPasswordReset,
+    VerifyResetKey,
+} from '../service/AuthService'
+import type { TChangePasswordRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
 
 export const requestUserProfile = (): TAppThunk => {
     return async (dispatch: any) => {
@@ -68,6 +79,13 @@ export const requestLogin = ({ email, password }: { email: string; password: str
                 setAuthTokens(payload.accessToken, payload.refreshToken)
                 dispatch(setIsAuthenticatedAction(true))
                 dispatch(setUserInfoAction(payload.user))
+
+                // Show success notification
+                toast.success({
+                    title: 'Đăng nhập thành công',
+                    description: `Chào mừng ${payload.user.username || 'bạn'} trở lại!`,
+                })
+
                 return { success: true }
             }
         } catch (error: any) {
@@ -99,47 +117,165 @@ export const requestRegister = (body: TRegisterRequest): TAppThunk => {
         try {
             const response = await Register(body)
             if (response.data.success) {
-                return true
+                // Show success notification
+                toast.success({
+                    title: 'Đăng ký thành công!',
+                    description: 'Vui lòng kiểm tra email để kích hoạt tài khoản của bạn.',
+                })
+                return { success: true }
             }
         } catch (error: any) {
             const errorMessage = error?.response?.data.Message || error?.response?.data.message || error.message
             dispatch(setErrorAction(errorMessage))
+
+            // Show error notification
+            toast.error({
+                title: 'Đăng ký thất bại',
+                description: errorMessage,
+            })
+
+            return { success: false, message: errorMessage }
         } finally {
             dispatch(setIsLoadingAction(false))
         }
     }
 }
 
-export const requestForgotPassword = (body: TForgotPasswordRequest): TAppThunk => {
+export const requestPasswordResetInit = (email: string): TAppThunk => {
     return async (dispatch: any) => {
         dispatch(setIsLoadingAction(true))
         try {
-            const response = await ForgotPassword(body)
-            if (response.data.success) {
-                return true
+            const response = await RequestPasswordReset(email)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Password reset link sent to your email' }
             }
+            return { success: false, message: 'Failed to send reset email' }
         } catch (error: any) {
-            const errorMessage = error?.response?.data.message || error.message
+            const errorMessage = error?.response?.data?.message || error.message
             dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
         } finally {
             dispatch(setIsLoadingAction(false))
         }
     }
 }
 
-export const requestResetPassword = (body: TResetPasswordRequest): TAppThunk => {
+export const verifyPasswordResetKey = (key: string): TAppThunk => {
     return async (dispatch: any) => {
         dispatch(setIsLoadingAction(true))
         try {
-            const response = await ResetPassword(body)
-            if (response.data.success) {
-                return true
+            const response = await VerifyResetKey(key)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Reset key is valid' }
             }
+            return { success: false, message: 'Invalid reset key' }
         } catch (error: any) {
-            const errorMessage = error?.response?.data.message || error.message
+            const errorMessage = error?.response?.data?.message || error.message
             dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
         } finally {
             dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const finishPasswordReset = (body: TResetPasswordRequest): TAppThunk => {
+    return async (dispatch: any) => {
+        dispatch(setIsLoadingAction(true))
+        try {
+            const response = await FinishPasswordReset(body)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Password has been reset successfully' }
+            }
+            return { success: false, message: 'Failed to reset password' }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error.message
+            dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
+        } finally {
+            dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const changePassword = (body: TChangePasswordRequest): TAppThunk => {
+    return async (dispatch: any) => {
+        dispatch(setIsLoadingAction(true))
+        try {
+            const response = await ChangePassword(body)
+            // Backend returns status 200 with message "Success"
+            if (response.status === 200 && response.data) {
+                return { success: true, message: response.data.message || 'Password changed successfully' }
+            }
+            return { success: false, message: 'Failed to change password' }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || error.message
+            dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
+        } finally {
+            dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const requestGoogleLogin = (code: string): TAppThunk => {
+    return async (dispatch: any) => {
+        dispatch(setIsLoadingAction(true))
+        try {
+            const response = await GoogleOAuth2Login(code)
+            if (response && response.data && response.data.data) {
+                const payload = response.data.data
+                setAuthTokens(payload.accessToken, payload.refreshToken)
+                dispatch(setIsAuthenticatedAction(true))
+                dispatch(setUserInfoAction(payload.user))
+
+                // Show success notification with different message for new users
+                if (payload.isNewUser) {
+                    toast.success({
+                        title: 'Đăng nhập thành công!',
+                        description: `Chào mừng ${payload.user.username || 'bạn'} đến với Bithub! ${payload.message || 'Vui lòng kiểm tra email để lấy mật khẩu tạm thời.'}`,
+                    })
+                } else {
+                    toast.success({
+                        title: 'Đăng nhập thành công',
+                        description: `Chào mừng ${payload.user.username || 'bạn'} trở lại!`,
+                    })
+                }
+
+                return { success: true, isNewUser: payload.isNewUser }
+            }
+        } catch (error: any) {
+            console.log('Google OAuth login error:', error)
+            const errorMessage = error?.response?.data?.message || 'Đăng nhập với Google không thành công'
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Đăng nhập thất bại',
+                description: errorMessage,
+            })
+
+            return { success: false, message: errorMessage }
+        } finally {
+            dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const getGoogleOAuth2Config = (): TAppThunk => {
+    return async (dispatch: any) => {
+        try {
+            const response = await GetGoogleOAuth2Config()
+            if (response && response.data && response.data.data) {
+                return { success: true, data: response.data.data }
+            }
+            return { success: false }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || 'Failed to get OAuth2 configuration'
+            dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
         }
     }
 }

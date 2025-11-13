@@ -23,11 +23,18 @@ export type TForgotPasswordRequest = {
 }
 
 export type TResetPasswordRequest = {
-    token: string
     email: string
+    key: string
     newPassword: string
     confirmNewPassword: string
 }
+
+export type TChangePasswordRequest = {
+    currentPassword: string
+    newPassword: string
+    confirmNewPassword: string
+}
+
 export type TUserProfile = {
     id: number
     username: string
@@ -43,4 +50,12 @@ export type TUserProfile = {
     lastLoginAttempt: number | null
     createdAt: string
     updatedAt: string
+    wallet: TWalletInfo
+    oauthProvider: string | null
+    oauthId: string | null
+}
+
+export type TWalletInfo = {
+    id: number
+    balance: number
 }

@@ -1,4 +1,6 @@
+import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
+import { useAuthStore } from '@/stores/auth-store'
 import useDialogState from '@/hooks/use-dialog-state'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button } from '@/components/ui/button'
@@ -13,9 +15,24 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu'
 import { SignOutDialog } from '@/components/sign-out-dialog'
+import { GetAdminProfile } from '@/features/auth/api/AuthService'
 
 export function ProfileDropdown() {
   const [open, setOpen] = useDialogState()
+  const { auth } = useAuthStore()
+
+  // Fetch admin profile
+  const { data: profileData } = useQuery({
+    queryKey: ['adminProfile'],
+    queryFn: () => GetAdminProfile(),
+    enabled: !!auth.accessToken,
+  })
+
+  const user = profileData?.data?.data
+  const fullName = user ? `${user.firstName} ${user.lastName}` : 'Admin'
+  const initials = user
+    ? `${user.firstName[0]}${user.lastName[0]}`.toUpperCase()
+    : 'AD'
 
   return (
     <>
@@ -23,17 +40,17 @@ export function ProfileDropdown() {
         <DropdownMenuTrigger asChild>
           <Button variant='ghost' className='relative h-8 w-8 rounded-full'>
             <Avatar className='h-8 w-8'>
-              <AvatarImage src='/avatars/01.png' alt='@shadcn' />
-              <AvatarFallback>BH</AvatarFallback>
+              <AvatarImage src={user?.avatar} alt={fullName} />
+              <AvatarFallback>{initials}</AvatarFallback>
             </Avatar>
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent className='w-56' align='end' forceMount>
           <DropdownMenuLabel className='font-normal'>
             <div className='flex flex-col gap-1.5'>
-              <p className='text-sm leading-none font-medium'>Bithub</p>
+              <p className='text-sm leading-none font-medium'>{fullName}</p>
               <p className='text-muted-foreground text-xs leading-none'>
-                bihubadmin@gmail.com
+                {user?.email || 'Loading...'}
               </p>
             </div>
           </DropdownMenuLabel>

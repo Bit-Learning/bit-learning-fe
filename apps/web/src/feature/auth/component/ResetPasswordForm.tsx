@@ -11,35 +11,43 @@ import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 import { setErrorAction } from '../../auth/store'
-import { requestResetPassword } from '../../auth/store/auth.actions'
+import { finishPasswordReset, verifyPasswordResetKey } from '../../auth/store/auth.actions'
 import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
 import type { TResetPasswordRequest } from '../type/authState'
 
 const formSchema = z
     .object({
+        email: z
+            .string()
+            .email({ message: 'Email không hợp lệ' })
+            .max(50, { message: 'Email không được vượt quá 50 ký tự' }),
         password: z
             .string()
-            .min(3, { message: 'Mật khẩu phải có ít nhất 3 ký tự' })
+            .min(6, { message: 'Mật khẩu phải có ít nhất 6 ký tự' })
             .max(50, { message: 'Mật khẩu không được vượt quá 50 ký tự' }),
         confirmPassword: z
             .string()
-            .min(3, { message: 'Xác nhận mật khẩu phải có ít nhất 3 ký tự' })
+            .min(6, { message: 'Xác nhận mật khẩu phải có ít nhất 6 ký tự' })
             .max(50, { message: 'Xác nhận mật khẩu không được vượt quá 50 ký tự' }),
     })
     .refine(data => data.password === data.confirmPassword, {
         message: 'Mật khẩu và xác nhận mật khẩu không khớp',
+        path: ['confirmPassword'],
     })
 
 const ResetPasswordForm: React.FC = () => {
     const { isLoading, isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
     const [showPassword, setShowPassword] = React.useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
+    const [resetKey, setResetKey] = React.useState<string | null>(null)
+    const [isVerifying, setIsVerifying] = React.useState(true)
     const dispatch = useAppDispatch()
     const navigate = useNavigate()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
+            email: '',
             password: '',
             confirmPassword: '',
         },
@@ -51,6 +59,39 @@ const ResetPasswordForm: React.FC = () => {
         }
     }, [isAuthenticated, navigate])
 
+    // Verify reset key on component mount
+    React.useEffect(() => {
+        const verifyKey = async () => {
+            const key = new URLSearchParams(window.location.search).get('key')
+            if (!key) {
+                toast.error({
+                    title: 'Link không hợp lệ',
+                    description: 'Vui lòng kiểm tra email và thử lại.',
+                })
+                navigate({ to: '/forgot-password' })
+                return
+            }
+
+            const result: any = await dispatch(verifyPasswordResetKey(key))
+            if (result?.success) {
+                setResetKey(key)
+                setIsVerifying(false)
+                toast.success({
+                    title: 'Xác thực thành công',
+                    description: 'Vui lòng nhập mật khẩu mới của bạn.',
+                })
+            } else {
+                toast.error({
+                    title: 'Link đã hết hạn hoặc không hợp lệ',
+                    description: result?.message || 'Vui lòng yêu cầu link mới.',
+                })
+                navigate({ to: '/forgot-password' })
+            }
+        }
+
+        verifyKey()
+    }, [dispatch, navigate])
+
     React.useEffect(() => {
         if (errorMsg) {
             toast.error({ title: errorMsg })
@@ -59,23 +100,43 @@ const ResetPasswordForm: React.FC = () => {
     }, [errorMsg, dispatch])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        const token = new URLSearchParams(window.location.search).get('token') || ''
-        const email = new URLSearchParams(window.location.search).get('email') || ''
-        if (!token || !email) {
+        if (!resetKey) {
             toast.error({ title: 'Yêu cầu không hợp lệ. Vui lòng thử lại.' })
             return
         }
+
+        dispatch(setErrorAction(null))
         const body: TResetPasswordRequest = {
-            token,
-            email,
+            email: values.email,
+            key: resetKey,
             newPassword: values.password,
             confirmNewPassword: values.confirmPassword,
         }
-        const result = await dispatch(requestResetPassword(body))
-        if (result !== undefined) {
+
+        const result: any = await dispatch(finishPasswordReset(body))
+        if (result?.success) {
+            toast.success({
+                title: 'Đặt lại mật khẩu thành công!',
+                description: 'Bạn có thể đăng nhập với mật khẩu mới.',
+            })
             navigate({ to: '/signin' })
-            toast.success({ title: 'Đặt lại mật khẩu thành công! Vui lòng đăng nhập.' })
+        } else {
+            toast.error({
+                title: 'Đặt lại mật khẩu thất bại',
+                description: result?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
+            })
         }
+    }
+
+    if (isVerifying) {
+        return (
+            <div className="flex flex-1 items-center justify-center">
+                <div className="text-center">
+                    <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
+                    <p className="text-sm text-gray-600 dark:text-gray-400">Đang xác thực...</p>
+                </div>
+            </div>
+        )
     }
 
     return (
@@ -104,6 +165,26 @@ const ResetPasswordForm: React.FC = () => {
                         <Form {...form}>
                             <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
                                 <div className="flex flex-col gap-4">
+                                    <FormField
+                                        control={form.control}
+                                        name="email"
+                                        render={({ field }) => (
+                                            <FormItem>
+                                                <FormLabel className="mb-2 font-semibold dark:text-white/90">
+                                                    Email <span className="text-red-500">*</span>
+                                                </FormLabel>
+                                                <FormControl>
+                                                    <Input
+                                                        type="email"
+                                                        placeholder="your.email@example.com"
+                                                        {...field}
+                                                        className="focus-visible:border-primary focus-visible:ring-primary h-11 w-full border focus-visible:ring-1 dark:bg-white/5 dark:text-white/90"
+                                                    />
+                                                </FormControl>
+                                                <FormMessage className="text-xs" />
+                                            </FormItem>
+                                        )}
+                                    />
                                     <FormField
                                         control={form.control}
                                         name="password"
