@@ -6,7 +6,9 @@ import { setErrorAction, setIsAuthenticatedAction, setIsLoadingAction, setUserIn
 import {
     ChangePassword,
     FinishPasswordReset,
+    GetGoogleOAuth2Config,
     GetUserProfile,
+    GoogleOAuth2Login,
     Login,
     Register,
     RequestPasswordReset,
@@ -216,6 +218,65 @@ export const changePassword = (body: TChangePasswordRequest): TAppThunk => {
             return { success: false, message: errorMessage }
         } finally {
             dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const requestGoogleLogin = (code: string): TAppThunk => {
+    return async (dispatch: any) => {
+        dispatch(setIsLoadingAction(true))
+        try {
+            const response = await GoogleOAuth2Login(code)
+            if (response && response.data && response.data.data) {
+                const payload = response.data.data
+                setAuthTokens(payload.accessToken, payload.refreshToken)
+                dispatch(setIsAuthenticatedAction(true))
+                dispatch(setUserInfoAction(payload.user))
+
+                // Show success notification with different message for new users
+                if (payload.isNewUser) {
+                    toast.success({
+                        title: 'Đăng nhập thành công!',
+                        description: `Chào mừng ${payload.user.username || 'bạn'} đến với Bithub! ${payload.message || 'Vui lòng kiểm tra email để lấy mật khẩu tạm thời.'}`,
+                    })
+                } else {
+                    toast.success({
+                        title: 'Đăng nhập thành công',
+                        description: `Chào mừng ${payload.user.username || 'bạn'} trở lại!`,
+                    })
+                }
+
+                return { success: true, isNewUser: payload.isNewUser }
+            }
+        } catch (error: any) {
+            console.log('Google OAuth login error:', error)
+            const errorMessage = error?.response?.data?.message || 'Đăng nhập với Google không thành công'
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Đăng nhập thất bại',
+                description: errorMessage,
+            })
+
+            return { success: false, message: errorMessage }
+        } finally {
+            dispatch(setIsLoadingAction(false))
+        }
+    }
+}
+
+export const getGoogleOAuth2Config = (): TAppThunk => {
+    return async (dispatch: any) => {
+        try {
+            const response = await GetGoogleOAuth2Config()
+            if (response && response.data && response.data.data) {
+                return { success: true, data: response.data.data }
+            }
+            return { success: false }
+        } catch (error: any) {
+            const errorMessage = error?.response?.data?.message || 'Failed to get OAuth2 configuration'
+            dispatch(setErrorAction(errorMessage))
+            return { success: false, message: errorMessage }
         }
     }
 }

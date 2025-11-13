@@ -52,6 +52,8 @@ export type TUserProfile = {
     createdAt: string
     updatedAt: string
     wallet: TWalletInfo
+    oauthProvider: string | null
+    oauthId: string | null
 }
 
 export type TWalletInfo = {
