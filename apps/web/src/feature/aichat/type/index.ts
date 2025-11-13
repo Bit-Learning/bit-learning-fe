@@ -93,6 +93,29 @@ export interface GenerateCustomPPTXRequest {
   placeholders: Record<string, string>
 }
 
+export interface SlideGenerationResponse {
+  id: number
+  topic: string
+  grade: number | null
+  templateId: number
+  templateName: string
+  cloudinaryUrl: string
+  filename: string
+  slideCount: number
+  collectionName: string | null
+  fromCache: boolean
+  generatedAt: string
+  message: string
+}
+
+export interface SlideHistoryPageResponse {
+  content: SlideGenerationResponse[]
+  totalElements: number
+  totalPages: number
+  size: number
+  number: number // current page (0-indexed)
+}
+
 // ============================================================================
 // Slide Content Types (for JSON response)
 // ============================================================================
@@ -306,6 +329,81 @@ export interface MindmapResponse {
   status: string
   processingTime?: number
   sources?: string[]
+}
+
+// ============================================================================
+// Chat & Conversation Types
+// ============================================================================
+
+export type MessageRole = 'user' | 'assistant' | 'system'
+
+export interface ChatMessageRequest {
+  conversation_id?: string // Optional - omit to create new conversation
+  message: string
+  grade?: number // 3-12
+  return_sources?: boolean
+  max_history?: number // 0-50, default: 10
+  user_id?: string // Set by backend from header
+}
+
+export interface ChatMessageResponse {
+  id: string
+  conversation_id: string
+  role: MessageRole
+  content: string
+  sources?: Record<string, any>[]
+  retrieval_mode?: string
+  docs_retrieved?: number
+  web_search_used?: boolean
+  processing_time?: number // milliseconds
+  created_at: string
+  metadata?: Record<string, any>
+}
+
+export interface ChatResponse {
+  conversation_id: string
+  message_id: string
+  user_message: ChatMessageResponse
+  assistant_message: ChatMessageResponse
+  status: string
+  error?: string
+}
+
+export interface ConversationCreateRequest {
+  title?: string // Optional - auto-generated if not provided
+  user_id?: string // Set by backend from header
+}
+
+export interface ConversationResponse {
+  id: string
+  user_id: string
+  title?: string
+  grade?: number
+  subject?: string
+  created_at: string
+  updated_at: string
+  is_archived: boolean
+  metadata?: Record<string, any>
+  message_count?: number
+}
+
+export interface ConversationListResponse {
+  conversations: ConversationResponse[]
+  total: number
+  page: number
+  page_size: number
+}
+
+export interface ConversationWithMessagesResponse {
+  conversation: ConversationResponse
+  messages: ChatMessageResponse[]
+  total_messages: number
+}
+
+export interface DeleteResponse {
+  success: boolean
+  message: string
+  deleted_id?: string
 }
 
 // ============================================================================

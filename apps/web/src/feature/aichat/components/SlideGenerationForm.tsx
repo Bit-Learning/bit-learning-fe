@@ -169,31 +169,23 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
                 <div className="flex items-center space-x-2">
                     <Checkbox
                         id="includeExamples"
-                        checked={includeExamples}
-                        onCheckedChange={(checked) => setIncludeExamples(checked as boolean)}
+                        isSelected={includeExamples}
+                        onChange={setIncludeExamples}
                         disabled={isGenerating}
-                    />
-                    <Label
-                        htmlFor="includeExamples"
-                        className="text-sm font-normal cursor-pointer"
                     >
                         Include examples
-                    </Label>
+                    </Checkbox>
                 </div>
 
                 <div className="flex items-center space-x-2">
                     <Checkbox
                         id="includeExercises"
-                        checked={includeExercises}
-                        onCheckedChange={(checked) => setIncludeExercises(checked as boolean)}
+                        isSelected={includeExercises}
+                        onChange={setIncludeExercises}
                         disabled={isGenerating}
-                    />
-                    <Label
-                        htmlFor="includeExercises"
-                        className="text-sm font-normal cursor-pointer"
                     >
                         Include exercises
-                    </Label>
+                    </Checkbox>
                 </div>
             </div>
 
@@ -216,7 +208,7 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
             <Button
                 className="w-full"
                 onClick={handleGenerate}
-                disabled={isGenerating || !topic.trim()}
+                isDisabled={isGenerating || !topic.trim()}
                 size="lg"
             >
                 {isGenerating ? (

@@ -3,6 +3,7 @@ export const endpoints = {
     ACCOUNT: '/users',
     PAYMENT: '/payment',
     SLIDE: '/slides',
+    CHAT: '/slides/chat',
 }
 
 export const API_PATH = {

@@ -21,6 +21,8 @@ import type {
   MindmapResponse,
   HealthResponse,
   ConvertToPlaceholdersResponse,
+  SlideGenerationResponse,
+  SlideHistoryPageResponse,
 } from '../type'
 
 export const SlideService = {
@@ -73,14 +75,13 @@ export const SlideService = {
       headers: { 'Content-Type': 'multipart/form-data' },
     })
   },
-  generatePPTX: (templateId: number, request: SlideRequest): Promise<AxiosResponse<Blob>> => {
+  generatePPTX: (templateId: number, request: SlideRequest): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
     const formData = new FormData()
     formData.append('request', JSON.stringify(request))
 
     return api.post(`${endpoints.SLIDE}/generate`, formData, {
       params: { templateId },
       headers: { 'Content-Type': 'multipart/form-data' },
-      responseType: 'blob',
     })
   },
 
@@ -115,6 +116,57 @@ export const SlideService = {
 
   generateMindmap: (request: MindmapRequest): Promise<AxiosResponse<ApiResponse<MindmapResponse>>> => {
     return api.post(`${endpoints.SLIDE}/mindmap/generate`, request)
+  },
+
+  downloadFromUrl: async (url: string, filename: string): Promise<void> => {
+    const response = await fetch(url)
+    if (!response.ok) {
+      throw new Error(`Failed to download file from ${url}`)
+    }
+    const blob = await response.blob()
+    downloadBlob(blob, filename)
+  },
+
+  /**
+   * Get user's slide generation history with pagination
+   *
+   * @param page - Page number (0-indexed)
+   * @param size - Page size (default: 10)
+   * @param sortBy - Sort field (default: 'createdAt')
+   * @param sortDir - Sort direction ('asc' or 'desc', default: 'desc')
+   * @returns Promise with paginated slide history
+   *
+   * @example
+   * ```typescript
+   * SlideService.getSlideHistory(0, 10, 'createdAt', 'desc')
+   * ```
+   */
+  getSlideHistory: (
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortDir: 'asc' | 'desc' = 'desc'
+  ): Promise<AxiosResponse<ApiResponse<SlideHistoryPageResponse>>> => {
+    return api.get(`${endpoints.SLIDE}/history`, {
+      params: { page, size, sortBy, sortDir },
+    })
+  },
+
+  /**
+   * Get specific generated slide by ID
+   *
+   * @param id - Slide ID
+   * @returns Promise with slide details
+   *
+   * @example
+   * ```typescript
+   * SlideService.getSlideById(123)
+   * ```
+   */
+  getSlideById: (
+    id: number
+  ): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
+    return api.get(`${endpoints.SLIDE}/history/${id}`)
   },
 }
 

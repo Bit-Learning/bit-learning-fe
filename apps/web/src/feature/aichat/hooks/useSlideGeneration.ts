@@ -1,43 +1,40 @@
-import { useMutation } from '@tanstack/react-query'
+import { useMutation, useQuery } from '@tanstack/react-query'
 import { SlideService, downloadBlob, generatePPTXFilename } from '../service/SlideService'
-import type { SlideRequest } from '../type'
-import { toast } from 'sonner'
+import type { SlideRequest, SlideGenerationResponse, SlideHistoryPageResponse } from '../type'
+import { toast } from '@workspace/ui/components/Sonner'
 
 interface GenerateSlideParams {
   templateId: number
   request: SlideRequest
 }
 
-/**
- * Custom hook for generating PowerPoint slides with AI
- *
- * Usage:
- * ```typescript
- * const { generateSlides, isGenerating } = useSlideGeneration()
- *
- * generateSlides({
- *   templateId: 1,
- *   request: {
- *     topic: 'Python Basics',
- *     grade: 10,
- *     slide_count: 5
- *   }
- * })
- * ```
- */
 export const useSlideGeneration = () => {
-  const mutation = useMutation({
+  const mutation = useMutation<SlideGenerationResponse, any, GenerateSlideParams>({
     mutationFn: async ({ templateId, request }: GenerateSlideParams) => {
-      return await SlideService.generatePPTX(templateId, request)
+      const response = await SlideService.generatePPTX(templateId, request)
+      return response.data.data!
     },
-    onSuccess: (response, variables) => {
-      // Automatically download the generated PPTX file
-      const filename = generatePPTXFilename(variables.request.topic)
-      downloadBlob(response.data, filename)
+    onSuccess: async (data) => {
+      // Download from Cloudinary URL
+      try {
+        await SlideService.downloadFromUrl(data.cloudinaryUrl, data.filename)
 
-      toast.success('Slides generated successfully!', {
-        description: `Downloaded: ${filename}`
-      })
+        const cacheIcon = data.fromCache ? '📦 ' : '✨ '
+        const cacheStatus = data.fromCache ? 'Retrieved from cache' : 'Generated'
+
+        toast.success('Slides ready!', {
+          description: `${cacheIcon}${cacheStatus}: ${data.filename}`
+        })
+      } catch (downloadError) {
+        console.error('Download error:', downloadError)
+        toast.error('Download failed', {
+          description: 'Slide was generated but download failed. Try downloading manually.',
+          action: {
+            label: 'Open URL',
+            onClick: () => window.open(data.cloudinaryUrl, '_blank')
+          }
+        })
+      }
     },
     onError: (error: any) => {
       const errorMessage = error?.response?.data?.message || 'Failed to generate slides'
@@ -52,6 +49,7 @@ export const useSlideGeneration = () => {
     generateSlides: mutation.mutate,
     generateSlidesAsync: mutation.mutateAsync,
     isGenerating: mutation.isPending,
+    data: mutation.data,
     error: mutation.error,
     isError: mutation.isError,
     isSuccess: mutation.isSuccess,
@@ -242,4 +240,48 @@ export const useMindmapGeneration = () => {
     isSuccess: mutation.isSuccess,
     reset: mutation.reset
   }
+}
+
+/**
+ * Custom hook for fetching user's slide generation history
+ *
+ * Usage:
+ * ```typescript
+ * const { data, isLoading, refetch } = useSlideHistory(0, 10, 'createdAt', 'desc')
+ * ```
+ */
+export const useSlideHistory = (
+  page: number = 0,
+  size: number = 10,
+  sortBy: string = 'createdAt',
+  sortDir: 'asc' | 'desc' = 'desc'
+) => {
+  return useQuery<SlideHistoryPageResponse>({
+    queryKey: ['slideHistory', page, size, sortBy, sortDir],
+    queryFn: async () => {
+      const response = await SlideService.getSlideHistory(page, size, sortBy, sortDir)
+      return response.data.data!
+    },
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
+}
+
+/**
+ * Custom hook for fetching specific slide details by ID
+ *
+ * Usage:
+ * ```typescript
+ * const { data, isLoading, refetch } = useSlideById(123)
+ * ```
+ */
+export const useSlideById = (id: number, enabled: boolean = true) => {
+  return useQuery<SlideGenerationResponse>({
+    queryKey: ['slide', id],
+    queryFn: async () => {
+      const response = await SlideService.getSlideById(id)
+      return response.data.data!
+    },
+    enabled: enabled && !!id,
+    staleTime: 1000 * 60 * 5, // 5 minutes
+  })
 }
