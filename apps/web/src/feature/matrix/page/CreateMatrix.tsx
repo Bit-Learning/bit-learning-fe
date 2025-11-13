@@ -49,9 +49,12 @@ export default function CreateMatrix() {
         queryKey: ['lessons', 'all', subjectId],
         queryFn: async () => {
             if (!chapters) return []
-            const lessonPromises = chapters.map(chapter => apiClient.lesson.getLessonsByChapter(chapter.id).queryFn())
+            const lessonPromises = chapters.map(async chapter => {
+                const queryOpts = apiClient.lesson.getLessonsByChapter(chapter.id)
+                return await queryOpts.queryFn?.({ queryKey: queryOpts.queryKey } as any)
+            })
             const lessonArrays = await Promise.all(lessonPromises)
-            return lessonArrays.flat()
+            return lessonArrays.flat().filter((lesson): lesson is NonNullable<typeof lesson> => lesson != null)
         },
         enabled: !!chapters && chapters.length > 0,
     })

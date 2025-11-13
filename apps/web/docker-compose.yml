@@ -16,7 +16,8 @@ services:
   # Production environment
   bithub-web-prod:
     container_name: bithub-web-prod
-    image: lcaohoanq/bithub-web:serve-nginx
+    # image: lcaohoanq/bithub-web:serve-nginx
+    image: lcaohoanq/bithub-web:serve-nginx-14
     build:
       context: ../..
       dockerfile: apps/web/Dockerfile.prod

@@ -46,15 +46,11 @@ export const useCreateConversation = () => {
             // Invalidate conversations list to refetch
             queryClient.invalidateQueries({ queryKey: conversationKeys.lists() })
 
-            toast.success('Conversation created', {
-                description: data.title || 'New conversation started',
-            })
+            toast.success({ title: 'Conversation created', description: 'You can now start chatting' })
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || 'Failed to create conversation'
-            toast.error('Creation failed', {
-                description: errorMessage,
-            })
+            toast.error({ title: 'Creation failed', description: errorMessage })
             console.error('Conversation creation error:', error)
         },
     })
@@ -179,15 +175,11 @@ export const useDeleteConversation = () => {
             // Remove the specific conversation from cache
             queryClient.removeQueries({ queryKey: conversationKeys.detail(conversationId) })
 
-            toast.success('Conversation deleted', {
-                description: data.message || 'Conversation and all messages removed',
-            })
+            toast.success({ title: 'Conversation deleted' })
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || 'Failed to delete conversation'
-            toast.error('Deletion failed', {
-                description: errorMessage,
-            })
+            toast.error({ title: 'Deletion failed', description: errorMessage })
             console.error('Conversation deletion error:', error)
         },
     })
