@@ -8,8 +8,10 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { Route as R404RouteImport } from './routes/404'
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as AboutRouteImport } from './routes/about'
+import { Route as AiChatbotRouteImport } from './routes/ai-chatbot'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as ChatRouteImport } from './routes/chat'
 import { Route as ConsultationRouteImport } from './routes/consultation'
@@ -24,30 +26,9 @@ import { Route as CoursesWebDevelopmentRouteImport } from './routes/courses/web-
 import { Route as CustomTemplateRouteImport } from './routes/custom-template'
 import { Route as DemoRouteImport } from './routes/demo'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as WebDesignRouteImport } from './routes/web-design'
-import { Route as UserProfileRouteImport } from './routes/user-profile'
-import { Route as UploadRouteImport } from './routes/upload'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as SigninRouteImport } from './routes/signin'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
-import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
-import { Route as OfflineCourseRouteImport } from './routes/offline-course'
-import { Route as MentorshipRouteImport } from './routes/mentorship'
-import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as DemoRouteImport } from './routes/demo'
-import { Route as CustomTemplateRouteImport } from './routes/custom-template'
-import { Route as CorporateTrainingRouteImport } from './routes/corporate-training'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as ConsultationRouteImport } from './routes/consultation'
-import { Route as ChatRouteImport } from './routes/chat'
-import { Route as AiChatbotRouteImport } from './routes/ai-chatbot'
-import { Route as AboutRouteImport } from './routes/about'
-import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as MentorshipRouteImport } from './routes/mentorship'
+import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as NewsIdRouteImport } from './routes/news/$id'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
 import { Route as OfflineCourseRouteImport } from './routes/offline-course'
@@ -65,7 +46,6 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
 import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
-import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as TemplatesSlidevIdEditRouteImport } from './routes/templates/slidev/$id/edit'
 import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
 import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
@@ -171,9 +151,9 @@ const ChatRoute = ChatRouteImport.update({
     getParentRoute: () => rootRouteImport,
 } as any)
 const AiChatbotRoute = AiChatbotRouteImport.update({
-  id: '/ai-chatbot',
-  path: '/ai-chatbot',
-  getParentRoute: () => rootRouteImport,
+    id: '/ai-chatbot',
+    path: '/ai-chatbot',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
     id: '/about',
@@ -181,9 +161,9 @@ const AboutRoute = AboutRouteImport.update({
     getParentRoute: () => rootRouteImport,
 } as any)
 const R404Route = R404RouteImport.update({
-  id: '/404',
-  path: '/404',
-  getParentRoute: () => rootRouteImport,
+    id: '/404',
+    path: '/404',
+    getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
     id: '/',
@@ -285,15 +265,15 @@ const PresentationsIdOverviewRoute = PresentationsIdOverviewRouteImport.update({
     path: '/overview',
     getParentRoute: () => PresentationsIdRoute,
 } as any)
+const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
+    id: '/mindmaps/$userId/$code',
+    path: '/mindmaps/$userId/$code',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
     id: '/auth/google/callback',
     path: '/auth/google/callback',
     getParentRoute: () => rootRouteImport,
-} as any)
-const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
-  id: '/mindmaps/$userId/$code',
-  path: '/mindmaps/$userId/$code',
-  getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
     id: '/templates/slidev/$id/edit',
@@ -303,7 +283,9 @@ const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
 
 export interface FileRoutesByFullPath {
     '/': typeof IndexRoute
+    '/404': typeof R404Route
     '/about': typeof AboutRoute
+    '/ai-chatbot': typeof AiChatbotRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -338,6 +320,7 @@ export interface FileRoutesByFullPath {
     '/presentations': typeof PresentationsIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/auth/google/callback': typeof AuthGoogleCallbackRoute
+    '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
@@ -347,7 +330,9 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
     '/': typeof IndexRoute
+    '/404': typeof R404Route
     '/about': typeof AboutRoute
+    '/ai-chatbot': typeof AiChatbotRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -382,6 +367,7 @@ export interface FileRoutesByTo {
     '/presentations': typeof PresentationsIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/auth/google/callback': typeof AuthGoogleCallbackRoute
+    '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
@@ -392,7 +378,9 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
     __root__: typeof rootRouteImport
     '/': typeof IndexRoute
+    '/404': typeof R404Route
     '/about': typeof AboutRoute
+    '/ai-chatbot': typeof AiChatbotRoute
     '/chat': typeof ChatRoute
     '/consultation': typeof ConsultationRoute
     '/contact': typeof ContactRoute
@@ -427,6 +415,7 @@ export interface FileRoutesById {
     '/presentations/': typeof PresentationsIndexRoute
     '/templates/': typeof TemplatesIndexRoute
     '/auth/google/callback': typeof AuthGoogleCallbackRoute
+    '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
@@ -438,7 +427,9 @@ export interface FileRouteTypes {
     fileRoutesByFullPath: FileRoutesByFullPath
     fullPaths:
         | '/'
+        | '/404'
         | '/about'
+        | '/ai-chatbot'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -473,6 +464,7 @@ export interface FileRouteTypes {
         | '/presentations'
         | '/templates'
         | '/auth/google/callback'
+        | '/mindmaps/$userId/$code'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
@@ -482,7 +474,9 @@ export interface FileRouteTypes {
     fileRoutesByTo: FileRoutesByTo
     to:
         | '/'
+        | '/404'
         | '/about'
+        | '/ai-chatbot'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -517,6 +511,7 @@ export interface FileRouteTypes {
         | '/presentations'
         | '/templates'
         | '/auth/google/callback'
+        | '/mindmaps/$userId/$code'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
@@ -526,7 +521,9 @@ export interface FileRouteTypes {
     id:
         | '__root__'
         | '/'
+        | '/404'
         | '/about'
+        | '/ai-chatbot'
         | '/chat'
         | '/consultation'
         | '/contact'
@@ -561,6 +558,7 @@ export interface FileRouteTypes {
         | '/presentations/'
         | '/templates/'
         | '/auth/google/callback'
+        | '/mindmaps/$userId/$code'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
@@ -571,7 +569,9 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
     IndexRoute: typeof IndexRoute
+    R404Route: typeof R404Route
     AboutRoute: typeof AboutRoute
+    AiChatbotRoute: typeof AiChatbotRoute
     ChatRoute: typeof ChatRoute
     ConsultationRoute: typeof ConsultationRoute
     ContactRoute: typeof ContactRoute
@@ -606,6 +606,7 @@ export interface RootRouteChildren {
     PresentationsIndexRoute: typeof PresentationsIndexRoute
     TemplatesIndexRoute: typeof TemplatesIndexRoute
     AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
+    MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
     TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
     TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
     TemplatesSlidevIdEditRoute: typeof TemplatesSlidevIdEditRoute
@@ -746,11 +747,25 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof ChatRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/ai-chatbot': {
+            id: '/ai-chatbot'
+            path: '/ai-chatbot'
+            fullPath: '/ai-chatbot'
+            preLoaderRoute: typeof AiChatbotRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/about': {
             id: '/about'
             path: '/about'
             fullPath: '/about'
             preLoaderRoute: typeof AboutRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/404': {
+            id: '/404'
+            path: '/404'
+            fullPath: '/404'
+            preLoaderRoute: typeof R404RouteImport
             parentRoute: typeof rootRouteImport
         }
         '/': {
@@ -893,6 +908,13 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof PresentationsIdOverviewRouteImport
             parentRoute: typeof PresentationsIdRoute
         }
+        '/mindmaps/$userId/$code': {
+            id: '/mindmaps/$userId/$code'
+            path: '/mindmaps/$userId/$code'
+            fullPath: '/mindmaps/$userId/$code'
+            preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/auth/google/callback': {
             id: '/auth/google/callback'
             path: '/auth/google/callback'
@@ -907,638 +929,6 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesSlidevIdEditRouteImport
             parentRoute: typeof rootRouteImport
         }
-  '/': typeof IndexRoute
-  '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/ai-chatbot': typeof AiChatbotRoute
-  '/chat': typeof ChatRoute
-  '/consultation': typeof ConsultationRoute
-  '/contact': typeof ContactRoute
-  '/corporate-training': typeof CorporateTrainingRoute
-  '/custom-template': typeof CustomTemplateRoute
-  '/demo': typeof DemoRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/mentorship': typeof MentorshipRoute
-  '/offline-course': typeof OfflineCourseRoute
-  '/payment-failed': typeof PaymentFailedRoute
-  '/payment-succeeded': typeof PaymentSucceededRoute
-  '/privacy': typeof PrivacyRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/signin': typeof SigninRoute
-  '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
-  '/upload': typeof UploadRoute
-  '/user-profile': typeof UserProfileRoute
-  '/web-design': typeof WebDesignRoute
-  '/courses/$id': typeof CoursesIdRoute
-  '/courses/backend-development': typeof CoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof CoursesDataScienceRoute
-  '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof CoursesWebDevelopmentRoute
-  '/news/$id': typeof NewsIdRoute
-  '/presentations/$id': typeof PresentationsIdRouteWithChildren
-  '/templates/$id': typeof TemplatesIdRoute
-  '/templates/dashboard': typeof TemplatesDashboardRoute
-  '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
-  '/courses': typeof CoursesIndexRoute
-  '/news': typeof NewsIndexRoute
-  '/presentations': typeof PresentationsIndexRoute
-  '/templates': typeof TemplatesIndexRoute
-  '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof PresentationsIdViewRoute
-  '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
-  '/templates/slidev': typeof TemplatesSlidevIndexRoute
-  '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
-}
-export interface FileRoutesByTo {
-  '/': typeof IndexRoute
-  '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/ai-chatbot': typeof AiChatbotRoute
-  '/chat': typeof ChatRoute
-  '/consultation': typeof ConsultationRoute
-  '/contact': typeof ContactRoute
-  '/corporate-training': typeof CorporateTrainingRoute
-  '/custom-template': typeof CustomTemplateRoute
-  '/demo': typeof DemoRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/mentorship': typeof MentorshipRoute
-  '/offline-course': typeof OfflineCourseRoute
-  '/payment-failed': typeof PaymentFailedRoute
-  '/payment-succeeded': typeof PaymentSucceededRoute
-  '/privacy': typeof PrivacyRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/signin': typeof SigninRoute
-  '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
-  '/upload': typeof UploadRoute
-  '/user-profile': typeof UserProfileRoute
-  '/web-design': typeof WebDesignRoute
-  '/courses/$id': typeof CoursesIdRoute
-  '/courses/backend-development': typeof CoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof CoursesDataScienceRoute
-  '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof CoursesWebDevelopmentRoute
-  '/news/$id': typeof NewsIdRoute
-  '/presentations/$id': typeof PresentationsIdRouteWithChildren
-  '/templates/$id': typeof TemplatesIdRoute
-  '/templates/dashboard': typeof TemplatesDashboardRoute
-  '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
-  '/courses': typeof CoursesIndexRoute
-  '/news': typeof NewsIndexRoute
-  '/presentations': typeof PresentationsIndexRoute
-  '/templates': typeof TemplatesIndexRoute
-  '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof PresentationsIdViewRoute
-  '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
-  '/templates/slidev': typeof TemplatesSlidevIndexRoute
-  '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
-}
-export interface FileRoutesById {
-  __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
-  '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/ai-chatbot': typeof AiChatbotRoute
-  '/chat': typeof ChatRoute
-  '/consultation': typeof ConsultationRoute
-  '/contact': typeof ContactRoute
-  '/corporate-training': typeof CorporateTrainingRoute
-  '/custom-template': typeof CustomTemplateRoute
-  '/demo': typeof DemoRoute
-  '/forgot-password': typeof ForgotPasswordRoute
-  '/mentorship': typeof MentorshipRoute
-  '/offline-course': typeof OfflineCourseRoute
-  '/payment-failed': typeof PaymentFailedRoute
-  '/payment-succeeded': typeof PaymentSucceededRoute
-  '/privacy': typeof PrivacyRoute
-  '/reset-password': typeof ResetPasswordRoute
-  '/signin': typeof SigninRoute
-  '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
-  '/upload': typeof UploadRoute
-  '/user-profile': typeof UserProfileRoute
-  '/web-design': typeof WebDesignRoute
-  '/courses/$id': typeof CoursesIdRoute
-  '/courses/backend-development': typeof CoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof CoursesDataScienceRoute
-  '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof CoursesWebDevelopmentRoute
-  '/news/$id': typeof NewsIdRoute
-  '/presentations/$id': typeof PresentationsIdRouteWithChildren
-  '/templates/$id': typeof TemplatesIdRoute
-  '/templates/dashboard': typeof TemplatesDashboardRoute
-  '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
-  '/courses/': typeof CoursesIndexRoute
-  '/news/': typeof NewsIndexRoute
-  '/presentations/': typeof PresentationsIndexRoute
-  '/templates/': typeof TemplatesIndexRoute
-  '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof PresentationsIdViewRoute
-  '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
-  '/templates/slidev/': typeof TemplatesSlidevIndexRoute
-  '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
-}
-export interface FileRouteTypes {
-  fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths:
-    | '/'
-    | '/404'
-    | '/about'
-    | '/ai-chatbot'
-    | '/chat'
-    | '/consultation'
-    | '/contact'
-    | '/corporate-training'
-    | '/custom-template'
-    | '/demo'
-    | '/forgot-password'
-    | '/mentorship'
-    | '/offline-course'
-    | '/payment-failed'
-    | '/payment-succeeded'
-    | '/privacy'
-    | '/reset-password'
-    | '/signin'
-    | '/signup'
-    | '/terms'
-    | '/upload'
-    | '/user-profile'
-    | '/web-design'
-    | '/courses/$id'
-    | '/courses/backend-development'
-    | '/courses/data-science'
-    | '/courses/mobile-development'
-    | '/courses/web-development'
-    | '/news/$id'
-    | '/presentations/$id'
-    | '/templates/$id'
-    | '/templates/dashboard'
-    | '/templates/template-preview'
-    | '/courses'
-    | '/news'
-    | '/presentations'
-    | '/templates'
-    | '/mindmaps/$userId/$code'
-    | '/presentations/$id/overview'
-    | '/presentations/$id/presenter'
-    | '/presentations/$id/view'
-    | '/templates/slidev/create'
-    | '/templates/slidev'
-    | '/templates/slidev/$id/edit'
-  fileRoutesByTo: FileRoutesByTo
-  to:
-    | '/'
-    | '/404'
-    | '/about'
-    | '/ai-chatbot'
-    | '/chat'
-    | '/consultation'
-    | '/contact'
-    | '/corporate-training'
-    | '/custom-template'
-    | '/demo'
-    | '/forgot-password'
-    | '/mentorship'
-    | '/offline-course'
-    | '/payment-failed'
-    | '/payment-succeeded'
-    | '/privacy'
-    | '/reset-password'
-    | '/signin'
-    | '/signup'
-    | '/terms'
-    | '/upload'
-    | '/user-profile'
-    | '/web-design'
-    | '/courses/$id'
-    | '/courses/backend-development'
-    | '/courses/data-science'
-    | '/courses/mobile-development'
-    | '/courses/web-development'
-    | '/news/$id'
-    | '/presentations/$id'
-    | '/templates/$id'
-    | '/templates/dashboard'
-    | '/templates/template-preview'
-    | '/courses'
-    | '/news'
-    | '/presentations'
-    | '/templates'
-    | '/mindmaps/$userId/$code'
-    | '/presentations/$id/overview'
-    | '/presentations/$id/presenter'
-    | '/presentations/$id/view'
-    | '/templates/slidev/create'
-    | '/templates/slidev'
-    | '/templates/slidev/$id/edit'
-  id:
-    | '__root__'
-    | '/'
-    | '/404'
-    | '/about'
-    | '/ai-chatbot'
-    | '/chat'
-    | '/consultation'
-    | '/contact'
-    | '/corporate-training'
-    | '/custom-template'
-    | '/demo'
-    | '/forgot-password'
-    | '/mentorship'
-    | '/offline-course'
-    | '/payment-failed'
-    | '/payment-succeeded'
-    | '/privacy'
-    | '/reset-password'
-    | '/signin'
-    | '/signup'
-    | '/terms'
-    | '/upload'
-    | '/user-profile'
-    | '/web-design'
-    | '/courses/$id'
-    | '/courses/backend-development'
-    | '/courses/data-science'
-    | '/courses/mobile-development'
-    | '/courses/web-development'
-    | '/news/$id'
-    | '/presentations/$id'
-    | '/templates/$id'
-    | '/templates/dashboard'
-    | '/templates/template-preview'
-    | '/courses/'
-    | '/news/'
-    | '/presentations/'
-    | '/templates/'
-    | '/mindmaps/$userId/$code'
-    | '/presentations/$id/overview'
-    | '/presentations/$id/presenter'
-    | '/presentations/$id/view'
-    | '/templates/slidev/create'
-    | '/templates/slidev/'
-    | '/templates/slidev/$id/edit'
-  fileRoutesById: FileRoutesById
-}
-export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
-  R404Route: typeof R404Route
-  AboutRoute: typeof AboutRoute
-  AiChatbotRoute: typeof AiChatbotRoute
-  ChatRoute: typeof ChatRoute
-  ConsultationRoute: typeof ConsultationRoute
-  ContactRoute: typeof ContactRoute
-  CorporateTrainingRoute: typeof CorporateTrainingRoute
-  CustomTemplateRoute: typeof CustomTemplateRoute
-  DemoRoute: typeof DemoRoute
-  ForgotPasswordRoute: typeof ForgotPasswordRoute
-  MentorshipRoute: typeof MentorshipRoute
-  OfflineCourseRoute: typeof OfflineCourseRoute
-  PaymentFailedRoute: typeof PaymentFailedRoute
-  PaymentSucceededRoute: typeof PaymentSucceededRoute
-  PrivacyRoute: typeof PrivacyRoute
-  ResetPasswordRoute: typeof ResetPasswordRoute
-  SigninRoute: typeof SigninRoute
-  SignupRoute: typeof SignupRoute
-  TermsRoute: typeof TermsRoute
-  UploadRoute: typeof UploadRoute
-  UserProfileRoute: typeof UserProfileRoute
-  WebDesignRoute: typeof WebDesignRoute
-  CoursesIdRoute: typeof CoursesIdRoute
-  CoursesBackendDevelopmentRoute: typeof CoursesBackendDevelopmentRoute
-  CoursesDataScienceRoute: typeof CoursesDataScienceRoute
-  CoursesMobileDevelopmentRoute: typeof CoursesMobileDevelopmentRoute
-  CoursesWebDevelopmentRoute: typeof CoursesWebDevelopmentRoute
-  NewsIdRoute: typeof NewsIdRoute
-  PresentationsIdRoute: typeof PresentationsIdRouteWithChildren
-  TemplatesIdRoute: typeof TemplatesIdRoute
-  TemplatesDashboardRoute: typeof TemplatesDashboardRoute
-  TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
-  CoursesIndexRoute: typeof CoursesIndexRoute
-  NewsIndexRoute: typeof NewsIndexRoute
-  PresentationsIndexRoute: typeof PresentationsIndexRoute
-  TemplatesIndexRoute: typeof TemplatesIndexRoute
-  MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
-  TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
-  TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
-  TemplatesSlidevIdEditRoute: typeof TemplatesSlidevIdEditRoute
-}
-
-declare module '@tanstack/react-router' {
-  interface FileRoutesByPath {
-    '/web-design': {
-      id: '/web-design'
-      path: '/web-design'
-      fullPath: '/web-design'
-      preLoaderRoute: typeof WebDesignRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/user-profile': {
-      id: '/user-profile'
-      path: '/user-profile'
-      fullPath: '/user-profile'
-      preLoaderRoute: typeof UserProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/upload': {
-      id: '/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof UploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signup': {
-      id: '/signup'
-      path: '/signup'
-      fullPath: '/signup'
-      preLoaderRoute: typeof SignupRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/signin': {
-      id: '/signin'
-      path: '/signin'
-      fullPath: '/signin'
-      preLoaderRoute: typeof SigninRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/reset-password': {
-      id: '/reset-password'
-      path: '/reset-password'
-      fullPath: '/reset-password'
-      preLoaderRoute: typeof ResetPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/payment-succeeded': {
-      id: '/payment-succeeded'
-      path: '/payment-succeeded'
-      fullPath: '/payment-succeeded'
-      preLoaderRoute: typeof PaymentSucceededRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/payment-failed': {
-      id: '/payment-failed'
-      path: '/payment-failed'
-      fullPath: '/payment-failed'
-      preLoaderRoute: typeof PaymentFailedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/offline-course': {
-      id: '/offline-course'
-      path: '/offline-course'
-      fullPath: '/offline-course'
-      preLoaderRoute: typeof OfflineCourseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mentorship': {
-      id: '/mentorship'
-      path: '/mentorship'
-      fullPath: '/mentorship'
-      preLoaderRoute: typeof MentorshipRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/forgot-password': {
-      id: '/forgot-password'
-      path: '/forgot-password'
-      fullPath: '/forgot-password'
-      preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/demo': {
-      id: '/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/custom-template': {
-      id: '/custom-template'
-      path: '/custom-template'
-      fullPath: '/custom-template'
-      preLoaderRoute: typeof CustomTemplateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/corporate-training': {
-      id: '/corporate-training'
-      path: '/corporate-training'
-      fullPath: '/corporate-training'
-      preLoaderRoute: typeof CorporateTrainingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/consultation': {
-      id: '/consultation'
-      path: '/consultation'
-      fullPath: '/consultation'
-      preLoaderRoute: typeof ConsultationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-chatbot': {
-      id: '/ai-chatbot'
-      path: '/ai-chatbot'
-      fullPath: '/ai-chatbot'
-      preLoaderRoute: typeof AiChatbotRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/404': {
-      id: '/404'
-      path: '/404'
-      fullPath: '/404'
-      preLoaderRoute: typeof R404RouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/': {
-      id: '/'
-      path: '/'
-      fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/': {
-      id: '/templates/'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof TemplatesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentations/': {
-      id: '/presentations/'
-      path: '/presentations'
-      fullPath: '/presentations'
-      preLoaderRoute: typeof PresentationsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news/': {
-      id: '/news/'
-      path: '/news'
-      fullPath: '/news'
-      preLoaderRoute: typeof NewsIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/': {
-      id: '/courses/'
-      path: '/courses'
-      fullPath: '/courses'
-      preLoaderRoute: typeof CoursesIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/template-preview': {
-      id: '/templates/template-preview'
-      path: '/templates/template-preview'
-      fullPath: '/templates/template-preview'
-      preLoaderRoute: typeof TemplatesTemplatePreviewRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/dashboard': {
-      id: '/templates/dashboard'
-      path: '/templates/dashboard'
-      fullPath: '/templates/dashboard'
-      preLoaderRoute: typeof TemplatesDashboardRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/$id': {
-      id: '/templates/$id'
-      path: '/templates/$id'
-      fullPath: '/templates/$id'
-      preLoaderRoute: typeof TemplatesIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentations/$id': {
-      id: '/presentations/$id'
-      path: '/presentations/$id'
-      fullPath: '/presentations/$id'
-      preLoaderRoute: typeof PresentationsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news/$id': {
-      id: '/news/$id'
-      path: '/news/$id'
-      fullPath: '/news/$id'
-      preLoaderRoute: typeof NewsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/web-development': {
-      id: '/courses/web-development'
-      path: '/courses/web-development'
-      fullPath: '/courses/web-development'
-      preLoaderRoute: typeof CoursesWebDevelopmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/mobile-development': {
-      id: '/courses/mobile-development'
-      path: '/courses/mobile-development'
-      fullPath: '/courses/mobile-development'
-      preLoaderRoute: typeof CoursesMobileDevelopmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/data-science': {
-      id: '/courses/data-science'
-      path: '/courses/data-science'
-      fullPath: '/courses/data-science'
-      preLoaderRoute: typeof CoursesDataScienceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/backend-development': {
-      id: '/courses/backend-development'
-      path: '/courses/backend-development'
-      fullPath: '/courses/backend-development'
-      preLoaderRoute: typeof CoursesBackendDevelopmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/$id': {
-      id: '/courses/$id'
-      path: '/courses/$id'
-      fullPath: '/courses/$id'
-      preLoaderRoute: typeof CoursesIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/slidev/': {
-      id: '/templates/slidev/'
-      path: '/templates/slidev'
-      fullPath: '/templates/slidev'
-      preLoaderRoute: typeof TemplatesSlidevIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/slidev/create': {
-      id: '/templates/slidev/create'
-      path: '/templates/slidev/create'
-      fullPath: '/templates/slidev/create'
-      preLoaderRoute: typeof TemplatesSlidevCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentations/$id/view': {
-      id: '/presentations/$id/view'
-      path: '/view'
-      fullPath: '/presentations/$id/view'
-      preLoaderRoute: typeof PresentationsIdViewRouteImport
-      parentRoute: typeof PresentationsIdRoute
-    }
-    '/presentations/$id/presenter': {
-      id: '/presentations/$id/presenter'
-      path: '/presenter'
-      fullPath: '/presentations/$id/presenter'
-      preLoaderRoute: typeof PresentationsIdPresenterRouteImport
-      parentRoute: typeof PresentationsIdRoute
-    }
-    '/presentations/$id/overview': {
-      id: '/presentations/$id/overview'
-      path: '/overview'
-      fullPath: '/presentations/$id/overview'
-      preLoaderRoute: typeof PresentationsIdOverviewRouteImport
-      parentRoute: typeof PresentationsIdRoute
-    }
-    '/mindmaps/$userId/$code': {
-      id: '/mindmaps/$userId/$code'
-      path: '/mindmaps/$userId/$code'
-      fullPath: '/mindmaps/$userId/$code'
-      preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/slidev/$id/edit': {
-      id: '/templates/slidev/$id/edit'
-      path: '/templates/slidev/$id/edit'
-      fullPath: '/templates/slidev/$id/edit'
-      preLoaderRoute: typeof TemplatesSlidevIdEditRouteImport
-      parentRoute: typeof rootRouteImport
     }
 }
 
@@ -1558,7 +948,9 @@ const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(P
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
+    R404Route: R404Route,
     AboutRoute: AboutRoute,
+    AiChatbotRoute: AiChatbotRoute,
     ChatRoute: ChatRoute,
     ConsultationRoute: ConsultationRoute,
     ContactRoute: ContactRoute,
@@ -1593,49 +985,9 @@ const rootRouteChildren: RootRouteChildren = {
     PresentationsIndexRoute: PresentationsIndexRoute,
     TemplatesIndexRoute: TemplatesIndexRoute,
     AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
+    MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
     TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
     TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
     TemplatesSlidevIdEditRoute: TemplatesSlidevIdEditRoute,
-  IndexRoute: IndexRoute,
-  R404Route: R404Route,
-  AboutRoute: AboutRoute,
-  AiChatbotRoute: AiChatbotRoute,
-  ChatRoute: ChatRoute,
-  ConsultationRoute: ConsultationRoute,
-  ContactRoute: ContactRoute,
-  CorporateTrainingRoute: CorporateTrainingRoute,
-  CustomTemplateRoute: CustomTemplateRoute,
-  DemoRoute: DemoRoute,
-  ForgotPasswordRoute: ForgotPasswordRoute,
-  MentorshipRoute: MentorshipRoute,
-  OfflineCourseRoute: OfflineCourseRoute,
-  PaymentFailedRoute: PaymentFailedRoute,
-  PaymentSucceededRoute: PaymentSucceededRoute,
-  PrivacyRoute: PrivacyRoute,
-  ResetPasswordRoute: ResetPasswordRoute,
-  SigninRoute: SigninRoute,
-  SignupRoute: SignupRoute,
-  TermsRoute: TermsRoute,
-  UploadRoute: UploadRoute,
-  UserProfileRoute: UserProfileRoute,
-  WebDesignRoute: WebDesignRoute,
-  CoursesIdRoute: CoursesIdRoute,
-  CoursesBackendDevelopmentRoute: CoursesBackendDevelopmentRoute,
-  CoursesDataScienceRoute: CoursesDataScienceRoute,
-  CoursesMobileDevelopmentRoute: CoursesMobileDevelopmentRoute,
-  CoursesWebDevelopmentRoute: CoursesWebDevelopmentRoute,
-  NewsIdRoute: NewsIdRoute,
-  PresentationsIdRoute: PresentationsIdRouteWithChildren,
-  TemplatesIdRoute: TemplatesIdRoute,
-  TemplatesDashboardRoute: TemplatesDashboardRoute,
-  TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
-  CoursesIndexRoute: CoursesIndexRoute,
-  NewsIndexRoute: NewsIndexRoute,
-  PresentationsIndexRoute: PresentationsIndexRoute,
-  TemplatesIndexRoute: TemplatesIndexRoute,
-  MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
-  TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
-  TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
-  TemplatesSlidevIdEditRoute: TemplatesSlidevIdEditRoute,
 }
 export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()

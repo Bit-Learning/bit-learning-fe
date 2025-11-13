@@ -9,3 +9,7 @@ export const getMindMapDataByUserIdAndCode = async (
 ): Promise<AxiosResponse<ApiResponse<MindMap>>> => {
     return api.get<ApiResponse<MindMap>>(`/products/mindmaps/${userId}/${code}`)
 }
+
+export const getAllMindMapsByUserId = async (userId: number): Promise<AxiosResponse<ApiResponse<MindMap[]>>> => {
+    return api.get<ApiResponse<MindMap[]>>(`/products/mindmaps/?userId=${userId}`)
+}

@@ -6,7 +6,7 @@ import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
-import { Tabs, Tab, TabList, TabPanel } from '@workspace/ui/components/Tabs'
+import { TabPanel, Tabs } from '@workspace/ui/components/Tabs'
 import {
     Sidebar,
     SidebarContent,
@@ -30,6 +30,7 @@ import {
     Home,
     LogOut,
     MessageSquare,
+    Network,
     Presentation,
     Search,
     SquarePen,
@@ -38,6 +39,7 @@ import * as React from 'react'
 import { useSelector } from 'react-redux'
 import { ChatTab } from '../components/ChatTab'
 import { ConversationsTab } from '../components/ConversationsTab'
+import { MindmapTab } from '../components/MindmapTab'
 import { SlideTab } from '../components/SlideTab'
 
 const AIChatbotPage = () => {
@@ -163,6 +165,16 @@ const AIChatbotPage = () => {
                                             <span>Tạo Slide</span>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
+                                    <SidebarMenuItem>
+                                        <SidebarMenuButton
+                                            onClick={() => setActiveTab('mindmap')}
+                                            isActive={activeTab === 'mindmap'}
+                                            tooltip="Tạo mind map AI"
+                                        >
+                                            <Network />
+                                            <span>Tạo Mind Map</span>
+                                        </SidebarMenuButton>
+                                    </SidebarMenuItem>
                                 </SidebarMenu>
                             </SidebarGroupContent>
                         </SidebarGroup>
@@ -194,6 +206,7 @@ const AIChatbotPage = () => {
                                         {activeTab === 'chat' && 'Trò chuyện với AI'}
                                         {activeTab === 'conversations' && 'Danh sách hội thoại'}
                                         {activeTab === 'slides' && 'Tạo slide AI'}
+                                        {activeTab === 'mindmap' && 'Tạo mind map AI'}
                                     </p>
                                 </div>
                             </div>
@@ -228,6 +241,15 @@ const AIChatbotPage = () => {
                                 <Presentation size={14} />
                                 Slides
                             </Button>
+                            <Button
+                                variant={activeTab === 'mindmap' ? 'default' : 'ghost'}
+                                size="sm"
+                                onClick={() => setActiveTab('mindmap')}
+                                className="h-8 gap-2"
+                            >
+                                <Network size={14} />
+                                Mind Map
+                            </Button>
                         </div>
                     </header>
 
@@ -254,6 +276,10 @@ const AIChatbotPage = () => {
 
                             <TabPanel id="slides" className="m-0 h-full flex-1">
                                 <SlideTab chatContext={currentConversationId} />
+                            </TabPanel>
+
+                            <TabPanel id="mindmap" className="m-0 h-full flex-1">
+                                <MindmapTab chatContext={currentConversationId} />
                             </TabPanel>
                         </Tabs>
                     </main>
