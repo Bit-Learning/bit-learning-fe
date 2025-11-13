@@ -105,7 +105,7 @@ function Mindmap({ data }: { data: MindMap }) {
     useLayoutEffect(() => {
         try {
             setIsLoading(true)
-            const echartsData = convertToEChartsData(initialJsonData)
+            const echartsData: EChartsTreeData = convertToEChartsData(initialJsonData)
 
             const chartOptions: EChartsOption = {
                 tooltip: {
@@ -129,13 +129,20 @@ function Mindmap({ data }: { data: MindMap }) {
                         symbolSize: 10,
 
                         roam: true,
+                        scaleLimit: {
+                            min: 0.6,
+                            max: 2,
+                        },
+                        height: '95%',
                         edgeShape: 'curve',
                         lineStyle: {
                             color: '#aaa',
                             width: 1.5,
                             curveness: 0.4,
+                            type: 'solid',
                         },
-
+                        center: ['50%', '50%'],
+                        zoom: 0.95,
                         itemStyle: {
                             borderWidth: 2,
                         },
@@ -154,18 +161,22 @@ function Mindmap({ data }: { data: MindMap }) {
 
                         leaves: {
                             label: {
-                                position: 'bottom',
-                                verticalAlign: 'top',
-                                align: 'center',
+                                position: 'right',
+                                verticalAlign: 'middle',
+                                align: 'left',
                                 borderColor: 'auto',
                                 borderWidth: 1.5,
                             },
                         },
 
                         emphasis: {
-                            focus: 'descendant',
+                            focus: 'self',
+                            blurScope: 'coordinateSystem',
+                            itemStyle: {
+                                borderWidth: 7,
+                            },
                         },
-                        initialTreeDepth: -1,
+                        initialTreeDepth: -100,
                         expandAndCollapse: true,
                         animationDuration: 550,
                         animationDurationUpdate: 750,
