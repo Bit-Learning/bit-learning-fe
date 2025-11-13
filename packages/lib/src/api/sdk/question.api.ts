@@ -18,7 +18,7 @@ export class QuestionApi {
         return queryOptions({
             queryKey: ['question', id],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<QuestionResponse>>(`/api/v1/questions/${id}`)
+                const response = await this.client.get<ApiResponse<QuestionResponse>>(`/matrices/questions/${id}`)
                 return response.data.data
             },
         })
@@ -30,7 +30,7 @@ export class QuestionApi {
             queryKey: ['questions', 'search', filter, pageable],
             queryFn: async () => {
                 const response = await this.client.post<ApiResponse<PageQuestionResponse>>(
-                    '/api/v1/questions/search',
+                    '/matrices/questions/search',
                     filter,
                     { params: pageable },
                 )
@@ -45,7 +45,7 @@ export class QuestionApi {
             queryKey: ['questions', 'my', userId, pageable],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<PageQuestionResponse>>(
-                    '/api/v1/questions/my-question',
+                    '/matrices/questions/my-question',
                     {
                         headers: { 'X-User-Id': userId },
                         params: pageable,
@@ -60,7 +60,7 @@ export class QuestionApi {
     createQuestion() {
         return {
             mutationFn: async (data: QuestionRequest) => {
-                const response = await this.client.post<ApiResponse<QuestionResponse>>('/api/v1/questions', data)
+                const response = await this.client.post<ApiResponse<QuestionResponse>>('/matrices/questions', data)
                 return response.data.data
             },
         }
@@ -70,7 +70,7 @@ export class QuestionApi {
     updateQuestion() {
         return {
             mutationFn: async ({ id, data }: { id: number; data: QuestionRequest }) => {
-                const response = await this.client.put<ApiResponse<QuestionResponse>>(`/api/v1/questions/${id}`, data)
+                const response = await this.client.put<ApiResponse<QuestionResponse>>(`/matrices/questions/${id}`, data)
                 return response.data.data
             },
         }
@@ -80,7 +80,7 @@ export class QuestionApi {
     deleteQuestion() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/questions/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/questions/${id}`)
                 return response.data.data
             },
         }
@@ -93,7 +93,7 @@ export class QuestionApi {
                 const formData = new FormData()
                 formData.append('file', file)
 
-                const response = await this.client.post<ApiResponse<object>>('/api/v1/questions/import', formData, {
+                const response = await this.client.post<ApiResponse<object>>('/matrices/questions/import', formData, {
                     headers: {
                         'Content-Type': 'multipart/form-data',
                     },
@@ -108,7 +108,7 @@ export class QuestionApi {
         return queryOptions({
             queryKey: ['question-options', questionId],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<OptionResponse[]>>('/api/v1/question-options', {
+                const response = await this.client.get<ApiResponse<OptionResponse[]>>('/matrices/question-options', {
                     params: { questionId },
                 })
                 return response.data.data
@@ -121,7 +121,7 @@ export class QuestionApi {
         return {
             mutationFn: async ({ questionId, options }: { questionId: number; options: OptionRequest[] }) => {
                 const response = await this.client.post<ApiResponse<OptionResponse[]>>(
-                    `/api/v1/question-options/set-for-question/${questionId}`,
+                    `/matrices/question-options/set-for-question/${questionId}`,
                     options,
                 )
                 return response.data.data
@@ -134,7 +134,7 @@ export class QuestionApi {
         return {
             mutationFn: async ({ optionId, data }: { optionId: number; data: OptionRequest }) => {
                 const response = await this.client.put<ApiResponse<OptionResponse>>(
-                    `/api/v1/question-options/${optionId}`,
+                    `/matrices/question-options/${optionId}`,
                     data,
                 )
                 return response.data.data
@@ -146,7 +146,7 @@ export class QuestionApi {
     deleteOption() {
         return {
             mutationFn: async (optionId: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/question-options/${optionId}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/question-options/${optionId}`)
                 return response.data.data
             },
         }

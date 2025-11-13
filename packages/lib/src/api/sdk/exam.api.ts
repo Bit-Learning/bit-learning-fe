@@ -17,7 +17,7 @@ export class ExamApi {
         return queryOptions({
             queryKey: ['exams', params],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<PageExamBriefResponse>>('/api/v1/exams', { params })
+                const response = await this.client.get<ApiResponse<PageExamBriefResponse>>('matrices/exams', { params })
                 return response.data.data
             },
         })
@@ -39,7 +39,7 @@ export class ExamApi {
                     cleanParams.search = params.search
                 }
 
-                const response = await this.client.get<ApiResponse<PageExamBriefResponse>>('/api/v1/exams/my-exams', {
+                const response = await this.client.get<ApiResponse<PageExamBriefResponse>>('/matrices/exams/my-exams', {
                     params: cleanParams,
                     headers: {
                         'X-User-Id': userId.toString(),
@@ -55,7 +55,7 @@ export class ExamApi {
         return queryOptions({
             queryKey: ['exam', id],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<ExamResponse>>(`/api/v1/exams/${id}`)
+                const response = await this.client.get<ApiResponse<ExamResponse>>(`/matrices/exams/${id}`)
                 return response.data.data
             },
         })
@@ -65,7 +65,7 @@ export class ExamApi {
     generateExam() {
         return {
             mutationFn: async (data: ExamGenerateRequest) => {
-                const response = await this.client.post<ApiResponse<ExamResponse>>('/api/v1/exams/generate', data)
+                const response = await this.client.post<ApiResponse<ExamResponse>>('/matrices/exams/generate', data)
                 return response.data.data
             },
         }
@@ -76,7 +76,7 @@ export class ExamApi {
         return {
             mutationFn: async (data: ExamGenerateFromUserQuestionsRequest) => {
                 const response = await this.client.post<ApiResponse<ExamResponse>>(
-                    '/api/v1/exams/generate-from-user-questions',
+                    '/matrices/exams/generate-from-user-questions',
                     data,
                 )
                 return response.data.data
@@ -89,7 +89,7 @@ export class ExamApi {
         return {
             mutationFn: async (data: ExamGenerateFromQuestionsRequest) => {
                 const response = await this.client.post<ApiResponse<ExamResponse>>(
-                    '/api/v1/exams/generate-from-questions',
+                    'matrices/exams/generate-from-questions',
                     data,
                 )
                 return response.data.data
@@ -101,7 +101,7 @@ export class ExamApi {
     deleteExam() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/exams/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`matrices/exams/${id}`)
                 return response.data.data
             },
         }
@@ -112,7 +112,7 @@ export class ExamApi {
         return {
             mutationFn: async ({ id, isPublished }: { id: number; isPublished: boolean }) => {
                 const response = await this.client.patch<ApiResponse<ExamResponse>>(
-                    `/api/v1/exams/${id}/publish`,
+                    `matrices/exams/${id}/publish`,
                     null,
                     { params: { isPublished } },
                 )
@@ -126,7 +126,7 @@ export class ExamApi {
         return queryOptions({
             queryKey: ['exam', 'download', id, format],
             queryFn: async () => {
-                const response = await this.client.get(`/api/v1/exams/${id}/download`, {
+                const response = await this.client.get(`matrices/exams/${id}/download`, {
                     params: { format },
                     responseType: 'blob',
                 })

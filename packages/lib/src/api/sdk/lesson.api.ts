@@ -10,7 +10,7 @@ export class LessonApi {
         return queryOptions({
             queryKey: ['lessons', 'chapter', chapterId],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<LessonResponse[]>>('/api/v1/lessons', {
+                const response = await this.client.get<ApiResponse<LessonResponse[]>>('/matrices/lessons', {
                     params: { chapterId },
                 })
                 return response.data.data
@@ -23,7 +23,7 @@ export class LessonApi {
         return queryOptions({
             queryKey: ['lesson', id],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<LessonResponse>>(`/api/v1/lessons/${id}`)
+                const response = await this.client.get<ApiResponse<LessonResponse>>(`/matrices/lessons/${id}`)
                 return response.data.data
             },
         })
@@ -33,7 +33,7 @@ export class LessonApi {
     createLesson() {
         return {
             mutationFn: async (data: LessonRequest) => {
-                const response = await this.client.post<ApiResponse<LessonResponse>>('/api/v1/lessons', data)
+                const response = await this.client.post<ApiResponse<LessonResponse>>('/matrices/lessons', data)
                 return response.data.data
             },
         }
@@ -43,7 +43,7 @@ export class LessonApi {
     updateLesson() {
         return {
             mutationFn: async ({ id, data }: { id: number; data: LessonRequest }) => {
-                const response = await this.client.put<ApiResponse<LessonResponse>>(`/api/v1/lessons/${id}`, data)
+                const response = await this.client.put<ApiResponse<LessonResponse>>(`/matrices/lessons/${id}`, data)
                 return response.data.data
             },
         }
@@ -53,7 +53,7 @@ export class LessonApi {
     deleteLesson() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/lessons/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/lessons/${id}`)
                 return response.data.data
             },
         }

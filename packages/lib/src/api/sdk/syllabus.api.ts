@@ -20,7 +20,7 @@ export class SyllabusApi {
         return queryOptions({
             queryKey: ['syllabuses', params],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<PageSyllabusResponse>>('/api/v1/syllabuses', {
+                const response = await this.client.get<ApiResponse<PageSyllabusResponse>>('/matrices/syllabuses', {
                     params,
                 })
                 return response.data.data
@@ -33,7 +33,7 @@ export class SyllabusApi {
         return queryOptions({
             queryKey: ['syllabus', id],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<SyllabusResponse>>(`/api/v1/syllabuses/${id}`)
+                const response = await this.client.get<ApiResponse<SyllabusResponse>>(`/matrices/syllabuses/${id}`)
                 return response.data.data
             },
         })
@@ -45,7 +45,7 @@ export class SyllabusApi {
             queryKey: ['syllabuses', 'my', userId, pageable],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<PageSyllabusResponse>>(
-                    '/api/v1/syllabuses/my-syllabuses',
+                    '/matrices/syllabuses/my-syllabuses',
                     {
                         headers: { 'X-User-Id': userId },
                         params: pageable,
@@ -60,7 +60,7 @@ export class SyllabusApi {
     createSyllabus() {
         return {
             mutationFn: async (data: SyllabusRequest) => {
-                const response = await this.client.post<ApiResponse<SyllabusResponse>>('/api/v1/syllabuses', data)
+                const response = await this.client.post<ApiResponse<SyllabusResponse>>('/matrices/syllabuses', data)
                 return response.data.data
             },
         }
@@ -70,7 +70,10 @@ export class SyllabusApi {
     updateSyllabus() {
         return {
             mutationFn: async ({ id, data }: { id: number; data: SyllabusRequest }) => {
-                const response = await this.client.put<ApiResponse<SyllabusResponse>>(`/api/v1/syllabuses/${id}`, data)
+                const response = await this.client.put<ApiResponse<SyllabusResponse>>(
+                    `/matrices/syllabuses/${id}`,
+                    data,
+                )
                 return response.data.data
             },
         }
@@ -80,7 +83,7 @@ export class SyllabusApi {
     deleteSyllabus() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/syllabuses/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/syllabuses/${id}`)
                 return response.data.data
             },
         }
@@ -91,7 +94,7 @@ export class SyllabusApi {
         return {
             mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
                 const response = await this.client.patch<ApiResponse<SyllabusResponse>>(
-                    `/api/v1/syllabuses/${id}/status`,
+                    `/matrices/syllabuses/${id}/status`,
                     null,
                     { params: { isActive } },
                 )
@@ -106,7 +109,7 @@ export class SyllabusApi {
             queryKey: ['syllabus-versions', syllabusId],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<SyllabusVersionResponse[]>>(
-                    '/api/v1/syllabus-versions',
+                    '/matrices/syllabus-versions',
                     { params: { syllabusId } },
                 )
                 return response.data.data
@@ -119,7 +122,7 @@ export class SyllabusApi {
             queryKey: ['syllabus-version', 'latest', syllabusId],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<SyllabusVersionResponse>>(
-                    '/api/v1/syllabus-versions/latest',
+                    '/matrices/syllabus-versions/latest',
                     { params: { syllabusId } },
                 )
                 return response.data.data
@@ -132,7 +135,7 @@ export class SyllabusApi {
             queryKey: ['syllabus-version', versionId],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<SyllabusVersionResponse>>(
-                    `/api/v1/syllabus-versions/${versionId}`,
+                    `/matrices/syllabus-versions/${versionId}`,
                 )
                 return response.data.data
             },
@@ -143,7 +146,7 @@ export class SyllabusApi {
         return {
             mutationFn: async (data: SyllabusVersionRequest) => {
                 const response = await this.client.post<ApiResponse<SyllabusVersionResponse>>(
-                    '/api/v1/syllabus-versions',
+                    '/matrices/syllabus-versions',
                     data,
                 )
                 return response.data.data
@@ -154,7 +157,9 @@ export class SyllabusApi {
     deleteVersion() {
         return {
             mutationFn: async (versionId: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/syllabus-versions/${versionId}`)
+                const response = await this.client.delete<ApiResponse<object>>(
+                    `/matrices/syllabus-versions/${versionId}`,
+                )
                 return response.data.data
             },
         }
@@ -166,7 +171,7 @@ export class SyllabusApi {
             queryKey: ['syllabus-details', versionId],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<SyllabusDetailResponse[]>>(
-                    '/api/v1/syllabus-details',
+                    '/matrices/syllabus-details',
                     {
                         params: { versionId },
                     },
@@ -180,7 +185,7 @@ export class SyllabusApi {
         return {
             mutationFn: async ({ id, data }: { id: number; data: SyllabusDetailRequest }) => {
                 const response = await this.client.put<ApiResponse<SyllabusDetailResponse>>(
-                    `/api/v1/syllabus-details/${id}`,
+                    `/matrices/syllabus-details/${id}`,
                     data,
                 )
                 return response.data.data
@@ -191,9 +196,23 @@ export class SyllabusApi {
     deleteSyllabusDetail() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/syllabus-details/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/syllabus-details/${id}`)
                 return response.data.data
             },
         }
+    }
+
+    // Download syllabus version
+    downloadSyllabusVersion(versionId: number, format: 'pdf' | 'docx') {
+        return queryOptions({
+            queryKey: ['syllabus-version', 'download', versionId, format],
+            queryFn: async () => {
+                const response = await this.client.get(`/matrices/syllabuses/versions/${versionId}/download`, {
+                    params: { format },
+                    responseType: 'blob',
+                })
+                return response.data
+            },
+        })
     }
 }

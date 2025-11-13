@@ -11,7 +11,7 @@ export class SubjectApi {
         return queryOptions({
             queryKey: ['subjects'],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<SubjectResponse[]>>('/api/v1/subjects')
+                const response = await this.client.get<ApiResponse<SubjectResponse[]>>('/matrices/subjects')
                 return response.data.data
             },
         })
@@ -22,7 +22,7 @@ export class SubjectApi {
         return queryOptions({
             queryKey: ['subject', id],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<SubjectResponse>>(`/api/v1/subjects/${id}`)
+                const response = await this.client.get<ApiResponse<SubjectResponse>>(`/matrices/subjects/${id}`)
                 return response.data.data
             },
         })
@@ -32,7 +32,7 @@ export class SubjectApi {
     createSubject() {
         return {
             mutationFn: async (data: SubjectRequest) => {
-                const response = await this.client.post<ApiResponse<SubjectResponse>>('/api/v1/subjects', data)
+                const response = await this.client.post<ApiResponse<SubjectResponse>>('/matrices/subjects', data)
                 return response.data.data
             },
         }
@@ -42,7 +42,7 @@ export class SubjectApi {
     updateSubject() {
         return {
             mutationFn: async ({ id, data }: { id: number; data: SubjectRequest }) => {
-                const response = await this.client.put<ApiResponse<SubjectResponse>>(`/api/v1/subjects/${id}`, data)
+                const response = await this.client.put<ApiResponse<SubjectResponse>>(`/matrices/subjects/${id}`, data)
                 return response.data.data
             },
         }
@@ -52,7 +52,7 @@ export class SubjectApi {
     deleteSubject() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/subjects/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/subjects/${id}`)
                 return response.data.data
             },
         }

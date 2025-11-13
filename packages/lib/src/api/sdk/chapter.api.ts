@@ -10,7 +10,7 @@ export class ChapterApi {
         return queryOptions({
             queryKey: ['chapters', 'subject', subjectId],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<ChapterResponse[]>>('/api/v1/chapters', {
+                const response = await this.client.get<ApiResponse<ChapterResponse[]>>('/matrices/chapters', {
                     params: { subjectId },
                 })
                 return response.data.data
@@ -23,7 +23,7 @@ export class ChapterApi {
         return queryOptions({
             queryKey: ['chapter', id],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<ChapterResponse>>(`/api/v1/chapters/${id}`)
+                const response = await this.client.get<ApiResponse<ChapterResponse>>(`/matrices/chapters/${id}`)
                 return response.data.data
             },
         })
@@ -33,7 +33,7 @@ export class ChapterApi {
     createChapter() {
         return {
             mutationFn: async (data: ChapterRequest) => {
-                const response = await this.client.post<ApiResponse<ChapterResponse>>('/api/v1/chapters', data)
+                const response = await this.client.post<ApiResponse<ChapterResponse>>('/matrices/chapters', data)
                 return response.data.data
             },
         }
@@ -43,7 +43,7 @@ export class ChapterApi {
     updateChapter() {
         return {
             mutationFn: async ({ id, data }: { id: number; data: ChapterRequest }) => {
-                const response = await this.client.put<ApiResponse<ChapterResponse>>(`/api/v1/chapters/${id}`, data)
+                const response = await this.client.put<ApiResponse<ChapterResponse>>(`/matrices/chapters/${id}`, data)
                 return response.data.data
             },
         }
@@ -53,7 +53,7 @@ export class ChapterApi {
     deleteChapter() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/chapters/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/chapters/${id}`)
                 return response.data.data
             },
         }

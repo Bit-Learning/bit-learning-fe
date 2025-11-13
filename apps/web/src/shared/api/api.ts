@@ -1,4 +1,3 @@
-import { API_CONFIG } from '@/shared/config/api.config'
 import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from '@/shared/lib/cookies'
 import axios, {
     AxiosError,
@@ -7,11 +6,12 @@ import axios, {
     type AxiosResponse,
     type InternalAxiosRequestConfig,
 } from 'axios'
+import { API_PATH } from '../constants/endpoints'
 
 const api: AxiosInstance = axios.create({
     baseURL: API_PATH.BASE_URL,
     headers: {
-        ...API_CONFIG.DEFAULT_HEADERS,
+        'Content-Type': 'application/json',
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',
         'ngrok-skip-browser-warning': 'true',
     },

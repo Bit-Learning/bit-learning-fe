@@ -20,7 +20,7 @@ export class MatrixApi {
         return queryOptions({
             queryKey: ['matrices', params],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<PageMatrixResponse>>('/api/v1/matrices', { params })
+                const response = await this.client.get<ApiResponse<PageMatrixResponse>>('/matrices', { params })
                 return response.data.data
             },
         })
@@ -31,7 +31,7 @@ export class MatrixApi {
         return queryOptions({
             queryKey: ['matrix', id],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<MatrixResponse>>(`/api/v1/matrices/${id}`)
+                const response = await this.client.get<ApiResponse<MatrixResponse>>(`/matrices/${id}`)
                 return response.data.data
             },
         })
@@ -42,13 +42,10 @@ export class MatrixApi {
         return queryOptions({
             queryKey: ['matrices', 'my', userId, pageable],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<PageMatrixResponse>>(
-                    '/api/v1/matrices/my-matrices',
-                    {
-                        headers: { 'X-User-Id': userId },
-                        params: pageable,
-                    },
-                )
+                const response = await this.client.get<ApiResponse<PageMatrixResponse>>('/matrices/my-matrices', {
+                    headers: { 'X-User-Id': userId },
+                    params: pageable,
+                })
                 return response.data.data
             },
         })
@@ -58,7 +55,7 @@ export class MatrixApi {
     createMatrix() {
         return {
             mutationFn: async (data: MatrixRequest) => {
-                const response = await this.client.post<ApiResponse<MatrixResponse>>('/api/v1/matrices', data)
+                const response = await this.client.post<ApiResponse<MatrixResponse>>('/matrices', data)
                 return response.data.data
             },
         }
@@ -68,7 +65,7 @@ export class MatrixApi {
     updateMatrix() {
         return {
             mutationFn: async ({ id, data }: { id: number; data: MatrixRequest }) => {
-                const response = await this.client.put<ApiResponse<MatrixResponse>>(`/api/v1/matrices/${id}`, data)
+                const response = await this.client.put<ApiResponse<MatrixResponse>>(`/matrices/${id}`, data)
                 return response.data.data
             },
         }
@@ -78,7 +75,7 @@ export class MatrixApi {
     deleteMatrix() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/matrices/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/${id}`)
                 return response.data.data
             },
         }
@@ -88,11 +85,9 @@ export class MatrixApi {
     setActiveStatus() {
         return {
             mutationFn: async ({ id, isActive }: { id: number; isActive: boolean }) => {
-                const response = await this.client.patch<ApiResponse<MatrixResponse>>(
-                    `/api/v1/matrices/${id}/status`,
-                    null,
-                    { params: { isActive } },
-                )
+                const response = await this.client.patch<ApiResponse<MatrixResponse>>(`/matrices/${id}/status`, null, {
+                    params: { isActive },
+                })
                 return response.data.data
             },
         }
@@ -104,7 +99,7 @@ export class MatrixApi {
             queryKey: ['matrix-versions', matrixId],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<MatrixVersionResponse[]>>(
-                    '/api/v1/matrix-versions',
+                    '/matrices/matrix-versions',
                     { params: { matrixId } },
                 )
                 return response.data.data
@@ -117,7 +112,7 @@ export class MatrixApi {
             queryKey: ['matrix-version', 'latest', matrixId],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<MatrixVersionResponse>>(
-                    '/api/v1/matrix-versions/latest',
+                    '/matrices/matrix-versions/latest',
                     { params: { matrixId } },
                 )
                 return response.data.data
@@ -130,7 +125,7 @@ export class MatrixApi {
             queryKey: ['matrix-version', versionId],
             queryFn: async () => {
                 const response = await this.client.get<ApiResponse<MatrixVersionResponse>>(
-                    `/api/v1/matrix-versions/${versionId}`,
+                    `/matrices/matrix-versions/${versionId}`,
                 )
                 return response.data.data
             },
@@ -141,7 +136,7 @@ export class MatrixApi {
         return {
             mutationFn: async (data: MatrixVersionRequest) => {
                 const response = await this.client.post<ApiResponse<MatrixVersionResponse>>(
-                    '/api/v1/matrix-versions',
+                    '/matrices/matrix-versions',
                     data,
                 )
                 return response.data.data
@@ -152,7 +147,7 @@ export class MatrixApi {
     deleteVersion() {
         return {
             mutationFn: async (versionId: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/matrix-versions/${versionId}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/matrix-versions/${versionId}`)
                 return response.data.data
             },
         }
@@ -163,9 +158,12 @@ export class MatrixApi {
         return queryOptions({
             queryKey: ['matrix-details', versionId],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<MatrixDetailResponse[]>>('/api/v1/matrix-details', {
-                    params: { versionId },
-                })
+                const response = await this.client.get<ApiResponse<MatrixDetailResponse[]>>(
+                    '/matrices/matrix-details',
+                    {
+                        params: { versionId },
+                    },
+                )
                 return response.data.data
             },
         })
@@ -175,7 +173,7 @@ export class MatrixApi {
         return {
             mutationFn: async ({ id, data }: { id: number; data: MatrixDetailRequest }) => {
                 const response = await this.client.put<ApiResponse<MatrixDetailResponse>>(
-                    `/api/v1/matrix-details/${id}`,
+                    `/matrices/matrix-details/${id}`,
                     data,
                 )
                 return response.data.data
@@ -186,7 +184,7 @@ export class MatrixApi {
     deleteMatrixDetail() {
         return {
             mutationFn: async (id: number) => {
-                const response = await this.client.delete<ApiResponse<object>>(`/api/v1/matrix-details/${id}`)
+                const response = await this.client.delete<ApiResponse<object>>(`/matrices/matrix-details/${id}`)
                 return response.data.data
             },
         }
