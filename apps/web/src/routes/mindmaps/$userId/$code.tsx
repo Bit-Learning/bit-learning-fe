@@ -17,8 +17,15 @@ export const Route = createFileRoute('/mindmaps/$userId/$code')({
     },
 
     loader: async ({ params }) => {
-        const res = await getMindMapDataByUserIdAndCode(+params.userId, params.code)
-        return res.data.data
+        try {
+            const res = await getMindMapDataByUserIdAndCode(+params.userId, params.code)
+            return res.data.data
+        } catch (err: any) {
+            if (err.response?.status === 404) {
+                throw redirect({ to: '/404' })
+            }
+            throw err
+        }
     },
 
     component: RouteComponent,
