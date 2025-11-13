@@ -49,3 +49,11 @@ export function ChangePassword(requestBody: TChangePasswordRequest): Promise<Axi
 export function Logout(): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/logout`)
 }
+
+export function GoogleOAuth2Login(code: string): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/oauth2/google`, { code })
+}
+
+export function GetGoogleOAuth2Config(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.get(`${endpoints.AUTH}/oauth2/google/config`)
+}
