@@ -1,6 +1,6 @@
 import { apiClient } from '@/shared/lib/apiClient'
-import { useNavigate, useParams } from '@tanstack/router'
-import { useQuery, useQueryClient } from '@tanstack:react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'

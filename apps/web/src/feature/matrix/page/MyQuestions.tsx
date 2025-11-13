@@ -30,11 +30,11 @@ export default function MyQuestions() {
         ...apiClient.question.getMyQuestions(userInfo?.id || 0, { page: currentPage, size: pageSize }),
         enabled: !!userInfo?.id,
         retry: false,
-        onError: (err: any) => {
-            console.error('[MyQuestions] API Error:', err)
-            console.error('[MyQuestions] Response:', err?.response)
-            console.error('[MyQuestions] Status:', err?.response?.status)
-        },
+        // onError: (err: any) => {
+        //     console.error('[MyQuestions] API Error:', err)
+        //     console.error('[MyQuestions] Response:', err?.response)
+        //     console.error('[MyQuestions] Status:', err?.response?.status)
+        // },
     })
 
     // Delete mutation

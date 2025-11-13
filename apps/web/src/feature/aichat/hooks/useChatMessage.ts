@@ -28,16 +28,12 @@ export const useSendMessage = () => {
             // Optional: Show success toast with processing time
             if (data.assistant_message.processing_time) {
                 const seconds = (data.assistant_message.processing_time / 1000).toFixed(2)
-                toast.success('Response received', {
-                    description: `Processed in ${seconds}s`,
-                })
+                toast.success({ title: 'Response received', description: `Processed in ${seconds}s` })
             }
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || 'Failed to send message'
-            toast.error('Message failed', {
-                description: errorMessage,
-            })
+            toast.error({ title: 'Message failed', description: errorMessage })
             console.error('Message sending error:', error)
         },
     })

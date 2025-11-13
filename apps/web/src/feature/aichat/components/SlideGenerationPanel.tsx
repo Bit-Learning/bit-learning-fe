@@ -200,7 +200,7 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
                             id="includeExamples"
                             isSelected={includeExamples}
                             onChange={setIncludeExamples}
-                            disabled={isGenerating}
+                            isDisabled={isGenerating}
                         />
                         <Label htmlFor="includeExamples" className="cursor-pointer text-sm font-normal">
                             Bao gồm ví dụ
@@ -211,7 +211,7 @@ export const SlideGenerationPanel: React.FC<SlideGenerationPanelProps> = ({ chat
                             id="includeExercises"
                             isSelected={includeExercises}
                             onChange={setIncludeExercises}
-                            disabled={isGenerating}
+                            isDisabled={isGenerating}
                         />
                         <Label htmlFor="includeExercises" className="cursor-pointer text-sm font-normal">
                             Bao gồm bài tập

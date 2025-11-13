@@ -46,7 +46,8 @@ export default function MyExams() {
 
     const handleDownloadExam = async (examId: number, examName: string, format: 'pdf' | 'docx') => {
         try {
-            const blob = await apiClient.exam.downloadExam(examId, format).queryFn()
+            const downloadOpts = apiClient.exam.downloadExam(examId, format)
+            const blob = await downloadOpts.queryFn?.({ queryKey: downloadOpts.queryKey } as any)
             const url = window.URL.createObjectURL(blob as Blob)
             const link = document.createElement('a')
             link.href = url

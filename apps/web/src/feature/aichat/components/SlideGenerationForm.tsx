@@ -150,7 +150,7 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
                         id="includeExamples"
                         isSelected={includeExamples}
                         onChange={setIncludeExamples}
-                        disabled={isGenerating}
+                        isDisabled={isGenerating}
                     >
                         Include examples
                     </Checkbox>
@@ -161,7 +161,7 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
                         id="includeExercises"
                         isSelected={includeExercises}
                         onChange={setIncludeExercises}
-                        disabled={isGenerating}
+                        isDisabled={isGenerating}
                     >
                         Include exercises
                     </Checkbox>
