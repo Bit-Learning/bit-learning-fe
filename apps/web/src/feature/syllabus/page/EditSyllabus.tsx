@@ -16,6 +16,10 @@ export default function EditSyllabus() {
     const syllabusId = Number((params as any).id)
     const queryClient = useQueryClient()
 
+    console.log('[EditSyllabus] Component loaded!')
+    console.log('[EditSyllabus] params:', params)
+    console.log('[EditSyllabus] syllabusId:', syllabusId)
+
     // Form state
     const [syllabusName, setSyllabusName] = useState('')
     const [syllabusCode, setSyllabusCode] = useState('')
@@ -26,9 +30,16 @@ export default function EditSyllabus() {
     const { data: subjects } = useQuery(apiClient.subject.getAllSubjects())
 
     // Load syllabus data
-    const { data: syllabusData, isLoading: isLoadingSyllabus } = useQuery(
-        apiClient.syllabus.getSyllabusById(syllabusId),
-    )
+    const {
+        data: syllabusData,
+        isLoading: isLoadingSyllabus,
+        error: syllabusError,
+    } = useQuery({
+        ...apiClient.syllabus.getSyllabusById(syllabusId),
+        enabled: !!syllabusId && !isNaN(syllabusId),
+    })
+
+    console.log('[EditSyllabus] Query state:', { syllabusData, isLoadingSyllabus, syllabusError, syllabusId })
 
     // Populate form when syllabus data is loaded
     useEffect(() => {

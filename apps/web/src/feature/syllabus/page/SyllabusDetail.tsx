@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@work
 import { confirm } from '@workspace/ui/components/ConfirmDialog'
 import { Skeleton } from '@workspace/ui/components/Skeleton'
 import { toast } from '@workspace/ui/components/Sonner'
-import { ArrowLeft, BookOpen, Clock, Download, Edit, FileText, Power, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, Clock, Download, Edit, FileText, Trash2 } from 'lucide-react'
 
 export default function SyllabusDetail() {
     const navigate = useNavigate()
@@ -36,22 +36,8 @@ export default function SyllabusDetail() {
             navigate({ to: '/syllabuses' })
         },
         onError: (error: any) => {
+            console.error('Delete error:', error)
             toast.error({ title: 'Lỗi khi xóa giáo trình', description: error.message })
-        },
-    })
-
-    // Toggle active status mutation
-    const toggleActiveMutation = useMutation({
-        ...apiClient.syllabus.setActiveStatus(),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['syllabuses'] })
-            queryClient.invalidateQueries({ queryKey: ['syllabus', syllabusId] })
-            toast.success({
-                title: variables.isActive ? 'Đã kích hoạt giáo trình' : 'Đã vô hiệu hóa giáo trình',
-            })
-        },
-        onError: (error: any) => {
-            toast.error({ title: 'Lỗi khi thay đổi trạng thái', description: error.message })
         },
     })
 
@@ -81,31 +67,17 @@ export default function SyllabusDetail() {
     }
 
     const handleDelete = () => {
+        console.log('Delete button clicked for syllabus:', syllabusId)
         confirm({
             title: 'Xác nhận xóa giáo trình',
             description: `Bạn có chắc chắn muốn xóa giáo trình "${syllabus?.name}"? Hành động này không thể hoàn tác.`,
             variant: 'destructive',
             action: {
                 label: 'Xóa',
-                onClick: () => deleteMutation.mutate(syllabusId),
-            },
-            cancel: {
-                label: 'Hủy',
-                onClick: () => {},
-            },
-        })
-    }
-
-    const handleToggleActive = () => {
-        if (!syllabus) return
-        const newStatus = !syllabus.isActive
-        confirm({
-            title: newStatus ? 'Kích hoạt giáo trình' : 'Vô hiệu hóa giáo trình',
-            description: `Bạn có chắc chắn muốn ${newStatus ? 'kích hoạt' : 'vô hiệu hóa'} giáo trình "${syllabus.name}"?`,
-            variant: 'default',
-            action: {
-                label: newStatus ? 'Kích hoạt' : 'Vô hiệu hóa',
-                onClick: () => toggleActiveMutation.mutate({ id: syllabusId, isActive: newStatus }),
+                onClick: () => {
+                    console.log('Calling deleteMutation.mutate')
+                    deleteMutation.mutate(syllabusId)
+                },
             },
             cancel: {
                 label: 'Hủy',
@@ -163,14 +135,6 @@ export default function SyllabusDetail() {
                                 Chỉnh sửa
                             </Button>
                         </Link>
-                        <Button
-                            variant="outline"
-                            className={`gap-2 ${syllabus.isActive ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'}`}
-                            onClick={handleToggleActive}
-                        >
-                            <Power className="h-4 w-4" />
-                            {syllabus.isActive ? 'Vô hiệu hóa' : 'Kích hoạt'}
-                        </Button>
                         <Button variant="outline" onClick={() => handleDownload('pdf')} className="gap-2">
                             <Download className="h-4 w-4" />
                             Tải PDF

@@ -7,7 +7,7 @@ import { Card, CardContent, CardDescription, CardHeader } from '@workspace/ui/co
 import { confirm } from '@workspace/ui/components/ConfirmDialog'
 import { Input } from '@workspace/ui/components/Input'
 import { toast } from '@workspace/ui/components/Sonner'
-import { BookOpen, Clock, Download, Edit, Plus, Power, Search, Trash2 } from 'lucide-react'
+import { BookOpen, Clock, Download, Edit, Plus, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 
 export default function SyllabusList() {
@@ -37,21 +37,8 @@ export default function SyllabusList() {
             toast.success({ title: 'Đã xóa giáo trình thành công!' })
         },
         onError: (error: any) => {
+            console.error('Delete error:', error)
             toast.error({ title: 'Lỗi khi xóa giáo trình', description: error.message })
-        },
-    })
-
-    // Toggle active status mutation
-    const toggleActiveMutation = useMutation({
-        ...apiClient.syllabus.setActiveStatus(),
-        onSuccess: (_, variables) => {
-            queryClient.invalidateQueries({ queryKey: ['syllabuses'] })
-            toast.success({
-                title: variables.isActive ? 'Đã kích hoạt giáo trình' : 'Đã vô hiệu hóa giáo trình',
-            })
-        },
-        onError: (error: any) => {
-            toast.error({ title: 'Lỗi khi thay đổi trạng thái', description: error.message })
         },
     })
 
@@ -64,30 +51,17 @@ export default function SyllabusList() {
     )
 
     const handleDelete = (id: number, name: string) => {
+        console.log('Delete button clicked for syllabus:', id, name)
         confirm({
             title: 'Xác nhận xóa giáo trình',
             description: `Bạn có chắc chắn muốn xóa giáo trình "${name}"? Hành động này không thể hoàn tác.`,
             variant: 'destructive',
             action: {
                 label: 'Xóa',
-                onClick: () => deleteMutation.mutate(id),
-            },
-            cancel: {
-                label: 'Hủy',
-                onClick: () => {},
-            },
-        })
-    }
-
-    const handleToggleActive = (id: number, currentStatus: boolean, name: string) => {
-        const newStatus = !currentStatus
-        confirm({
-            title: newStatus ? 'Kích hoạt giáo trình' : 'Vô hiệu hóa giáo trình',
-            description: `Bạn có chắc chắn muốn ${newStatus ? 'kích hoạt' : 'vô hiệu hóa'} giáo trình "${name}"?`,
-            variant: 'default',
-            action: {
-                label: newStatus ? 'Kích hoạt' : 'Vô hiệu hóa',
-                onClick: () => toggleActiveMutation.mutate({ id, isActive: newStatus }),
+                onClick: () => {
+                    console.log('Calling deleteMutation.mutate with id:', id)
+                    deleteMutation.mutate(id)
+                },
             },
             cancel: {
                 label: 'Hủy',
@@ -246,16 +220,6 @@ export default function SyllabusList() {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            className={`gap-2 ${syllabus.isActive ? 'text-orange-600 hover:bg-orange-50' : 'text-green-600 hover:bg-green-50'}`}
-                                            onClick={() =>
-                                                handleToggleActive(syllabus.id, syllabus.isActive, syllabus.name)
-                                            }
-                                        >
-                                            <Power className="h-4 w-4" />
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
                                             className="gap-2 text-red-600 hover:bg-red-50"
                                             onClick={() => handleDelete(syllabus.id, syllabus.name)}
                                         >
@@ -267,21 +231,21 @@ export default function SyllabusList() {
                                             variant="outline"
                                             size="sm"
                                             className="flex-1 gap-2"
-                                            onClick={() => handleDownload(syllabus, 'pdf')}
-                                            isDisabled={!syllabus.versions || syllabus.versions.length === 0}
-                                        >
-                                            <Download className="h-4 w-4" />
-                                            PDF
-                                        </Button>
-                                        <Button
-                                            variant="outline"
-                                            size="sm"
-                                            className="flex-1 gap-2"
                                             onClick={() => handleDownload(syllabus, 'docx')}
                                             isDisabled={!syllabus.versions || syllabus.versions.length === 0}
                                         >
                                             <Download className="h-4 w-4" />
                                             Word
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            className="flex-1 gap-2"
+                                            onClick={() => handleDownload(syllabus, 'pdf')}
+                                            isDisabled={!syllabus.versions || syllabus.versions.length === 0}
+                                        >
+                                            <Download className="h-4 w-4" />
+                                            PDF
                                         </Button>
                                     </div>
                                 </div>
