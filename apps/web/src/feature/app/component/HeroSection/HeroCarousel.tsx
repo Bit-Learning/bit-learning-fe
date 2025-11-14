@@ -90,7 +90,7 @@ export const HeroCarousel = () => {
             </div>
 
             <div className="relative z-10 flex min-h-screen items-center justify-center">
-                <div className="max-w-6xl px-6 py-20 text-center text-white">
+                <div className="max-w-7xl px-6 py-20 text-center text-white">
                     <div className="mb-8 flex justify-center">{slide.icon}</div>
 
                     <h1 className="mb-6 leading-tight font-bold max-[776px]:text-4xl md:text-6xl">{slide.title}</h1>
