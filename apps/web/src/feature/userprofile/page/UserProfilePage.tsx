@@ -13,7 +13,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Av
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardHeader, CardTitle } from '@workspace/ui/components/Card'
-import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
+import Loader from '@workspace/ui/components/loader/OrangeBlockLoader'
 import {
     Sidebar,
     SidebarContent,
@@ -138,7 +138,7 @@ function UserProfilePage() {
 
     // User is guaranteed to exist here because of route-level protection
     if (isLoading || !userInfo) {
-        return <SpinnerLoader />
+        return <Loader />
     }
 
     const handleLogout = () => {
@@ -276,7 +276,7 @@ function UserProfilePage() {
                                     alt="Cover"
                                     className="h-full w-full object-cover"
                                 />
-                                <Button size="sm" variant="secondary" className="absolute bottom-4 right-4 gap-2">
+                                <Button size="sm" variant="secondary" className="absolute right-4 bottom-4 gap-2">
                                     <Camera className="h-4 w-4" />
                                     <span className="hidden sm:inline">Chỉnh sửa ảnh bìa</span>
                                 </Button>
@@ -298,7 +298,7 @@ function UserProfilePage() {
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
+                                            className="absolute right-2 bottom-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
                                         >
                                             <Camera className="h-4 w-4" />
                                         </Button>
@@ -360,7 +360,7 @@ function UserProfilePage() {
                                                 <label className="text-muted-foreground text-sm font-medium">
                                                     Ngày tham gia
                                                 </label>
-                                                <p className="break-all font-mono text-xs">
+                                                <p className="font-mono text-xs break-all">
                                                     {userInfo.createdAt.slice(0, 10) || 'N/A'}
                                                 </p>
                                             </div>
@@ -377,7 +377,7 @@ function UserProfilePage() {
                                         </div>
                                         {presentationsLoading ? (
                                             <div className="flex justify-center py-8">
-                                                <SpinnerLoader />
+                                                <Loader />
                                             </div>
                                         ) : userPresentations && userPresentations.length > 0 ? (
                                             <div className="grid gap-4 sm:grid-cols-2">
@@ -458,7 +458,7 @@ function UserProfilePage() {
                                         </div>
                                         {ordersLoading ? (
                                             <div className="flex justify-center py-8">
-                                                <SpinnerLoader />
+                                                <Loader />
                                             </div>
                                         ) : userOrders && userOrders.length > 0 ? (
                                             <div className="space-y-4">
@@ -799,7 +799,7 @@ function UserProfilePage() {
 
                                             {transactionsLoading ? (
                                                 <div className="flex justify-center py-8">
-                                                    <SpinnerLoader />
+                                                    <Loader />
                                                 </div>
                                             ) : filteredTransactions && filteredTransactions.length > 0 ? (
                                                 <div className="overflow-x-auto">

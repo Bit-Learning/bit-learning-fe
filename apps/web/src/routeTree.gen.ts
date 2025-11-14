@@ -25,8 +25,18 @@ import { Route as CoursesMobileDevelopmentRouteImport } from './routes/courses/m
 import { Route as CoursesWebDevelopmentRouteImport } from './routes/courses/web-development'
 import { Route as CustomTemplateRouteImport } from './routes/custom-template'
 import { Route as DemoRouteImport } from './routes/demo'
+import { Route as ExamsIdRouteImport } from './routes/exams/$id'
+import { Route as ExamsGenerateRouteImport } from './routes/exams/generate'
+import { Route as ExamsMyExamsRouteImport } from './routes/exams/my-exams'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as InternalTestLoaderRouteImport } from './routes/internal/test-loader'
+import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
+import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.generate'
+import { Route as MatricesCreateRouteImport } from './routes/matrices/create'
+import { Route as MatricesImportRouteImport } from './routes/matrices/import'
+import { Route as MatricesIndexRouteImport } from './routes/matrices/index'
+import { Route as MatricesMyRouteImport } from './routes/matrices/my'
 import { Route as MentorshipRouteImport } from './routes/mentorship'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as NewsIdRouteImport } from './routes/news/$id'
@@ -40,9 +50,20 @@ import { Route as PresentationsIdPresenterRouteImport } from './routes/presentat
 import { Route as PresentationsIdViewRouteImport } from './routes/presentations/$id/view'
 import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as QuestionsIdEditRouteImport } from './routes/questions/$id/edit'
+import { Route as QuestionsIdIndexRouteImport } from './routes/questions/$id/index'
+import { Route as QuestionsCreateRouteImport } from './routes/questions/create'
+import { Route as QuestionsGenerateFromQuestionsRouteImport } from './routes/questions/generate-from-questions'
+import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
+import { Route as QuestionsMyRouteImport } from './routes/questions/my'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as SignupRouteImport } from './routes/signup'
+import { Route as SyllabusesIdEditRouteImport } from './routes/syllabuses/$id/edit'
+import { Route as SyllabusesIdIndexRouteImport } from './routes/syllabuses/$id/index'
+import { Route as SyllabusesCreateRouteImport } from './routes/syllabuses/create'
+import { Route as SyllabusesIndexRouteImport } from './routes/syllabuses/index'
+import { Route as SyllabusesMyRouteImport } from './routes/syllabuses/my'
 import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
 import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
@@ -270,6 +291,16 @@ const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
     path: '/mindmaps/$userId/$code',
     getParentRoute: () => rootRouteImport,
 } as any)
+const MatricesIdGenerateRoute = MatricesIdGenerateRouteImport.update({
+    id: '/matrices/$id/generate',
+    path: '/matrices/$id/generate',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesIdEditRoute = MatricesIdEditRouteImport.update({
+    id: '/matrices/$id/edit',
+    path: '/matrices/$id/edit',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
     id: '/auth/google/callback',
     path: '/auth/google/callback',
@@ -310,21 +341,42 @@ export interface FileRoutesByFullPath {
     '/courses/data-science': typeof CoursesDataScienceRoute
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
+    '/exams/$id': typeof ExamsIdRoute
+    '/exams/generate': typeof ExamsGenerateRoute
+    '/exams/my-exams': typeof ExamsMyExamsRoute
+    '/internal/test-loader': typeof InternalTestLoaderRoute
+    '/matrices/create': typeof MatricesCreateRoute
+    '/matrices/import': typeof MatricesImportRoute
+    '/matrices/my': typeof MatricesMyRoute
     '/news/$id': typeof NewsIdRoute
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
+    '/questions/create': typeof QuestionsCreateRoute
+    '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
+    '/questions/my': typeof QuestionsMyRoute
+    '/syllabuses/create': typeof SyllabusesCreateRoute
+    '/syllabuses/my': typeof SyllabusesMyRoute
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses': typeof CoursesIndexRoute
+    '/matrices': typeof MatricesIndexRoute
     '/news': typeof NewsIndexRoute
     '/presentations': typeof PresentationsIndexRoute
+    '/questions': typeof QuestionsIndexRoute
+    '/syllabuses': typeof SyllabusesIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/auth/google/callback': typeof AuthGoogleCallbackRoute
+    '/matrices/$id/edit': typeof MatricesIdEditRoute
+    '/matrices/$id/generate': typeof MatricesIdGenerateRoute
     '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
+    '/questions/$id/edit': typeof QuestionsIdEditRoute
+    '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+    '/questions/$id': typeof QuestionsIdIndexRoute
+    '/syllabuses/$id': typeof SyllabusesIdIndexRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
 }
@@ -357,21 +409,42 @@ export interface FileRoutesByTo {
     '/courses/data-science': typeof CoursesDataScienceRoute
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
+    '/exams/$id': typeof ExamsIdRoute
+    '/exams/generate': typeof ExamsGenerateRoute
+    '/exams/my-exams': typeof ExamsMyExamsRoute
+    '/internal/test-loader': typeof InternalTestLoaderRoute
+    '/matrices/create': typeof MatricesCreateRoute
+    '/matrices/import': typeof MatricesImportRoute
+    '/matrices/my': typeof MatricesMyRoute
     '/news/$id': typeof NewsIdRoute
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
+    '/questions/create': typeof QuestionsCreateRoute
+    '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
+    '/questions/my': typeof QuestionsMyRoute
+    '/syllabuses/create': typeof SyllabusesCreateRoute
+    '/syllabuses/my': typeof SyllabusesMyRoute
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses': typeof CoursesIndexRoute
+    '/matrices': typeof MatricesIndexRoute
     '/news': typeof NewsIndexRoute
     '/presentations': typeof PresentationsIndexRoute
+    '/questions': typeof QuestionsIndexRoute
+    '/syllabuses': typeof SyllabusesIndexRoute
     '/templates': typeof TemplatesIndexRoute
     '/auth/google/callback': typeof AuthGoogleCallbackRoute
+    '/matrices/$id/edit': typeof MatricesIdEditRoute
+    '/matrices/$id/generate': typeof MatricesIdGenerateRoute
     '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
+    '/questions/$id/edit': typeof QuestionsIdEditRoute
+    '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+    '/questions/$id': typeof QuestionsIdIndexRoute
+    '/syllabuses/$id': typeof SyllabusesIdIndexRoute
     '/templates/slidev': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
 }
@@ -405,21 +478,42 @@ export interface FileRoutesById {
     '/courses/data-science': typeof CoursesDataScienceRoute
     '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
     '/courses/web-development': typeof CoursesWebDevelopmentRoute
+    '/exams/$id': typeof ExamsIdRoute
+    '/exams/generate': typeof ExamsGenerateRoute
+    '/exams/my-exams': typeof ExamsMyExamsRoute
+    '/internal/test-loader': typeof InternalTestLoaderRoute
+    '/matrices/create': typeof MatricesCreateRoute
+    '/matrices/import': typeof MatricesImportRoute
+    '/matrices/my': typeof MatricesMyRoute
     '/news/$id': typeof NewsIdRoute
     '/presentations/$id': typeof PresentationsIdRouteWithChildren
+    '/questions/create': typeof QuestionsCreateRoute
+    '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
+    '/questions/my': typeof QuestionsMyRoute
+    '/syllabuses/create': typeof SyllabusesCreateRoute
+    '/syllabuses/my': typeof SyllabusesMyRoute
     '/templates/$id': typeof TemplatesIdRoute
     '/templates/dashboard': typeof TemplatesDashboardRoute
     '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
     '/courses/': typeof CoursesIndexRoute
+    '/matrices/': typeof MatricesIndexRoute
     '/news/': typeof NewsIndexRoute
     '/presentations/': typeof PresentationsIndexRoute
+    '/questions/': typeof QuestionsIndexRoute
+    '/syllabuses/': typeof SyllabusesIndexRoute
     '/templates/': typeof TemplatesIndexRoute
     '/auth/google/callback': typeof AuthGoogleCallbackRoute
+    '/matrices/$id/edit': typeof MatricesIdEditRoute
+    '/matrices/$id/generate': typeof MatricesIdGenerateRoute
     '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
     '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
     '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
     '/presentations/$id/view': typeof PresentationsIdViewRoute
+    '/questions/$id/edit': typeof QuestionsIdEditRoute
+    '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
     '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+    '/questions/$id/': typeof QuestionsIdIndexRoute
+    '/syllabuses/$id/': typeof SyllabusesIdIndexRoute
     '/templates/slidev/': typeof TemplatesSlidevIndexRoute
     '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
 }
@@ -454,21 +548,42 @@ export interface FileRouteTypes {
         | '/courses/data-science'
         | '/courses/mobile-development'
         | '/courses/web-development'
+        | '/exams/$id'
+        | '/exams/generate'
+        | '/exams/my-exams'
+        | '/internal/test-loader'
+        | '/matrices/create'
+        | '/matrices/import'
+        | '/matrices/my'
         | '/news/$id'
         | '/presentations/$id'
+        | '/questions/create'
+        | '/questions/generate-from-questions'
+        | '/questions/my'
+        | '/syllabuses/create'
+        | '/syllabuses/my'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses'
+        | '/matrices'
         | '/news'
         | '/presentations'
+        | '/questions'
+        | '/syllabuses'
         | '/templates'
         | '/auth/google/callback'
+        | '/matrices/$id/edit'
+        | '/matrices/$id/generate'
         | '/mindmaps/$userId/$code'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
+        | '/questions/$id/edit'
+        | '/syllabuses/$id/edit'
         | '/templates/slidev/create'
+        | '/questions/$id'
+        | '/syllabuses/$id'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
     fileRoutesByTo: FileRoutesByTo
@@ -501,21 +616,42 @@ export interface FileRouteTypes {
         | '/courses/data-science'
         | '/courses/mobile-development'
         | '/courses/web-development'
+        | '/exams/$id'
+        | '/exams/generate'
+        | '/exams/my-exams'
+        | '/internal/test-loader'
+        | '/matrices/create'
+        | '/matrices/import'
+        | '/matrices/my'
         | '/news/$id'
         | '/presentations/$id'
+        | '/questions/create'
+        | '/questions/generate-from-questions'
+        | '/questions/my'
+        | '/syllabuses/create'
+        | '/syllabuses/my'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses'
+        | '/matrices'
         | '/news'
         | '/presentations'
+        | '/questions'
+        | '/syllabuses'
         | '/templates'
         | '/auth/google/callback'
+        | '/matrices/$id/edit'
+        | '/matrices/$id/generate'
         | '/mindmaps/$userId/$code'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
+        | '/questions/$id/edit'
+        | '/syllabuses/$id/edit'
         | '/templates/slidev/create'
+        | '/questions/$id'
+        | '/syllabuses/$id'
         | '/templates/slidev'
         | '/templates/slidev/$id/edit'
     id:
@@ -548,21 +684,42 @@ export interface FileRouteTypes {
         | '/courses/data-science'
         | '/courses/mobile-development'
         | '/courses/web-development'
+        | '/exams/$id'
+        | '/exams/generate'
+        | '/exams/my-exams'
+        | '/internal/test-loader'
+        | '/matrices/create'
+        | '/matrices/import'
+        | '/matrices/my'
         | '/news/$id'
         | '/presentations/$id'
+        | '/questions/create'
+        | '/questions/generate-from-questions'
+        | '/questions/my'
+        | '/syllabuses/create'
+        | '/syllabuses/my'
         | '/templates/$id'
         | '/templates/dashboard'
         | '/templates/template-preview'
         | '/courses/'
+        | '/matrices/'
         | '/news/'
         | '/presentations/'
+        | '/questions/'
+        | '/syllabuses/'
         | '/templates/'
         | '/auth/google/callback'
+        | '/matrices/$id/edit'
+        | '/matrices/$id/generate'
         | '/mindmaps/$userId/$code'
         | '/presentations/$id/overview'
         | '/presentations/$id/presenter'
         | '/presentations/$id/view'
+        | '/questions/$id/edit'
+        | '/syllabuses/$id/edit'
         | '/templates/slidev/create'
+        | '/questions/$id/'
+        | '/syllabuses/$id/'
         | '/templates/slidev/'
         | '/templates/slidev/$id/edit'
     fileRoutesById: FileRoutesById
@@ -596,18 +753,39 @@ export interface RootRouteChildren {
     CoursesDataScienceRoute: typeof CoursesDataScienceRoute
     CoursesMobileDevelopmentRoute: typeof CoursesMobileDevelopmentRoute
     CoursesWebDevelopmentRoute: typeof CoursesWebDevelopmentRoute
+    ExamsIdRoute: typeof ExamsIdRoute
+    ExamsGenerateRoute: typeof ExamsGenerateRoute
+    ExamsMyExamsRoute: typeof ExamsMyExamsRoute
+    InternalTestLoaderRoute: typeof InternalTestLoaderRoute
+    MatricesCreateRoute: typeof MatricesCreateRoute
+    MatricesImportRoute: typeof MatricesImportRoute
+    MatricesMyRoute: typeof MatricesMyRoute
     NewsIdRoute: typeof NewsIdRoute
     PresentationsIdRoute: typeof PresentationsIdRouteWithChildren
+    QuestionsCreateRoute: typeof QuestionsCreateRoute
+    QuestionsGenerateFromQuestionsRoute: typeof QuestionsGenerateFromQuestionsRoute
+    QuestionsMyRoute: typeof QuestionsMyRoute
+    SyllabusesCreateRoute: typeof SyllabusesCreateRoute
+    SyllabusesMyRoute: typeof SyllabusesMyRoute
     TemplatesIdRoute: typeof TemplatesIdRoute
     TemplatesDashboardRoute: typeof TemplatesDashboardRoute
     TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
     CoursesIndexRoute: typeof CoursesIndexRoute
+    MatricesIndexRoute: typeof MatricesIndexRoute
     NewsIndexRoute: typeof NewsIndexRoute
     PresentationsIndexRoute: typeof PresentationsIndexRoute
+    QuestionsIndexRoute: typeof QuestionsIndexRoute
+    SyllabusesIndexRoute: typeof SyllabusesIndexRoute
     TemplatesIndexRoute: typeof TemplatesIndexRoute
     AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
+    MatricesIdEditRoute: typeof MatricesIdEditRoute
+    MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
     MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
+    QuestionsIdEditRoute: typeof QuestionsIdEditRoute
+    SyllabusesIdEditRoute: typeof SyllabusesIdEditRoute
     TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
+    QuestionsIdIndexRoute: typeof QuestionsIdIndexRoute
+    SyllabusesIdIndexRoute: typeof SyllabusesIdIndexRoute
     TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
     TemplatesSlidevIdEditRoute: typeof TemplatesSlidevIdEditRoute
 }
@@ -782,6 +960,20 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/syllabuses/': {
+            id: '/syllabuses/'
+            path: '/syllabuses'
+            fullPath: '/syllabuses'
+            preLoaderRoute: typeof SyllabusesIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/': {
+            id: '/questions/'
+            path: '/questions'
+            fullPath: '/questions'
+            preLoaderRoute: typeof QuestionsIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/presentations/': {
             id: '/presentations/'
             path: '/presentations'
@@ -794,6 +986,13 @@ declare module '@tanstack/react-router' {
             path: '/news'
             fullPath: '/news'
             preLoaderRoute: typeof NewsIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/': {
+            id: '/matrices/'
+            path: '/matrices'
+            fullPath: '/matrices'
+            preLoaderRoute: typeof MatricesIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/courses/': {
@@ -824,6 +1023,41 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesIdRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/syllabuses/my': {
+            id: '/syllabuses/my'
+            path: '/syllabuses/my'
+            fullPath: '/syllabuses/my'
+            preLoaderRoute: typeof SyllabusesMyRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/syllabuses/create': {
+            id: '/syllabuses/create'
+            path: '/syllabuses/create'
+            fullPath: '/syllabuses/create'
+            preLoaderRoute: typeof SyllabusesCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/my': {
+            id: '/questions/my'
+            path: '/questions/my'
+            fullPath: '/questions/my'
+            preLoaderRoute: typeof QuestionsMyRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/generate-from-questions': {
+            id: '/questions/generate-from-questions'
+            path: '/questions/generate-from-questions'
+            fullPath: '/questions/generate-from-questions'
+            preLoaderRoute: typeof QuestionsGenerateFromQuestionsRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/create': {
+            id: '/questions/create'
+            path: '/questions/create'
+            fullPath: '/questions/create'
+            preLoaderRoute: typeof QuestionsCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/presentations/$id': {
             id: '/presentations/$id'
             path: '/presentations/$id'
@@ -836,6 +1070,55 @@ declare module '@tanstack/react-router' {
             path: '/news/$id'
             fullPath: '/news/$id'
             preLoaderRoute: typeof NewsIdRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/my': {
+            id: '/matrices/my'
+            path: '/matrices/my'
+            fullPath: '/matrices/my'
+            preLoaderRoute: typeof MatricesMyRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/import': {
+            id: '/matrices/import'
+            path: '/matrices/import'
+            fullPath: '/matrices/import'
+            preLoaderRoute: typeof MatricesImportRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/create': {
+            id: '/matrices/create'
+            path: '/matrices/create'
+            fullPath: '/matrices/create'
+            preLoaderRoute: typeof MatricesCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/internal/test-loader': {
+            id: '/internal/test-loader'
+            path: '/internal/test-loader'
+            fullPath: '/internal/test-loader'
+            preLoaderRoute: typeof InternalTestLoaderRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/exams/my-exams': {
+            id: '/exams/my-exams'
+            path: '/exams/my-exams'
+            fullPath: '/exams/my-exams'
+            preLoaderRoute: typeof ExamsMyExamsRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/exams/generate': {
+            id: '/exams/generate'
+            path: '/exams/generate'
+            fullPath: '/exams/generate'
+            preLoaderRoute: typeof ExamsGenerateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/exams/$id': {
+            id: '/exams/$id'
+            path: '/exams/$id'
+            fullPath: '/exams/$id'
+            preLoaderRoute: typeof ExamsIdRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/courses/web-development': {
@@ -880,11 +1163,39 @@ declare module '@tanstack/react-router' {
             preLoaderRoute: typeof TemplatesSlidevIndexRouteImport
             parentRoute: typeof rootRouteImport
         }
+        '/syllabuses/$id/': {
+            id: '/syllabuses/$id/'
+            path: '/syllabuses/$id'
+            fullPath: '/syllabuses/$id'
+            preLoaderRoute: typeof SyllabusesIdIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/$id/': {
+            id: '/questions/$id/'
+            path: '/questions/$id'
+            fullPath: '/questions/$id'
+            preLoaderRoute: typeof QuestionsIdIndexRouteImport
+            parentRoute: typeof rootRouteImport
+        }
         '/templates/slidev/create': {
             id: '/templates/slidev/create'
             path: '/templates/slidev/create'
             fullPath: '/templates/slidev/create'
             preLoaderRoute: typeof TemplatesSlidevCreateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/syllabuses/$id/edit': {
+            id: '/syllabuses/$id/edit'
+            path: '/syllabuses/$id/edit'
+            fullPath: '/syllabuses/$id/edit'
+            preLoaderRoute: typeof SyllabusesIdEditRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/questions/$id/edit': {
+            id: '/questions/$id/edit'
+            path: '/questions/$id/edit'
+            fullPath: '/questions/$id/edit'
+            preLoaderRoute: typeof QuestionsIdEditRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/presentations/$id/view': {
@@ -913,6 +1224,20 @@ declare module '@tanstack/react-router' {
             path: '/mindmaps/$userId/$code'
             fullPath: '/mindmaps/$userId/$code'
             preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/$id/generate': {
+            id: '/matrices/$id/generate'
+            path: '/matrices/$id/generate'
+            fullPath: '/matrices/$id/generate'
+            preLoaderRoute: typeof MatricesIdGenerateRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/matrices/$id/edit': {
+            id: '/matrices/$id/edit'
+            path: '/matrices/$id/edit'
+            fullPath: '/matrices/$id/edit'
+            preLoaderRoute: typeof MatricesIdEditRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/auth/google/callback': {
@@ -975,18 +1300,39 @@ const rootRouteChildren: RootRouteChildren = {
     CoursesDataScienceRoute: CoursesDataScienceRoute,
     CoursesMobileDevelopmentRoute: CoursesMobileDevelopmentRoute,
     CoursesWebDevelopmentRoute: CoursesWebDevelopmentRoute,
+    ExamsIdRoute: ExamsIdRoute,
+    ExamsGenerateRoute: ExamsGenerateRoute,
+    ExamsMyExamsRoute: ExamsMyExamsRoute,
+    InternalTestLoaderRoute: InternalTestLoaderRoute,
+    MatricesCreateRoute: MatricesCreateRoute,
+    MatricesImportRoute: MatricesImportRoute,
+    MatricesMyRoute: MatricesMyRoute,
     NewsIdRoute: NewsIdRoute,
     PresentationsIdRoute: PresentationsIdRouteWithChildren,
+    QuestionsCreateRoute: QuestionsCreateRoute,
+    QuestionsGenerateFromQuestionsRoute: QuestionsGenerateFromQuestionsRoute,
+    QuestionsMyRoute: QuestionsMyRoute,
+    SyllabusesCreateRoute: SyllabusesCreateRoute,
+    SyllabusesMyRoute: SyllabusesMyRoute,
     TemplatesIdRoute: TemplatesIdRoute,
     TemplatesDashboardRoute: TemplatesDashboardRoute,
     TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
     CoursesIndexRoute: CoursesIndexRoute,
+    MatricesIndexRoute: MatricesIndexRoute,
     NewsIndexRoute: NewsIndexRoute,
     PresentationsIndexRoute: PresentationsIndexRoute,
+    QuestionsIndexRoute: QuestionsIndexRoute,
+    SyllabusesIndexRoute: SyllabusesIndexRoute,
     TemplatesIndexRoute: TemplatesIndexRoute,
     AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
+    MatricesIdEditRoute: MatricesIdEditRoute,
+    MatricesIdGenerateRoute: MatricesIdGenerateRoute,
     MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
+    QuestionsIdEditRoute: QuestionsIdEditRoute,
+    SyllabusesIdEditRoute: SyllabusesIdEditRoute,
     TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
+    QuestionsIdIndexRoute: QuestionsIdIndexRoute,
+    SyllabusesIdIndexRoute: SyllabusesIdIndexRoute,
     TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
     TemplatesSlidevIdEditRoute: TemplatesSlidevIdEditRoute,
 }
