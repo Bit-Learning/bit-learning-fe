@@ -303,12 +303,8 @@ function Mindmap({ data }: { data: MindMap }) {
 
     const handleSave = async () => {
         try {
-            console.log('Saving mindmap data...')
-            // call API to update mindmap on server
             const payload = { data: JSON.stringify(jsonData) }
             const resp = await updateMindMap(payload, data.code, data.userId)
-            console.log('updateMindMap response:', resp?.data)
-            // if success, clear hasChanges
             setHasChanges(false)
         } catch (err) {
             console.error('Failed to update mindmap:', err)
