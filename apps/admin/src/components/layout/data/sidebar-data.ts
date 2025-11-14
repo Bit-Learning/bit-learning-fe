@@ -38,78 +38,83 @@ export const sidebarData: SidebarData = {
     {
       name: 'Bithub Admin',
       logo: Command,
-      plan: 'Admin Portal',
+      plan: 'Cổng Quản Trị',
     },
     {
       name: 'Bithub Inc',
       logo: GalleryVerticalEnd,
-      plan: 'Enterprise',
+      plan: 'Doanh Nghiệp',
     },
     {
       name: 'Bithub Corp.',
       logo: AudioWaveform,
-      plan: 'Startup',
+      plan: 'Khởi Nghiệp',
     },
   ],
   navGroups: [
     {
-      title: 'General',
+      title: 'Chung',
       items: [
         {
-          title: 'Dashboard',
+          title: 'Bảng điều khiển',
           url: '/',
           icon: LayoutDashboard,
         },
         {
-          title: 'Tasks',
+          title: 'Nhiệm vụ',
           url: '/tasks',
           icon: ListTodo,
         },
         {
-          title: 'Apps',
+          title: 'Ứng dụng',
           url: '/apps',
           icon: Package,
         },
         {
-          title: 'Chats',
+          title: 'Trò chuyện',
           url: '/chats',
           badge: '3',
           icon: MessagesSquare,
         },
         {
-          title: 'Users',
+          title: 'Người dùng',
           url: '/users',
           icon: Users,
         },
         {
-          title: 'Orders',
+          title: 'Đơn hàng',
           url: '/orders',
           icon: PackageOpen,
         },
         {
-          title: 'Templates',
+          title: 'Mẫu',
           url: '/templates',
           icon: FileText,
         },
+        // {
+        //   title: 'Mẫu Slide AI',
+        //   url: '/product-templates',
+        //   icon: FileText,
+        // },
         {
-          title: 'Transactions',
+          title: 'Giao dịch',
           url: '/transactions',
           icon: CreditCard,
         },
         {
-          title: 'Secured by Clerk',
+          title: 'Bảo mật bởi Clerk',
           icon: ClerkLogo,
           items: [
             {
-              title: 'Sign In',
+              title: 'Đăng nhập',
               url: '/clerk/sign-in',
             },
             {
-              title: 'Sign Up',
+              title: 'Đăng ký',
               url: '/clerk/sign-up',
             },
             {
-              title: 'User Management',
+              title: 'Quản lý người dùng',
               url: '/clerk/user-management',
             },
           ],
@@ -117,60 +122,60 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Pages',
+      title: 'Trang',
       items: [
         {
-          title: 'Auth',
+          title: 'Xác thực',
           icon: ShieldCheck,
           items: [
             {
-              title: 'Sign In',
+              title: 'Đăng nhập',
               url: '/sign-in',
             },
             {
-              title: 'Sign In (2 Col)',
+              title: 'Đăng nhập (2 cột)',
               url: '/sign-in-2',
             },
             {
-              title: 'Sign Up',
+              title: 'Đăng ký',
               url: '/sign-up',
             },
             {
-              title: 'Forgot Password',
+              title: 'Quên mật khẩu',
               url: '/forgot-password',
             },
             {
-              title: 'OTP',
+              title: 'Mã OTP',
               url: '/otp',
             },
           ],
         },
         {
-          title: 'Errors',
+          title: 'Lỗi',
           icon: Bug,
           items: [
             {
-              title: 'Unauthorized',
+              title: 'Không có quyền',
               url: '/errors/unauthorized',
               icon: Lock,
             },
             {
-              title: 'Forbidden',
+              title: 'Bị cấm',
               url: '/errors/forbidden',
               icon: UserX,
             },
             {
-              title: 'Not Found',
+              title: 'Không tìm thấy',
               url: '/errors/not-found',
               icon: FileX,
             },
             {
-              title: 'Internal Server Error',
+              title: 'Lỗi máy chủ',
               url: '/errors/internal-server-error',
               icon: ServerOff,
             },
             {
-              title: 'Maintenance Error',
+              title: 'Lỗi bảo trì',
               url: '/errors/maintenance-error',
               icon: Construction,
             },
@@ -179,41 +184,41 @@ export const sidebarData: SidebarData = {
       ],
     },
     {
-      title: 'Other',
+      title: 'Khác',
       items: [
         {
-          title: 'Settings',
+          title: 'Cài đặt',
           icon: Settings,
           items: [
             {
-              title: 'Profile',
+              title: 'Hồ sơ',
               url: '/settings',
               icon: UserCog,
             },
             {
-              title: 'Account',
+              title: 'Tài khoản',
               url: '/settings/account',
               icon: Wrench,
             },
             {
-              title: 'Appearance',
+              title: 'Giao diện',
               url: '/settings/appearance',
               icon: Palette,
             },
             {
-              title: 'Notifications',
+              title: 'Thông báo',
               url: '/settings/notifications',
               icon: Bell,
             },
             {
-              title: 'Display',
+              title: 'Hiển thị',
               url: '/settings/display',
               icon: Monitor,
             },
           ],
         },
         {
-          title: 'Help Center',
+          title: 'Trung tâm trợ giúp',
           url: '/help-center',
           icon: HelpCircle,
         },

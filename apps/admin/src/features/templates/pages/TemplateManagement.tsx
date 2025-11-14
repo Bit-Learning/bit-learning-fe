@@ -67,13 +67,13 @@ export function TemplateManagement() {
   const createMutation = useMutation({
     mutationFn: createTemplate,
     onSuccess: () => {
-      toast.success('Template created successfully!')
+      toast.success('Tạo mẫu thành công!')
       queryClient.invalidateQueries({ queryKey: ['admin-templates'] })
       setIsCreateOpen(false)
       resetForm()
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to create template')
+      toast.error(error?.response?.data?.message || 'Không thể tạo mẫu')
     },
   })
 
@@ -82,13 +82,13 @@ export function TemplateManagement() {
     mutationFn: ({ id, data }: { id: number; data: TemplateRequest }) =>
       updateTemplate(id, data),
     onSuccess: () => {
-      toast.success('Template updated successfully!')
+      toast.success('Cập nhật mẫu thành công!')
       queryClient.invalidateQueries({ queryKey: ['admin-templates'] })
       setIsEditOpen(false)
       resetForm()
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to update template')
+      toast.error(error?.response?.data?.message || 'Không thể cập nhật mẫu')
     },
   })
 
@@ -96,11 +96,11 @@ export function TemplateManagement() {
   const deleteMutation = useMutation({
     mutationFn: deleteTemplate,
     onSuccess: () => {
-      toast.success('Template deleted successfully!')
+      toast.success('Xóa mẫu thành công!')
       queryClient.invalidateQueries({ queryKey: ['admin-templates'] })
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to delete template')
+      toast.error(error?.response?.data?.message || 'Không thể xóa mẫu')
     },
   })
 
@@ -108,11 +108,11 @@ export function TemplateManagement() {
   const toggleMutation = useMutation({
     mutationFn: toggleTemplateStatus,
     onSuccess: () => {
-      toast.success('Template status updated!')
+      toast.success('Đã cập nhật trạng thái mẫu!')
       queryClient.invalidateQueries({ queryKey: ['admin-templates'] })
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to toggle status')
+      toast.error(error?.response?.data?.message || 'Không thể đổi trạng thái')
     },
   })
 
@@ -121,12 +121,12 @@ export function TemplateManagement() {
     mutationFn: rebuildTemplatePreview,
     onSuccess: () => {
       toast.success(
-        'Template preview rebuild initiated! Check back in a few minutes.'
+        'Đã bắt đầu xây dựng lại preview! Kiểm tra lại sau vài phút.'
       )
       queryClient.invalidateQueries({ queryKey: ['admin-templates'] })
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || 'Failed to rebuild preview')
+      toast.error(error?.response?.data?.message || 'Không thể rebuild preview')
     },
   })
 
@@ -164,7 +164,7 @@ export function TemplateManagement() {
   const handleDelete = (id: number) => {
     if (
       confirm(
-        'Are you sure you want to delete this template? This action cannot be undone.'
+        'Bạn có chắc chắn muốn xóa mẫu này? Hành động này không thể hoàn tác.'
       )
     ) {
       deleteMutation.mutate(id)
@@ -180,27 +180,27 @@ export function TemplateManagement() {
   }
 
   return (
-    <div className='container mx-auto space-y-6 p-6'>
+    <div className='space-y-6'>
       <div className='flex items-center justify-between'>
         <div>
-          <h1 className='text-3xl font-bold'>Template Management</h1>
+          <h3 className='text-xl font-semibold'>Quản lý mẫu sản phẩm</h3>
           <p className='text-muted-foreground'>
-            Manage presentation templates - CRUD operations
+            Quản lý các mẫu markdown - CRUD operations
           </p>
         </div>
         <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
           <DialogTrigger asChild>
             <Button onClick={resetForm}>
               <Plus className='mr-2 h-4 w-4' />
-              Create Template
+              Tạo mẫu mới
             </Button>
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Create New Template</DialogTitle>
+              <DialogTitle>Tạo mẫu sản phẩm mới</DialogTitle>
               <DialogDescription>
-                ⚠️ IMPORTANT: Ensure markdown file exists in
-                classpath:static/markdown/ before creating!
+                ⚠️ LƯU Ý: Đảm bảo file markdown tồn tại trong
+                classpath:static/markdown/ trước khi tạo!
               </DialogDescription>
             </DialogHeader>
             <TemplateForm
@@ -225,13 +225,13 @@ export function TemplateManagement() {
                   <CardDescription>ID: {template.id}</CardDescription>
                 </div>
                 <Badge variant={template.isActive ? 'default' : 'secondary'}>
-                  {template.isActive ? 'Active' : 'Inactive'}
+                  {template.isActive ? 'Hoạt động' : 'Không hoạt động'}
                 </Badge>
               </div>
             </CardHeader>
             <CardContent className='space-y-4'>
               <div>
-                <p className='text-muted-foreground text-sm'>Price</p>
+                <p className='text-muted-foreground text-sm'>Giá</p>
                 <p className='text-lg font-semibold'>
                   {template.price.toLocaleString('vi-VN', {
                     style: 'currency',
@@ -242,7 +242,7 @@ export function TemplateManagement() {
 
               {template.previewUrl && (
                 <div>
-                  <p className='text-muted-foreground text-sm'>Preview URL</p>
+                  <p className='text-muted-foreground text-sm'>URL xem trước</p>
                   <p className='truncate text-sm'>{template.previewUrl}</p>
                 </div>
               )}
@@ -255,7 +255,7 @@ export function TemplateManagement() {
                     onClick={() => setPreviewTemplate(template)}
                   >
                     <Eye className='mr-1 h-4 w-4' />
-                    Preview
+                    Xem
                   </Button>
                 )}
                 <Button
@@ -263,7 +263,7 @@ export function TemplateManagement() {
                   size='sm'
                   onClick={() => rebuildMutation.mutate(template.id)}
                   disabled={rebuildMutation.isPending}
-                  title='Rebuild template preview'
+                  title='Xây dựng lại preview'
                 >
                   <RefreshCw className='mr-1 h-4 w-4' />
                   Rebuild
@@ -275,7 +275,7 @@ export function TemplateManagement() {
                   disabled={toggleMutation.isPending}
                 >
                   <Power className='mr-1 h-4 w-4' />
-                  Toggle
+                  Bật/Tắt
                 </Button>
                 <Button
                   variant='outline'
@@ -283,7 +283,7 @@ export function TemplateManagement() {
                   onClick={() => handleEdit(template)}
                 >
                   <Pencil className='mr-1 h-4 w-4' />
-                  Edit
+                  Sửa
                 </Button>
                 <Button
                   variant='destructive'
@@ -292,7 +292,7 @@ export function TemplateManagement() {
                   disabled={deleteMutation.isPending}
                 >
                   <Trash2 className='mr-1 h-4 w-4' />
-                  Delete
+                  Xóa
                 </Button>
               </div>
             </CardContent>
@@ -304,8 +304,8 @@ export function TemplateManagement() {
       <Dialog open={isEditOpen} onOpenChange={setIsEditOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit Template</DialogTitle>
-            <DialogDescription>Update template information</DialogDescription>
+            <DialogTitle>Chỉnh sửa mẫu</DialogTitle>
+            <DialogDescription>Cập nhật thông tin mẫu sản phẩm</DialogDescription>
           </DialogHeader>
           <TemplateForm
             formData={formData}
@@ -330,19 +330,19 @@ export function TemplateManagement() {
               onClick={() => setPreviewTemplate(null)}
               className='absolute top-4 right-4 z-10 rounded-full bg-black/50 px-3 py-1 text-white hover:bg-black/70'
             >
-              ✕ Close
+              ✕ Đóng
             </button>
             <h3 className='mb-4 text-xl font-bold'>
-              Preview: {previewTemplate.name.replace(/_/g, ' ')}
+              Xem trước: {previewTemplate.name.replace(/_/g, ' ')}
             </h3>
             {previewTemplate.previewUrl ? (
               <iframe
                 src={previewTemplate.previewUrl}
                 className='h-[70vh] w-full rounded border'
-                title={`Preview of ${previewTemplate.name}`}
+                title={`Xem trước ${previewTemplate.name}`}
               />
             ) : (
-              <p className='text-muted-foreground'>No preview available</p>
+              <p className='text-muted-foreground'>Không có bản xem trước</p>
             )}
           </div>
         </div>
@@ -366,20 +366,20 @@ function TemplateForm({
   return (
     <div className='space-y-4'>
       <div>
-        <Label htmlFor='name'>Template Name *</Label>
+        <Label htmlFor='name'>Tên mẫu *</Label>
         <Input
           id='name'
           value={formData.name}
           onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-          placeholder='e.g., business_proposal or math.md'
+          placeholder='VD: business_proposal hoặc math.md'
         />
         <p className='text-muted-foreground mt-1 text-xs'>
-          Should match the markdown filename (with or without .md extension)
+          Phải khớp với tên file markdown (có hoặc không có đuôi .md)
         </p>
       </div>
 
       <div>
-        <Label htmlFor='price'>Price (VND) *</Label>
+        <Label htmlFor='price'>Giá (VND) *</Label>
         <Input
           id='price'
           type='number'
@@ -392,19 +392,18 @@ function TemplateForm({
       </div>
 
       <div>
-        <Label htmlFor='previewUrl'>Preview URL (Optional)</Label>
+        <Label htmlFor='previewUrl'>URL xem trước (Tùy chọn)</Label>
         <Input
           id='previewUrl'
           value={formData.previewUrl}
           onChange={(e) =>
             setFormData({ ...formData, previewUrl: e.target.value })
           }
-          placeholder='Leave empty for auto-build'
+          placeholder='Để trống để tự động tạo'
         />
         <p className='text-muted-foreground mt-1 text-xs'>
-          💡 <strong>Leave empty to auto-build preview</strong>. The system will
-          automatically build the template from the markdown file and host it in
-          MinIO. Or provide a custom URL.
+          💡 <strong>Để trống để tự động tạo preview</strong>. Hệ thống sẽ
+          tự động build mẫu từ file markdown và lưu trữ trong MinIO. Hoặc cung cấp URL tùy chỉnh.
         </p>
       </div>
 
@@ -416,12 +415,12 @@ function TemplateForm({
             setFormData({ ...formData, isActive: checked })
           }
         />
-        <Label htmlFor='isActive'>Active (visible to users)</Label>
+        <Label htmlFor='isActive'>Hoạt động (hiển thị cho người dùng)</Label>
       </div>
 
       <Button onClick={onSubmit} disabled={isLoading} className='w-full'>
         {isLoading && <Loader2 className='mr-2 h-4 w-4 animate-spin' />}
-        {isLoading ? 'Saving...' : 'Save Template'}
+        {isLoading ? 'Đang lưu...' : 'Lưu mẫu'}
       </Button>
     </div>
   )

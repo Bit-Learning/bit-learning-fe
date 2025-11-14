@@ -46,11 +46,11 @@ export function Users() {
         <div className='flex flex-wrap items-end justify-between gap-2'>
           <div>
             <h2 className='text-2xl font-bold tracking-tight'>
-              User Management
+              Quản lí người dùng
             </h2>
             <p className='text-muted-foreground'>
-              Manage your users and their roles here.
-              {!isLoading && ` (${totalElements} total users)`}
+              Quản lí tất cả người dùng trong hệ thống
+              {!isLoading && ` (${totalElements} người dùng)`}
             </p>
           </div>
           <UsersPrimaryButtons />

@@ -54,7 +54,7 @@ export const usersColumns: ColumnDef<User>[] = [
   {
     id: 'user',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='User' />
+      <DataTableColumnHeader column={column} title='Người dùng' />
     ),
     cell: ({ row }) => {
       const { firstName, lastName, avatar } = row.original
@@ -84,7 +84,7 @@ export const usersColumns: ColumnDef<User>[] = [
   {
     accessorKey: 'activated',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Status' />
+      <DataTableColumnHeader column={column} title='Trạng thái' />
     ),
     cell: ({ row }) => {
       const activated = row.getValue('activated') as boolean
@@ -92,7 +92,7 @@ export const usersColumns: ColumnDef<User>[] = [
       return (
         <div className='flex space-x-2'>
           <Badge variant='outline' className={cn('capitalize', badgeColor)}>
-            {activated ? 'Active' : 'Inactive'}
+            {activated ? 'Hoạt động' : 'Không hoạt động'}
           </Badge>
         </div>
       )
@@ -108,7 +108,7 @@ export const usersColumns: ColumnDef<User>[] = [
   {
     accessorKey: 'role',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Role' />
+      <DataTableColumnHeader column={column} title='Vai trò' />
     ),
     cell: ({ row }) => {
       const { role } = row.original
@@ -136,13 +136,13 @@ export const usersColumns: ColumnDef<User>[] = [
   {
     accessorKey: 'wallet',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Balance' />
+      <DataTableColumnHeader column={column} title='Số dư' />
     ),
     cell: ({ row }) => {
       const wallet = row.getValue('wallet') as { id: number; balance: number }
       return (
         <div className='text-right font-medium'>
-          ${wallet.balance.toFixed(2)}
+          {wallet.balance.toFixed(0)}đ
         </div>
       )
     },
@@ -151,11 +151,11 @@ export const usersColumns: ColumnDef<User>[] = [
   {
     accessorKey: 'lastLoginAttempt',
     header: ({ column }) => (
-      <DataTableColumnHeader column={column} title='Last Login' />
+      <DataTableColumnHeader column={column} title='Đăng nhập lần cuối' />
     ),
     cell: ({ row }) => {
       const lastLogin = row.getValue('lastLoginAttempt') as string | null
-      if (!lastLogin) return <div className='text-muted-foreground'>Never</div>
+      if (!lastLogin) return <div className='text-muted-foreground'>Chưa từng</div>
       const date = new Date(lastLogin)
       return (
         <div className='text-nowrap'>

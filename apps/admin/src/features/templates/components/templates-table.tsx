@@ -22,28 +22,23 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { DataTablePagination, DataTableToolbar } from '@/components/data-table'
-import { roles } from '../data/data'
-import { type User } from '../data/schema'
+import { type Template } from '../data/schema'
 import { DataTableBulkActions } from './data-table-bulk-actions'
-import { usersColumns as columns } from './users-columns'
+import { templatesColumns as columns } from './templates-columns'
 
 type DataTableProps = {
-  data: User[]
+  data: Template[]
   search: Record<string, unknown>
   navigate: NavigateFn
 }
 
-export function UsersTable({ data, search, navigate }: DataTableProps) {
+export function TemplatesTable({ data, search, navigate }: DataTableProps) {
   // Local UI-only states
   const [rowSelection, setRowSelection] = useState({})
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({})
   const [sorting, setSorting] = useState<SortingState>([])
 
-  // Local state management for table (uncomment to use local-only state, not synced with URL)
-  // const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>([])
-  // const [pagination, onPaginationChange] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
-
-  // Synced with URL states (keys/defaults mirror users route search schema)
+  // Synced with URL states
   const {
     columnFilters,
     onColumnFiltersChange,
@@ -56,10 +51,8 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
     pagination: { defaultPage: 1, defaultPageSize: 10 },
     globalFilter: { enabled: false },
     columnFilters: [
-      // email per-column text filter
-      { columnId: 'email', searchKey: 'email', type: 'string' },
-      { columnId: 'activated', searchKey: 'activated', type: 'array' },
-      { columnId: 'role', searchKey: 'role', type: 'array' },
+      // name per-column text filter
+      { columnId: 'name', searchKey: 'name', type: 'string' },
     ],
   })
 
@@ -95,29 +88,15 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
   return (
     <div
       className={cn(
-        'max-sm:has-[div[role="toolbar"]]:mb-16', // Add margin bottom to the table on mobile when the toolbar is visible
+        'max-sm:has-[div[role="toolbar"]]:mb-16',
         'flex flex-1 flex-col gap-4'
       )}
     >
       <DataTableToolbar
         table={table}
-        searchPlaceholder='Lọc người dùng theo email...'
-        searchKey='email'
-        filters={[
-          {
-            columnId: 'activated',
-            title: 'Trạng thái',
-            options: [
-              { label: 'Hoạt động', value: 'true' },
-              { label: 'Không hoạt động', value: 'false' },
-            ],
-          },
-          {
-            columnId: 'role',
-            title: 'Vai trò',
-            options: roles.map((role) => ({ ...role })),
-          },
-        ]}
+        searchPlaceholder='Tìm kiếm theo tên mẫu...'
+        searchKey='name'
+        filters={[]}
       />
       <div className='overflow-hidden rounded-md border'>
         <Table>
