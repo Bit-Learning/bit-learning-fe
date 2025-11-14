@@ -113,7 +113,7 @@ export default function MyQuestions() {
             {/* Actions Bar */}
             <div className="mb-6 flex flex-col gap-4 md:flex-row">
                 <div className="relative flex-1">
-                    <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                     <Input
                         type="text"
                         placeholder="Tìm kiếm câu hỏi..."
@@ -129,12 +129,12 @@ export default function MyQuestions() {
                             Generate đề thi
                         </Button>
                     </Link>
-                    <Link to="/questions/create">
+                    {/* <Link to="/questions/create">
                         <Button className="gap-2">
                             <Plus className="h-4 w-4" />
                             Tạo câu hỏi mới
                         </Button>
-                    </Link>
+                    </Link> */}
                 </div>
             </div>
 
@@ -144,11 +144,11 @@ export default function MyQuestions() {
                     <CardContent className="flex flex-col items-center justify-center py-16">
                         <FileQuestion className="mb-4 h-16 w-16 text-gray-400" />
                         <h3 className="mb-2 text-xl font-medium">Chưa có câu hỏi nào</h3>
-                        <p className="text-muted-foreground mb-4">Bắt đầu tạo câu hỏi đầu tiên của bạn</p>
-                        <Link to="/questions/create">
+                        <p className="text-muted-foreground mb-4">Bắt đầu import câu hỏi đầu tiên của bạn</p>
+                        <Link to="/matrices/import">
                             <Button className="gap-2">
                                 <Plus className="h-4 w-4" />
-                                Tạo câu hỏi mới
+                                Import câu hỏi
                             </Button>
                         </Link>
                     </CardContent>
@@ -240,7 +240,7 @@ export default function MyQuestions() {
                             setPageSize(Number(e.target.value))
                             setCurrentPage(0)
                         }}
-                        className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
                     >
                         <option value={10}>10 / trang</option>
                         <option value={20}>20 / trang</option>

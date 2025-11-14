@@ -192,7 +192,7 @@ export default function GenerateExamFromQuestions() {
         <div className="container mx-auto max-w-7xl px-4 py-8">
             {/* Header */}
             <div className="mb-8">
-                <Button variant="ghost" onClick={() => navigate({ to: '/questions' })} className="mb-4 gap-2">
+                <Button variant="ghost" onClick={() => navigate({ to: '/questions/my' })} className="mb-4 gap-2">
                     <ArrowLeft className="h-4 w-4" />
                     Quay lại danh sách câu hỏi
                 </Button>
@@ -260,7 +260,7 @@ export default function GenerateExamFromQuestions() {
                         <CardContent>
                             {/* Search */}
                             <div className="relative mb-4">
-                                <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                                <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                                 <Input
                                     type="text"
                                     placeholder="Tìm kiếm câu hỏi..."

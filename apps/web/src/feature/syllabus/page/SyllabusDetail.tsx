@@ -1,13 +1,13 @@
 import { apiClient } from '@/shared/lib/apiClient'
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
-import { Link, useNavigate, useParams } from '@tanstack/react-router'
+import { useNavigate, useParams } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { confirm } from '@workspace/ui/components/ConfirmDialog'
 import { Skeleton } from '@workspace/ui/components/Skeleton'
 import { toast } from '@workspace/ui/components/Sonner'
-import { ArrowLeft, BookOpen, Clock, Download, Edit, FileText, Trash2 } from 'lucide-react'
+import { ArrowLeft, BookOpen, Clock, Download, FileText } from 'lucide-react'
 
 export default function SyllabusDetail() {
     const navigate = useNavigate()
@@ -129,12 +129,12 @@ export default function SyllabusDetail() {
                         <p className="text-muted-foreground">Môn học: {syllabus.subject.name}</p>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                        <Link to={`/syllabuses/${syllabusId}/edit` as any}>
+                        {/* <Link to={`/syllabuses/${syllabusId}/edit` as any}>
                             <Button variant="outline" className="gap-2">
                                 <Edit className="h-4 w-4" />
                                 Chỉnh sửa
                             </Button>
-                        </Link>
+                        </Link> */}
                         <Button variant="outline" onClick={() => handleDownload('pdf')} className="gap-2">
                             <Download className="h-4 w-4" />
                             Tải PDF
@@ -143,10 +143,10 @@ export default function SyllabusDetail() {
                             <Download className="h-4 w-4" />
                             Tải Word
                         </Button>
-                        <Button variant="outline" className="gap-2 text-red-600 hover:bg-red-50" onClick={handleDelete}>
+                        {/* <Button variant="outline" className="gap-2 text-red-600 hover:bg-red-50" onClick={handleDelete}>
                             <Trash2 className="h-4 w-4" />
                             Xóa
-                        </Button>
+                        </Button> */}
                     </div>
                 </div>
             </div>

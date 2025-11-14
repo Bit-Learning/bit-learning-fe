@@ -6,7 +6,7 @@ import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
-import { ArrowLeft, Clock, Edit, FileSpreadsheet, Plus, Search, Trash2 } from 'lucide-react'
+import { ArrowLeft, Clock, FileSpreadsheet, Plus, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 
@@ -92,7 +92,7 @@ export default function MyMatrices() {
             {/* Actions Bar */}
             <div className="mb-6 flex flex-col gap-4 md:flex-row">
                 <div className="relative flex-1">
-                    <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                     <Input
                         type="text"
                         placeholder="Tìm kiếm ma trận theo tên hoặc môn học..."
@@ -165,12 +165,12 @@ export default function MyMatrices() {
                                             Xem chi tiết
                                         </Button>
                                     </Link>
-                                    <Link to={`/matrices/${matrix.id}/edit` as any}>
+                                    {/* <Link to={`/matrices/${matrix.id}/edit` as any}>
                                         <Button variant="outline" size="sm" className="gap-2">
                                             <Edit className="h-4 w-4" />
                                             Sửa
                                         </Button>
-                                    </Link>
+                                    </Link> */}
                                     <Button
                                         variant="outline"
                                         size="sm"

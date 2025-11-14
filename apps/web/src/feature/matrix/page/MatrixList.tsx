@@ -5,7 +5,7 @@ import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
-import { Download, Edit, FileSpreadsheet, FileText, Plus, Search, Trash2, Upload } from 'lucide-react'
+import { Edit, FileSpreadsheet, FileText, Plus, Search, Trash2, Upload } from 'lucide-react'
 import { useState } from 'react'
 
 export default function MatrixList() {
@@ -86,7 +86,7 @@ export default function MatrixList() {
             {/* Actions Bar */}
             <div className="mb-6 flex flex-col gap-4 md:flex-row">
                 <div className="relative flex-1">
-                    <Search className="text-muted-foreground absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 transform" />
+                    <Search className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2 transform" />
                     <Input
                         type="text"
                         placeholder="Tìm kiếm ma trận theo tên hoặc môn học..."
@@ -221,7 +221,7 @@ export default function MatrixList() {
                     </Link>
                 </Card>
 
-                <Card className="cursor-pointer transition-shadow hover:shadow-md">
+                {/* <Card className="cursor-pointer transition-shadow hover:shadow-md">
                     <CardHeader>
                         <div className="flex items-center gap-3">
                             <div className="rounded-lg bg-purple-100 p-3">
@@ -233,7 +233,7 @@ export default function MatrixList() {
                             </div>
                         </div>
                     </CardHeader>
-                </Card>
+                </Card> */}
             </div>
         </div>
     )

@@ -20,7 +20,9 @@ export class MatrixApi {
         return queryOptions({
             queryKey: ['matrices', params],
             queryFn: async () => {
-                const response = await this.client.get<ApiResponse<PageMatrixResponse>>('/matrices', { params })
+                const response = await this.client.get<ApiResponse<PageMatrixResponse>>('/matrices/my-matrices', {
+                    params,
+                })
                 return response.data.data
             },
         })
