@@ -31,12 +31,35 @@ import { Route as MentorshipRouteImport } from './routes/mentorship'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as NewsIdRouteImport } from './routes/news/$id'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
-import { Route as OfflineCourseRouteImport } from './routes/offline-course'
-import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
-import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
+import { Route as MatricesIndexRouteImport } from './routes/matrices/index'
+import { Route as CoursesIndexRouteImport } from './routes/courses/index'
+import { Route as TemplatesTemplatePreviewRouteImport } from './routes/templates/template-preview'
+import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
+import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
+import { Route as SyllabusesMyRouteImport } from './routes/syllabuses/my'
+import { Route as SyllabusesCreateRouteImport } from './routes/syllabuses/create'
+import { Route as QuestionsMyRouteImport } from './routes/questions/my'
+import { Route as QuestionsGenerateFromQuestionsRouteImport } from './routes/questions/generate-from-questions'
+import { Route as QuestionsCreateRouteImport } from './routes/questions/create'
 import { Route as PresentationsIdRouteImport } from './routes/presentations/$id'
-import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
-import { Route as PresentationsIdPresenterRouteImport } from './routes/presentations/$id/presenter'
+import { Route as NewsIdRouteImport } from './routes/news/$id'
+import { Route as MatricesMyRouteImport } from './routes/matrices/my'
+import { Route as MatricesImportRouteImport } from './routes/matrices/import'
+import { Route as MatricesCreateRouteImport } from './routes/matrices/create'
+import { Route as ExamsMyExamsRouteImport } from './routes/exams/my-exams'
+import { Route as ExamsGenerateRouteImport } from './routes/exams/generate'
+import { Route as ExamsIdRouteImport } from './routes/exams/$id'
+import { Route as CoursesWebDevelopmentRouteImport } from './routes/courses/web-development'
+import { Route as CoursesMobileDevelopmentRouteImport } from './routes/courses/mobile-development'
+import { Route as CoursesDataScienceRouteImport } from './routes/courses/data-science'
+import { Route as CoursesBackendDevelopmentRouteImport } from './routes/courses/backend-development'
+import { Route as CoursesIdRouteImport } from './routes/courses/$id'
+import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
+import { Route as SyllabusesIdIndexRouteImport } from './routes/syllabuses/$id/index'
+import { Route as QuestionsIdIndexRouteImport } from './routes/questions/$id/index'
+import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
+import { Route as SyllabusesIdEditRouteImport } from './routes/syllabuses/$id/edit'
+import { Route as QuestionsIdEditRouteImport } from './routes/questions/$id/edit'
 import { Route as PresentationsIdViewRouteImport } from './routes/presentations/$id/view'
 import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
 import { Route as PrivacyRouteImport } from './routes/privacy'
@@ -47,108 +70,101 @@ import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
 import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
 import { Route as TemplatesSlidevIdEditRouteImport } from './routes/templates/slidev/$id/edit'
-import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
-import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
-import { Route as TemplatesTemplatePreviewRouteImport } from './routes/templates/template-preview'
-import { Route as TermsRouteImport } from './routes/terms'
-import { Route as UploadRouteImport } from './routes/upload'
-import { Route as UserProfileRouteImport } from './routes/user-profile'
-import { Route as WebDesignRouteImport } from './routes/web-design'
 
 const WebDesignRoute = WebDesignRouteImport.update({
-    id: '/web-design',
-    path: '/web-design',
-    getParentRoute: () => rootRouteImport,
+  id: '/web-design',
+  path: '/web-design',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const UserProfileRoute = UserProfileRouteImport.update({
-    id: '/user-profile',
-    path: '/user-profile',
-    getParentRoute: () => rootRouteImport,
+  id: '/user-profile',
+  path: '/user-profile',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const UploadRoute = UploadRouteImport.update({
-    id: '/upload',
-    path: '/upload',
-    getParentRoute: () => rootRouteImport,
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TermsRoute = TermsRouteImport.update({
-    id: '/terms',
-    path: '/terms',
-    getParentRoute: () => rootRouteImport,
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
-    id: '/signup',
-    path: '/signup',
-    getParentRoute: () => rootRouteImport,
+  id: '/signup',
+  path: '/signup',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const SigninRoute = SigninRouteImport.update({
-    id: '/signin',
-    path: '/signin',
-    getParentRoute: () => rootRouteImport,
+  id: '/signin',
+  path: '/signin',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ResetPasswordRoute = ResetPasswordRouteImport.update({
-    id: '/reset-password',
-    path: '/reset-password',
-    getParentRoute: () => rootRouteImport,
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PrivacyRoute = PrivacyRouteImport.update({
-    id: '/privacy',
-    path: '/privacy',
-    getParentRoute: () => rootRouteImport,
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PaymentSucceededRoute = PaymentSucceededRouteImport.update({
-    id: '/payment-succeeded',
-    path: '/payment-succeeded',
-    getParentRoute: () => rootRouteImport,
+  id: '/payment-succeeded',
+  path: '/payment-succeeded',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PaymentFailedRoute = PaymentFailedRouteImport.update({
-    id: '/payment-failed',
-    path: '/payment-failed',
-    getParentRoute: () => rootRouteImport,
+  id: '/payment-failed',
+  path: '/payment-failed',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const OfflineCourseRoute = OfflineCourseRouteImport.update({
-    id: '/offline-course',
-    path: '/offline-course',
-    getParentRoute: () => rootRouteImport,
+  id: '/offline-course',
+  path: '/offline-course',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MentorshipRoute = MentorshipRouteImport.update({
-    id: '/mentorship',
-    path: '/mentorship',
-    getParentRoute: () => rootRouteImport,
+  id: '/mentorship',
+  path: '/mentorship',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
-    id: '/forgot-password',
-    path: '/forgot-password',
-    getParentRoute: () => rootRouteImport,
+  id: '/forgot-password',
+  path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const DemoRoute = DemoRouteImport.update({
-    id: '/demo',
-    path: '/demo',
-    getParentRoute: () => rootRouteImport,
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CustomTemplateRoute = CustomTemplateRouteImport.update({
-    id: '/custom-template',
-    path: '/custom-template',
-    getParentRoute: () => rootRouteImport,
+  id: '/custom-template',
+  path: '/custom-template',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CorporateTrainingRoute = CorporateTrainingRouteImport.update({
-    id: '/corporate-training',
-    path: '/corporate-training',
-    getParentRoute: () => rootRouteImport,
+  id: '/corporate-training',
+  path: '/corporate-training',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
-    id: '/contact',
-    path: '/contact',
-    getParentRoute: () => rootRouteImport,
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ConsultationRoute = ConsultationRouteImport.update({
-    id: '/consultation',
-    path: '/consultation',
-    getParentRoute: () => rootRouteImport,
+  id: '/consultation',
+  path: '/consultation',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const ChatRoute = ChatRouteImport.update({
-    id: '/chat',
-    path: '/chat',
-    getParentRoute: () => rootRouteImport,
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AiChatbotRoute = AiChatbotRouteImport.update({
     id: '/ai-chatbot',
@@ -156,9 +172,9 @@ const AiChatbotRoute = AiChatbotRouteImport.update({
     getParentRoute: () => rootRouteImport,
 } as any)
 const AboutRoute = AboutRouteImport.update({
-    id: '/about',
-    path: '/about',
-    getParentRoute: () => rootRouteImport,
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const R404Route = R404RouteImport.update({
     id: '/404',
@@ -166,100 +182,195 @@ const R404Route = R404RouteImport.update({
     getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
-    id: '/',
-    path: '/',
-    getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
-    id: '/templates/',
-    path: '/templates/',
-    getParentRoute: () => rootRouteImport,
+  id: '/templates/',
+  path: '/templates/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesIndexRoute = SyllabusesIndexRouteImport.update({
+  id: '/syllabuses/',
+  path: '/syllabuses/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIndexRoute = QuestionsIndexRouteImport.update({
+  id: '/questions/',
+  path: '/questions/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PresentationsIndexRoute = PresentationsIndexRouteImport.update({
-    id: '/presentations/',
-    path: '/presentations/',
-    getParentRoute: () => rootRouteImport,
+  id: '/presentations/',
+  path: '/presentations/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const NewsIndexRoute = NewsIndexRouteImport.update({
-    id: '/news/',
-    path: '/news/',
-    getParentRoute: () => rootRouteImport,
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesIndexRoute = MatricesIndexRouteImport.update({
+  id: '/matrices/',
+  path: '/matrices/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
-    id: '/courses/',
-    path: '/courses/',
-    getParentRoute: () => rootRouteImport,
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const TemplatesTemplatePreviewRoute = TemplatesTemplatePreviewRouteImport.update({
+const TemplatesTemplatePreviewRoute =
+  TemplatesTemplatePreviewRouteImport.update({
     id: '/templates/template-preview',
     path: '/templates/template-preview',
     getParentRoute: () => rootRouteImport,
-} as any)
+  } as any)
 const TemplatesDashboardRoute = TemplatesDashboardRouteImport.update({
-    id: '/templates/dashboard',
-    path: '/templates/dashboard',
-    getParentRoute: () => rootRouteImport,
+  id: '/templates/dashboard',
+  path: '/templates/dashboard',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesIdRoute = TemplatesIdRouteImport.update({
-    id: '/templates/$id',
-    path: '/templates/$id',
+  id: '/templates/$id',
+  path: '/templates/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesMyRoute = SyllabusesMyRouteImport.update({
+  id: '/syllabuses/my',
+  path: '/syllabuses/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesCreateRoute = SyllabusesCreateRouteImport.update({
+  id: '/syllabuses/create',
+  path: '/syllabuses/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsMyRoute = QuestionsMyRouteImport.update({
+  id: '/questions/my',
+  path: '/questions/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsGenerateFromQuestionsRoute =
+  QuestionsGenerateFromQuestionsRouteImport.update({
+    id: '/questions/generate-from-questions',
+    path: '/questions/generate-from-questions',
     getParentRoute: () => rootRouteImport,
+  } as any)
+const QuestionsCreateRoute = QuestionsCreateRouteImport.update({
+  id: '/questions/create',
+  path: '/questions/create',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PresentationsIdRoute = PresentationsIdRouteImport.update({
-    id: '/presentations/$id',
-    path: '/presentations/$id',
-    getParentRoute: () => rootRouteImport,
+  id: '/presentations/$id',
+  path: '/presentations/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const NewsIdRoute = NewsIdRouteImport.update({
-    id: '/news/$id',
-    path: '/news/$id',
-    getParentRoute: () => rootRouteImport,
+  id: '/news/$id',
+  path: '/news/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesMyRoute = MatricesMyRouteImport.update({
+  id: '/matrices/my',
+  path: '/matrices/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesImportRoute = MatricesImportRouteImport.update({
+  id: '/matrices/import',
+  path: '/matrices/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesCreateRoute = MatricesCreateRouteImport.update({
+  id: '/matrices/create',
+  path: '/matrices/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsMyExamsRoute = ExamsMyExamsRouteImport.update({
+  id: '/exams/my-exams',
+  path: '/exams/my-exams',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsGenerateRoute = ExamsGenerateRouteImport.update({
+  id: '/exams/generate',
+  path: '/exams/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsIdRoute = ExamsIdRouteImport.update({
+  id: '/exams/$id',
+  path: '/exams/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesWebDevelopmentRoute = CoursesWebDevelopmentRouteImport.update({
-    id: '/courses/web-development',
-    path: '/courses/web-development',
-    getParentRoute: () => rootRouteImport,
+  id: '/courses/web-development',
+  path: '/courses/web-development',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const CoursesMobileDevelopmentRoute = CoursesMobileDevelopmentRouteImport.update({
+const CoursesMobileDevelopmentRoute =
+  CoursesMobileDevelopmentRouteImport.update({
     id: '/courses/mobile-development',
     path: '/courses/mobile-development',
     getParentRoute: () => rootRouteImport,
-} as any)
+  } as any)
 const CoursesDataScienceRoute = CoursesDataScienceRouteImport.update({
-    id: '/courses/data-science',
-    path: '/courses/data-science',
-    getParentRoute: () => rootRouteImport,
+  id: '/courses/data-science',
+  path: '/courses/data-science',
+  getParentRoute: () => rootRouteImport,
 } as any)
-const CoursesBackendDevelopmentRoute = CoursesBackendDevelopmentRouteImport.update({
+const CoursesBackendDevelopmentRoute =
+  CoursesBackendDevelopmentRouteImport.update({
     id: '/courses/backend-development',
     path: '/courses/backend-development',
     getParentRoute: () => rootRouteImport,
-} as any)
+  } as any)
 const CoursesIdRoute = CoursesIdRouteImport.update({
-    id: '/courses/$id',
-    path: '/courses/$id',
-    getParentRoute: () => rootRouteImport,
+  id: '/courses/$id',
+  path: '/courses/$id',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesSlidevIndexRoute = TemplatesSlidevIndexRouteImport.update({
-    id: '/templates/slidev/',
-    path: '/templates/slidev/',
-    getParentRoute: () => rootRouteImport,
+  id: '/templates/slidev/',
+  path: '/templates/slidev/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesIdIndexRoute = SyllabusesIdIndexRouteImport.update({
+  id: '/syllabuses/$id/',
+  path: '/syllabuses/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIdIndexRoute = QuestionsIdIndexRouteImport.update({
+  id: '/questions/$id/',
+  path: '/questions/$id/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
-    id: '/templates/slidev/create',
-    path: '/templates/slidev/create',
-    getParentRoute: () => rootRouteImport,
+  id: '/templates/slidev/create',
+  path: '/templates/slidev/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesIdEditRoute = SyllabusesIdEditRouteImport.update({
+  id: '/syllabuses/$id/edit',
+  path: '/syllabuses/$id/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIdEditRoute = QuestionsIdEditRouteImport.update({
+  id: '/questions/$id/edit',
+  path: '/questions/$id/edit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const PresentationsIdViewRoute = PresentationsIdViewRouteImport.update({
-    id: '/view',
-    path: '/view',
-    getParentRoute: () => PresentationsIdRoute,
+  id: '/view',
+  path: '/view',
+  getParentRoute: () => PresentationsIdRoute,
 } as any)
-const PresentationsIdPresenterRoute = PresentationsIdPresenterRouteImport.update({
+const PresentationsIdPresenterRoute =
+  PresentationsIdPresenterRouteImport.update({
     id: '/presenter',
     path: '/presenter',
     getParentRoute: () => PresentationsIdRoute,
-} as any)
+  } as any)
 const PresentationsIdOverviewRoute = PresentationsIdOverviewRouteImport.update({
     id: '/overview',
     path: '/overview',
@@ -276,9 +387,9 @@ const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
     getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
-    id: '/templates/slidev/$id/edit',
-    path: '/templates/slidev/$id/edit',
-    getParentRoute: () => rootRouteImport,
+  id: '/templates/slidev/$id/edit',
+  path: '/templates/slidev/$id/edit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -930,21 +1041,24 @@ declare module '@tanstack/react-router' {
             parentRoute: typeof rootRouteImport
         }
     }
+  }
 }
 
 interface PresentationsIdRouteChildren {
-    PresentationsIdOverviewRoute: typeof PresentationsIdOverviewRoute
-    PresentationsIdPresenterRoute: typeof PresentationsIdPresenterRoute
-    PresentationsIdViewRoute: typeof PresentationsIdViewRoute
+  PresentationsIdOverviewRoute: typeof PresentationsIdOverviewRoute
+  PresentationsIdPresenterRoute: typeof PresentationsIdPresenterRoute
+  PresentationsIdViewRoute: typeof PresentationsIdViewRoute
 }
 
 const PresentationsIdRouteChildren: PresentationsIdRouteChildren = {
-    PresentationsIdOverviewRoute: PresentationsIdOverviewRoute,
-    PresentationsIdPresenterRoute: PresentationsIdPresenterRoute,
-    PresentationsIdViewRoute: PresentationsIdViewRoute,
+  PresentationsIdOverviewRoute: PresentationsIdOverviewRoute,
+  PresentationsIdPresenterRoute: PresentationsIdPresenterRoute,
+  PresentationsIdViewRoute: PresentationsIdViewRoute,
 }
 
-const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(PresentationsIdRouteChildren)
+const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(
+  PresentationsIdRouteChildren,
+)
 
 const rootRouteChildren: RootRouteChildren = {
     IndexRoute: IndexRoute,
@@ -990,4 +1104,6 @@ const rootRouteChildren: RootRouteChildren = {
     TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
     TemplatesSlidevIdEditRoute: TemplatesSlidevIdEditRoute,
 }
-export const routeTree = rootRouteImport._addFileChildren(rootRouteChildren)._addFileTypes<FileRouteTypes>()
+export const routeTree = rootRouteImport
+  ._addFileChildren(rootRouteChildren)
+  ._addFileTypes<FileRouteTypes>()

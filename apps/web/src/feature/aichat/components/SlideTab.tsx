@@ -1,9 +1,9 @@
-import { SlideGenerationPanel } from './SlideGenerationPanel'
-import { useSlideHistory } from '../hooks'
 import { Button } from '@workspace/ui/components/Button'
-import { Download, FileText, Clock, Loader2, ChevronLeft, ChevronRight, Presentation } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Clock, Download, FileText, Loader2, Presentation } from 'lucide-react'
 import * as React from 'react'
+import { useSlideHistory } from '../hooks'
 import { SlideService } from '../service/SlideService'
+import { SlideGenerationPanel } from './SlideGenerationPanel'
 
 interface SlideTabProps {
     chatContext?: string
@@ -70,12 +70,8 @@ export const SlideTab = ({ chatContext }: SlideTabProps) => {
                         ) : data && data.content.length === 0 ? (
                             <div className="flex h-64 flex-col items-center justify-center text-center">
                                 <FileText className="mb-4 h-16 w-16 text-gray-300" />
-                                <p className="mb-2 text-lg font-semibold text-gray-600">
-                                    Chưa có slide nào
-                                </p>
-                                <p className="text-sm text-gray-500">
-                                    Tạo slide đầu tiên để bắt đầu
-                                </p>
+                                <p className="mb-2 text-lg font-semibold text-gray-600">Chưa có slide nào</p>
+                                <p className="text-sm text-gray-500">Tạo slide đầu tiên để bắt đầu</p>
                             </div>
                         ) : (
                             <>
@@ -96,9 +92,7 @@ export const SlideTab = ({ chatContext }: SlideTabProps) => {
                                                 <h3 className="mb-1 truncate font-semibold text-gray-900">
                                                     {slide.topic}
                                                 </h3>
-                                                <p className="text-xs text-gray-500">
-                                                    Template: {slide.templateName}
-                                                </p>
+                                                <p className="text-xs text-gray-500">Template: {slide.templateName}</p>
                                                 {slide.grade && (
                                                     <p className="text-xs text-gray-500">Lớp {slide.grade}</p>
                                                 )}

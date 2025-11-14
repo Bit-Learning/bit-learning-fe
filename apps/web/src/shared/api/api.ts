@@ -114,6 +114,7 @@ async function onResponseError(error: AxiosError): Promise<any> {
         '/auth/forgot-password',
         '/auth/reset-password',
         '/auth/activate',
+        '/auth/oauth2/google/config', // Don't redirect on OAuth config 401
     ]
     const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))
 

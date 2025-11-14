@@ -1,16 +1,9 @@
 import { Button } from '@workspace/ui/components/Button'
-import { Input } from '@workspace/ui/components/update/input'
-import { Label } from '@workspace/ui/components/label'
-import {
-    Select,
-    SelectContent,
-    SelectItem,
-    SelectTrigger,
-    SelectValue,
-} from '@workspace/ui/components/update/select'
-import { Textarea } from '@workspace/ui/components/Textarea'
 import { Checkbox } from '@workspace/ui/components/Checkbox'
-import { Loader2, Sparkles, FileDown } from 'lucide-react'
+import { Label } from '@workspace/ui/components/label'
+import { Input } from '@workspace/ui/components/update/input'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/update/select'
+import { FileDown, Loader2, Sparkles } from 'lucide-react'
 import React from 'react'
 import { useSlideGeneration } from '../hooks/useSlideGeneration'
 import type { CollectionName } from '../type'
@@ -36,7 +29,7 @@ interface SlideGenerationFormProps {
 export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
     templateId,
     templateName,
-    defaultTopic = ''
+    defaultTopic = '',
 }) => {
     const [topic, setTopic] = React.useState(defaultTopic)
     const [grade, setGrade] = React.useState<number>(10)
@@ -61,8 +54,8 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
                 format: 'json',
                 include_examples: includeExamples,
                 include_exercises: includeExercises,
-                collection_name: collectionName
-            }
+                collection_name: collectionName,
+            },
         })
     }
 
@@ -70,7 +63,7 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
         <div className="space-y-4">
             {/* Header */}
             <div className="border-b pb-4">
-                <h3 className="text-lg font-semibold">Generate Slides with AI</h3>
+                <h3 className="text-lg font-semibold">Tạo Slide với AI</h3>
                 <p className="text-sm text-gray-600">
                     Template: <span className="font-medium">{templateName}</span>
                 </p>
@@ -79,64 +72,58 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
             {/* Topic Input */}
             <div className="space-y-2">
                 <Label htmlFor="topic">
-                    Topic <span className="text-red-500">*</span>
+                    Chủ đề <span className="text-red-500">*</span>
                 </Label>
                 <Input
                     id="topic"
-                    placeholder="e.g., Python Basics, Loops in Programming"
+                    placeholder="Ví dụ: Python cơ bản, Vòng lặp trong lập trình"
                     value={topic}
-                    onChange={(e) => setTopic(e.target.value)}
+                    onChange={e => setTopic(e.target.value)}
                     disabled={isGenerating}
                 />
-                <p className="text-xs text-gray-500">
-                    Enter the main topic for your presentation
-                </p>
+                <p className="text-xs text-gray-500">Nhập chủ đề chính cho bài thuyết trình</p>
             </div>
 
             {/* Grade Selection */}
             <div className="space-y-2">
-                <Label htmlFor="grade">Grade Level</Label>
+                <Label htmlFor="grade">Lớp</Label>
                 <Select
                     value={grade.toString()}
-                    onValueChange={(value) => setGrade(Number(value))}
+                    onValueChange={value => setGrade(Number(value))}
                     disabled={isGenerating}
                 >
                     <SelectTrigger id="grade">
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        {Array.from({ length: 10 }, (_, i) => i + 3).map((g) => (
+                        {Array.from({ length: 10 }, (_, i) => i + 3).map(g => (
                             <SelectItem key={g} value={g.toString()}>
-                                Grade {g}
+                                Lớp {g}
                             </SelectItem>
                         ))}
                     </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500">
-                    Content will be adapted for this grade level (3-12)
-                </p>
+                <p className="text-xs text-gray-500">Nội dung sẽ được điều chỉnh cho cấp lớp này (3-12)</p>
             </div>
 
             {/* Slide Count */}
             <div className="space-y-2">
-                <Label htmlFor="slideCount">Number of Slides</Label>
+                <Label htmlFor="slideCount">Số lượng Slide</Label>
                 <Input
                     id="slideCount"
                     type="number"
                     min={1}
                     max={20}
                     value={slideCount}
-                    onChange={(e) => setSlideCount(Number(e.target.value))}
+                    onChange={e => setSlideCount(Number(e.target.value))}
                     disabled={isGenerating}
                 />
-                <p className="text-xs text-gray-500">
-                    How many slides to generate (1-20)
-                </p>
+                <p className="text-xs text-gray-500">Số slide cần tạo (1-20)</p>
             </div>
 
             {/* Collection Selection */}
             <div className="space-y-2">
-                <Label htmlFor="collection">Knowledge Base</Label>
+                <Label htmlFor="collection">Nguồn kiến thức</Label>
                 <Select
                     value={collectionName}
                     onValueChange={(value: CollectionName) => setCollectionName(value)}
@@ -146,34 +133,26 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
                         <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                        <SelectItem value="sgk_tin_kntt">
-                            SGK Tin học - Kết nối tri thức
-                        </SelectItem>
-                        <SelectItem value="sgk_tin_cd">
-                            SGK Tin học - Cánh diều
-                        </SelectItem>
-                        <SelectItem value="sgk_tin_ctst">
-                            SGK Tin học - Chân trời sáng tạo
-                        </SelectItem>
+                        <SelectItem value="sgk_tin_kntt">SGK Tin học - Kết nối tri thức</SelectItem>
+                        <SelectItem value="sgk_tin_cd">SGK Tin học - Cánh diều</SelectItem>
+                        <SelectItem value="sgk_tin_ctst">SGK Tin học - Chân trời sáng tạo</SelectItem>
                     </SelectContent>
                 </Select>
-                <p className="text-xs text-gray-500">
-                    Select the textbook source for content
-                </p>
+                <p className="text-xs text-gray-500">Chọn nguồn sách giáo khoa cho nội dung</p>
             </div>
 
             {/* Options */}
             <div className="space-y-3">
-                <Label>Options</Label>
+                <Label>Tùy chọn</Label>
 
                 <div className="flex items-center space-x-2">
                     <Checkbox
                         id="includeExamples"
                         isSelected={includeExamples}
                         onChange={setIncludeExamples}
-                        disabled={isGenerating}
+                        isDisabled={isGenerating}
                     >
-                        Include examples
+                        Bao gồm ví dụ
                     </Checkbox>
                 </div>
 
@@ -182,9 +161,9 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
                         id="includeExercises"
                         isSelected={includeExercises}
                         onChange={setIncludeExercises}
-                        disabled={isGenerating}
+                        isDisabled={isGenerating}
                     >
-                        Include exercises
+                        Bao gồm bài tập
                     </Checkbox>
                 </div>
             </div>
@@ -192,44 +171,34 @@ export const SlideGenerationForm: React.FC<SlideGenerationFormProps> = ({
             {/* Info Box */}
             <div className="rounded-md bg-blue-50 p-3 text-sm">
                 <div className="flex gap-2">
-                    <Sparkles className="h-4 w-4 text-blue-600 flex-shrink-0 mt-0.5" />
+                    <Sparkles className="mt-0.5 h-4 w-4 flex-shrink-0 text-blue-600" />
                     <div className="space-y-1">
-                        <p className="font-medium text-blue-900">AI-Powered Generation</p>
+                        <p className="font-medium text-blue-900">Tạo slide bằng AI</p>
                         <p className="text-xs text-blue-700">
-                            Our AI will analyze the topic and generate educational content
-                            from the selected knowledge base. The presentation will be
-                            automatically downloaded when ready.
+                            AI sẽ phân tích chủ đề và tạo nội dung giáo dục từ nguồn kiến thức đã chọn. Bài thuyết trình
+                            sẽ tự động được tải xuống khi hoàn thành.
                         </p>
                     </div>
                 </div>
             </div>
 
             {/* Generate Button */}
-            <Button
-                className="w-full"
-                onClick={handleGenerate}
-                isDisabled={isGenerating || !topic.trim()}
-                size="lg"
-            >
+            <Button className="w-full" onClick={handleGenerate} isDisabled={isGenerating || !topic.trim()} size="lg">
                 {isGenerating ? (
                     <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        Generating slides...
+                        Đang tạo slides...
                     </>
                 ) : (
                     <>
                         <FileDown className="mr-2 h-4 w-4" />
-                        Generate & Download Slides
+                        Tạo & Tải xuống Slides
                     </>
                 )}
             </Button>
 
             {/* Help Text */}
-            {!topic.trim() && (
-                <p className="text-xs text-center text-gray-500">
-                    Enter a topic to begin
-                </p>
-            )}
+            {!topic.trim() && <p className="text-center text-xs text-gray-500">Nhập chủ đề để bắt đầu</p>}
         </div>
     )
 }

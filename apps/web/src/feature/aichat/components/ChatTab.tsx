@@ -1,9 +1,9 @@
-import { useSendMessage, useConversationMessages } from '../hooks'
+import { PrismCodeBlock } from '@/shared/components/PrismCodeBlock'
 import { Button } from '@workspace/ui/components/Button'
 import { Input } from '@workspace/ui/components/update/input'
-import { ArrowUp, Sparkles, FileText, Presentation, BookImage, Loader2 } from 'lucide-react'
+import { ArrowUp, BookImage, FileText, Loader2, Presentation, Sparkles } from 'lucide-react'
 import * as React from 'react'
-import { PrismCodeBlock } from '@/shared/components/PrismCodeBlock'
+import { useConversationMessages, useSendMessage } from '../hooks'
 
 interface Message {
     id: string
@@ -66,7 +66,7 @@ const MessageContent = ({ content }: { content: string }) => {
                     return <PrismCodeBlock key={index} code={part.content} language={part.language || 'text'} />
                 }
                 return (
-                    <p key={index} className="whitespace-pre-wrap text-sm leading-relaxed">
+                    <p key={index} className="text-sm leading-relaxed whitespace-pre-wrap">
                         {formatText(part.content)}
                     </p>
                 )
@@ -85,7 +85,7 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
     const [messages, setMessages] = React.useState<Message[]>([])
     const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
-    const { sendMessage, isPending, data: chatResponse } = useSendMessage()
+    const { sendMessage, isPending, data: chatResponse, isError } = useSendMessage()
     const { data: conversationData } = useConversationMessages(conversationId || '', undefined)
 
     const scrollToBottom = () => {
@@ -112,40 +112,35 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
         }
     }, [conversationData])
 
-    // Update messages when chat response arrives
+    // Notify parent when new conversation is created
     React.useEffect(() => {
-        if (chatResponse) {
-            const userMsg: Message = {
-                id: chatResponse.user_message.id,
-                role: 'user',
-                content: chatResponse.user_message.content,
-                timestamp: new Date(chatResponse.user_message.created_at).toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }),
-            }
-
-            const aiMsg: Message = {
-                id: chatResponse.assistant_message.id,
-                role: 'assistant',
-                content: chatResponse.assistant_message.content,
-                timestamp: new Date(chatResponse.assistant_message.created_at).toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }),
-            }
-
-            setMessages(prev => [...prev, userMsg, aiMsg])
-
-            // Notify parent if new conversation created
-            if (!conversationId && onConversationCreated) {
-                onConversationCreated(chatResponse.conversation_id)
-            }
+        if (chatResponse && !conversationId && onConversationCreated) {
+            onConversationCreated(chatResponse.conversation_id)
         }
-    }, [chatResponse])
+    }, [chatResponse, conversationId, onConversationCreated])
+
+    // Remove temporary messages on error
+    React.useEffect(() => {
+        if (isError) {
+            setMessages(prev => prev.filter(msg => !msg.id.startsWith('temp-')))
+        }
+    }, [isError])
 
     const handleSubmit = () => {
         if (!message.trim() || isPending) return
+
+        // Optimistic update: Add user message immediately
+        const userMessage: Message = {
+            id: `temp-${Date.now()}`, // Temporary ID
+            role: 'user',
+            content: message,
+            timestamp: new Date().toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit',
+            }),
+        }
+
+        setMessages(prev => [...prev, userMessage])
 
         sendMessage({
             conversation_id: conversationId,
@@ -184,7 +179,9 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
                                         <FileText className="h-5 w-5 text-blue-600" />
                                     </div>
                                     <h3 className="mb-1 font-semibold text-gray-900">Trả lời câu hỏi</h3>
-                                    <p className="text-sm text-gray-600">Hỏi tôi bất cứ điều gì về lập trình, học tập</p>
+                                    <p className="text-sm text-gray-600">
+                                        Hỏi tôi bất cứ điều gì về lập trình, học tập
+                                    </p>
                                 </div>
 
                                 <div className="rounded-xl border border-gray-200 bg-white p-4 text-left shadow-sm transition-all hover:shadow-md">
@@ -204,7 +201,9 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
                                 </div>
                             </div>
 
-                            <p className="mt-8 text-sm text-gray-500">Bắt đầu bằng cách nhập câu hỏi của bạn bên dưới</p>
+                            <p className="mt-8 text-sm text-gray-500">
+                                Bắt đầu bằng cách nhập câu hỏi của bạn bên dưới
+                            </p>
                         </div>
                     </div>
                 ) : (
@@ -225,7 +224,7 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
                                     {msg.role === 'assistant' ? (
                                         <MessageContent content={msg.content} />
                                     ) : (
-                                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
+                                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
                                     )}
                                     <span className="mt-2 block text-xs opacity-60">{msg.timestamp}</span>
                                 </div>
@@ -234,7 +233,7 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
 
                         {/* Typing Indicator */}
                         {isPending && (
-                            <div className="flex gap-3 justify-start">
+                            <div className="flex justify-start gap-3">
                                 <div className="max-w-[85%] rounded-2xl border border-gray-200 bg-white px-4 py-3 shadow-sm">
                                     <div className="flex items-center gap-1">
                                         <div className="flex gap-1">

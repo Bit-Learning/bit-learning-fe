@@ -1,28 +1,3 @@
-import { useConversations, useDeleteConversation, useCreateConversation } from '../hooks'
-import { Button } from '@workspace/ui/components/Button'
-import { Input } from '@workspace/ui/components/update/input'
-import { Label } from '@workspace/ui/components/label'
-import {
-    Dialog,
-    DialogTrigger,
-    DialogOverlay,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogFooter,
-} from '@workspace/ui/components/Dialog'
-import {
-    MessageSquare,
-    Trash2,
-    Archive,
-    Clock,
-    Plus,
-    Loader2,
-    AlertCircle,
-    ChevronLeft,
-    ChevronRight,
-} from 'lucide-react'
-import * as React from 'react'
 import {
     AlertDialog,
     AlertDialogAction,
@@ -33,6 +8,30 @@ import {
     AlertDialogHeader,
     AlertDialogTitle,
 } from '@workspace/ui/components/alert-dialog'
+import { Button } from '@workspace/ui/components/Button'
+import {
+    DialogContent,
+    DialogFooter,
+    DialogHeader,
+    DialogOverlay,
+    DialogTitle,
+    DialogTrigger,
+} from '@workspace/ui/components/Dialog'
+import { Label } from '@workspace/ui/components/label'
+import { Input } from '@workspace/ui/components/update/input'
+import {
+    AlertCircle,
+    Archive,
+    ChevronLeft,
+    ChevronRight,
+    Clock,
+    Loader2,
+    MessageSquare,
+    Plus,
+    Trash2,
+} from 'lucide-react'
+import * as React from 'react'
+import { useConversations, useCreateConversation, useDeleteConversation } from '../hooks'
 
 interface ConversationsTabProps {
     onSelectConversation?: (id: string) => void
@@ -61,18 +60,15 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
 
     const handleCreateConversation = () => {
         const title = newTitle.trim()
-        createConversation(
-            title ? { title } : {},
-            {
-                onSuccess: data => {
-                    setShowCreateDialog(false)
-                    setNewTitle('')
-                    if (onSelectConversation) {
-                        onSelectConversation(data.id)
-                    }
-                },
-            }
-        )
+        createConversation(title ? { title } : {}, {
+            onSuccess: data => {
+                setShowCreateDialog(false)
+                setNewTitle('')
+                if (onSelectConversation) {
+                    onSelectConversation(data.id)
+                }
+            },
+        })
     }
 
     if (isLoading) {
@@ -104,17 +100,14 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
             <div className="border-b bg-white px-6 py-4">
                 <div className="flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-bold text-gray-900">Conversations</h2>
+                        <h2 className="text-xl font-bold text-gray-900">Cuộc hội thoại</h2>
                         <p className="text-sm text-gray-500">
-                            {data?.total || 0} conversations • Page {page}
+                            {data?.total || 0} cuộc hội thoại • Trang {page}
                         </p>
                     </div>
-                    <Button
-                        onClick={() => setShowCreateDialog(true)}
-                        className="gap-2 bg-blue-600 hover:bg-blue-700"
-                    >
+                    <Button onClick={() => setShowCreateDialog(true)} className="gap-2 bg-blue-600 hover:bg-blue-700">
                         <Plus className="h-4 w-4" />
-                        New Conversation
+                        Cuộc hội thoại mới
                     </Button>
                 </div>
             </div>
@@ -125,11 +118,11 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                     <div className="flex h-full items-center justify-center">
                         <div className="text-center">
                             <MessageSquare className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-                            <h3 className="mb-2 text-lg font-semibold text-gray-900">No conversations yet</h3>
-                            <p className="mb-4 text-sm text-gray-600">Start a new conversation to get started</p>
+                            <h3 className="mb-2 text-lg font-semibold text-gray-900">Chưa có cuộc hội thoại nào</h3>
+                            <p className="mb-4 text-sm text-gray-600">Bắt đầu cuộc hội thoại mới để sử dụng</p>
                             <Button onClick={() => setShowCreateDialog(true)} className="gap-2">
                                 <Plus className="h-4 w-4" />
-                                Create First Conversation
+                                Tạo cuộc hội thoại đầu tiên
                             </Button>
                         </div>
                     </div>
@@ -138,12 +131,13 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                         {data.conversations.map(conv => (
                             <div
                                 key={conv.id}
-                                className={`group relative rounded-xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${currentConversationId === conv.id ? 'border-blue-500 ring-2 ring-blue-100' : ''
-                                    }`}
+                                className={`group relative rounded-xl border bg-white p-4 shadow-sm transition-all hover:shadow-md ${
+                                    currentConversationId === conv.id ? 'border-blue-500 ring-2 ring-blue-100' : ''
+                                }`}
                             >
                                 {/* Archived Badge */}
                                 {conv.is_archived && (
-                                    <div className="absolute right-2 top-2">
+                                    <div className="absolute top-2 right-2">
                                         <Archive className="h-4 w-4 text-gray-400" />
                                     </div>
                                 )}
@@ -151,12 +145,12 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                                 {/* Content */}
                                 <div className="mb-3">
                                     <h3 className="mb-1 truncate font-semibold text-gray-900">
-                                        {conv.title || 'Untitled Conversation'}
+                                        {conv.title || 'Cuộc hội thoại chưa có tiêu đề'}
                                     </h3>
                                     {conv.subject && (
-                                        <p className="mb-1 text-xs text-gray-500">Subject: {conv.subject}</p>
+                                        <p className="mb-1 text-xs text-gray-500">Chủ đề: {conv.subject}</p>
                                     )}
-                                    {conv.grade && <p className="text-xs text-gray-500">Grade: {conv.grade}</p>}
+                                    {conv.grade && <p className="text-xs text-gray-500">Lớp: {conv.grade}</p>}
                                 </div>
 
                                 {/* Metadata */}
@@ -187,7 +181,7 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                                         className="flex-1"
                                         onClick={() => onSelectConversation?.(conv.id)}
                                     >
-                                        Open
+                                        Mở
                                     </Button>
                                     <Button
                                         variant="ghost"
@@ -210,7 +204,7 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                 <div className="border-t bg-white px-6 py-4">
                     <div className="flex items-center justify-between">
                         <p className="text-sm text-gray-600">
-                            Showing {(page - 1) * 20 + 1} - {Math.min(page * 20, data.total)} of {data.total}
+                            Hiển thị {(page - 1) * 20 + 1} - {Math.min(page * 20, data.total)} của {data.total}
                         </p>
                         <div className="flex gap-2">
                             <Button
@@ -220,7 +214,7 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                                 isDisabled={page === 1}
                             >
                                 <ChevronLeft className="h-4 w-4" />
-                                Previous
+                                Trước
                             </Button>
                             <Button
                                 variant="outline"
@@ -228,7 +222,7 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                                 onClick={() => setPage(p => p + 1)}
                                 isDisabled={page * 20 >= data.total}
                             >
-                                Next
+                                Tiếp
                                 <ChevronRight className="h-4 w-4" />
                             </Button>
                         </div>
@@ -241,16 +235,16 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                 <DialogOverlay>
                     <DialogContent className="sm:max-w-md">
                         <DialogHeader>
-                            <DialogTitle>Create New Conversation</DialogTitle>
+                            <DialogTitle>Tạo cuộc hội thoại mới</DialogTitle>
                         </DialogHeader>
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
                                 <Label htmlFor="title">
-                                    Conversation Title <span className="text-xs text-gray-500">(Optional)</span>
+                                    Tiêu đề cuộc hội thoại <span className="text-xs text-gray-500">(Không bắt buộc)</span>
                                 </Label>
                                 <Input
                                     id="title"
-                                    placeholder="e.g., Learning Python Basics"
+                                    placeholder="Ví dụ: Học Python cơ bản"
                                     value={newTitle}
                                     onChange={e => setNewTitle(e.target.value)}
                                     onKeyDown={e => {
@@ -262,7 +256,7 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                                     className="w-full"
                                 />
                                 <p className="text-xs text-gray-500">
-                                    Leave blank to auto-generate a title based on your first message
+                                    Để trống để tự động tạo tiêu đề dựa trên tin nhắn đầu tiên
                                 </p>
                             </div>
                         </div>
@@ -275,18 +269,18 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                                 }}
                                 isDisabled={isCreating}
                             >
-                                Cancel
+                                Hủy
                             </Button>
                             <Button onClick={handleCreateConversation} isDisabled={isCreating} className="gap-2">
                                 {isCreating ? (
                                     <>
                                         <Loader2 className="h-4 w-4 animate-spin" />
-                                        Creating...
+                                        Đang tạo...
                                     </>
                                 ) : (
                                     <>
                                         <Plus className="h-4 w-4" />
-                                        Create
+                                        Tạo
                                     </>
                                 )}
                             </Button>
@@ -299,21 +293,20 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
             <AlertDialog open={!!deleteId} onOpenChange={() => setDeleteId(null)}>
                 <AlertDialogContent>
                     <AlertDialogHeader>
-                        <AlertDialogTitle>Delete Conversation?</AlertDialogTitle>
+                        <AlertDialogTitle>Xóa cuộc hội thoại?</AlertDialogTitle>
                         <AlertDialogDescription>
-                            This action cannot be undone. This will permanently delete this conversation and all its
-                            messages.
+                            Hành động này không thể hoàn tác. Cuộc hội thoại và tất cả tin nhắn sẽ bị xóa vĩnh viễn.
                         </AlertDialogDescription>
                     </AlertDialogHeader>
                     <AlertDialogFooter>
-                        <AlertDialogCancel>Cancel</AlertDialogCancel>
+                        <AlertDialogCancel>Hủy</AlertDialogCancel>
                         <AlertDialogAction
                             onClick={handleDelete}
                             disabled={isDeleting}
                             className="bg-red-600 hover:bg-red-700"
                         >
                             {isDeleting ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : null}
-                            Delete
+                            Xóa
                         </AlertDialogAction>
                     </AlertDialogFooter>
                 </AlertDialogContent>

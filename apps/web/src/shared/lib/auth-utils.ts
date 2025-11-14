@@ -100,7 +100,10 @@ export function requireRole(requiredRole: string, location?: { href: string }) {
  * Use this for login/signup pages
  */
 export function redirectIfAuthenticated() {
-    if (isLoggedIn()) {
+    const loggedIn = isLoggedIn()
+    console.log('redirectIfAuthenticated: isLoggedIn =', loggedIn)
+    if (loggedIn) {
+        console.log('redirectIfAuthenticated: Throwing redirect to /user-profile')
         throw redirect({ to: '/user-profile' })
     }
 }

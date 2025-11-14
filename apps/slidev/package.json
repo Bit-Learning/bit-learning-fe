@@ -6,6 +6,7 @@
         "build": "slidev build",
         "dev": "slidev",
         "dev:op": "slidev --open",
+        "dev:test": "slidev pages/tinhoc_lop11_htmlcssjs.md --open",
         "export": "slidev export"
     },
     "dependencies": {

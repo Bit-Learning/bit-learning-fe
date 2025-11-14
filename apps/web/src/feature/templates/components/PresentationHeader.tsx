@@ -21,7 +21,7 @@ function ListItem({
     onClick?: () => void
 }) {
     return (
-        <li onClick={onClick} className="hover:bg-muted cursor-pointer rounded-md p-2 transition-colors select-none">
+        <li onClick={onClick} className="hover:bg-muted cursor-pointer select-none rounded-md p-2 transition-colors">
             <div className="flex items-center gap-2">
                 {icon && <span className="text-muted-foreground">{icon}</span>}
                 <div className="text-sm font-medium">{title}</div>
@@ -40,7 +40,7 @@ export function PresentationHeader() {
                 {/* Logo */}
                 <div
                     onClick={() => navigate({ to: '/' })}
-                    className="flex cursor-pointer items-center gap-2 transition-transform select-none hover:scale-[1.02]"
+                    className="flex cursor-pointer select-none items-center gap-2 transition-transform hover:scale-[1.02]"
                 >
                     <img src="/Logo.png" alt="InnEdu Logo" className="h-10 object-contain" />
                 </div>

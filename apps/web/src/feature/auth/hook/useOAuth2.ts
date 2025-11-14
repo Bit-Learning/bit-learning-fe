@@ -45,19 +45,28 @@ export const useGoogleOAuth2Config = () => {
     return useQuery<GoogleOAuth2Config>({
         queryKey: OAUTH2_QUERY_KEYS.googleConfig,
         queryFn: async () => {
-            const response = await GetGoogleOAuth2Config()
-            const configData: GoogleOAuth2ConfigResponse = response.data.data
+            try {
+                const response = await GetGoogleOAuth2Config()
+                const configData: GoogleOAuth2ConfigResponse = response.data.data
 
-            // Build the authorization URL from the config parameters
-            return {
-                clientId: configData.clientId,
-                redirectUri: configData.redirectUri,
-                authorizationUrl: buildAuthorizationUrl(configData),
+                // Build the authorization URL from the config parameters
+                return {
+                    clientId: configData.clientId,
+                    redirectUri: configData.redirectUri,
+                    authorizationUrl: buildAuthorizationUrl(configData),
+                }
+            } catch (error) {
+                console.error('[OAuth2] Failed to fetch Google OAuth2 config:', error)
+                // Return null instead of throwing to prevent infinite refresh
+                throw error
             }
         },
         staleTime: Infinity, // Config rarely changes, keep it fresh forever
+        gcTime: Infinity, // Keep the cache forever (renamed from cacheTime in v5)
         retry: false, // Don't retry failed requests to avoid spamming the server
+        retryOnMount: false, // Don't retry when component remounts
         refetchOnWindowFocus: false, // Don't refetch when window regains focus
         refetchOnMount: false, // Don't refetch on component remount
+        refetchOnReconnect: false, // Don't refetch when internet reconnects
     })
 }

@@ -55,7 +55,7 @@ const ChatPromptPage = () => {
             <div className="flex min-h-screen items-center justify-center">
                 <div className="text-center">
                     <div className="mb-4 inline-block h-12 w-12 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent"></div>
-                    <p className="text-gray-600">Loading profile...</p>
+                    <p className="text-gray-600">Đang tải hồ sơ...</p>
                 </div>
             </div>
         )
@@ -95,7 +95,7 @@ const ChatPromptPage = () => {
                             <SidebarGroupContent>
                                 <SidebarMenu>
                                     <SidebarMenuItem>
-                                        <SidebarMenuButton asChild tooltip="Home">
+                                        <SidebarMenuButton asChild tooltip="Trang chủ">
                                             <Link to="/">
                                                 <Home />
                                                 <span>Trang chủ</span>
@@ -130,7 +130,7 @@ const ChatPromptPage = () => {
                     <SidebarFooter>
                         <SidebarMenu>
                             <SidebarMenuItem>
-                                <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
+                                <SidebarMenuButton onClick={handleLogout} tooltip="Đăng xuất">
                                     <LogOut />
                                     <span>Đăng xuất</span>
                                 </SidebarMenuButton>
@@ -156,7 +156,7 @@ const ChatPromptPage = () => {
 
                             <div className="min-w-[200px] text-center">
                                 <p className="truncate text-sm font-semibold">
-                                    {mockConversations[currentConversationIndex]?.title ?? 'No conversation'}
+                                    {mockConversations[currentConversationIndex]?.title ?? 'Không có cuộc trò chuyện'}
                                 </p>
                                 <p className="text-muted-foreground text-xs">
                                     {mockConversations[currentConversationIndex]?.date ?? ''}

@@ -1,60 +1,60 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { SlideService, downloadBlob, generatePPTXFilename } from '../service/SlideService'
-import type { SlideRequest, SlideGenerationResponse, SlideHistoryPageResponse } from '../type'
 import { toast } from '@workspace/ui/components/Sonner'
+import { getMessageFromCode, SUCCESS_MESSAGES } from '../constants'
+import { SlideService, downloadBlob } from '../service/SlideService'
+import type { SlideGenerationResponse, SlideHistoryPageResponse, SlideRequest } from '../type'
 
 interface GenerateSlideParams {
-  templateId: number
-  request: SlideRequest
+    templateId: number
+    request: SlideRequest
 }
 
 export const useSlideGeneration = () => {
-  const mutation = useMutation<SlideGenerationResponse, any, GenerateSlideParams>({
-    mutationFn: async ({ templateId, request }: GenerateSlideParams) => {
-      const response = await SlideService.generatePPTX(templateId, request)
-      return response.data.data!
-    },
-    onSuccess: async (data) => {
-      // Download from Cloudinary URL
-      try {
-        await SlideService.downloadFromUrl(data.cloudinaryUrl, data.filename)
+    const mutation = useMutation<SlideGenerationResponse, any, GenerateSlideParams>({
+        mutationFn: async ({ templateId, request }: GenerateSlideParams) => {
+            const response = await SlideService.generatePPTX(templateId, request)
+            return response.data.data!
+        },
+        onSuccess: async data => {
+            // Download from Cloudinary URL
+            try {
+                await SlideService.downloadFromUrl(data.cloudinaryUrl, data.filename)
 
-        const cacheIcon = data.fromCache ? '📦 ' : '✨ '
-        const cacheStatus = data.fromCache ? 'Retrieved from cache' : 'Generated'
+                const cacheIcon = data.fromCache ? '📦 ' : '✨ '
+                const cacheStatus = data.fromCache ? 'Lấy từ cache' : 'Đã tạo mới'
 
-        toast.success('Slides ready!', {
-          description: `${cacheIcon}${cacheStatus}: ${data.filename}`
-        })
-      } catch (downloadError) {
-        console.error('Download error:', downloadError)
-        toast.error('Download failed', {
-          description: 'Slide was generated but download failed. Try downloading manually.',
-          action: {
-            label: 'Open URL',
-            onClick: () => window.open(data.cloudinaryUrl, '_blank')
-          }
-        })
-      }
-    },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Failed to generate slides'
-      toast.error('Generation failed', {
-        description: errorMessage
-      })
-      console.error('Slide generation error:', error)
+                toast.success({
+                    title: SUCCESS_MESSAGES.SLIDE_GENERATED,
+                    description: `${cacheIcon}${cacheStatus}: ${data.filename}`,
+                })
+            } catch (downloadError) {
+                console.error('Download error:', downloadError)
+                toast.error({
+                    title: 'Tải xuống thất bại',
+                    description: 'Slide đã được tạo nhưng tải xuống thất bại. Vui lòng thử tải lại.',
+                })
+            }
+        },
+        onError: (error: any) => {
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Tạo slide thất bại', description: errorMessage })
+            console.error('Slide generation error:', { error, code: errorCode, message: errorMessage })
+        },
+    })
+
+    return {
+        generateSlides: mutation.mutate,
+        generateSlidesAsync: mutation.mutateAsync,
+        isGenerating: mutation.isPending,
+        data: mutation.data,
+        error: mutation.error,
+        isError: mutation.isError,
+        isSuccess: mutation.isSuccess,
+        reset: mutation.reset,
     }
-  })
-
-  return {
-    generateSlides: mutation.mutate,
-    generateSlidesAsync: mutation.mutateAsync,
-    isGenerating: mutation.isPending,
-    data: mutation.data,
-    error: mutation.error,
-    isError: mutation.isError,
-    isSuccess: mutation.isSuccess,
-    reset: mutation.reset
-  }
 }
 
 /**
@@ -72,32 +72,34 @@ export const useSlideGeneration = () => {
  * ```
  */
 export const useSlidePreview = () => {
-  const mutation = useMutation({
-    mutationFn: async (request: SlideRequest) => {
-      const response = await SlideService.generateJSON(request)
-      return response.data.data
-    },
-    onSuccess: () => {
-      toast.success('Preview generated successfully!')
-    },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Failed to generate preview'
-      toast.error('Preview failed', {
-        description: errorMessage
-      })
-    }
-  })
+    const mutation = useMutation({
+        mutationFn: async (request: SlideRequest) => {
+            const response = await SlideService.generateJSON(request)
+            return response.data.data
+        },
+        onSuccess: () => {
+            toast.success({ title: 'Thành công', description: 'Tạo xem trước slide thành công' })
+        },
+        onError: (error: any) => {
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
 
-  return {
-    previewSlides: mutation.mutate,
-    previewSlidesAsync: mutation.mutateAsync,
-    isLoading: mutation.isPending,
-    preview: mutation.data,
-    error: mutation.error,
-    isError: mutation.isError,
-    isSuccess: mutation.isSuccess,
-    reset: mutation.reset
-  }
+            toast.error({ title: 'Tạo xem trước thất bại', description: errorMessage })
+            console.error('Slide preview error:', { error, code: errorCode, message: errorMessage })
+        },
+    })
+
+    return {
+        previewSlides: mutation.mutate,
+        previewSlidesAsync: mutation.mutateAsync,
+        isLoading: mutation.isPending,
+        preview: mutation.data,
+        error: mutation.error,
+        isError: mutation.isError,
+        isSuccess: mutation.isSuccess,
+        reset: mutation.reset,
+    }
 }
 
 /**
@@ -117,36 +119,39 @@ export const useSlidePreview = () => {
  * ```
  */
 export const useCustomSlideGeneration = () => {
-  const mutation = useMutation({
-    mutationFn: async ({ template, placeholders }: { template: File; placeholders: Record<string, string> }) => {
-      return await SlideService.generateCustomPPTX(template, placeholders)
-    },
-    onSuccess: (response) => {
-      // Download the generated file
-      const filename = `custom_slides_${new Date().toISOString().split('T')[0]}.pptx`
-      downloadBlob(response.data, filename)
+    const mutation = useMutation({
+        mutationFn: async ({ template, placeholders }: { template: File; placeholders: Record<string, string> }) => {
+            return await SlideService.generateCustomPPTX(template, placeholders)
+        },
+        onSuccess: response => {
+            // Download the generated file
+            const filename = `custom_slides_${new Date().toISOString().split('T')[0]}.pptx`
+            downloadBlob(response.data, filename)
 
-      toast.success('Custom slides generated successfully!', {
-        description: `Downloaded: ${filename}`
-      })
-    },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Failed to generate custom slides'
-      toast.error('Generation failed', {
-        description: errorMessage
-      })
+            toast.success({
+                title: SUCCESS_MESSAGES.SLIDE_GENERATED,
+                description: `Đã tải xuống: ${filename}`,
+            })
+        },
+        onError: (error: any) => {
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Tạo slide tùy chỉnh thất bại', description: errorMessage })
+            console.error('Custom slide generation error:', { error, code: errorCode, message: errorMessage })
+        },
+    })
+
+    return {
+        generateCustom: mutation.mutate,
+        generateCustomAsync: mutation.mutateAsync,
+        isGenerating: mutation.isPending,
+        error: mutation.error,
+        isError: mutation.isError,
+        isSuccess: mutation.isSuccess,
+        reset: mutation.reset,
     }
-  })
-
-  return {
-    generateCustom: mutation.mutate,
-    generateCustomAsync: mutation.mutateAsync,
-    isGenerating: mutation.isPending,
-    error: mutation.error,
-    isError: mutation.isError,
-    isSuccess: mutation.isSuccess,
-    reset: mutation.reset
-  }
 }
 
 /**
@@ -163,35 +168,37 @@ export const useCustomSlideGeneration = () => {
  * ```
  */
 export const useAskQuestion = () => {
-  const mutation = useMutation({
-    mutationFn: async (request: { question: string; grade_filter?: number }) => {
-      const response = await SlideService.askQuestion({
-        question: request.question,
-        question_type: 'general',
-        grade_filter: request.grade_filter,
-        return_sources: true,
-        max_sources: 3
-      })
-      return response.data.data
-    },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Failed to get answer'
-      toast.error('Question failed', {
-        description: errorMessage
-      })
-    }
-  })
+    const mutation = useMutation({
+        mutationFn: async (request: { question: string; grade_filter?: number }) => {
+            const response = await SlideService.askQuestion({
+                question: request.question,
+                question_type: 'general',
+                grade_filter: request.grade_filter,
+                return_sources: true,
+                max_sources: 3,
+            })
+            return response.data.data
+        },
+        onError: (error: any) => {
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
 
-  return {
-    askQuestion: mutation.mutate,
-    askQuestionAsync: mutation.mutateAsync,
-    isAsking: mutation.isPending,
-    answer: mutation.data,
-    error: mutation.error,
-    isError: mutation.isError,
-    isSuccess: mutation.isSuccess,
-    reset: mutation.reset
-  }
+            toast.error({ title: 'Trả lời câu hỏi thất bại', description: errorMessage })
+            console.error('Question answering error:', { error, code: errorCode, message: errorMessage })
+        },
+    })
+
+    return {
+        askQuestion: mutation.mutate,
+        askQuestionAsync: mutation.mutateAsync,
+        isAsking: mutation.isPending,
+        answer: mutation.data,
+        error: mutation.error,
+        isError: mutation.isError,
+        isSuccess: mutation.isSuccess,
+        reset: mutation.reset,
+    }
 }
 
 /**
@@ -208,38 +215,40 @@ export const useAskQuestion = () => {
  * ```
  */
 export const useMindmapGeneration = () => {
-  const mutation = useMutation({
-    mutationFn: async (request: { topic: string; grade?: number }) => {
-      const response = await SlideService.generateMindmap({
-        topic: request.topic,
-        grade: request.grade,
-        maxDepth: 3,
-        maxBranches: 6,
-        includeExamples: true
-      })
-      return response.data.data
-    },
-    onSuccess: () => {
-      toast.success('Mindmap generated successfully!')
-    },
-    onError: (error: any) => {
-      const errorMessage = error?.response?.data?.message || 'Failed to generate mindmap'
-      toast.error('Mindmap generation failed', {
-        description: errorMessage
-      })
-    }
-  })
+    const mutation = useMutation({
+        mutationFn: async (request: { topic: string; grade?: number }) => {
+            const response = await SlideService.generateMindmap({
+                topic: request.topic,
+                grade: request.grade,
+                maxDepth: 3,
+                maxBranches: 6,
+                includeExamples: true,
+            })
+            return response.data.data
+        },
+        onSuccess: () => {
+            toast.success({ title: 'Thành công', description: 'Tạo sơ đồ tư duy thành công' })
+        },
+        onError: (error: any) => {
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
 
-  return {
-    generateMindmap: mutation.mutate,
-    generateMindmapAsync: mutation.mutateAsync,
-    isGenerating: mutation.isPending,
-    mindmap: mutation.data,
-    error: mutation.error,
-    isError: mutation.isError,
-    isSuccess: mutation.isSuccess,
-    reset: mutation.reset
-  }
+            toast.error({ title: 'Tạo sơ đồ tư duy thất bại', description: errorMessage })
+            console.error('Mindmap generation error:', { error, code: errorCode, message: errorMessage })
+        },
+    })
+
+    return {
+        generateMindmap: mutation.mutate,
+        generateMindmapAsync: mutation.mutateAsync,
+        isGenerating: mutation.isPending,
+        mindmap: mutation.data,
+        error: mutation.error,
+        isError: mutation.isError,
+        isSuccess: mutation.isSuccess,
+        reset: mutation.reset,
+    }
 }
 
 /**
@@ -251,19 +260,19 @@ export const useMindmapGeneration = () => {
  * ```
  */
 export const useSlideHistory = (
-  page: number = 0,
-  size: number = 10,
-  sortBy: string = 'createdAt',
-  sortDir: 'asc' | 'desc' = 'desc'
+    page: number = 0,
+    size: number = 10,
+    sortBy: string = 'createdAt',
+    sortDir: 'asc' | 'desc' = 'desc',
 ) => {
-  return useQuery<SlideHistoryPageResponse>({
-    queryKey: ['slideHistory', page, size, sortBy, sortDir],
-    queryFn: async () => {
-      const response = await SlideService.getSlideHistory(page, size, sortBy, sortDir)
-      return response.data.data!
-    },
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  })
+    return useQuery<SlideHistoryPageResponse>({
+        queryKey: ['slideHistory', page, size, sortBy, sortDir],
+        queryFn: async () => {
+            const response = await SlideService.getSlideHistory(page, size, sortBy, sortDir)
+            return response.data.data!
+        },
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    })
 }
 
 /**
@@ -275,13 +284,13 @@ export const useSlideHistory = (
  * ```
  */
 export const useSlideById = (id: number, enabled: boolean = true) => {
-  return useQuery<SlideGenerationResponse>({
-    queryKey: ['slide', id],
-    queryFn: async () => {
-      const response = await SlideService.getSlideById(id)
-      return response.data.data!
-    },
-    enabled: enabled && !!id,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-  })
+    return useQuery<SlideGenerationResponse>({
+        queryKey: ['slide', id],
+        queryFn: async () => {
+            const response = await SlideService.getSlideById(id)
+            return response.data.data!
+        },
+        enabled: enabled && !!id,
+        staleTime: 1000 * 60 * 5, // 5 minutes
+    })
 }

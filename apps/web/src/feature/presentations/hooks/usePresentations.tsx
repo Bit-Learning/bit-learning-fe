@@ -30,6 +30,13 @@ export const usePresentationTemplates = (page: number = 0, size: number = 20) =>
     })
 }
 
+export const useAvailablePresentationTemplates = () => {
+    return useQuery<Template[]>({
+        queryKey: ['presentationTemplates', 'allAvailable'],
+        queryFn: () => fetchAllAvailableTemplates(),
+    })
+}
+
 export const useUserPresentations = (userId: number) => {
     return useQuery<Presentation[]>({
         queryKey: PRESENTATION_QUERY_KEYS.list(`userId=${userId}`),
@@ -43,8 +50,13 @@ export const fetchPresentations = async (): Promise<Presentation[]> => {
 }
 
 export const fetchAllTemplates = async (page: number = 0, size: number = 20): Promise<Template[]> => {
-    const response = await api.get(`/products/presentations/public/templates?page=${page}size=${size}`)
+    const response = await api.get(`/products/presentations/templates/active?page=${page}size=${size}`)
     return response.data.data.content || []
+}
+
+export const fetchAllAvailableTemplates = async (): Promise<Template[]> => {
+    const response = await api.get(`/products/templates/active`)
+    return response.data.data || []
 }
 
 export const fetchUserPresentations = async (userId: number): Promise<Presentation[]> => {

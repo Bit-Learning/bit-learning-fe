@@ -11,7 +11,7 @@ import type {
 } from '../type/authState'
 
 export function Login(requestBody: TLoginRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
-    return api.post(`${endpoints.AUTH}/login-user`, requestBody)
+    return api.post(`${endpoints.AUTH}/login`, requestBody)
 }
 
 export function Register(requestBody: TRegisterRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {

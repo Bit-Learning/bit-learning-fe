@@ -1,5 +1,4 @@
 import { TAppThunk } from '@/feature/app/type/AppState'
-import { Roles } from '@/shared/constants/enums'
 import { clearAuthTokens, getAccessToken, setAuthTokens } from '@/shared/lib/cookies'
 import { toast } from '@workspace/ui/components/Sonner'
 import { setErrorAction, setIsAuthenticatedAction, setIsLoadingAction, setUserInfoAction } from '.'
@@ -74,7 +73,7 @@ export const requestLogin = ({ email, password }: { email: string; password: str
     return async (dispatch: any) => {
         dispatch(setIsLoadingAction(true))
         try {
-            const response = await Login({ email, password, role: Roles.USER })
+            const response = await Login({ email, password })
             if (response && response.data && response.data.data) {
                 const payload = response.data.data
                 setAuthTokens(payload.accessToken, payload.refreshToken)
