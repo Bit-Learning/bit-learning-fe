@@ -79,7 +79,11 @@ export default function ExamDetail() {
         <div className="container mx-auto max-w-6xl px-4 py-8">
             {/* Header */}
             <div className="mb-8">
-                <Button variant="ghost" onClick={() => navigate({ to: '/matrices' as any })} className="mb-4 gap-2">
+                <Button
+                    variant="ghost"
+                    onClick={() => navigate({ to: '/exams/my-exams' as any })}
+                    className="mb-4 gap-2"
+                >
                     <ArrowLeft className="h-4 w-4" />
                     Quay lại
                 </Button>

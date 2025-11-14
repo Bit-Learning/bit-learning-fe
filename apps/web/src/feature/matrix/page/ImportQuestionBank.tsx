@@ -5,6 +5,7 @@ import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Progress } from '@workspace/ui/components/Progress'
 import { toast } from '@workspace/ui/components/Sonner'
+import { Document, Packer, Paragraph, TextRun } from 'docx'
 import { AlertCircle, ArrowLeft, CheckCircle, Download, FileSpreadsheet, Upload } from 'lucide-react'
 import { useRef, useState } from 'react'
 
@@ -73,21 +74,174 @@ export default function ImportQuestionBank() {
         }
     }
 
-    const handleDownloadTemplate = () => {
-        // Create a sample CSV/Excel template
-        const csvContent = `Question,Answer,Type,Level,Lesson ID,Subject ID,Tags
-"What is 2+2?","4","MCQ","EASY",1,1,"math,basic"
-"Solve x^2 = 4","x = ±2","ESSAY","MEDIUM",1,1,"algebra"
-`
-        const blob = new Blob([csvContent], { type: 'text/csv' })
+    const handleDownloadTemplate = async () => {
+        // Create Word document with question bank template
+        const doc = new Document({
+            sections: [
+                {
+                    properties: {},
+                    children: [
+                        // MCQ Example
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: '[Info: SubjectCode=TH11_CTST, ClassLevel=11, CurriculumCode=CTST, LessonCode=TH11_CTST_C1_L1, Type=MCQ, Level=EASY]',
+                                    color: '0000FF',
+                                    bold: true,
+                                }),
+                            ],
+                            spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: 'Câu 1: Cấu trúc dữ liệu nào lưu trữ các phần tử liền kề nhau trong bộ nhớ?',
+                                    bold: true,
+                                }),
+                            ],
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: 'A. Mảng (Array)',
+                            spacing: { after: 50 },
+                        }),
+                        new Paragraph({
+                            text: 'B. Danh sách liên kết (Linked List)',
+                            spacing: { after: 50 },
+                        }),
+                        new Paragraph({
+                            text: 'C. Cây (Tree)',
+                            spacing: { after: 50 },
+                        }),
+                        new Paragraph({
+                            text: 'D. Đồ thị (Graph)',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: 'Đáp án: A',
+                                    color: '008000',
+                                    bold: true,
+                                }),
+                            ],
+                            spacing: { after: 400 },
+                        }),
+
+                        // ESSAY Example
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: '[Info: SubjectCode=TH11_CTST, ClassLevel=11, CurriculumCode=CTST, LessonCode=TH11_CTST_C1_L1, Type=ESSAY, Level=MEDIUM]',
+                                    color: '0000FF',
+                                    bold: true,
+                                }),
+                            ],
+                            spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: 'Câu 2: Nêu một ưu điểm của Mảng (Array) so với Danh sách liên kết (Linked List).',
+                                    bold: true,
+                                }),
+                            ],
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: 'Đáp án: Truy cập ngẫu nhiên nhanh (O(1)) thông qua chỉ số (index).',
+                                    color: '008000',
+                                    bold: true,
+                                }),
+                            ],
+                            spacing: { after: 400 },
+                        }),
+
+                        // Instructions
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: '─────────────────────────────────────────────────────',
+                                    color: 'CCCCCC',
+                                }),
+                            ],
+                            spacing: { before: 400, after: 400 },
+                        }),
+                        new Paragraph({
+                            children: [
+                                new TextRun({
+                                    text: 'HƯỚNG DẪN SỬ DỤNG TEMPLATE',
+                                    bold: true,
+                                    size: 28,
+                                }),
+                            ],
+                            spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                            text: '• Mỗi câu hỏi bắt đầu bằng dòng [Info:...] chứa metadata',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• SubjectCode: Mã môn học (ví dụ: TH11_CTST)',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• ClassLevel: Khối lớp (ví dụ: 11)',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• CurriculumCode: Mã chương trình (ví dụ: CTST)',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• LessonCode: Mã bài học (ví dụ: TH11_CTST_C1_L1)',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• Type: Loại câu hỏi (MCQ hoặc ESSAY)',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• Level: Độ khó (EASY, MEDIUM, HARD)',
+                            spacing: { after: 200 },
+                        }),
+                        new Paragraph({
+                            text: '• Đối với MCQ: Liệt kê các đáp án A, B, C, D... trên từng dòng',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• Đối với ESSAY: Chỉ cần câu hỏi và đáp án',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• Dòng "Đáp án:" chỉ ra đáp án đúng (MCQ: A/B/C/D, ESSAY: câu trả lời chi tiết)',
+                            spacing: { after: 100 },
+                        }),
+                        new Paragraph({
+                            text: '• Để thêm câu hỏi mới, copy định dạng trên và thay đổi nội dung',
+                            spacing: { after: 100 },
+                        }),
+                    ],
+                },
+            ],
+        })
+
+        // Generate and download
+        const blob = await Packer.toBlob(doc)
+
+        // Download file using browser API
         const url = window.URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.download = 'question_bank_template.csv'
+        link.download = 'question_bank_template.docx'
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)
         window.URL.revokeObjectURL(url)
+
+        toast.success({ title: 'Đã tải template thành công!' })
     }
 
     return (
@@ -109,10 +263,14 @@ export default function ImportQuestionBank() {
                 </CardHeader>
                 <CardContent>
                     <ol className="list-inside list-decimal space-y-2 text-sm">
-                        <li>Tải xuống file mẫu để xem định dạng yêu cầu</li>
-                        <li>Điền thông tin câu hỏi vào file theo đúng định dạng</li>
-                        <li>File hỗ trợ: Excel (.xlsx, .xls) hoặc CSV (.csv)</li>
-                        <li>Các cột bắt buộc: Question, Answer, Type, Level, Subject ID</li>
+                        <li>Tải xuống file mẫu Word để xem định dạng yêu cầu</li>
+                        <li>
+                            Mỗi câu hỏi bắt đầu với dòng [Info:...] chứa metadata (SubjectCode, ClassLevel,
+                            CurriculumCode, LessonCode, Type, Level)
+                        </li>
+                        <li>Đối với MCQ: Liệt kê các đáp án A, B, C, D... và ghi rõ đáp án đúng</li>
+                        <li>Đối với ESSAY: Chỉ cần câu hỏi và đáp án chi tiết</li>
+                        <li>File hỗ trợ: Word (.docx)</li>
                         <li>Tải file lên và hệ thống sẽ tự động xử lý</li>
                     </ol>
                     <Button variant="outline" className="mt-4 gap-2" onClick={handleDownloadTemplate}>
@@ -138,7 +296,7 @@ export default function ImportQuestionBank() {
                             <input
                                 ref={fileInputRef}
                                 type="file"
-                                accept=".xlsx,.xls,.csv"
+                                accept=".docx,.doc"
                                 onChange={handleFileSelect}
                                 className="hidden"
                             />
@@ -159,9 +317,7 @@ export default function ImportQuestionBank() {
                             ) : (
                                 <div>
                                     <p className="mb-2 font-medium">Click để chọn file hoặc kéo thả vào đây</p>
-                                    <p className="text-muted-foreground text-sm">
-                                        Hỗ trợ: .xlsx, .xls, .csv (Tối đa 10MB)
-                                    </p>
+                                    <p className="text-muted-foreground text-sm">Hỗ trợ: .docx, .doc (Tối đa 10MB)</p>
                                 </div>
                             )}
                         </div>
@@ -242,19 +398,23 @@ export default function ImportQuestionBank() {
                     <ul className="text-muted-foreground space-y-2 text-sm">
                         <li className="flex items-start gap-2">
                             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                            <span>Đảm bảo file của bạn tuân theo đúng định dạng mẫu</span>
+                            <span>Đảm bảo file của bạn tuân theo đúng định dạng mẫu Word</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                            <span>Question Type: MCQ (trắc nghiệm) hoặc ESSAY (tự luận)</span>
+                            <span>Mỗi câu hỏi phải có dòng [Info:...] ở đầu chứa metadata đầy đủ</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                            <span>Question Level: EASY, MEDIUM, hoặc HARD</span>
+                            <span>Type: MCQ (trắc nghiệm) hoặc ESSAY (tự luận)</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
-                            <span>Subject ID và Lesson ID phải tồn tại trong hệ thống</span>
+                            <span>Level: EASY (Dễ), MEDIUM (Trung bình), hoặc HARD (Khó)</span>
+                        </li>
+                        <li className="flex items-start gap-2">
+                            <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
+                            <span>SubjectCode, LessonCode phải tồn tại trong hệ thống</span>
                         </li>
                         <li className="flex items-start gap-2">
                             <AlertCircle className="mt-0.5 h-4 w-4 flex-shrink-0" />
