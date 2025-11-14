@@ -115,10 +115,10 @@ const ForgotPasswordForm: React.FC = () => {
 
                         <div className="mt-5">
                             <p className="text-center text-sm font-normal text-gray-700 sm:text-start dark:text-gray-400">
-                                Đã nhớ mật khẩu?{' '}
+                                Đã có tài khoản?{' '}
                                 <Link
                                     to="/signin"
-                                    className="text-primary hover:text-secondary dark:text-white/90 dark:hover:text-white/70"
+                                    className="text-primary hover:text-blue-800 dark:text-white/90 dark:hover:text-white/70"
                                 >
                                     Đăng nhập{' '}
                                 </Link>
