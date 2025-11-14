@@ -30,11 +30,22 @@ const convertToEChartsData = (data: InputData): EChartsTreeData => {
         connections.set(conn.source, children)
     })
 
-    const buildTree = (nodeId: string): EChartsTreeData => {
+    const buildTree = (nodeId: string, visited = new Set<string>()): EChartsTreeData | null => {
+        // Tránh chu trình: nếu node đã thăm, return null
+        if (visited.has(nodeId)) {
+            return null
+        }
+
         const node = allNodes.get(nodeId)!
         const childrenIds = connections.get(nodeId) || []
 
-        const children = childrenIds.map(childId => buildTree(childId)).filter(Boolean)
+        // Thêm node vào visited set
+        const newVisited = new Set(visited)
+        newVisited.add(nodeId)
+
+        const children = childrenIds
+            .map(childId => buildTree(childId, newVisited))
+            .filter((child): child is EChartsTreeData => child !== null)
 
         const treeNode: EChartsTreeData = {
             name: node.label,
@@ -78,7 +89,7 @@ const convertToEChartsData = (data: InputData): EChartsTreeData => {
         return treeNode
     }
 
-    return buildTree(data.centerNode.id)
+    return buildTree(data.centerNode.id) || { name: 'Error', value: 0 }
 }
 
 const borderColors = [

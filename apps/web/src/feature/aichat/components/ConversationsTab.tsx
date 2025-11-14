@@ -137,7 +137,7 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                             >
                                 {/* Archived Badge */}
                                 {conv.is_archived && (
-                                    <div className="absolute top-2 right-2">
+                                    <div className="absolute right-2 top-2">
                                         <Archive className="h-4 w-4 text-gray-400" />
                                     </div>
                                 )}
@@ -240,7 +240,8 @@ export const ConversationsTab = ({ onSelectConversation, currentConversationId }
                         <div className="space-y-4 py-4">
                             <div className="space-y-2">
                                 <Label htmlFor="title">
-                                    Tiêu đề cuộc hội thoại <span className="text-xs text-gray-500">(Không bắt buộc)</span>
+                                    Tiêu đề cuộc hội thoại{' '}
+                                    <span className="text-xs text-gray-500">(Không bắt buộc)</span>
                                 </Label>
                                 <Input
                                     id="title"

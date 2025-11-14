@@ -1,7 +1,7 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from '@workspace/ui/components/Sonner'
 import { getMessageFromCode, SUCCESS_MESSAGES } from '../constants'
-import { SlideService, downloadBlob } from '../service/SlideService'
+import { downloadBlob, SlideService } from '../service/SlideService'
 import type { SlideGenerationResponse, SlideHistoryPageResponse, SlideRequest } from '../type'
 
 interface GenerateSlideParams {
@@ -194,56 +194,6 @@ export const useAskQuestion = () => {
         askQuestionAsync: mutation.mutateAsync,
         isAsking: mutation.isPending,
         answer: mutation.data,
-        error: mutation.error,
-        isError: mutation.isError,
-        isSuccess: mutation.isSuccess,
-        reset: mutation.reset,
-    }
-}
-
-/**
- * Custom hook for generating mindmaps
- *
- * Usage:
- * ```typescript
- * const { generateMindmap, isGenerating, mindmap } = useMindmapGeneration()
- *
- * generateMindmap({
- *   topic: 'Photosynthesis',
- *   grade: 10
- * })
- * ```
- */
-export const useMindmapGeneration = () => {
-    const mutation = useMutation({
-        mutationFn: async (request: { topic: string; grade?: number }) => {
-            const response = await SlideService.generateMindmap({
-                topic: request.topic,
-                grade: request.grade,
-                maxDepth: 3,
-                maxBranches: 6,
-                includeExamples: true,
-            })
-            return response.data.data
-        },
-        onSuccess: () => {
-            toast.success({ title: 'Thành công', description: 'Tạo sơ đồ tư duy thành công' })
-        },
-        onError: (error: any) => {
-            const errorCode = error?.response?.data?.code
-            const backendMessage = error?.response?.data?.message
-            const errorMessage = getMessageFromCode(errorCode, backendMessage)
-
-            toast.error({ title: 'Tạo sơ đồ tư duy thất bại', description: errorMessage })
-            console.error('Mindmap generation error:', { error, code: errorCode, message: errorMessage })
-        },
-    })
-
-    return {
-        generateMindmap: mutation.mutate,
-        generateMindmapAsync: mutation.mutateAsync,
-        isGenerating: mutation.isPending,
-        mindmap: mutation.data,
         error: mutation.error,
         isError: mutation.isError,
         isSuccess: mutation.isSuccess,

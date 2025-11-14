@@ -47,7 +47,6 @@ import { Route as AiChatbotRouteImport } from './routes/ai-chatbot'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as IndexRouteImport } from './routes/index'
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
 import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
 import { Route as SyllabusesIndexRouteImport } from './routes/syllabuses/index'
 import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
@@ -81,27 +80,6 @@ import { Route as PresentationsIdPresenterRouteImport } from './routes/presentat
 import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
 import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.generate'
 import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
-=======
-import { Route as MentorshipRouteImport } from './routes/mentorship'
-import { Route as NewsIdRouteImport } from './routes/news/$id'
-import { Route as NewsIndexRouteImport } from './routes/news/index'
-import { Route as OfflineCourseRouteImport } from './routes/offline-course'
-import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
-import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
-import { Route as PresentationsIdRouteImport } from './routes/presentations/$id'
-import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
-import { Route as PresentationsIdPresenterRouteImport } from './routes/presentations/$id/presenter'
-import { Route as PresentationsIdViewRouteImport } from './routes/presentations/$id/view'
-import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
-import { Route as PrivacyRouteImport } from './routes/privacy'
-import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as SigninRouteImport } from './routes/signin'
-import { Route as SignupRouteImport } from './routes/signup'
-import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
-import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
-import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
-import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
->>>>>>> develop:apps/web/src/routeTree.gen.ts
 import { Route as TemplatesSlidevIdEditRouteImport } from './routes/templates/slidev/$id/edit'
 import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
 import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
@@ -1061,12 +1039,8 @@ declare module '@tanstack/react-router' {
   '/questions': typeof QuestionsIndexRoute
   '/syllabuses': typeof SyllabusesIndexRoute
   '/templates': typeof TemplatesIndexRoute
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
-=======
-  '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
->>>>>>> develop:apps/web/src/routeTree.gen.ts
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
   '/presentations/$id/view': typeof PresentationsIdViewRoute
@@ -1124,12 +1098,8 @@ export interface FileRoutesByTo {
   '/questions': typeof QuestionsIndexRoute
   '/syllabuses': typeof SyllabusesIndexRoute
   '/templates': typeof TemplatesIndexRoute
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
-=======
-  '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
->>>>>>> develop:apps/web/src/routeTree.gen.ts
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
   '/presentations/$id/view': typeof PresentationsIdViewRoute
@@ -1188,12 +1158,8 @@ export interface FileRoutesById {
   '/questions/': typeof QuestionsIndexRoute
   '/syllabuses/': typeof SyllabusesIndexRoute
   '/templates/': typeof TemplatesIndexRoute
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
-=======
-  '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
->>>>>>> develop:apps/web/src/routeTree.gen.ts
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
   '/presentations/$id/view': typeof PresentationsIdViewRoute
@@ -1253,12 +1219,8 @@ export interface FileRouteTypes {
     | '/questions'
     | '/syllabuses'
     | '/templates'
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
-=======
-    | '/mindmaps/$userId/$code'
->>>>>>> develop:apps/web/src/routeTree.gen.ts
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
     | '/presentations/$id/view'
@@ -1316,12 +1278,8 @@ export interface FileRouteTypes {
     | '/questions'
     | '/syllabuses'
     | '/templates'
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
-=======
-    | '/mindmaps/$userId/$code'
->>>>>>> develop:apps/web/src/routeTree.gen.ts
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
     | '/presentations/$id/view'
@@ -1379,12 +1337,8 @@ export interface FileRouteTypes {
     | '/questions/'
     | '/syllabuses/'
     | '/templates/'
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
-=======
-    | '/mindmaps/$userId/$code'
->>>>>>> develop:apps/web/src/routeTree.gen.ts
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
     | '/presentations/$id/view'
@@ -1443,12 +1397,8 @@ export interface RootRouteChildren {
   QuestionsIndexRoute: typeof QuestionsIndexRoute
   SyllabusesIndexRoute: typeof SyllabusesIndexRoute
   TemplatesIndexRoute: typeof TemplatesIndexRoute
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
   MatricesIdEditRoute: typeof MatricesIdEditRoute
   MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
-=======
-  MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
->>>>>>> develop:apps/web/src/routeTree.gen.ts
   TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
   TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
   TemplatesSlidevIdEditRoute: typeof TemplatesSlidevIdEditRoute
@@ -1834,7 +1784,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PresentationsIdOverviewRouteImport
       parentRoute: typeof PresentationsIdRoute
     }
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
     '/matrices/$id/generate': {
       id: '/matrices/$id/generate'
       path: '/matrices/$id/generate'
@@ -1847,13 +1796,6 @@ declare module '@tanstack/react-router' {
       path: '/matrices/$id/edit'
       fullPath: '/matrices/$id/edit'
       preLoaderRoute: typeof MatricesIdEditRouteImport
-=======
-    '/mindmaps/$userId/$code': {
-      id: '/mindmaps/$userId/$code'
-      path: '/mindmaps/$userId/$code'
-      fullPath: '/mindmaps/$userId/$code'
-      preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
->>>>>>> develop:apps/web/src/routeTree.gen.ts
       parentRoute: typeof rootRouteImport
     }
     '/templates/slidev/$id/edit': {
@@ -1979,12 +1921,8 @@ const rootRouteChildren: RootRouteChildren = {
   QuestionsIndexRoute: QuestionsIndexRoute,
   SyllabusesIndexRoute: SyllabusesIndexRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
-<<<<<<< HEAD:apps/web/.tanstack/tmp/502ed1d9-8c0d1ffb628fd6d38cd320fe15b55680
   MatricesIdEditRoute: MatricesIdEditRoute,
   MatricesIdGenerateRoute: MatricesIdGenerateRoute,
-=======
-  MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
->>>>>>> develop:apps/web/src/routeTree.gen.ts
   TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
   TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
   TemplatesSlidevIdEditRoute: TemplatesSlidevIdEditRoute,

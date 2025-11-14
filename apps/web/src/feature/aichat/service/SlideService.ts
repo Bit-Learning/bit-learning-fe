@@ -120,7 +120,6 @@ export const SlideService = {
         downloadBlob(blob, filename)
     },
 
-    
     getSlideHistory: (
         page: number = 0,
         size: number = 10,
@@ -132,7 +131,6 @@ export const SlideService = {
         })
     },
 
-   
     getSlideById: (id: number): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
         return api.get(`${endpoints.SLIDE}/history/${id}`)
     },

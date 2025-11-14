@@ -6,7 +6,7 @@ import { useAppDispatch } from '@/shared/redux/store'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card } from '@workspace/ui/components/Card'
-import SpinnerLoader from '@workspace/ui/components/loader/SpinnerLoader'
+import Loader from '@workspace/ui/components/loader/OrangeBlockLoader'
 import { toast } from '@workspace/ui/components/Sonner'
 import { Loader2 } from 'lucide-react'
 import { useState } from 'react'
@@ -78,13 +78,13 @@ function PresentationList() {
         }
     }
 
-    if (isLoading || templateLoading || presentationsLoading) return <SpinnerLoader />
+    if (isLoading || templateLoading || presentationsLoading) return <Loader />
     if (error) return <div>Error loading templates.</div>
 
     return (
         <div className="container mx-auto px-6 py-12">
             <div>
-                <h2 className="mb-4 mt-12 text-2xl font-bold">Các mẫu thuyết trình có sẵn</h2>
+                <h2 className="mt-12 mb-4 text-2xl font-bold">Các mẫu thuyết trình có sẵn</h2>
 
                 {activeTemplates?.length === 0 && !templateLoading && (
                     <div className="rounded-lg border border-dashed p-8 text-center">
@@ -106,7 +106,7 @@ function PresentationList() {
                                 >
                                     {/* Status Badge - Top Right Corner */}
                                     {isCreating && (
-                                        <div className="absolute right-3 top-3 z-10">
+                                        <div className="absolute top-3 right-3 z-10">
                                             <Badge variant="secondary" className="flex items-center gap-1">
                                                 <Loader2 className="h-3 w-3 animate-spin" />
                                                 Đang tạo...
@@ -146,7 +146,7 @@ function PresentationList() {
                                     {/* Card Content */}
                                     <div className="p-5">
                                         {/* Template Name */}
-                                        <h3 className="mb-3 text-lg font-bold capitalize leading-tight text-gray-900">
+                                        <h3 className="mb-3 text-lg leading-tight font-bold text-gray-900 capitalize">
                                             {template.name.replace(/_/g, ' ')}
                                         </h3>
 

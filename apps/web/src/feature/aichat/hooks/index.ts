@@ -14,12 +14,14 @@
 export {
     useAskQuestion,
     useCustomSlideGeneration,
-    useMindmapGeneration,
     useSlideById,
     useSlideGeneration,
     useSlideHistory,
     useSlidePreview,
 } from './useSlideGeneration'
+
+// Mindmaps Hooks
+export { useMindmapGeneration, useMindmapHistory } from './useMindmapGeneration'
 
 // Template Hooks
 export { useTemplate, useTemplates } from './useTemplates'
