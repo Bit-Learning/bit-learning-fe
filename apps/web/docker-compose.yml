@@ -17,7 +17,7 @@ services:
   bithub-web-prod:
     container_name: bithub-web-prod
     # image: lcaohoanq/bithub-web:serve-nginx
-    image: lcaohoanq/bithub-web:serve-nginx-14
+    image: lcaohoanq/bithub-web:serve-nginx-15
     build:
       context: ../..
       dockerfile: apps/web/Dockerfile.prod
@@ -25,6 +25,8 @@ services:
       - "5174:5173"
     environment:
       - NODE_ENV=production
+      - VITE_API_BASE_URL=/api
+      - VITE_PRODUCT_API_BASE_URL=https://bithub-presentation.taskgenix.website/api
     networks:
       - app-net
 
