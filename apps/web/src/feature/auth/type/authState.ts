@@ -47,7 +47,7 @@ export type TUserProfile = {
     activationKey: string | null
     resetKey: string | null
     langKey: string
-    lastLoginAttempt: number | null
+    lastLoginAttempt: string | null
     createdAt: string
     updatedAt: string
     wallet: TWalletInfo

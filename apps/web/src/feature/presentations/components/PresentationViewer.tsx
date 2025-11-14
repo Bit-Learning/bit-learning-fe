@@ -1,4 +1,5 @@
 import { useLayout } from '@/context/layout-context'
+import { API_PATH } from '@/shared/constants/endpoints'
 import { useEffect } from 'react'
 
 type ViewerProps = {
@@ -21,7 +22,7 @@ function PresentationViewer({ id, mode }: ViewerProps) {
 
     // This URL points DIRECTLY to your Spring Boot gatekeeper controller
     // This is the 'publicUrl' your builder service now sets
-    const baseUrl = `http://localhost:4004/api/products/presentations/view/${id}`
+    const baseUrl = `${API_PATH.BASE_PRODUCT_URL}/products/presentations/view/${id}`
 
     let presentationUrl: string
 

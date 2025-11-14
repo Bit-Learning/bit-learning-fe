@@ -12,4 +12,5 @@ export const endpoints = {
  */
 export const API_PATH = {
     BASE_URL: import.meta.env.VITE_API_BASE_URL ?? '/api',
+    BASE_PRODUCT_URL: import.meta.env.VITE_PRODUCT_API_BASE_URL ?? 'http://localhost:4004/api',
 }
