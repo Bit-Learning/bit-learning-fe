@@ -1,3 +1,4 @@
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Checkbox } from '@workspace/ui/components/Checkbox'
@@ -7,8 +8,10 @@ import { Input } from '@workspace/ui/components/update/input'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@workspace/ui/components/update/select'
 import { Loader2, Network, Sparkles } from 'lucide-react'
 import React from 'react'
+import { useSelector } from 'react-redux'
 import { useMindmapGeneration } from '../hooks'
 import type { MindmapGenerationRequest, MindmapResponse } from '../service/MindmapService'
+import { deductBalanceAI } from '../service/PaymentService'
 
 interface MindmapGenerationFormProps {
     chatContext?: string
@@ -20,6 +23,7 @@ export const MindmapGenerationForm: React.FC<MindmapGenerationFormProps> = ({ ch
     const [maxDepth, setMaxDepth] = React.useState<number>(3)
     const [maxBranches, setMaxBranches] = React.useState<number>(4)
     const [includeExamples, setIncludeExamples] = React.useState(true)
+    const { userInfo } = useSelector(selectAuthStateInfo)
 
     const { generateMindmapAsync, isGenerating } = useMindmapGeneration()
     const navigate = useNavigate()
@@ -35,6 +39,14 @@ export const MindmapGenerationForm: React.FC<MindmapGenerationFormProps> = ({ ch
     }, [chatContext])
 
     const handleGenerateMindmap = async () => {
+        if ((userInfo?.wallet.balance || 0) < 10000) {
+            toast.error({
+                title: 'Số dư không đủ',
+                description: 'Bạn không đủ tiền để tạo mind map. Vui lòng nạp thêm tiền vào ví.',
+            })
+            return
+        }
+
         if (!topic.trim()) {
             toast.error({
                 title: 'Vui lòng nhập chủ đề',
@@ -53,13 +65,9 @@ export const MindmapGenerationForm: React.FC<MindmapGenerationFormProps> = ({ ch
 
         try {
             const result: MindmapResponse = await generateMindmapAsync(request)
-            console.log(result)
+            await deductBalanceAI(10000)
 
             if (result && result.code && result.userId) {
-                console.log('open')
-                // Build full URL with current origin to ensure window.open works
-                const fullUrl = `${window.location.origin}/mindmaps/${result.userId}/${result.code}`
-                // window.open(fullUrl, '_blank')
                 navigate({ to: `/mindmaps/${result.userId}/${result.code}` })
             }
         } catch (error) {
