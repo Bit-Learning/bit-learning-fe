@@ -71,6 +71,11 @@ export const navItems = [
                 to: '/presentations',
                 description: 'Tải về các bài giảng và tài liệu học tập miễn phí chất lượng từ BithubLearning.',
             },
+            {
+                title: 'Trợ lý AI',
+                to: '/ai-chatbot',
+                description: 'Trợ lý AI giúp soạn tài liệu và hỗ trợ học tập hiệu quả.',
+            },
         ],
     },
 
