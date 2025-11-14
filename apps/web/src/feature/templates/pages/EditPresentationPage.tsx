@@ -2,6 +2,7 @@ import { useNavigate, useParams } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
 import { Separator } from '@workspace/ui/components/Separator'
+import { toast } from '@workspace/ui/components/Sonner'
 import { ArrowLeft, Edit, Loader2 } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { PresentationForm } from '../components/PresentationForm'
@@ -35,7 +36,7 @@ const EditPresentationPage = () => {
         const result = await updatePresentation(presentation.id, data)
 
         if (result.success) {
-            alert('✅ Cập nhật bài thuyết trình thành công!')
+            toast.success({ title: 'Cập nhật bài thuyết trình thành công!' })
             navigate({ to: '/templates/slidev' })
         } else {
             setError(result.error || 'Có lỗi xảy ra')

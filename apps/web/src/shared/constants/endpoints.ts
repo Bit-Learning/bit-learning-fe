@@ -6,6 +6,11 @@ export const endpoints = {
     CHAT: '/slides/chat',
 }
 
+/**
+ * @deprecated Use API_CONFIG from @/shared/config/api.config instead
+ * This will be removed in future versions
+ */
 export const API_PATH = {
     BASE_URL: import.meta.env.VITE_API_BASE_URL ?? '/api',
+    BASE_PRODUCT_URL: import.meta.env.VITE_PRODUCT_API_BASE_URL ?? 'http://localhost:4004/api',
 }

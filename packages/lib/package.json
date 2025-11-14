@@ -21,6 +21,8 @@
         "typescript": "^5.9.2"
     },
     "exports": {
+        "./api": "./src/api/index.ts",
+        "./api/sdk/*": "./src/api/sdk/*.ts",
         "./*": "./src/*/index.ts"
     }
 }

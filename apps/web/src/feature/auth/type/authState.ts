@@ -8,7 +8,6 @@ export type TAuthState = {
 export type TLoginRequest = {
     email: string
     password: string
-    role: string
 }
 export type TRegisterRequest = {
     email: string
@@ -48,7 +47,7 @@ export type TUserProfile = {
     activationKey: string | null
     resetKey: string | null
     langKey: string
-    lastLoginAttempt: number | null
+    lastLoginAttempt: string | null
     createdAt: string
     updatedAt: string
     wallet: TWalletInfo
