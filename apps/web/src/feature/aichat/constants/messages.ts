@@ -207,7 +207,6 @@ export const CODE_TO_MESSAGE_MAP: Record<string, string> = {
 // UTILITY FUNCTIONS
 // ============================================================================
 
-
 export function getMessageFromCode(code?: string, fallbackMessage?: string): string {
     if (!code) {
         return fallbackMessage || GENERAL_ERROR_MESSAGES.INTERNAL_SERVER_ERROR
@@ -216,7 +215,6 @@ export function getMessageFromCode(code?: string, fallbackMessage?: string): str
     return CODE_TO_MESSAGE_MAP[code] || fallbackMessage || GENERAL_ERROR_MESSAGES.INTERNAL_SERVER_ERROR
 }
 
-
 export function getMessageWithTime(baseMessage: string, processingTime?: number): string {
     if (!processingTime) return baseMessage
 
@@ -224,12 +222,10 @@ export function getMessageWithTime(baseMessage: string, processingTime?: number)
     return `${baseMessage} (${seconds}s)`
 }
 
-
 export function isSuccessCode(code?: string): boolean {
     if (!code) return false
     return code in SUCCESS_MESSAGES
 }
-
 
 export function isErrorCode(code?: string): boolean {
     if (!code) return false

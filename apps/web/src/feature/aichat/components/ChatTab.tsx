@@ -66,7 +66,7 @@ const MessageContent = ({ content }: { content: string }) => {
                     return <PrismCodeBlock key={index} code={part.content} language={part.language || 'text'} />
                 }
                 return (
-                    <p key={index} className="text-sm leading-relaxed whitespace-pre-wrap">
+                    <p key={index} className="whitespace-pre-wrap text-sm leading-relaxed">
                         {formatText(part.content)}
                     </p>
                 )
@@ -224,7 +224,7 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
                                     {msg.role === 'assistant' ? (
                                         <MessageContent content={msg.content} />
                                     ) : (
-                                        <p className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</p>
+                                        <p className="whitespace-pre-wrap text-sm leading-relaxed">{msg.content}</p>
                                     )}
                                     <span className="mt-2 block text-xs opacity-60">{msg.timestamp}</span>
                                 </div>

@@ -17,7 +17,7 @@ export const useMindmapGeneration = (): UseMindmapGenerationReturn => {
         onSuccess: data => {
             toast.success({
                 title: 'Mind Map đã sẵn sàng!',
-                description: `✨ ${data.filename}`,
+                description: `✨ ${data.title} đã được tạo thành công.`,
             })
         },
         onError: (error: any) => {

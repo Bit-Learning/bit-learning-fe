@@ -3,6 +3,7 @@ import { type TreeSeriesOption } from 'echarts/charts'
 export type MindMap = {
     id: number
     data: string
+    title: string
     userId: number
     code: string
     createdAt: string

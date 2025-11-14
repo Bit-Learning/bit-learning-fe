@@ -3,7 +3,7 @@ import { Button } from '@workspace/ui/components/Button'
 import { Clock, FileText, Loader2, Network } from 'lucide-react'
 import * as React from 'react'
 import { useSelector } from 'react-redux'
-import { useMindmapHistory } from '../hooks/useMindmapGeneration'
+import { useMindmapHistory } from '../hooks'
 import { MindmapGenerationForm } from './MindmapGenerationForm'
 
 interface MindmapTabProps {
