@@ -6,6 +6,7 @@ import * as echarts from 'echarts/core'
 import { CanvasRenderer } from 'echarts/renderers'
 import { X } from 'lucide-react'
 import { useLayoutEffect, useRef, useState } from 'react'
+import { updateMindMap } from '../services/mindmap.service'
 import { EChartsTreeData, InputData, InputNode, MindMap } from '../types/mindmap.types'
 
 echarts.use([TreeChart, CanvasRenderer, TitleComponent, TooltipComponent, ToolboxComponent])
@@ -300,9 +301,18 @@ function Mindmap({ data }: { data: MindMap }) {
         }
     }
 
-    const handleSave = () => {
-        console.log('Current Mindmap Data:', jsonData)
-        console.log('JSON String:', JSON.stringify(jsonData, null, 2))
+    const handleSave = async () => {
+        try {
+            console.log('Saving mindmap data...')
+            // call API to update mindmap on server
+            const payload = { data: JSON.stringify(jsonData) }
+            const resp = await updateMindMap(payload, data.code, data.userId)
+            console.log('updateMindMap response:', resp?.data)
+            // if success, clear hasChanges
+            setHasChanges(false)
+        } catch (err) {
+            console.error('Failed to update mindmap:', err)
+        }
     }
 
     if (isLoading) {
