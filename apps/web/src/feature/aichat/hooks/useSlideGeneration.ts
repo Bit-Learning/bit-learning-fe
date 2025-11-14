@@ -1,5 +1,6 @@
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { toast } from '@workspace/ui/components/Sonner'
+import { getMessageFromCode, SUCCESS_MESSAGES } from '../constants'
 import { SlideService, downloadBlob } from '../service/SlideService'
 import type { SlideGenerationResponse, SlideHistoryPageResponse, SlideRequest } from '../type'
 
@@ -20,25 +21,27 @@ export const useSlideGeneration = () => {
                 await SlideService.downloadFromUrl(data.cloudinaryUrl, data.filename)
 
                 const cacheIcon = data.fromCache ? '📦 ' : '✨ '
-                const cacheStatus = data.fromCache ? 'Retrieved from cache' : 'Generated'
+                const cacheStatus = data.fromCache ? 'Lấy từ cache' : 'Đã tạo mới'
 
-                toast.success({ title: 'Slides ready!', description: `${cacheIcon}${cacheStatus}: ${data.filename}` })
+                toast.success({
+                    title: SUCCESS_MESSAGES.SLIDE_GENERATED,
+                    description: `${cacheIcon}${cacheStatus}: ${data.filename}`,
+                })
             } catch (downloadError) {
                 console.error('Download error:', downloadError)
                 toast.error({
-                    title: 'Download failed',
-                    description: 'Slide was generated but download failed. Try downloading manually.',
-                    // action: {
-                    //     label: 'Open URL',
-                    //     onClick: () => window.open(data.cloudinaryUrl, '_blank'),
-                    // },
+                    title: 'Tải xuống thất bại',
+                    description: 'Slide đã được tạo nhưng tải xuống thất bại. Vui lòng thử tải lại.',
                 })
             }
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to generate slides'
-            toast.error({ title: 'Generation failed', description: errorMessage })
-            console.error('Slide generation error:', error)
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Tạo slide thất bại', description: errorMessage })
+            console.error('Slide generation error:', { error, code: errorCode, message: errorMessage })
         },
     })
 
@@ -75,11 +78,15 @@ export const useSlidePreview = () => {
             return response.data.data
         },
         onSuccess: () => {
-            toast.success({ title: 'Preview generated successfully!' })
+            toast.success({ title: 'Thành công', description: 'Tạo xem trước slide thành công' })
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to generate preview'
-            toast.error({ title: 'Preview failed', description: errorMessage })
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Tạo xem trước thất bại', description: errorMessage })
+            console.error('Slide preview error:', { error, code: errorCode, message: errorMessage })
         },
     })
 
@@ -121,11 +128,18 @@ export const useCustomSlideGeneration = () => {
             const filename = `custom_slides_${new Date().toISOString().split('T')[0]}.pptx`
             downloadBlob(response.data, filename)
 
-            toast.success({ title: 'Custom slides generated successfully!', description: `Downloaded: ${filename}` })
+            toast.success({
+                title: SUCCESS_MESSAGES.SLIDE_GENERATED,
+                description: `Đã tải xuống: ${filename}`,
+            })
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to generate custom slides'
-            toast.error({ title: 'Generation failed', description: errorMessage })
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Tạo slide tùy chỉnh thất bại', description: errorMessage })
+            console.error('Custom slide generation error:', { error, code: errorCode, message: errorMessage })
         },
     })
 
@@ -166,8 +180,12 @@ export const useAskQuestion = () => {
             return response.data.data
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to get answer'
-            toast.error({ title: 'Question failed', description: errorMessage })
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Trả lời câu hỏi thất bại', description: errorMessage })
+            console.error('Question answering error:', { error, code: errorCode, message: errorMessage })
         },
     })
 
@@ -209,11 +227,15 @@ export const useMindmapGeneration = () => {
             return response.data.data
         },
         onSuccess: () => {
-            toast.success({ title: 'Mindmap generated successfully!' })
+            toast.success({ title: 'Thành công', description: 'Tạo sơ đồ tư duy thành công' })
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to generate mindmap'
-            toast.error({ title: 'Mindmap generation failed', description: errorMessage })
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Tạo sơ đồ tư duy thất bại', description: errorMessage })
+            console.error('Mindmap generation error:', { error, code: errorCode, message: errorMessage })
         },
     })
 

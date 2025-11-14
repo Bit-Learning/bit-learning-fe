@@ -85,7 +85,7 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
     const [messages, setMessages] = React.useState<Message[]>([])
     const messagesEndRef = React.useRef<HTMLDivElement>(null)
 
-    const { sendMessage, isPending, data: chatResponse } = useSendMessage()
+    const { sendMessage, isPending, data: chatResponse, isError } = useSendMessage()
     const { data: conversationData } = useConversationMessages(conversationId || '', undefined)
 
     const scrollToBottom = () => {
@@ -112,40 +112,35 @@ export const ChatTab = ({ conversationId, onConversationCreated }: ChatTabProps)
         }
     }, [conversationData])
 
-    // Update messages when chat response arrives
+    // Notify parent when new conversation is created
     React.useEffect(() => {
-        if (chatResponse) {
-            const userMsg: Message = {
-                id: chatResponse.user_message.id,
-                role: 'user',
-                content: chatResponse.user_message.content,
-                timestamp: new Date(chatResponse.user_message.created_at).toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }),
-            }
-
-            const aiMsg: Message = {
-                id: chatResponse.assistant_message.id,
-                role: 'assistant',
-                content: chatResponse.assistant_message.content,
-                timestamp: new Date(chatResponse.assistant_message.created_at).toLocaleTimeString('vi-VN', {
-                    hour: '2-digit',
-                    minute: '2-digit',
-                }),
-            }
-
-            setMessages(prev => [...prev, userMsg, aiMsg])
-
-            // Notify parent if new conversation created
-            if (!conversationId && onConversationCreated) {
-                onConversationCreated(chatResponse.conversation_id)
-            }
+        if (chatResponse && !conversationId && onConversationCreated) {
+            onConversationCreated(chatResponse.conversation_id)
         }
-    }, [chatResponse])
+    }, [chatResponse, conversationId, onConversationCreated])
+
+    // Remove temporary messages on error
+    React.useEffect(() => {
+        if (isError) {
+            setMessages(prev => prev.filter(msg => !msg.id.startsWith('temp-')))
+        }
+    }, [isError])
 
     const handleSubmit = () => {
         if (!message.trim() || isPending) return
+
+        // Optimistic update: Add user message immediately
+        const userMessage: Message = {
+            id: `temp-${Date.now()}`, // Temporary ID
+            role: 'user',
+            content: message,
+            timestamp: new Date().toLocaleTimeString('vi-VN', {
+                hour: '2-digit',
+                minute: '2-digit',
+            }),
+        }
+
+        setMessages(prev => [...prev, userMessage])
 
         sendMessage({
             conversation_id: conversationId,

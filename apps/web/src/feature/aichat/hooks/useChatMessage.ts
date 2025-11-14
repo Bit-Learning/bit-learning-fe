@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@workspace/ui/components/Sonner'
+import { getMessageFromCode, getMessageWithTime, SUCCESS_MESSAGES } from '../constants'
 import { ChatService } from '../service/ChatService'
 import type { ChatMessageRequest, ChatResponse } from '../type'
 import { conversationKeys } from './useChatConversation'
@@ -25,16 +26,25 @@ export const useSendMessage = () => {
                 queryClient.invalidateQueries({ queryKey: conversationKeys.lists() })
             }
 
-            // Optional: Show success toast with processing time
+            // Show success toast with processing time (if available)
             if (data.assistant_message.processing_time) {
-                const seconds = (data.assistant_message.processing_time / 1000).toFixed(2)
-                toast.success({ title: 'Response received', description: `Processed in ${seconds}s` })
+                const message = getMessageWithTime(
+                    SUCCESS_MESSAGES.MESSAGE_SENT,
+                    data.assistant_message.processing_time,
+                )
+                toast.success({ title: 'Thành công', description: message })
             }
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to send message'
-            toast.error({ title: 'Message failed', description: errorMessage })
-            console.error('Message sending error:', error)
+            // Get error code from response
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+
+            // Map error code to Vietnamese message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Lỗi gửi tin nhắn', description: errorMessage })
+            console.error('Message sending error:', { error, code: errorCode, message: errorMessage })
         },
     })
 

@@ -1,8 +1,6 @@
-import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
+import { useLayout } from '@/context/layout-context'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
-import { clearAuthTokens } from '@/shared/lib/cookies'
-import { useAppDispatch } from '@/shared/redux/store'
-import { Link, useNavigate } from '@tanstack/react-router'
+import { Link } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -10,7 +8,6 @@ import { TabPanel, Tabs } from '@workspace/ui/components/Tabs'
 import {
     Sidebar,
     SidebarContent,
-    SidebarFooter,
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
@@ -28,7 +25,6 @@ import {
     ClipboardPlus,
     FileText,
     Home,
-    LogOut,
     MessageSquare,
     Presentation,
     Search,
@@ -46,8 +42,15 @@ const AIChatbotPage = () => {
     const [activeSection, setActiveSection] = React.useState('newChat')
 
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
-    const dispatch = useAppDispatch()
-    const navigate = useNavigate()
+    const { setLayoutConfig } = useLayout()
+
+    // Hide footer when component mounts, restore when unmounts
+    React.useEffect(() => {
+        setLayoutConfig({ showHeader: true, showFooter: false })
+        return () => {
+            setLayoutConfig({ showHeader: true, showFooter: true })
+        }
+    }, [setLayoutConfig])
 
     const menuItems = [
         { id: 'newChat', label: 'Đoạn hội thoại mới', icon: SquarePen },
@@ -74,13 +77,6 @@ const AIChatbotPage = () => {
                 </div>
             </div>
         )
-    }
-
-    const handleLogout = () => {
-        clearAuthTokens()
-        dispatch(setIsAuthenticatedAction(false))
-        dispatch(setUserInfoAction(null))
-        navigate({ to: '/signin' })
     }
 
     return (
@@ -150,7 +146,7 @@ const AIChatbotPage = () => {
                                             tooltip="Danh sách conversations"
                                         >
                                             <SquarePen />
-                                            <span>Conversations</span>
+                                            <span>Cuộc hội thoại</span>
                                         </SidebarMenuButton>
                                     </SidebarMenuItem>
                                     <SidebarMenuItem>
@@ -167,17 +163,6 @@ const AIChatbotPage = () => {
                             </SidebarGroupContent>
                         </SidebarGroup>
                     </SidebarContent>
-
-                    <SidebarFooter>
-                        <SidebarMenu>
-                            <SidebarMenuItem>
-                                <SidebarMenuButton onClick={handleLogout} tooltip="Logout">
-                                    <LogOut />
-                                    <span>Đăng xuất</span>
-                                </SidebarMenuButton>
-                            </SidebarMenuItem>
-                        </SidebarMenu>
-                    </SidebarFooter>
 
                     <SidebarRail />
                 </Sidebar>

@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@workspace/ui/components/Sonner'
+import { getMessageFromCode, SUCCESS_MESSAGES } from '../constants'
 import { ChatService } from '../service/ChatService'
 import type {
     ConversationCreateRequest,
@@ -46,12 +47,18 @@ export const useCreateConversation = () => {
             // Invalidate conversations list to refetch
             queryClient.invalidateQueries({ queryKey: conversationKeys.lists() })
 
-            toast.success({ title: 'Conversation created', description: 'You can now start chatting' })
+            toast.success({
+                title: 'Thành công',
+                description: SUCCESS_MESSAGES.CONVERSATION_CREATED,
+            })
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to create conversation'
-            toast.error({ title: 'Creation failed', description: errorMessage })
-            console.error('Conversation creation error:', error)
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Tạo cuộc hội thoại thất bại', description: errorMessage })
+            console.error('Conversation creation error:', { error, code: errorCode, message: errorMessage })
         },
     })
 
@@ -175,12 +182,18 @@ export const useDeleteConversation = () => {
             // Remove the specific conversation from cache
             queryClient.removeQueries({ queryKey: conversationKeys.detail(conversationId) })
 
-            toast.success({ title: 'Conversation deleted' })
+            toast.success({
+                title: 'Thành công',
+                description: SUCCESS_MESSAGES.CONVERSATION_DELETED,
+            })
         },
         onError: (error: any) => {
-            const errorMessage = error?.response?.data?.message || 'Failed to delete conversation'
-            toast.error({ title: 'Deletion failed', description: errorMessage })
-            console.error('Conversation deletion error:', error)
+            const errorCode = error?.response?.data?.code
+            const backendMessage = error?.response?.data?.message
+            const errorMessage = getMessageFromCode(errorCode, backendMessage)
+
+            toast.error({ title: 'Xóa cuộc hội thoại thất bại', description: errorMessage })
+            console.error('Conversation deletion error:', { error, code: errorCode, message: errorMessage })
         },
     })
 

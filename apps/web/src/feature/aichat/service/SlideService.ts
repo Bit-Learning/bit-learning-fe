@@ -120,20 +120,7 @@ export const SlideService = {
         downloadBlob(blob, filename)
     },
 
-    /**
-     * Get user's slide generation history with pagination
-     *
-     * @param page - Page number (0-indexed)
-     * @param size - Page size (default: 10)
-     * @param sortBy - Sort field (default: 'createdAt')
-     * @param sortDir - Sort direction ('asc' or 'desc', default: 'desc')
-     * @returns Promise with paginated slide history
-     *
-     * @example
-     * ```typescript
-     * SlideService.getSlideHistory(0, 10, 'createdAt', 'desc')
-     * ```
-     */
+    
     getSlideHistory: (
         page: number = 0,
         size: number = 10,
@@ -145,17 +132,7 @@ export const SlideService = {
         })
     },
 
-    /**
-     * Get specific generated slide by ID
-     *
-     * @param id - Slide ID
-     * @returns Promise with slide details
-     *
-     * @example
-     * ```typescript
-     * SlideService.getSlideById(123)
-     * ```
-     */
+   
     getSlideById: (id: number): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
         return api.get(`${endpoints.SLIDE}/history/${id}`)
     },
