@@ -196,6 +196,16 @@ const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
     path: '/templates/',
     getParentRoute: () => rootRouteImport,
 } as any)
+const SyllabusesIndexRoute = SyllabusesIndexRouteImport.update({
+    id: '/syllabuses/',
+    path: '/syllabuses/',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIndexRoute = QuestionsIndexRouteImport.update({
+    id: '/questions/',
+    path: '/questions/',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const PresentationsIndexRoute = PresentationsIndexRouteImport.update({
     id: '/presentations/',
     path: '/presentations/',
@@ -204,6 +214,11 @@ const PresentationsIndexRoute = PresentationsIndexRouteImport.update({
 const NewsIndexRoute = NewsIndexRouteImport.update({
     id: '/news/',
     path: '/news/',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesIndexRoute = MatricesIndexRouteImport.update({
+    id: '/matrices/',
+    path: '/matrices/',
     getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
@@ -226,6 +241,31 @@ const TemplatesIdRoute = TemplatesIdRouteImport.update({
     path: '/templates/$id',
     getParentRoute: () => rootRouteImport,
 } as any)
+const SyllabusesMyRoute = SyllabusesMyRouteImport.update({
+    id: '/syllabuses/my',
+    path: '/syllabuses/my',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesCreateRoute = SyllabusesCreateRouteImport.update({
+    id: '/syllabuses/create',
+    path: '/syllabuses/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsMyRoute = QuestionsMyRouteImport.update({
+    id: '/questions/my',
+    path: '/questions/my',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsGenerateFromQuestionsRoute = QuestionsGenerateFromQuestionsRouteImport.update({
+    id: '/questions/generate-from-questions',
+    path: '/questions/generate-from-questions',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsCreateRoute = QuestionsCreateRouteImport.update({
+    id: '/questions/create',
+    path: '/questions/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const PresentationsIdRoute = PresentationsIdRouteImport.update({
     id: '/presentations/$id',
     path: '/presentations/$id',
@@ -234,6 +274,41 @@ const PresentationsIdRoute = PresentationsIdRouteImport.update({
 const NewsIdRoute = NewsIdRouteImport.update({
     id: '/news/$id',
     path: '/news/$id',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesMyRoute = MatricesMyRouteImport.update({
+    id: '/matrices/my',
+    path: '/matrices/my',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesImportRoute = MatricesImportRouteImport.update({
+    id: '/matrices/import',
+    path: '/matrices/import',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const MatricesCreateRoute = MatricesCreateRouteImport.update({
+    id: '/matrices/create',
+    path: '/matrices/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const InternalTestLoaderRoute = InternalTestLoaderRouteImport.update({
+    id: '/internal/test-loader',
+    path: '/internal/test-loader',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsMyExamsRoute = ExamsMyExamsRouteImport.update({
+    id: '/exams/my-exams',
+    path: '/exams/my-exams',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsGenerateRoute = ExamsGenerateRouteImport.update({
+    id: '/exams/generate',
+    path: '/exams/generate',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const ExamsIdRoute = ExamsIdRouteImport.update({
+    id: '/exams/$id',
+    path: '/exams/$id',
     getParentRoute: () => rootRouteImport,
 } as any)
 const CoursesWebDevelopmentRoute = CoursesWebDevelopmentRouteImport.update({
@@ -266,9 +341,29 @@ const TemplatesSlidevIndexRoute = TemplatesSlidevIndexRouteImport.update({
     path: '/templates/slidev/',
     getParentRoute: () => rootRouteImport,
 } as any)
+const SyllabusesIdIndexRoute = SyllabusesIdIndexRouteImport.update({
+    id: '/syllabuses/$id/',
+    path: '/syllabuses/$id/',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIdIndexRoute = QuestionsIdIndexRouteImport.update({
+    id: '/questions/$id/',
+    path: '/questions/$id/',
+    getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
     id: '/templates/slidev/create',
     path: '/templates/slidev/create',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const SyllabusesIdEditRoute = SyllabusesIdEditRouteImport.update({
+    id: '/syllabuses/$id/edit',
+    path: '/syllabuses/$id/edit',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const QuestionsIdEditRoute = QuestionsIdEditRouteImport.update({
+    id: '/questions/$id/edit',
+    path: '/questions/$id/edit',
     getParentRoute: () => rootRouteImport,
 } as any)
 const PresentationsIdViewRoute = PresentationsIdViewRouteImport.update({
