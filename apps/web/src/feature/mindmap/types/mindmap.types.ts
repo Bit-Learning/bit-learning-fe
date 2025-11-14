@@ -5,6 +5,7 @@ export type MindMap = {
     data: string
     userId: number
     code: string
+    createdAt: string
 }
 
 export interface InputNode {
