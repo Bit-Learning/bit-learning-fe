@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Checkbox } from '@workspace/ui/components/Checkbox'
 import { Label } from '@workspace/ui/components/label'
@@ -7,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Loader2, Network, Sparkles } from 'lucide-react'
 import React from 'react'
 import { useMindmapGeneration } from '../hooks'
-import type { MindmapGenerationRequest } from '../service/MindmapService'
+import type { MindmapGenerationRequest, MindmapResponse } from '../service/MindmapService'
 
 interface MindmapGenerationFormProps {
     chatContext?: string
@@ -20,19 +21,20 @@ export const MindmapGenerationForm: React.FC<MindmapGenerationFormProps> = ({ ch
     const [maxBranches, setMaxBranches] = React.useState<number>(4)
     const [includeExamples, setIncludeExamples] = React.useState(true)
 
-    const { generateMindmap, isGenerating } = useMindmapGeneration()
+    const { generateMindmapAsync, isGenerating } = useMindmapGeneration()
+    const navigate = useNavigate()
 
     // Auto-fill topic from chat context if available
     React.useEffect(() => {
         if (chatContext && !topic) {
             const lines = chatContext.split('\n').filter(line => line.trim().length > 0)
             if (lines.length > 0 && lines[0]) {
-                setTopic(lines[0].substring(0, 50)) // Limit to 50 chars as per requirement
+                setTopic(lines[0].substring(0, 150)) // Limit to 150 chars as per requirement
             }
         }
     }, [chatContext])
 
-    const handleGenerateMindmap = () => {
+    const handleGenerateMindmap = async () => {
         if (!topic.trim()) {
             toast.error({
                 title: 'Vui lòng nhập chủ đề',
@@ -43,14 +45,26 @@ export const MindmapGenerationForm: React.FC<MindmapGenerationFormProps> = ({ ch
         const request: MindmapGenerationRequest = {
             topic: topic.trim(),
             grade,
-            max_depth: maxDepth,
-            max_branches: maxBranches,
-            include_examples: includeExamples,
-            collection_name: 'sgk_tin_kntt',
-            format: 'json',
+            maxDepth: maxDepth,
+            maxBranches: maxBranches,
+            includeExamples: includeExamples,
+            collectionName: 'sgk_tin_kntt',
         }
 
-        generateMindmap(request)
+        try {
+            const result: MindmapResponse = await generateMindmapAsync(request)
+            console.log(result)
+
+            if (result && result.code && result.userId) {
+                console.log('open')
+                // Build full URL with current origin to ensure window.open works
+                const fullUrl = `${window.location.origin}/mindmaps/${result.userId}/${result.code}`
+                // window.open(fullUrl, '_blank')
+                navigate({ to: `/mindmaps/${result.userId}/${result.code}` })
+            }
+        } catch (error) {
+            console.error('Generation failed (form):', error)
+        }
     }
 
     return (
@@ -70,11 +84,11 @@ export const MindmapGenerationForm: React.FC<MindmapGenerationFormProps> = ({ ch
                         id="topic"
                         placeholder="Ví dụ: Lập trình Python, Cấu trúc dữ liệu"
                         value={topic}
-                        onChange={e => setTopic(e.target.value.substring(0, 50))}
+                        onChange={e => setTopic(e.target.value.substring(0, 150))}
                         disabled={isGenerating}
-                        maxLength={50}
+                        maxLength={150}
                     />
-                    <p className="text-xs text-gray-500">Nhập chủ đề cho sơ đồ tư duy ({topic.length}/50)</p>
+                    <p className="text-xs text-gray-500">Nhập chủ đề cho sơ đồ tư duy ({topic.length}/150)</p>
                 </div>
 
                 {/* Grade Selection */}

@@ -5,23 +5,19 @@ import type { ApiResponse } from '../type'
 export interface MindmapGenerationRequest {
     topic: string
     grade: number
-    max_depth: number
-    max_branches: number
-    include_examples: boolean
-    collection_name: string
-    format?: string
+    maxDepth: number
+    maxBranches: number
+    includeExamples: boolean
+    collectionName: string
 }
 
 export interface MindmapResponse {
-    id: string
-    topic: string
-    grade: number
-    max_depth: number
-    max_branches: number
-    include_examples: boolean
-    generatedAt: string
-    cloudinaryUrl: string
-    filename: string
+    id: number
+    data: string
+    title: string
+    userId: number
+    code: string
+    createdAt: string
 }
 
 export interface MindmapHistoryResponse {
@@ -34,7 +30,7 @@ export interface MindmapHistoryResponse {
 
 export const MindmapService = {
     generateMindmap: (request: MindmapGenerationRequest): Promise<AxiosResponse<ApiResponse<MindmapResponse>>> => {
-        return api.post(`/products/mindmaps`, request)
+        return api.post(`/products/mindmaps/data`, request)
     },
 
     getMindmapHistory: (userId: number): Promise<AxiosResponse<ApiResponse<MindmapHistoryResponse[]>>> => {
