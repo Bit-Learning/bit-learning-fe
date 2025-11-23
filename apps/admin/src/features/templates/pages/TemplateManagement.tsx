@@ -305,7 +305,9 @@ export function TemplateManagement() {
         <DialogContent>
           <DialogHeader>
             <DialogTitle>Chỉnh sửa mẫu</DialogTitle>
-            <DialogDescription>Cập nhật thông tin mẫu sản phẩm</DialogDescription>
+            <DialogDescription>
+              Cập nhật thông tin mẫu sản phẩm
+            </DialogDescription>
           </DialogHeader>
           <TemplateForm
             formData={formData}
@@ -402,8 +404,9 @@ function TemplateForm({
           placeholder='Để trống để tự động tạo'
         />
         <p className='text-muted-foreground mt-1 text-xs'>
-          💡 <strong>Để trống để tự động tạo preview</strong>. Hệ thống sẽ
-          tự động build mẫu từ file markdown và lưu trữ trong MinIO. Hoặc cung cấp URL tùy chỉnh.
+          💡 <strong>Để trống để tự động tạo preview</strong>. Hệ thống sẽ tự
+          động build mẫu từ file markdown và lưu trữ trong MinIO. Hoặc cung cấp
+          URL tùy chỉnh.
         </p>
       </div>
 

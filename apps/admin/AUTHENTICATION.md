@@ -5,11 +5,13 @@ This document explains the admin-specific authentication implementation that dif
 ## Key Differences from Web App
 
 ### 1. **Role Restriction**
+
 - **Web App**: Uses `Roles.USER` for regular users
 - **Admin App**: Uses `Roles.ADMIN` for administrators only
 - **Enforcement**: Login API call is hardcoded to only accept ADMIN role
 
 ### 2. **State Management**
+
 - **Web App**: Uses Redux Toolkit for state management
 - **Admin App**: Uses **TanStack Query** (React Query) only - no Redux
   - Simpler state management
@@ -17,6 +19,7 @@ This document explains the admin-specific authentication implementation that dif
   - Automatic refetching and background updates
 
 ### 3. **Auth Store**
+
 - Located at: `src/stores/auth-store.ts`
 - Uses Zustand (lightweight state management)
 - Stores:
@@ -25,6 +28,7 @@ This document explains the admin-specific authentication implementation that dif
   - `user`: Admin user information including firstName, lastName, avatar
 
 ### 4. **API Service**
+
 - Located at: `src/features/auth/api/AuthService.ts`
 - Key functions:
   - `AdminLogin()`: Enforces ADMIN role
@@ -33,6 +37,7 @@ This document explains the admin-specific authentication implementation that dif
   - `Logout()`: Signs out admin user
 
 ### 5. **Type Safety**
+
 - Located at: `src/features/auth/types/auth.types.ts`
 - Types:
   - `TAdminLoginRequest`: Login payload with ADMIN role
@@ -42,6 +47,7 @@ This document explains the admin-specific authentication implementation that dif
 ## Authentication Flow
 
 ### Login Process
+
 1. User enters email and password in sign-in form
 2. Form validation with Zod schema
 3. TanStack Query mutation calls `AdminLogin()` with:
@@ -63,6 +69,7 @@ This document explains the admin-specific authentication implementation that dif
    - Block non-admin users with clear message
 
 ### Profile Loading
+
 - Component: `components/profile-dropdown.tsx`
 - Uses TanStack Query to fetch profile:
   ```typescript
@@ -75,6 +82,7 @@ This document explains the admin-specific authentication implementation that dif
 - Displays user avatar, name, and email
 
 ### Token Refresh
+
 - Automatic via API interceptor in `shared/api/api.ts`
 - On 401 error:
   1. Check if refresh token exists
@@ -121,6 +129,7 @@ src/
 ## Usage Examples
 
 ### Login Form (with TanStack Query)
+
 ```typescript
 const loginMutation = useMutation({
   mutationFn: (data: TAdminLoginRequest) => AdminLogin(data),
@@ -142,6 +151,7 @@ function onSubmit(data) {
 ```
 
 ### Fetch User Profile
+
 ```typescript
 const { data: profileData } = useQuery({
   queryKey: ['adminProfile'],
@@ -151,6 +161,7 @@ const { data: profileData } = useQuery({
 ```
 
 ### Sign Out
+
 ```typescript
 const handleSignOut = () => {
   auth.reset() // Clears tokens and user info
@@ -161,6 +172,7 @@ const handleSignOut = () => {
 ## Testing
 
 To test admin login:
+
 1. Start the backend with admin account seeded
 2. Use admin credentials:
    - Email: `admin@gmail.com`

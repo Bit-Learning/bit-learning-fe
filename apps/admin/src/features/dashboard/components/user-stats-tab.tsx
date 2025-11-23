@@ -38,7 +38,7 @@ export function UserStatsTab({ data, isLoading }: UserStatsTabProps) {
 
   if (!data) {
     return (
-      <div className='text-center text-muted-foreground'>
+      <div className='text-muted-foreground text-center'>
         Không thể tải dữ liệu người dùng
       </div>
     )
@@ -126,7 +126,7 @@ export function UserStatsTab({ data, isLoading }: UserStatsTabProps) {
           <div className='space-y-4'>
             <div className='space-y-2'>
               <div className='flex items-center justify-between'>
-                <span className='text-sm text-muted-foreground'>Hôm nay</span>
+                <span className='text-muted-foreground text-sm'>Hôm nay</span>
                 <div className='flex items-center gap-2'>
                   <div
                     className='h-2 rounded-full bg-blue-500'
@@ -141,7 +141,7 @@ export function UserStatsTab({ data, isLoading }: UserStatsTabProps) {
                 </div>
               </div>
               <div className='flex items-center justify-between'>
-                <span className='text-sm text-muted-foreground'>Tuần này</span>
+                <span className='text-muted-foreground text-sm'>Tuần này</span>
                 <div className='flex items-center gap-2'>
                   <div
                     className='h-2 rounded-full bg-orange-500'
@@ -156,7 +156,7 @@ export function UserStatsTab({ data, isLoading }: UserStatsTabProps) {
                 </div>
               </div>
               <div className='flex items-center justify-between'>
-                <span className='text-sm text-muted-foreground'>Tháng này</span>
+                <span className='text-muted-foreground text-sm'>Tháng này</span>
                 <div className='flex items-center gap-2'>
                   <div className='h-2 w-full rounded-full bg-pink-500' />
                   <span className='text-sm font-medium'>
@@ -169,7 +169,7 @@ export function UserStatsTab({ data, isLoading }: UserStatsTabProps) {
             <div className='rounded-lg border p-4'>
               <div className='flex items-center justify-between'>
                 <div>
-                  <p className='text-sm text-muted-foreground'>
+                  <p className='text-muted-foreground text-sm'>
                     Tỷ lệ người dùng hoạt động
                   </p>
                   <p className='text-2xl font-bold'>
@@ -177,7 +177,7 @@ export function UserStatsTab({ data, isLoading }: UserStatsTabProps) {
                   </p>
                 </div>
                 <div className='text-right'>
-                  <p className='text-sm text-muted-foreground'>
+                  <p className='text-muted-foreground text-sm'>
                     Hoạt động / Tổng
                   </p>
                   <p className='text-sm font-medium'>

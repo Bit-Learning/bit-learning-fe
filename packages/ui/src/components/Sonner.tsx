@@ -16,7 +16,7 @@ function Toast(props: ToastProps) {
     const { title, description, id, variant = 'neutral' } = props
 
     return (
-        <div className="group bg-popover shadow-popover relative flex min-h-[64px] w-full items-center gap-3 rounded-xl border px-4 py-2.5 pr-7 md:w-[364px]">
+        <div className="bg-popover shadow-popover group relative flex min-h-[64px] w-full items-center gap-3 rounded-xl border px-4 py-2.5 pr-7 md:w-[364px]">
             <ToastIcon variant={variant} />
             <div className="flex flex-1 items-center">
                 <div className="w-full">

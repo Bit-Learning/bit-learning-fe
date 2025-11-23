@@ -40,7 +40,7 @@ export function OrderStatsTab({ data, isLoading }: OrderStatsTabProps) {
 
   if (!data) {
     return (
-      <div className='text-center text-muted-foreground'>
+      <div className='text-muted-foreground text-center'>
         Không thể tải dữ liệu đơn hàng
       </div>
     )
@@ -105,9 +105,7 @@ export function OrderStatsTab({ data, isLoading }: OrderStatsTabProps) {
         <Card className='col-span-4'>
           <CardHeader>
             <CardTitle>Tổng quan doanh thu</CardTitle>
-            <CardDescription>
-              Biểu đồ doanh thu theo thời gian
-            </CardDescription>
+            <CardDescription>Biểu đồ doanh thu theo thời gian</CardDescription>
           </CardHeader>
           <CardContent className='ps-2'>
             <Overview />
@@ -117,17 +115,17 @@ export function OrderStatsTab({ data, isLoading }: OrderStatsTabProps) {
         <Card className='col-span-3'>
           <CardHeader>
             <CardTitle>Trạng thái đơn hàng</CardTitle>
-            <CardDescription>
-              Phân bổ theo trạng thái
-            </CardDescription>
+            <CardDescription>Phân bổ theo trạng thái</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='space-y-2'>
               {Object.entries(data.statusBreakdown).map(([status, count]) => (
                 <div key={status} className='flex items-center justify-between'>
                   <div className='flex items-center gap-2'>
-                    <div className='h-2 w-2 rounded-full bg-primary' />
-                    <span className='text-sm capitalize'>{translateStatus(status)}</span>
+                    <div className='bg-primary h-2 w-2 rounded-full' />
+                    <span className='text-sm capitalize'>
+                      {translateStatus(status)}
+                    </span>
                   </div>
                   <span className='text-sm font-medium'>
                     {count.toLocaleString('vi-VN')}
@@ -151,11 +149,11 @@ function formatCurrency(amount: number): string {
 
 function translateStatus(status: string): string {
   const statusMap: Record<string, string> = {
-    'PENDING': 'Chờ xử lý',
-    'PROCESSING': 'Đang xử lý',
-    'COMPLETED': 'Hoàn thành',
-    'CANCELLED': 'Đã hủy',
-    'REFUNDED': 'Đã hoàn tiền',
+    PENDING: 'Chờ xử lý',
+    PROCESSING: 'Đang xử lý',
+    COMPLETED: 'Hoàn thành',
+    CANCELLED: 'Đã hủy',
+    REFUNDED: 'Đã hoàn tiền',
   }
   return statusMap[status] || status
 }

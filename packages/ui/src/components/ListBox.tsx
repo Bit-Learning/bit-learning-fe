@@ -24,7 +24,7 @@ function ListBox<T extends object>({ className, ...props }: AriaListBoxProps<T>)
             className={composeRenderProps(className, className =>
                 cn(
                     className,
-                    'group bg-popover text-popover-foreground overflow-auto rounded-md border p-1 shadow-md outline-none',
+                    'bg-popover text-popover-foreground group overflow-auto rounded-md border p-1 shadow-md outline-none',
                     /* Empty */
                     'data-[empty]:p-6 data-[empty]:text-center data-[empty]:text-sm',
                 ),

@@ -11,6 +11,7 @@ export default defineConfig({
             '@': resolve(__dirname, './src'),
         },
     },
+    build: { sourcemap: false },
     // server: {
     //     port: 5173,
     //     proxy: {

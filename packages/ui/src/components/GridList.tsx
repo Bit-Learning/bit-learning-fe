@@ -20,7 +20,7 @@ export function GridList<T extends object>({ children, ...props }: AriaGridListP
             {...props}
             className={composeRenderProps(props.className, className =>
                 cn(
-                    'jolly-GridList group bg-popover text-popover-foreground flex flex-col gap-2 overflow-auto rounded-md border p-1 shadow-md outline-none',
+                    'jolly-GridList bg-popover text-popover-foreground group flex flex-col gap-2 overflow-auto rounded-md border p-1 shadow-md outline-none',
                     /* Empty */
                     'data-[empty]:p-6 data-[empty]:text-center data-[empty]:text-sm',
                     className,

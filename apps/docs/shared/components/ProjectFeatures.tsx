@@ -115,7 +115,7 @@ function FeatureCard({ icons, title, description, url = '#', variant = 'landing'
         <Link
             href={url}
             className={cn(
-                'group bg-background hover:bg-background-secondary relative flex h-full flex-col justify-between gap-5 p-3 transition-colors md:p-8',
+                'bg-background hover:bg-background-secondary group relative flex h-full flex-col justify-between gap-5 p-3 transition-colors md:p-8',
                 variant === 'landing' && 'border-t border-r',
                 variant === 'docs' && 'rounded-lg border md:p-4',
             )}

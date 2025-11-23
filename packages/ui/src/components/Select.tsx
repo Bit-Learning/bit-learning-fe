@@ -199,7 +199,7 @@ function BsSelectItem<T extends BsSelectOption>(
             {...props}
             textValue={props.children}
             className={cn(
-                'group text-popover-foreground flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 outline-hidden select-none',
+                'text-popover-foreground group flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 outline-hidden select-none',
                 'data-focused:bg-primary! data-focused:text-white! data-[focus-visible]:bg-neutral-500/15',
             )}
         >

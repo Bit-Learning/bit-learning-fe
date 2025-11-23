@@ -46,13 +46,16 @@ export function PaymentStatsTab({ data, isLoading }: PaymentStatsTabProps) {
 
   if (!data) {
     return (
-      <div className='text-center text-muted-foreground'>
+      <div className='text-muted-foreground text-center'>
         Không thể tải dữ liệu thanh toán
       </div>
     )
   }
 
-  const successRate = ((data.successfulTransactions / data.totalTransactions) * 100).toFixed(1)
+  const successRate = (
+    (data.successfulTransactions / data.totalTransactions) *
+    100
+  ).toFixed(1)
 
   const stats = [
     {
@@ -153,9 +156,7 @@ export function PaymentStatsTab({ data, isLoading }: PaymentStatsTabProps) {
         <Card>
           <CardHeader>
             <CardTitle>Loại giao dịch</CardTitle>
-            <CardDescription>
-              Phân bổ theo loại giao dịch
-            </CardDescription>
+            <CardDescription>Phân bổ theo loại giao dịch</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
@@ -183,7 +184,10 @@ export function PaymentStatsTab({ data, isLoading }: PaymentStatsTabProps) {
             <div className='mt-6 space-y-2 rounded-lg border p-4'>
               <h4 className='text-sm font-medium'>Chi tiết theo loại</h4>
               {Object.entries(data.typeBreakdown).map(([type, count]) => (
-                <div key={type} className='flex items-center justify-between text-sm'>
+                <div
+                  key={type}
+                  className='flex items-center justify-between text-sm'
+                >
                   <span className='text-muted-foreground capitalize'>
                     {translateType(type)}
                   </span>
@@ -200,20 +204,23 @@ export function PaymentStatsTab({ data, isLoading }: PaymentStatsTabProps) {
         <Card>
           <CardHeader>
             <CardTitle>Trạng thái giao dịch</CardTitle>
-            <CardDescription>
-              Phân bổ theo trạng thái
-            </CardDescription>
+            <CardDescription>Phân bổ theo trạng thái</CardDescription>
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
               <div className='space-y-2'>
                 {Object.entries(data.statusBreakdown).map(([status, count]) => (
-                  <div key={status} className='flex items-center justify-between'>
+                  <div
+                    key={status}
+                    className='flex items-center justify-between'
+                  >
                     <div className='flex items-center gap-2'>
                       <div
                         className={`h-2 w-2 rounded-full ${getStatusColor(status)}`}
                       />
-                      <span className='text-sm'>{translatePaymentStatus(status)}</span>
+                      <span className='text-sm'>
+                        {translatePaymentStatus(status)}
+                      </span>
                     </div>
                     <span className='text-sm font-medium'>
                       {count.toLocaleString('vi-VN')}
@@ -226,7 +233,7 @@ export function PaymentStatsTab({ data, isLoading }: PaymentStatsTabProps) {
               <div className='rounded-lg border p-4'>
                 <div className='flex items-center justify-between'>
                   <div>
-                    <p className='text-sm text-muted-foreground'>
+                    <p className='text-muted-foreground text-sm'>
                       Tỷ lệ thành công
                     </p>
                     <p className='text-2xl font-bold text-green-600'>
@@ -234,7 +241,7 @@ export function PaymentStatsTab({ data, isLoading }: PaymentStatsTabProps) {
                     </p>
                   </div>
                   <div className='text-right'>
-                    <p className='text-sm text-muted-foreground'>
+                    <p className='text-muted-foreground text-sm'>
                       Thành công / Tổng
                     </p>
                     <p className='text-sm font-medium'>
@@ -272,7 +279,7 @@ function TransactionTypeBar({
           {value.toLocaleString('vi-VN')} ({percentage}%)
         </span>
       </div>
-      <div className='h-2 w-full rounded-full bg-muted'>
+      <div className='bg-muted h-2 w-full rounded-full'>
         <div
           className={`h-full rounded-full ${color}`}
           style={{ width: `${percentage}%` }}
@@ -291,35 +298,35 @@ function formatCurrency(amount: number): string {
 
 function translateType(type: string): string {
   const typeMap: Record<string, string> = {
-    'DEPOSIT': 'Nạp tiền',
-    'AI_REQUEST': 'AI Request',
-    'PURCHASE': 'Mua hàng',
+    DEPOSIT: 'Nạp tiền',
+    AI_REQUEST: 'AI Request',
+    PURCHASE: 'Mua hàng',
   }
   return typeMap[type] || type
 }
 
 function translatePaymentStatus(status: string): string {
   const statusMap: Record<string, string> = {
-    'PENDING': 'Chờ xử lý',
-    'PROCESSING': 'Đang xử lý',
-    'COMPLETED': 'Hoàn thành',
-    'SUCCESS': 'Thành công',
-    'FAILED': 'Thất bại',
-    'CANCELLED': 'Đã hủy',
-    'REFUNDED': 'Đã hoàn tiền',
+    PENDING: 'Chờ xử lý',
+    PROCESSING: 'Đang xử lý',
+    COMPLETED: 'Hoàn thành',
+    SUCCESS: 'Thành công',
+    FAILED: 'Thất bại',
+    CANCELLED: 'Đã hủy',
+    REFUNDED: 'Đã hoàn tiền',
   }
   return statusMap[status] || status
 }
 
 function getStatusColor(status: string): string {
   const colorMap: Record<string, string> = {
-    'PENDING': 'bg-yellow-500',
-    'PROCESSING': 'bg-blue-500',
-    'COMPLETED': 'bg-green-500',
-    'SUCCESS': 'bg-green-500',
-    'FAILED': 'bg-red-500',
-    'CANCELLED': 'bg-gray-500',
-    'REFUNDED': 'bg-orange-500',
+    PENDING: 'bg-yellow-500',
+    PROCESSING: 'bg-blue-500',
+    COMPLETED: 'bg-green-500',
+    SUCCESS: 'bg-green-500',
+    FAILED: 'bg-red-500',
+    CANCELLED: 'bg-gray-500',
+    REFUNDED: 'bg-orange-500',
   }
   return colorMap[status] || 'bg-gray-500'
 }

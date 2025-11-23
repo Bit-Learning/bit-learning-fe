@@ -127,7 +127,7 @@ export function Chats() {
                     <button
                       type='button'
                       className={cn(
-                        'group hover:bg-accent hover:text-accent-foreground',
+                        'hover:bg-accent hover:text-accent-foreground group',
                         `flex w-full rounded-md px-2 py-2 text-start text-sm`,
                         selectedUser?.id === id && 'sm:bg-muted'
                       )}

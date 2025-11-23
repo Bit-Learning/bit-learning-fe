@@ -155,7 +155,8 @@ export const usersColumns: ColumnDef<User>[] = [
     ),
     cell: ({ row }) => {
       const lastLogin = row.getValue('lastLoginAttempt') as string | null
-      if (!lastLogin) return <div className='text-muted-foreground'>Chưa từng</div>
+      if (!lastLogin)
+        return <div className='text-muted-foreground'>Chưa từng</div>
       const date = new Date(lastLogin)
       return (
         <div className='text-nowrap'>

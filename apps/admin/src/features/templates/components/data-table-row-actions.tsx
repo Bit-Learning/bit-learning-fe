@@ -1,16 +1,8 @@
-import { type Row } from '@tanstack/react-table'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Download, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { type Row } from '@tanstack/react-table'
+import { Download, MoreHorizontal, Pencil, Trash2 } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -21,8 +13,16 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { type Template } from '../data/schema'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu'
 import { deleteTemplate } from '../api/templates-api'
+import { type Template } from '../data/schema'
 
 interface DataTableRowActionsProps<TData> {
   row: Row<TData>
@@ -61,7 +61,7 @@ export function DataTableRowActions<TData>({
         <DropdownMenuTrigger asChild>
           <Button
             variant='ghost'
-            className='flex h-8 w-8 p-0 data-[state=open]:bg-muted'
+            className='data-[state=open]:bg-muted flex h-8 w-8 p-0'
           >
             <MoreHorizontal className='h-4 w-4' />
             <span className='sr-only'>Mở menu</span>
@@ -92,8 +92,8 @@ export function DataTableRowActions<TData>({
           <AlertDialogHeader>
             <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này không thể hoàn tác. Mẫu &quot;{template.name}&quot; sẽ bị xóa
-              vĩnh viễn khỏi hệ thống.
+              Hành động này không thể hoàn tác. Mẫu &quot;{template.name}&quot;
+              sẽ bị xóa vĩnh viễn khỏi hệ thống.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

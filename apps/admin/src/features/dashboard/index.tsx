@@ -10,11 +10,10 @@ import { Search } from '@/components/search'
 import { ThemeSwitch } from '@/components/theme-switch'
 import { getAllDashboardStats } from './api/dashboard-api'
 import { Analytics } from './components/analytics'
-import { StatsCards } from './components/stats-cards'
 import { OrderStatsTab } from './components/order-stats-tab'
-import { UserStatsTab } from './components/user-stats-tab'
 import { PaymentStatsTab } from './components/payment-stats-tab'
-import { OverviewTab } from './components/overview-tab'
+import { StatsCards } from './components/stats-cards'
+import { UserStatsTab } from './components/user-stats-tab'
 
 export function Dashboard() {
   // Fetch dashboard statistics
@@ -75,10 +74,7 @@ export function Dashboard() {
 
           {/* Users Tab */}
           <TabsContent value='users' className='space-y-4'>
-            <UserStatsTab
-              data={dashboardStats?.users}
-              isLoading={isLoading}
-            />
+            <UserStatsTab data={dashboardStats?.users} isLoading={isLoading} />
           </TabsContent>
 
           {/* Payments Tab */}

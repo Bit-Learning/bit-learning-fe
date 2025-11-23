@@ -6,12 +6,7 @@ import {
   TrendingUp,
   CreditCard,
 } from 'lucide-react'
-import {
-  Card,
-  CardContent,
-  CardHeader,
-  CardTitle,
-} from '@/components/ui/card'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { DashboardStats } from '../types/dashboard.types'
 
@@ -42,7 +37,7 @@ export function StatsCards({ data, isLoading }: StatsCardsProps) {
 
   if (!data) {
     return (
-      <div className='text-center text-muted-foreground'>
+      <div className='text-muted-foreground text-center'>
         Không thể tải dữ liệu thống kê
       </div>
     )
@@ -123,7 +118,9 @@ export function StatsCards({ data, isLoading }: StatsCardsProps) {
             </CardHeader>
             <CardContent>
               <div className='text-2xl font-bold'>{stat.value}</div>
-              <p className='text-muted-foreground text-xs'>{stat.description}</p>
+              <p className='text-muted-foreground text-xs'>
+                {stat.description}
+              </p>
             </CardContent>
           </Card>
         )

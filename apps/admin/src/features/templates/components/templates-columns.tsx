@@ -1,8 +1,7 @@
-import { type ColumnDef } from '@tanstack/react-table'
 import { format } from 'date-fns'
+import { type ColumnDef } from '@tanstack/react-table'
 import { vi } from 'date-fns/locale'
 import { cn } from '@/lib/utils'
-import { Badge } from '@/components/ui/badge'
 import { Checkbox } from '@/components/ui/checkbox'
 import { DataTableColumnHeader } from '@/components/data-table'
 import { LongText } from '@/components/long-text'
@@ -68,7 +67,7 @@ export const templatesColumns: ColumnDef<Template>[] = [
               className='h-12 w-12 rounded object-cover'
             />
           ) : (
-            <div className='flex h-12 w-12 items-center justify-center rounded bg-muted text-xs text-muted-foreground'>
+            <div className='bg-muted text-muted-foreground flex h-12 w-12 items-center justify-center rounded text-xs'>
               N/A
             </div>
           )}
@@ -84,7 +83,9 @@ export const templatesColumns: ColumnDef<Template>[] = [
     ),
     cell: ({ row }) => (
       <div className='flex items-center gap-2'>
-        <LongText className='max-w-xs font-medium'>{row.getValue('name')}</LongText>
+        <LongText className='max-w-xs font-medium'>
+          {row.getValue('name')}
+        </LongText>
       </div>
     ),
     meta: { className: 'w-48' },
@@ -99,11 +100,11 @@ export const templatesColumns: ColumnDef<Template>[] = [
       return (
         <div className='max-w-md'>
           {description ? (
-            <LongText className='text-sm text-muted-foreground'>
+            <LongText className='text-muted-foreground text-sm'>
               {description}
             </LongText>
           ) : (
-            <span className='text-sm text-muted-foreground'>—</span>
+            <span className='text-muted-foreground text-sm'>—</span>
           )}
         </div>
       )
@@ -119,7 +120,7 @@ export const templatesColumns: ColumnDef<Template>[] = [
       const createdAt = row.getValue('createdAt') as string
       const date = new Date(createdAt)
       return (
-        <div className='text-nowrap text-sm'>
+        <div className='text-sm text-nowrap'>
           {format(date, 'dd/MM/yyyy HH:mm', { locale: vi })}
         </div>
       )
@@ -134,7 +135,7 @@ export const templatesColumns: ColumnDef<Template>[] = [
       const updatedAt = row.getValue('updatedAt') as string
       const date = new Date(updatedAt)
       return (
-        <div className='text-nowrap text-sm'>
+        <div className='text-sm text-nowrap'>
           {format(date, 'dd/MM/yyyy HH:mm', { locale: vi })}
         </div>
       )

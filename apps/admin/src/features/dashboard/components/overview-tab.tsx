@@ -7,9 +7,9 @@ import {
 } from '@/components/ui/card'
 import { Skeleton } from '@/components/ui/skeleton'
 import type { DashboardStats } from '../types/dashboard.types'
-import { StatsCards } from './stats-cards'
 import { PaymentRevenueChart } from './payment-revenue-chart'
 import { RecentSales } from './recent-sales'
+import { StatsCards } from './stats-cards'
 
 interface OverviewTabProps {
   data?: DashboardStats
@@ -61,7 +61,7 @@ export function OverviewTab({ data, isLoading }: OverviewTabProps) {
             data.payments.monthlyRevenue.length > 0 ? (
               <PaymentRevenueChart data={data.payments.monthlyRevenue} />
             ) : (
-              <div className='flex h-[350px] items-center justify-center text-muted-foreground'>
+              <div className='text-muted-foreground flex h-[350px] items-center justify-center'>
                 Không có dữ liệu doanh thu theo tháng
               </div>
             )}
@@ -87,11 +87,10 @@ export function OverviewTab({ data, isLoading }: OverviewTabProps) {
                       {data.orders.totalOrders.toLocaleString('vi-VN')}
                     </span>
                   </div>
-                  <div className='text-xs text-muted-foreground'>
-                    Doanh thu:{' '}
-                    {formatCurrency(data.orders.totalRevenue)}
+                  <div className='text-muted-foreground text-xs'>
+                    Doanh thu: {formatCurrency(data.orders.totalRevenue)}
                   </div>
-                  <div className='h-2 w-full rounded-full bg-muted'>
+                  <div className='bg-muted h-2 w-full rounded-full'>
                     <div
                       className='h-full rounded-full bg-blue-500'
                       style={{
@@ -99,9 +98,14 @@ export function OverviewTab({ data, isLoading }: OverviewTabProps) {
                       }}
                     />
                   </div>
-                  <div className='text-xs text-muted-foreground'>
+                  <div className='text-muted-foreground text-xs'>
                     Tháng này: {formatCurrency(data.orders.revenueThisMonth)} (
-                    {((data.orders.revenueThisMonth / data.orders.totalRevenue) * 100).toFixed(1)}%)
+                    {(
+                      (data.orders.revenueThisMonth /
+                        data.orders.totalRevenue) *
+                      100
+                    ).toFixed(1)}
+                    %)
                   </div>
                 </div>
 
@@ -113,11 +117,10 @@ export function OverviewTab({ data, isLoading }: OverviewTabProps) {
                       {data.users.totalUsers.toLocaleString('vi-VN')}
                     </span>
                   </div>
-                  <div className='text-xs text-muted-foreground'>
-                    Hoạt động:{' '}
-                    {data.users.activeUsers.toLocaleString('vi-VN')}
+                  <div className='text-muted-foreground text-xs'>
+                    Hoạt động: {data.users.activeUsers.toLocaleString('vi-VN')}
                   </div>
-                  <div className='h-2 w-full rounded-full bg-muted'>
+                  <div className='bg-muted h-2 w-full rounded-full'>
                     <div
                       className='h-full rounded-full bg-green-500'
                       style={{
@@ -125,8 +128,9 @@ export function OverviewTab({ data, isLoading }: OverviewTabProps) {
                       }}
                     />
                   </div>
-                  <div className='text-xs text-muted-foreground'>
-                    Mới tháng này: +{data.users.newUsersThisMonth.toLocaleString('vi-VN')}
+                  <div className='text-muted-foreground text-xs'>
+                    Mới tháng này: +
+                    {data.users.newUsersThisMonth.toLocaleString('vi-VN')}
                   </div>
                 </div>
 
@@ -138,11 +142,10 @@ export function OverviewTab({ data, isLoading }: OverviewTabProps) {
                       {data.payments.totalTransactions.toLocaleString('vi-VN')}
                     </span>
                   </div>
-                  <div className='text-xs text-muted-foreground'>
-                    Tổng:{' '}
-                    {formatCurrency(data.payments.totalRevenue)}
+                  <div className='text-muted-foreground text-xs'>
+                    Tổng: {formatCurrency(data.payments.totalRevenue)}
                   </div>
-                  <div className='h-2 w-full rounded-full bg-muted'>
+                  <div className='bg-muted h-2 w-full rounded-full'>
                     <div
                       className='h-full rounded-full bg-emerald-500'
                       style={{
@@ -150,14 +153,23 @@ export function OverviewTab({ data, isLoading }: OverviewTabProps) {
                       }}
                     />
                   </div>
-                  <div className='text-xs text-muted-foreground'>
-                    Thành công: {data.payments.successfulTransactions.toLocaleString('vi-VN')} (
-                    {((data.payments.successfulTransactions / data.payments.totalTransactions) * 100).toFixed(1)}%)
+                  <div className='text-muted-foreground text-xs'>
+                    Thành công:{' '}
+                    {data.payments.successfulTransactions.toLocaleString(
+                      'vi-VN'
+                    )}{' '}
+                    (
+                    {(
+                      (data.payments.successfulTransactions /
+                        data.payments.totalTransactions) *
+                      100
+                    ).toFixed(1)}
+                    %)
                   </div>
                 </div>
               </div>
             ) : (
-              <div className='text-center text-muted-foreground'>
+              <div className='text-muted-foreground text-center'>
                 Không có dữ liệu
               </div>
             )}

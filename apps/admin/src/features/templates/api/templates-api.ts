@@ -44,7 +44,9 @@ export async function getTemplates(params: {
  * Get all templates (non-paginated)
  */
 export async function getAllTemplates() {
-  const response = await api.get<ApiResponse<Template[]>>('/slides/templates/all')
+  const response = await api.get<ApiResponse<Template[]>>(
+    '/slides/templates/all'
+  )
   return response.data.data
 }
 
@@ -52,7 +54,9 @@ export async function getAllTemplates() {
  * Get template by ID
  */
 export async function getTemplateById(id: number) {
-  const response = await api.get<ApiResponse<Template>>(`/slides/templates/${id}`)
+  const response = await api.get<ApiResponse<Template>>(
+    `/slides/templates/${id}`
+  )
   return response.data.data
 }
 
@@ -75,11 +79,15 @@ export async function createTemplate(data: {
     formData.append('thumbnailFile', data.thumbnailFile)
   }
 
-  const response = await api.post<ApiResponse<Template>>('/slides/templates', formData, {
-    headers: {
-      'Content-Type': 'multipart/form-data',
-    },
-  })
+  const response = await api.post<ApiResponse<Template>>(
+    '/slides/templates',
+    formData,
+    {
+      headers: {
+        'Content-Type': 'multipart/form-data',
+      },
+    }
+  )
   return response.data.data
 }
 
@@ -125,7 +133,9 @@ export async function updateTemplate(
  * Delete template
  */
 export async function deleteTemplate(id: number) {
-  const response = await api.delete<ApiResponse<void>>(`/slides/templates/${id}`)
+  const response = await api.delete<ApiResponse<void>>(
+    `/slides/templates/${id}`
+  )
   return response.data
 }
 

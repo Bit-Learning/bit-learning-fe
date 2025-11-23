@@ -76,7 +76,7 @@ export function UploaderItem({
     // card variant
     if (variant === 'card') {
         return (
-            <div className="group bg-background-secondary relative grid size-22 shrink-0 place-items-center rounded-lg">
+            <div className="bg-background-secondary group relative grid size-22 shrink-0 place-items-center rounded-lg">
                 {isUploading && <CircleProgress value={uploaderFile.percent} className="absolute top-1 right-1" />}
 
                 {/* content */}

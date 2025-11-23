@@ -1,9 +1,8 @@
-import { type Table } from '@tanstack/react-table'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { Trash2, X } from 'lucide-react'
 import { useState } from 'react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { type Table } from '@tanstack/react-table'
+import { Trash2, X } from 'lucide-react'
 import { toast } from 'sonner'
-import { Button } from '@/components/ui/button'
 import {
   AlertDialog,
   AlertDialogAction,
@@ -14,8 +13,9 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog'
-import { type Template } from '../data/schema'
+import { Button } from '@/components/ui/button'
 import { deleteTemplates } from '../api/templates-api'
+import { type Template } from '../data/schema'
 
 interface DataTableBulkActionsProps {
   table: Table<Template>
@@ -51,11 +51,13 @@ export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
 
   return (
     <>
-      <div className='fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-md border bg-background p-3 shadow-lg'>
-        <div className='text-sm text-muted-foreground'>
-          Đã chọn <span className='font-semibold text-foreground'>{selectedCount}</span> mẫu
+      <div className='bg-background fixed bottom-4 left-1/2 z-50 flex -translate-x-1/2 items-center gap-3 rounded-md border p-3 shadow-lg'>
+        <div className='text-muted-foreground text-sm'>
+          Đã chọn{' '}
+          <span className='text-foreground font-semibold'>{selectedCount}</span>{' '}
+          mẫu
         </div>
-        <div className='h-4 w-px bg-border' />
+        <div className='bg-border h-4 w-px' />
         <div className='flex items-center gap-2'>
           <Button
             variant='destructive'
@@ -83,8 +85,8 @@ export function DataTableBulkActions({ table }: DataTableBulkActionsProps) {
           <AlertDialogHeader>
             <AlertDialogTitle>Bạn có chắc chắn muốn xóa?</AlertDialogTitle>
             <AlertDialogDescription>
-              Hành động này không thể hoàn tác. {selectedCount} mẫu đã chọn sẽ bị xóa
-              vĩnh viễn khỏi hệ thống.
+              Hành động này không thể hoàn tác. {selectedCount} mẫu đã chọn sẽ
+              bị xóa vĩnh viễn khỏi hệ thống.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>

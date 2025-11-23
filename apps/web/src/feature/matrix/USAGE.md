@@ -24,24 +24,28 @@ feature/matrix/
 ## 🎯 Các trang đã tạo
 
 ### 1. Matrix List (`/matrices`)
+
 - ✅ Danh sách ma trận với pagination
 - ✅ Search và filter
 - ✅ Delete ma trận
 - ✅ Tích hợp API đầy đủ
 
 ### 2. Create Matrix (`/matrices/create`)
+
 - ✅ Form tạo ma trận mới
 - ✅ Cấu trúc ma trận (matrix details)
 - ✅ Validation
 - 🔄 Cần tích hợp API
 
 ### 3. Import Question Bank (`/matrices/import`)
+
 - ✅ Upload file Excel/CSV
 - ✅ Preview kết quả import
 - ✅ Statistics
 - 🔄 Cần tích hợp API
 
 ### 4. Generate Exam (`/matrices/:id/generate`)
+
 - ✅ Cấu hình tạo đề
 - ✅ Preview đề thi
 - ✅ Download PDF/Word
@@ -50,7 +54,9 @@ feature/matrix/
 ## 🛠️ Components có sẵn
 
 ### DifficultyBadge
+
 Hiển thị badge cho mức độ câu hỏi
+
 ```tsx
 import { DifficultyBadge } from '@/feature/matrix/components'
 
@@ -60,38 +66,43 @@ import { DifficultyBadge } from '@/feature/matrix/components'
 ```
 
 ### StatusBadge
+
 Hiển thị trạng thái active/inactive
+
 ```tsx
 import { StatusBadge } from '@/feature/matrix/components'
 
-<StatusBadge isActive={true} />
+;<StatusBadge isActive={true} />
 ```
 
 ### LoadingSpinner
+
 Loading indicator
+
 ```tsx
 import { LoadingSpinner } from '@/feature/matrix/components'
 
-<LoadingSpinner message="Đang tải..." size="md" />
+;<LoadingSpinner message="Đang tải..." size="md" />
 ```
 
 ### ErrorMessage
+
 Hiển thị lỗi với retry button
+
 ```tsx
 import { ErrorMessage } from '@/feature/matrix/components'
 
-<ErrorMessage
-    message="Không thể tải dữ liệu"
-    onRetry={() => refetch()}
-/>
+;<ErrorMessage message="Không thể tải dữ liệu" onRetry={() => refetch()} />
 ```
 
 ### EmptyState
+
 Hiển thị khi không có dữ liệu
+
 ```tsx
 import { EmptyState } from '@/feature/matrix/components'
 
-<EmptyState
+;<EmptyState
     title="Chưa có ma trận nào"
     description="Tạo ma trận đầu tiên của bạn"
     actionLabel="Tạo mới"
@@ -102,6 +113,7 @@ import { EmptyState } from '@/feature/matrix/components'
 ## 🔧 Utilities
 
 ### matrix.utils.ts
+
 Các hàm tiện ích cho matrix module:
 
 ```typescript
@@ -131,16 +143,16 @@ import { useQuery, useMutation } from '@tanstack/react-query'
 // Fetch matrices
 const { data, isLoading } = useQuery(
     apiClient.matrix.getAllMatrices({
-        pageable: { page: 0, size: 10 }
-    })
+        pageable: { page: 0, size: 10 },
+    }),
 )
 
 // Create matrix
 const createMutation = useMutation({
     ...apiClient.matrix.createMatrix(),
-    onSuccess: (data) => {
+    onSuccess: data => {
         console.log('Created:', data)
-    }
+    },
 })
 ```
 

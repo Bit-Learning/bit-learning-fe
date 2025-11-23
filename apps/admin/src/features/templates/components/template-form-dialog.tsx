@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useForm } from 'react-hook-form'
 import { zodResolver } from '@hookform/resolvers/zod'
-import { Plus, Upload } from 'lucide-react'
+import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { Plus } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
 import {
@@ -25,8 +25,8 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
-import { templateRequestSchema, type TemplateRequest } from '../data/schema'
 import { createTemplate } from '../api/templates-api'
+import { templateRequestSchema, type TemplateRequest } from '../data/schema'
 
 export function TemplateFormDialog() {
   const [open, setOpen] = useState(false)
@@ -78,7 +78,9 @@ export function TemplateFormDialog() {
     }
   }
 
-  const handleThumbnailFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleThumbnailFileChange = (
+    e: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = e.target.files?.[0]
     if (file) {
       setThumbnailFile(file)
@@ -147,7 +149,7 @@ export function TemplateFormDialog() {
                     className='cursor-pointer'
                   />
                   {templateFile && (
-                    <span className='text-sm text-muted-foreground'>
+                    <span className='text-muted-foreground text-sm'>
                       {templateFile.name}
                     </span>
                   )}
@@ -169,7 +171,7 @@ export function TemplateFormDialog() {
                     className='cursor-pointer'
                   />
                   {thumbnailFile && (
-                    <span className='text-sm text-muted-foreground'>
+                    <span className='text-muted-foreground text-sm'>
                       {thumbnailFile.name}
                     </span>
                   )}

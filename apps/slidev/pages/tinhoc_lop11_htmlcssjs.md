@@ -2,14 +2,14 @@
 # Cấu hình chung cho toàn bộ slides
 theme: seriph
 background: https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&q=80&w=1170
-title: "Giới thiệu HTML - CSS - JavaScript"
+title: 'Giới thiệu HTML - CSS - JavaScript'
 info: |
-  ## Bài học Tin học 11
-  Nhập môn Lập trình Web dành cho học sinh Trung học Phổ thông Việt Nam.
-class: "text-center"
+    ## Bài học Tin học 11
+    Nhập môn Lập trình Web dành cho học sinh Trung học Phổ thông Việt Nam.
+class: 'text-center'
 # Bật tính năng vẽ
 drawings:
-  persist: false
+    persist: false
 # Hiệu ứng chuyển slide mặc định
 transition: slide-left
 # Bật các thành phần MDC (Markdown Components)
@@ -29,8 +29,8 @@ The last comment block of each slide will be treated as slide notes. It will be 
 -->
 
 ---
-transition: fade-out
----
+
+## transition: fade-out
 
 # Mục tiêu bài học
 
@@ -121,13 +121,13 @@ Hôm nay chúng ta sẽ tìm hiểu:
 ```css
 /* Chọn thẻ h1 và đổi màu */
 h1 {
-  color: blue;
-  font-size: 30px;
+    color: blue;
+    font-size: 30px;
 }
 
 /\* Chọn thẻ p và đổi font \*/ p {
-  color: green;
-  font-family: Arial;
+    color: green;
+    font-family: Arial;
 }
 ```
 
@@ -174,7 +174,7 @@ h1 {
   };
 </script>
 
-```
+````
 
 </div>
 
@@ -248,7 +248,7 @@ transform: rotate(360deg);
 }
 }
 
-```
+````
 
 </div>
 
@@ -305,36 +305,36 @@ transform: rotate(360deg);
 
 ```html
 <html>
-  <head>
-    <title>Trang Web Đầu Tiên</title>
-    <style>
-      /* Đây là CSS */
-      body {
-        font-family: Arial;
-        text-align: center;
-      }
-      h1 {
-        color: teal;
-      }
-      .my-box {
-        background: yellow;
-        padding: 20px;
-        border: 2px solid black;
-      }
-    </style>
-  </head>
-  <body>
-    <h1>Chào mừng đến lớp Tin học 11!</h1>
+    <head>
+        <title>Trang Web Đầu Tiên</title>
+        <style>
+            /* Đây là CSS */
+            body {
+                font-family: Arial;
+                text-align: center;
+            }
+            h1 {
+                color: teal;
+            }
+            .my-box {
+                background: yellow;
+                padding: 20px;
+                border: 2px solid black;
+            }
+        </style>
+    </head>
+    <body>
+        <h1>Chào mừng đến lớp Tin học 11!</h1>
 
-    <div class="my-box">
-      <p>Đây là HTML và CSS đầu tiên của em.</p>
-      <button onclick="alert('Tuyệt vời!')">Bấm em đi!</button>
-    </div>
+        <div class="my-box">
+            <p>Đây là HTML và CSS đầu tiên của em.</p>
+            <button onclick="alert('Tuyệt vời!')">Bấm em đi!</button>
+        </div>
 
-    <script>
-      console.log("Trang web đã tải xong!");
-    </script>
-  </body>
+        <script>
+            console.log('Trang web đã tải xong!')
+        </script>
+    </body>
 </html>
 ```
 
