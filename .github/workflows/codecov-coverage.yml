@@ -3,7 +3,6 @@ name: Run tests and upload coverage
 on:
     push:
         branches:
-            - develop
             - test
     pull_request:
         branches:
@@ -37,10 +36,14 @@ jobs:
             - name: Install dependencies
               run: pnpm install
 
-            - name: Run tests
+            - name: Run tests with coverage
               run: pnpm vitest run --coverage
 
-            - name: Upload results to Codecov
+            - name: Upload coverage to Codecov
               uses: codecov/codecov-action@v5
               with:
+                  working-directory: ../..
+                  files: coverage/apps-web/lcov.info
+                  fail_ci_if_error: false
+                  verbose: true
                   token: ${{ secrets.CODECOV_TOKEN }}
