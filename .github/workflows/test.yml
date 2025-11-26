@@ -3,7 +3,6 @@ name: Run tests and upload coverage
 on:
     push:
         branches:
-            - develop
             - test
     pull_request:
         branches:
