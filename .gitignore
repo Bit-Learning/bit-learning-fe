@@ -40,3 +40,6 @@ npm-debug.log*
 
 # next.js
 next-env.d.ts
+
+# apps/web
+apps/web/.env.sentry-build-plugin

@@ -1,4 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit'
+import * as Sentry from '@sentry/react'
 import { useDispatch } from 'react-redux'
 import { persistReducer, persistStore } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
@@ -12,6 +13,10 @@ const persistConfig = {
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)
 
+const sentryReduxEnhancer = Sentry.createReduxEnhancer({
+    // Optionally pass options listed below
+})
+
 const store = configureStore({
     reducer: persistedReducer,
     middleware: getDefaultMiddleware =>
@@ -20,6 +25,9 @@ const store = configureStore({
                 ignoredActions: ['persist/PERSIST', 'persist/REHYDRATE'],
             },
         }),
+    enhancers: getDefaultEnhancers => {
+        return getDefaultEnhancers().concat(sentryReduxEnhancer)
+    },
 })
 
 export const persistor = persistStore(store)
