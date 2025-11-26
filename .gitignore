@@ -43,6 +43,7 @@ next-env.d.ts
 
 # apps/web
 apps/web/.env.sentry-build-plugin
+apps/web/*.xml
 
 *storybook.log
 storybook-static

@@ -1,3 +1,4 @@
+import { codecovVitePlugin } from '@codecov/vite-plugin'
 import { sentryVitePlugin } from '@sentry/vite-plugin'
 import { tanstackRouter } from '@tanstack/router-plugin/vite'
 import react from '@vitejs/plugin-react'
@@ -12,6 +13,11 @@ export default defineConfig({
         sentryVitePlugin({
             org: 'bithub-learning',
             project: 'bithub-web',
+        }),
+        codecovVitePlugin({
+            enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,
+            bundleName: 'web',
+            uploadToken: process.env.CODECOV_TOKEN,
         }),
     ],
     resolve: {
@@ -29,6 +35,7 @@ export default defineConfig({
             reportsDirectory: '../../coverage/apps-web',
             exclude: ['node_modules/', 'src/test/', '**/*.d.ts', '**/*.config.*', '**/coverage/**'],
         },
+        reporters: ['default'],
         include: ['src/**/*.{test,spec}.{ts,tsx}'],
     },
     build: { sourcemap: false },
