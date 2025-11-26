@@ -22,10 +22,12 @@ export default defineConfig({
     test: {
         globals: true,
         environment: 'jsdom',
+        setupFiles: ['src/test/setup.ts'],
         coverage: {
             provider: 'v8',
             reporter: ['text', 'lcov'],
             reportsDirectory: '../../coverage/apps-web',
+            exclude: ['node_modules/', 'src/test/', '**/*.d.ts', '**/*.config.*', '**/coverage/**'],
         },
         include: ['src/**/*.{test,spec}.{ts,tsx}'],
     },
