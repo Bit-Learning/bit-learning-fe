@@ -1,4 +1,4 @@
-import { useLayout } from '@/context/layout-context'
+import { useLayout } from '@/shared/context/layout-context'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'

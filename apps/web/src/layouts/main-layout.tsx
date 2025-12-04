@@ -1,4 +1,4 @@
-import { useLayout } from '@/context/layout-context'
+import { useLayout } from '@/shared/context/layout-context'
 import { motion } from 'framer-motion'
 import { memo } from 'react'
 import Footer from './footer'

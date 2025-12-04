@@ -1,4 +1,4 @@
-import PageMeta from '@/components/seo/page-meta'
+import PageMeta from '@/shared/components/seo/page-meta'
 import { useParams } from '@tanstack/react-router'
 import React from 'react'
 import CourseDetailContent from '../component/CourseDetailContent'

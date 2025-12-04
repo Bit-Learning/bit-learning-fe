@@ -1,7 +1,7 @@
-import { useLayout } from '@/context/layout-context'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import Mindmap from '@/feature/mindmap/pages/MindMap'
 import { getMindMapDataByUserIdAndCode } from '@/feature/mindmap/services/mindmap.service'
+import { useLayout } from '@/shared/context/layout-context'
 import store from '@/shared/redux/store'
 import { createFileRoute, redirect } from '@tanstack/react-router'
 import { useEffect } from 'react'

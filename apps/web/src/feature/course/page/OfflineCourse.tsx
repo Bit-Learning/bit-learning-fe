@@ -1,4 +1,4 @@
-import PageMeta from '@/components/seo/page-meta'
+import PageMeta from '@/shared/components/seo/page-meta'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
@@ -166,7 +166,7 @@ const OfflineCoursePage: React.FC = () => {
                     title="Đăng Ký Khóa Học Offline - BithubLearning"
                     description="Đăng ký các khóa học offline chất lượng cao tại BithubLearning"
                 />
-                <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 py-8">
+                <div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50 py-8">
                     <div className="container mx-auto max-w-6xl px-4">
                         <div className="mb-8">
                             <Button
@@ -193,9 +193,9 @@ const OfflineCoursePage: React.FC = () => {
             />
 
             {/* Hero Section */}
-            <section className="relative bg-gradient-to-br from-blue-600 via-blue-700 to-orange-600 py-20 text-white">
+            <section className="bg-linear-to-br relative from-blue-600 via-blue-700 to-orange-600 py-20 text-white">
                 <div className="absolute inset-0 bg-black/20"></div>
-                <div className="relative z-10 container mx-auto px-4">
+                <div className="container relative z-10 mx-auto px-4">
                     <div className="mx-auto max-w-4xl text-center">
                         <div className="mb-6 flex items-center justify-center space-x-2">
                             <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
@@ -203,7 +203,7 @@ const OfflineCoursePage: React.FC = () => {
                             </div>
                             <span className="text-2xl font-bold">BithubLearning</span>
                         </div>
-                        <h1 className="mb-6 text-5xl leading-tight font-bold">Khóa Học Lập Trình Offline</h1>
+                        <h1 className="mb-6 text-5xl font-bold leading-tight">Khóa Học Lập Trình Offline</h1>
                         <p className="mb-8 text-xl leading-relaxed opacity-90">
                             Học trực tiếp với giảng viên chuyên nghiệp, tương tác và thực hành ngay tại lớp học. Xây
                             dựng nền tảng vững chắc cho sự nghiệp lập trình của bạn.
@@ -277,7 +277,7 @@ const OfflineCoursePage: React.FC = () => {
             </section>
 
             {/* Courses Section */}
-            <section id="courses" className="bg-gradient-to-br from-gray-50 to-blue-50 py-20">
+            <section id="courses" className="bg-linear-to-br from-gray-50 to-blue-50 py-20">
                 <div className="container mx-auto px-4">
                     <div className="mb-16 text-center">
                         <h2 className="mb-4 text-4xl font-bold text-gray-900">Các Khóa Học Offline</h2>
@@ -298,16 +298,16 @@ const OfflineCoursePage: React.FC = () => {
                                         alt={course.name}
                                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                                     />
-                                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
-                                    <div className="absolute top-4 left-4">
+                                    <div className="bg-linear-to-t absolute inset-0 from-black/60 to-transparent"></div>
+                                    <div className="absolute left-4 top-4">
                                         <Badge className="bg-orange-600 text-white">{course.level}</Badge>
                                     </div>
-                                    <div className="absolute top-4 right-4">
+                                    <div className="absolute right-4 top-4">
                                         <Badge variant="secondary" className="bg-white/90 text-gray-900">
                                             {course.duration}
                                         </Badge>
                                     </div>
-                                    <div className="absolute right-4 bottom-4 left-4">
+                                    <div className="absolute bottom-4 left-4 right-4">
                                         <button className="flex h-12 w-12 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-colors hover:bg-white/30">
                                             <Play className="ml-1 h-5 w-5 text-white" />
                                         </button>
@@ -396,7 +396,7 @@ const OfflineCoursePage: React.FC = () => {
                                         alt={post.title}
                                         className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                                     />
-                                    <div className="absolute top-4 left-4">
+                                    <div className="absolute left-4 top-4">
                                         <Badge className="bg-blue-600 text-white">{post.category}</Badge>
                                     </div>
                                 </div>
@@ -424,7 +424,7 @@ const OfflineCoursePage: React.FC = () => {
             </section>
 
             {/* Training Center Section */}
-            <section className="bg-gradient-to-br from-gray-50 to-blue-50 py-20">
+            <section className="bg-linear-to-br from-gray-50 to-blue-50 py-20">
                 <div className="container mx-auto px-4">
                     <div className="mb-16 text-center">
                         <h2 className="mb-4 text-4xl font-bold text-gray-900">Cơ Sở Đào Tạo</h2>
@@ -441,7 +441,7 @@ const OfflineCoursePage: React.FC = () => {
                                     alt="Cơ sở đào tạo BithubLearning"
                                     className="h-full w-full object-cover"
                                 />
-                                <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                                <div className="bg-linear-to-t absolute inset-0 from-black/50 to-transparent"></div>
                             </div>
                         </div>
 
@@ -508,7 +508,7 @@ const OfflineCoursePage: React.FC = () => {
             </section>
 
             {/* CTA Section */}
-            <section className="bg-gradient-to-r from-blue-700 to-orange-600 py-20 text-white">
+            <section className="bg-linear-to-r from-blue-700 to-orange-600 py-20 text-white">
                 <div className="container mx-auto px-4 text-center">
                     <h2 className="mb-6 text-4xl font-bold">Sẵn sàng bắt đầu hành trình lập trình?</h2>
                     <p className="mx-auto mb-8 max-w-2xl text-xl opacity-90">

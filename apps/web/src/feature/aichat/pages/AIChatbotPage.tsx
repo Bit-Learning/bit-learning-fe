@@ -1,5 +1,5 @@
-import { useLayout } from '@/context/layout-context'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { useLayout } from '@/shared/context/layout-context'
 import { Link } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'

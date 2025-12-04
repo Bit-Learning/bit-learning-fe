@@ -1,4 +1,4 @@
-import { CommandMenu } from '@/components/command-menu'
+import { CommandMenu } from '@/shared/components/command-menu'
 import React from 'react'
 
 interface SearchContextType {

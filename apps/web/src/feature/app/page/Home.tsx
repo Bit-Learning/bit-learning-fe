@@ -1,4 +1,4 @@
-import PageMeta from '@/components/seo/page-meta'
+import PageMeta from '@/shared/components/seo/page-meta'
 import AboutSection from '../component/AboutSection'
 import ContactSection from '../component/ContactSection'
 import CoursesSection from '../component/CoursesSection'

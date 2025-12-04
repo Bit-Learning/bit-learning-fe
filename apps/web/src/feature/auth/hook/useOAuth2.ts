@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { GetGoogleOAuth2Config } from '../service/AuthService'
+import { GetGoogleOAuth2Config } from '../api/auth.api'
 
 export const OAUTH2_QUERY_KEYS = {
     googleConfig: ['oauth2', 'google', 'config'] as const,

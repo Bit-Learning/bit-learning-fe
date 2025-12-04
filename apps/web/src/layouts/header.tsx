@@ -1,6 +1,6 @@
-import { navItems } from '@/components/layouts/data/nav-items'
 import { logout } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
+import { navItems } from '@/layouts/data/nav-items'
 import { SearchProvider, useSearch } from '@/shared/context/search-context'
 import { mergeName } from '@/shared/lib/string-utils'
 import { useAppDispatch } from '@/shared/redux/store'
@@ -162,7 +162,7 @@ const Header: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setOpen(true)}
-                                className="relative mt-[6px] cursor-pointer text-gray-600 transition-colors hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400"
+                                className="relative mt-1.5 cursor-pointer text-gray-600 transition-colors hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400"
                             >
                                 <Search size={18} />
                             </button>
@@ -176,7 +176,7 @@ const Header: React.FC = () => {
                             </SheetTrigger>
                             <SheetContent
                                 side="right"
-                                className="w-[320px] bg-gradient-to-b from-white to-gray-50 p-0 sm:w-[400px] dark:from-gray-900 dark:to-gray-800"
+                                className="bg-linear-to-b w-[320px] from-white to-gray-50 p-0 sm:w-[400px] dark:from-gray-900 dark:to-gray-800"
                             >
                                 <MobileSheetMenu onNavigate={handleNavigate} onClose={() => setIsSheetOpen(false)} />
                             </SheetContent>

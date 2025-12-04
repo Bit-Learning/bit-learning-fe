@@ -1,5 +1,5 @@
-import { useLayout } from '@/context/layout-context'
 import SignInPage from '@/feature/auth/page/Login'
+import { useLayout } from '@/shared/context/layout-context'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 

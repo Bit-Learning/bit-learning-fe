@@ -1,4 +1,4 @@
-import { useLayout } from '@/context/layout-context'
+import { useLayout } from '@/shared/context/layout-context'
 import { useRouter } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 

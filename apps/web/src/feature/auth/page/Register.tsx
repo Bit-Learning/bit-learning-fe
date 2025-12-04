@@ -1,4 +1,4 @@
-import PageMeta from '@/components/seo/page-meta'
+import PageMeta from '@/shared/components/seo/page-meta'
 import SignUpForm from '../component/SignUpForm'
 import AuthLayout from '../layout/AuthLayout'
 

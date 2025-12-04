@@ -1,5 +1,5 @@
-import { useLayout } from '@/context/layout-context'
 import ForgotPasswordPage from '@/feature/auth/page/ForgotPassword'
+import { useLayout } from '@/shared/context/layout-context'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 

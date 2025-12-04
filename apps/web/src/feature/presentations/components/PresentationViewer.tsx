@@ -1,5 +1,5 @@
-import { useLayout } from '@/context/layout-context'
 import { API_PATH } from '@/shared/constants/endpoints'
+import { useLayout } from '@/shared/context/layout-context'
 import { useEffect } from 'react'
 
 type ViewerProps = {

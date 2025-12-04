@@ -12,7 +12,7 @@ import {
     Register,
     RequestPasswordReset,
     VerifyResetKey,
-} from '../service/AuthService'
+} from '../api/auth.api'
 import type { TChangePasswordRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
 
 export const requestUserProfile = (): TAppThunk => {

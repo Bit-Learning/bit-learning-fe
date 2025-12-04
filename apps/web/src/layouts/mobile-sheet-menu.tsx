@@ -1,4 +1,4 @@
-import { navItems } from '@/components/layouts/data/nav-items'
+import { navItems } from '@/layouts/data/nav-items'
 import { Minus, Plus } from 'lucide-react'
 import { useState } from 'react'
 
@@ -28,7 +28,7 @@ const MobileSheetMenu: React.FC<MobileSheetMenuProps> = ({ onNavigate, onClose }
                                     onClose?.()
                                 }
                             }}
-                            className="flex w-full items-center justify-between px-4 py-3 text-[15px] font-bold tracking-wide uppercase transition hover:bg-[#333]"
+                            className="flex w-full items-center justify-between px-4 py-3 text-[15px] font-bold uppercase tracking-wide transition hover:bg-[#333]"
                         >
                             <span>{item.title}</span>
                             {item.items ? (

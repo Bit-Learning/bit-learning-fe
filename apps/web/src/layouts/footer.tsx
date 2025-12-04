@@ -3,7 +3,7 @@ import { Facebook, Instagram, Linkedin, Mail, MapPin, Phone, Twitter } from 'luc
 
 const Footer: React.FC = () => {
     return (
-        <footer className="bg-gradient-to-br from-gray-800 to-gray-900 text-white">
+        <footer className="bg-linear-to-br from-gray-800 to-gray-900 text-white">
             <div className="container mx-auto px-4 py-16">
                 <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
                     {/* Company Info */}
