@@ -8,11 +8,10 @@ import axios, {
 } from 'axios'
 
 const api: AxiosInstance = axios.create({
-    baseURL: import.meta.env.VITE_API_BASE_URL,
+    baseURL: 'http://localhost:8080/api/',
     headers: {
         'Content-Type': 'application/json',
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',
-        'ngrok-skip-browser-warning': 'true',
     },
 })
 

@@ -1,19 +1,13 @@
-import { useAppDispatch } from '@/shared/redux/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { Input } from '@workspace/ui/components/Input'
-import { toast } from '@workspace/ui/components/Sonner'
 import { ChevronLeftIcon, EyeClosedIcon, EyeIcon, Mail, User } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
-import { useSelector } from 'react-redux'
 import { z } from 'zod'
-import { setErrorAction } from '../../auth/store'
-import { requestRegister } from '../../auth/store/auth.actions'
-import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
-import type { TRegisterRequest } from '../type/authState'
+import { useRegister } from '../queries/useAuth'
 
 const formSchema = z
     .object({
@@ -25,9 +19,7 @@ const formSchema = z
             .string()
             .min(3, { message: 'Mật khẩu phải có ít nhất 3 ký tự' })
             .max(50, { message: 'Mật khẩu không được vượt quá 50 ký tự' })
-            .regex(/(?=.*[a-z])/, {
-                message: 'Mật khẩu phải chứa ít nhất 1 chữ thường',
-            })
+            .regex(/(?=.*[a-z])/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ thường' })
             .regex(/(?=.*[A-Z])/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ hoa' })
             .regex(/(?=.*[0-9])/, { message: 'Mật khẩu phải chứa ít nhất 1 chữ số' })
             .regex(/(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])/, {
@@ -43,11 +35,12 @@ const formSchema = z
     })
 
 const SignUpForm: React.FC = () => {
-    const { isLoading, isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
+    const navigate = useNavigate()
     const [showPassword, setShowPassword] = React.useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
-    const dispatch = useAppDispatch()
-    const navigate = useNavigate()
+
+    const { mutate: register, isPending: isRegistering, isSuccess } = useRegister()
+
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
         defaultValues: {
@@ -60,42 +53,35 @@ const SignUpForm: React.FC = () => {
     })
 
     React.useEffect(() => {
-        if (isAuthenticated) {
-            navigate({ to: '/' })
+        if (isSuccess) {
+            const timer = setTimeout(() => {
+                navigate({ to: '/signin' })
+            }, 2000)
+            return () => clearTimeout(timer)
         }
-    }, [isAuthenticated, navigate])
+    }, [isSuccess, navigate])
 
-    React.useEffect(() => {
-        if (errorMsg) {
-            toast.error({ title: errorMsg })
-            dispatch(setErrorAction(null))
-        }
-    }, [errorMsg, dispatch])
-
-    async function onSubmit(values: z.infer<typeof formSchema>) {
-        const body: TRegisterRequest = {
+    function onSubmit(values: z.infer<typeof formSchema>) {
+        register({
             email: values.email,
             password: values.password,
             firstName: values.firstName,
             lastName: values.lastName,
-        }
-        const result: any = await dispatch(requestRegister(body))
-
-        // Success toast is now handled in the action
-        // Redirect to sign in page on success
-        if (result?.success) {
-            setTimeout(() => {
-                navigate({ to: '/signin' })
-            }, 2000) // Give time for user to see the success message
-        }
+        })
     }
 
     return (
         <div className="flex h-full w-full flex-col lg:w-1/2">
-            {isLoading && <div></div>}
+            {isRegistering && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                    <div className="rounded-lg bg-white p-6 text-center">
+                        <div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-orange-600 border-t-transparent"></div>
+                        <p className="text-gray-600">Đang đăng ký...</p>
+                    </div>
+                </div>
+            )}
 
-            {/* Header */}
-            <div className="flex-shrink-0 p-6">
+            <div className="shrink-0 p-6">
                 <Link
                     to="/"
                     className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400"
@@ -105,23 +91,16 @@ const SignUpForm: React.FC = () => {
                 </Link>
             </div>
 
-            {/* Main Content */}
             <div className="flex flex-1 items-center justify-center px-6 pb-6">
                 <div className="w-full max-w-md">
-                    {/* Logo for mobile */}
                     <div className="mb-8 flex items-center justify-center lg:hidden">
-                        <div className="flex items-center space-x-2">
-                            <img src="./Logo.png" alt="Bithub Logo" className="h-10 w-36 object-contain" />
-                        </div>
+                        <img src="./Logo.png" alt="Bithub Logo" className="h-10 w-36 object-contain" />
                     </div>
 
-                    {/* Form Card */}
                     <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
                         <div className="mb-6 text-center">
                             <div className="mb-4 flex justify-center">
-                                <div className="flex items-center space-x-2">
-                                    <img src="./Logo.png" alt="Bithub Logo" className="h-8 w-24 object-contain" />
-                                </div>
+                                <img src="./Logo.png" alt="Bithub Logo" className="h-8 w-24 object-contain" />
                             </div>
                             <h1 className="mb-2 text-xl font-bold text-gray-900">Tạo tài khoản mới</h1>
                             <p className="text-sm text-gray-600">Tham gia cộng đồng Bithub để học tập và phát triển</p>
@@ -132,13 +111,7 @@ const SignUpForm: React.FC = () => {
                                 type="button"
                                 className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white px-7 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
                             >
-                                <svg
-                                    width="20"
-                                    height="20"
-                                    viewBox="0 0 20 20"
-                                    fill="none"
-                                    xmlns="http://www.w3.org/2000/svg"
-                                >
+                                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                                     <path
                                         d="M18.7511 10.1944C18.7511 9.47495 18.6915 8.94995 18.5626 8.40552H10.1797V11.6527H15.1003C15.0011 12.4597 14.4654 13.675 13.2749 14.4916L13.2582 14.6003L15.9087 16.6126L16.0924 16.6305C17.7788 15.1041 18.7511 12.8583 18.7511 10.1944Z"
                                         fill="#4285F4"
@@ -182,7 +155,7 @@ const SignUpForm: React.FC = () => {
                                                 </FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
-                                                        <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                                        <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                                                         <Input
                                                             placeholder="Họ"
                                                             {...field}
@@ -204,7 +177,7 @@ const SignUpForm: React.FC = () => {
                                                 </FormLabel>
                                                 <FormControl>
                                                     <div className="relative">
-                                                        <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                                        <User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                                                         <Input
                                                             placeholder="Tên"
                                                             {...field}
@@ -228,7 +201,7 @@ const SignUpForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
+                                                    <Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
                                                     <Input
                                                         placeholder="Nhập email của bạn"
                                                         {...field}
@@ -251,7 +224,7 @@ const SignUpForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
+                                                    <div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-gray-400">
                                                         <div className="h-2 w-2 rounded-full bg-white"></div>
                                                     </div>
                                                     <Input
@@ -263,7 +236,7 @@ const SignUpForm: React.FC = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowPassword(!showPassword)}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
                                                     >
                                                         {showPassword ? (
                                                             <EyeIcon className="h-5 w-5" />
@@ -288,7 +261,7 @@ const SignUpForm: React.FC = () => {
                                             </FormLabel>
                                             <FormControl>
                                                 <div className="relative">
-                                                    <div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 transform items-center justify-center rounded-full bg-gray-400">
+                                                    <div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-gray-400">
                                                         <div className="h-2 w-2 rounded-full bg-white"></div>
                                                     </div>
                                                     <Input
@@ -300,7 +273,7 @@ const SignUpForm: React.FC = () => {
                                                     <button
                                                         type="button"
                                                         onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                                                        className="absolute right-3 top-1/2 -translate-y-1/2 transform text-gray-400 transition-colors hover:text-gray-600"
+                                                        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
                                                     >
                                                         {showConfirmPassword ? (
                                                             <EyeIcon className="h-5 w-5" />
@@ -316,11 +289,11 @@ const SignUpForm: React.FC = () => {
                                 />
 
                                 <Button
-                                    className="h-11 w-full rounded-xl bg-gradient-to-r from-orange-600 to-orange-700 font-semibold text-white shadow-lg transition-all duration-200 hover:from-orange-700 hover:to-orange-800 hover:shadow-xl"
+                                    className="bg-linear-to-r h-11 w-full rounded-xl from-orange-600 to-orange-700 font-semibold text-white shadow-lg transition-all duration-200 hover:from-orange-700 hover:to-orange-800 hover:shadow-xl"
                                     type="submit"
-                                    isDisabled={isLoading}
+                                    isDisabled={isRegistering}
                                 >
-                                    {isLoading ? 'Đang đăng ký...' : 'Tạo tài khoản'}
+                                    {isRegistering ? 'Đang đăng ký...' : 'Tạo tài khoản'}
                                 </Button>
                             </form>
                         </Form>
