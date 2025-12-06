@@ -1,4 +1,7 @@
+import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
 import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from '@/shared/lib/cookies'
+import store from '@/shared/redux/store'
+import { toast } from '@workspace/ui/components/Sonner'
 import axios, {
     AxiosError,
     type AxiosInstance,
@@ -53,11 +56,23 @@ function handleRefreshToken(refreshToken: string | undefined): Promise<string> {
         )
         .then((response: AxiosResponse) => {
             console.log('[Token Refresh] Refresh successful')
-            const { accessToken, refreshToken: newRefreshToken } = response.data.data
+            const loginResponse = response.data.data
+            const { accessToken, refreshToken: newRefreshToken, user } = loginResponse
+
             if (!accessToken || !newRefreshToken) {
                 throw new Error('Invalid refresh token response')
             }
+
+            // Update cookies
             setAuthTokens(accessToken, newRefreshToken)
+
+            // Update Redux state to keep user logged in
+            if (user) {
+                store.dispatch(setUserInfoAction(user))
+                store.dispatch(setIsAuthenticatedAction(true))
+                console.log('[Token Refresh] Redux state updated with user info')
+            }
+
             // Update default headers directly
             if (api.defaults.headers) {
                 api.defaults.headers.common['Authorization'] = `Bearer ${accessToken}`
@@ -72,8 +87,13 @@ function handleRefreshToken(refreshToken: string | undefined): Promise<string> {
             console.error('[Token Refresh] Refresh failed:', error.response?.status, error.response?.data)
             failedRequestQueue.forEach(({ reject }) => reject(error))
             failedRequestQueue = []
+
+            // Clear tokens and Redux state
             clearAuthTokens()
-            console.log('[Token Refresh] Redirecting to signin')
+            store.dispatch(setIsAuthenticatedAction(false))
+            store.dispatch(setUserInfoAction(null))
+
+            console.log('[Token Refresh] User logged out, redirecting to signin')
             window.location.href = '/signin'
             throw error
         })
@@ -116,14 +136,46 @@ async function onResponseError(error: AxiosError): Promise<any> {
     ]
     const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))
 
+    // Handle 500 errors that might be caused by invalid/revoked tokens
+    if (error.response?.status === 500 && !isAuthEndpoint) {
+        const errorMessage = (error.response?.data as any)?.message || ''
+        const isTokenError =
+            errorMessage.toLowerCase().includes('token') ||
+            errorMessage.toLowerCase().includes('jwt') ||
+            errorMessage.toLowerCase().includes('authentication')
+
+        if (isTokenError && !originalRequest._retry) {
+            console.log('[Auth] 500 error with token issue detected, attempting token refresh')
+            const refreshToken = getRefreshToken()
+
+            if (refreshToken) {
+                originalRequest._retry = true
+                try {
+                    const newAccessToken = await handleRefreshToken(refreshToken)
+                    if (newAccessToken) {
+                        setAuthorizationHeader({ request: originalRequest, token: newAccessToken })
+                        return api.request(originalRequest)
+                    }
+                } catch (refreshError) {
+                    console.error('[Auth] Token refresh failed on 500 error:', refreshError)
+                    // Fall through to reject the original error
+                }
+            }
+        }
+    }
+
+    // Handle 401 unauthorized errors (including expired tokens)
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
-        console.log('[Auth] 401 error detected for:', originalRequest.url)
+        console.log('[Auth] 401 Unauthorized detected for:', originalRequest.url)
+        console.log('[Auth] Error details:', error.response?.data)
         const refreshToken = getRefreshToken()
 
         // If no refresh token, clear auth and redirect
         if (!refreshToken) {
             console.log('[Auth] No refresh token found, logging out')
             clearAuthTokens()
+            store.dispatch(setIsAuthenticatedAction(false))
+            store.dispatch(setUserInfoAction(null))
             window.location.href = '/signin'
             return Promise.reject(error)
         }
@@ -149,10 +201,17 @@ async function onResponseError(error: AxiosError): Promise<any> {
         }
 
         try {
-            console.log('[Auth] Attempting to refresh token')
+            console.log('[Auth] Access token expired, refreshing automatically...')
+            toast.info({
+                title: 'Đang làm mới phiên đăng nhập...',
+                description: 'Vui lòng đợi một chút',
+            })
             const newAccessToken = await handleRefreshToken(refreshToken)
             if (newAccessToken) {
-                console.log('[Auth] Token refreshed, retrying original request:', originalRequest.url)
+                console.log('[Auth] ✓ Token refreshed successfully, retrying original request:', originalRequest.url)
+                toast.success({
+                    title: 'Phiên đăng nhập đã được làm mới',
+                })
                 setAuthorizationHeader({
                     request: originalRequest,
                     token: newAccessToken,
@@ -161,7 +220,11 @@ async function onResponseError(error: AxiosError): Promise<any> {
             }
             throw new Error('No new access token available after refresh')
         } catch (refreshError) {
-            console.error('[Auth] Token refresh failed:', refreshError)
+            console.error('[Auth] ✗ Token refresh failed:', refreshError)
+            toast.error({
+                title: 'Phiên đăng nhập hết hạn',
+                description: 'Vui lòng đăng nhập lại',
+            })
             return Promise.reject(refreshError)
         }
     }
