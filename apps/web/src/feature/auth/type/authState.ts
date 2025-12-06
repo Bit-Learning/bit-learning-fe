@@ -30,6 +30,7 @@ export type TResetPasswordRequest = {
 }
 
 export type TChangePasswordRequest = {
+    email: string
     currentPassword: string
     newPassword: string
     confirmNewPassword: string
