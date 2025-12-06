@@ -9,21 +9,6 @@ export type TLoginRequest = {
     email: string
     password: string
 }
-
-export type TLoginRoleRequest = {
-    email: string
-    password: string
-    role: string
-}
-export interface TLoginRoleResponse {
-    accessToken: string
-    refreshToken: string
-    tokenType: string
-    expiresIn: string
-    refreshExpiresIn: string
-    user: TUserProfile
-}
-
 export type TRegisterRequest = {
     email: string
     password: string
@@ -45,6 +30,7 @@ export type TResetPasswordRequest = {
 }
 
 export type TChangePasswordRequest = {
+    email: string
     currentPassword: string
     newPassword: string
     confirmNewPassword: string

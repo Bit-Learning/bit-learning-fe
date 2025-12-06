@@ -1,4 +1,5 @@
 import { changePassword } from '@/feature/auth/store/auth.actions'
+import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import type { TChangePasswordRequest } from '@/feature/auth/type/authState'
 import { useAppDispatch } from '@/shared/redux/store'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -18,6 +19,7 @@ import {
 import { EyeClosedIcon, EyeIcon } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
+import { useSelector } from 'react-redux'
 import { z } from 'zod'
 
 const formSchema = z
@@ -51,6 +53,7 @@ interface ChangePasswordDialogProps {
 
 export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialogProps) {
     const dispatch = useAppDispatch()
+    const { userInfo } = useSelector(selectAuthStateInfo)
     const [isLoading, setIsLoading] = React.useState(false)
     const [showCurrentPassword, setShowCurrentPassword] = React.useState(false)
     const [showNewPassword, setShowNewPassword] = React.useState(false)
@@ -68,6 +71,7 @@ export function ChangePasswordDialog({ open, onOpenChange }: ChangePasswordDialo
     async function onSubmit(values: z.infer<typeof formSchema>) {
         setIsLoading(true)
         const body: TChangePasswordRequest = {
+            email: userInfo?.email || '',
             currentPassword: values.currentPassword,
             newPassword: values.newPassword,
             confirmNewPassword: values.confirmNewPassword,

@@ -1,4 +1,4 @@
-import Header from '@/components/layouts/header'
+import Header from '@/layouts/header'
 import React, { memo } from 'react'
 
 interface Props {
