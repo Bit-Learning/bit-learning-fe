@@ -1,5 +1,5 @@
 import type { PayloadAction } from '@reduxjs/toolkit'
-import type { TAuthState } from '../type/authState'
+import type { TAuthState } from '../types/auth.type'
 
 export const setIsAuthenticated = (state: TAuthState, action: PayloadAction<boolean>) => {
     state.isAuthenticated = action.payload

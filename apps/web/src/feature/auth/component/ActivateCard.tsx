@@ -1,4 +1,6 @@
 import { useNavigate, useSearch } from '@tanstack/react-router'
+import { Button } from '@workspace/ui/components/Button'
+import { CheckCircle2, Loader2, XCircle } from 'lucide-react'
 import { useEffect, useState } from 'react'
 import { useActivateAccount } from '../queries/useAuth'
 
@@ -32,90 +34,75 @@ const ActivateCard: React.FC = () => {
     }, [isSuccess, isError, navigate])
 
     return (
-        <div className="flex min-h-screen items-center justify-center bg-gray-50 px-4 py-12 sm:px-6 lg:px-8">
-            <div className="w-full max-w-md space-y-8">
-                <div className="rounded-lg bg-white p-8 shadow-md">
+        <div className="bg-linear-to-br flex min-h-screen items-center justify-center from-gray-50 to-gray-100 px-4 py-12 sm:px-6 lg:px-8">
+            <div className="w-full max-w-md">
+                <div className="rounded-xl bg-white p-8 shadow-lg">
                     <div className="text-center">
                         <h2 className="text-3xl font-bold tracking-tight text-gray-900">Kích hoạt tài khoản</h2>
+                        <p className="mt-2 text-sm text-gray-600">Đang xác thực thông tin của bạn</p>
                     </div>
 
                     <div className="mt-8">
                         {activationStatus === 'pending' && (
                             <div className="text-center">
-                                <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-gray-200 border-t-blue-600"></div>
-                                <p className="text-gray-600">Đang kích hoạt tài khoản của bạn...</p>
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center">
+                                    <Loader2 className="h-12 w-12 animate-spin text-blue-600" />
+                                </div>
+                                <p className="text-base font-medium text-gray-700">
+                                    Đang kích hoạt tài khoản của bạn...
+                                </p>
+                                <p className="mt-1 text-sm text-gray-500">Vui lòng đợi trong giây lát</p>
                             </div>
                         )}
 
                         {activationStatus === 'success' && (
                             <div className="text-center">
-                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
-                                    <svg
-                                        className="h-6 w-6 text-green-600"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M5 13l4 4L19 7"
-                                        />
-                                    </svg>
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+                                    <CheckCircle2 className="h-10 w-10 text-green-600" />
                                 </div>
-                                <h3 className="mb-2 text-lg font-semibold text-gray-900">Kích hoạt thành công!</h3>
-                                <p className="mb-4 text-gray-600">Tài khoản của bạn đã được kích hoạt thành công.</p>
-                                <p className="text-sm text-gray-500">Đang chuyển hướng đến trang đăng nhập...</p>
-                                <button
-                                    onClick={() => navigate({ to: '/signin' })}
-                                    className="mt-4 w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                                >
+                                <h3 className="mb-2 text-xl font-semibold text-gray-900">Kích hoạt thành công!</h3>
+                                <p className="mb-1 text-gray-600">Tài khoản của bạn đã được kích hoạt thành công.</p>
+                                <p className="mb-6 text-sm text-gray-500">Đang chuyển hướng đến trang đăng nhập...</p>
+                                <Button onClick={() => navigate({ to: '/signin' })} className="w-full" size="lg">
                                     Đăng nhập ngay
-                                </button>
+                                </Button>
                             </div>
                         )}
 
                         {activationStatus === 'error' && (
                             <div className="text-center">
-                                <div className="mx-auto mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
-                                    <svg
-                                        className="h-6 w-6 text-red-600"
-                                        fill="none"
-                                        stroke="currentColor"
-                                        viewBox="0 0 24 24"
-                                    >
-                                        <path
-                                            strokeLinecap="round"
-                                            strokeLinejoin="round"
-                                            strokeWidth={2}
-                                            d="M6 18L18 6M6 6l12 12"
-                                        />
-                                    </svg>
+                                <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-red-100">
+                                    <XCircle className="h-10 w-10 text-red-600" />
                                 </div>
-                                <h3 className="mb-2 text-lg font-semibold text-gray-900">Kích hoạt thất bại</h3>
-                                <p className="mb-4 text-gray-600">
-                                    {error?.response?.data?.message ||
+                                <h3 className="mb-2 text-xl font-semibold text-gray-900">Kích hoạt thất bại</h3>
+                                <p className="mb-6 text-gray-600">
+                                    {(error as any)?.response?.data?.message ||
                                         'Liên kết kích hoạt không hợp lệ hoặc đã hết hạn.'}
                                 </p>
-                                <div className="space-y-2">
-                                    <button
-                                        onClick={() => navigate({ to: '/signup' })}
-                                        className="w-full rounded-md bg-blue-600 px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
-                                    >
+                                <div className="space-y-3">
+                                    <Button onClick={() => navigate({ to: '/signup' })} className="w-full" size="lg">
                                         Đăng ký lại
-                                    </button>
-                                    <button
+                                    </Button>
+                                    <Button
                                         onClick={() => navigate({ to: '/signin' })}
-                                        className="w-full rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-semibold text-gray-700 shadow-sm hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:ring-offset-2"
+                                        variant="outline"
+                                        className="w-full"
+                                        size="lg"
                                     >
                                         Quay lại đăng nhập
-                                    </button>
+                                    </Button>
                                 </div>
                             </div>
                         )}
                     </div>
                 </div>
+
+                <p className="mt-4 text-center text-sm text-gray-500">
+                    Bạn cần hỗ trợ?{' '}
+                    <a href="/support" className="font-medium text-blue-600 hover:text-blue-500">
+                        Liên hệ với chúng tôi
+                    </a>
+                </p>
             </div>
         </div>
     )

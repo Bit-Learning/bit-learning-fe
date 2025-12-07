@@ -92,7 +92,7 @@ const SignUpForm: React.FC = () => {
             </div>
 
             <div className="flex flex-1 items-center justify-center px-6 pb-6">
-                <div className="w-full max-w-md">
+                <div className="w-full max-w-xl">
                     <div className="mb-8 flex items-center justify-center lg:hidden">
                         <img src="./Logo.png" alt="Bithub Logo" className="h-10 w-36 object-contain" />
                     </div>

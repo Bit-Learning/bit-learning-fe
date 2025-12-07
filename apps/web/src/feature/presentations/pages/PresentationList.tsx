@@ -1,8 +1,6 @@
 // src/components/PresentationList.js
-import { requestUserProfile } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { useCreateOrder } from '@/feature/order/hook/useOrder'
-import { useAppDispatch } from '@/shared/redux/store'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card } from '@workspace/ui/components/Card'
@@ -20,7 +18,6 @@ import '../styles/index.css'
 import { Template } from '../types/presentation.types'
 
 function PresentationList() {
-    const dispatch = useAppDispatch()
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const { data: activeTemplates, isLoading: templateLoading, error } = useAvailablePresentationTemplates()
     const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0)
@@ -56,7 +53,6 @@ function PresentationList() {
                     },
                 ],
             })
-            dispatch(requestUserProfile())
             await createPresentation.mutateAsync({
                 name: template.name.replace(/_/g, ' '),
                 description: `Presentation created from ${template.name} template`,
@@ -84,7 +80,7 @@ function PresentationList() {
     return (
         <div className="container mx-auto px-6 py-12">
             <div>
-                <h2 className="mt-12 mb-4 text-2xl font-bold">Các mẫu thuyết trình có sẵn</h2>
+                <h2 className="mb-4 mt-12 text-2xl font-bold">Các mẫu thuyết trình có sẵn</h2>
 
                 {activeTemplates?.length === 0 && !templateLoading && (
                     <div className="rounded-lg border border-dashed p-8 text-center">
@@ -106,7 +102,7 @@ function PresentationList() {
                                 >
                                     {/* Status Badge - Top Right Corner */}
                                     {isCreating && (
-                                        <div className="absolute top-3 right-3 z-10">
+                                        <div className="absolute right-3 top-3 z-10">
                                             <Badge variant="secondary" className="flex items-center gap-1">
                                                 <Loader2 className="h-3 w-3 animate-spin" />
                                                 Đang tạo...
@@ -115,7 +111,7 @@ function PresentationList() {
                                     )}
 
                                     {/* Preview Image/Placeholder */}
-                                    <div className="relative h-48 overflow-hidden bg-gradient-to-br from-blue-50 to-indigo-100">
+                                    <div className="bg-linear-to-br relative h-48 overflow-hidden from-blue-50 to-indigo-100">
                                         {template.previewUrl ? (
                                             <iframe
                                                 src={template.previewUrl}
@@ -140,13 +136,13 @@ function PresentationList() {
                                             </div>
                                         )}
                                         {/* Gradient Overlay */}
-                                        <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
+                                        <div className="bg-linear-to-t absolute inset-0 from-black/20 to-transparent opacity-0 transition-opacity group-hover:opacity-100" />
                                     </div>
 
                                     {/* Card Content */}
                                     <div className="p-5">
                                         {/* Template Name */}
-                                        <h3 className="mb-3 text-lg leading-tight font-bold text-gray-900 capitalize">
+                                        <h3 className="mb-3 text-lg font-bold capitalize leading-tight text-gray-900">
                                             {template.name.replace(/_/g, ' ')}
                                         </h3>
 
@@ -219,7 +215,7 @@ function PresentationList() {
                                                         ? 'cursor-not-allowed bg-gray-300'
                                                         : !canAfford
                                                           ? 'cursor-not-allowed bg-red-400 hover:bg-red-500'
-                                                          : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
+                                                          : 'bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700'
                                                 }`}
                                             >
                                                 {isCreating ? (

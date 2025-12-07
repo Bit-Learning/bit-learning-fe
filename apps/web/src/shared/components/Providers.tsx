@@ -1,4 +1,4 @@
-import { initializeAuth } from '@/feature/auth/store/auth.actions'
+import { useInitializeAuth } from '@/feature/user/queries/useUser'
 import { ThemeProvider } from '@/shared/components/ThemeProvider'
 import { matchQuery, MutationCache, QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
@@ -6,8 +6,8 @@ import { ConfirmDialog } from '@workspace/ui/components/ConfirmDialog'
 import { BsProvider } from '@workspace/ui/components/Provider'
 import { useEffect } from 'react'
 import { HelmetProvider } from 'react-helmet-async'
-import { Provider, useDispatch } from 'react-redux'
-import store, { AppDispatch } from '../redux/store'
+import { Provider } from 'react-redux'
+import store from '../redux/store'
 
 const queryClient = new QueryClient({
     defaultOptions: {
@@ -21,8 +21,6 @@ const queryClient = new QueryClient({
         onSuccess: async (_data, _variables, _context, mutation) => {
             await queryClient.invalidateQueries({
                 predicate: query =>
-                    // invalidate all matching tags at once
-                    // or everything if no meta is provided
                     (mutation.meta?.invalidates as any)?.some((queryKey: any) => matchQuery({ queryKey }, query)) ??
                     true,
             })
@@ -31,12 +29,11 @@ const queryClient = new QueryClient({
 })
 
 const AuthInitializer = () => {
-    const dispatch = useDispatch<AppDispatch>()
+    const initializeAuth = useInitializeAuth()
 
     useEffect(() => {
-        // Initialize auth state on app load
-        dispatch(initializeAuth())
-    }, [dispatch])
+        initializeAuth()
+    }, [])
 
     return null
 }

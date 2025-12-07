@@ -29,13 +29,6 @@ export type TResetPasswordRequest = {
     confirmNewPassword: string
 }
 
-export type TChangePasswordRequest = {
-    email: string
-    currentPassword: string
-    newPassword: string
-    confirmNewPassword: string
-}
-
 export type TUserProfile = {
     id: number
     username: string
