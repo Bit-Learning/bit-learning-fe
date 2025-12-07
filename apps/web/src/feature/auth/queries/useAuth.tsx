@@ -2,7 +2,14 @@ import { clearAuthTokens, setAuthTokens } from '@/shared/lib/cookies'
 import { useAppDispatch } from '@/shared/redux/store'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@workspace/ui/components/Sonner'
-import { FinishPasswordReset, Login, Register, RequestPasswordReset, VerifyResetKey } from '../api/auth.api'
+import {
+    ActivateAccount,
+    FinishPasswordReset,
+    Login,
+    Register,
+    RequestPasswordReset,
+    VerifyResetKey,
+} from '../api/auth.api'
 import { setErrorAction, setIsAuthenticatedAction, setIsLoadingAction, setUserInfoAction } from '../store'
 import type { TLoginRequest, TRegisterRequest, TResetPasswordRequest } from '../type/authState'
 
@@ -98,6 +105,42 @@ export function useRegister() {
 
             toast.error({
                 title: 'Đăng ký thất bại',
+                description: errorMessage,
+            })
+        },
+        onSettled: () => {
+            dispatch(setIsLoadingAction(false))
+        },
+    })
+}
+
+export function useActivateAccount() {
+    const dispatch = useAppDispatch()
+
+    return useMutation({
+        mutationFn: async (key: string) => {
+            const response = await ActivateAccount(key)
+            return response.data
+        },
+        onMutate: () => {
+            dispatch(setIsLoadingAction(true))
+            dispatch(setErrorAction(null))
+        },
+        onSuccess: data => {
+            toast.success({
+                title: 'Kích hoạt tài khoản thành công!',
+                description: data.message || 'Bạn có thể đăng nhập ngay bây giờ.',
+            })
+        },
+        onError: (error: any) => {
+            const errorMessage =
+                error?.response?.data?.message ||
+                'Kích hoạt tài khoản thất bại. Liên kết có thể đã hết hạn hoặc không hợp lệ.'
+
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Kích hoạt thất bại',
                 description: errorMessage,
             })
         },

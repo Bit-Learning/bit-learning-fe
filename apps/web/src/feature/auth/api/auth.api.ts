@@ -5,8 +5,6 @@ import type { AxiosResponse } from 'axios'
 import type {
     TChangePasswordRequest,
     TLoginRequest,
-    TLoginRoleRequest,
-    TLoginRoleResponse,
     TRefreshTokenRequest,
     TRegisterRequest,
     TResetPasswordRequest,
@@ -16,14 +14,12 @@ export function Login(requestBody: TLoginRequest): Promise<AxiosResponse<ApiResp
     return api.post(`${endpoints.AUTH}/login`, requestBody)
 }
 
-export function LoginRole(
-    requestBody: TLoginRoleRequest,
-): Promise<AxiosResponse<ApiResponse<TLoginRoleResponse>, any>> {
-    return api.post(`${endpoints.AUTH}/login-user`, requestBody)
-}
-
 export function Register(requestBody: TRegisterRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/register`, requestBody)
+}
+
+export function ActivateAccount(key: string): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.get(`${endpoints.AUTH}/activate?key=${encodeURIComponent(key)}`)
 }
 
 export function RefreshToken(requestBody: TRefreshTokenRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {

@@ -74,6 +74,7 @@ import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userI
 import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.generate'
 import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
+import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
 import { Route as TemplatesSlidevIdEditRouteImport } from './routes/templates/slidev/$id/edit'
 
 const WebDesignRoute = WebDesignRouteImport.update({
@@ -406,6 +407,11 @@ const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
   path: '/auth/google/callback',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiAuthActivateRoute = ApiAuthActivateRouteImport.update({
+  id: '/api/auth/activate',
+  path: '/api/auth/activate',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
   id: '/templates/slidev/$id/edit',
   path: '/templates/slidev/$id/edit',
@@ -465,6 +471,7 @@ export interface FileRoutesByFullPath {
   '/questions': typeof QuestionsIndexRoute
   '/syllabuses': typeof SyllabusesIndexRoute
   '/templates': typeof TemplatesIndexRoute
+  '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
@@ -533,6 +540,7 @@ export interface FileRoutesByTo {
   '/questions': typeof QuestionsIndexRoute
   '/syllabuses': typeof SyllabusesIndexRoute
   '/templates': typeof TemplatesIndexRoute
+  '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
@@ -602,6 +610,7 @@ export interface FileRoutesById {
   '/questions/': typeof QuestionsIndexRoute
   '/syllabuses/': typeof SyllabusesIndexRoute
   '/templates/': typeof TemplatesIndexRoute
+  '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
@@ -672,6 +681,7 @@ export interface FileRouteTypes {
     | '/questions'
     | '/syllabuses'
     | '/templates'
+    | '/api/auth/activate'
     | '/auth/google/callback'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
@@ -740,6 +750,7 @@ export interface FileRouteTypes {
     | '/questions'
     | '/syllabuses'
     | '/templates'
+    | '/api/auth/activate'
     | '/auth/google/callback'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
@@ -808,6 +819,7 @@ export interface FileRouteTypes {
     | '/questions/'
     | '/syllabuses/'
     | '/templates/'
+    | '/api/auth/activate'
     | '/auth/google/callback'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
@@ -877,6 +889,7 @@ export interface RootRouteChildren {
   QuestionsIndexRoute: typeof QuestionsIndexRoute
   SyllabusesIndexRoute: typeof SyllabusesIndexRoute
   TemplatesIndexRoute: typeof TemplatesIndexRoute
+  ApiAuthActivateRoute: typeof ApiAuthActivateRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
   MatricesIdEditRoute: typeof MatricesIdEditRoute
   MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
@@ -1347,6 +1360,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthGoogleCallbackRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/auth/activate': {
+      id: '/api/auth/activate'
+      path: '/api/auth/activate'
+      fullPath: '/api/auth/activate'
+      preLoaderRoute: typeof ApiAuthActivateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/templates/slidev/$id/edit': {
       id: '/templates/slidev/$id/edit'
       path: '/templates/slidev/$id/edit'
@@ -1426,6 +1446,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestionsIndexRoute: QuestionsIndexRoute,
   SyllabusesIndexRoute: SyllabusesIndexRoute,
   TemplatesIndexRoute: TemplatesIndexRoute,
+  ApiAuthActivateRoute: ApiAuthActivateRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
   MatricesIdEditRoute: MatricesIdEditRoute,
   MatricesIdGenerateRoute: MatricesIdGenerateRoute,
