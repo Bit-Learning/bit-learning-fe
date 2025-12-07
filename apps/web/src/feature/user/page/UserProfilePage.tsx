@@ -1,5 +1,4 @@
 import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
-import { requestUserProfile } from '@/feature/auth/store/auth.actions'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { useFetchOrdersByUserId } from '@/feature/order/hook/useOrder'
 import { CreatePaymentURL } from '@/feature/payment/service/paymentService'
@@ -41,7 +40,6 @@ import {
     Clock,
     CreditCard,
     Filter,
-    Home,
     Key,
     LogOut,
     MapPin,
@@ -77,14 +75,6 @@ function UserProfilePage() {
         userInfo?.wallet?.id || 0,
     )
 
-    React.useEffect(() => {
-        // Fetch user profile on mount if not already loaded
-        if (!userInfo) {
-            dispatch(requestUserProfile())
-        }
-    }, [dispatch, userInfo])
-
-    // Filter transactions based on selected filters
     const filteredTransactions = React.useMemo(() => {
         if (!userTransactions) return []
 
@@ -95,7 +85,6 @@ function UserProfilePage() {
         })
     }, [userTransactions, transactionTypeFilter, transactionStatusFilter])
 
-    // Calculate transaction statistics
     const transactionStats = React.useMemo(() => {
         if (!userTransactions || userTransactions.length === 0) {
             return {
@@ -191,22 +180,6 @@ function UserProfilePage() {
 
                     <SidebarContent>
                         <SidebarGroup>
-                            <SidebarGroupLabel>Điều hướng</SidebarGroupLabel>
-                            <SidebarGroupContent>
-                                <SidebarMenu>
-                                    <SidebarMenuItem>
-                                        <SidebarMenuButton asChild tooltip="Home">
-                                            <Link to="/">
-                                                <Home />
-                                                <span>Trang chủ</span>
-                                            </Link>
-                                        </SidebarMenuButton>
-                                    </SidebarMenuItem>
-                                </SidebarMenu>
-                            </SidebarGroupContent>
-                        </SidebarGroup>
-
-                        <SidebarGroup>
                             <SidebarGroupLabel>Hồ sơ</SidebarGroupLabel>
                             <SidebarGroupContent>
                                 <SidebarMenu>
@@ -259,7 +232,7 @@ function UserProfilePage() {
                 </Sidebar>
 
                 <SidebarInset>
-                    <header className="border-sidebar-border bg-background sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b px-4">
+                    <header className="border-sidebar-border bg-background sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b px-2">
                         <SidebarTrigger className="-ml-1" />
                         <div className="flex flex-1 items-center justify-between">
                             <h1 className="text-xl font-semibold">Hồ sơ người dùng</h1>
@@ -276,7 +249,7 @@ function UserProfilePage() {
                                     alt="Cover"
                                     className="h-full w-full object-cover"
                                 />
-                                <Button size="sm" variant="secondary" className="absolute right-4 bottom-4 gap-2">
+                                <Button size="sm" variant="secondary" className="absolute bottom-4 right-4 gap-2">
                                     <Camera className="h-4 w-4" />
                                     <span className="hidden sm:inline">Chỉnh sửa ảnh bìa</span>
                                 </Button>
@@ -298,7 +271,7 @@ function UserProfilePage() {
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute right-2 bottom-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
+                                            className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
                                         >
                                             <Camera className="h-4 w-4" />
                                         </Button>
@@ -360,7 +333,7 @@ function UserProfilePage() {
                                                 <label className="text-muted-foreground text-sm font-medium">
                                                     Ngày tham gia
                                                 </label>
-                                                <p className="font-mono text-xs break-all">
+                                                <p className="break-all font-mono text-xs">
                                                     {userInfo.createdAt.slice(0, 10) || 'N/A'}
                                                 </p>
                                             </div>

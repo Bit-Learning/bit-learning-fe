@@ -1,4 +1,4 @@
-import UserProfilePage from '@/feature/userprofile/page/UserProfilePage'
+import UserProfilePage from '@/feature/user/page/UserProfilePage'
 import { useLayout } from '@/shared/context/layout-context'
 import { requireAuth } from '@/shared/lib/auth-utils'
 import { createFileRoute } from '@tanstack/react-router'
