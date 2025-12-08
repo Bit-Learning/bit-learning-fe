@@ -15,9 +15,6 @@ export type TRegisterRequest = {
     firstName: string
     lastName: string
 }
-export type TRefreshTokenRequest = {
-    refreshToken: string
-}
 export type TForgotPasswordRequest = {
     email: string
 }

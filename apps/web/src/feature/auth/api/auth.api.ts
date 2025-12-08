@@ -1,8 +1,9 @@
+import { TChangePasswordRequest } from '@/feature/user/types/user.type'
 import api from '@/shared/api/api'
 import { endpoints } from '@/shared/constants/endpoints'
 import { ApiResponse } from 'AppModels'
 import type { AxiosResponse } from 'axios'
-import type { TLoginRequest, TRefreshTokenRequest, TRegisterRequest, TResetPasswordRequest } from '../types/auth.type'
+import { TLoginRequest, TRegisterRequest, TResetPasswordRequest } from '../types/auth.type'
 
 export function Login(requestBody: TLoginRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/login`, requestBody)
@@ -16,8 +17,16 @@ export function ActivateAccount(key: string): Promise<AxiosResponse<ApiResponse<
     return api.get(`${endpoints.AUTH}/activate?key=${encodeURIComponent(key)}`)
 }
 
-export function RefreshToken(requestBody: TRefreshTokenRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
-    return api.post(`${endpoints.AUTH}/refresh-token`, requestBody)
+export function RefreshToken(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/refresh-token`)
+}
+
+export function GetAccountProfile(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.get(`${endpoints.ACCOUNT}/profile`)
+}
+
+export function GetUserProfile(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.get(`${endpoints.ACCOUNT}/profile`)
 }
 
 export function RequestPasswordReset(email: string): Promise<AxiosResponse<ApiResponse<any>, any>> {
@@ -30,6 +39,10 @@ export function VerifyResetKey(key: string): Promise<AxiosResponse<ApiResponse<a
 
 export function FinishPasswordReset(requestBody: TResetPasswordRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/reset-password/finish`, requestBody)
+}
+
+export function ChangePassword(requestBody: TChangePasswordRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.ACCOUNT}/change-password`, requestBody)
 }
 
 export function Logout(): Promise<AxiosResponse<ApiResponse<any>, any>> {
