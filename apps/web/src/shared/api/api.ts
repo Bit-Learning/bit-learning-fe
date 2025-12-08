@@ -1,5 +1,5 @@
 import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
-import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from '@/shared/lib/cookies'
+import { clearAuthTokens, getAccessToken, setAccessToken } from '@/shared/lib/cookies'
 import store from '@/shared/redux/store'
 import { toast } from '@workspace/ui/components/Sonner'
 import axios, {
@@ -11,11 +11,13 @@ import axios, {
 } from 'axios'
 
 const api: AxiosInstance = axios.create({
-    baseURL: 'http://localhost:8080/api/',
+    baseURL: import.meta.env.VITE_API_BASE_URL ?? 'http://localhost:8080/api/',
     headers: {
         'Content-Type': 'application/json',
         'Accept-Language': localStorage.getItem('i18nextLng') || 'vi',
     },
+    // Enable sending cookies (including HttpOnly refresh token) with all requests
+    withCredentials: true,
 })
 
 let isRefreshing = false
@@ -31,40 +33,31 @@ function setAuthorizationHeader(params: { request: AxiosRequestConfig; token: st
     }
 }
 
-function handleRefreshToken(refreshToken: string | undefined): Promise<string> {
-    if (!refreshToken) {
-        console.error('[Token Refresh] No refresh token available')
-        return Promise.reject(new Error('No refresh token available'))
-    }
-
+function handleRefreshToken(): Promise<string> {
     console.log('[Token Refresh] Starting token refresh process')
     isRefreshing = true
 
     return api
-        .post(
-            '/auth/refresh-token',
-            {
-                refreshToken,
+        .post('/auth/refresh-token', {}, {
+            headers: {
+                'Content-Type': 'application/json',
             },
-            {
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                // Skip auth interceptor for refresh token request
-                _retry: true,
-            } as any,
-        )
+            // Skip auth interceptor for refresh token request
+            _retry: true,
+            // Ensure cookies are sent (refresh token is HttpOnly cookie)
+            withCredentials: true,
+        } as any)
         .then((response: AxiosResponse) => {
             console.log('[Token Refresh] Refresh successful')
             const loginResponse = response.data.data
-            const { accessToken, refreshToken: newRefreshToken, user } = loginResponse
+            const { accessToken, user } = loginResponse
 
-            if (!accessToken || !newRefreshToken) {
+            if (!accessToken) {
                 throw new Error('Invalid refresh token response')
             }
 
-            // Update cookies
-            setAuthTokens(accessToken, newRefreshToken)
+            // Update access token cookie (refresh token is updated automatically as HttpOnly cookie by backend)
+            setAccessToken(accessToken)
 
             // Update Redux state to keep user logged in
             if (user) {
@@ -132,6 +125,7 @@ async function onResponseError(error: AxiosError): Promise<any> {
         '/auth/forgot-password',
         '/auth/reset-password',
         '/auth/activate',
+        '/auth/logout', // Don't try to refresh token during logout
         '/auth/oauth2/google/config', // Don't redirect on OAuth config 401
     ]
     const isAuthEndpoint = authEndpoints.some(endpoint => originalRequest.url?.includes(endpoint))
@@ -146,20 +140,17 @@ async function onResponseError(error: AxiosError): Promise<any> {
 
         if (isTokenError && !originalRequest._retry) {
             console.log('[Auth] 500 error with token issue detected, attempting token refresh')
-            const refreshToken = getRefreshToken()
-
-            if (refreshToken) {
-                originalRequest._retry = true
-                try {
-                    const newAccessToken = await handleRefreshToken(refreshToken)
-                    if (newAccessToken) {
-                        setAuthorizationHeader({ request: originalRequest, token: newAccessToken })
-                        return api.request(originalRequest)
-                    }
-                } catch (refreshError) {
-                    console.error('[Auth] Token refresh failed on 500 error:', refreshError)
-                    // Fall through to reject the original error
+            originalRequest._retry = true
+            try {
+                // Refresh token is sent automatically via HttpOnly cookie
+                const newAccessToken = await handleRefreshToken()
+                if (newAccessToken) {
+                    setAuthorizationHeader({ request: originalRequest, token: newAccessToken })
+                    return api.request(originalRequest)
                 }
+            } catch (refreshError) {
+                console.error('[Auth] Token refresh failed on 500 error:', refreshError)
+                // Fall through to reject the original error
             }
         }
     }
@@ -168,17 +159,6 @@ async function onResponseError(error: AxiosError): Promise<any> {
     if (error.response?.status === 401 && !originalRequest._retry && !isAuthEndpoint) {
         console.log('[Auth] 401 Unauthorized detected for:', originalRequest.url)
         console.log('[Auth] Error details:', error.response?.data)
-        const refreshToken = getRefreshToken()
-
-        // If no refresh token, clear auth and redirect
-        if (!refreshToken) {
-            console.log('[Auth] No refresh token found, logging out')
-            clearAuthTokens()
-            store.dispatch(setIsAuthenticatedAction(false))
-            store.dispatch(setUserInfoAction(null))
-            window.location.href = '/signin'
-            return Promise.reject(error)
-        }
 
         originalRequest._retry = true
 
@@ -206,7 +186,8 @@ async function onResponseError(error: AxiosError): Promise<any> {
                 title: 'Đang làm mới phiên đăng nhập...',
                 description: 'Vui lòng đợi một chút',
             })
-            const newAccessToken = await handleRefreshToken(refreshToken)
+            // Refresh token is sent automatically via HttpOnly cookie
+            const newAccessToken = await handleRefreshToken()
             if (newAccessToken) {
                 console.log('[Auth] ✓ Token refreshed successfully, retrying original request:', originalRequest.url)
                 toast.success({

@@ -7,6 +7,7 @@ import {
     FinishPasswordReset,
     GoogleOAuth2Login,
     Login,
+    Logout,
     Register,
     RequestPasswordReset,
     VerifyResetKey,
@@ -244,16 +245,25 @@ export function useLogout() {
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient()
 
-    return () => {
-        clearAuthTokens()
-        dispatch(setIsAuthenticatedAction(false))
-        dispatch(setUserInfoAction(null))
-        dispatch(setErrorAction(null))
-        queryClient.clear()
-        toast.info({
-            title: 'Đã đăng xuất',
-            description: 'Hẹn gặp lại bạn!',
-        })
+    return async () => {
+        try {
+            // Call backend to invalidate session and clear HttpOnly refresh token cookie
+            await Logout()
+        } catch (error) {
+            console.error('Logout API error:', error)
+            // Continue with local cleanup even if API call fails
+        } finally {
+            // Always clear local auth state
+            clearAuthTokens()
+            dispatch(setIsAuthenticatedAction(false))
+            dispatch(setUserInfoAction(null))
+            dispatch(setErrorAction(null))
+            queryClient.clear()
+            toast.info({
+                title: 'Đã đăng xuất',
+                description: 'Hẹn gặp lại bạn!',
+            })
+        }
     }
 }
 
