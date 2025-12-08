@@ -1,9 +1,8 @@
-import { logout } from '@/feature/auth/store/auth.actions'
+import { useLogout } from '@/feature/auth/queries/useAuth'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { navItems } from '@/layouts/data/nav-items'
 import { SearchProvider, useSearch } from '@/shared/context/search-context'
 import { mergeName } from '@/shared/lib/string-utils'
-import { useAppDispatch } from '@/shared/redux/store'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Button } from '@workspace/ui/components/Button'
@@ -25,10 +24,10 @@ import MobileSheetMenu from './mobile-sheet-menu'
 
 const Header: React.FC = () => {
     const navigate = useNavigate()
-    const dispatch = useAppDispatch()
     const [isSheetOpen, setIsSheetOpen] = useState(false)
     const { setOpen } = useSearch()
     const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo)
+    const logout = useLogout()
 
     const handleNavigate = (path: string) => {
         navigate({ to: path })
@@ -36,7 +35,7 @@ const Header: React.FC = () => {
     }
 
     const handleLogout = () => {
-        dispatch(logout())
+        logout()
         navigate({ to: '/signin' })
     }
 

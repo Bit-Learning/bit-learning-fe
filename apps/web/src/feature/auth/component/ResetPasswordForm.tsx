@@ -1,4 +1,3 @@
-import { useAppDispatch } from '@/shared/redux/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
@@ -10,10 +9,8 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
-import { setErrorAction } from '../../auth/store'
-import { finishPasswordReset, verifyPasswordResetKey } from '../../auth/store/auth.actions'
 import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
-import type { TResetPasswordRequest } from '../type/authState'
+import { useResetPassword, useVerifyResetKey } from '../queries/useAuth'
 
 const formSchema = z
     .object({
@@ -36,13 +33,15 @@ const formSchema = z
     })
 
 const ResetPasswordForm: React.FC = () => {
-    const { isLoading, isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
+    const { isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
     const [showPassword, setShowPassword] = React.useState(false)
     const [showConfirmPassword, setShowConfirmPassword] = React.useState(false)
     const [resetKey, setResetKey] = React.useState<string | null>(null)
     const [isVerifying, setIsVerifying] = React.useState(true)
-    const dispatch = useAppDispatch()
     const navigate = useNavigate()
+
+    const { mutate: resetPassword, isPending: isLoading } = useResetPassword()
+    const { mutate: verifyKey } = useVerifyResetKey()
 
     const form = useForm<z.infer<typeof formSchema>>({
         resolver: zodResolver(formSchema),
@@ -59,45 +58,43 @@ const ResetPasswordForm: React.FC = () => {
         }
     }, [isAuthenticated, navigate])
 
-    // Verify reset key on component mount
     React.useEffect(() => {
-        const verifyKey = async () => {
-            const key = new URLSearchParams(window.location.search).get('key')
-            if (!key) {
-                toast.error({
-                    title: 'Link không hợp lệ',
-                    description: 'Vui lòng kiểm tra email và thử lại.',
-                })
-                navigate({ to: '/forgot-password' })
-                return
-            }
+        const key = new URLSearchParams(window.location.search).get('key')
 
-            const result: any = await dispatch(verifyPasswordResetKey(key))
-            if (result?.success) {
+        if (!key) {
+            toast.error({
+                title: 'Link không hợp lệ',
+                description: 'Vui lòng kiểm tra email và thử lại.',
+            })
+            navigate({ to: '/forgot-password' })
+            return
+        }
+
+        verifyKey(key, {
+            onSuccess: data => {
                 setResetKey(key)
                 setIsVerifying(false)
                 toast.success({
                     title: 'Xác thực thành công',
-                    description: 'Vui lòng nhập mật khẩu mới của bạn.',
+                    description: data.message || 'Vui lòng nhập mật khẩu mới của bạn.',
                 })
-            } else {
+            },
+            onError: (error: any) => {
+                const errorMessage = error?.response?.data?.message || error.message
                 toast.error({
                     title: 'Link đã hết hạn hoặc không hợp lệ',
-                    description: result?.message || 'Vui lòng yêu cầu link mới.',
+                    description: errorMessage || 'Vui lòng yêu cầu link mới.',
                 })
                 navigate({ to: '/forgot-password' })
-            }
-        }
-
-        verifyKey()
-    }, [dispatch, navigate])
+            },
+        })
+    }, [navigate])
 
     React.useEffect(() => {
         if (errorMsg) {
             toast.error({ title: errorMsg })
-            dispatch(setErrorAction(null))
         }
-    }, [errorMsg, dispatch])
+    }, [errorMsg])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         if (!resetKey) {
@@ -105,27 +102,19 @@ const ResetPasswordForm: React.FC = () => {
             return
         }
 
-        dispatch(setErrorAction(null))
-        const body: TResetPasswordRequest = {
-            email: values.email,
-            key: resetKey,
-            newPassword: values.password,
-            confirmNewPassword: values.confirmPassword,
-        }
-
-        const result: any = await dispatch(finishPasswordReset(body))
-        if (result?.success) {
-            toast.success({
-                title: 'Đặt lại mật khẩu thành công!',
-                description: 'Bạn có thể đăng nhập với mật khẩu mới.',
-            })
-            navigate({ to: '/signin' })
-        } else {
-            toast.error({
-                title: 'Đặt lại mật khẩu thất bại',
-                description: result?.message || 'Có lỗi xảy ra, vui lòng thử lại.',
-            })
-        }
+        resetPassword(
+            {
+                key: resetKey,
+                newPassword: values.password,
+                email: values.email,
+                confirmNewPassword: values.password,
+            },
+            {
+                onSuccess: () => {
+                    navigate({ to: '/signin' })
+                },
+            },
+        )
     }
 
     if (isVerifying) {

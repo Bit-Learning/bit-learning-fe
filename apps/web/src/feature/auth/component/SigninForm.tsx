@@ -1,4 +1,3 @@
-import { useAppDispatch } from '@/shared/redux/store'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
@@ -12,11 +11,9 @@ import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
-import { setErrorAction } from '../../auth/store'
-import { requestLogin } from '../../auth/store/auth.actions'
 import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
 import { useGoogleOAuth2Config } from '../hook/useOAuth2'
-import type { TLoginRequest } from '../type/authState'
+import { useLogin } from '../queries/useAuth'
 
 const formSchema = z.object({
     email: z
@@ -30,23 +27,23 @@ const formSchema = z.object({
 })
 
 const SignInForm: React.FC = () => {
-    const { isLoading, isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
+    const { isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo)
     const [showPassword, setShowPassword] = React.useState(false)
     const [hasRedirected, setHasRedirected] = React.useState(false)
-    const dispatch = useAppDispatch()
     const navigate = useNavigate()
 
-    // Fetch Google OAuth2 configuration using TanStack Query
+    const { mutate: login, isPending: isLoading } = useLogin()
+
     const { data: googleOAuth2Config, isError: isOAuth2Error, error: oauthError } = useGoogleOAuth2Config()
     const [hasShownOAuthError, setHasShownOAuthError] = React.useState(false)
 
-    const form = useForm<z.infer<typeof formSchema>>({
+    const form = useForm({
         resolver: zodResolver(formSchema),
         defaultValues: {
             email: '',
             password: '',
         },
-    })
+    } as const)
 
     React.useEffect(() => {
         console.log('SignInForm: isAuthenticated changed:', isAuthenticated, 'hasRedirected:', hasRedirected)
@@ -57,37 +54,18 @@ const SignInForm: React.FC = () => {
         }
     }, [isAuthenticated, navigate, hasRedirected])
 
-    // Show OAuth error only once when it first occurs
     React.useEffect(() => {
         if (isOAuth2Error && !hasShownOAuthError) {
             console.error('[OAuth2] Failed to load Google OAuth2 configuration:', oauthError)
             setHasShownOAuthError(true)
-            // Don't show toast here - only show when user tries to click the button
         }
     }, [isOAuth2Error, hasShownOAuthError, oauthError])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
-        // Clear any previous errors
-        dispatch(setErrorAction(null))
-
-        const body: TLoginRequest = {
+        login({
             email: values.email,
             password: values.password,
-        }
-        const result: any = await dispatch(requestLogin(body))
-
-        // Only show warning for activation - success/error toasts are handled in actions
-        if (result?.needsActivation) {
-            toast.warning({
-                title: 'Tài khoản chưa kích hoạt',
-                description: result.message,
-            })
-        } else if (result?.success === false) {
-            toast.error({
-                title: 'Đăng nhập thất bại',
-                description: result.message,
-            })
-        }
+        })
     }
 
     return (
@@ -101,8 +79,7 @@ const SignInForm: React.FC = () => {
                 </div>
             )}
 
-            {/* Header */}
-            <div className="flex-shrink-0 p-6">
+            <div className="shrink-0 p-6">
                 <Link
                     to="/"
                     className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400"
@@ -112,17 +89,14 @@ const SignInForm: React.FC = () => {
                 </Link>
             </div>
 
-            {/* Main Content */}
             <div className="flex flex-1 items-center justify-center px-6 pb-6">
                 <div className="w-full max-w-md">
-                    {/* Logo for mobile */}
                     <div className="mb-8 flex items-center justify-center lg:hidden">
                         <div className="flex items-center space-x-2">
                             <img src="./Logo.png" alt="Bithub Logo" className="h-10 w-36 object-contain" />
                         </div>
                     </div>
 
-                    {/* Form Card */}
                     <div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
                         <div className="mb-6 text-center">
                             <div className="mb-4 flex justify-center">
@@ -134,11 +108,10 @@ const SignInForm: React.FC = () => {
                             <p className="text-sm text-gray-600">Đăng nhập để truy cập tài khoản của bạn</p>
                         </div>
 
-                        {/* Error Display */}
                         {errorMsg && (
                             <div className="mb-4 rounded-lg border border-red-200 bg-red-50 p-3">
                                 <div className="flex items-center">
-                                    <div className="flex-shrink-0">
+                                    <div className="shrink-0">
                                         <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
                                             <path
                                                 fillRule="evenodd"
@@ -292,7 +265,7 @@ const SignInForm: React.FC = () => {
                                 </div>
 
                                 <Button
-                                    className="h-11 w-full rounded-xl bg-gradient-to-r from-blue-700 to-blue-800 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
+                                    className="bg-linear-to-r h-11 w-full rounded-xl from-blue-700 to-blue-800 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
                                     type="submit"
                                     isDisabled={isLoading}
                                 >

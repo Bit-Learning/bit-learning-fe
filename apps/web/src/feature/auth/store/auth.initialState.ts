@@ -1,4 +1,4 @@
-import type { TAuthState } from '../type/authState'
+import type { TAuthState } from '../types/auth.type'
 
 export const authInitialState: TAuthState = {
     isAuthenticated: false,
