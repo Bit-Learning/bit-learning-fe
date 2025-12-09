@@ -17,14 +17,6 @@ export function ActivateAccount(key: string): Promise<AxiosResponse<ApiResponse<
     return api.get(`${endpoints.AUTH}/activate?key=${encodeURIComponent(key)}`)
 }
 
-export function RefreshToken(): Promise<AxiosResponse<ApiResponse<any>, any>> {
-    return api.post(`${endpoints.AUTH}/refresh-token`)
-}
-
-export function GetAccountProfile(): Promise<AxiosResponse<ApiResponse<any>, any>> {
-    return api.get(`${endpoints.ACCOUNT}/profile`)
-}
-
 export function GetUserProfile(): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.get(`${endpoints.ACCOUNT}/profile`)
 }
