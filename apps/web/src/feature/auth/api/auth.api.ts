@@ -48,3 +48,11 @@ export function GoogleOAuth2Login(code: string): Promise<AxiosResponse<ApiRespon
 export function GetGoogleOAuth2Config(): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.get(`${endpoints.AUTH}/oauth2/google/config`)
 }
+
+export function GitHubOAuth2Login(code: string): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/oauth2/github`, { code })
+}
+
+export function GetGitHubOAuth2Config(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.get(`${endpoints.AUTH}/oauth2/github/config`)
+}

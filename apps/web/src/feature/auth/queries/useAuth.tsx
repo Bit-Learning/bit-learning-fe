@@ -5,6 +5,7 @@ import { toast } from '@workspace/ui/components/Sonner'
 import {
     ActivateAccount,
     FinishPasswordReset,
+    GitHubOAuth2Login,
     GoogleOAuth2Login,
     Login,
     Logout,
@@ -260,7 +261,7 @@ export function useLogout() {
             dispatch(setErrorAction(null))
             queryClient.clear()
             toast.info({
-                title: 'Đã đăng xuất',
+                title: 'Đăng xuất thành công',
                 description: 'Hẹn gặp lại bạn!',
             })
         }
@@ -299,6 +300,51 @@ export function useGoogleLogin() {
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || 'Đăng nhập với Google không thành công'
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Đăng nhập thất bại',
+                description: errorMessage,
+            })
+        },
+        onSettled: () => {
+            dispatch(setIsLoadingAction(false))
+        },
+    })
+}
+
+export function useGitHubLogin() {
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async (code: string) => {
+            const response = await GitHubOAuth2Login(code)
+            return response.data.data
+        },
+        onMutate: () => {
+            dispatch(setIsLoadingAction(true))
+        },
+        onSuccess: (data: any) => {
+            setAuthTokens(data.accessToken, data.refreshToken)
+            dispatch(setIsAuthenticatedAction(true))
+            dispatch(setUserInfoAction(data.user))
+            queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() })
+
+            if (data.isNewUser) {
+                toast.success({
+                    title: 'Đăng nhập thành công!',
+                    description: `Chào mừng ${data.user.username || 'bạn'} đến với Bithub! ${data.message || 'Vui lòng kiểm tra email để lấy mật khẩu tạm thời.'}`,
+                })
+            } else {
+                toast.success({
+                    title: 'Đăng nhập thành công',
+                    description: `Chào mừng ${data.user.username || 'bạn'} trở lại!`,
+                })
+            }
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || 'Đăng nhập với GitHub không thành công'
             dispatch(setErrorAction(errorMessage))
 
             toast.error({

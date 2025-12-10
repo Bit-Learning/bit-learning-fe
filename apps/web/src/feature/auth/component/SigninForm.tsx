@@ -12,7 +12,7 @@ import { useForm } from 'react-hook-form'
 import { useSelector } from 'react-redux'
 import { z } from 'zod'
 import { selectAuthStateInfo } from '../../auth/store/auth.selectors'
-import { useGoogleOAuth2Config } from '../hook/useOAuth2'
+import { useGitHubOAuth2Config, useGoogleOAuth2Config } from '../hook/useOAuth2'
 import { useLogin } from '../queries/useAuth'
 
 const formSchema = z.object({
@@ -35,7 +35,9 @@ const SignInForm: React.FC = () => {
     const { mutate: login, isPending: isLoading } = useLogin()
 
     const { data: googleOAuth2Config, isError: isOAuth2Error, error: oauthError } = useGoogleOAuth2Config()
+    const { data: githubOAuth2Config, isError: isGitHubOAuth2Error, error: githubOauthError } = useGitHubOAuth2Config()
     const [hasShownOAuthError, setHasShownOAuthError] = React.useState(false)
+    const [hasShownGitHubOAuthError, setHasShownGitHubOAuthError] = React.useState(false)
 
     const form = useForm({
         resolver: zodResolver(formSchema),
@@ -60,6 +62,13 @@ const SignInForm: React.FC = () => {
             setHasShownOAuthError(true)
         }
     }, [isOAuth2Error, hasShownOAuthError, oauthError])
+
+    React.useEffect(() => {
+        if (isGitHubOAuth2Error && !hasShownGitHubOAuthError) {
+            console.error('[OAuth2] Failed to load GitHub OAuth2 configuration:', githubOauthError)
+            setHasShownGitHubOAuthError(true)
+        }
+    }, [isGitHubOAuth2Error, hasShownGitHubOAuthError, githubOauthError])
 
     async function onSubmit(values: z.infer<typeof formSchema>) {
         login({
@@ -127,7 +136,7 @@ const SignInForm: React.FC = () => {
                             </div>
                         )}
 
-                        <div className="mb-6 flex items-center justify-center">
+                        <div className="mb-6 grid grid-cols-2 gap-3">
                             <button
                                 type="button"
                                 onClick={() => {
@@ -147,7 +156,7 @@ const SignInForm: React.FC = () => {
                                     }
                                 }}
                                 disabled={isOAuth2Error}
-                                className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white px-7 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
                                 title={isOAuth2Error ? 'Dịch vụ Google OAuth2 không khả dụng' : undefined}
                             >
                                 <svg
@@ -174,7 +183,44 @@ const SignInForm: React.FC = () => {
                                         fill="#EB4335"
                                     />
                                 </svg>
-                                Đăng nhập với Google
+                                <span className="hidden sm:inline">Google</span>
+                            </button>
+                            <button
+                                type="button"
+                                onClick={() => {
+                                    if (githubOAuth2Config?.authorizationUrl) {
+                                        window.location.href = githubOAuth2Config.authorizationUrl
+                                    } else if (isGitHubOAuth2Error) {
+                                        toast.error({
+                                            title: 'Lỗi kết nối',
+                                            description:
+                                                'Không thể kết nối đến dịch vụ GitHub OAuth2. Vui lòng thử lại sau hoặc đăng nhập bằng email.',
+                                        })
+                                    } else {
+                                        toast.warning({
+                                            title: 'Đang tải',
+                                            description: 'Đang tải cấu hình GitHub. Vui lòng thử lại trong giây lát.',
+                                        })
+                                    }
+                                }}
+                                disabled={isGitHubOAuth2Error}
+                                className="inline-flex cursor-pointer items-center justify-center gap-2 rounded-xl border-2 border-gray-200 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+                                title={isGitHubOAuth2Error ? 'Dịch vụ GitHub OAuth2 không khả dụng' : undefined}
+                            >
+                                <svg
+                                    width="20"
+                                    height="20"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                >
+                                    <path
+                                        fillRule="evenodd"
+                                        clipRule="evenodd"
+                                        d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.165 20 14.418 20 10c0-5.523-4.477-10-10-10z"
+                                    />
+                                </svg>
+                                <span className="hidden sm:inline">GitHub</span>
                             </button>
                         </div>
 
