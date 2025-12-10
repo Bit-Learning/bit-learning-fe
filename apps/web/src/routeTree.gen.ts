@@ -73,6 +73,7 @@ import { Route as PresentationsIdOverviewRouteImport } from './routes/presentati
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.generate'
 import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
+import { Route as CoursesGradeGradeRouteImport } from './routes/courses/grade/$grade'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
 import { Route as TemplatesSlidevIdEditRouteImport } from './routes/templates/slidev/$id/edit'
@@ -402,6 +403,11 @@ const MatricesIdEditRoute = MatricesIdEditRouteImport.update({
   path: '/matrices/$id/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const CoursesGradeGradeRoute = CoursesGradeGradeRouteImport.update({
+  id: '/courses/grade/$grade',
+  path: '/courses/grade/$grade',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
   id: '/auth/google/callback',
   path: '/auth/google/callback',
@@ -473,6 +479,7 @@ export interface FileRoutesByFullPath {
   '/templates': typeof TemplatesIndexRoute
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/courses/grade/$grade': typeof CoursesGradeGradeRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
@@ -542,6 +549,7 @@ export interface FileRoutesByTo {
   '/templates': typeof TemplatesIndexRoute
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/courses/grade/$grade': typeof CoursesGradeGradeRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
@@ -612,6 +620,7 @@ export interface FileRoutesById {
   '/templates/': typeof TemplatesIndexRoute
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/courses/grade/$grade': typeof CoursesGradeGradeRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
@@ -683,6 +692,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/api/auth/activate'
     | '/auth/google/callback'
+    | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
     | '/mindmaps/$userId/$code'
@@ -752,6 +762,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/api/auth/activate'
     | '/auth/google/callback'
+    | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
     | '/mindmaps/$userId/$code'
@@ -821,6 +832,7 @@ export interface FileRouteTypes {
     | '/templates/'
     | '/api/auth/activate'
     | '/auth/google/callback'
+    | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
     | '/mindmaps/$userId/$code'
@@ -891,6 +903,7 @@ export interface RootRouteChildren {
   TemplatesIndexRoute: typeof TemplatesIndexRoute
   ApiAuthActivateRoute: typeof ApiAuthActivateRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
+  CoursesGradeGradeRoute: typeof CoursesGradeGradeRoute
   MatricesIdEditRoute: typeof MatricesIdEditRoute
   MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
@@ -1353,6 +1366,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatricesIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/courses/grade/$grade': {
+      id: '/courses/grade/$grade'
+      path: '/courses/grade/$grade'
+      fullPath: '/courses/grade/$grade'
+      preLoaderRoute: typeof CoursesGradeGradeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/google/callback': {
       id: '/auth/google/callback'
       path: '/auth/google/callback'
@@ -1448,6 +1468,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemplatesIndexRoute: TemplatesIndexRoute,
   ApiAuthActivateRoute: ApiAuthActivateRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
+  CoursesGradeGradeRoute: CoursesGradeGradeRoute,
   MatricesIdEditRoute: MatricesIdEditRoute,
   MatricesIdGenerateRoute: MatricesIdGenerateRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,

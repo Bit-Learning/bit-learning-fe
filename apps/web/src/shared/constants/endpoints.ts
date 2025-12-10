@@ -4,6 +4,7 @@ export const endpoints = {
     PAYMENT: '/payment',
     SLIDE: '/slides',
     CHAT: '/slides/chat',
+    COURSES: '/courses',
 }
 
 /**

@@ -5,38 +5,7 @@ export const navItems = [
     },
     {
         title: 'Khóa học Online',
-        items: [
-            {
-                title: 'Tất cả khóa học',
-                to: '/courses',
-                description: 'Xem tất cả khóa học lập trình và công nghệ tại BithubLearning.',
-            },
-            {
-                title: 'Lập trình Web',
-                to: '/courses',
-                description: 'Khóa học lập trình web từ cơ bản đến nâng cao với HTML, CSS, JavaScript, React, Node.js.',
-            },
-            {
-                title: 'Lập trình Mobile',
-                to: '/courses',
-                description: 'Học phát triển ứng dụng di động với React Native, Flutter, iOS, Android.',
-            },
-            {
-                title: 'Lập trình Backend',
-                to: '/courses',
-                description: 'Khóa học phát triển backend với Node.js, Python, Java, Database.',
-            },
-            {
-                title: 'Data Science & AI',
-                to: '/courses',
-                description: 'Học về khoa học dữ liệu, machine learning và trí tuệ nhân tạo.',
-            },
-            {
-                title: 'DevOps & Cloud',
-                to: '/courses',
-                description: 'Khóa học về DevOps, Docker, Kubernetes và cloud computing.',
-            },
-        ],
+        to: 'courses',
     },
     {
         title: 'Khóa học Offline',
