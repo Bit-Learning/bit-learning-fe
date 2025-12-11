@@ -8,6 +8,7 @@ import {
     Award,
     BookOpen,
     CheckCircle,
+    ChevronLeft,
     Clock,
     Download,
     Heart,
@@ -100,24 +101,15 @@ const CourseDetailContent: React.FC = () => {
     return (
         <div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50">
             <div className="container mx-auto max-w-7xl px-4 py-8">
-                <div className="mb-6 flex items-center gap-2 text-sm">
-                    <Link to="/" className="text-gray-600 hover:text-blue-700">
-                        Trang chủ
-                    </Link>
-                    <span className="text-gray-400">/</span>
-                    <Link to="/courses" className="text-gray-600 hover:text-blue-700">
-                        Khóa học
-                    </Link>
-                    <span className="text-gray-400">/</span>
+                <div className="text-md mb-6 flex items-center gap-2">
                     <Link
                         to="/courses/grade/$grade"
-                        className="text-gray-600 hover:text-blue-700"
+                        className="mb-4 inline-flex items-center text-gray-600 transition-colors hover:text-blue-700"
                         params={{ grade: String(course.grade) }}
                     >
+                        <ChevronLeft className="mr-2 h-5 w-5" />
                         Lớp {course.grade}
                     </Link>
-                    <span className="text-gray-400">/</span>
-                    <span className="text-gray-900">{course.title}</span>
                 </div>
 
                 <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -331,7 +323,7 @@ const CourseDetailContent: React.FC = () => {
                     </div>
 
                     <div className="space-y-6">
-                        <Card className="sticky top-6">
+                        <Card className="top-6">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Award className="h-5 w-5 text-orange-600" />
@@ -370,22 +362,6 @@ const CourseDetailContent: React.FC = () => {
                                 >
                                     Đăng ký ngay
                                 </Button>
-
-                                <Link to="/offline-course">
-                                    <Button
-                                        variant="outline"
-                                        className="w-full rounded-lg border-2 border-orange-600 py-3 font-semibold text-orange-600 transition-all duration-200 hover:bg-orange-600 hover:text-white"
-                                    >
-                                        Đăng ký lớp Offline
-                                    </Button>
-                                </Link>
-
-                                <div className="text-center">
-                                    <p className="text-sm text-gray-500">
-                                        Hoặc gọi <span className="font-semibold text-blue-700">0767666299</span> để tư
-                                        vấn
-                                    </p>
-                                </div>
                             </CardContent>
                         </Card>
 

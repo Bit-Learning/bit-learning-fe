@@ -1,8 +1,7 @@
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
-import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
-import { Award, BookOpen, ChevronLeft, Play, Star } from 'lucide-react'
+import { BookOpen, ChevronLeft, Play, Star } from 'lucide-react'
 import React from 'react'
 import { useCourseActions } from '../queries/useCourse'
 
@@ -33,9 +32,9 @@ const AllCoursesContent: React.FC = () => {
                 <div className="mb-8">
                     <Link
                         to="/"
-                        className="mb-4 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-blue-700"
+                        className="text-md mb-4 inline-flex items-center text-gray-600 transition-colors hover:text-blue-700"
                     >
-                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        <ChevronLeft className="mr-2 h-5 w-5" />
                         Trang chủ
                     </Link>
 
@@ -118,28 +117,6 @@ const AllCoursesContent: React.FC = () => {
                             </div>
                             <h3 className="mb-2 font-semibold text-gray-900">Học mọi lúc mọi nơi</h3>
                             <p className="text-sm text-gray-600">Video bài giảng chất lượng cao, học tập linh hoạt</p>
-                        </div>
-                    </div>
-                </div>
-
-                <div className="mt-12 text-center">
-                    <div className="bg-linear-to-r rounded-2xl from-blue-700 to-orange-600 p-8 text-white">
-                        <div className="mb-4 flex justify-center">
-                            <Award className="h-12 w-12 text-white" />
-                        </div>
-                        <h3 className="mb-4 text-2xl font-bold">Bắt đầu hành trình học tin học ngay hôm nay!</h3>
-                        <p className="mb-6 text-lg opacity-90">
-                            Tham gia cộng đồng hơn 8,000+ học sinh đã thành công với Bithub Learning
-                        </p>
-                        <div className="flex flex-col justify-center gap-4 sm:flex-row">
-                            <Link to="/offline-course">
-                                <Button className="rounded-lg bg-white px-8 py-3 font-semibold text-blue-700 transition-colors hover:bg-gray-100">
-                                    Đăng ký lớp Offline
-                                </Button>
-                            </Link>
-                            <Button className="rounded-lg border-2 border-white px-8 py-3 font-semibold text-white transition-colors hover:bg-white hover:text-blue-700">
-                                Tư vấn miễn phí
-                            </Button>
                         </div>
                     </div>
                 </div>

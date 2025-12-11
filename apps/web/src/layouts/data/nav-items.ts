@@ -5,7 +5,7 @@ export const navItems = [
     },
     {
         title: 'Khóa học Online',
-        to: 'courses',
+        to: '/courses',
     },
     {
         title: 'Khóa học Offline',

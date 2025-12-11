@@ -58,10 +58,9 @@ const CoursesByGradeComponent: React.FC = () => {
             </div>
         )
     }
-
-    const courses = data?.content || []
-    const totalElements = data?.totalElements || 0
-    const totalPages = data?.totalPages || 0
+    const courses: CoursePreview[] = Array.isArray(data?.data) ? data.data : []
+    const totalElements = data?.page?.totalElements || 0
+    const totalPages = data?.page?.totalPages || 0
 
     return (
         <div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50">
@@ -69,9 +68,9 @@ const CoursesByGradeComponent: React.FC = () => {
                 <div className="mb-8">
                     <Link
                         to="/courses"
-                        className="mb-4 inline-flex items-center text-sm text-gray-600 transition-colors hover:text-blue-700"
+                        className="text-md mb-4 inline-flex items-center text-gray-600 transition-colors hover:text-blue-700"
                     >
-                        <ChevronLeft className="mr-2 h-4 w-4" />
+                        <ChevronLeft className="mr-2 h-5 w-5" />
                         Tất cả khóa học
                     </Link>
 
@@ -92,16 +91,16 @@ const CoursesByGradeComponent: React.FC = () => {
                     </div>
                 )}
 
-                {courses.length > 0 ? (
+                {courses ? (
                     <>
                         <div className="mb-6">
                             <p className="text-gray-600">
-                                Hiển thị <span className="font-semibold">{courses.length}</span> khóa học (Tổng:{' '}
+                                Hiển thị <span className="font-semibold">{totalElements}</span> khóa học (Tổng:{' '}
                                 {totalElements})
                             </p>
                         </div>
 
-                        <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                        <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                             {courses.map((course: CoursePreview) => (
                                 <Link key={course.id} to="/courses/$id" params={{ id: String(course.id) }}>
                                     <Card
@@ -137,26 +136,30 @@ const CoursesByGradeComponent: React.FC = () => {
 
                                         <CardContent className="p-4">
                                             <div className="space-y-3">
-                                                <h3 className="line-clamp-2 text-sm font-bold text-gray-900 transition-colors group-hover:text-blue-700">
+                                                <h3 className="text-md line-clamp-2 h-12 font-bold text-gray-900 transition-colors group-hover:text-blue-700">
                                                     {course.title}
                                                 </h3>
 
-                                                <p className="text-sm text-gray-600">{course.instructorName}</p>
+                                                <p className="text-sm text-gray-600">
+                                                    Giảng viên: {course.instructorName}
+                                                </p>
 
-                                                <div className="flex items-center gap-2 text-sm">
+                                                <div className="flex items-center justify-between gap-2 text-sm">
                                                     <div className="flex items-center gap-1">
                                                         <Star className="h-4 w-4 fill-current text-yellow-500" />
-                                                        <span className="font-semibold">{course.ratingStar}</span>
+                                                        <span className="font-semibold">{course.ratingStar ?? 5}</span>
+                                                        <span className="text-gray-500">
+                                                            ({course.ratingCount ?? 1000})
+                                                        </span>
                                                     </div>
-                                                    <span className="text-gray-500">({course.ratingCount})</span>
-                                                </div>
 
-                                                <div className="flex items-center justify-between">
-                                                    <span className="text-lg font-bold text-blue-700">
-                                                        {course.price === 0
-                                                            ? 'Miễn phí'
-                                                            : `${course.price.toLocaleString()}đ`}
-                                                    </span>
+                                                    <div className="flex items-center">
+                                                        <span className="text-lg font-bold text-blue-700">
+                                                            {course.price === 0
+                                                                ? 'Miễn phí'
+                                                                : `${course.price.toLocaleString()}đ`}
+                                                        </span>
+                                                    </div>
                                                 </div>
                                             </div>
                                         </CardContent>

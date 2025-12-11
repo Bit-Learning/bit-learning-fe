@@ -68,11 +68,3 @@ export interface CreateCourseRequest {
 }
 
 export interface UpdateCourseRequest extends CreateCourseRequest {}
-
-export interface PageResponse<T> {
-    content: T[]
-    totalElements: number
-    totalPages: number
-    size: number
-    number: number
-}

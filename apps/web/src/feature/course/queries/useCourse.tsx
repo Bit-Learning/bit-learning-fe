@@ -20,11 +20,11 @@ export const useCoursesByGrade = (grade?: number) => {
     const targetGrade = grade ?? selectedGrade
 
     return useQuery({
-        queryKey: courseKeys.byGrade(targetGrade ?? 0, pagination.page, pagination.size),
+        queryKey: courseKeys.byGrade(targetGrade ?? 1, pagination.page, pagination.size),
         queryFn: async () => {
             if (!targetGrade) return null
             const response = await courseApi.getCoursesByGrade(targetGrade, pagination.page, pagination.size)
-            return response.data.data
+            return response.data
         },
         enabled: !!targetGrade,
         staleTime: 5 * 60 * 1000,
