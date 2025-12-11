@@ -17,7 +17,7 @@ services:
   bithub-web-prod:
     container_name: bithub-web-prod
     # image: lcaohoanq/bithub-web:serve-nginx
-    image: lcaohoanq/bithub-web:serve-nginx-15
+    image: lcaohoanq/bithub-web:enterprise
     build:
       context: ../..
       dockerfile: apps/web/Dockerfile.prod
