@@ -16,7 +16,7 @@ services:
   # Production environment
   bithub-admin-prod:
     container_name: bithub-admin-prod
-    image: lcaohoanq/bithub-admin:serve-nginx
+    image: lcaohoanq/bithub-admin:enterprise
     build:
       context: ../..
       dockerfile: apps/admin/Dockerfile.prod
