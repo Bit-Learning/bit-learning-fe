@@ -8,7 +8,7 @@ import rootReducer from './rootReducer'
 const persistConfig = {
     key: 'root',
     storage,
-    whitelist: ['app', 'auth', 'course'],
+    whitelist: ['app', 'auth', 'course', 'section', 'lecture'],
 }
 
 const persistedReducer = persistReducer(persistConfig, rootReducer)

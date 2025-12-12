@@ -1,3 +1,4 @@
+import CourseCurriculum from '@/feature/course/component/CourseCurriculum'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -266,35 +267,7 @@ const CourseDetailContent: React.FC = () => {
                                     </TabsContent>
 
                                     <TabsContent value="curriculum" className="space-y-4">
-                                        <h3 className="mb-4 text-xl font-bold text-gray-900">Nội dung khóa học</h3>
-                                        <div className="space-y-3">
-                                            {course.sections && course.sections.length > 0 ? (
-                                                course.sections.map(section => (
-                                                    <div
-                                                        key={section.id}
-                                                        className="rounded-lg border border-gray-200 p-4 transition-colors hover:border-blue-300"
-                                                    >
-                                                        <div className="flex items-start justify-between">
-                                                            <div className="flex-1">
-                                                                <h4 className="mb-2 font-semibold text-gray-900">
-                                                                    {section.title}
-                                                                </h4>
-                                                                <div className="flex items-center gap-4 text-sm text-gray-500">
-                                                                    <span className="flex items-center gap-1">
-                                                                        <Video className="h-4 w-4" />
-                                                                        {section.lectures?.length || 0} bài học
-                                                                    </span>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                ))
-                                            ) : (
-                                                <p className="py-8 text-center text-gray-500">
-                                                    Nội dung khóa học đang được cập nhật
-                                                </p>
-                                            )}
-                                        </div>
+                                        <CourseCurriculum courseId={course.id} />
                                     </TabsContent>
 
                                     <TabsContent value="instructor" className="space-y-6">
@@ -308,7 +281,7 @@ const CourseDetailContent: React.FC = () => {
                                                     {course.instructorName}
                                                 </h4>
                                                 <p className="mb-2 font-medium text-blue-600">
-                                                    Giảng viên ID: {course.instructorId}
+                                                    ID: {course.instructorId}
                                                 </p>
                                                 <p className="leading-relaxed text-gray-700">
                                                     Giảng viên giàu kinh nghiệm trong lĩnh vực tin học, đã có nhiều năm
