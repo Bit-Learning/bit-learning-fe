@@ -7,8 +7,8 @@ export const endpoints = {
     COURSES: '/courses',
     SECTIONS: '/sections',
     LECTURES: '/lectures',
-    LECTURE_VIDEO: '/lectures/lectures-videos',
-    LECTURE_QUIZ: '/lectures/lectures-quizzes',
+    LECTURE_VIDEO: '/lectures/lecture-videos',
+    LECTURE_QUIZ: '/lectures/lecture-quizzes',
 }
 
 /**

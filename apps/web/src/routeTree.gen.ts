@@ -52,6 +52,7 @@ import { Route as NewsIdRouteImport } from './routes/news/$id'
 import { Route as MatricesMyRouteImport } from './routes/matrices/my'
 import { Route as MatricesImportRouteImport } from './routes/matrices/import'
 import { Route as MatricesCreateRouteImport } from './routes/matrices/create'
+import { Route as LecturesIdRouteImport } from './routes/lectures/$id'
 import { Route as InternalTestLoaderRouteImport } from './routes/internal/test-loader'
 import { Route as ExamsMyExamsRouteImport } from './routes/exams/my-exams'
 import { Route as ExamsGenerateRouteImport } from './routes/exams/generate'
@@ -295,6 +296,11 @@ const MatricesCreateRoute = MatricesCreateRouteImport.update({
   path: '/matrices/create',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LecturesIdRoute = LecturesIdRouteImport.update({
+  id: '/lectures/$id',
+  path: '/lectures/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const InternalTestLoaderRoute = InternalTestLoaderRouteImport.update({
   id: '/internal/test-loader',
   path: '/internal/test-loader',
@@ -457,6 +463,7 @@ export interface FileRoutesByFullPath {
   '/exams/generate': typeof ExamsGenerateRoute
   '/exams/my-exams': typeof ExamsMyExamsRoute
   '/internal/test-loader': typeof InternalTestLoaderRoute
+  '/lectures/$id': typeof LecturesIdRoute
   '/matrices/create': typeof MatricesCreateRoute
   '/matrices/import': typeof MatricesImportRoute
   '/matrices/my': typeof MatricesMyRoute
@@ -527,6 +534,7 @@ export interface FileRoutesByTo {
   '/exams/generate': typeof ExamsGenerateRoute
   '/exams/my-exams': typeof ExamsMyExamsRoute
   '/internal/test-loader': typeof InternalTestLoaderRoute
+  '/lectures/$id': typeof LecturesIdRoute
   '/matrices/create': typeof MatricesCreateRoute
   '/matrices/import': typeof MatricesImportRoute
   '/matrices/my': typeof MatricesMyRoute
@@ -598,6 +606,7 @@ export interface FileRoutesById {
   '/exams/generate': typeof ExamsGenerateRoute
   '/exams/my-exams': typeof ExamsMyExamsRoute
   '/internal/test-loader': typeof InternalTestLoaderRoute
+  '/lectures/$id': typeof LecturesIdRoute
   '/matrices/create': typeof MatricesCreateRoute
   '/matrices/import': typeof MatricesImportRoute
   '/matrices/my': typeof MatricesMyRoute
@@ -670,6 +679,7 @@ export interface FileRouteTypes {
     | '/exams/generate'
     | '/exams/my-exams'
     | '/internal/test-loader'
+    | '/lectures/$id'
     | '/matrices/create'
     | '/matrices/import'
     | '/matrices/my'
@@ -740,6 +750,7 @@ export interface FileRouteTypes {
     | '/exams/generate'
     | '/exams/my-exams'
     | '/internal/test-loader'
+    | '/lectures/$id'
     | '/matrices/create'
     | '/matrices/import'
     | '/matrices/my'
@@ -810,6 +821,7 @@ export interface FileRouteTypes {
     | '/exams/generate'
     | '/exams/my-exams'
     | '/internal/test-loader'
+    | '/lectures/$id'
     | '/matrices/create'
     | '/matrices/import'
     | '/matrices/my'
@@ -881,6 +893,7 @@ export interface RootRouteChildren {
   ExamsGenerateRoute: typeof ExamsGenerateRoute
   ExamsMyExamsRoute: typeof ExamsMyExamsRoute
   InternalTestLoaderRoute: typeof InternalTestLoaderRoute
+  LecturesIdRoute: typeof LecturesIdRoute
   MatricesCreateRoute: typeof MatricesCreateRoute
   MatricesImportRoute: typeof MatricesImportRoute
   MatricesMyRoute: typeof MatricesMyRoute
@@ -1219,6 +1232,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatricesCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/lectures/$id': {
+      id: '/lectures/$id'
+      path: '/lectures/$id'
+      fullPath: '/lectures/$id'
+      preLoaderRoute: typeof LecturesIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/internal/test-loader': {
       id: '/internal/test-loader'
       path: '/internal/test-loader'
@@ -1446,6 +1466,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExamsGenerateRoute: ExamsGenerateRoute,
   ExamsMyExamsRoute: ExamsMyExamsRoute,
   InternalTestLoaderRoute: InternalTestLoaderRoute,
+  LecturesIdRoute: LecturesIdRoute,
   MatricesCreateRoute: MatricesCreateRoute,
   MatricesImportRoute: MatricesImportRoute,
   MatricesMyRoute: MatricesMyRoute,

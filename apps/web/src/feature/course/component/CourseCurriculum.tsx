@@ -1,3 +1,4 @@
+import { useNavigate } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { ChevronDown, ChevronUp, PlayCircle } from 'lucide-react'
@@ -11,11 +12,19 @@ interface CourseCurriculumProps {
 const CourseCurriculum: React.FC<CourseCurriculumProps> = ({ courseId }) => {
     const [expandedSections, setExpandedSections] = useState<number[]>([])
     const { data: sections, isLoading, error } = useSectionsByCourse(courseId)
+    const navigate = useNavigate()
 
     const toggleSection = (sectionId: number) => {
         setExpandedSections(prev =>
             prev.includes(sectionId) ? prev.filter(id => id !== sectionId) : [...prev, sectionId],
         )
+    }
+
+    const handleLectureClick = (id: number) => {
+        navigate({
+            to: '/lectures/$id',
+            params: { id: String(id) },
+        })
     }
 
     const expandAll = () => {
@@ -96,6 +105,7 @@ const CourseCurriculum: React.FC<CourseCurriculumProps> = ({ courseId }) => {
                                         section.lectures.map((lecture, index) => (
                                             <div
                                                 key={lecture.id}
+                                                onClick={() => lecture.isPreviewable && handleLectureClick(lecture.id)}
                                                 className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50"
                                             >
                                                 <div className="flex items-center gap-3">
