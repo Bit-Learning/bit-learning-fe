@@ -44,9 +44,38 @@ export type TUserProfile = {
     wallet: TWalletInfo
     oauthProvider: string | null
     oauthId: string | null
+    mfaEnabled: boolean
 }
 
 export type TWalletInfo = {
     id: number
     balance: number
+}
+
+// MFA Types
+export type TTwoFactorAuthResponse = {
+    secret: string
+    qrCodeUrl: string
+    manualEntryKey: string
+}
+
+export type TVerifyTotpRequest = {
+    totpCode: string
+}
+
+export type TLoginWith2FARequest = {
+    email: string
+    password: string
+    totpCode: string
+}
+
+export type TTwoFactorRequiredResponse = {
+    requires2FA: boolean
+    email: string
+    message: string
+}
+
+export type TCompleteTwoFactorRequest = {
+    email: string
+    totpCode: string
 }

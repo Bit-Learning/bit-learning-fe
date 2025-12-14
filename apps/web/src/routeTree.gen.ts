@@ -60,6 +60,7 @@ import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
 import { Route as QuestionsMyRouteImport } from './routes/questions/my'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as SigninRouteImport } from './routes/signin'
+import { Route as Signin2faRouteImport } from './routes/signin-2fa'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as SyllabusesIdEditRouteImport } from './routes/syllabuses/$id/edit'
 import { Route as SyllabusesIdIndexRouteImport } from './routes/syllabuses/$id/index'
@@ -101,6 +102,11 @@ const TermsRoute = TermsRouteImport.update({
 const SignupRoute = SignupRouteImport.update({
     id: '/signup',
     path: '/signup',
+    getParentRoute: () => rootRouteImport,
+} as any)
+const Signin2faRoute = Signin2faRouteImport.update({
+    id: '/signin-2fa',
+    path: '/signin-2fa',
     getParentRoute: () => rootRouteImport,
 } as any)
 const SigninRoute = SigninRouteImport.update({
@@ -438,6 +444,7 @@ export interface FileRoutesByFullPath {
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
     '/signin': typeof SigninRoute
+    '/signin-2fa': typeof Signin2faRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
     '/upload': typeof UploadRoute
@@ -508,6 +515,7 @@ export interface FileRoutesByTo {
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
     '/signin': typeof SigninRoute
+    '/signin-2fa': typeof Signin2faRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
     '/upload': typeof UploadRoute
@@ -579,6 +587,7 @@ export interface FileRoutesById {
     '/privacy': typeof PrivacyRoute
     '/reset-password': typeof ResetPasswordRoute
     '/signin': typeof SigninRoute
+    '/signin-2fa': typeof Signin2faRoute
     '/signup': typeof SignupRoute
     '/terms': typeof TermsRoute
     '/upload': typeof UploadRoute
@@ -651,6 +660,7 @@ export interface FileRouteTypes {
         | '/privacy'
         | '/reset-password'
         | '/signin'
+        | '/signin-2fa'
         | '/signup'
         | '/terms'
         | '/upload'
@@ -721,6 +731,7 @@ export interface FileRouteTypes {
         | '/privacy'
         | '/reset-password'
         | '/signin'
+        | '/signin-2fa'
         | '/signup'
         | '/terms'
         | '/upload'
@@ -791,6 +802,7 @@ export interface FileRouteTypes {
         | '/privacy'
         | '/reset-password'
         | '/signin'
+        | '/signin-2fa'
         | '/signup'
         | '/terms'
         | '/upload'
@@ -862,6 +874,7 @@ export interface RootRouteChildren {
     PrivacyRoute: typeof PrivacyRoute
     ResetPasswordRoute: typeof ResetPasswordRoute
     SigninRoute: typeof SigninRoute
+    Signin2faRoute: typeof Signin2faRoute
     SignupRoute: typeof SignupRoute
     TermsRoute: typeof TermsRoute
     UploadRoute: typeof UploadRoute
@@ -946,6 +959,13 @@ declare module '@tanstack/react-router' {
             path: '/signup'
             fullPath: '/signup'
             preLoaderRoute: typeof SignupRouteImport
+            parentRoute: typeof rootRouteImport
+        }
+        '/signin-2fa': {
+            id: '/signin-2fa'
+            path: '/signin-2fa'
+            fullPath: '/signin-2fa'
+            preLoaderRoute: typeof Signin2faRouteImport
             parentRoute: typeof rootRouteImport
         }
         '/signin': {
@@ -1425,6 +1445,7 @@ const rootRouteChildren: RootRouteChildren = {
     PrivacyRoute: PrivacyRoute,
     ResetPasswordRoute: ResetPasswordRoute,
     SigninRoute: SigninRoute,
+    Signin2faRoute: Signin2faRoute,
     SignupRoute: SignupRoute,
     TermsRoute: TermsRoute,
     UploadRoute: UploadRoute,

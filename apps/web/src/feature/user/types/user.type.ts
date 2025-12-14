@@ -23,6 +23,7 @@ export type TUserProfile = {
     wallet: TWalletInfo
     oauthProvider: string | null
     oauthId: string | null
+    mfaEnabled: boolean
 }
 
 export type TWalletInfo = {
