@@ -1,3 +1,4 @@
+import TwoFactorSettings from '@/feature/auth/component/TwoFactorSettings'
 import { setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { useFetchOrdersByUserId } from '@/feature/order/hook/useOrder'
@@ -915,20 +916,17 @@ function UserProfilePage() {
                             )}
 
                             {activeSection === 'security' && (
-                                <Card>
-                                    <CardContent className="p-6">
-                                        <h3 className="mb-4 text-lg font-semibold">Security Settings</h3>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="text-sm font-medium">Two-Factor Authentication</label>
-                                                <p className="text-muted-foreground text-sm">
-                                                    Add an extra layer of security
-                                                </p>
-                                            </div>
-                                            <Button variant="outline">Enable 2FA</Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                <div className="space-y-4">
+                                    <Card>
+                                        <CardContent className="p-6">
+                                            <h3 className="mb-6 text-lg font-semibold">Security Settings</h3>
+                                            <TwoFactorSettings
+                                                is2FAEnabled={userInfo?.mfaEnabled || false}
+                                                userEmail={userInfo?.email}
+                                            />
+                                        </CardContent>
+                                    </Card>
+                                </div>
                             )}
 
                             {activeSection === 'settings' && (

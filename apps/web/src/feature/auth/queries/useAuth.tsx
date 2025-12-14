@@ -21,7 +21,7 @@ export const authQueryKeys = {
     profile: () => [...authQueryKeys.all, 'profile'] as const,
 }
 
-export function useLogin() {
+export function useLogin(options?: { on2FARequired?: (email: string) => void }) {
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient()
 
@@ -35,6 +35,15 @@ export function useLogin() {
             dispatch(setErrorAction(null))
         },
         onSuccess: (data: any) => {
+            // Check if 2FA is required
+            if (data.requires2FA) {
+                // Call the callback to show 2FA form
+                options?.on2FARequired?.(data.email)
+                dispatch(setIsLoadingAction(false))
+                return
+            }
+
+            // Normal login flow
             setAuthTokens(data.accessToken, data.refreshToken)
             dispatch(setIsAuthenticatedAction(true))
             dispatch(setUserInfoAction(data.user))
