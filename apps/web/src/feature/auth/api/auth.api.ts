@@ -84,3 +84,8 @@ export function Complete2FA(requestBody: {
 }): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.post(`${endpoints.AUTH}/2fa/complete`, requestBody)
 }
+
+// QR Code Login API Functions
+export function GenerateQRToken(): Promise<AxiosResponse<ApiResponse<{ qrToken: string }>, any>> {
+    return api.get(`${endpoints.AUTH}/qr/generate`)
+}
