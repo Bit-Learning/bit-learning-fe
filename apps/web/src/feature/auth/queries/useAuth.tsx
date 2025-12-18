@@ -5,6 +5,7 @@ import { toast } from '@workspace/ui/components/Sonner'
 import {
     ActivateAccount,
     FinishPasswordReset,
+    GitHubOAuth2Login,
     GoogleOAuth2Login,
     Login,
     Logout,
@@ -20,7 +21,7 @@ export const authQueryKeys = {
     profile: () => [...authQueryKeys.all, 'profile'] as const,
 }
 
-export function useLogin() {
+export function useLogin(options?: { on2FARequired?: (email: string) => void }) {
     const dispatch = useAppDispatch()
     const queryClient = useQueryClient()
 
@@ -34,6 +35,15 @@ export function useLogin() {
             dispatch(setErrorAction(null))
         },
         onSuccess: (data: any) => {
+            // Check if 2FA is required
+            if (data.requires2FA) {
+                // Call the callback to show 2FA form
+                options?.on2FARequired?.(data.email)
+                dispatch(setIsLoadingAction(false))
+                return
+            }
+
+            // Normal login flow
             setAuthTokens(data.accessToken, data.refreshToken)
             dispatch(setIsAuthenticatedAction(true))
             dispatch(setUserInfoAction(data.user))
@@ -260,7 +270,7 @@ export function useLogout() {
             dispatch(setErrorAction(null))
             queryClient.clear()
             toast.info({
-                title: 'Đã đăng xuất',
+                title: 'Đăng xuất thành công',
                 description: 'Hẹn gặp lại bạn!',
             })
         }
@@ -299,6 +309,51 @@ export function useGoogleLogin() {
         },
         onError: (error: any) => {
             const errorMessage = error?.response?.data?.message || 'Đăng nhập với Google không thành công'
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Đăng nhập thất bại',
+                description: errorMessage,
+            })
+        },
+        onSettled: () => {
+            dispatch(setIsLoadingAction(false))
+        },
+    })
+}
+
+export function useGitHubLogin() {
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async (code: string) => {
+            const response = await GitHubOAuth2Login(code)
+            return response.data.data
+        },
+        onMutate: () => {
+            dispatch(setIsLoadingAction(true))
+        },
+        onSuccess: (data: any) => {
+            setAuthTokens(data.accessToken, data.refreshToken)
+            dispatch(setIsAuthenticatedAction(true))
+            dispatch(setUserInfoAction(data.user))
+            queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() })
+
+            if (data.isNewUser) {
+                toast.success({
+                    title: 'Đăng nhập thành công!',
+                    description: `Chào mừng ${data.user.username || 'bạn'} đến với Bithub! ${data.message || 'Vui lòng kiểm tra email để lấy mật khẩu tạm thời.'}`,
+                })
+            } else {
+                toast.success({
+                    title: 'Đăng nhập thành công',
+                    description: `Chào mừng ${data.user.username || 'bạn'} trở lại!`,
+                })
+            }
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || 'Đăng nhập với GitHub không thành công'
             dispatch(setErrorAction(errorMessage))
 
             toast.error({

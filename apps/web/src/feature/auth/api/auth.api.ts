@@ -48,3 +48,44 @@ export function GoogleOAuth2Login(code: string): Promise<AxiosResponse<ApiRespon
 export function GetGoogleOAuth2Config(): Promise<AxiosResponse<ApiResponse<any>, any>> {
     return api.get(`${endpoints.AUTH}/oauth2/google/config`)
 }
+
+export function GitHubOAuth2Login(code: string): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/oauth2/github`, { code })
+}
+
+export function GetGitHubOAuth2Config(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.get(`${endpoints.AUTH}/oauth2/github/config`)
+}
+
+// MFA API Functions
+export function Enable2FA(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/2fa/enable`)
+}
+
+export function Verify2FA(requestBody: { totpCode: string }): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/2fa/verify`, requestBody)
+}
+
+export function Disable2FA(): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.delete(`${endpoints.AUTH}/2fa/disable`)
+}
+
+export function LoginWith2FA(requestBody: {
+    email: string
+    password: string
+    totpCode: string
+}): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/login/2fa`, requestBody)
+}
+
+export function Complete2FA(requestBody: {
+    email: string
+    totpCode: string
+}): Promise<AxiosResponse<ApiResponse<any>, any>> {
+    return api.post(`${endpoints.AUTH}/2fa/complete`, requestBody)
+}
+
+// QR Code Login API Functions
+export function GenerateQRToken(): Promise<AxiosResponse<ApiResponse<{ qrToken: string }>, any>> {
+    return api.get(`${endpoints.AUTH}/qr/generate`)
+}
