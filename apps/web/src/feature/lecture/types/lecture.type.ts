@@ -16,6 +16,11 @@ export interface LectureDetail {
     isDeleted: boolean
 }
 
+export interface LectureTextDetail {
+    lecture: LectureDetail
+    content: string
+}
+
 export interface AnswerDetail {
     id: number
     answerText: string

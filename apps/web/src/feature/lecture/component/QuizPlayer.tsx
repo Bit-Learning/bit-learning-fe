@@ -13,8 +13,6 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId }) => {
     const [submitted, setSubmitted] = useState(false)
     const [score, setScore] = useState(0)
 
-    console.log(quizData)
-
     const handleSubmit = () => {
         if (!quizData) return
 

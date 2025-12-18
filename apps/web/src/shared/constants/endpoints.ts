@@ -9,6 +9,7 @@ export const endpoints = {
     LECTURES: '/lectures',
     LECTURE_VIDEO: '/lectures/lecture-videos',
     LECTURE_QUIZ: '/lectures/lecture-quizzes',
+    LECTURE_TEXT: '/lectures/lecture-texts',
 }
 
 /**

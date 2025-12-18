@@ -20,6 +20,19 @@ export const useLectureQuiz = (id: number) => {
     })
 }
 
+export const useLectureText = (id: number) => {
+    return useQuery({
+        queryKey: ['text'],
+        queryFn: async () => {
+            const response = await lectureApi.getLectureTextById(id)
+            return response.data.data
+        },
+        enabled: !!id,
+        staleTime: 5 * 60 * 1000,
+        gcTime: 10 * 60 * 1000,
+    })
+}
+
 export const useVideoUrls = (lectureId: number) => {
     const m3u8Url = lectureApi.getVideoM3u8Url(lectureId)
 

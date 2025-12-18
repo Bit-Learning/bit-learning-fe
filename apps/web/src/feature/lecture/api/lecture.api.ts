@@ -2,7 +2,7 @@ import api from '@/shared/api/api'
 import { ApiResponse } from '@/shared/api/api.type'
 import { endpoints } from '@/shared/constants/endpoints'
 import { AxiosResponse } from 'axios'
-import { LectureQuizDetail } from '../types/lecture.type'
+import { LectureQuizDetail, LectureTextDetail } from '../types/lecture.type'
 
 export const lectureApi = {
     getVideoM3u8Url(id: number): string {
@@ -31,5 +31,8 @@ export const lectureApi = {
     },
     getLectureQuizById(id: number): Promise<AxiosResponse<ApiResponse<LectureQuizDetail>>> {
         return api.get(`${endpoints.LECTURE_QUIZ}/${id}`)
+    },
+    getLectureTextById(id: number): Promise<AxiosResponse<ApiResponse<LectureTextDetail>>> {
+        return api.get(`${endpoints.LECTURE_TEXT}/${id}`)
     },
 }

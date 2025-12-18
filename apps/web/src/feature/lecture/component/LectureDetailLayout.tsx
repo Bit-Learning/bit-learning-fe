@@ -6,6 +6,7 @@ import { useSectionsByCourse } from '../queries/useSection'
 import { LectureType } from '../types/lecture.type'
 import CourseSidebar from './CourseSidebar'
 import QuizPlayer from './QuizPlayer'
+import TextContent from './TextContent'
 import VideoPlayer from './VideoPlayer'
 
 interface LectureDetailLayoutProps {
@@ -115,6 +116,8 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                             <VideoPlayer lectureId={lectureId} />
                         ) : currentLecture?.type === LectureType.QUIZ ? (
                             <QuizPlayer lectureId={lectureId} />
+                        ) : currentLecture?.type === LectureType.TEXT ? (
+                            <TextContent lectureId={lectureId} />
                         ) : (
                             <div className="flex h-full items-center justify-center text-gray-400">
                                 <p>Nội dung đang được cập nhật</p>
