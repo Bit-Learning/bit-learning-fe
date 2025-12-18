@@ -6,11 +6,11 @@ import { LectureQuizDetail } from '../types/lecture.type'
 
 export const lectureApi = {
     getVideoM3u8Url(id: number): string {
-        return `${api.defaults.baseURL}/lecture-videos/${id}/m3u8`
+        return `${api.defaults.baseURL}lectures/lecture-videos/${id}/m3u8`
     },
 
     getVideoSegmentUrl(id: number, segment: string): string {
-        return `${api.defaults.baseURL}/lecture-videos/${id}/${segment}`
+        return `${api.defaults.baseURL}lectures/lecture-videos/${id}/${segment}`
     },
     fetchVideoM3u8(id: number): Promise<AxiosResponse<string>> {
         return api.get(`${endpoints.LECTURE_VIDEO}/${id}/m3u8`, {
