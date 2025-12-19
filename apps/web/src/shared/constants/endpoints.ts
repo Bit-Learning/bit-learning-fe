@@ -4,6 +4,12 @@ export const endpoints = {
     PAYMENT: '/payment',
     SLIDE: '/slides',
     CHAT: '/slides/chat',
+    COURSES: '/courses',
+    SECTIONS: '/sections',
+    LECTURES: '/lectures',
+    LECTURE_VIDEO: '/lectures/lecture-videos',
+    LECTURE_QUIZ: '/lectures/lecture-quizzes',
+    LECTURE_TEXT: '/lectures/lecture-texts',
 }
 
 /**
