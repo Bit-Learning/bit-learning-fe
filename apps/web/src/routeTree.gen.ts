@@ -73,6 +73,9 @@ import { Route as PresentationsIdViewRouteImport } from './routes/presentations/
 import { Route as PresentationsIdPresenterRouteImport } from './routes/presentations/$id/presenter'
 import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
+import { Route as MentorCourseListRouteImport } from './routes/mentor/course/list'
+import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/create'
+import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
 import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.generate'
 import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
 import { Route as CoursesGradeGradeRouteImport } from './routes/courses/grade/$grade'
@@ -406,6 +409,21 @@ const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   path: '/mindmaps/$userId/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MentorCourseListRoute = MentorCourseListRouteImport.update({
+  id: '/mentor/course/list',
+  path: '/mentor/course/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorCourseCreateRoute = MentorCourseCreateRouteImport.update({
+  id: '/mentor/course/create',
+  path: '/mentor/course/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorCourseIdRoute = MentorCourseIdRouteImport.update({
+  id: '/mentor/course/$id',
+  path: '/mentor/course/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MatricesIdGenerateRoute = MatricesIdGenerateRouteImport.update({
   id: '/matrices/$id/generate',
   path: '/matrices/$id/generate',
@@ -503,6 +521,9 @@ export interface FileRoutesByFullPath {
   '/courses/grade/$grade': typeof CoursesGradeGradeRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
+  '/mentor/course/$id': typeof MentorCourseIdRoute
+  '/mentor/course/create': typeof MentorCourseCreateRoute
+  '/mentor/course/list': typeof MentorCourseListRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
@@ -576,6 +597,9 @@ export interface FileRoutesByTo {
   '/courses/grade/$grade': typeof CoursesGradeGradeRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
+  '/mentor/course/$id': typeof MentorCourseIdRoute
+  '/mentor/course/create': typeof MentorCourseCreateRoute
+  '/mentor/course/list': typeof MentorCourseListRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
@@ -650,6 +674,9 @@ export interface FileRoutesById {
   '/courses/grade/$grade': typeof CoursesGradeGradeRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
+  '/mentor/course/$id': typeof MentorCourseIdRoute
+  '/mentor/course/create': typeof MentorCourseCreateRoute
+  '/mentor/course/list': typeof MentorCourseListRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
@@ -725,6 +752,9 @@ export interface FileRouteTypes {
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
+    | '/mentor/course/$id'
+    | '/mentor/course/create'
+    | '/mentor/course/list'
     | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
@@ -798,6 +828,9 @@ export interface FileRouteTypes {
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
+    | '/mentor/course/$id'
+    | '/mentor/course/create'
+    | '/mentor/course/list'
     | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
@@ -871,6 +904,9 @@ export interface FileRouteTypes {
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
+    | '/mentor/course/$id'
+    | '/mentor/course/create'
+    | '/mentor/course/list'
     | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
@@ -945,6 +981,9 @@ export interface RootRouteChildren {
   CoursesGradeGradeRoute: typeof CoursesGradeGradeRoute
   MatricesIdEditRoute: typeof MatricesIdEditRoute
   MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
+  MentorCourseIdRoute: typeof MentorCourseIdRoute
+  MentorCourseCreateRoute: typeof MentorCourseCreateRoute
+  MentorCourseListRoute: typeof MentorCourseListRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
   QuestionsIdEditRoute: typeof QuestionsIdEditRoute
   SyllabusesIdEditRoute: typeof SyllabusesIdEditRoute
@@ -1405,6 +1444,27 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mentor/course/list': {
+      id: '/mentor/course/list'
+      path: '/mentor/course/list'
+      fullPath: '/mentor/course/list'
+      preLoaderRoute: typeof MentorCourseListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/course/create': {
+      id: '/mentor/course/create'
+      path: '/mentor/course/create'
+      fullPath: '/mentor/course/create'
+      preLoaderRoute: typeof MentorCourseCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/course/$id': {
+      id: '/mentor/course/$id'
+      path: '/mentor/course/$id'
+      fullPath: '/mentor/course/$id'
+      preLoaderRoute: typeof MentorCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/matrices/$id/generate': {
       id: '/matrices/$id/generate'
       path: '/matrices/$id/generate'
@@ -1534,6 +1594,9 @@ const rootRouteChildren: RootRouteChildren = {
   CoursesGradeGradeRoute: CoursesGradeGradeRoute,
   MatricesIdEditRoute: MatricesIdEditRoute,
   MatricesIdGenerateRoute: MatricesIdGenerateRoute,
+  MentorCourseIdRoute: MentorCourseIdRoute,
+  MentorCourseCreateRoute: MentorCourseCreateRoute,
+  MentorCourseListRoute: MentorCourseListRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
   QuestionsIdEditRoute: QuestionsIdEditRoute,
   SyllabusesIdEditRoute: SyllabusesIdEditRoute,
