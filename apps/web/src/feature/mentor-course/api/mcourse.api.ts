@@ -5,8 +5,27 @@ import { AxiosResponse } from 'axios'
 import { CreateCourseRequest, UpdateCourseRequest } from '../types/mcourse.type'
 
 export const mcourseApi = {
-    createCourse(data: CreateCourseRequest): Promise<AxiosResponse<ApiResponse<void>>> {
-        return api.post(endpoints.COURSES, data)
+    createCourse(data: CreateCourseRequest, thumbnail: File): Promise<AxiosResponse<ApiResponse<void>>> {
+        const formData = new FormData()
+        const requestBlob = new Blob([JSON.stringify(data)], { type: 'application/json' })
+        formData.append('request', requestBlob)
+        formData.append('thumbnail', thumbnail)
+
+        return api.post(endpoints.COURSES, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data',
+            },
+        })
+    },
+
+    getCoursesByInstructor(
+        instructorId: number,
+        page: number = 0,
+        size: number = 10,
+    ): Promise<AxiosResponse<ApiResponse<any>>> {
+        return api.get(`${endpoints.COURSES}/instructor/${instructorId}`, {
+            params: { page, size },
+        })
     },
 
     updateCourse(id: number, data: UpdateCourseRequest): Promise<AxiosResponse<ApiResponse<void>>> {

@@ -1,20 +1,27 @@
-import { useCoursesByGrade, useCourseState } from '@/feature/course/queries/useCourse'
+import { CoursePreview } from '@/feature/course/types/course.type'
 import { Link } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Card } from '@workspace/ui/components/Card'
 import { Input } from '@workspace/ui/components/Input'
-import { BookOpen, Edit, Eye, EyeOff, Plus, Search, Trash2, Users } from 'lucide-react'
+import { BookOpen, Edit, Eye, EyeOff, Plus, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
-import { useDeleteCourse, useHideOrShowCourse } from '../queries/useCourse'
+import { useCoursesByInstructor, useDeleteCourse, useHideOrShowCourse } from '../queries/useCourse'
 
-export const CoursesListView = () => {
+interface CourseListViewProps {
+    instructorId: number
+}
+
+export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
     const [searchQuery, setSearchQuery] = useState('')
-    const { pagination } = useCourseState()
-    const { data: coursesData, isLoading } = useCoursesByGrade(10)
+    const [page, setPage] = useState(0)
+    const [size] = useState(10)
+
+    const { data: coursesData, isLoading } = useCoursesByInstructor(instructorId, page, size)
     const deleteMutation = useDeleteCourse()
     const hideMutation = useHideOrShowCourse()
 
     const courses = Array.isArray(coursesData?.data) ? coursesData.data : []
+    const totalPages = coursesData?.data?.totalPages || 0
 
     const handleDelete = (id: number) => {
         if (confirm('Bạn có chắc muốn xóa khóa học này?')) {
@@ -26,7 +33,9 @@ export const CoursesListView = () => {
         hideMutation.mutate({ id, isHidden: !isHidden })
     }
 
-    const filteredCourses = courses.filter(course => course.title.toLowerCase().includes(searchQuery.toLowerCase()))
+    const filteredCourses = courses.filter((course: { title: string }) =>
+        course.title.toLowerCase().includes(searchQuery.toLowerCase()),
+    )
 
     return (
         <div className="space-y-6">
@@ -75,71 +84,98 @@ export const CoursesListView = () => {
                     </Link>
                 </Card>
             ) : (
-                <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
-                    {filteredCourses.map(course => (
-                        <Card key={course.id} className="overflow-hidden transition-shadow hover:shadow-lg">
-                            <div className="bg-linear-to-br flex aspect-video items-center justify-center from-blue-500 to-indigo-600">
-                                {course.thumbnail ? (
-                                    <img
-                                        src={course.thumbnail}
-                                        alt={course.title}
-                                        className="h-full w-full object-cover"
-                                    />
-                                ) : (
-                                    <BookOpen className="h-16 w-16 text-white/50" />
-                                )}
-                            </div>
-
-                            <div className="space-y-3 p-4">
-                                <div className="flex items-start justify-between">
-                                    <div className="flex-1">
-                                        <h3 className="line-clamp-2 text-lg font-semibold">{course.title}</h3>
-                                        <p className="mt-1 line-clamp-2 text-sm text-gray-600">{course.subtitle}</p>
-                                    </div>
+                <>
+                    <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+                        {filteredCourses.map((course: CoursePreview) => (
+                            <Card key={course.id} className="overflow-hidden py-0 transition-shadow hover:shadow-lg">
+                                <div className="bg-linear-to-br h-70 flex aspect-video items-center justify-center from-blue-500 to-indigo-600">
+                                    {course.thumbnailUrl ? (
+                                        <img
+                                            src={course.thumbnailUrl}
+                                            alt={course.title}
+                                            className="h-full w-full object-cover"
+                                        />
+                                    ) : (
+                                        <BookOpen className="h-16 w-16 text-white/50" />
+                                    )}
                                 </div>
 
-                                <div className="flex items-center gap-4 text-sm text-gray-600">
-                                    <div className="flex items-center gap-1">
-                                        <Users className="h-4 w-4" />
-                                        <span>0 học viên</span>
+                                <div className="space-y-3 p-4">
+                                    <div className="flex items-start justify-between">
+                                        <div className="flex-1">
+                                            <h3 className="line-clamp-2 text-lg font-semibold">{course.title}</h3>
+                                        </div>
                                     </div>
-                                    <div className="flex items-center gap-1">
-                                        <BookOpen className="h-4 w-4" />
-                                        <span>Lớp {course.grade}</span>
+
+                                    <div className="flex items-center gap-4 text-sm text-gray-600">
+                                        <div className="flex items-center gap-1">
+                                            <BookOpen className="h-4 w-4" />
+                                            <span>Lớp {course.grade}</span>
+                                        </div>
                                     </div>
-                                </div>
 
-                                <div className="text-2xl font-bold text-blue-600">
-                                    {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString('vi-VN')} ₫`}
-                                </div>
+                                    <div className="text-2xl font-bold text-blue-600">
+                                        {course.price === 0 ? 'Miễn phí' : `${course.price.toLocaleString('vi-VN')} ₫`}
+                                    </div>
 
-                                <div className="flex items-center gap-2 border-t pt-3">
-                                    <Link to="/mentor/course/$id" params={{ id: course.id }} className="flex-1">
-                                        <Button variant="outline" className="w-full" size="sm">
-                                            <Edit className="mr-2 h-4 w-4" />
-                                            Chi tiết
+                                    <div className="flex items-center gap-2 border-t pt-3">
+                                        <Link
+                                            to="/mentor/course/$id"
+                                            params={{ id: String(course.id) }}
+                                            className="flex-1"
+                                        >
+                                            <Button variant="outline" className="w-full" size="sm">
+                                                <Edit className="mr-2 h-4 w-4" />
+                                                Chi tiết
+                                            </Button>
+                                        </Link>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleToggleHide(course.id, course.isDeleted)}
+                                        >
+                                            {course.isDeleted ? (
+                                                <Eye className="h-4 w-4" />
+                                            ) : (
+                                                <EyeOff className="h-4 w-4" />
+                                            )}
                                         </Button>
-                                    </Link>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleToggleHide(course.id, course.isHidden)}
-                                    >
-                                        {course.isHidden ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                                    </Button>
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => handleDelete(course.id)}
-                                        isDisabled={deleteMutation.isPending}
-                                    >
-                                        <Trash2 className="h-4 w-4 text-red-500" />
-                                    </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => handleDelete(course.id)}
+                                            isDisabled={deleteMutation.isPending}
+                                        >
+                                            <Trash2 className="h-4 w-4 text-red-500" />
+                                        </Button>
+                                    </div>
                                 </div>
-                            </div>
-                        </Card>
-                    ))}
-                </div>
+                            </Card>
+                        ))}
+                    </div>
+
+                    {totalPages > 1 && (
+                        <div className="flex justify-center gap-2">
+                            <Button
+                                variant="outline"
+                                onClick={() => setPage(p => Math.max(0, p - 1))}
+                                isDisabled={page === 0}
+                            >
+                                Trước
+                            </Button>
+                            <span className="flex items-center px-4">
+                                Trang {page + 1} / {totalPages}
+                            </span>
+                            <Button
+                                variant="outline"
+                                onClick={() => setPage(p => Math.min(totalPages - 1, p + 1))}
+                                isDisabled={page >= totalPages - 1}
+                            >
+                                Sau
+                            </Button>
+                        </div>
+                    )}
+                </>
             )}
         </div>
     )

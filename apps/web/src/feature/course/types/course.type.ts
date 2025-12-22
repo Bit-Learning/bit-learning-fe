@@ -28,6 +28,7 @@ export interface CoursePreview {
     level: CourseLevel
     grade: number
     price: number
+    isDeleted: boolean
 }
 
 export interface CourseDetail {

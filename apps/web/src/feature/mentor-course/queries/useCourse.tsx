@@ -1,4 +1,4 @@
-import { useMutation, useQueryClient } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@workspace/ui/components/Sonner'
 import { mcourseApi } from '../api/mcourse.api'
 import { CreateCourseRequest, UpdateCourseRequest } from '../types/mcourse.type'
@@ -6,13 +6,15 @@ import { CreateCourseRequest, UpdateCourseRequest } from '../types/mcourse.type'
 export const mcourseKeys = {
     all: ['mcourses'] as const,
     detail: (id: number) => ['mcourses', 'detail', id] as const,
+    byInstructor: (instructorId: number) => ['mcourses', 'instructor', instructorId] as const,
 }
 
 export const useCreateCourse = () => {
     const queryClient = useQueryClient()
 
     return useMutation({
-        mutationFn: (data: CreateCourseRequest) => mcourseApi.createCourse(data),
+        mutationFn: ({ data, thumbnail }: { data: CreateCourseRequest; thumbnail: File }) =>
+            mcourseApi.createCourse(data, thumbnail),
         onSuccess: response => {
             queryClient.invalidateQueries({ queryKey: mcourseKeys.all })
             toast.success({
@@ -29,6 +31,16 @@ export const useCreateCourse = () => {
     })
 }
 
+export const useCoursesByInstructor = (instructorId: number, page: number = 0, size: number = 10) => {
+    return useQuery({
+        queryKey: [...mcourseKeys.byInstructor(instructorId), page, size],
+        queryFn: async () => {
+            const response = await mcourseApi.getCoursesByInstructor(instructorId, page, size)
+            return response.data
+        },
+        enabled: !!instructorId,
+    })
+}
 export const useUpdateCourse = () => {
     const queryClient = useQueryClient()
 

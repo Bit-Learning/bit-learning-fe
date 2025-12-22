@@ -14,6 +14,7 @@ import { CreateCourseRequest, Language } from '../types/mcourse.type'
 
 export const CreateCourseForm = () => {
     const [thumbnailPreview, setThumbnailPreview] = useState<string>('')
+    const [thumbnailFile, setThumbnailFile] = useState<File | null>(null)
     const createCourseMutation = useCreateCourse()
     const navigate = useNavigate()
 
@@ -39,6 +40,7 @@ export const CreateCourseForm = () => {
     const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const file = e.target.files?.[0]
         if (file) {
+            setThumbnailFile(file)
             const reader = new FileReader()
             reader.onloadend = () => {
                 setThumbnailPreview(reader.result as string)
@@ -47,9 +49,18 @@ export const CreateCourseForm = () => {
         }
     }
 
+    const handleRemoveThumbnail = () => {
+        setThumbnailPreview('')
+        setThumbnailFile(null)
+    }
+
     const onSubmit = async (data: CreateCourseRequest) => {
+        if (!thumbnailFile) {
+            return
+        }
+
         try {
-            await createCourseMutation.mutateAsync(data)
+            await createCourseMutation.mutateAsync({ data, thumbnail: thumbnailFile })
             navigate({ to: '/mentor/course/list' })
         } catch (error) {
             console.error('Failed to create course:', error)
@@ -77,6 +88,7 @@ export const CreateCourseForm = () => {
                             className={cn(
                                 'relative mt-2 cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors hover:border-blue-400',
                                 thumbnailPreview ? 'border-blue-400' : 'border-gray-300',
+                                !thumbnailFile && 'border-red-300',
                             )}
                         >
                             {thumbnailPreview ? (
@@ -87,7 +99,7 @@ export const CreateCourseForm = () => {
                                         variant="outline"
                                         size="sm"
                                         className="absolute right-2 top-2"
-                                        onClick={() => setThumbnailPreview('')}
+                                        onClick={handleRemoveThumbnail}
                                     >
                                         <X className="h-4 w-4" />
                                     </Button>
@@ -106,6 +118,7 @@ export const CreateCourseForm = () => {
                                 onChange={handleThumbnailChange}
                             />
                         </div>
+                        {!thumbnailFile && <p className="mt-1 text-sm text-red-500">Ảnh bìa là bắt buộc</p>}
                     </div>
 
                     <div className="col-span-2">
@@ -251,7 +264,11 @@ export const CreateCourseForm = () => {
                             Hủy
                         </Button>
                     </Link>
-                    <Button type="submit" isDisabled={createCourseMutation.isPending} className="min-w-[120px]">
+                    <Button
+                        type="submit"
+                        isDisabled={createCourseMutation.isPending || !thumbnailFile}
+                        className="min-w-[120px]"
+                    >
                         {createCourseMutation.isPending ? 'Đang tạo...' : 'Tạo khóa học'}
                     </Button>
                 </div>
