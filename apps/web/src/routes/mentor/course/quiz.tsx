@@ -1,9 +1,9 @@
-import CreateQuizPage from '@/feature/mentor-course/pages/CreateQuizPage'
+import QuizPage from '@/feature/mentor-course/pages/QuizPage'
 import { useLayout } from '@/shared/context/layout-context'
 import { createFileRoute } from '@tanstack/react-router'
 import { useEffect } from 'react'
 
-const CreateQuizPageWrapper = () => {
+const QuizPageWrapper = () => {
     const { setLayoutConfig } = useLayout()
 
     useEffect(() => {
@@ -14,9 +14,9 @@ const CreateQuizPageWrapper = () => {
         }
     }, [setLayoutConfig])
 
-    return <CreateQuizPage />
+    return <QuizPage />
 }
 
 export const Route = createFileRoute('/mentor/course/quiz')({
-    component: CreateQuizPageWrapper,
+    component: QuizPageWrapper,
 })

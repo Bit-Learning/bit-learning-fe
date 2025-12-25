@@ -12,3 +12,11 @@ export interface UpdateSectionRequest {
     isPublished?: boolean
     orderIndex: number
 }
+
+export interface SectionDetail {
+    id: number
+    title: string
+    description?: string
+    isPublished: boolean
+    orderIndex: number
+}

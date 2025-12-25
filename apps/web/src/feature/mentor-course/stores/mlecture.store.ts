@@ -1,40 +1,50 @@
 import type { RootState } from '@/shared/redux/store'
-import type { PayloadAction } from '@reduxjs/toolkit'
-import { createSlice } from '@reduxjs/toolkit'
+import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
-export type TMLectureState = {
-    createQuizContext: {
-        sectionId: number | null
-        courseId: number | null
-    } | null
+interface CreateQuizContext {
+    sectionId: number
+    courseId: number
 }
 
-const mlectureInitialState: TMLectureState = {
+interface EditQuizContext {
+    sectionId: number
+    courseId: number
+    lectureId: number
+    orderIndex: number
+}
+
+interface MLectureState {
+    createQuizContext: CreateQuizContext | null
+    editQuizContext: EditQuizContext | null
+}
+
+const initialState: MLectureState = {
     createQuizContext: null,
+    editQuizContext: null,
 }
 
-const setCreateQuizContext = (
-    state: TMLectureState,
-    action: PayloadAction<{ sectionId: number; courseId: number } | null>,
-) => {
-    state.createQuizContext = action.payload
-}
-
-const resetMLectureState = () => {
-    return mlectureInitialState
-}
-
-export const mlecture = createSlice({
+const mlectureSlice = createSlice({
     name: 'mlecture',
-    initialState: mlectureInitialState,
+    initialState,
     reducers: {
-        setCreateQuizContextAction: setCreateQuizContext,
-        resetMLectureStateAction: resetMLectureState,
+        setCreateQuizContextAction: (state, action: PayloadAction<CreateQuizContext>) => {
+            state.createQuizContext = action.payload
+            state.editQuizContext = null
+        },
+        setEditQuizContextAction: (state, action: PayloadAction<EditQuizContext>) => {
+            state.editQuizContext = action.payload
+            state.createQuizContext = null
+        },
+        resetMLectureStateAction: state => {
+            state.createQuizContext = null
+            state.editQuizContext = null
+        },
     },
 })
 
-export const { setCreateQuizContextAction, resetMLectureStateAction } = mlecture.actions
+export const { setCreateQuizContextAction, setEditQuizContextAction, resetMLectureStateAction } = mlectureSlice.actions
 
 export const selectCreateQuizContext = (state: RootState) => state.mlecture.createQuizContext
+export const selectEditQuizContext = (state: RootState) => state.mlecture.editQuizContext
 
-export default mlecture.reducer
+export default mlectureSlice.reducer

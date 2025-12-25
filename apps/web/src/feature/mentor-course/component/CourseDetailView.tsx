@@ -1,6 +1,8 @@
 import { useCourseDetail } from '@/feature/course/queries/useCourse'
 import { useSectionsByCourse } from '@/feature/lecture/queries/useSection'
-import { Link } from '@tanstack/react-router'
+import { LectureDetail } from '@/feature/lecture/types/lecture.type'
+import { useAppDispatch } from '@/shared/redux/store'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
 import { Card } from '@workspace/ui/components/Card'
@@ -18,27 +20,47 @@ import {
     GripVertical,
     HelpCircle,
     Plus,
+    Settings,
     Trash2,
     Video,
 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useDeleteLecture } from '../queries/useLecture'
 import { useCreateSection, useDeleteSection } from '../queries/useSection'
+import { setEditQuizContextAction } from '../stores/mlecture.store'
+import { SectionDetail } from '../types/msection.api'
 import { CreateLectureModal } from './CreateLectureModal'
+import { EditCourseModal } from './EditCourseModal'
+import { EditLectureModal } from './EditLectureModal'
+import { EditSectionModal } from './EditSectionModal'
+import { LectureDetailModal } from './LectureDetailModal'
 
 interface CourseDetailViewProps {
     courseId: number
 }
 
+type ModalState =
+    | { type: 'none' }
+    | { type: 'create-lecture'; sectionId: number }
+    | { type: 'view-lecture'; lecture: LectureDetail }
+    | { type: 'edit-lecture'; lecture: LectureDetail }
+    | { type: 'edit-section'; section: SectionDetail }
+    | { type: 'edit-course' }
+
 export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
     const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set())
     const [isAddingSection, setIsAddingSection] = useState(false)
-    const [selectedSectionId, setSelectedSectionId] = useState<number | null>(null)
+    const [modalState, setModalState] = useState<ModalState>({ type: 'none' })
 
-    const { data: course, isLoading: courseLoading } = useCourseDetail(courseId)
-    const { data: sections, isLoading: sectionsLoading } = useSectionsByCourse(courseId)
+    const navigate = useNavigate()
+    const dispatch = useAppDispatch()
+
+    const { data: course, isLoading: courseLoading, refetch: refetchCourse } = useCourseDetail(courseId)
+    const { data: sections, isLoading: sectionsLoading, refetch: refetchSections } = useSectionsByCourse(courseId)
     const createSectionMutation = useCreateSection()
     const deleteSectionMutation = useDeleteSection()
+    const deleteLectureMutation = useDeleteLecture()
 
     const sectionForm = useForm<{ title: string; description: string }>({
         defaultValues: { title: '', description: '' },
@@ -76,6 +98,77 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
         }
     }
 
+    const handleDeleteLecture = async (lectureId: number) => {
+        if (confirm('Bạn có chắc muốn xóa bài học này?')) {
+            try {
+                await deleteLectureMutation.mutateAsync(lectureId)
+                refetchSections()
+            } catch (error) {
+                console.error('Failed to delete lecture:', error)
+            }
+        }
+    }
+
+    const closeModal = () => setModalState({ type: 'none' })
+
+    const handleViewLecture = (lecture: LectureDetail) => {
+        setModalState({ type: 'view-lecture', lecture })
+    }
+
+    const handleEditLecture = (lecture: LectureDetail) => {
+        if (lecture.type === 'QUIZ') {
+            // Quiz -> navigate to QuizForm page
+            dispatch(
+                setEditQuizContextAction({
+                    sectionId: lecture.sectionId,
+                    courseId: courseId,
+                    lectureId: lecture.id,
+                    orderIndex: lecture.orderIndex,
+                }),
+            )
+            navigate({ to: '/mentor/course/quiz' })
+        } else {
+            // Video/Text -> open modal
+            setModalState({ type: 'edit-lecture', lecture })
+        }
+    }
+
+    const handleEditSection = (section: SectionDetail) => {
+        setModalState({ type: 'edit-section', section })
+    }
+
+    const handleEditFromView = () => {
+        if (modalState.type === 'view-lecture') {
+            const lecture = modalState.lecture
+            if (lecture.type === 'QUIZ') {
+                dispatch(
+                    setEditQuizContextAction({
+                        sectionId: lecture.sectionId,
+                        courseId: courseId,
+                        lectureId: lecture.id,
+                        orderIndex: lecture.orderIndex,
+                    }),
+                )
+                navigate({ to: '/mentor/course/quiz' })
+                closeModal()
+            } else {
+                setModalState({ type: 'edit-lecture', lecture })
+            }
+        }
+    }
+
+    const handleSectionUpdated = () => {
+        refetchSections()
+    }
+
+    const handleLectureUpdated = () => {
+        refetchSections()
+    }
+
+    const handleCourseUpdated = () => {
+        refetchCourse()
+    }
+
     if (courseLoading) {
         return (
             <div className="py-12 text-center">
@@ -96,18 +189,28 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
     return (
         <div className="space-y-4">
             <Link to="/mentor/course/list">
-                <Button variant="outline" size="sm">
-                    <ArrowLeft className="mr-2 h-4 w-4" />
-                    Quay lại
+                <Button
+                    variant="outline"
+                    size="lg"
+                    className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+                >
+                    <ArrowLeft className="h-4 w-4" />
+                    <span>Quay lại danh sách</span>
                 </Button>
             </Link>
-            <div className="flex items-center justify-between">
-                <div className="flex items-center gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold">{course.title}</h1>
-                        <p className="mt-1 text-gray-600">{course.subtitle}</p>
-                    </div>
+
+            <div className="mt-2 flex items-center justify-between">
+                <div>
+                    <h1 className="text-3xl font-bold">{course.title}</h1>
+                    <p className="mt-1 text-gray-600">{course.subtitle}</p>
                 </div>
+                <Button
+                    onClick={() => setModalState({ type: 'edit-course' })}
+                    className="bg-linear-to-r gap-2 from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                >
+                    <Settings className="h-4 w-4" />
+                    Chỉnh sửa khóa học
+                </Button>
             </div>
 
             <Card className="p-6">
@@ -169,7 +272,6 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                             </FormItem>
                                         )}
                                     />
-
                                     <FormField
                                         control={sectionForm.control}
                                         name="description"
@@ -186,7 +288,6 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                             </FormItem>
                                         )}
                                     />
-
                                     <div className="flex gap-2">
                                         <Button type="submit" size="sm" isDisabled={createSectionMutation.isPending}>
                                             {createSectionMutation.isPending ? 'Đang thêm...' : 'Thêm chương'}
@@ -250,6 +351,16 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                             size="sm"
                                             onClick={e => {
                                                 e.stopPropagation()
+                                                handleEditSection(section as SectionDetail)
+                                            }}
+                                        >
+                                            <Edit className="h-4 w-4" />
+                                        </Button>
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={e => {
+                                                e.stopPropagation()
                                                 handleDeleteSection(section.id)
                                             }}
                                             isDisabled={deleteSectionMutation.isPending}
@@ -270,7 +381,9 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                             variant="outline"
                                             size="sm"
                                             className="w-full"
-                                            onClick={() => setSelectedSectionId(section.id)}
+                                            onClick={() =>
+                                                setModalState({ type: 'create-lecture', sectionId: section.id })
+                                            }
                                         >
                                             <Plus className="mr-2 h-4 w-4" />
                                             Thêm bài học
@@ -313,14 +426,31 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            <Badge variant="outline" className="text-xs">
-                                                                <Eye className="mr-1 h-4 w-3" />
-                                                                Xem chi tiết
-                                                            </Badge>
-                                                            <Button variant="outline" size="sm">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    handleViewLecture(lecture as LectureDetail)
+                                                                }
+                                                            >
+                                                                <Eye className="mr-1 h-4 w-4" />
+                                                                Xem
+                                                            </Button>
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() =>
+                                                                    handleEditLecture(lecture as LectureDetail)
+                                                                }
+                                                            >
                                                                 <Edit className="h-4 w-4" />
                                                             </Button>
-                                                            <Button variant="outline" size="sm">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleDeleteLecture(lecture.id)}
+                                                                isDisabled={deleteLectureMutation.isPending}
+                                                            >
                                                                 <Trash2 className="h-4 w-4 text-red-500" />
                                                             </Button>
                                                         </div>
@@ -336,12 +466,25 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                 </div>
             </Card>
 
-            {selectedSectionId && (
-                <CreateLectureModal
-                    courseId={courseId}
-                    sectionId={selectedSectionId}
-                    onClose={() => setSelectedSectionId(null)}
-                />
+            {/* Modals */}
+            {modalState.type === 'create-lecture' && (
+                <CreateLectureModal courseId={courseId} sectionId={modalState.sectionId} onClose={closeModal} />
+            )}
+
+            {modalState.type === 'view-lecture' && (
+                <LectureDetailModal lecture={modalState.lecture} onClose={closeModal} onEdit={handleEditFromView} />
+            )}
+
+            {modalState.type === 'edit-lecture' && (
+                <EditLectureModal lecture={modalState.lecture} onClose={closeModal} onSuccess={handleLectureUpdated} />
+            )}
+
+            {modalState.type === 'edit-section' && (
+                <EditSectionModal section={modalState.section} onClose={closeModal} onSuccess={handleSectionUpdated} />
+            )}
+
+            {modalState.type === 'edit-course' && (
+                <EditCourseModal course={course as any} onClose={closeModal} onSuccess={handleCourseUpdated} />
             )}
         </div>
     )
