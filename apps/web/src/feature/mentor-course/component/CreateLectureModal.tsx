@@ -1,3 +1,5 @@
+import { useAppDispatch } from '@/shared/redux/store'
+import { useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Card } from '@workspace/ui/components/Card'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
@@ -6,22 +8,31 @@ import { Textarea } from '@workspace/ui/components/Textarea'
 import { FileText, HelpCircle, Upload, Video, X } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
-import { useCreateLectureQuiz, useCreateLectureText, useCreateLectureVideo } from '../queries/useLecture'
+import { useCreateLectureText, useCreateLectureVideo } from '../queries/useLecture'
+import { setCreateQuizContextAction } from '../stores/mlecture.store'
 
 interface CreateLectureModalProps {
+    courseId: number
     sectionId: number
     onClose: () => void
 }
 
 type LectureType = 'VIDEO' | 'TEXT' | 'QUIZ'
 
-export const CreateLectureModal = ({ sectionId, onClose }: CreateLectureModalProps) => {
+export const CreateLectureModal = ({ sectionId, courseId, onClose }: CreateLectureModalProps) => {
     const [lectureType, setLectureType] = useState<LectureType | null>(null)
     const [videoFile, setVideoFile] = useState<File | null>(null)
+    const navigate = useNavigate()
+    const dispatch = useAppDispatch()
 
     const createVideoMutation = useCreateLectureVideo()
     const createTextMutation = useCreateLectureText()
-    const createQuizMutation = useCreateLectureQuiz()
+
+    const handleQuizClick = () => {
+        dispatch(setCreateQuizContextAction({ sectionId, courseId }))
+        navigate({ to: '/mentor/course/quiz' })
+        onClose()
+    }
 
     const form = useForm<{ title: string; description: string; textContent?: string }>({
         defaultValues: { title: '', description: '', textContent: '' },
@@ -88,7 +99,7 @@ export const CreateLectureModal = ({ sectionId, onClose }: CreateLectureModalPro
                         </Card>
                         <Card
                             className="cursor-pointer p-6 text-center transition-all hover:border-purple-400 hover:shadow-lg"
-                            onClick={() => setLectureType('QUIZ')}
+                            onClick={handleQuizClick}
                         >
                             <HelpCircle className="mx-auto mb-3 h-12 w-12 text-purple-600" />
                             <h3 className="mb-1 font-semibold">Bài kiểm tra</h3>

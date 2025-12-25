@@ -313,12 +313,10 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                                             </div>
                                                         </div>
                                                         <div className="flex items-center gap-2">
-                                                            {lecture.isPreviewable && (
-                                                                <Badge variant="outline" className="text-xs">
-                                                                    <Eye className="mr-1 h-3 w-3" />
-                                                                    Xem trước
-                                                                </Badge>
-                                                            )}
+                                                            <Badge variant="outline" className="text-xs">
+                                                                <Eye className="mr-1 h-4 w-3" />
+                                                                Xem chi tiết
+                                                            </Badge>
                                                             <Button variant="outline" size="sm">
                                                                 <Edit className="h-4 w-4" />
                                                             </Button>
@@ -339,7 +337,11 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
             </Card>
 
             {selectedSectionId && (
-                <CreateLectureModal sectionId={selectedSectionId} onClose={() => setSelectedSectionId(null)} />
+                <CreateLectureModal
+                    courseId={courseId}
+                    sectionId={selectedSectionId}
+                    onClose={() => setSelectedSectionId(null)}
+                />
             )}
         </div>
     )

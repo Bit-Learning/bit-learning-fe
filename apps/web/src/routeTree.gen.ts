@@ -73,6 +73,7 @@ import { Route as PresentationsIdViewRouteImport } from './routes/presentations/
 import { Route as PresentationsIdPresenterRouteImport } from './routes/presentations/$id/presenter'
 import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
+import { Route as MentorCourseQuizRouteImport } from './routes/mentor/course/quiz'
 import { Route as MentorCourseListRouteImport } from './routes/mentor/course/list'
 import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/create'
 import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
@@ -409,6 +410,11 @@ const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   path: '/mindmaps/$userId/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MentorCourseQuizRoute = MentorCourseQuizRouteImport.update({
+  id: '/mentor/course/quiz',
+  path: '/mentor/course/quiz',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentorCourseListRoute = MentorCourseListRouteImport.update({
   id: '/mentor/course/list',
   path: '/mentor/course/list',
@@ -524,6 +530,7 @@ export interface FileRoutesByFullPath {
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
+  '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
@@ -600,6 +607,7 @@ export interface FileRoutesByTo {
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
+  '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
@@ -677,6 +685,7 @@ export interface FileRoutesById {
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
+  '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
   '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
@@ -755,6 +764,7 @@ export interface FileRouteTypes {
     | '/mentor/course/$id'
     | '/mentor/course/create'
     | '/mentor/course/list'
+    | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
@@ -831,6 +841,7 @@ export interface FileRouteTypes {
     | '/mentor/course/$id'
     | '/mentor/course/create'
     | '/mentor/course/list'
+    | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
@@ -907,6 +918,7 @@ export interface FileRouteTypes {
     | '/mentor/course/$id'
     | '/mentor/course/create'
     | '/mentor/course/list'
+    | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
@@ -984,6 +996,7 @@ export interface RootRouteChildren {
   MentorCourseIdRoute: typeof MentorCourseIdRoute
   MentorCourseCreateRoute: typeof MentorCourseCreateRoute
   MentorCourseListRoute: typeof MentorCourseListRoute
+  MentorCourseQuizRoute: typeof MentorCourseQuizRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
   QuestionsIdEditRoute: typeof QuestionsIdEditRoute
   SyllabusesIdEditRoute: typeof SyllabusesIdEditRoute
@@ -1444,6 +1457,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mentor/course/quiz': {
+      id: '/mentor/course/quiz'
+      path: '/mentor/course/quiz'
+      fullPath: '/mentor/course/quiz'
+      preLoaderRoute: typeof MentorCourseQuizRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentor/course/list': {
       id: '/mentor/course/list'
       path: '/mentor/course/list'
@@ -1597,6 +1617,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentorCourseIdRoute: MentorCourseIdRoute,
   MentorCourseCreateRoute: MentorCourseCreateRoute,
   MentorCourseListRoute: MentorCourseListRoute,
+  MentorCourseQuizRoute: MentorCourseQuizRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
   QuestionsIdEditRoute: QuestionsIdEditRoute,
   SyllabusesIdEditRoute: SyllabusesIdEditRoute,
