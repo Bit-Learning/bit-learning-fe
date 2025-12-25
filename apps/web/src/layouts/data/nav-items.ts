@@ -45,6 +45,11 @@ export const navItems = [
                 to: '/ai-chatbot',
                 description: 'Trợ lý AI giúp soạn tài liệu và hỗ trợ học tập hiệu quả.',
             },
+            {
+                title: 'Game hóa học tập',
+                to: '/games',
+                description: 'Tham gia các trò chơi tương tác để nâng cao kỹ năng lập trình của bạn.',
+            },
         ],
     },
 

@@ -43,9 +43,5 @@ function RouteComponent() {
         }
     }, [setLayoutConfig])
 
-    return (
-        <>
-            <Mindmap data={data} />
-        </>
-    )
+    return <>{data && <Mindmap data={data} />}</>
 }
