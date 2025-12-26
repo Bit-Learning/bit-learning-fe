@@ -151,4 +151,26 @@
   .button-3d {
     @apply border border-black/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_1px_3px_0_rgba(0,0,0,0.15)] dark:border-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)];
   }
+
+  /* Custom scrollbar for horizontal scrolling */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+
+  .scrollbar-thumb-primary\/20::-webkit-scrollbar-thumb {
+    background-color: oklch(48.8% 0.243 264.376 / 0.2);
+    border-radius: 9999px;
+  }
+
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  .scrollbar-thin::-webkit-scrollbar {
+    height: 6px;
+  }
+
+  .dark .scrollbar-thumb-primary\/20::-webkit-scrollbar-thumb {
+    background-color: oklch(54.6% 0.245 262.881 / 0.2);
+  }
 }

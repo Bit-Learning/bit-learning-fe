@@ -39,6 +39,7 @@ import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
 import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
 import { Route as NewsIndexRouteImport } from './routes/news/index'
 import { Route as MatricesIndexRouteImport } from './routes/matrices/index'
+import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as CoursesIndexRouteImport } from './routes/courses/index'
 import { Route as TemplatesTemplatePreviewRouteImport } from './routes/templates/template-preview'
 import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
@@ -55,6 +56,7 @@ import { Route as MatricesImportRouteImport } from './routes/matrices/import'
 import { Route as MatricesCreateRouteImport } from './routes/matrices/create'
 import { Route as LecturesIdRouteImport } from './routes/lectures/$id'
 import { Route as InternalTestLoaderRouteImport } from './routes/internal/test-loader'
+import { Route as GamesListRouteImport } from './routes/games/list'
 import { Route as ExamsMyExamsRouteImport } from './routes/exams/my-exams'
 import { Route as ExamsGenerateRouteImport } from './routes/exams/generate'
 import { Route as ExamsIdRouteImport } from './routes/exams/$id'
@@ -66,6 +68,7 @@ import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
 import { Route as SyllabusesIdIndexRouteImport } from './routes/syllabuses/$id/index'
 import { Route as QuestionsIdIndexRouteImport } from './routes/questions/$id/index'
+import { Route as GamesIdIndexRouteImport } from './routes/games/$id/index'
 import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
 import { Route as SyllabusesIdEditRouteImport } from './routes/syllabuses/$id/edit'
 import { Route as QuestionsIdEditRouteImport } from './routes/questions/$id/edit'
@@ -79,6 +82,7 @@ import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/c
 import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
 import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.generate'
 import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
+import { Route as GamesIdPlayRouteImport } from './routes/games/$id.play'
 import { Route as CoursesGradeGradeRouteImport } from './routes/courses/grade/$grade'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as AuthGithubCallbackRouteImport } from './routes/auth/github/callback'
@@ -235,6 +239,11 @@ const MatricesIndexRoute = MatricesIndexRouteImport.update({
   path: '/matrices/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesIndexRoute = GamesIndexRouteImport.update({
+  id: '/games/',
+  path: '/games/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesIndexRoute = CoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
@@ -317,6 +326,11 @@ const InternalTestLoaderRoute = InternalTestLoaderRouteImport.update({
   path: '/internal/test-loader',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesListRoute = GamesListRouteImport.update({
+  id: '/games/list',
+  path: '/games/list',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ExamsMyExamsRoute = ExamsMyExamsRouteImport.update({
   id: '/exams/my-exams',
   path: '/exams/my-exams',
@@ -372,6 +386,11 @@ const SyllabusesIdIndexRoute = SyllabusesIdIndexRouteImport.update({
 const QuestionsIdIndexRoute = QuestionsIdIndexRouteImport.update({
   id: '/questions/$id/',
   path: '/questions/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesIdIndexRoute = GamesIdIndexRouteImport.update({
+  id: '/games/$id/',
+  path: '/games/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
@@ -440,6 +459,11 @@ const MatricesIdEditRoute = MatricesIdEditRouteImport.update({
   path: '/matrices/$id/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesIdPlayRoute = GamesIdPlayRouteImport.update({
+  id: '/games/$id/play',
+  path: '/games/$id/play',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const CoursesGradeGradeRoute = CoursesGradeGradeRouteImport.update({
   id: '/courses/grade/$grade',
   path: '/courses/grade/$grade',
@@ -499,6 +523,7 @@ export interface FileRoutesByFullPath {
   '/exams/$id': typeof ExamsIdRoute
   '/exams/generate': typeof ExamsGenerateRoute
   '/exams/my-exams': typeof ExamsMyExamsRoute
+  '/games/list': typeof GamesListRoute
   '/internal/test-loader': typeof InternalTestLoaderRoute
   '/lectures/$id': typeof LecturesIdRoute
   '/matrices/create': typeof MatricesCreateRoute
@@ -515,6 +540,7 @@ export interface FileRoutesByFullPath {
   '/templates/dashboard': typeof TemplatesDashboardRoute
   '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
   '/courses': typeof CoursesIndexRoute
+  '/games': typeof GamesIndexRoute
   '/matrices': typeof MatricesIndexRoute
   '/news': typeof NewsIndexRoute
   '/presentations': typeof PresentationsIndexRoute
@@ -525,6 +551,7 @@ export interface FileRoutesByFullPath {
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/courses/grade/$grade': typeof CoursesGradeGradeRoute
+  '/games/$id/play': typeof GamesIdPlayRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -538,6 +565,7 @@ export interface FileRoutesByFullPath {
   '/questions/$id/edit': typeof QuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
   '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+  '/games/$id': typeof GamesIdIndexRoute
   '/questions/$id': typeof QuestionsIdIndexRoute
   '/syllabuses/$id': typeof SyllabusesIdIndexRoute
   '/templates/slidev': typeof TemplatesSlidevIndexRoute
@@ -576,6 +604,7 @@ export interface FileRoutesByTo {
   '/exams/$id': typeof ExamsIdRoute
   '/exams/generate': typeof ExamsGenerateRoute
   '/exams/my-exams': typeof ExamsMyExamsRoute
+  '/games/list': typeof GamesListRoute
   '/internal/test-loader': typeof InternalTestLoaderRoute
   '/lectures/$id': typeof LecturesIdRoute
   '/matrices/create': typeof MatricesCreateRoute
@@ -592,6 +621,7 @@ export interface FileRoutesByTo {
   '/templates/dashboard': typeof TemplatesDashboardRoute
   '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
   '/courses': typeof CoursesIndexRoute
+  '/games': typeof GamesIndexRoute
   '/matrices': typeof MatricesIndexRoute
   '/news': typeof NewsIndexRoute
   '/presentations': typeof PresentationsIndexRoute
@@ -602,6 +632,7 @@ export interface FileRoutesByTo {
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/courses/grade/$grade': typeof CoursesGradeGradeRoute
+  '/games/$id/play': typeof GamesIdPlayRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -615,6 +646,7 @@ export interface FileRoutesByTo {
   '/questions/$id/edit': typeof QuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
   '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+  '/games/$id': typeof GamesIdIndexRoute
   '/questions/$id': typeof QuestionsIdIndexRoute
   '/syllabuses/$id': typeof SyllabusesIdIndexRoute
   '/templates/slidev': typeof TemplatesSlidevIndexRoute
@@ -654,6 +686,7 @@ export interface FileRoutesById {
   '/exams/$id': typeof ExamsIdRoute
   '/exams/generate': typeof ExamsGenerateRoute
   '/exams/my-exams': typeof ExamsMyExamsRoute
+  '/games/list': typeof GamesListRoute
   '/internal/test-loader': typeof InternalTestLoaderRoute
   '/lectures/$id': typeof LecturesIdRoute
   '/matrices/create': typeof MatricesCreateRoute
@@ -670,6 +703,7 @@ export interface FileRoutesById {
   '/templates/dashboard': typeof TemplatesDashboardRoute
   '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
   '/courses/': typeof CoursesIndexRoute
+  '/games/': typeof GamesIndexRoute
   '/matrices/': typeof MatricesIndexRoute
   '/news/': typeof NewsIndexRoute
   '/presentations/': typeof PresentationsIndexRoute
@@ -680,6 +714,7 @@ export interface FileRoutesById {
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/courses/grade/$grade': typeof CoursesGradeGradeRoute
+  '/games/$id/play': typeof GamesIdPlayRoute
   '/matrices/$id/edit': typeof MatricesIdEditRoute
   '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -693,6 +728,7 @@ export interface FileRoutesById {
   '/questions/$id/edit': typeof QuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
   '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
+  '/games/$id/': typeof GamesIdIndexRoute
   '/questions/$id/': typeof QuestionsIdIndexRoute
   '/syllabuses/$id/': typeof SyllabusesIdIndexRoute
   '/templates/slidev/': typeof TemplatesSlidevIndexRoute
@@ -733,6 +769,7 @@ export interface FileRouteTypes {
     | '/exams/$id'
     | '/exams/generate'
     | '/exams/my-exams'
+    | '/games/list'
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/matrices/create'
@@ -749,6 +786,7 @@ export interface FileRouteTypes {
     | '/templates/dashboard'
     | '/templates/template-preview'
     | '/courses'
+    | '/games'
     | '/matrices'
     | '/news'
     | '/presentations'
@@ -759,6 +797,7 @@ export interface FileRouteTypes {
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/courses/grade/$grade'
+    | '/games/$id/play'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
     | '/mentor/course/$id'
@@ -772,6 +811,7 @@ export interface FileRouteTypes {
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
+    | '/games/$id'
     | '/questions/$id'
     | '/syllabuses/$id'
     | '/templates/slidev'
@@ -810,6 +850,7 @@ export interface FileRouteTypes {
     | '/exams/$id'
     | '/exams/generate'
     | '/exams/my-exams'
+    | '/games/list'
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/matrices/create'
@@ -826,6 +867,7 @@ export interface FileRouteTypes {
     | '/templates/dashboard'
     | '/templates/template-preview'
     | '/courses'
+    | '/games'
     | '/matrices'
     | '/news'
     | '/presentations'
@@ -836,6 +878,7 @@ export interface FileRouteTypes {
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/courses/grade/$grade'
+    | '/games/$id/play'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
     | '/mentor/course/$id'
@@ -849,6 +892,7 @@ export interface FileRouteTypes {
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
+    | '/games/$id'
     | '/questions/$id'
     | '/syllabuses/$id'
     | '/templates/slidev'
@@ -887,6 +931,7 @@ export interface FileRouteTypes {
     | '/exams/$id'
     | '/exams/generate'
     | '/exams/my-exams'
+    | '/games/list'
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/matrices/create'
@@ -903,6 +948,7 @@ export interface FileRouteTypes {
     | '/templates/dashboard'
     | '/templates/template-preview'
     | '/courses/'
+    | '/games/'
     | '/matrices/'
     | '/news/'
     | '/presentations/'
@@ -913,6 +959,7 @@ export interface FileRouteTypes {
     | '/auth/github/callback'
     | '/auth/google/callback'
     | '/courses/grade/$grade'
+    | '/games/$id/play'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
     | '/mentor/course/$id'
@@ -926,6 +973,7 @@ export interface FileRouteTypes {
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
+    | '/games/$id/'
     | '/questions/$id/'
     | '/syllabuses/$id/'
     | '/templates/slidev/'
@@ -965,6 +1013,7 @@ export interface RootRouteChildren {
   ExamsIdRoute: typeof ExamsIdRoute
   ExamsGenerateRoute: typeof ExamsGenerateRoute
   ExamsMyExamsRoute: typeof ExamsMyExamsRoute
+  GamesListRoute: typeof GamesListRoute
   InternalTestLoaderRoute: typeof InternalTestLoaderRoute
   LecturesIdRoute: typeof LecturesIdRoute
   MatricesCreateRoute: typeof MatricesCreateRoute
@@ -981,6 +1030,7 @@ export interface RootRouteChildren {
   TemplatesDashboardRoute: typeof TemplatesDashboardRoute
   TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
   CoursesIndexRoute: typeof CoursesIndexRoute
+  GamesIndexRoute: typeof GamesIndexRoute
   MatricesIndexRoute: typeof MatricesIndexRoute
   NewsIndexRoute: typeof NewsIndexRoute
   PresentationsIndexRoute: typeof PresentationsIndexRoute
@@ -991,6 +1041,7 @@ export interface RootRouteChildren {
   AuthGithubCallbackRoute: typeof AuthGithubCallbackRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
   CoursesGradeGradeRoute: typeof CoursesGradeGradeRoute
+  GamesIdPlayRoute: typeof GamesIdPlayRoute
   MatricesIdEditRoute: typeof MatricesIdEditRoute
   MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
   MentorCourseIdRoute: typeof MentorCourseIdRoute
@@ -1001,6 +1052,7 @@ export interface RootRouteChildren {
   QuestionsIdEditRoute: typeof QuestionsIdEditRoute
   SyllabusesIdEditRoute: typeof SyllabusesIdEditRoute
   TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
+  GamesIdIndexRoute: typeof GamesIdIndexRoute
   QuestionsIdIndexRoute: typeof QuestionsIdIndexRoute
   SyllabusesIdIndexRoute: typeof SyllabusesIdIndexRoute
   TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
@@ -1219,6 +1271,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatricesIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/': {
+      id: '/games/'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof GamesIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/': {
       id: '/courses/'
       path: '/courses'
@@ -1331,6 +1390,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof InternalTestLoaderRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/list': {
+      id: '/games/list'
+      path: '/games/list'
+      fullPath: '/games/list'
+      preLoaderRoute: typeof GamesListRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/exams/my-exams': {
       id: '/exams/my-exams'
       path: '/exams/my-exams'
@@ -1406,6 +1472,13 @@ declare module '@tanstack/react-router' {
       path: '/questions/$id'
       fullPath: '/questions/$id'
       preLoaderRoute: typeof QuestionsIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/$id/': {
+      id: '/games/$id/'
+      path: '/games/$id'
+      fullPath: '/games/$id'
+      preLoaderRoute: typeof GamesIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/templates/slidev/create': {
@@ -1499,6 +1572,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MatricesIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/games/$id/play': {
+      id: '/games/$id/play'
+      path: '/games/$id/play'
+      fullPath: '/games/$id/play'
+      preLoaderRoute: typeof GamesIdPlayRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/courses/grade/$grade': {
       id: '/courses/grade/$grade'
       path: '/courses/grade/$grade'
@@ -1586,6 +1666,7 @@ const rootRouteChildren: RootRouteChildren = {
   ExamsIdRoute: ExamsIdRoute,
   ExamsGenerateRoute: ExamsGenerateRoute,
   ExamsMyExamsRoute: ExamsMyExamsRoute,
+  GamesListRoute: GamesListRoute,
   InternalTestLoaderRoute: InternalTestLoaderRoute,
   LecturesIdRoute: LecturesIdRoute,
   MatricesCreateRoute: MatricesCreateRoute,
@@ -1602,6 +1683,7 @@ const rootRouteChildren: RootRouteChildren = {
   TemplatesDashboardRoute: TemplatesDashboardRoute,
   TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
   CoursesIndexRoute: CoursesIndexRoute,
+  GamesIndexRoute: GamesIndexRoute,
   MatricesIndexRoute: MatricesIndexRoute,
   NewsIndexRoute: NewsIndexRoute,
   PresentationsIndexRoute: PresentationsIndexRoute,
@@ -1612,6 +1694,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthGithubCallbackRoute: AuthGithubCallbackRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
   CoursesGradeGradeRoute: CoursesGradeGradeRoute,
+  GamesIdPlayRoute: GamesIdPlayRoute,
   MatricesIdEditRoute: MatricesIdEditRoute,
   MatricesIdGenerateRoute: MatricesIdGenerateRoute,
   MentorCourseIdRoute: MentorCourseIdRoute,
@@ -1622,6 +1705,7 @@ const rootRouteChildren: RootRouteChildren = {
   QuestionsIdEditRoute: QuestionsIdEditRoute,
   SyllabusesIdEditRoute: SyllabusesIdEditRoute,
   TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
+  GamesIdIndexRoute: GamesIdIndexRoute,
   QuestionsIdIndexRoute: QuestionsIdIndexRoute,
   SyllabusesIdIndexRoute: SyllabusesIdIndexRoute,
   TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
