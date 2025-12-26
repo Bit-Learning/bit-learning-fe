@@ -6,6 +6,7 @@ import { Input } from '@workspace/ui/components/Input'
 import { BookOpen, Edit, Eye, EyeOff, Plus, Search, Trash2 } from 'lucide-react'
 import { useState } from 'react'
 import { useCoursesByInstructor, useDeleteCourse, useHideOrShowCourse } from '../queries/useCourse'
+import { DeleteConfirmModal } from './DeleteConfirmModal'
 
 interface CourseListViewProps {
     instructorId: number
@@ -15,6 +16,11 @@ export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
     const [searchQuery, setSearchQuery] = useState('')
     const [page, setPage] = useState(0)
     const [size] = useState(10)
+    const [deleteModal, setDeleteModal] = useState<{ isOpen: boolean; id: number; name: string }>({
+        isOpen: false,
+        id: 0,
+        name: '',
+    })
 
     const { data: coursesData, isLoading } = useCoursesByInstructor(instructorId, page, size)
     const deleteMutation = useDeleteCourse()
@@ -23,10 +29,18 @@ export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
     const courses = Array.isArray(coursesData?.data) ? coursesData.data : []
     const totalPages = coursesData?.data?.totalPages || 0
 
-    const handleDelete = (id: number) => {
-        if (confirm('Bạn có chắc muốn xóa khóa học này?')) {
-            deleteMutation.mutate(id)
-        }
+    const openDeleteModal = (id: number, name: string) => {
+        setDeleteModal({ isOpen: true, id, name })
+    }
+
+    const closeDeleteModal = () => {
+        setDeleteModal({ isOpen: false, id: 0, name: '' })
+    }
+
+    const handleConfirmDelete = () => {
+        deleteMutation.mutate(deleteModal.id, {
+            onSuccess: () => closeDeleteModal(),
+        })
     }
 
     const handleToggleHide = (id: number, isHidden: boolean) => {
@@ -143,7 +157,7 @@ export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
                                         <Button
                                             variant="outline"
                                             size="sm"
-                                            onClick={() => handleDelete(course.id)}
+                                            onClick={() => openDeleteModal(course.id, course.title)}
                                             isDisabled={deleteMutation.isPending}
                                         >
                                             <Trash2 className="h-4 w-4 text-red-500" />
@@ -177,6 +191,15 @@ export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
                     )}
                 </>
             )}
+
+            <DeleteConfirmModal
+                isOpen={deleteModal.isOpen}
+                onClose={closeDeleteModal}
+                onConfirm={handleConfirmDelete}
+                itemType="course"
+                itemName={deleteModal.name}
+                isLoading={deleteMutation.isPending}
+            />
         </div>
     )
 }

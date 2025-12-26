@@ -31,6 +31,7 @@ import { useCreateSection, useDeleteSection } from '../queries/useSection'
 import { setEditQuizContextAction } from '../stores/mlecture.store'
 import { SectionDetail } from '../types/msection.api'
 import { CreateLectureModal } from './CreateLectureModal'
+import { DeleteConfirmModal, DeleteItemType } from './DeleteConfirmModal'
 import { EditCourseModal } from './EditCourseModal'
 import { EditLectureModal } from './EditLectureModal'
 import { EditSectionModal } from './EditSectionModal'
@@ -48,10 +49,16 @@ type ModalState =
     | { type: 'edit-section'; section: SectionDetail }
     | { type: 'edit-course' }
 
+type DeleteModalState =
+    | { type: 'none' }
+    | { type: 'section'; id: number; name: string }
+    | { type: 'lecture'; id: number; name: string }
+
 export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
     const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set())
     const [isAddingSection, setIsAddingSection] = useState(false)
     const [modalState, setModalState] = useState<ModalState>({ type: 'none' })
+    const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: 'none' })
 
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
@@ -68,11 +75,8 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
 
     const toggleSection = (sectionId: number) => {
         const newExpanded = new Set(expandedSections)
-        if (newExpanded.has(sectionId)) {
-            newExpanded.delete(sectionId)
-        } else {
-            newExpanded.add(sectionId)
-        }
+        if (newExpanded.has(sectionId)) newExpanded.delete(sectionId)
+        else newExpanded.add(sectionId)
         setExpandedSections(newExpanded)
     }
 
@@ -92,17 +96,29 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
         }
     }
 
-    const handleDeleteSection = (sectionId: number) => {
-        if (confirm('Bạn có chắc muốn xóa chương này?')) {
-            deleteSectionMutation.mutate(sectionId)
-        }
+    const openDeleteSectionModal = (sectionId: number, sectionName: string) => {
+        setDeleteModal({ type: 'section', id: sectionId, name: sectionName })
     }
 
-    const handleDeleteLecture = async (lectureId: number) => {
-        if (confirm('Bạn có chắc muốn xóa bài học này?')) {
+    const openDeleteLectureModal = (lectureId: number, lectureName: string) => {
+        setDeleteModal({ type: 'lecture', id: lectureId, name: lectureName })
+    }
+
+    const closeDeleteModal = () => setDeleteModal({ type: 'none' })
+
+    const handleConfirmDelete = async () => {
+        if (deleteModal.type === 'section') {
             try {
-                await deleteLectureMutation.mutateAsync(lectureId)
+                await deleteSectionMutation.mutateAsync(deleteModal.id)
+                closeDeleteModal()
+            } catch (error) {
+                console.error('Failed to delete section:', error)
+            }
+        } else if (deleteModal.type === 'lecture') {
+            try {
+                await deleteLectureMutation.mutateAsync(deleteModal.id)
                 refetchSections()
+                closeDeleteModal()
             } catch (error) {
                 console.error('Failed to delete lecture:', error)
             }
@@ -111,31 +127,25 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
 
     const closeModal = () => setModalState({ type: 'none' })
 
-    const handleViewLecture = (lecture: LectureDetail) => {
-        setModalState({ type: 'view-lecture', lecture })
-    }
+    const handleViewLecture = (lecture: LectureDetail) => setModalState({ type: 'view-lecture', lecture })
 
     const handleEditLecture = (lecture: LectureDetail) => {
         if (lecture.type === 'QUIZ') {
-            // Quiz -> navigate to QuizForm page
             dispatch(
                 setEditQuizContextAction({
                     sectionId: lecture.sectionId,
-                    courseId: courseId,
+                    courseId,
                     lectureId: lecture.id,
                     orderIndex: lecture.orderIndex,
                 }),
             )
             navigate({ to: '/mentor/course/quiz' })
         } else {
-            // Video/Text -> open modal
             setModalState({ type: 'edit-lecture', lecture })
         }
     }
 
-    const handleEditSection = (section: SectionDetail) => {
-        setModalState({ type: 'edit-section', section })
-    }
+    const handleEditSection = (section: SectionDetail) => setModalState({ type: 'edit-section', section })
 
     const handleEditFromView = () => {
         if (modalState.type === 'view-lecture') {
@@ -144,7 +154,7 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                 dispatch(
                     setEditQuizContextAction({
                         sectionId: lecture.sectionId,
-                        courseId: courseId,
+                        courseId,
                         lectureId: lecture.id,
                         orderIndex: lecture.orderIndex,
                     }),
@@ -157,17 +167,9 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
         }
     }
 
-    const handleSectionUpdated = () => {
-        refetchSections()
-    }
-
-    const handleLectureUpdated = () => {
-        refetchSections()
-    }
-
-    const handleCourseUpdated = () => {
-        refetchCourse()
-    }
+    const handleSectionUpdated = () => refetchSections()
+    const handleLectureUpdated = () => refetchSections()
+    const handleCourseUpdated = () => refetchCourse()
 
     if (courseLoading) {
         return (
@@ -361,7 +363,7 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                             size="sm"
                                             onClick={e => {
                                                 e.stopPropagation()
-                                                handleDeleteSection(section.id)
+                                                openDeleteSectionModal(section.id, section.title)
                                             }}
                                             isDisabled={deleteSectionMutation.isPending}
                                         >
@@ -448,7 +450,9 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                                                             <Button
                                                                 variant="outline"
                                                                 size="sm"
-                                                                onClick={() => handleDeleteLecture(lecture.id)}
+                                                                onClick={() =>
+                                                                    openDeleteLectureModal(lecture.id, lecture.title)
+                                                                }
                                                                 isDisabled={deleteLectureMutation.isPending}
                                                             >
                                                                 <Trash2 className="h-4 w-4 text-red-500" />
@@ -466,26 +470,30 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                 </div>
             </Card>
 
-            {/* Modals */}
             {modalState.type === 'create-lecture' && (
                 <CreateLectureModal courseId={courseId} sectionId={modalState.sectionId} onClose={closeModal} />
             )}
-
             {modalState.type === 'view-lecture' && (
                 <LectureDetailModal lecture={modalState.lecture} onClose={closeModal} onEdit={handleEditFromView} />
             )}
-
             {modalState.type === 'edit-lecture' && (
                 <EditLectureModal lecture={modalState.lecture} onClose={closeModal} onSuccess={handleLectureUpdated} />
             )}
-
             {modalState.type === 'edit-section' && (
                 <EditSectionModal section={modalState.section} onClose={closeModal} onSuccess={handleSectionUpdated} />
             )}
-
             {modalState.type === 'edit-course' && (
                 <EditCourseModal course={course as any} onClose={closeModal} onSuccess={handleCourseUpdated} />
             )}
+
+            <DeleteConfirmModal
+                isOpen={deleteModal.type !== 'none'}
+                onClose={closeDeleteModal}
+                onConfirm={handleConfirmDelete}
+                itemType={deleteModal.type === 'none' ? 'lecture' : (deleteModal.type as DeleteItemType)}
+                itemName={deleteModal.type !== 'none' ? deleteModal.name : undefined}
+                isLoading={deleteSectionMutation.isPending || deleteLectureMutation.isPending}
+            />
         </div>
     )
 }
