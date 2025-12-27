@@ -12,6 +12,7 @@ import { Textarea } from '@workspace/ui/components/Textarea'
 import {
     ArrowLeft,
     BookOpen,
+    CheckCircle,
     ChevronDown,
     ChevronUp,
     Edit,
@@ -26,6 +27,7 @@ import {
 } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { useValidateCourse } from '../queries/useCourse'
 import { useDeleteLecture } from '../queries/useLecture'
 import { useCreateSection, useDeleteSection } from '../queries/useSection'
 import { setEditQuizContextAction } from '../stores/mlecture.store'
@@ -36,6 +38,7 @@ import { EditCourseModal } from './EditCourseModal'
 import { EditLectureModal } from './EditLectureModal'
 import { EditSectionModal } from './EditSectionModal'
 import { LectureDetailModal } from './LectureDetailModal'
+import { PublishCourseModal } from './PublishCourseModal'
 
 interface CourseDetailViewProps {
     courseId: number
@@ -59,6 +62,10 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
     const [isAddingSection, setIsAddingSection] = useState(false)
     const [modalState, setModalState] = useState<ModalState>({ type: 'none' })
     const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: 'none' })
+    const [publishModal, setPublishModal] = useState<{
+        isOpen: boolean
+        isPublishing: boolean
+    }>({ isOpen: false, isPublishing: true })
 
     const navigate = useNavigate()
     const dispatch = useAppDispatch()
@@ -68,6 +75,7 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
     const createSectionMutation = useCreateSection()
     const deleteSectionMutation = useDeleteSection()
     const deleteLectureMutation = useDeleteLecture()
+    const validateCourseMutation = useValidateCourse()
 
     const sectionForm = useForm<{ title: string; description: string }>({
         defaultValues: { title: '', description: '' },
@@ -167,6 +175,27 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
         }
     }
 
+    const openPublishModal = (isPublishing: boolean) => {
+        setPublishModal({ isOpen: true, isPublishing })
+    }
+
+    const closePublishModal = () => {
+        setPublishModal({ isOpen: false, isPublishing: true })
+    }
+
+    const handleConfirmPublish = async () => {
+        try {
+            await validateCourseMutation.mutateAsync({
+                id: courseId,
+                isAccepted: publishModal.isPublishing,
+            })
+            closePublishModal()
+            refetchCourse()
+        } catch (error) {
+            console.error(error)
+        }
+    }
+
     const handleSectionUpdated = () => refetchSections()
     const handleLectureUpdated = () => refetchSections()
     const handleCourseUpdated = () => refetchCourse()
@@ -206,13 +235,19 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                     <h1 className="text-3xl font-bold">{course.title}</h1>
                     <p className="mt-1 text-gray-600">{course.subtitle}</p>
                 </div>
-                <Button
-                    onClick={() => setModalState({ type: 'edit-course' })}
-                    className="bg-linear-to-r gap-2 from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-                >
-                    <Settings className="h-4 w-4" />
-                    Chỉnh sửa khóa học
-                </Button>
+                <div>
+                    <Button
+                        onClick={() => setModalState({ type: 'edit-course' })}
+                        className="bg-linear-to-r mr-3 gap-2 from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                    >
+                        <Settings className="h-4 w-4" />
+                        Chỉnh sửa khóa học
+                    </Button>
+                    <Button onClick={() => openPublishModal(true)} className="gap-2 bg-green-600 hover:bg-green-700">
+                        <CheckCircle className="h-4 w-4" />
+                        Xuất bản khóa học
+                    </Button>
+                </div>
             </div>
 
             <Card className="p-6">
@@ -493,6 +528,15 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                 itemType={deleteModal.type === 'none' ? 'lecture' : (deleteModal.type as DeleteItemType)}
                 itemName={deleteModal.type !== 'none' ? deleteModal.name : undefined}
                 isLoading={deleteSectionMutation.isPending || deleteLectureMutation.isPending}
+            />
+
+            <PublishCourseModal
+                isOpen={publishModal.isOpen}
+                onClose={closePublishModal}
+                onConfirm={handleConfirmPublish}
+                isPublishing={publishModal.isPublishing}
+                courseName={course.title}
+                isLoading={validateCourseMutation.isPending}
             />
         </div>
     )

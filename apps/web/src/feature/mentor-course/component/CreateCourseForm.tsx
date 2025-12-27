@@ -122,7 +122,9 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div className="col-span-2">
-                        <Label htmlFor="title">Tên khóa học *</Label>
+                        <Label className="mb-2" htmlFor="title">
+                            Tên khóa học *
+                        </Label>
                         <Input
                             id="title"
                             {...register('title', {
@@ -136,7 +138,9 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div className="col-span-2">
-                        <Label htmlFor="subtitle">Mô tả ngắn *</Label>
+                        <Label className="mb-2" htmlFor="subtitle">
+                            Mô tả ngắn *
+                        </Label>
                         <Input
                             id="subtitle"
                             {...register('subtitle', {
@@ -150,7 +154,9 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div className="col-span-2">
-                        <Label htmlFor="description">Mô tả chi tiết *</Label>
+                        <Label className="mb-2" htmlFor="description">
+                            Mô tả chi tiết *
+                        </Label>
                         <Textarea
                             id="description"
                             {...register('description', { required: 'Mô tả chi tiết là bắt buộc' })}
@@ -164,7 +170,9 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div>
-                        <Label htmlFor="price">Giá khóa học (VNĐ) *</Label>
+                        <Label className="mb-2" htmlFor="price">
+                            Giá khóa học (VNĐ) *
+                        </Label>
                         <Input
                             id="price"
                             type="number"
@@ -180,7 +188,9 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div>
-                        <Label htmlFor="grade">Khối lớp *</Label>
+                        <Label className="mb-2" htmlFor="grade">
+                            Khối lớp *
+                        </Label>
                         <select
                             id="grade"
                             {...register('grade', { required: true, valueAsNumber: true })}
@@ -195,7 +205,9 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div>
-                        <Label htmlFor="language">Ngôn ngữ *</Label>
+                        <Label className="mb-2" htmlFor="language">
+                            Ngôn ngữ *
+                        </Label>
                         <select
                             id="language"
                             {...register('language')}
@@ -207,7 +219,9 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div>
-                        <Label htmlFor="level">Cấp độ *</Label>
+                        <Label className="mb-2" htmlFor="level">
+                            Cấp độ *
+                        </Label>
                         <select
                             id="level"
                             {...register('level')}
@@ -220,24 +234,26 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div className="col-span-2">
-                        <Label htmlFor="outcome">Học viên sẽ học được gì? *</Label>
+                        <Label className="mb-2" htmlFor="outcome">
+                            Học viên sẽ học được gì? *
+                        </Label>
                         <Textarea
                             id="outcome"
                             {...register('outcome', { required: 'Trường này là bắt buộc' })}
                             rows={3}
-                            placeholder="VD: - Hiểu cơ bản về Python&#10;- Xây dựng ứng dụng web&#10;- Làm việc với database"
                             className={cn(errors.outcome && 'border-red-500')}
                         />
                         {errors.outcome && <p className="mt-1 text-sm text-red-500">{errors.outcome.message}</p>}
                     </div>
 
                     <div className="col-span-2">
-                        <Label htmlFor="requirement">Yêu cầu *</Label>
+                        <Label className="mb-2" htmlFor="requirement">
+                            Yêu cầu *
+                        </Label>
                         <Textarea
                             id="requirement"
                             {...register('requirement', { required: 'Trường này là bắt buộc' })}
                             rows={3}
-                            placeholder="VD: - Máy tính cá nhân&#10;- Kết nối internet&#10;- Không cần kiến thức lập trình"
                             className={cn(errors.requirement && 'border-red-500')}
                         />
                         {errors.requirement && (
@@ -246,12 +262,13 @@ export const CreateCourseForm = () => {
                     </div>
 
                     <div className="col-span-2">
-                        <Label htmlFor="audience">Đối tượng học viên *</Label>
+                        <Label className="mb-2" htmlFor="audience">
+                            Đối tượng học viên *
+                        </Label>
                         <Textarea
                             id="audience"
                             {...register('audience', { required: 'Trường này là bắt buộc' })}
                             rows={3}
-                            placeholder="VD: - Người mới bắt đầu lập trình&#10;- Sinh viên IT&#10;- Người muốn chuyển nghề"
                             className={cn(errors.audience && 'border-red-500')}
                         />
                         {errors.audience && <p className="mt-1 text-sm text-red-500">{errors.audience.message}</p>}

@@ -17,7 +17,7 @@ import {
     navigationMenuTriggerStyle,
 } from '@workspace/ui/components/navigation-menu'
 import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@workspace/ui/components/sheet'
-import { LogOut, Menu, Search, Settings, User, Wallet } from 'lucide-react'
+import { LogOut, Menu, Search, Settings, User, User2Icon, Wallet } from 'lucide-react'
 import { useState } from 'react'
 import { useSelector } from 'react-redux'
 import MobileSheetMenu from './mobile-sheet-menu'
@@ -127,6 +127,10 @@ const Header: React.FC = () => {
                                                     currency: 'VND',
                                                 })}
                                             </span>
+                                        </MenuItem>
+                                        <MenuItem onAction={() => navigate({ to: '/mentor/course/list' })}>
+                                            <User2Icon className="mr-2 h-4 w-4" />
+                                            <span>Mentor</span>
                                         </MenuItem>
                                         <MenuItem isDisabled>
                                             <Settings className="mr-2 h-4 w-4" />

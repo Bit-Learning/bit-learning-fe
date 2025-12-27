@@ -52,4 +52,9 @@ export const mcourseApi = {
             },
         })
     },
+    validateCourse(id: number, isAccepted: boolean): Promise<AxiosResponse<ApiResponse<void>>> {
+        return api.post(`${endpoints.COURSES}/validate/${id}`, null, {
+            params: { isAccepted },
+        })
+    },
 }

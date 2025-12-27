@@ -132,3 +132,29 @@ export const useUpdateThumbnail = () => {
         },
     })
 }
+
+export const useValidateCourse = () => {
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: ({ id, isAccepted }: { id: number; isAccepted: boolean }) =>
+            mcourseApi.validateCourse(id, isAccepted),
+        onSuccess: (response, variables) => {
+            queryClient.invalidateQueries({ queryKey: mcourseKeys.all })
+            queryClient.invalidateQueries({ queryKey: mcourseKeys.detail(variables.id) })
+            queryClient.invalidateQueries({ queryKey: ['courses', 'detail', variables.id] })
+
+            const action = variables.isAccepted ? 'xuất bản' : 'hủy xuất bản'
+            toast.success({
+                title: `${variables.isAccepted ? 'Xuất bản' : 'Hủy xuất bản'} khóa học thành công!`,
+                description: response.data.message || `Khóa học đã được ${action}.`,
+            })
+        },
+        onError: (error: any) => {
+            toast.error({
+                title: 'Thao tác thất bại!',
+                description: error?.response?.data?.message || 'Đã xảy ra lỗi khi cập nhật trạng thái khóa học.',
+            })
+        },
+    })
+}
