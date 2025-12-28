@@ -1,21 +1,29 @@
 import { GameService } from '@/feature/game/api/GameService'
 import type { GameSection } from '@/feature/game/types'
+import PresentationBanner from '@/shared/components/PresentationBanner'
+import SeeMoreButton from '@/shared/components/SeeMoreButton'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
-import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent } from '@workspace/ui/components/Card'
 import { Skeleton } from '@workspace/ui/components/Skeleton'
-import { BookOpen, ChevronRight, Code, Gamepad2, Keyboard, Trophy } from 'lucide-react'
+import { motion } from 'framer-motion'
+import { BookOpen, Code, Gamepad2, Keyboard, Trophy } from 'lucide-react'
+import Contact from '../component/Contact'
+
+const fadeInUp = {
+    hidden: { opacity: 0, y: 40 },
+    visible: { opacity: 1, y: 0 },
+}
 
 const GameTypeIcon = ({ type }: { type: string }) => {
     const iconMap: Record<string, React.ReactNode> = {
-        QUIZ: <BookOpen className="h-5 w-5" />,
-        FILL_IN_BLANK: <Code className="h-5 w-5" />,
-        TYPING: <Keyboard className="h-5 w-5" />,
-        CODE_COMPLETION: <Code className="h-5 w-5" />,
+        QUIZ: <BookOpen className="h-5 w-5 text-orange-500" />,
+        FILL_IN_BLANK: <Code className="h-5 w-5 text-orange-500" />,
+        TYPING: <Keyboard className="h-5 w-5 text-orange-500" />,
+        CODE_COMPLETION: <Code className="h-5 w-5 text-orange-500" />,
     }
-    return iconMap[type] || <Gamepad2 className="h-5 w-5" />
+    return iconMap[type] || <Gamepad2 className="h-5 w-5 text-orange-500" />
 }
 
 const GameCard = ({ game }: { game: any }) => (
@@ -58,28 +66,23 @@ const GameSection = ({ section }: { section: GameSection }) => (
     <div className="mb-12">
         <div className="mb-6 flex items-center justify-between">
             <div className="flex items-center gap-3">
-                <div className="bg-primary/10 rounded-lg p-2">
+                <div className="rounded-lg bg-gray-100 p-4">
                     <GameTypeIcon type={section.type} />
                 </div>
                 <div>
                     <h2 className="text-2xl font-bold">{section.sectionTitle}</h2>
-                    <p className="text-muted-foreground text-sm">
-                        {section.items.length} game{section.items.length !== 1 ? 's' : ''} available
-                    </p>
+                    <p className="text-muted-foreground text-sm">{section.items.length} game</p>
                 </div>
             </div>
             <Link to="/games/list" search={{ type: section.type }}>
-                <Button variant="ghost" className="gap-2">
-                    View All
-                    <ChevronRight className="h-4 w-4" />
-                </Button>
+                <SeeMoreButton />
             </Link>
         </div>
 
         {/* Horizontal Scrolling Container */}
         <div className="relative">
-            <div className="scrollbar-thin scrollbar-thumb-primary/20 scrollbar-track-transparent overflow-x-auto pb-4">
-                <div className="flex gap-4" style={{ minWidth: 'min-content' }}>
+            <div className="scrollbar-thin scrollbar-thumb-primary/30 scrollbar-track-transparent hover:scrollbar-thumb-primary/50 overflow-x-auto pb-4">
+                <div className="flex min-w-max gap-4" style={{ minWidth: 'min-content' }}>
                     {section.items.map(game => (
                         <div key={game.id} className="w-[280px] flex-shrink-0">
                             <GameCard game={game} />
@@ -129,47 +132,62 @@ export default function GameDashboardPage() {
     })
 
     return (
-        <div className="container mx-auto px-4 py-8">
+        <motion.div
+            className="flex min-h-screen flex-col"
+            initial={{ opacity: 0, y: 30 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, ease: 'easeOut' }}
+        >
             {/* Hero Section */}
-            <div className="mb-12 text-center">
-                <div className="mb-4 inline-flex items-center gap-2">
-                    <Gamepad2 className="text-primary h-8 w-8" />
-                    <h1 className="from-primary bg-gradient-to-r to-purple-600 bg-clip-text text-4xl font-bold text-transparent">
-                        Game Center
-                    </h1>
-                </div>
-                <p className="text-muted-foreground mx-auto max-w-2xl text-lg">
-                    Challenge yourself with interactive games. Test your knowledge, improve your skills, and compete
-                    with others!
-                </p>
-            </div>
 
-            {/* Loading State */}
-            {isLoading && (
-                <>
-                    <LoadingSkeleton />
-                    <LoadingSkeleton />
-                </>
-            )}
+            <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                transition={{ duration: 0.6 }}
+                viewport={{ once: true, amount: 0.3 }}
+            >
+                <PresentationBanner />
+            </motion.div>
 
-            {/* Error State */}
-            {error && (
-                <div className="py-12 text-center">
-                    <p className="text-destructive">Failed to load games. Please try again later.</p>
-                </div>
-            )}
+            <main className="container mx-auto flex-1 overflow-hidden bg-[#FFFFFF] px-4 py-8">
+                {/* Loading State */}
+                {isLoading && (
+                    <>
+                        <LoadingSkeleton />
+                        <LoadingSkeleton />
+                    </>
+                )}
 
-            {/* Game Sections */}
-            {data && data.length === 0 && (
-                <div className="py-12 text-center">
-                    <Gamepad2 className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
-                    <p className="text-muted-foreground">No games available at the moment.</p>
-                </div>
-            )}
+                {/* Error State */}
+                {error && (
+                    <div className="py-12 text-center">
+                        <p className="text-destructive">Failed to load games. Please try again later.</p>
+                    </div>
+                )}
 
-            {data?.map(section => (
-                <GameSection key={section.type} section={section} />
-            ))}
-        </div>
+                {/* Game Sections */}
+                {data && data.length === 0 && (
+                    <div className="py-12 text-center">
+                        <Gamepad2 className="text-muted-foreground mx-auto mb-4 h-16 w-16" />
+                        <p className="text-muted-foreground">No games available at the moment.</p>
+                    </div>
+                )}
+
+                {data?.map(section => (
+                    <GameSection key={section.type} section={section} />
+                ))}
+            </main>
+
+            <motion.div
+                variants={fadeInUp}
+                initial="hidden"
+                whileInView="visible"
+                transition={{ duration: 0.6, delay: 0.2 }}
+                viewport={{ once: true, amount: 0.3 }}
+            >
+                <Contact />
+            </motion.div>
+        </motion.div>
     )
 }

@@ -1,7 +1,8 @@
+import { mergeName } from '@/shared/lib/string-utils'
 import { Award, Medal, Trophy } from 'lucide-react'
 import React from 'react'
 import { useLeaderboard } from '../hooks/useGame'
-
+import '../styles/playerscorebutton.css'
 interface LeaderboardProps {
     gameId: number
 }
@@ -70,11 +71,11 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ gameId }) => {
                 Leaderboard
             </h3>
 
-            <div className="space-y-3">
+            <div className="space-y-5">
                 {leaderboard.map(entry => (
                     <div
                         key={entry.userId}
-                        className={`${getRankBgColor(entry.rank)} rounded-xl border-2 p-4 transition-all duration-200 hover:shadow-md`}
+                        className={`${getRankBgColor(entry.rank)} rounded-xl border-2 p-3 transition-all duration-200 hover:shadow-md`}
                     >
                         <div className="flex items-center gap-4">
                             {/* Rank */}
@@ -93,7 +94,9 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ gameId }) => {
                                     className="h-12 w-12 rounded-full border-2 border-white shadow-sm"
                                 />
                                 <div>
-                                    <div className="font-bold text-gray-900">{entry.username}</div>
+                                    <div className="font-bold text-gray-900">
+                                        {mergeName(entry.firstName, entry.lastName)}
+                                    </div>
                                     {entry.rank <= 3 && (
                                         <div className="text-xs text-gray-500">
                                             {entry.rank === 1 && '👑 Champion'}
@@ -106,8 +109,19 @@ export const Leaderboard: React.FC<LeaderboardProps> = ({ gameId }) => {
 
                             {/* Score */}
                             <div className="flex-shrink-0">
-                                <div className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-sm">
+                                {/* <div className="rounded-full bg-gradient-to-r from-indigo-600 to-purple-600 px-4 py-2 text-lg font-bold text-white shadow-sm">
                                     {entry.score}
+                                </div> */}
+                                <div className="comic-brutal-button-container">
+                                    <button className="comic-brutal-button">
+                                        <div className="button-inner">
+                                            <span className="button-text">{entry.score}</span>
+                                            <div className="halftone-overlay"></div>
+                                            <div className="ink-splatter"></div>
+                                        </div>
+                                        <div className="button-shadow"></div>
+                                        <div className="button-frame"></div>
+                                    </button>
                                 </div>
                             </div>
                         </div>

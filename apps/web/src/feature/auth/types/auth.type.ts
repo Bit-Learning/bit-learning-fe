@@ -26,12 +26,24 @@ export type TResetPasswordRequest = {
     confirmNewPassword: string
 }
 
+export type TSocialProfile = {
+    facebook?: string
+    instagram?: string
+    threads?: string
+    twitter?: string
+    linkedin?: string
+    github?: string
+    website?: string
+}
+
 export type TUserProfile = {
     id: number
     username: string
     firstName: string
     lastName: string
     avatar: string
+    coverImage?: string
+    pronouns?: string
     email: string
     activated: boolean
     role: string
@@ -45,6 +57,11 @@ export type TUserProfile = {
     oauthProvider: string | null
     oauthId: string | null
     mfaEnabled: boolean
+    bio?: string
+    phoneNumber?: string
+    location?: string
+    socialProfile?: TSocialProfile
+    jobTitle?: string
 }
 
 export type TWalletInfo = {

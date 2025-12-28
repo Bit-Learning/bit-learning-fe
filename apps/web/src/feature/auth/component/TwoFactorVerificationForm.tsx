@@ -6,7 +6,6 @@ import { Button } from '@workspace/ui/components/Button'
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@workspace/ui/components/Form'
 import { Input } from '@workspace/ui/components/Input'
 import { toast } from '@workspace/ui/components/Sonner'
-import { ArrowLeft, Shield } from 'lucide-react'
 import React from 'react'
 import { useForm } from 'react-hook-form'
 import { useDispatch } from 'react-redux'
@@ -109,16 +108,10 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({ e
 
             <div className="rounded-2xl bg-white p-8">
                 <div className="mb-6 text-center">
-                    <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-blue-100">
-                        <Shield className="h-8 w-8 text-blue-600" />
+                    <div className="mx-auto mb-4 flex items-center justify-center">
+                        <img src="./Logo.png" alt="Bithub Logo" className="h-10 w-36 object-contain" />
                     </div>
-                    <h1 className="mb-2 text-xl font-bold text-gray-900">Xác thực hai yếu tố</h1>
-                    <p className="text-sm text-gray-600">Nhập mã 6 chữ số từ ứng dụng xác thực của bạn</p>
-                    <div className="mt-3 rounded-lg bg-blue-50 p-3">
-                        <p className="text-sm text-blue-800">
-                            <strong>{email}</strong>
-                        </p>
-                    </div>
+                    {/* <h1 className="mb-2 text-xl font-bold text-gray-900">Bit Learning</h1> */}
                 </div>
 
                 <Form {...form}>
@@ -129,7 +122,7 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({ e
                             render={({ field }) => (
                                 <FormItem>
                                     <FormLabel className="text-sm font-semibold text-gray-700">
-                                        Mã xác thực <span className="text-red-500">*</span>
+                                        Nhập mã xác thực <span className="text-red-500">*</span>
                                     </FormLabel>
                                     <FormControl>
                                         <Input
@@ -146,9 +139,9 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({ e
                             )}
                         />
 
-                        <div className="rounded-lg bg-blue-50 p-3">
-                            <p className="text-xs text-blue-800">
-                                Mở ứng dụng xác thực (Google Authenticator, Authy, v.v.) trên điện thoại để lấy mã
+                        <div className="rounded-lg">
+                            <p className="text-sm text-gray-500">
+                                Nhập mã từ ứng dụng xác thực trên điện thoại của bạn.
                             </p>
                         </div>
 
@@ -159,16 +152,6 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({ e
                                 isDisabled={verifyMutation.isPending || form.watch('totpCode').length !== 6}
                             >
                                 {verifyMutation.isPending ? 'Đang xác thực...' : 'Xác nhận'}
-                            </Button>
-
-                            <Button
-                                type="button"
-                                onClick={onBack}
-                                variant="outline"
-                                className="h-12 w-full rounded-xl border-2 border-gray-300 font-semibold text-gray-700 hover:bg-gray-50"
-                            >
-                                <ArrowLeft className="mr-2 h-4 w-4" />
-                                Quay lại đăng nhập
                             </Button>
                         </div>
                     </form>
