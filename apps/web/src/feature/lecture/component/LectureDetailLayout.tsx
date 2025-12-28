@@ -1,7 +1,7 @@
-import { Link } from '@tanstack/react-router'
+import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
-import { ChevronLeft, ChevronRight, Menu, X } from 'lucide-react'
-import React, { useEffect, useState } from 'react'
+import { CheckCircle, ChevronLeft, ChevronRight, Menu, X } from 'lucide-react'
+import React, { useCallback, useEffect, useMemo, useState } from 'react'
 import { useSectionsByCourse } from '../queries/useSection'
 import { LectureType } from '../types/lecture.type'
 import CourseSidebar from './CourseSidebar'
@@ -15,76 +15,81 @@ interface LectureDetailLayoutProps {
 }
 
 const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lectureId }) => {
-    const [isSidebarOpen, setIsSidebarOpen] = useState(true)
-    const [currentLecture, setCurrentLecture] = useState<any>(null)
+    const [isSidebarOpen, setIsSidebarOpen] = useState(false)
+    const [completedLectures, setCompletedLectures] = useState<number[]>([])
+    const [lectureProgress, setLectureProgress] = useState<Record<number, number>>({})
 
+    const navigate = useNavigate()
     const { data: sections, isLoading } = useSectionsByCourse(courseId)
 
-    useEffect(() => {
-        if (sections) {
-            for (const section of sections) {
-                console.log(lectureId)
-                const lecture = section.lectures?.find(l => l.id === lectureId)
-                if (lecture) {
-                    setCurrentLecture({ ...lecture, sectionTitle: section.title })
-                    break
-                }
-            }
+    const currentLecture = useMemo(() => {
+        if (!sections) return null
+        for (const section of sections) {
+            const lecture = section.lectures?.find(l => l.id === lectureId)
+            if (lecture) return { ...lecture, sectionTitle: section.title, sectionId: section.id }
         }
+        return null
     }, [sections, lectureId])
 
-    const getNextLecture = () => {
-        if (!sections || !currentLecture) return null
+    const allLectures = useMemo(() => {
+        if (!sections) return []
+        return sections.flatMap(s => s.lectures?.filter(l => !l.isDeleted) || [])
+    }, [sections])
 
-        let foundCurrent = false
-        for (const section of sections) {
-            for (const lecture of section.lectures || []) {
-                if (foundCurrent && !lecture.isDeleted) {
-                    return lecture
-                }
-                if (lecture.id === currentLecture.id) {
-                    foundCurrent = true
-                }
-            }
-        }
-        return null
-    }
-
-    const getPreviousLecture = () => {
-        if (!sections || !currentLecture) return null
-
-        let previousLecture = null
-        for (const section of sections) {
-            for (const lecture of section.lectures || []) {
-                if (lecture.id === currentLecture.id) {
-                    return previousLecture
-                }
-                if (!lecture.isDeleted) {
-                    previousLecture = lecture
-                }
-            }
-        }
-        return null
-    }
+    const currentIndex = allLectures.findIndex(l => l.id === lectureId)
+    const previousLecture = currentIndex > 0 ? allLectures[currentIndex - 1] : null
+    const nextLecture = currentIndex < allLectures.length - 1 ? allLectures[currentIndex + 1] : null
 
     const goToLecture = (newLectureId: number) => {
-        window.location.href = `/lectures/${newLectureId}`
+        navigate({ to: '/lectures/$id', params: { id: String(newLectureId) } })
     }
+
+    const handleVideoComplete = useCallback(() => {
+        if (!completedLectures.includes(lectureId)) {
+            setCompletedLectures(prev => [...prev, lectureId])
+        }
+    }, [lectureId, completedLectures])
+
+    const handleProgressUpdate = useCallback(
+        (percent: number) => {
+            setLectureProgress(prev => ({ ...prev, [lectureId]: percent }))
+        },
+        [lectureId],
+    )
+
+    useEffect(() => {
+        const handleKeydown = (e: KeyboardEvent) => {
+            if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return
+
+            switch (e.key) {
+                case 'ArrowLeft':
+                    if (e.shiftKey && previousLecture) goToLecture(previousLecture.id)
+                    break
+                case 'ArrowRight':
+                    if (e.shiftKey && nextLecture) goToLecture(nextLecture.id)
+                    break
+            }
+        }
+        window.addEventListener('keydown', handleKeydown)
+        return () => window.removeEventListener('keydown', handleKeydown)
+    }, [previousLecture, nextLecture])
 
     if (isLoading) {
         return (
             <div className="flex h-screen items-center justify-center bg-gray-900">
                 <div className="text-center">
-                    <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600"></div>
+                    <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-500"></div>
                     <p className="mt-4 text-gray-400">Đang tải bài học...</p>
                 </div>
             </div>
         )
     }
 
+    const isCompleted = completedLectures.includes(lectureId)
+
     return (
         <div className="flex h-screen flex-col bg-gray-900">
-            <div className="flex items-center justify-between border-b border-gray-800 bg-gray-950 px-4 py-3">
+            <header className="flex items-center justify-between border-b border-gray-800 bg-gray-950 px-4 py-3">
                 <div className="flex items-center gap-4">
                     <Link
                         to="/courses/$id"
@@ -93,27 +98,40 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                     >
                         <ChevronLeft className="h-6 w-6" />
                     </Link>
-                    <div>
-                        <h1 className="text-sm font-semibold text-white">{currentLecture?.sectionTitle}</h1>
-                        <p className="text-xs text-gray-400">{currentLecture?.title}</p>
+                    <div className="max-w-md">
+                        <p className="truncate text-xs text-gray-500">{currentLecture?.sectionTitle}</p>
+                        <h1 className="truncate text-sm font-semibold text-white">{currentLecture?.title}</h1>
                     </div>
                 </div>
 
-                <Button
-                    variant="ghost"
-                    size="sm"
-                    onPress={() => setIsSidebarOpen(!isSidebarOpen)}
-                    className="text-gray-400 hover:text-white lg:hidden"
-                >
-                    {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-                </Button>
-            </div>
+                <div className="flex items-center gap-2">
+                    {isCompleted && (
+                        <span className="flex items-center gap-1 text-sm text-green-400">
+                            <CheckCircle className="h-4 w-4" />
+                            Đã hoàn thành
+                        </span>
+                    )}
+
+                    <Button
+                        variant="ghost"
+                        size="sm"
+                        onPress={() => setIsSidebarOpen(!isSidebarOpen)}
+                        className="text-gray-400 hover:text-white lg:hidden"
+                    >
+                        {isSidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                    </Button>
+                </div>
+            </header>
 
             <div className="flex flex-1 overflow-hidden">
                 <div className="flex flex-1 flex-col">
                     <div className="flex-1 bg-black">
                         {currentLecture?.type === LectureType.VIDEO ? (
-                            <VideoPlayer lectureId={lectureId} />
+                            <VideoPlayer
+                                lectureId={lectureId}
+                                onComplete={handleVideoComplete}
+                                onProgressUpdate={handleProgressUpdate}
+                            />
                         ) : currentLecture?.type === LectureType.QUIZ ? (
                             <QuizPlayer lectureId={lectureId} />
                         ) : currentLecture?.type === LectureType.TEXT ? (
@@ -125,41 +143,44 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                         )}
                     </div>
 
-                    <div className="flex items-center justify-between border-t border-gray-800 bg-gray-950 px-6 py-4">
+                    <div className="flex items-center justify-between border-t border-gray-800 bg-gray-950 px-4 py-3">
                         <Button
                             variant="outline"
-                            isDisabled={!getPreviousLecture()}
-                            onPress={() => {
-                                const prev = getPreviousLecture()
-                                if (prev) goToLecture(prev.id)
-                            }}
-                            className="border-gray-700 bg-gray-800 text-white"
+                            size="sm"
+                            isDisabled={!previousLecture}
+                            onPress={() => previousLecture && goToLecture(previousLecture.id)}
+                            className="border-gray-700 bg-gray-800/50 text-white hover:bg-gray-700"
                         >
-                            <ChevronLeft className="mr-2 h-4 w-4" />
-                            Bài trước
+                            <ChevronLeft className="mr-1 h-4 w-4" />
+                            <span className="hidden sm:inline">Bài trước</span>
                         </Button>
+
+                        <div className="flex items-center gap-2 text-sm text-gray-400">
+                            <span>{currentIndex + 1}</span>
+                            <span>/</span>
+                            <span>{allLectures.length}</span>
+                        </div>
 
                         <Button
                             variant="outline"
-                            isDisabled={!getNextLecture()}
-                            onPress={() => {
-                                const next = getNextLecture()
-                                if (next) goToLecture(next.id)
-                            }}
-                            className="border-gray-700 bg-gray-800 text-white"
+                            size="sm"
+                            isDisabled={!nextLecture}
+                            onPress={() => nextLecture && goToLecture(nextLecture.id)}
+                            className="border-gray-700 bg-gray-800/50 text-white hover:bg-gray-700"
                         >
-                            Bài tiếp theo
-                            <ChevronRight className="ml-2 h-4 w-4" />
+                            <span className="hidden sm:inline">Bài tiếp</span>
+                            <ChevronRight className="ml-1 h-4 w-4" />
                         </Button>
                     </div>
                 </div>
 
                 <CourseSidebar
-                    courseId={courseId}
                     lectureId={lectureId}
                     sections={sections}
                     isOpen={isSidebarOpen}
                     onNavigate={goToLecture}
+                    completedLectures={completedLectures}
+                    lectureProgress={lectureProgress}
                 />
             </div>
         </div>

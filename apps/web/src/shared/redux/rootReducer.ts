@@ -1,4 +1,5 @@
 import course from '@/feature/course/store/course.store'
+import learning from '@/feature/lecture/store/learning.store'
 import lecture from '@/feature/lecture/store/lecture.store'
 import section from '@/feature/lecture/store/section.store'
 import mlecture from '@/feature/mentor-course/stores/mlecture.store'
@@ -14,6 +15,7 @@ const combineReducer = combineReducers({
     section: section,
     lecture: lecture,
     mlecture: mlecture,
+    learning: learning,
 })
 
 export type RootState = ReturnType<typeof combineReducer>
