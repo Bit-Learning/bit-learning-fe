@@ -28,7 +28,7 @@ const store = configureStore({
     enhancers: getDefaultEnhancers => {
         return getDefaultEnhancers().concat(sentryReduxEnhancer)
     },
-} as const)
+})
 
 export const persistor = persistStore(store)
 
