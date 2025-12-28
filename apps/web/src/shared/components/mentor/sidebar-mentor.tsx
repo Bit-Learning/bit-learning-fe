@@ -14,7 +14,7 @@ interface SidebarProps {
 }
 
 const menuItems = [
-    { id: 'dashboard', label: 'Trang thống kê', icon: LayoutDashboard },
+    { id: 'dashboard', label: 'Trang thống kê', icon: LayoutDashboard, path: '/mentor/dashboard' },
     { id: 'courses', label: 'Khóa học', icon: BookOpen, path: '/mentor/course/list' },
 ]
 

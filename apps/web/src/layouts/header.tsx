@@ -128,7 +128,7 @@ const Header: React.FC = () => {
                                                 })}
                                             </span>
                                         </MenuItem>
-                                        <MenuItem onAction={() => navigate({ to: '/mentor/course/list' })}>
+                                        <MenuItem onAction={() => navigate({ to: '/mentor/dashboard' })}>
                                             <User2Icon className="mr-2 h-4 w-4" />
                                             <span>Mentor</span>
                                         </MenuItem>

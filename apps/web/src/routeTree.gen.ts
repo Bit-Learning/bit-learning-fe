@@ -68,6 +68,7 @@ import { Route as CoursesIdRouteImport } from './routes/courses/$id'
 import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
 import { Route as SyllabusesIdIndexRouteImport } from './routes/syllabuses/$id/index'
 import { Route as QuestionsIdIndexRouteImport } from './routes/questions/$id/index'
+import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
 import { Route as GamesIdIndexRouteImport } from './routes/games/$id/index'
 import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
 import { Route as SyllabusesIdEditRouteImport } from './routes/syllabuses/$id/edit'
@@ -388,6 +389,11 @@ const QuestionsIdIndexRoute = QuestionsIdIndexRouteImport.update({
   path: '/questions/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MentorDashboardIndexRoute = MentorDashboardIndexRouteImport.update({
+  id: '/mentor/dashboard/',
+  path: '/mentor/dashboard/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GamesIdIndexRoute = GamesIdIndexRouteImport.update({
   id: '/games/$id/',
   path: '/games/$id/',
@@ -566,6 +572,7 @@ export interface FileRoutesByFullPath {
   '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
   '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
   '/games/$id': typeof GamesIdIndexRoute
+  '/mentor/dashboard': typeof MentorDashboardIndexRoute
   '/questions/$id': typeof QuestionsIdIndexRoute
   '/syllabuses/$id': typeof SyllabusesIdIndexRoute
   '/templates/slidev': typeof TemplatesSlidevIndexRoute
@@ -647,6 +654,7 @@ export interface FileRoutesByTo {
   '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
   '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
   '/games/$id': typeof GamesIdIndexRoute
+  '/mentor/dashboard': typeof MentorDashboardIndexRoute
   '/questions/$id': typeof QuestionsIdIndexRoute
   '/syllabuses/$id': typeof SyllabusesIdIndexRoute
   '/templates/slidev': typeof TemplatesSlidevIndexRoute
@@ -729,6 +737,7 @@ export interface FileRoutesById {
   '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
   '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
   '/games/$id/': typeof GamesIdIndexRoute
+  '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/questions/$id/': typeof QuestionsIdIndexRoute
   '/syllabuses/$id/': typeof SyllabusesIdIndexRoute
   '/templates/slidev/': typeof TemplatesSlidevIndexRoute
@@ -812,6 +821,7 @@ export interface FileRouteTypes {
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
     | '/games/$id'
+    | '/mentor/dashboard'
     | '/questions/$id'
     | '/syllabuses/$id'
     | '/templates/slidev'
@@ -893,6 +903,7 @@ export interface FileRouteTypes {
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
     | '/games/$id'
+    | '/mentor/dashboard'
     | '/questions/$id'
     | '/syllabuses/$id'
     | '/templates/slidev'
@@ -974,6 +985,7 @@ export interface FileRouteTypes {
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
     | '/games/$id/'
+    | '/mentor/dashboard/'
     | '/questions/$id/'
     | '/syllabuses/$id/'
     | '/templates/slidev/'
@@ -1053,6 +1065,7 @@ export interface RootRouteChildren {
   SyllabusesIdEditRoute: typeof SyllabusesIdEditRoute
   TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
   GamesIdIndexRoute: typeof GamesIdIndexRoute
+  MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
   QuestionsIdIndexRoute: typeof QuestionsIdIndexRoute
   SyllabusesIdIndexRoute: typeof SyllabusesIdIndexRoute
   TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
@@ -1474,6 +1487,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof QuestionsIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mentor/dashboard/': {
+      id: '/mentor/dashboard/'
+      path: '/mentor/dashboard'
+      fullPath: '/mentor/dashboard'
+      preLoaderRoute: typeof MentorDashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/games/$id/': {
       id: '/games/$id/'
       path: '/games/$id'
@@ -1706,6 +1726,7 @@ const rootRouteChildren: RootRouteChildren = {
   SyllabusesIdEditRoute: SyllabusesIdEditRoute,
   TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
   GamesIdIndexRoute: GamesIdIndexRoute,
+  MentorDashboardIndexRoute: MentorDashboardIndexRoute,
   QuestionsIdIndexRoute: QuestionsIdIndexRoute,
   SyllabusesIdIndexRoute: SyllabusesIdIndexRoute,
   TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
