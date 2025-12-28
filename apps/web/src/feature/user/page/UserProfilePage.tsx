@@ -38,6 +38,7 @@ import {
     ArrowUpRight,
     Bell,
     Camera,
+    Check,
     CheckCircle,
     Clock,
     CreditCard,
@@ -318,9 +319,9 @@ function UserProfilePage() {
 
                             <CardContent className="relative bg-white p-6">
                                 <div className="flex justify-center gap-6">
-                                    <div className="relative -mt-20 md:-mt-24">
+                                    <div className="relative">
                                         <div className="rounded-full bg-white p-1">
-                                            <Avatar className="h-32 w-32 border-4 border-white shadow-xl md:h-40 md:w-40">
+                                            <Avatar className="border-gray h-32 w-32 border-2 md:h-40 md:w-40">
                                                 {userInfo.avatar && (
                                                     <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
                                                 )}
@@ -339,7 +340,7 @@ function UserProfilePage() {
                                         <Button
                                             size="icon"
                                             variant="outline"
-                                            className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
+                                            className="absolute bottom-10 right-2 h-10 w-10 rounded-full bg-gray-200 shadow-md hover:bg-gray-50"
                                             onClick={() => avatarInputRef.current?.click()}
                                             isDisabled={isUploadingAvatar}
                                         >
@@ -355,10 +356,12 @@ function UserProfilePage() {
                                             {/* <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
                                                 {userInfo.activated ? 'Active' : 'Inactive'}
                                             </Badge> */}
-                                            <div className="mb-6 flex items-center gap-4">
+                                            <div className="mb-1 flex items-center gap-4">
                                                 <p className="text-3xl font-bold">
                                                     {mergeName(userInfo.firstName, userInfo.lastName)}
                                                 </p>
+
+                                                {userInfo.activated && <Check className="h-6 w-6 text-blue-500" />}
 
                                                 <Button
                                                     size="sm"
@@ -369,6 +372,7 @@ function UserProfilePage() {
                                                     Chỉnh sửa hồ sơ
                                                 </Button>
                                             </div>
+                                            <div className="flex items-center gap-1">{userInfo.username || 'N/A'}</div>
 
                                             <div className="flex items-center gap-1">{userInfo.bio || 'N/A'}</div>
                                         </div>
