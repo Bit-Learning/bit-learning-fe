@@ -90,6 +90,8 @@ export interface LeaderboardEntry {
     rank: number
     userId: number
     username: string
+    firstName: string
+    lastName: string
     avatar: string
     score: number
 }
