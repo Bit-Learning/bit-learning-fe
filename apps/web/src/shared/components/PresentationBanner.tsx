@@ -56,7 +56,7 @@ export default function SlideBanner() {
                                 </div>
                                 <h1 className="text-3xl font-bold leading-tight text-gray-800 lg:text-6xl">
                                     <span className="relative text-orange-500">
-                                        Bithub
+                                        Bithub Game Center
                                         <svg className="absolute -bottom-2 left-0 h-3 w-full" viewBox="0 0 200 12">
                                             <path
                                                 d="M0,8 Q50,2 100,8 T200,8"
@@ -72,8 +72,8 @@ export default function SlideBanner() {
                                     Trí tuệ nhân tạo - Giáo dục sáng tạo
                                 </h3>
                                 <p className="max-w-xl text-xl leading-relaxed text-gray-600">
-                                    Nâng cao kỹ năng và kiến thức với các khóa học chất lượng cao, tài nguyên phong phú
-                                    và phương pháp học tập hiện đại.
+                                    Thử thách bản thân với các trò chơi tương tác. Kiểm tra kiến ​​thức, nâng cao kỹ
+                                    năng và cạnh tranh với những người chơi khác!
                                 </p>
                             </div>
                             <div className="flex flex-col gap-4 sm:flex-row">
@@ -81,7 +81,7 @@ export default function SlideBanner() {
                                     data-slot="button"
                                     className="[&amp;_svg]:pointer-events-none [&amp;_svg:not([class*='size-'])]:size-4 [&amp;_svg]:shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive shadow-xs has-[&gt;svg]:px-4 group inline-flex h-10 shrink-0 cursor-pointer items-center justify-center gap-2 whitespace-nowrap rounded-md bg-orange-500 px-10 py-6 text-lg font-medium text-white outline-none transition-all hover:bg-orange-600 focus-visible:ring-[3px] disabled:pointer-events-none disabled:opacity-50"
                                 >
-                                    Bắt đầu học ngay
+                                    Bắt đầu chơi ngay
                                     <svg
                                         xmlns="http://www.w3.org/2000/svg"
                                         width="24"

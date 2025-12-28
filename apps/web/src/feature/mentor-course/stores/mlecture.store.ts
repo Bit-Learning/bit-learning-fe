@@ -1,19 +1,19 @@
 import type { RootState } from '@/shared/redux/store'
 import { createSlice, type PayloadAction } from '@reduxjs/toolkit'
 
-interface CreateQuizContext {
+export interface CreateQuizContext {
     sectionId: number
     courseId: number
 }
 
-interface EditQuizContext {
+export interface EditQuizContext {
     sectionId: number
     courseId: number
     lectureId: number
     orderIndex: number
 }
 
-interface MLectureState {
+export interface MLectureState {
     createQuizContext: CreateQuizContext | null
     editQuizContext: EditQuizContext | null
 }
