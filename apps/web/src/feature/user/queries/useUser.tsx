@@ -2,11 +2,11 @@ import { setIsLoadingAction } from '@/feature/app/store'
 import { setErrorAction, setIsAuthenticatedAction, setUserInfoAction } from '@/feature/auth/store'
 import { getAccessToken } from '@/shared/lib/cookies'
 import { useAppDispatch } from '@/shared/redux/store'
-import { useMutation, useQuery } from '@tanstack/react-query'
+import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { toast } from '@workspace/ui/components/Sonner'
 import { useEffect } from 'react'
-import { ChangePassword, GetUserProfile } from '../api/user.api'
-import { TChangePasswordRequest } from '../types/user.type'
+import { ChangePassword, GetUserProfile, UpdateUserProfile, UploadAvatar, UploadCoverImage } from '../api/user.api'
+import { TChangePasswordRequest, TUpdateUserRequest } from '../types/user.type'
 
 export const userQueryKeys = {
     all: ['profile'] as const,
@@ -82,6 +82,118 @@ export function useChangePassword() {
 
             toast.error({
                 title: 'Đổi mật khẩu thất bại',
+                description: errorMessage,
+            })
+        },
+        onSettled: () => {
+            dispatch(setIsLoadingAction(false))
+        },
+    })
+}
+
+export function useUpdateUserProfile() {
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async (data: TUpdateUserRequest) => {
+            const response = await UpdateUserProfile(data)
+            return response.data
+        },
+        onMutate: () => {
+            dispatch(setIsLoadingAction(true))
+        },
+        onSuccess: data => {
+            // Update both cache and redux store
+            queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
+            dispatch(setUserInfoAction(data.data))
+
+            toast.success({
+                title: 'Cập nhật hồ sơ thành công',
+                description: data.message || 'Thông tin của bạn đã được cập nhật.',
+            })
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || 'Cập nhật hồ sơ thất bại'
+
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Cập nhật hồ sơ thất bại',
+                description: errorMessage,
+            })
+        },
+        onSettled: () => {
+            dispatch(setIsLoadingAction(false))
+        },
+    })
+}
+
+export function useUploadAvatar() {
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async (avatarFile: File) => {
+            const response = await UploadAvatar(avatarFile)
+            return response.data
+        },
+        onMutate: () => {
+            dispatch(setIsLoadingAction(true))
+        },
+        onSuccess: data => {
+            // Refetch user profile to get updated avatar
+            queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
+
+            toast.success({
+                title: 'Tải ảnh đại diện thành công',
+                description: data.message || 'Ảnh đại diện của bạn đã được cập nhật.',
+            })
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || 'Tải ảnh đại diện thất bại'
+
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Tải ảnh đại diện thất bại',
+                description: errorMessage,
+            })
+        },
+        onSettled: () => {
+            dispatch(setIsLoadingAction(false))
+        },
+    })
+}
+
+export function useUploadCoverImage() {
+    const dispatch = useAppDispatch()
+    const queryClient = useQueryClient()
+
+    return useMutation({
+        mutationFn: async (coverFile: File) => {
+            const response = await UploadCoverImage(coverFile)
+            return response.data
+        },
+        onMutate: () => {
+            dispatch(setIsLoadingAction(true))
+        },
+        onSuccess: data => {
+            // Refetch user profile to get updated cover image
+            queryClient.invalidateQueries({ queryKey: userQueryKeys.all })
+
+            toast.success({
+                title: 'Tải ảnh bìa thành công',
+                description: data.message || 'Ảnh bìa của bạn đã được cập nhật.',
+            })
+        },
+        onError: (error: any) => {
+            const errorMessage = error?.response?.data?.message || 'Tải ảnh bìa thất bại'
+
+            dispatch(setErrorAction(errorMessage))
+
+            toast.error({
+                title: 'Tải ảnh bìa thất bại',
                 description: errorMessage,
             })
         },
