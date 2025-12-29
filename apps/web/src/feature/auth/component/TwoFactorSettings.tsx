@@ -82,21 +82,12 @@ const TwoFactorSettings: React.FC<TwoFactorSettingsProps> = ({ is2FAEnabled, use
                             </div>
                         )}
 
-                        {!is2FAEnabled && (
-                            <div className="mt-3 rounded-lg bg-blue-50 p-3">
-                                <p className="text-sm text-blue-800">
-                                    💡 Khi bật 2FA, bạn sẽ cần nhập mã từ ứng dụng xác thực mỗi khi đăng nhập
-                                </p>
-                            </div>
-                        )}
-
                         <div className="mt-4 flex gap-3">
                             {!is2FAEnabled ? (
                                 <Button
                                     onClick={() => setShowEnable2FA(true)}
                                     className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 font-semibold text-white hover:from-blue-700 hover:to-blue-800"
                                 >
-                                    <Shield className="mr-2 h-4 w-4" />
                                     Bật xác thực hai yếu tố
                                 </Button>
                             ) : (

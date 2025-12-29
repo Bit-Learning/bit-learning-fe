@@ -1,3 +1,4 @@
+import { Button } from '@workspace/ui/components/Button'
 import { Award, BookOpen, Code, Database, Globe, GraduationCap, Smartphone, Users } from 'lucide-react'
 
 const services = [
@@ -70,7 +71,9 @@ const PracticeAreaSection: React.FC = () => {
                 </div>
 
                 <div className="mt-16 text-center">
-                    <button className="bithub-button-secondary px-8 py-4 text-lg">Xem tất cả khóa học</button>
+                    <Button variant={'outline'} className="px-8 py-4 text-lg">
+                        Xem tất cả khóa học
+                    </Button>
                 </div>
             </div>
         </section>
