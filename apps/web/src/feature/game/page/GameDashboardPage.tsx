@@ -1,7 +1,7 @@
 import { GameService } from '@/feature/game/api/GameService'
 import type { GameSection } from '@/feature/game/types'
 import PresentationBanner from '@/shared/components/PresentationBanner'
-import SeeMoreButton from '@/shared/components/SeeMoreButton'
+import SeeMoreButton from '@/shared/components/button/SeeMoreButton'
 import { useQuery } from '@tanstack/react-query'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
