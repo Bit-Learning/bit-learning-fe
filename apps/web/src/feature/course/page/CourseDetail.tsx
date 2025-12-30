@@ -5,7 +5,7 @@ import CourseDetailContent from '../component/CourseDetailContent'
 import { useCourseActions } from '../queries/useCourse'
 
 const CourseDetailPage: React.FC = () => {
-    const { id } = useParams({ from: '/courses/$id' })
+    const { id } = useParams({ from: '/_layout/courses/$id' })
     const { selectCourse } = useCourseActions()
 
     useEffect(() => {

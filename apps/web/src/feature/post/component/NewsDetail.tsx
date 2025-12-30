@@ -21,7 +21,7 @@ import {
 import React from 'react'
 
 const NewsDetail: React.FC = () => {
-    const { id } = useParams({ from: '/news/$id' })
+    const { id } = useParams({ from: '/_layout/news/$id' })
     const navigate = useNavigate()
     const [isLiked, setIsLiked] = React.useState(false)
     const [isBookmarked, setIsBookmarked] = React.useState(false)
@@ -343,7 +343,7 @@ test('renders learn react link', () =&gt; {
                         {currentNews.trending && <Badge className="bg-orange-500 text-white">Trending</Badge>}
                     </div>
 
-                    <h1 className="mb-6 text-3xl leading-tight font-bold text-gray-900 md:text-4xl">
+                    <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
                         {currentNews.title}
                     </h1>
 

@@ -1,10 +1,8 @@
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import Mindmap from '@/feature/mindmap/pages/MindMap'
 import { getMindMapDataByUserIdAndCode } from '@/feature/mindmap/services/mindmap.service'
-import { useLayout } from '@/shared/context/layout-context'
 import store from '@/shared/redux/store'
 import { createFileRoute, redirect } from '@tanstack/react-router'
-import { useEffect } from 'react'
 
 export const Route = createFileRoute('/mindmaps/$userId/$code')({
     beforeLoad: async ({ params }) => {
@@ -33,15 +31,6 @@ export const Route = createFileRoute('/mindmaps/$userId/$code')({
 
 function RouteComponent() {
     const data = Route.useLoaderData()
-    const { setLayoutConfig } = useLayout()
-
-    useEffect(() => {
-        setLayoutConfig({ showHeader: false, showFooter: false })
-
-        return () => {
-            setLayoutConfig({ showHeader: true, showFooter: true })
-        }
-    }, [setLayoutConfig])
 
     return <>{data && <Mindmap data={data} />}</>
 }
