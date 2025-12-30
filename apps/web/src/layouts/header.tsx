@@ -1,6 +1,7 @@
 import { useLogout } from '@/feature/auth/queries/useAuth'
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
 import { navItems } from '@/layouts/data/nav-items'
+import CodeButton from '@/shared/components/button/CodeButton'
 import { SearchProvider, useSearch } from '@/shared/context/search-context'
 import { mergeName } from '@/shared/lib/string-utils'
 import { Link, useNavigate } from '@tanstack/react-router'
@@ -145,18 +146,7 @@ const Header: React.FC = () => {
                                 </MenuPopover>
                             </MenuTrigger>
                         ) : (
-                            <>
-                                <Button
-                                    variant="outline"
-                                    onClick={() => navigate({ to: '/signin' })}
-                                    className="bithub-button-outline"
-                                >
-                                    Đăng nhập
-                                </Button>
-                                <Button onClick={() => navigate({ to: '/signup' })} className="bithub-button-primary">
-                                    Đăng ký
-                                </Button>
-                            </>
+                            <CodeButton label="Đăng nhập" onClick={() => navigate({ to: '/signin' })} />
                         )}
                     </div>
 

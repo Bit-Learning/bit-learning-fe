@@ -13,7 +13,7 @@ import { SlidevPresentation } from '../types'
 
 const EditPresentationPage = () => {
     const navigate = useNavigate()
-    const params = useParams({ from: '/templates/slidev/$id/edit' })
+    const params = useParams({ from: '/_layout/templates/slidev/$id/edit' })
     const { updatePresentation, isLoading } = usePresentations()
     const [presentation, setPresentation] = useState<SlidevPresentation | null>(null)
     const [error, setError] = useState<string>('')

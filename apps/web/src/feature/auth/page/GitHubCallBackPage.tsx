@@ -1,5 +1,4 @@
 import { useGitHubLogin } from '@/feature/auth/queries/useAuth'
-import { useLayout } from '@/shared/context/layout-context'
 import { useNavigate } from '@tanstack/react-router'
 import { Loader2, XCircle } from 'lucide-react'
 import React from 'react'
@@ -14,17 +13,6 @@ function GitHubCallbackPage() {
     const navigate = useNavigate()
     const { mutate: githubLogin, isPending, isError, error } = useGitHubLogin()
     const [localError, setLocalError] = React.useState<string | null>(null)
-    const { setLayoutConfig } = useLayout()
-
-    React.useEffect(() => {
-        // Set layout config for this page: hide header hide footer
-        setLayoutConfig({ showHeader: false, showFooter: false })
-
-        // Reset to default when leaving the page
-        return () => {
-            setLayoutConfig({ showHeader: true, showFooter: true })
-        }
-    }, [setLayoutConfig])
 
     React.useEffect(() => {
         const handleCallback = async () => {

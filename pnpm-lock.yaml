@@ -255,6 +255,9 @@ importers:
       '@sentry/vite-plugin':
         specifier: ^4.6.1
         version: 4.6.1
+      '@splidejs/react-splide':
+        specifier: ^0.7.12
+        version: 0.7.12
       '@tanstack/react-query':
         specifier: ^5.87.1
         version: 5.90.11(react@19.2.1)
@@ -363,9 +366,6 @@ importers:
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
-      tailwind-scrollbar:
-        specifier: ^4.0.2
-        version: 4.0.2(react@19.2.1)(tailwindcss@4.1.17)
       zod:
         specifier: ^4.1.12
         version: 4.1.13
@@ -649,6 +649,9 @@ importers:
       tailwind-merge:
         specifier: ^3.3.1
         version: 3.4.0
+      tailwind-scrollbar:
+        specifier: ^4.0.2
+        version: 4.0.2(react@19.2.1)(tailwindcss@4.1.17)
       tailwind-variants:
         specifier: ^2.1.0
         version: 2.1.0(tailwind-merge@3.4.0)(tailwindcss@4.1.17)
@@ -2987,6 +2990,12 @@ packages:
   '@sentry/vite-plugin@4.6.1':
     resolution: {integrity: sha512-Qvys1y3o8/bfL3ikrHnJS9zxdjt0z3POshdBl3967UcflrTqBmnGNkcVk53SlmtJWIfh85fgmrLvGYwZ2YiqNg==}
     engines: {node: '>= 14'}
+
+  '@splidejs/react-splide@0.7.12':
+    resolution: {integrity: sha512-UfXH+j47jsMc4x5HA/aOwuuHPqn6y9+ZTNYPWDRD8iLKvIVMZlzq2unjUEvyDAU+TTVPZOXkG2Ojeoz0P4AkZw==}
+
+  '@splidejs/splide@4.1.4':
+    resolution: {integrity: sha512-5I30evTJcAJQXt6vJ26g2xEkG+l1nXcpEw4xpKh0/FWQ8ozmAeTbtniVtVmz2sH1Es3vgfC4SS8B2X4o5JMptA==}
 
   '@standard-schema/spec@1.0.0':
     resolution: {integrity: sha512-m2bOd0f2RT9k8QJx1JN85cZYyH1RqFBdlwtkSlf4tBDYLCiiZnv1fIIwacK6cqwXavOydf0NPToMQgpKq+dVlA==}
@@ -9662,6 +9671,12 @@ snapshots:
     transitivePeerDependencies:
       - encoding
       - supports-color
+
+  '@splidejs/react-splide@0.7.12':
+    dependencies:
+      '@splidejs/splide': 4.1.4
+
+  '@splidejs/splide@4.1.4': {}
 
   '@standard-schema/spec@1.0.0': {}
 

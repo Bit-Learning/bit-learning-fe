@@ -1,5 +1,4 @@
 import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
-import { useLayout } from '@/shared/context/layout-context'
 import { Link } from '@tanstack/react-router'
 import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
 import { Badge } from '@workspace/ui/components/Badge'
@@ -44,15 +43,6 @@ const AIChatbotPage = () => {
     const [activeSection, setActiveSection] = React.useState('newChat')
 
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
-    const { setLayoutConfig } = useLayout()
-
-    // Hide footer when component mounts, restore when unmounts
-    React.useEffect(() => {
-        setLayoutConfig({ showHeader: true, showFooter: false })
-        return () => {
-            setLayoutConfig({ showHeader: true, showFooter: true })
-        }
-    }, [setLayoutConfig])
 
     const menuItems = [
         { id: 'newChat', label: 'Đoạn hội thoại mới', icon: SquarePen },

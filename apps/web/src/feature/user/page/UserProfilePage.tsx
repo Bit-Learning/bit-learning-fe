@@ -23,7 +23,6 @@ import {
     SidebarGroup,
     SidebarGroupContent,
     SidebarGroupLabel,
-    SidebarHeader,
     SidebarInset,
     SidebarMenu,
     SidebarMenuButton,
@@ -38,12 +37,15 @@ import {
     ArrowUpRight,
     Bell,
     Camera,
+    Check,
     CheckCircle,
+    CircleUserRound,
     Clock,
     CreditCard,
     Edit,
     Filter,
     Key,
+    Laptop,
     Link2,
     LogOut,
     Mail,
@@ -72,6 +74,7 @@ function UserProfilePage() {
     const navigate = useNavigate()
     const { userInfo, isLoading } = useSelector(selectAuthStateInfo)
     const [activeSection, setActiveSection] = React.useState('overview')
+    const [activeSettingTab, setActiveSettingTab] = React.useState('security')
     const [openAddFunds, setOpenAddFunds] = React.useState(false)
     const [openChangePassword, setOpenChangePassword] = React.useState(false)
     const [openEditProfile, setOpenEditProfile] = React.useState(false)
@@ -190,7 +193,6 @@ function UserProfilePage() {
         { id: 'wallet', label: 'Ví & Giao dịch', icon: Wallet },
         { id: 'activity', label: 'Hoạt động', icon: Activity },
         { id: 'notifications', label: 'Thông báo', icon: Bell },
-        { id: 'security', label: 'Bảo mật', icon: Shield },
         { id: 'settings', label: 'Cài đặt', icon: Settings },
     ]
 
@@ -207,24 +209,13 @@ function UserProfilePage() {
         <SidebarProvider defaultOpen>
             <div className="flex min-h-screen w-full">
                 <Sidebar collapsible="icon">
-                    <SidebarHeader>
-                        <div className="flex items-center gap-3 px-2 py-3">
-                            <Avatar className="h-10 w-10">
-                                {userInfo.avatar && <AvatarImage src={userInfo.avatar} alt={userInfo.username} />}
-                                <AvatarFallback className="bg-blue-600 text-white">
-                                    {userInfo.username?.slice(0, 2).toUpperCase()}
-                                </AvatarFallback>
-                            </Avatar>
-                            <div className="flex flex-col">
-                                <span className="text-sm font-semibold">{userInfo.username}</span>
-                                <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'} className="w-fit">
-                                    {userInfo.role}
-                                </Badge>
-                            </div>
-                        </div>
-                    </SidebarHeader>
-
                     <SidebarContent>
+                        <SidebarGroup>
+                            <div className="flex items-center gap-2 px-2 py-3">
+                                <SidebarTrigger size={'lg'} />
+                            </div>
+                        </SidebarGroup>
+
                         <SidebarGroup>
                             <SidebarGroupLabel>Hồ sơ</SidebarGroupLabel>
                             <SidebarGroupContent>
@@ -277,245 +268,253 @@ function UserProfilePage() {
                     <SidebarRail />
                 </Sidebar>
 
-                <SidebarInset>
-                    <header className="border-sidebar-border bg-background sticky top-0 z-10 flex h-16 shrink-0 items-center gap-2 border-b px-2">
-                        <SidebarTrigger className="-ml-1" />
-                        <div className="flex flex-1 items-center justify-between">
-                            <h1 className="text-xl font-semibold">Hồ sơ người dùng</h1>
-                        </div>
-                    </header>
-
-                    <main className="flex-1">
+                <SidebarInset className="p-0">
+                    <div className="m-0">
                         {/* Profile Header Card with Banner */}
-                        <Card className="overflow-hidden rounded-none border-x-0 border-t-0">
-                            {/* Cover Photo Banner */}
-                            <div className="relative h-48 w-full md:h-64 lg:h-80">
-                                <img
-                                    src={userInfo.coverImage || '/user_no_wallpaper.jpg'}
-                                    alt="Cover"
-                                    className="h-full w-full object-cover"
-                                />
-                                <input
-                                    type="file"
-                                    ref={coverInputRef}
-                                    onChange={handleCoverChange}
-                                    accept="image/*"
-                                    className="hidden"
-                                />
-                                <Button
-                                    size="sm"
-                                    variant="secondary"
-                                    className="absolute bottom-4 right-4 gap-2"
-                                    onClick={() => coverInputRef.current?.click()}
-                                    isDisabled={isUploadingCover}
-                                >
-                                    <Camera className="h-4 w-4 text-white" />
-                                    <span className="hidden text-white sm:inline">
-                                        {isUploadingCover ? 'Đang tải...' : 'Chỉnh sửa ảnh bìa'}
-                                    </span>
-                                </Button>
-                            </div>
+                        {activeSection !== 'settings' && (
+                            <Card className="m-0 overflow-hidden rounded-none border-x-0 border-t-0">
+                                {/* Cover Photo Banner */}
+                                <div className="relative h-48 w-full md:h-64 lg:h-80">
+                                    <img
+                                        src={userInfo.coverImage || '/user_no_wallpaper.jpg'}
+                                        alt="Cover"
+                                        className="h-full w-full object-cover"
+                                    />
+                                    <input
+                                        type="file"
+                                        ref={coverInputRef}
+                                        onChange={handleCoverChange}
+                                        accept="image/*"
+                                        className="hidden"
+                                    />
+                                    <Button
+                                        size="sm"
+                                        variant="secondary"
+                                        className="absolute bottom-4 right-4 gap-2"
+                                        onClick={() => coverInputRef.current?.click()}
+                                        isDisabled={isUploadingCover}
+                                    >
+                                        <Camera className="h-4 w-4 text-white" />
+                                        <span className="hidden text-white sm:inline">
+                                            {isUploadingCover ? 'Đang tải...' : 'Chỉnh sửa ảnh bìa'}
+                                        </span>
+                                    </Button>
+                                </div>
 
-                            <CardContent className="relative bg-white p-6">
-                                <div className="flex justify-center gap-6">
-                                    <div className="relative -mt-20 md:-mt-24">
-                                        <div className="rounded-full bg-white p-1">
-                                            <Avatar className="h-32 w-32 border-4 border-white shadow-xl md:h-40 md:w-40">
-                                                {userInfo.avatar && (
-                                                    <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
-                                                )}
-                                                <AvatarFallback className="bg-blue-600 text-2xl text-white md:text-3xl">
-                                                    {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
-                                                </AvatarFallback>
-                                            </Avatar>
+                                <CardContent className="relative bg-white p-6">
+                                    <div className="flex justify-center gap-6">
+                                        <div className="relative">
+                                            <div className="rounded-full bg-white p-1">
+                                                <Avatar className="border-gray h-32 w-32 border-2 md:h-40 md:w-40">
+                                                    {userInfo.avatar && (
+                                                        <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
+                                                    )}
+                                                    <AvatarFallback className="bg-blue-600 text-2xl text-white md:text-3xl">
+                                                        {userInfo.username?.slice(0, 2).toUpperCase() || '??'}
+                                                    </AvatarFallback>
+                                                </Avatar>
+                                            </div>
+                                            <input
+                                                type="file"
+                                                ref={avatarInputRef}
+                                                onChange={handleAvatarChange}
+                                                accept="image/*"
+                                                className="hidden"
+                                            />
+                                            <Button
+                                                size="icon"
+                                                variant="outline"
+                                                className="absolute bottom-10 right-2 h-10 w-10 rounded-full bg-gray-200 shadow-md hover:bg-gray-50"
+                                                onClick={() => avatarInputRef.current?.click()}
+                                                isDisabled={isUploadingAvatar}
+                                            >
+                                                <Camera className="h-4 w-4" />
+                                            </Button>
                                         </div>
-                                        <input
-                                            type="file"
-                                            ref={avatarInputRef}
-                                            onChange={handleAvatarChange}
-                                            accept="image/*"
-                                            className="hidden"
-                                        />
-                                        <Button
-                                            size="icon"
-                                            variant="outline"
-                                            className="absolute bottom-2 right-2 h-10 w-10 rounded-full bg-white shadow-md hover:bg-gray-50"
-                                            onClick={() => avatarInputRef.current?.click()}
-                                            isDisabled={isUploadingAvatar}
-                                        >
-                                            <Camera className="h-4 w-4" />
-                                        </Button>
-                                    </div>
 
-                                    <div className="space-y-4">
-                                        <div className="mb-6 flex flex-col gap-2">
-                                            {/* <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'}>
+                                        <div className="space-y-4">
+                                            <div className="mb-6 flex flex-col gap-2">
+                                                {/* <Badge variant={userInfo.role === 'ADMIN' ? 'default' : 'secondary'}>
                                                 {userInfo.role}
                                             </Badge> */}
-                                            {/* <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
+                                                {/* <Badge variant={userInfo.activated ? 'default' : 'destructive'}>
                                                 {userInfo.activated ? 'Active' : 'Inactive'}
                                             </Badge> */}
-                                            <div className="mb-6 flex items-center gap-4">
-                                                <p className="text-3xl font-bold">
-                                                    {mergeName(userInfo.firstName, userInfo.lastName)}
-                                                </p>
+                                                <div className="mb-1 flex items-center gap-4">
+                                                    <p className="text-3xl font-bold">
+                                                        {mergeName(userInfo.firstName, userInfo.lastName)}
+                                                    </p>
 
-                                                <Button
-                                                    size="sm"
-                                                    variant="outline"
-                                                    onClick={() => setOpenEditProfile(true)}
-                                                >
-                                                    <Edit className="mr-2 h-4 w-4" />
-                                                    Chỉnh sửa hồ sơ
-                                                </Button>
-                                            </div>
+                                                    {userInfo.activated && <Check className="h-6 w-6 text-blue-500" />}
 
-                                            <div className="flex items-center gap-1">{userInfo.bio || 'N/A'}</div>
-                                        </div>
-
-                                        <div className="text-muted-foreground flex flex-col flex-wrap gap-4 text-sm">
-                                            <div className="flex items-center gap-1">
-                                                <Mail className="size-4" />
-                                                {userInfo.email}
-                                            </div>
-                                            <div className="flex items-center gap-1">
-                                                <MapPin className="size-4" />
-                                                {userInfo.location || 'N/A'}
-                                            </div>
-                                            {userInfo.socialProfile &&
-                                                Object.values(userInfo.socialProfile).some(v => v) && (
-                                                    <PopoverTrigger>
-                                                        <Button
-                                                            variant="ghost"
-                                                            className="text-muted-foreground flex h-auto items-center justify-start gap-1 p-0 hover:bg-transparent"
-                                                        >
-                                                            <Link2 className="size-4" />
-                                                            <p className="hover:underline">Kết nối với tôi</p>
-                                                        </Button>
-                                                        <Popover placement="bottom left">
-                                                            <PopoverDialog className="w-64">
-                                                                <div className="flex flex-col gap-2">
-                                                                    {userInfo.socialProfile.facebook && (
-                                                                        <a
-                                                                            href={userInfo.socialProfile.facebook}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 rounded-md p-2 text-blue-600 transition-colors hover:bg-blue-50"
-                                                                        >
-                                                                            <svg
-                                                                                className="h-4 w-4"
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
-                                                                            </svg>
-                                                                            Facebook
-                                                                        </a>
-                                                                    )}
-                                                                    {userInfo.socialProfile.instagram && (
-                                                                        <a
-                                                                            href={userInfo.socialProfile.instagram}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 rounded-md p-2 text-pink-600 transition-colors hover:bg-pink-50"
-                                                                        >
-                                                                            <svg
-                                                                                className="h-4 w-4"
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
-                                                                            </svg>
-                                                                            Instagram
-                                                                        </a>
-                                                                    )}
-                                                                    {userInfo.socialProfile.twitter && (
-                                                                        <a
-                                                                            href={userInfo.socialProfile.twitter}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 rounded-md p-2 text-sky-600 transition-colors hover:bg-sky-50"
-                                                                        >
-                                                                            <svg
-                                                                                className="h-4 w-4"
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
-                                                                            </svg>
-                                                                            Twitter/X
-                                                                        </a>
-                                                                    )}
-                                                                    {userInfo.socialProfile.linkedin && (
-                                                                        <a
-                                                                            href={userInfo.socialProfile.linkedin}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 rounded-md p-2 text-blue-700 transition-colors hover:bg-blue-50"
-                                                                        >
-                                                                            <svg
-                                                                                className="h-4 w-4"
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
-                                                                            </svg>
-                                                                            LinkedIn
-                                                                        </a>
-                                                                    )}
-                                                                    {userInfo.socialProfile.github && (
-                                                                        <a
-                                                                            href={userInfo.socialProfile.github}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 rounded-md p-2 text-gray-800 transition-colors hover:bg-gray-100"
-                                                                        >
-                                                                            <svg
-                                                                                className="h-4 w-4"
-                                                                                fill="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
-                                                                            </svg>
-                                                                            GitHub
-                                                                        </a>
-                                                                    )}
-                                                                    {userInfo.socialProfile.website && (
-                                                                        <a
-                                                                            href={userInfo.socialProfile.website}
-                                                                            target="_blank"
-                                                                            rel="noopener noreferrer"
-                                                                            className="flex items-center gap-2 rounded-md p-2 text-green-600 transition-colors hover:bg-green-50"
-                                                                        >
-                                                                            <svg
-                                                                                className="h-4 w-4"
-                                                                                fill="none"
-                                                                                stroke="currentColor"
-                                                                                viewBox="0 0 24 24"
-                                                                            >
-                                                                                <path
-                                                                                    strokeLinecap="round"
-                                                                                    strokeLinejoin="round"
-                                                                                    strokeWidth={2}
-                                                                                    d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
-                                                                                />
-                                                                            </svg>
-                                                                            Website
-                                                                        </a>
-                                                                    )}
-                                                                </div>
-                                                            </PopoverDialog>
-                                                        </Popover>
-                                                    </PopoverTrigger>
+                                                    <Button
+                                                        size="sm"
+                                                        variant="outline"
+                                                        onClick={() => setOpenEditProfile(true)}
+                                                    >
+                                                        <Edit className="mr-2 h-4 w-4" />
+                                                        Chỉnh sửa hồ sơ
+                                                    </Button>
+                                                </div>
+                                                {userInfo.username && (
+                                                    <div className="flex items-center gap-1">{userInfo.username}</div>
                                                 )}
+
+                                                {userInfo.bio && (
+                                                    <div className="flex items-center gap-1">{userInfo.bio}</div>
+                                                )}
+                                            </div>
+
+                                            <div className="text-muted-foreground flex flex-col flex-wrap gap-4 text-sm">
+                                                <div className="flex items-center gap-1">
+                                                    <Mail className="size-4" />
+                                                    {userInfo.email}
+                                                </div>
+                                                <div className="flex items-center gap-1">
+                                                    <MapPin className="size-4" />
+                                                    {userInfo.location || 'Vị trí không xác định'}
+                                                </div>
+
+                                                <div className="flex items-center gap-1">
+                                                    <CircleUserRound className="size-4" />
+                                                    {userInfo.jobTitle}
+                                                </div>
+
+                                                {userInfo.socialProfile &&
+                                                    Object.values(userInfo.socialProfile).some(v => v) && (
+                                                        <PopoverTrigger>
+                                                            <Button
+                                                                variant="ghost"
+                                                                className="text-muted-foreground flex h-auto items-center justify-start gap-1 p-0 hover:bg-transparent"
+                                                            >
+                                                                <Link2 className="size-4" />
+                                                                <p className="hover:underline">Kết nối với tôi</p>
+                                                            </Button>
+                                                            <Popover placement="bottom left">
+                                                                <PopoverDialog className="w-64">
+                                                                    <div className="flex flex-col gap-2">
+                                                                        {userInfo.socialProfile.facebook && (
+                                                                            <a
+                                                                                href={userInfo.socialProfile.facebook}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 rounded-md p-2 text-blue-600 transition-colors hover:bg-blue-50"
+                                                                            >
+                                                                                <svg
+                                                                                    className="h-4 w-4"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z" />
+                                                                                </svg>
+                                                                                Facebook
+                                                                            </a>
+                                                                        )}
+                                                                        {userInfo.socialProfile.instagram && (
+                                                                            <a
+                                                                                href={userInfo.socialProfile.instagram}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 rounded-md p-2 text-pink-600 transition-colors hover:bg-pink-50"
+                                                                            >
+                                                                                <svg
+                                                                                    className="h-4 w-4"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z" />
+                                                                                </svg>
+                                                                                Instagram
+                                                                            </a>
+                                                                        )}
+                                                                        {userInfo.socialProfile.twitter && (
+                                                                            <a
+                                                                                href={userInfo.socialProfile.twitter}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 rounded-md p-2 text-sky-600 transition-colors hover:bg-sky-50"
+                                                                            >
+                                                                                <svg
+                                                                                    className="h-4 w-4"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <path d="M23.953 4.57a10 10 0 01-2.825.775 4.958 4.958 0 002.163-2.723c-.951.555-2.005.959-3.127 1.184a4.92 4.92 0 00-8.384 4.482C7.69 8.095 4.067 6.13 1.64 3.162a4.822 4.822 0 00-.666 2.475c0 1.71.87 3.213 2.188 4.096a4.904 4.904 0 01-2.228-.616v.06a4.923 4.923 0 003.946 4.827 4.996 4.996 0 01-2.212.085 4.936 4.936 0 004.604 3.417 9.867 9.867 0 01-6.102 2.105c-.39 0-.779-.023-1.17-.067a13.995 13.995 0 007.557 2.209c9.053 0 13.998-7.496 13.998-13.985 0-.21 0-.42-.015-.63A9.935 9.935 0 0024 4.59z" />
+                                                                                </svg>
+                                                                                Twitter/X
+                                                                            </a>
+                                                                        )}
+                                                                        {userInfo.socialProfile.linkedin && (
+                                                                            <a
+                                                                                href={userInfo.socialProfile.linkedin}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 rounded-md p-2 text-blue-700 transition-colors hover:bg-blue-50"
+                                                                            >
+                                                                                <svg
+                                                                                    className="h-4 w-4"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z" />
+                                                                                </svg>
+                                                                                LinkedIn
+                                                                            </a>
+                                                                        )}
+                                                                        {userInfo.socialProfile.github && (
+                                                                            <a
+                                                                                href={userInfo.socialProfile.github}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 rounded-md p-2 text-gray-800 transition-colors hover:bg-gray-100"
+                                                                            >
+                                                                                <svg
+                                                                                    className="h-4 w-4"
+                                                                                    fill="currentColor"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+                                                                                </svg>
+                                                                                GitHub
+                                                                            </a>
+                                                                        )}
+                                                                        {userInfo.socialProfile.website && (
+                                                                            <a
+                                                                                href={userInfo.socialProfile.website}
+                                                                                target="_blank"
+                                                                                rel="noopener noreferrer"
+                                                                                className="flex items-center gap-2 rounded-md p-2 text-green-600 transition-colors hover:bg-green-50"
+                                                                            >
+                                                                                <svg
+                                                                                    className="h-4 w-4"
+                                                                                    fill="none"
+                                                                                    stroke="currentColor"
+                                                                                    viewBox="0 0 24 24"
+                                                                                >
+                                                                                    <path
+                                                                                        strokeLinecap="round"
+                                                                                        strokeLinejoin="round"
+                                                                                        strokeWidth={2}
+                                                                                        d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"
+                                                                                    />
+                                                                                </svg>
+                                                                                Website
+                                                                            </a>
+                                                                        )}
+                                                                    </div>
+                                                                </PopoverDialog>
+                                                            </Popover>
+                                                        </PopoverTrigger>
+                                                    )}
+                                            </div>
                                         </div>
                                     </div>
-                                </div>
-                            </CardContent>
-                        </Card>
+                                </CardContent>
+                            </Card>
+                        )}
 
                         {/* Dynamic Content Based on Active Section */}
-                        <div className="space-y-4 p-6">
+                        <div className={activeSection === 'settings' ? 'h-screen' : 'space-y-4 p-6'}>
                             {activeSection === 'overview' && (
                                 <div className="space-y-4">
                                     <Card>
@@ -524,36 +523,12 @@ function UserProfilePage() {
                                                 <h3 className="text-lg font-semibold">Thông tin cơ bản</h3>
                                             </div>
                                             <div className="grid gap-4 md:grid-cols-2">
-                                                <div>
-                                                    <label className="text-muted-foreground text-sm font-medium">
-                                                        Họ và tên
-                                                    </label>
-                                                    <p className="text-base">
-                                                        {userInfo.firstName} {userInfo.lastName}
-                                                    </p>
-                                                </div>
                                                 {userInfo.pronouns && (
                                                     <div>
                                                         <label className="text-muted-foreground text-sm font-medium">
                                                             Đại từ
                                                         </label>
                                                         <p className="text-base">{userInfo.pronouns}</p>
-                                                    </div>
-                                                )}
-                                                {userInfo.jobTitle && (
-                                                    <div>
-                                                        <label className="text-muted-foreground text-sm font-medium">
-                                                            Nghề nghiệp
-                                                        </label>
-                                                        <p className="text-base">{userInfo.jobTitle}</p>
-                                                    </div>
-                                                )}
-                                                {userInfo.location && (
-                                                    <div>
-                                                        <label className="text-muted-foreground text-sm font-medium">
-                                                            Địa điểm
-                                                        </label>
-                                                        <p className="text-base">{userInfo.location}</p>
                                                     </div>
                                                 )}
                                                 {userInfo.phoneNumber && (
@@ -1165,39 +1140,414 @@ function UserProfilePage() {
                                 </Card>
                             )}
 
-                            {activeSection === 'security' && (
-                                <div className="space-y-4">
-                                    <Card>
-                                        <CardContent className="p-6">
-                                            <h3 className="mb-6 text-lg font-semibold">Security Settings</h3>
-                                            <TwoFactorSettings
-                                                is2FAEnabled={userInfo?.mfaEnabled || false}
-                                                userEmail={userInfo?.email}
-                                            />
-                                        </CardContent>
-                                    </Card>
-                                </div>
-                            )}
-
                             {activeSection === 'settings' && (
-                                <Card>
-                                    <CardContent className="p-6">
-                                        <h3 className="mb-4 text-lg font-semibold">Account Settings</h3>
-                                        <div className="space-y-4">
-                                            <div>
-                                                <label className="text-sm font-medium">Language</label>
-                                                <p className="text-base">{userInfo.langKey?.toUpperCase() || 'EN'}</p>
+                                <div className="flex h-full">
+                                    {/* Left Sidebar - Settings Navigation */}
+                                    <div className="w-64 border-r bg-gray-50 p-4">
+                                        <h2 className="mb-4 text-xl font-bold">Cài đặt</h2>
+                                        <nav className="space-y-1">
+                                            <button
+                                                onClick={() => setActiveSettingTab('security')}
+                                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
+                                                    activeSettingTab === 'security'
+                                                        ? 'bg-blue-100 font-medium text-blue-700'
+                                                        : 'hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <Shield className="h-5 w-5" />
+                                                Bảo mật
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveSettingTab('account')}
+                                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
+                                                    activeSettingTab === 'account'
+                                                        ? 'bg-blue-100 font-medium text-blue-700'
+                                                        : 'hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <User className="h-5 w-5" />
+                                                Tài khoản
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveSettingTab('notifications')}
+                                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
+                                                    activeSettingTab === 'notifications'
+                                                        ? 'bg-blue-100 font-medium text-blue-700'
+                                                        : 'hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <Bell className="h-5 w-5" />
+                                                Thông báo
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveSettingTab('privacy')}
+                                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
+                                                    activeSettingTab === 'privacy'
+                                                        ? 'bg-blue-100 font-medium text-blue-700'
+                                                        : 'hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <Settings className="h-5 w-5" />
+                                                Quyền riêng tư
+                                            </button>
+                                            <button
+                                                onClick={() => setActiveSettingTab('appearance')}
+                                                className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
+                                                    activeSettingTab === 'appearance'
+                                                        ? 'bg-blue-100 font-medium text-blue-700'
+                                                        : 'hover:bg-gray-100'
+                                                }`}
+                                            >
+                                                <CreditCard className="h-5 w-5" />
+                                                Giao diện
+                                            </button>
+                                        </nav>
+                                    </div>
+
+                                    {/* Right Content Area - Settings Content */}
+                                    <div className="flex-1 overflow-y-auto p-8">
+                                        {activeSettingTab === 'security' && (
+                                            <div className="max-w-3xl space-y-6">
+                                                <div>
+                                                    <h3 className="mb-2 text-2xl font-bold">Bảo mật</h3>
+                                                    <p className="text-muted-foreground">
+                                                        Quản lý cài đặt bảo mật và xác thực của bạn
+                                                    </p>
+                                                </div>
+
+                                                {/* Two-Factor Authentication */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Xác thực hai yếu tố (2FA)</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent>
+                                                        <TwoFactorSettings
+                                                            is2FAEnabled={userInfo?.mfaEnabled || false}
+                                                            userEmail={userInfo?.email}
+                                                        />
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Password */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Mật khẩu</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="font-medium">Đổi mật khẩu</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Cập nhật mật khẩu của bạn thường xuyên
+                                                                </p>
+                                                            </div>
+                                                            <Button onClick={() => setOpenChangePassword(true)}>
+                                                                Đổi mật khẩu
+                                                            </Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Active Sessions */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Phiên đăng nhập hoạt động</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-start justify-between rounded-lg border p-4">
+                                                            <div className="flex gap-3">
+                                                                <div className="rounded-lg bg-blue-100 p-2">
+                                                                    <Laptop className="h-5 w-5 text-blue-600" />
+                                                                </div>
+                                                                <div>
+                                                                    <p className="font-medium">Thiết bị hiện tại</p>
+                                                                    <p className="text-muted-foreground text-sm">
+                                                                        Linux • Chrome • Hà Nội, Việt Nam
+                                                                    </p>
+                                                                    <p className="text-muted-foreground text-xs">
+                                                                        Hoạt động ngay bây giờ
+                                                                    </p>
+                                                                </div>
+                                                            </div>
+                                                            <Badge variant="secondary">Hiện tại</Badge>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
                                             </div>
-                                            <Button variant="outline">Update Settings</Button>
-                                        </div>
-                                    </CardContent>
-                                </Card>
+                                        )}
+
+                                        {activeSettingTab === 'account' && (
+                                            <div className="max-w-3xl space-y-6">
+                                                <div>
+                                                    <h3 className="mb-2 text-2xl font-bold">Cài đặt tài khoản</h3>
+                                                    <p className="text-muted-foreground">
+                                                        Quản lý thông tin tài khoản và tùy chọn của bạn
+                                                    </p>
+                                                </div>
+
+                                                {/* Profile Information */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Thông tin hồ sơ</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="font-medium">Chỉnh sửa hồ sơ</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Cập nhật thông tin cá nhân của bạn
+                                                                </p>
+                                                            </div>
+                                                            <Button onClick={() => setOpenEditProfile(true)}>
+                                                                Chỉnh sửa
+                                                            </Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Language */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Ngôn ngữ & Khu vực</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div>
+                                                                <p className="font-medium">Ngôn ngữ</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    {userInfo.langKey?.toUpperCase() || 'EN'}
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Thay đổi
+                                                            </Button>
+                                                        </div>
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div>
+                                                                <p className="font-medium">Múi giờ</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    UTC+7 (Giờ Việt Nam)
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Thay đổi
+                                                            </Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Delete Account */}
+                                                <Card className="border-red-200">
+                                                    <CardHeader>
+                                                        <CardTitle className="text-red-600">Xóa tài khoản</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <p className="text-muted-foreground text-sm">
+                                                            Xóa vĩnh viễn tài khoản và toàn bộ dữ liệu của bạn. Hành
+                                                            động này không thể hoàn tác.
+                                                        </p>
+                                                        <Button variant="destructive">Xóa tài khoản</Button>
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        )}
+
+                                        {activeSettingTab === 'notifications' && (
+                                            <div className="max-w-3xl space-y-6">
+                                                <div>
+                                                    <h3 className="mb-2 text-2xl font-bold">Thông báo</h3>
+                                                    <p className="text-muted-foreground">
+                                                        Quản lý cách bạn nhận thông báo
+                                                    </p>
+                                                </div>
+
+                                                {/* Email Notifications */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Thông báo Email</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div className="flex-1">
+                                                                <p className="font-medium">Cập nhật khóa học</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Nhận thông báo về khóa học mới và cập nhật
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Bật
+                                                            </Button>
+                                                        </div>
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div className="flex-1">
+                                                                <p className="font-medium">Đơn hàng</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Thông báo về đơn hàng và thanh toán
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Bật
+                                                            </Button>
+                                                        </div>
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div className="flex-1">
+                                                                <p className="font-medium">Tin tức & Khuyến mãi</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Nhận ưu đãi và tin tức từ Bithub
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Tắt
+                                                            </Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Push Notifications */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Thông báo đẩy</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div className="flex-1">
+                                                                <p className="font-medium">Tin nhắn mới</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Nhận thông báo khi có tin nhắn mới
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Bật
+                                                            </Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        )}
+
+                                        {activeSettingTab === 'privacy' && (
+                                            <div className="max-w-3xl space-y-6">
+                                                <div>
+                                                    <h3 className="mb-2 text-2xl font-bold">Quyền riêng tư</h3>
+                                                    <p className="text-muted-foreground">
+                                                        Kiểm soát quyền riêng tư và dữ liệu của bạn
+                                                    </p>
+                                                </div>
+
+                                                {/* Profile Visibility */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Hiển thị hồ sơ</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div className="flex-1">
+                                                                <p className="font-medium">
+                                                                    Ai có thể xem hồ sơ của bạn
+                                                                </p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Công khai
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Thay đổi
+                                                            </Button>
+                                                        </div>
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div className="flex-1">
+                                                                <p className="font-medium">Hiển thị email</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Chỉ hiển thị cho bạn bè
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Thay đổi
+                                                            </Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Data & Privacy */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Dữ liệu & Quyền riêng tư</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between">
+                                                            <div>
+                                                                <p className="font-medium">Tải xuống dữ liệu của bạn</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Tải xuống bản sao dữ liệu của bạn
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline">Tải xuống</Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        )}
+
+                                        {activeSettingTab === 'appearance' && (
+                                            <div className="max-w-3xl space-y-6">
+                                                <div>
+                                                    <h3 className="mb-2 text-2xl font-bold">Giao diện</h3>
+                                                    <p className="text-muted-foreground">
+                                                        Tùy chỉnh giao diện ứng dụng
+                                                    </p>
+                                                </div>
+
+                                                {/* Theme */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Chủ đề</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="grid grid-cols-3 gap-4">
+                                                            <button className="rounded-lg border-2 border-blue-500 p-4 text-center">
+                                                                <div className="mb-2 h-20 rounded bg-white"></div>
+                                                                <p className="font-medium">Sáng</p>
+                                                            </button>
+                                                            <button className="rounded-lg border-2 border-transparent p-4 text-center hover:border-gray-300">
+                                                                <div className="mb-2 h-20 rounded bg-gray-900"></div>
+                                                                <p className="font-medium">Tối</p>
+                                                            </button>
+                                                            <button className="rounded-lg border-2 border-transparent p-4 text-center hover:border-gray-300">
+                                                                <div className="mb-2 h-20 rounded bg-gradient-to-r from-white to-gray-900"></div>
+                                                                <p className="font-medium">Tự động</p>
+                                                            </button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+
+                                                {/* Display Settings */}
+                                                <Card>
+                                                    <CardHeader>
+                                                        <CardTitle>Cài đặt hiển thị</CardTitle>
+                                                    </CardHeader>
+                                                    <CardContent className="space-y-4">
+                                                        <div className="flex items-center justify-between rounded-lg border p-4">
+                                                            <div>
+                                                                <p className="font-medium">Kích thước chữ</p>
+                                                                <p className="text-muted-foreground text-sm">
+                                                                    Trung bình
+                                                                </p>
+                                                            </div>
+                                                            <Button variant="outline" size="sm">
+                                                                Điều chỉnh
+                                                            </Button>
+                                                        </div>
+                                                    </CardContent>
+                                                </Card>
+                                            </div>
+                                        )}
+                                    </div>
+                                </div>
                             )}
                         </div>
 
                         {/* Profile Tabs Content */}
                         {/* <ProfileContent /> */}
-                    </main>
+                    </div>
                     <AddFundsDialog
                         open={openAddFunds}
                         onOpenChange={setOpenAddFunds}

@@ -15,7 +15,7 @@ const gameTypes = [
 ]
 
 export const GameListPage: React.FC = () => {
-    const search = useSearch({ from: '/games/list' })
+    const search = useSearch({ from: '/_headerOnly/games/list' })
     const navigate = useNavigate({ from: '/games/list' })
     const typeFilter = (search as any)?.type || ''
     const [page, setPage] = useState(0)

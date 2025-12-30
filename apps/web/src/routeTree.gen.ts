@@ -9,105 +9,93 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as WebDesignRouteImport } from './routes/web-design'
-import { Route as UserProfileRouteImport } from './routes/user-profile'
-import { Route as UploadRouteImport } from './routes/upload'
-import { Route as TermsRouteImport } from './routes/terms'
+import { Route as TestWpmRouteImport } from './routes/test-wpm'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as Signin2faRouteImport } from './routes/signin-2fa'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PrivacyRouteImport } from './routes/privacy'
 import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
 import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
-import { Route as OfflineCourseRouteImport } from './routes/offline-course'
-import { Route as MentorshipRouteImport } from './routes/mentorship'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as DemoRouteImport } from './routes/demo'
-import { Route as CustomTemplateRouteImport } from './routes/custom-template'
-import { Route as CorporateTrainingRouteImport } from './routes/corporate-training'
-import { Route as ContactRouteImport } from './routes/contact'
-import { Route as ConsultationRouteImport } from './routes/consultation'
-import { Route as ChatRouteImport } from './routes/chat'
-import { Route as AiChatbotRouteImport } from './routes/ai-chatbot'
-import { Route as AboutRouteImport } from './routes/about'
+import { Route as LayoutRouteImport } from './routes/_layout'
+import { Route as HeaderOnlyRouteImport } from './routes/_headerOnly'
 import { Route as R404RouteImport } from './routes/404'
-import { Route as IndexRouteImport } from './routes/index'
-import { Route as TemplatesIndexRouteImport } from './routes/templates/index'
-import { Route as SyllabusesIndexRouteImport } from './routes/syllabuses/index'
-import { Route as QuestionsIndexRouteImport } from './routes/questions/index'
-import { Route as PresentationsIndexRouteImport } from './routes/presentations/index'
-import { Route as NewsIndexRouteImport } from './routes/news/index'
-import { Route as MatricesIndexRouteImport } from './routes/matrices/index'
-import { Route as GamesIndexRouteImport } from './routes/games/index'
-import { Route as CoursesIndexRouteImport } from './routes/courses/index'
-import { Route as TemplatesTemplatePreviewRouteImport } from './routes/templates/template-preview'
-import { Route as TemplatesDashboardRouteImport } from './routes/templates/dashboard'
-import { Route as TemplatesIdRouteImport } from './routes/templates/$id'
-import { Route as SyllabusesMyRouteImport } from './routes/syllabuses/my'
-import { Route as SyllabusesCreateRouteImport } from './routes/syllabuses/create'
-import { Route as QuestionsMyRouteImport } from './routes/questions/my'
-import { Route as QuestionsGenerateFromQuestionsRouteImport } from './routes/questions/generate-from-questions'
-import { Route as QuestionsCreateRouteImport } from './routes/questions/create'
-import { Route as PresentationsIdRouteImport } from './routes/presentations/$id'
-import { Route as NewsIdRouteImport } from './routes/news/$id'
-import { Route as MatricesMyRouteImport } from './routes/matrices/my'
-import { Route as MatricesImportRouteImport } from './routes/matrices/import'
-import { Route as MatricesCreateRouteImport } from './routes/matrices/create'
-import { Route as LecturesIdRouteImport } from './routes/lectures/$id'
-import { Route as InternalTestLoaderRouteImport } from './routes/internal/test-loader'
-import { Route as GamesListRouteImport } from './routes/games/list'
-import { Route as ExamsMyExamsRouteImport } from './routes/exams/my-exams'
-import { Route as ExamsGenerateRouteImport } from './routes/exams/generate'
-import { Route as ExamsIdRouteImport } from './routes/exams/$id'
-import { Route as CoursesWebDevelopmentRouteImport } from './routes/courses/web-development'
-import { Route as CoursesMobileDevelopmentRouteImport } from './routes/courses/mobile-development'
-import { Route as CoursesDataScienceRouteImport } from './routes/courses/data-science'
-import { Route as CoursesBackendDevelopmentRouteImport } from './routes/courses/backend-development'
-import { Route as CoursesIdRouteImport } from './routes/courses/$id'
-import { Route as TemplatesSlidevIndexRouteImport } from './routes/templates/slidev/index'
-import { Route as SyllabusesIdIndexRouteImport } from './routes/syllabuses/$id/index'
-import { Route as QuestionsIdIndexRouteImport } from './routes/questions/$id/index'
+import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as LayoutWebDesignRouteImport } from './routes/_layout/web-design'
+import { Route as LayoutUploadRouteImport } from './routes/_layout/upload'
+import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
+import { Route as LayoutPrivacyRouteImport } from './routes/_layout/privacy'
+import { Route as LayoutOfflineCourseRouteImport } from './routes/_layout/offline-course'
+import { Route as LayoutMentorshipRouteImport } from './routes/_layout/mentorship'
+import { Route as LayoutDemoRouteImport } from './routes/_layout/demo'
+import { Route as LayoutCustomTemplateRouteImport } from './routes/_layout/custom-template'
+import { Route as LayoutCorporateTrainingRouteImport } from './routes/_layout/corporate-training'
+import { Route as LayoutContactRouteImport } from './routes/_layout/contact'
+import { Route as LayoutConsultationRouteImport } from './routes/_layout/consultation'
+import { Route as LayoutChatRouteImport } from './routes/_layout/chat'
+import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
+import { Route as HeaderOnlyUserProfileRouteImport } from './routes/_headerOnly/user-profile'
+import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
 import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
-import { Route as GamesIdIndexRouteImport } from './routes/games/$id/index'
-import { Route as TemplatesSlidevCreateRouteImport } from './routes/templates/slidev/create'
-import { Route as SyllabusesIdEditRouteImport } from './routes/syllabuses/$id/edit'
-import { Route as QuestionsIdEditRouteImport } from './routes/questions/$id/edit'
-import { Route as PresentationsIdViewRouteImport } from './routes/presentations/$id/view'
-import { Route as PresentationsIdPresenterRouteImport } from './routes/presentations/$id/presenter'
-import { Route as PresentationsIdOverviewRouteImport } from './routes/presentations/$id/overview'
+import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
+import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
+import { Route as LayoutQuestionsIndexRouteImport } from './routes/_layout/questions/index'
+import { Route as LayoutPresentationsIndexRouteImport } from './routes/_layout/presentations/index'
+import { Route as LayoutNewsIndexRouteImport } from './routes/_layout/news/index'
+import { Route as LayoutMatricesIndexRouteImport } from './routes/_layout/matrices/index'
+import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
+import { Route as HeaderOnlyGamesIndexRouteImport } from './routes/_headerOnly/games/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as MentorCourseQuizRouteImport } from './routes/mentor/course/quiz'
 import { Route as MentorCourseListRouteImport } from './routes/mentor/course/list'
 import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/create'
 import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
-import { Route as MatricesIdGenerateRouteImport } from './routes/matrices/$id.generate'
-import { Route as MatricesIdEditRouteImport } from './routes/matrices/$id.edit'
-import { Route as GamesIdPlayRouteImport } from './routes/games/$id.play'
-import { Route as CoursesGradeGradeRouteImport } from './routes/courses/grade/$grade'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as AuthGithubCallbackRouteImport } from './routes/auth/github/callback'
 import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
-import { Route as TemplatesSlidevIdEditRouteImport } from './routes/templates/slidev/$id/edit'
+import { Route as LayoutTemplatesTemplatePreviewRouteImport } from './routes/_layout/templates/template-preview'
+import { Route as LayoutTemplatesDashboardRouteImport } from './routes/_layout/templates/dashboard'
+import { Route as LayoutTemplatesIdRouteImport } from './routes/_layout/templates/$id'
+import { Route as LayoutSyllabusesMyRouteImport } from './routes/_layout/syllabuses/my'
+import { Route as LayoutSyllabusesCreateRouteImport } from './routes/_layout/syllabuses/create'
+import { Route as LayoutQuestionsMyRouteImport } from './routes/_layout/questions/my'
+import { Route as LayoutQuestionsGenerateFromQuestionsRouteImport } from './routes/_layout/questions/generate-from-questions'
+import { Route as LayoutQuestionsCreateRouteImport } from './routes/_layout/questions/create'
+import { Route as LayoutPresentationsIdRouteImport } from './routes/_layout/presentations/$id'
+import { Route as LayoutNewsIdRouteImport } from './routes/_layout/news/$id'
+import { Route as LayoutMatricesMyRouteImport } from './routes/_layout/matrices/my'
+import { Route as LayoutMatricesImportRouteImport } from './routes/_layout/matrices/import'
+import { Route as LayoutMatricesCreateRouteImport } from './routes/_layout/matrices/create'
+import { Route as LayoutLecturesIdRouteImport } from './routes/_layout/lectures/$id'
+import { Route as LayoutInternalTestLoaderRouteImport } from './routes/_layout/internal/test-loader'
+import { Route as LayoutExamsMyExamsRouteImport } from './routes/_layout/exams/my-exams'
+import { Route as LayoutExamsGenerateRouteImport } from './routes/_layout/exams/generate'
+import { Route as LayoutExamsIdRouteImport } from './routes/_layout/exams/$id'
+import { Route as LayoutCoursesWebDevelopmentRouteImport } from './routes/_layout/courses/web-development'
+import { Route as LayoutCoursesMobileDevelopmentRouteImport } from './routes/_layout/courses/mobile-development'
+import { Route as LayoutCoursesDataScienceRouteImport } from './routes/_layout/courses/data-science'
+import { Route as LayoutCoursesBackendDevelopmentRouteImport } from './routes/_layout/courses/backend-development'
+import { Route as LayoutCoursesIdRouteImport } from './routes/_layout/courses/$id'
+import { Route as HeaderOnlyGamesListRouteImport } from './routes/_headerOnly/games/list'
+import { Route as LayoutTemplatesSlidevIndexRouteImport } from './routes/_layout/templates/slidev/index'
+import { Route as LayoutSyllabusesIdIndexRouteImport } from './routes/_layout/syllabuses/$id/index'
+import { Route as LayoutQuestionsIdIndexRouteImport } from './routes/_layout/questions/$id/index'
+import { Route as HeaderOnlyGamesIdIndexRouteImport } from './routes/_headerOnly/games/$id/index'
+import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
+import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
+import { Route as LayoutQuestionsIdEditRouteImport } from './routes/_layout/questions/$id/edit'
+import { Route as LayoutPresentationsIdViewRouteImport } from './routes/_layout/presentations/$id/view'
+import { Route as LayoutPresentationsIdPresenterRouteImport } from './routes/_layout/presentations/$id/presenter'
+import { Route as LayoutPresentationsIdOverviewRouteImport } from './routes/_layout/presentations/$id/overview'
+import { Route as LayoutMatricesIdGenerateRouteImport } from './routes/_layout/matrices/$id.generate'
+import { Route as LayoutMatricesIdEditRouteImport } from './routes/_layout/matrices/$id.edit'
+import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
+import { Route as HeaderOnlyGamesIdPlayRouteImport } from './routes/_headerOnly/games/$id.play'
+import { Route as LayoutTemplatesSlidevIdEditRouteImport } from './routes/_layout/templates/slidev/$id/edit'
 
-const WebDesignRoute = WebDesignRouteImport.update({
-  id: '/web-design',
-  path: '/web-design',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UserProfileRoute = UserProfileRouteImport.update({
-  id: '/user-profile',
-  path: '/user-profile',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const UploadRoute = UploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TermsRoute = TermsRouteImport.update({
-  id: '/terms',
-  path: '/terms',
+const TestWpmRoute = TestWpmRouteImport.update({
+  id: '/test-wpm',
+  path: '/test-wpm',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -130,11 +118,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PrivacyRoute = PrivacyRouteImport.update({
-  id: '/privacy',
-  path: '/privacy',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const PaymentSucceededRoute = PaymentSucceededRouteImport.update({
   id: '/payment-succeeded',
   path: '/payment-succeeded',
@@ -145,59 +128,17 @@ const PaymentFailedRoute = PaymentFailedRouteImport.update({
   path: '/payment-failed',
   getParentRoute: () => rootRouteImport,
 } as any)
-const OfflineCourseRoute = OfflineCourseRouteImport.update({
-  id: '/offline-course',
-  path: '/offline-course',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MentorshipRoute = MentorshipRouteImport.update({
-  id: '/mentorship',
-  path: '/mentorship',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const DemoRoute = DemoRouteImport.update({
-  id: '/demo',
-  path: '/demo',
+const LayoutRoute = LayoutRouteImport.update({
+  id: '/_layout',
   getParentRoute: () => rootRouteImport,
 } as any)
-const CustomTemplateRoute = CustomTemplateRouteImport.update({
-  id: '/custom-template',
-  path: '/custom-template',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CorporateTrainingRoute = CorporateTrainingRouteImport.update({
-  id: '/corporate-training',
-  path: '/corporate-training',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ContactRoute = ContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ConsultationRoute = ConsultationRouteImport.update({
-  id: '/consultation',
-  path: '/consultation',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ChatRoute = ChatRouteImport.update({
-  id: '/chat',
-  path: '/chat',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AiChatbotRoute = AiChatbotRouteImport.update({
-  id: '/ai-chatbot',
-  path: '/ai-chatbot',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const AboutRoute = AboutRouteImport.update({
-  id: '/about',
-  path: '/about',
+const HeaderOnlyRoute = HeaderOnlyRouteImport.update({
+  id: '/_headerOnly',
   getParentRoute: () => rootRouteImport,
 } as any)
 const R404Route = R404RouteImport.update({
@@ -205,230 +146,131 @@ const R404Route = R404RouteImport.update({
   path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
-const IndexRoute = IndexRouteImport.update({
+const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
-  getParentRoute: () => rootRouteImport,
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TemplatesIndexRoute = TemplatesIndexRouteImport.update({
-  id: '/templates/',
-  path: '/templates/',
-  getParentRoute: () => rootRouteImport,
+const LayoutWebDesignRoute = LayoutWebDesignRouteImport.update({
+  id: '/web-design',
+  path: '/web-design',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const SyllabusesIndexRoute = SyllabusesIndexRouteImport.update({
-  id: '/syllabuses/',
-  path: '/syllabuses/',
-  getParentRoute: () => rootRouteImport,
+const LayoutUploadRoute = LayoutUploadRouteImport.update({
+  id: '/upload',
+  path: '/upload',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const QuestionsIndexRoute = QuestionsIndexRouteImport.update({
-  id: '/questions/',
-  path: '/questions/',
-  getParentRoute: () => rootRouteImport,
+const LayoutTermsRoute = LayoutTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const PresentationsIndexRoute = PresentationsIndexRouteImport.update({
-  id: '/presentations/',
-  path: '/presentations/',
-  getParentRoute: () => rootRouteImport,
+const LayoutPrivacyRoute = LayoutPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const NewsIndexRoute = NewsIndexRouteImport.update({
-  id: '/news/',
-  path: '/news/',
-  getParentRoute: () => rootRouteImport,
+const LayoutOfflineCourseRoute = LayoutOfflineCourseRouteImport.update({
+  id: '/offline-course',
+  path: '/offline-course',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const MatricesIndexRoute = MatricesIndexRouteImport.update({
-  id: '/matrices/',
-  path: '/matrices/',
-  getParentRoute: () => rootRouteImport,
+const LayoutMentorshipRoute = LayoutMentorshipRouteImport.update({
+  id: '/mentorship',
+  path: '/mentorship',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const GamesIndexRoute = GamesIndexRouteImport.update({
-  id: '/games/',
-  path: '/games/',
-  getParentRoute: () => rootRouteImport,
+const LayoutDemoRoute = LayoutDemoRouteImport.update({
+  id: '/demo',
+  path: '/demo',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const CoursesIndexRoute = CoursesIndexRouteImport.update({
-  id: '/courses/',
-  path: '/courses/',
-  getParentRoute: () => rootRouteImport,
+const LayoutCustomTemplateRoute = LayoutCustomTemplateRouteImport.update({
+  id: '/custom-template',
+  path: '/custom-template',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TemplatesTemplatePreviewRoute =
-  TemplatesTemplatePreviewRouteImport.update({
-    id: '/templates/template-preview',
-    path: '/templates/template-preview',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const TemplatesDashboardRoute = TemplatesDashboardRouteImport.update({
-  id: '/templates/dashboard',
-  path: '/templates/dashboard',
-  getParentRoute: () => rootRouteImport,
+const LayoutCorporateTrainingRoute = LayoutCorporateTrainingRouteImport.update({
+  id: '/corporate-training',
+  path: '/corporate-training',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TemplatesIdRoute = TemplatesIdRouteImport.update({
-  id: '/templates/$id',
-  path: '/templates/$id',
-  getParentRoute: () => rootRouteImport,
+const LayoutContactRoute = LayoutContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const SyllabusesMyRoute = SyllabusesMyRouteImport.update({
-  id: '/syllabuses/my',
-  path: '/syllabuses/my',
-  getParentRoute: () => rootRouteImport,
+const LayoutConsultationRoute = LayoutConsultationRouteImport.update({
+  id: '/consultation',
+  path: '/consultation',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const SyllabusesCreateRoute = SyllabusesCreateRouteImport.update({
-  id: '/syllabuses/create',
-  path: '/syllabuses/create',
-  getParentRoute: () => rootRouteImport,
+const LayoutChatRoute = LayoutChatRouteImport.update({
+  id: '/chat',
+  path: '/chat',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const QuestionsMyRoute = QuestionsMyRouteImport.update({
-  id: '/questions/my',
-  path: '/questions/my',
-  getParentRoute: () => rootRouteImport,
+const LayoutAboutRoute = LayoutAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const QuestionsGenerateFromQuestionsRoute =
-  QuestionsGenerateFromQuestionsRouteImport.update({
-    id: '/questions/generate-from-questions',
-    path: '/questions/generate-from-questions',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const QuestionsCreateRoute = QuestionsCreateRouteImport.update({
-  id: '/questions/create',
-  path: '/questions/create',
-  getParentRoute: () => rootRouteImport,
+const HeaderOnlyUserProfileRoute = HeaderOnlyUserProfileRouteImport.update({
+  id: '/user-profile',
+  path: '/user-profile',
+  getParentRoute: () => HeaderOnlyRoute,
 } as any)
-const PresentationsIdRoute = PresentationsIdRouteImport.update({
-  id: '/presentations/$id',
-  path: '/presentations/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const NewsIdRoute = NewsIdRouteImport.update({
-  id: '/news/$id',
-  path: '/news/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MatricesMyRoute = MatricesMyRouteImport.update({
-  id: '/matrices/my',
-  path: '/matrices/my',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MatricesImportRoute = MatricesImportRouteImport.update({
-  id: '/matrices/import',
-  path: '/matrices/import',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MatricesCreateRoute = MatricesCreateRouteImport.update({
-  id: '/matrices/create',
-  path: '/matrices/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const LecturesIdRoute = LecturesIdRouteImport.update({
-  id: '/lectures/$id',
-  path: '/lectures/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const InternalTestLoaderRoute = InternalTestLoaderRouteImport.update({
-  id: '/internal/test-loader',
-  path: '/internal/test-loader',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesListRoute = GamesListRouteImport.update({
-  id: '/games/list',
-  path: '/games/list',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExamsMyExamsRoute = ExamsMyExamsRouteImport.update({
-  id: '/exams/my-exams',
-  path: '/exams/my-exams',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExamsGenerateRoute = ExamsGenerateRouteImport.update({
-  id: '/exams/generate',
-  path: '/exams/generate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const ExamsIdRoute = ExamsIdRouteImport.update({
-  id: '/exams/$id',
-  path: '/exams/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoursesWebDevelopmentRoute = CoursesWebDevelopmentRouteImport.update({
-  id: '/courses/web-development',
-  path: '/courses/web-development',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoursesMobileDevelopmentRoute =
-  CoursesMobileDevelopmentRouteImport.update({
-    id: '/courses/mobile-development',
-    path: '/courses/mobile-development',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const CoursesDataScienceRoute = CoursesDataScienceRouteImport.update({
-  id: '/courses/data-science',
-  path: '/courses/data-science',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoursesBackendDevelopmentRoute =
-  CoursesBackendDevelopmentRouteImport.update({
-    id: '/courses/backend-development',
-    path: '/courses/backend-development',
-    getParentRoute: () => rootRouteImport,
-  } as any)
-const CoursesIdRoute = CoursesIdRouteImport.update({
-  id: '/courses/$id',
-  path: '/courses/$id',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const TemplatesSlidevIndexRoute = TemplatesSlidevIndexRouteImport.update({
-  id: '/templates/slidev/',
-  path: '/templates/slidev/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const SyllabusesIdIndexRoute = SyllabusesIdIndexRouteImport.update({
-  id: '/syllabuses/$id/',
-  path: '/syllabuses/$id/',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const QuestionsIdIndexRoute = QuestionsIdIndexRouteImport.update({
-  id: '/questions/$id/',
-  path: '/questions/$id/',
-  getParentRoute: () => rootRouteImport,
+const HeaderOnlyAiChatbotRoute = HeaderOnlyAiChatbotRouteImport.update({
+  id: '/ai-chatbot',
+  path: '/ai-chatbot',
+  getParentRoute: () => HeaderOnlyRoute,
 } as any)
 const MentorDashboardIndexRoute = MentorDashboardIndexRouteImport.update({
   id: '/mentor/dashboard/',
   path: '/mentor/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
-const GamesIdIndexRoute = GamesIdIndexRouteImport.update({
-  id: '/games/$id/',
-  path: '/games/$id/',
-  getParentRoute: () => rootRouteImport,
+const LayoutTemplatesIndexRoute = LayoutTemplatesIndexRouteImport.update({
+  id: '/templates/',
+  path: '/templates/',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const TemplatesSlidevCreateRoute = TemplatesSlidevCreateRouteImport.update({
-  id: '/templates/slidev/create',
-  path: '/templates/slidev/create',
-  getParentRoute: () => rootRouteImport,
+const LayoutSyllabusesIndexRoute = LayoutSyllabusesIndexRouteImport.update({
+  id: '/syllabuses/',
+  path: '/syllabuses/',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const SyllabusesIdEditRoute = SyllabusesIdEditRouteImport.update({
-  id: '/syllabuses/$id/edit',
-  path: '/syllabuses/$id/edit',
-  getParentRoute: () => rootRouteImport,
+const LayoutQuestionsIndexRoute = LayoutQuestionsIndexRouteImport.update({
+  id: '/questions/',
+  path: '/questions/',
+  getParentRoute: () => LayoutRoute,
 } as any)
-const QuestionsIdEditRoute = QuestionsIdEditRouteImport.update({
-  id: '/questions/$id/edit',
-  path: '/questions/$id/edit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PresentationsIdViewRoute = PresentationsIdViewRouteImport.update({
-  id: '/view',
-  path: '/view',
-  getParentRoute: () => PresentationsIdRoute,
-} as any)
-const PresentationsIdPresenterRoute =
-  PresentationsIdPresenterRouteImport.update({
-    id: '/presenter',
-    path: '/presenter',
-    getParentRoute: () => PresentationsIdRoute,
+const LayoutPresentationsIndexRoute =
+  LayoutPresentationsIndexRouteImport.update({
+    id: '/presentations/',
+    path: '/presentations/',
+    getParentRoute: () => LayoutRoute,
   } as any)
-const PresentationsIdOverviewRoute = PresentationsIdOverviewRouteImport.update({
-  id: '/overview',
-  path: '/overview',
-  getParentRoute: () => PresentationsIdRoute,
+const LayoutNewsIndexRoute = LayoutNewsIndexRouteImport.update({
+  id: '/news/',
+  path: '/news/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutMatricesIndexRoute = LayoutMatricesIndexRouteImport.update({
+  id: '/matrices/',
+  path: '/matrices/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutCoursesIndexRoute = LayoutCoursesIndexRouteImport.update({
+  id: '/courses/',
+  path: '/courses/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const HeaderOnlyGamesIndexRoute = HeaderOnlyGamesIndexRouteImport.update({
+  id: '/games/',
+  path: '/games/',
+  getParentRoute: () => HeaderOnlyRoute,
 } as any)
 const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   id: '/mindmaps/$userId/$code',
@@ -455,26 +297,6 @@ const MentorCourseIdRoute = MentorCourseIdRouteImport.update({
   path: '/mentor/course/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MatricesIdGenerateRoute = MatricesIdGenerateRouteImport.update({
-  id: '/matrices/$id/generate',
-  path: '/matrices/$id/generate',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const MatricesIdEditRoute = MatricesIdEditRouteImport.update({
-  id: '/matrices/$id/edit',
-  path: '/matrices/$id/edit',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const GamesIdPlayRoute = GamesIdPlayRouteImport.update({
-  id: '/games/$id/play',
-  path: '/games/$id/play',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CoursesGradeGradeRoute = CoursesGradeGradeRouteImport.update({
-  id: '/courses/grade/$grade',
-  path: '/courses/grade/$grade',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
   id: '/auth/google/callback',
   path: '/auth/google/callback',
@@ -490,286 +312,498 @@ const ApiAuthActivateRoute = ApiAuthActivateRouteImport.update({
   path: '/api/auth/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const TemplatesSlidevIdEditRoute = TemplatesSlidevIdEditRouteImport.update({
-  id: '/templates/slidev/$id/edit',
-  path: '/templates/slidev/$id/edit',
-  getParentRoute: () => rootRouteImport,
+const LayoutTemplatesTemplatePreviewRoute =
+  LayoutTemplatesTemplatePreviewRouteImport.update({
+    id: '/templates/template-preview',
+    path: '/templates/template-preview',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutTemplatesDashboardRoute =
+  LayoutTemplatesDashboardRouteImport.update({
+    id: '/templates/dashboard',
+    path: '/templates/dashboard',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutTemplatesIdRoute = LayoutTemplatesIdRouteImport.update({
+  id: '/templates/$id',
+  path: '/templates/$id',
+  getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutSyllabusesMyRoute = LayoutSyllabusesMyRouteImport.update({
+  id: '/syllabuses/my',
+  path: '/syllabuses/my',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutSyllabusesCreateRoute = LayoutSyllabusesCreateRouteImport.update({
+  id: '/syllabuses/create',
+  path: '/syllabuses/create',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutQuestionsMyRoute = LayoutQuestionsMyRouteImport.update({
+  id: '/questions/my',
+  path: '/questions/my',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutQuestionsGenerateFromQuestionsRoute =
+  LayoutQuestionsGenerateFromQuestionsRouteImport.update({
+    id: '/questions/generate-from-questions',
+    path: '/questions/generate-from-questions',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutQuestionsCreateRoute = LayoutQuestionsCreateRouteImport.update({
+  id: '/questions/create',
+  path: '/questions/create',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutPresentationsIdRoute = LayoutPresentationsIdRouteImport.update({
+  id: '/presentations/$id',
+  path: '/presentations/$id',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutNewsIdRoute = LayoutNewsIdRouteImport.update({
+  id: '/news/$id',
+  path: '/news/$id',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutMatricesMyRoute = LayoutMatricesMyRouteImport.update({
+  id: '/matrices/my',
+  path: '/matrices/my',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutMatricesImportRoute = LayoutMatricesImportRouteImport.update({
+  id: '/matrices/import',
+  path: '/matrices/import',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutMatricesCreateRoute = LayoutMatricesCreateRouteImport.update({
+  id: '/matrices/create',
+  path: '/matrices/create',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutLecturesIdRoute = LayoutLecturesIdRouteImport.update({
+  id: '/lectures/$id',
+  path: '/lectures/$id',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutInternalTestLoaderRoute =
+  LayoutInternalTestLoaderRouteImport.update({
+    id: '/internal/test-loader',
+    path: '/internal/test-loader',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutExamsMyExamsRoute = LayoutExamsMyExamsRouteImport.update({
+  id: '/exams/my-exams',
+  path: '/exams/my-exams',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutExamsGenerateRoute = LayoutExamsGenerateRouteImport.update({
+  id: '/exams/generate',
+  path: '/exams/generate',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutExamsIdRoute = LayoutExamsIdRouteImport.update({
+  id: '/exams/$id',
+  path: '/exams/$id',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutCoursesWebDevelopmentRoute =
+  LayoutCoursesWebDevelopmentRouteImport.update({
+    id: '/courses/web-development',
+    path: '/courses/web-development',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutCoursesMobileDevelopmentRoute =
+  LayoutCoursesMobileDevelopmentRouteImport.update({
+    id: '/courses/mobile-development',
+    path: '/courses/mobile-development',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutCoursesDataScienceRoute =
+  LayoutCoursesDataScienceRouteImport.update({
+    id: '/courses/data-science',
+    path: '/courses/data-science',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutCoursesBackendDevelopmentRoute =
+  LayoutCoursesBackendDevelopmentRouteImport.update({
+    id: '/courses/backend-development',
+    path: '/courses/backend-development',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutCoursesIdRoute = LayoutCoursesIdRouteImport.update({
+  id: '/courses/$id',
+  path: '/courses/$id',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const HeaderOnlyGamesListRoute = HeaderOnlyGamesListRouteImport.update({
+  id: '/games/list',
+  path: '/games/list',
+  getParentRoute: () => HeaderOnlyRoute,
+} as any)
+const LayoutTemplatesSlidevIndexRoute =
+  LayoutTemplatesSlidevIndexRouteImport.update({
+    id: '/templates/slidev/',
+    path: '/templates/slidev/',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutSyllabusesIdIndexRoute = LayoutSyllabusesIdIndexRouteImport.update({
+  id: '/syllabuses/$id/',
+  path: '/syllabuses/$id/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutQuestionsIdIndexRoute = LayoutQuestionsIdIndexRouteImport.update({
+  id: '/questions/$id/',
+  path: '/questions/$id/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const HeaderOnlyGamesIdIndexRoute = HeaderOnlyGamesIdIndexRouteImport.update({
+  id: '/games/$id/',
+  path: '/games/$id/',
+  getParentRoute: () => HeaderOnlyRoute,
+} as any)
+const LayoutTemplatesSlidevCreateRoute =
+  LayoutTemplatesSlidevCreateRouteImport.update({
+    id: '/templates/slidev/create',
+    path: '/templates/slidev/create',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutSyllabusesIdEditRoute = LayoutSyllabusesIdEditRouteImport.update({
+  id: '/syllabuses/$id/edit',
+  path: '/syllabuses/$id/edit',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutQuestionsIdEditRoute = LayoutQuestionsIdEditRouteImport.update({
+  id: '/questions/$id/edit',
+  path: '/questions/$id/edit',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutPresentationsIdViewRoute =
+  LayoutPresentationsIdViewRouteImport.update({
+    id: '/view',
+    path: '/view',
+    getParentRoute: () => LayoutPresentationsIdRoute,
+  } as any)
+const LayoutPresentationsIdPresenterRoute =
+  LayoutPresentationsIdPresenterRouteImport.update({
+    id: '/presenter',
+    path: '/presenter',
+    getParentRoute: () => LayoutPresentationsIdRoute,
+  } as any)
+const LayoutPresentationsIdOverviewRoute =
+  LayoutPresentationsIdOverviewRouteImport.update({
+    id: '/overview',
+    path: '/overview',
+    getParentRoute: () => LayoutPresentationsIdRoute,
+  } as any)
+const LayoutMatricesIdGenerateRoute =
+  LayoutMatricesIdGenerateRouteImport.update({
+    id: '/matrices/$id/generate',
+    path: '/matrices/$id/generate',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutMatricesIdEditRoute = LayoutMatricesIdEditRouteImport.update({
+  id: '/matrices/$id/edit',
+  path: '/matrices/$id/edit',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutCoursesGradeGradeRoute = LayoutCoursesGradeGradeRouteImport.update({
+  id: '/courses/grade/$grade',
+  path: '/courses/grade/$grade',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const HeaderOnlyGamesIdPlayRoute = HeaderOnlyGamesIdPlayRouteImport.update({
+  id: '/games/$id/play',
+  path: '/games/$id/play',
+  getParentRoute: () => HeaderOnlyRoute,
+} as any)
+const LayoutTemplatesSlidevIdEditRoute =
+  LayoutTemplatesSlidevIdEditRouteImport.update({
+    id: '/templates/slidev/$id/edit',
+    path: '/templates/slidev/$id/edit',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
-  '/': typeof IndexRoute
   '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/ai-chatbot': typeof AiChatbotRoute
-  '/chat': typeof ChatRoute
-  '/consultation': typeof ConsultationRoute
-  '/contact': typeof ContactRoute
-  '/corporate-training': typeof CorporateTrainingRoute
-  '/custom-template': typeof CustomTemplateRoute
-  '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/mentorship': typeof MentorshipRoute
-  '/offline-course': typeof OfflineCourseRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
-  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
-  '/upload': typeof UploadRoute
-  '/user-profile': typeof UserProfileRoute
-  '/web-design': typeof WebDesignRoute
-  '/courses/$id': typeof CoursesIdRoute
-  '/courses/backend-development': typeof CoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof CoursesDataScienceRoute
-  '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof CoursesWebDevelopmentRoute
-  '/exams/$id': typeof ExamsIdRoute
-  '/exams/generate': typeof ExamsGenerateRoute
-  '/exams/my-exams': typeof ExamsMyExamsRoute
-  '/games/list': typeof GamesListRoute
-  '/internal/test-loader': typeof InternalTestLoaderRoute
-  '/lectures/$id': typeof LecturesIdRoute
-  '/matrices/create': typeof MatricesCreateRoute
-  '/matrices/import': typeof MatricesImportRoute
-  '/matrices/my': typeof MatricesMyRoute
-  '/news/$id': typeof NewsIdRoute
-  '/presentations/$id': typeof PresentationsIdRouteWithChildren
-  '/questions/create': typeof QuestionsCreateRoute
-  '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
-  '/questions/my': typeof QuestionsMyRoute
-  '/syllabuses/create': typeof SyllabusesCreateRoute
-  '/syllabuses/my': typeof SyllabusesMyRoute
-  '/templates/$id': typeof TemplatesIdRoute
-  '/templates/dashboard': typeof TemplatesDashboardRoute
-  '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
-  '/courses': typeof CoursesIndexRoute
-  '/games': typeof GamesIndexRoute
-  '/matrices': typeof MatricesIndexRoute
-  '/news': typeof NewsIndexRoute
-  '/presentations': typeof PresentationsIndexRoute
-  '/questions': typeof QuestionsIndexRoute
-  '/syllabuses': typeof SyllabusesIndexRoute
-  '/templates': typeof TemplatesIndexRoute
+  '/test-wpm': typeof TestWpmRoute
+  '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
+  '/user-profile': typeof HeaderOnlyUserProfileRoute
+  '/about': typeof LayoutAboutRoute
+  '/chat': typeof LayoutChatRoute
+  '/consultation': typeof LayoutConsultationRoute
+  '/contact': typeof LayoutContactRoute
+  '/corporate-training': typeof LayoutCorporateTrainingRoute
+  '/custom-template': typeof LayoutCustomTemplateRoute
+  '/demo': typeof LayoutDemoRoute
+  '/mentorship': typeof LayoutMentorshipRoute
+  '/offline-course': typeof LayoutOfflineCourseRoute
+  '/privacy': typeof LayoutPrivacyRoute
+  '/terms': typeof LayoutTermsRoute
+  '/upload': typeof LayoutUploadRoute
+  '/web-design': typeof LayoutWebDesignRoute
+  '/': typeof LayoutIndexRoute
+  '/games/list': typeof HeaderOnlyGamesListRoute
+  '/courses/$id': typeof LayoutCoursesIdRoute
+  '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
+  '/courses/data-science': typeof LayoutCoursesDataScienceRoute
+  '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
+  '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
+  '/exams/$id': typeof LayoutExamsIdRoute
+  '/exams/generate': typeof LayoutExamsGenerateRoute
+  '/exams/my-exams': typeof LayoutExamsMyExamsRoute
+  '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
+  '/lectures/$id': typeof LayoutLecturesIdRoute
+  '/matrices/create': typeof LayoutMatricesCreateRoute
+  '/matrices/import': typeof LayoutMatricesImportRoute
+  '/matrices/my': typeof LayoutMatricesMyRoute
+  '/news/$id': typeof LayoutNewsIdRoute
+  '/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
+  '/questions/create': typeof LayoutQuestionsCreateRoute
+  '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
+  '/questions/my': typeof LayoutQuestionsMyRoute
+  '/syllabuses/create': typeof LayoutSyllabusesCreateRoute
+  '/syllabuses/my': typeof LayoutSyllabusesMyRoute
+  '/templates/$id': typeof LayoutTemplatesIdRoute
+  '/templates/dashboard': typeof LayoutTemplatesDashboardRoute
+  '/templates/template-preview': typeof LayoutTemplatesTemplatePreviewRoute
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
-  '/courses/grade/$grade': typeof CoursesGradeGradeRoute
-  '/games/$id/play': typeof GamesIdPlayRoute
-  '/matrices/$id/edit': typeof MatricesIdEditRoute
-  '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof PresentationsIdViewRoute
-  '/questions/$id/edit': typeof QuestionsIdEditRoute
-  '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
-  '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
-  '/games/$id': typeof GamesIdIndexRoute
+  '/games': typeof HeaderOnlyGamesIndexRoute
+  '/courses': typeof LayoutCoursesIndexRoute
+  '/matrices': typeof LayoutMatricesIndexRoute
+  '/news': typeof LayoutNewsIndexRoute
+  '/presentations': typeof LayoutPresentationsIndexRoute
+  '/questions': typeof LayoutQuestionsIndexRoute
+  '/syllabuses': typeof LayoutSyllabusesIndexRoute
+  '/templates': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
-  '/questions/$id': typeof QuestionsIdIndexRoute
-  '/syllabuses/$id': typeof SyllabusesIdIndexRoute
-  '/templates/slidev': typeof TemplatesSlidevIndexRoute
-  '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
+  '/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
+  '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
+  '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
+  '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
+  '/presentations/$id/overview': typeof LayoutPresentationsIdOverviewRoute
+  '/presentations/$id/presenter': typeof LayoutPresentationsIdPresenterRoute
+  '/presentations/$id/view': typeof LayoutPresentationsIdViewRoute
+  '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
+  '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
+  '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
+  '/games/$id': typeof HeaderOnlyGamesIdIndexRoute
+  '/questions/$id': typeof LayoutQuestionsIdIndexRoute
+  '/syllabuses/$id': typeof LayoutSyllabusesIdIndexRoute
+  '/templates/slidev': typeof LayoutTemplatesSlidevIndexRoute
+  '/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRoutesByTo {
-  '/': typeof IndexRoute
   '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/ai-chatbot': typeof AiChatbotRoute
-  '/chat': typeof ChatRoute
-  '/consultation': typeof ConsultationRoute
-  '/contact': typeof ContactRoute
-  '/corporate-training': typeof CorporateTrainingRoute
-  '/custom-template': typeof CustomTemplateRoute
-  '/demo': typeof DemoRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/mentorship': typeof MentorshipRoute
-  '/offline-course': typeof OfflineCourseRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
-  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
-  '/upload': typeof UploadRoute
-  '/user-profile': typeof UserProfileRoute
-  '/web-design': typeof WebDesignRoute
-  '/courses/$id': typeof CoursesIdRoute
-  '/courses/backend-development': typeof CoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof CoursesDataScienceRoute
-  '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof CoursesWebDevelopmentRoute
-  '/exams/$id': typeof ExamsIdRoute
-  '/exams/generate': typeof ExamsGenerateRoute
-  '/exams/my-exams': typeof ExamsMyExamsRoute
-  '/games/list': typeof GamesListRoute
-  '/internal/test-loader': typeof InternalTestLoaderRoute
-  '/lectures/$id': typeof LecturesIdRoute
-  '/matrices/create': typeof MatricesCreateRoute
-  '/matrices/import': typeof MatricesImportRoute
-  '/matrices/my': typeof MatricesMyRoute
-  '/news/$id': typeof NewsIdRoute
-  '/presentations/$id': typeof PresentationsIdRouteWithChildren
-  '/questions/create': typeof QuestionsCreateRoute
-  '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
-  '/questions/my': typeof QuestionsMyRoute
-  '/syllabuses/create': typeof SyllabusesCreateRoute
-  '/syllabuses/my': typeof SyllabusesMyRoute
-  '/templates/$id': typeof TemplatesIdRoute
-  '/templates/dashboard': typeof TemplatesDashboardRoute
-  '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
-  '/courses': typeof CoursesIndexRoute
-  '/games': typeof GamesIndexRoute
-  '/matrices': typeof MatricesIndexRoute
-  '/news': typeof NewsIndexRoute
-  '/presentations': typeof PresentationsIndexRoute
-  '/questions': typeof QuestionsIndexRoute
-  '/syllabuses': typeof SyllabusesIndexRoute
-  '/templates': typeof TemplatesIndexRoute
+  '/test-wpm': typeof TestWpmRoute
+  '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
+  '/user-profile': typeof HeaderOnlyUserProfileRoute
+  '/about': typeof LayoutAboutRoute
+  '/chat': typeof LayoutChatRoute
+  '/consultation': typeof LayoutConsultationRoute
+  '/contact': typeof LayoutContactRoute
+  '/corporate-training': typeof LayoutCorporateTrainingRoute
+  '/custom-template': typeof LayoutCustomTemplateRoute
+  '/demo': typeof LayoutDemoRoute
+  '/mentorship': typeof LayoutMentorshipRoute
+  '/offline-course': typeof LayoutOfflineCourseRoute
+  '/privacy': typeof LayoutPrivacyRoute
+  '/terms': typeof LayoutTermsRoute
+  '/upload': typeof LayoutUploadRoute
+  '/web-design': typeof LayoutWebDesignRoute
+  '/': typeof LayoutIndexRoute
+  '/games/list': typeof HeaderOnlyGamesListRoute
+  '/courses/$id': typeof LayoutCoursesIdRoute
+  '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
+  '/courses/data-science': typeof LayoutCoursesDataScienceRoute
+  '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
+  '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
+  '/exams/$id': typeof LayoutExamsIdRoute
+  '/exams/generate': typeof LayoutExamsGenerateRoute
+  '/exams/my-exams': typeof LayoutExamsMyExamsRoute
+  '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
+  '/lectures/$id': typeof LayoutLecturesIdRoute
+  '/matrices/create': typeof LayoutMatricesCreateRoute
+  '/matrices/import': typeof LayoutMatricesImportRoute
+  '/matrices/my': typeof LayoutMatricesMyRoute
+  '/news/$id': typeof LayoutNewsIdRoute
+  '/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
+  '/questions/create': typeof LayoutQuestionsCreateRoute
+  '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
+  '/questions/my': typeof LayoutQuestionsMyRoute
+  '/syllabuses/create': typeof LayoutSyllabusesCreateRoute
+  '/syllabuses/my': typeof LayoutSyllabusesMyRoute
+  '/templates/$id': typeof LayoutTemplatesIdRoute
+  '/templates/dashboard': typeof LayoutTemplatesDashboardRoute
+  '/templates/template-preview': typeof LayoutTemplatesTemplatePreviewRoute
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
-  '/courses/grade/$grade': typeof CoursesGradeGradeRoute
-  '/games/$id/play': typeof GamesIdPlayRoute
-  '/matrices/$id/edit': typeof MatricesIdEditRoute
-  '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof PresentationsIdViewRoute
-  '/questions/$id/edit': typeof QuestionsIdEditRoute
-  '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
-  '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
-  '/games/$id': typeof GamesIdIndexRoute
+  '/games': typeof HeaderOnlyGamesIndexRoute
+  '/courses': typeof LayoutCoursesIndexRoute
+  '/matrices': typeof LayoutMatricesIndexRoute
+  '/news': typeof LayoutNewsIndexRoute
+  '/presentations': typeof LayoutPresentationsIndexRoute
+  '/questions': typeof LayoutQuestionsIndexRoute
+  '/syllabuses': typeof LayoutSyllabusesIndexRoute
+  '/templates': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
-  '/questions/$id': typeof QuestionsIdIndexRoute
-  '/syllabuses/$id': typeof SyllabusesIdIndexRoute
-  '/templates/slidev': typeof TemplatesSlidevIndexRoute
-  '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
+  '/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
+  '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
+  '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
+  '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
+  '/presentations/$id/overview': typeof LayoutPresentationsIdOverviewRoute
+  '/presentations/$id/presenter': typeof LayoutPresentationsIdPresenterRoute
+  '/presentations/$id/view': typeof LayoutPresentationsIdViewRoute
+  '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
+  '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
+  '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
+  '/games/$id': typeof HeaderOnlyGamesIdIndexRoute
+  '/questions/$id': typeof LayoutQuestionsIdIndexRoute
+  '/syllabuses/$id': typeof LayoutSyllabusesIdIndexRoute
+  '/templates/slidev': typeof LayoutTemplatesSlidevIndexRoute
+  '/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
-  '/': typeof IndexRoute
   '/404': typeof R404Route
-  '/about': typeof AboutRoute
-  '/ai-chatbot': typeof AiChatbotRoute
-  '/chat': typeof ChatRoute
-  '/consultation': typeof ConsultationRoute
-  '/contact': typeof ContactRoute
-  '/corporate-training': typeof CorporateTrainingRoute
-  '/custom-template': typeof CustomTemplateRoute
-  '/demo': typeof DemoRoute
+  '/_headerOnly': typeof HeaderOnlyRouteWithChildren
+  '/_layout': typeof LayoutRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
-  '/mentorship': typeof MentorshipRoute
-  '/offline-course': typeof OfflineCourseRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
-  '/privacy': typeof PrivacyRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/terms': typeof TermsRoute
-  '/upload': typeof UploadRoute
-  '/user-profile': typeof UserProfileRoute
-  '/web-design': typeof WebDesignRoute
-  '/courses/$id': typeof CoursesIdRoute
-  '/courses/backend-development': typeof CoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof CoursesDataScienceRoute
-  '/courses/mobile-development': typeof CoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof CoursesWebDevelopmentRoute
-  '/exams/$id': typeof ExamsIdRoute
-  '/exams/generate': typeof ExamsGenerateRoute
-  '/exams/my-exams': typeof ExamsMyExamsRoute
-  '/games/list': typeof GamesListRoute
-  '/internal/test-loader': typeof InternalTestLoaderRoute
-  '/lectures/$id': typeof LecturesIdRoute
-  '/matrices/create': typeof MatricesCreateRoute
-  '/matrices/import': typeof MatricesImportRoute
-  '/matrices/my': typeof MatricesMyRoute
-  '/news/$id': typeof NewsIdRoute
-  '/presentations/$id': typeof PresentationsIdRouteWithChildren
-  '/questions/create': typeof QuestionsCreateRoute
-  '/questions/generate-from-questions': typeof QuestionsGenerateFromQuestionsRoute
-  '/questions/my': typeof QuestionsMyRoute
-  '/syllabuses/create': typeof SyllabusesCreateRoute
-  '/syllabuses/my': typeof SyllabusesMyRoute
-  '/templates/$id': typeof TemplatesIdRoute
-  '/templates/dashboard': typeof TemplatesDashboardRoute
-  '/templates/template-preview': typeof TemplatesTemplatePreviewRoute
-  '/courses/': typeof CoursesIndexRoute
-  '/games/': typeof GamesIndexRoute
-  '/matrices/': typeof MatricesIndexRoute
-  '/news/': typeof NewsIndexRoute
-  '/presentations/': typeof PresentationsIndexRoute
-  '/questions/': typeof QuestionsIndexRoute
-  '/syllabuses/': typeof SyllabusesIndexRoute
-  '/templates/': typeof TemplatesIndexRoute
+  '/test-wpm': typeof TestWpmRoute
+  '/_headerOnly/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
+  '/_headerOnly/user-profile': typeof HeaderOnlyUserProfileRoute
+  '/_layout/about': typeof LayoutAboutRoute
+  '/_layout/chat': typeof LayoutChatRoute
+  '/_layout/consultation': typeof LayoutConsultationRoute
+  '/_layout/contact': typeof LayoutContactRoute
+  '/_layout/corporate-training': typeof LayoutCorporateTrainingRoute
+  '/_layout/custom-template': typeof LayoutCustomTemplateRoute
+  '/_layout/demo': typeof LayoutDemoRoute
+  '/_layout/mentorship': typeof LayoutMentorshipRoute
+  '/_layout/offline-course': typeof LayoutOfflineCourseRoute
+  '/_layout/privacy': typeof LayoutPrivacyRoute
+  '/_layout/terms': typeof LayoutTermsRoute
+  '/_layout/upload': typeof LayoutUploadRoute
+  '/_layout/web-design': typeof LayoutWebDesignRoute
+  '/_layout/': typeof LayoutIndexRoute
+  '/_headerOnly/games/list': typeof HeaderOnlyGamesListRoute
+  '/_layout/courses/$id': typeof LayoutCoursesIdRoute
+  '/_layout/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
+  '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
+  '/_layout/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
+  '/_layout/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
+  '/_layout/exams/$id': typeof LayoutExamsIdRoute
+  '/_layout/exams/generate': typeof LayoutExamsGenerateRoute
+  '/_layout/exams/my-exams': typeof LayoutExamsMyExamsRoute
+  '/_layout/internal/test-loader': typeof LayoutInternalTestLoaderRoute
+  '/_layout/lectures/$id': typeof LayoutLecturesIdRoute
+  '/_layout/matrices/create': typeof LayoutMatricesCreateRoute
+  '/_layout/matrices/import': typeof LayoutMatricesImportRoute
+  '/_layout/matrices/my': typeof LayoutMatricesMyRoute
+  '/_layout/news/$id': typeof LayoutNewsIdRoute
+  '/_layout/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
+  '/_layout/questions/create': typeof LayoutQuestionsCreateRoute
+  '/_layout/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
+  '/_layout/questions/my': typeof LayoutQuestionsMyRoute
+  '/_layout/syllabuses/create': typeof LayoutSyllabusesCreateRoute
+  '/_layout/syllabuses/my': typeof LayoutSyllabusesMyRoute
+  '/_layout/templates/$id': typeof LayoutTemplatesIdRoute
+  '/_layout/templates/dashboard': typeof LayoutTemplatesDashboardRoute
+  '/_layout/templates/template-preview': typeof LayoutTemplatesTemplatePreviewRoute
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
-  '/courses/grade/$grade': typeof CoursesGradeGradeRoute
-  '/games/$id/play': typeof GamesIdPlayRoute
-  '/matrices/$id/edit': typeof MatricesIdEditRoute
-  '/matrices/$id/generate': typeof MatricesIdGenerateRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/presentations/$id/overview': typeof PresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof PresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof PresentationsIdViewRoute
-  '/questions/$id/edit': typeof QuestionsIdEditRoute
-  '/syllabuses/$id/edit': typeof SyllabusesIdEditRoute
-  '/templates/slidev/create': typeof TemplatesSlidevCreateRoute
-  '/games/$id/': typeof GamesIdIndexRoute
+  '/_headerOnly/games/': typeof HeaderOnlyGamesIndexRoute
+  '/_layout/courses/': typeof LayoutCoursesIndexRoute
+  '/_layout/matrices/': typeof LayoutMatricesIndexRoute
+  '/_layout/news/': typeof LayoutNewsIndexRoute
+  '/_layout/presentations/': typeof LayoutPresentationsIndexRoute
+  '/_layout/questions/': typeof LayoutQuestionsIndexRoute
+  '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
+  '/_layout/templates/': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
-  '/questions/$id/': typeof QuestionsIdIndexRoute
-  '/syllabuses/$id/': typeof SyllabusesIdIndexRoute
-  '/templates/slidev/': typeof TemplatesSlidevIndexRoute
-  '/templates/slidev/$id/edit': typeof TemplatesSlidevIdEditRoute
+  '/_headerOnly/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
+  '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
+  '/_layout/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
+  '/_layout/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
+  '/_layout/presentations/$id/overview': typeof LayoutPresentationsIdOverviewRoute
+  '/_layout/presentations/$id/presenter': typeof LayoutPresentationsIdPresenterRoute
+  '/_layout/presentations/$id/view': typeof LayoutPresentationsIdViewRoute
+  '/_layout/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
+  '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
+  '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
+  '/_headerOnly/games/$id/': typeof HeaderOnlyGamesIdIndexRoute
+  '/_layout/questions/$id/': typeof LayoutQuestionsIdIndexRoute
+  '/_layout/syllabuses/$id/': typeof LayoutSyllabusesIdIndexRoute
+  '/_layout/templates/slidev/': typeof LayoutTemplatesSlidevIndexRoute
+  '/_layout/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
-    | '/'
     | '/404'
-    | '/about'
+    | '/forgot-password'
+    | '/payment-failed'
+    | '/payment-succeeded'
+    | '/reset-password'
+    | '/signin'
+    | '/signin-2fa'
+    | '/signup'
+    | '/test-wpm'
     | '/ai-chatbot'
+    | '/user-profile'
+    | '/about'
     | '/chat'
     | '/consultation'
     | '/contact'
     | '/corporate-training'
     | '/custom-template'
     | '/demo'
-    | '/forgot-password'
     | '/mentorship'
     | '/offline-course'
-    | '/payment-failed'
-    | '/payment-succeeded'
     | '/privacy'
-    | '/reset-password'
-    | '/signin'
-    | '/signin-2fa'
-    | '/signup'
     | '/terms'
     | '/upload'
-    | '/user-profile'
     | '/web-design'
+    | '/'
+    | '/games/list'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -778,7 +812,6 @@ export interface FileRouteTypes {
     | '/exams/$id'
     | '/exams/generate'
     | '/exams/my-exams'
-    | '/games/list'
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/matrices/create'
@@ -794,26 +827,27 @@ export interface FileRouteTypes {
     | '/templates/$id'
     | '/templates/dashboard'
     | '/templates/template-preview'
-    | '/courses'
+    | '/api/auth/activate'
+    | '/auth/github/callback'
+    | '/auth/google/callback'
+    | '/mentor/course/$id'
+    | '/mentor/course/create'
+    | '/mentor/course/list'
+    | '/mentor/course/quiz'
+    | '/mindmaps/$userId/$code'
     | '/games'
+    | '/courses'
     | '/matrices'
     | '/news'
     | '/presentations'
     | '/questions'
     | '/syllabuses'
     | '/templates'
-    | '/api/auth/activate'
-    | '/auth/github/callback'
-    | '/auth/google/callback'
-    | '/courses/grade/$grade'
+    | '/mentor/dashboard'
     | '/games/$id/play'
+    | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
-    | '/mentor/course/$id'
-    | '/mentor/course/create'
-    | '/mentor/course/list'
-    | '/mentor/course/quiz'
-    | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
     | '/presentations/$id/view'
@@ -821,37 +855,38 @@ export interface FileRouteTypes {
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
     | '/games/$id'
-    | '/mentor/dashboard'
     | '/questions/$id'
     | '/syllabuses/$id'
     | '/templates/slidev'
     | '/templates/slidev/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
-    | '/'
     | '/404'
-    | '/about'
+    | '/forgot-password'
+    | '/payment-failed'
+    | '/payment-succeeded'
+    | '/reset-password'
+    | '/signin'
+    | '/signin-2fa'
+    | '/signup'
+    | '/test-wpm'
     | '/ai-chatbot'
+    | '/user-profile'
+    | '/about'
     | '/chat'
     | '/consultation'
     | '/contact'
     | '/corporate-training'
     | '/custom-template'
     | '/demo'
-    | '/forgot-password'
     | '/mentorship'
     | '/offline-course'
-    | '/payment-failed'
-    | '/payment-succeeded'
     | '/privacy'
-    | '/reset-password'
-    | '/signin'
-    | '/signin-2fa'
-    | '/signup'
     | '/terms'
     | '/upload'
-    | '/user-profile'
     | '/web-design'
+    | '/'
+    | '/games/list'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -860,7 +895,6 @@ export interface FileRouteTypes {
     | '/exams/$id'
     | '/exams/generate'
     | '/exams/my-exams'
-    | '/games/list'
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/matrices/create'
@@ -876,26 +910,27 @@ export interface FileRouteTypes {
     | '/templates/$id'
     | '/templates/dashboard'
     | '/templates/template-preview'
-    | '/courses'
+    | '/api/auth/activate'
+    | '/auth/github/callback'
+    | '/auth/google/callback'
+    | '/mentor/course/$id'
+    | '/mentor/course/create'
+    | '/mentor/course/list'
+    | '/mentor/course/quiz'
+    | '/mindmaps/$userId/$code'
     | '/games'
+    | '/courses'
     | '/matrices'
     | '/news'
     | '/presentations'
     | '/questions'
     | '/syllabuses'
     | '/templates'
-    | '/api/auth/activate'
-    | '/auth/github/callback'
-    | '/auth/google/callback'
-    | '/courses/grade/$grade'
+    | '/mentor/dashboard'
     | '/games/$id/play'
+    | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
-    | '/mentor/course/$id'
-    | '/mentor/course/create'
-    | '/mentor/course/list'
-    | '/mentor/course/quiz'
-    | '/mindmaps/$userId/$code'
     | '/presentations/$id/overview'
     | '/presentations/$id/presenter'
     | '/presentations/$id/view'
@@ -903,203 +938,127 @@ export interface FileRouteTypes {
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
     | '/games/$id'
-    | '/mentor/dashboard'
     | '/questions/$id'
     | '/syllabuses/$id'
     | '/templates/slidev'
     | '/templates/slidev/$id/edit'
   id:
     | '__root__'
-    | '/'
     | '/404'
-    | '/about'
-    | '/ai-chatbot'
-    | '/chat'
-    | '/consultation'
-    | '/contact'
-    | '/corporate-training'
-    | '/custom-template'
-    | '/demo'
+    | '/_headerOnly'
+    | '/_layout'
     | '/forgot-password'
-    | '/mentorship'
-    | '/offline-course'
     | '/payment-failed'
     | '/payment-succeeded'
-    | '/privacy'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/terms'
-    | '/upload'
-    | '/user-profile'
-    | '/web-design'
-    | '/courses/$id'
-    | '/courses/backend-development'
-    | '/courses/data-science'
-    | '/courses/mobile-development'
-    | '/courses/web-development'
-    | '/exams/$id'
-    | '/exams/generate'
-    | '/exams/my-exams'
-    | '/games/list'
-    | '/internal/test-loader'
-    | '/lectures/$id'
-    | '/matrices/create'
-    | '/matrices/import'
-    | '/matrices/my'
-    | '/news/$id'
-    | '/presentations/$id'
-    | '/questions/create'
-    | '/questions/generate-from-questions'
-    | '/questions/my'
-    | '/syllabuses/create'
-    | '/syllabuses/my'
-    | '/templates/$id'
-    | '/templates/dashboard'
-    | '/templates/template-preview'
-    | '/courses/'
-    | '/games/'
-    | '/matrices/'
-    | '/news/'
-    | '/presentations/'
-    | '/questions/'
-    | '/syllabuses/'
-    | '/templates/'
+    | '/test-wpm'
+    | '/_headerOnly/ai-chatbot'
+    | '/_headerOnly/user-profile'
+    | '/_layout/about'
+    | '/_layout/chat'
+    | '/_layout/consultation'
+    | '/_layout/contact'
+    | '/_layout/corporate-training'
+    | '/_layout/custom-template'
+    | '/_layout/demo'
+    | '/_layout/mentorship'
+    | '/_layout/offline-course'
+    | '/_layout/privacy'
+    | '/_layout/terms'
+    | '/_layout/upload'
+    | '/_layout/web-design'
+    | '/_layout/'
+    | '/_headerOnly/games/list'
+    | '/_layout/courses/$id'
+    | '/_layout/courses/backend-development'
+    | '/_layout/courses/data-science'
+    | '/_layout/courses/mobile-development'
+    | '/_layout/courses/web-development'
+    | '/_layout/exams/$id'
+    | '/_layout/exams/generate'
+    | '/_layout/exams/my-exams'
+    | '/_layout/internal/test-loader'
+    | '/_layout/lectures/$id'
+    | '/_layout/matrices/create'
+    | '/_layout/matrices/import'
+    | '/_layout/matrices/my'
+    | '/_layout/news/$id'
+    | '/_layout/presentations/$id'
+    | '/_layout/questions/create'
+    | '/_layout/questions/generate-from-questions'
+    | '/_layout/questions/my'
+    | '/_layout/syllabuses/create'
+    | '/_layout/syllabuses/my'
+    | '/_layout/templates/$id'
+    | '/_layout/templates/dashboard'
+    | '/_layout/templates/template-preview'
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
-    | '/courses/grade/$grade'
-    | '/games/$id/play'
-    | '/matrices/$id/edit'
-    | '/matrices/$id/generate'
     | '/mentor/course/$id'
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
-    | '/presentations/$id/overview'
-    | '/presentations/$id/presenter'
-    | '/presentations/$id/view'
-    | '/questions/$id/edit'
-    | '/syllabuses/$id/edit'
-    | '/templates/slidev/create'
-    | '/games/$id/'
+    | '/_headerOnly/games/'
+    | '/_layout/courses/'
+    | '/_layout/matrices/'
+    | '/_layout/news/'
+    | '/_layout/presentations/'
+    | '/_layout/questions/'
+    | '/_layout/syllabuses/'
+    | '/_layout/templates/'
     | '/mentor/dashboard/'
-    | '/questions/$id/'
-    | '/syllabuses/$id/'
-    | '/templates/slidev/'
-    | '/templates/slidev/$id/edit'
+    | '/_headerOnly/games/$id/play'
+    | '/_layout/courses/grade/$grade'
+    | '/_layout/matrices/$id/edit'
+    | '/_layout/matrices/$id/generate'
+    | '/_layout/presentations/$id/overview'
+    | '/_layout/presentations/$id/presenter'
+    | '/_layout/presentations/$id/view'
+    | '/_layout/questions/$id/edit'
+    | '/_layout/syllabuses/$id/edit'
+    | '/_layout/templates/slidev/create'
+    | '/_headerOnly/games/$id/'
+    | '/_layout/questions/$id/'
+    | '/_layout/syllabuses/$id/'
+    | '/_layout/templates/slidev/'
+    | '/_layout/templates/slidev/$id/edit'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
-  IndexRoute: typeof IndexRoute
   R404Route: typeof R404Route
-  AboutRoute: typeof AboutRoute
-  AiChatbotRoute: typeof AiChatbotRoute
-  ChatRoute: typeof ChatRoute
-  ConsultationRoute: typeof ConsultationRoute
-  ContactRoute: typeof ContactRoute
-  CorporateTrainingRoute: typeof CorporateTrainingRoute
-  CustomTemplateRoute: typeof CustomTemplateRoute
-  DemoRoute: typeof DemoRoute
+  HeaderOnlyRoute: typeof HeaderOnlyRouteWithChildren
+  LayoutRoute: typeof LayoutRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  MentorshipRoute: typeof MentorshipRoute
-  OfflineCourseRoute: typeof OfflineCourseRoute
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentSucceededRoute: typeof PaymentSucceededRoute
-  PrivacyRoute: typeof PrivacyRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SigninRoute: typeof SigninRoute
   Signin2faRoute: typeof Signin2faRoute
   SignupRoute: typeof SignupRoute
-  TermsRoute: typeof TermsRoute
-  UploadRoute: typeof UploadRoute
-  UserProfileRoute: typeof UserProfileRoute
-  WebDesignRoute: typeof WebDesignRoute
-  CoursesIdRoute: typeof CoursesIdRoute
-  CoursesBackendDevelopmentRoute: typeof CoursesBackendDevelopmentRoute
-  CoursesDataScienceRoute: typeof CoursesDataScienceRoute
-  CoursesMobileDevelopmentRoute: typeof CoursesMobileDevelopmentRoute
-  CoursesWebDevelopmentRoute: typeof CoursesWebDevelopmentRoute
-  ExamsIdRoute: typeof ExamsIdRoute
-  ExamsGenerateRoute: typeof ExamsGenerateRoute
-  ExamsMyExamsRoute: typeof ExamsMyExamsRoute
-  GamesListRoute: typeof GamesListRoute
-  InternalTestLoaderRoute: typeof InternalTestLoaderRoute
-  LecturesIdRoute: typeof LecturesIdRoute
-  MatricesCreateRoute: typeof MatricesCreateRoute
-  MatricesImportRoute: typeof MatricesImportRoute
-  MatricesMyRoute: typeof MatricesMyRoute
-  NewsIdRoute: typeof NewsIdRoute
-  PresentationsIdRoute: typeof PresentationsIdRouteWithChildren
-  QuestionsCreateRoute: typeof QuestionsCreateRoute
-  QuestionsGenerateFromQuestionsRoute: typeof QuestionsGenerateFromQuestionsRoute
-  QuestionsMyRoute: typeof QuestionsMyRoute
-  SyllabusesCreateRoute: typeof SyllabusesCreateRoute
-  SyllabusesMyRoute: typeof SyllabusesMyRoute
-  TemplatesIdRoute: typeof TemplatesIdRoute
-  TemplatesDashboardRoute: typeof TemplatesDashboardRoute
-  TemplatesTemplatePreviewRoute: typeof TemplatesTemplatePreviewRoute
-  CoursesIndexRoute: typeof CoursesIndexRoute
-  GamesIndexRoute: typeof GamesIndexRoute
-  MatricesIndexRoute: typeof MatricesIndexRoute
-  NewsIndexRoute: typeof NewsIndexRoute
-  PresentationsIndexRoute: typeof PresentationsIndexRoute
-  QuestionsIndexRoute: typeof QuestionsIndexRoute
-  SyllabusesIndexRoute: typeof SyllabusesIndexRoute
-  TemplatesIndexRoute: typeof TemplatesIndexRoute
+  TestWpmRoute: typeof TestWpmRoute
   ApiAuthActivateRoute: typeof ApiAuthActivateRoute
   AuthGithubCallbackRoute: typeof AuthGithubCallbackRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
-  CoursesGradeGradeRoute: typeof CoursesGradeGradeRoute
-  GamesIdPlayRoute: typeof GamesIdPlayRoute
-  MatricesIdEditRoute: typeof MatricesIdEditRoute
-  MatricesIdGenerateRoute: typeof MatricesIdGenerateRoute
   MentorCourseIdRoute: typeof MentorCourseIdRoute
   MentorCourseCreateRoute: typeof MentorCourseCreateRoute
   MentorCourseListRoute: typeof MentorCourseListRoute
   MentorCourseQuizRoute: typeof MentorCourseQuizRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
-  QuestionsIdEditRoute: typeof QuestionsIdEditRoute
-  SyllabusesIdEditRoute: typeof SyllabusesIdEditRoute
-  TemplatesSlidevCreateRoute: typeof TemplatesSlidevCreateRoute
-  GamesIdIndexRoute: typeof GamesIdIndexRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
-  QuestionsIdIndexRoute: typeof QuestionsIdIndexRoute
-  SyllabusesIdIndexRoute: typeof SyllabusesIdIndexRoute
-  TemplatesSlidevIndexRoute: typeof TemplatesSlidevIndexRoute
-  TemplatesSlidevIdEditRoute: typeof TemplatesSlidevIdEditRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/web-design': {
-      id: '/web-design'
-      path: '/web-design'
-      fullPath: '/web-design'
-      preLoaderRoute: typeof WebDesignRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/user-profile': {
-      id: '/user-profile'
-      path: '/user-profile'
-      fullPath: '/user-profile'
-      preLoaderRoute: typeof UserProfileRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/upload': {
-      id: '/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof UploadRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/terms': {
-      id: '/terms'
-      path: '/terms'
-      fullPath: '/terms'
-      preLoaderRoute: typeof TermsRouteImport
+    '/test-wpm': {
+      id: '/test-wpm'
+      path: '/test-wpm'
+      fullPath: '/test-wpm'
+      preLoaderRoute: typeof TestWpmRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -1130,13 +1089,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/privacy': {
-      id: '/privacy'
-      path: '/privacy'
-      fullPath: '/privacy'
-      preLoaderRoute: typeof PrivacyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/payment-succeeded': {
       id: '/payment-succeeded'
       path: '/payment-succeeded'
@@ -1151,20 +1103,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaymentFailedRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/offline-course': {
-      id: '/offline-course'
-      path: '/offline-course'
-      fullPath: '/offline-course'
-      preLoaderRoute: typeof OfflineCourseRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mentorship': {
-      id: '/mentorship'
-      path: '/mentorship'
-      fullPath: '/mentorship'
-      preLoaderRoute: typeof MentorshipRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
@@ -1172,60 +1110,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ForgotPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/demo': {
-      id: '/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof DemoRouteImport
+    '/_layout': {
+      id: '/_layout'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/custom-template': {
-      id: '/custom-template'
-      path: '/custom-template'
-      fullPath: '/custom-template'
-      preLoaderRoute: typeof CustomTemplateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/corporate-training': {
-      id: '/corporate-training'
-      path: '/corporate-training'
-      fullPath: '/corporate-training'
-      preLoaderRoute: typeof CorporateTrainingRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/contact': {
-      id: '/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof ContactRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/consultation': {
-      id: '/consultation'
-      path: '/consultation'
-      fullPath: '/consultation'
-      preLoaderRoute: typeof ConsultationRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/chat': {
-      id: '/chat'
-      path: '/chat'
-      fullPath: '/chat'
-      preLoaderRoute: typeof ChatRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/ai-chatbot': {
-      id: '/ai-chatbot'
-      path: '/ai-chatbot'
-      fullPath: '/ai-chatbot'
-      preLoaderRoute: typeof AiChatbotRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/about': {
-      id: '/about'
-      path: '/about'
-      fullPath: '/about'
-      preLoaderRoute: typeof AboutRouteImport
+    '/_headerOnly': {
+      id: '/_headerOnly'
+      path: ''
+      fullPath: ''
+      preLoaderRoute: typeof HeaderOnlyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/404': {
@@ -1235,257 +1131,117 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/': {
-      id: '/'
+    '/_layout/': {
+      id: '/_layout/'
       path: '/'
       fullPath: '/'
-      preLoaderRoute: typeof IndexRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof LayoutIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/templates/': {
-      id: '/templates/'
-      path: '/templates'
-      fullPath: '/templates'
-      preLoaderRoute: typeof TemplatesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/web-design': {
+      id: '/_layout/web-design'
+      path: '/web-design'
+      fullPath: '/web-design'
+      preLoaderRoute: typeof LayoutWebDesignRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/syllabuses/': {
-      id: '/syllabuses/'
-      path: '/syllabuses'
-      fullPath: '/syllabuses'
-      preLoaderRoute: typeof SyllabusesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/upload': {
+      id: '/_layout/upload'
+      path: '/upload'
+      fullPath: '/upload'
+      preLoaderRoute: typeof LayoutUploadRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/questions/': {
-      id: '/questions/'
-      path: '/questions'
-      fullPath: '/questions'
-      preLoaderRoute: typeof QuestionsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/terms': {
+      id: '/_layout/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof LayoutTermsRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/presentations/': {
-      id: '/presentations/'
-      path: '/presentations'
-      fullPath: '/presentations'
-      preLoaderRoute: typeof PresentationsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/privacy': {
+      id: '/_layout/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof LayoutPrivacyRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/news/': {
-      id: '/news/'
-      path: '/news'
-      fullPath: '/news'
-      preLoaderRoute: typeof NewsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/offline-course': {
+      id: '/_layout/offline-course'
+      path: '/offline-course'
+      fullPath: '/offline-course'
+      preLoaderRoute: typeof LayoutOfflineCourseRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/matrices/': {
-      id: '/matrices/'
-      path: '/matrices'
-      fullPath: '/matrices'
-      preLoaderRoute: typeof MatricesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/mentorship': {
+      id: '/_layout/mentorship'
+      path: '/mentorship'
+      fullPath: '/mentorship'
+      preLoaderRoute: typeof LayoutMentorshipRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/games/': {
-      id: '/games/'
-      path: '/games'
-      fullPath: '/games'
-      preLoaderRoute: typeof GamesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/demo': {
+      id: '/_layout/demo'
+      path: '/demo'
+      fullPath: '/demo'
+      preLoaderRoute: typeof LayoutDemoRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/courses/': {
-      id: '/courses/'
-      path: '/courses'
-      fullPath: '/courses'
-      preLoaderRoute: typeof CoursesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/custom-template': {
+      id: '/_layout/custom-template'
+      path: '/custom-template'
+      fullPath: '/custom-template'
+      preLoaderRoute: typeof LayoutCustomTemplateRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/templates/template-preview': {
-      id: '/templates/template-preview'
-      path: '/templates/template-preview'
-      fullPath: '/templates/template-preview'
-      preLoaderRoute: typeof TemplatesTemplatePreviewRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/corporate-training': {
+      id: '/_layout/corporate-training'
+      path: '/corporate-training'
+      fullPath: '/corporate-training'
+      preLoaderRoute: typeof LayoutCorporateTrainingRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/templates/dashboard': {
-      id: '/templates/dashboard'
-      path: '/templates/dashboard'
-      fullPath: '/templates/dashboard'
-      preLoaderRoute: typeof TemplatesDashboardRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/contact': {
+      id: '/_layout/contact'
+      path: '/contact'
+      fullPath: '/contact'
+      preLoaderRoute: typeof LayoutContactRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/templates/$id': {
-      id: '/templates/$id'
-      path: '/templates/$id'
-      fullPath: '/templates/$id'
-      preLoaderRoute: typeof TemplatesIdRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/consultation': {
+      id: '/_layout/consultation'
+      path: '/consultation'
+      fullPath: '/consultation'
+      preLoaderRoute: typeof LayoutConsultationRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/syllabuses/my': {
-      id: '/syllabuses/my'
-      path: '/syllabuses/my'
-      fullPath: '/syllabuses/my'
-      preLoaderRoute: typeof SyllabusesMyRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/chat': {
+      id: '/_layout/chat'
+      path: '/chat'
+      fullPath: '/chat'
+      preLoaderRoute: typeof LayoutChatRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/syllabuses/create': {
-      id: '/syllabuses/create'
-      path: '/syllabuses/create'
-      fullPath: '/syllabuses/create'
-      preLoaderRoute: typeof SyllabusesCreateRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/about': {
+      id: '/_layout/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof LayoutAboutRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/questions/my': {
-      id: '/questions/my'
-      path: '/questions/my'
-      fullPath: '/questions/my'
-      preLoaderRoute: typeof QuestionsMyRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_headerOnly/user-profile': {
+      id: '/_headerOnly/user-profile'
+      path: '/user-profile'
+      fullPath: '/user-profile'
+      preLoaderRoute: typeof HeaderOnlyUserProfileRouteImport
+      parentRoute: typeof HeaderOnlyRoute
     }
-    '/questions/generate-from-questions': {
-      id: '/questions/generate-from-questions'
-      path: '/questions/generate-from-questions'
-      fullPath: '/questions/generate-from-questions'
-      preLoaderRoute: typeof QuestionsGenerateFromQuestionsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/questions/create': {
-      id: '/questions/create'
-      path: '/questions/create'
-      fullPath: '/questions/create'
-      preLoaderRoute: typeof QuestionsCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/presentations/$id': {
-      id: '/presentations/$id'
-      path: '/presentations/$id'
-      fullPath: '/presentations/$id'
-      preLoaderRoute: typeof PresentationsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/news/$id': {
-      id: '/news/$id'
-      path: '/news/$id'
-      fullPath: '/news/$id'
-      preLoaderRoute: typeof NewsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/matrices/my': {
-      id: '/matrices/my'
-      path: '/matrices/my'
-      fullPath: '/matrices/my'
-      preLoaderRoute: typeof MatricesMyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/matrices/import': {
-      id: '/matrices/import'
-      path: '/matrices/import'
-      fullPath: '/matrices/import'
-      preLoaderRoute: typeof MatricesImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/matrices/create': {
-      id: '/matrices/create'
-      path: '/matrices/create'
-      fullPath: '/matrices/create'
-      preLoaderRoute: typeof MatricesCreateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/lectures/$id': {
-      id: '/lectures/$id'
-      path: '/lectures/$id'
-      fullPath: '/lectures/$id'
-      preLoaderRoute: typeof LecturesIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/internal/test-loader': {
-      id: '/internal/test-loader'
-      path: '/internal/test-loader'
-      fullPath: '/internal/test-loader'
-      preLoaderRoute: typeof InternalTestLoaderRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/list': {
-      id: '/games/list'
-      path: '/games/list'
-      fullPath: '/games/list'
-      preLoaderRoute: typeof GamesListRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exams/my-exams': {
-      id: '/exams/my-exams'
-      path: '/exams/my-exams'
-      fullPath: '/exams/my-exams'
-      preLoaderRoute: typeof ExamsMyExamsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exams/generate': {
-      id: '/exams/generate'
-      path: '/exams/generate'
-      fullPath: '/exams/generate'
-      preLoaderRoute: typeof ExamsGenerateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/exams/$id': {
-      id: '/exams/$id'
-      path: '/exams/$id'
-      fullPath: '/exams/$id'
-      preLoaderRoute: typeof ExamsIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/web-development': {
-      id: '/courses/web-development'
-      path: '/courses/web-development'
-      fullPath: '/courses/web-development'
-      preLoaderRoute: typeof CoursesWebDevelopmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/mobile-development': {
-      id: '/courses/mobile-development'
-      path: '/courses/mobile-development'
-      fullPath: '/courses/mobile-development'
-      preLoaderRoute: typeof CoursesMobileDevelopmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/data-science': {
-      id: '/courses/data-science'
-      path: '/courses/data-science'
-      fullPath: '/courses/data-science'
-      preLoaderRoute: typeof CoursesDataScienceRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/backend-development': {
-      id: '/courses/backend-development'
-      path: '/courses/backend-development'
-      fullPath: '/courses/backend-development'
-      preLoaderRoute: typeof CoursesBackendDevelopmentRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/$id': {
-      id: '/courses/$id'
-      path: '/courses/$id'
-      fullPath: '/courses/$id'
-      preLoaderRoute: typeof CoursesIdRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/templates/slidev/': {
-      id: '/templates/slidev/'
-      path: '/templates/slidev'
-      fullPath: '/templates/slidev'
-      preLoaderRoute: typeof TemplatesSlidevIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/syllabuses/$id/': {
-      id: '/syllabuses/$id/'
-      path: '/syllabuses/$id'
-      fullPath: '/syllabuses/$id'
-      preLoaderRoute: typeof SyllabusesIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/questions/$id/': {
-      id: '/questions/$id/'
-      path: '/questions/$id'
-      fullPath: '/questions/$id'
-      preLoaderRoute: typeof QuestionsIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_headerOnly/ai-chatbot': {
+      id: '/_headerOnly/ai-chatbot'
+      path: '/ai-chatbot'
+      fullPath: '/ai-chatbot'
+      preLoaderRoute: typeof HeaderOnlyAiChatbotRouteImport
+      parentRoute: typeof HeaderOnlyRoute
     }
     '/mentor/dashboard/': {
       id: '/mentor/dashboard/'
@@ -1494,54 +1250,61 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/games/$id/': {
-      id: '/games/$id/'
-      path: '/games/$id'
-      fullPath: '/games/$id'
-      preLoaderRoute: typeof GamesIdIndexRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/templates/': {
+      id: '/_layout/templates/'
+      path: '/templates'
+      fullPath: '/templates'
+      preLoaderRoute: typeof LayoutTemplatesIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/templates/slidev/create': {
-      id: '/templates/slidev/create'
-      path: '/templates/slidev/create'
-      fullPath: '/templates/slidev/create'
-      preLoaderRoute: typeof TemplatesSlidevCreateRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/syllabuses/': {
+      id: '/_layout/syllabuses/'
+      path: '/syllabuses'
+      fullPath: '/syllabuses'
+      preLoaderRoute: typeof LayoutSyllabusesIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/syllabuses/$id/edit': {
-      id: '/syllabuses/$id/edit'
-      path: '/syllabuses/$id/edit'
-      fullPath: '/syllabuses/$id/edit'
-      preLoaderRoute: typeof SyllabusesIdEditRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/questions/': {
+      id: '/_layout/questions/'
+      path: '/questions'
+      fullPath: '/questions'
+      preLoaderRoute: typeof LayoutQuestionsIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/questions/$id/edit': {
-      id: '/questions/$id/edit'
-      path: '/questions/$id/edit'
-      fullPath: '/questions/$id/edit'
-      preLoaderRoute: typeof QuestionsIdEditRouteImport
-      parentRoute: typeof rootRouteImport
+    '/_layout/presentations/': {
+      id: '/_layout/presentations/'
+      path: '/presentations'
+      fullPath: '/presentations'
+      preLoaderRoute: typeof LayoutPresentationsIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/presentations/$id/view': {
-      id: '/presentations/$id/view'
-      path: '/view'
-      fullPath: '/presentations/$id/view'
-      preLoaderRoute: typeof PresentationsIdViewRouteImport
-      parentRoute: typeof PresentationsIdRoute
+    '/_layout/news/': {
+      id: '/_layout/news/'
+      path: '/news'
+      fullPath: '/news'
+      preLoaderRoute: typeof LayoutNewsIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/presentations/$id/presenter': {
-      id: '/presentations/$id/presenter'
-      path: '/presenter'
-      fullPath: '/presentations/$id/presenter'
-      preLoaderRoute: typeof PresentationsIdPresenterRouteImport
-      parentRoute: typeof PresentationsIdRoute
+    '/_layout/matrices/': {
+      id: '/_layout/matrices/'
+      path: '/matrices'
+      fullPath: '/matrices'
+      preLoaderRoute: typeof LayoutMatricesIndexRouteImport
+      parentRoute: typeof LayoutRoute
     }
-    '/presentations/$id/overview': {
-      id: '/presentations/$id/overview'
-      path: '/overview'
-      fullPath: '/presentations/$id/overview'
-      preLoaderRoute: typeof PresentationsIdOverviewRouteImport
-      parentRoute: typeof PresentationsIdRoute
+    '/_layout/courses/': {
+      id: '/_layout/courses/'
+      path: '/courses'
+      fullPath: '/courses'
+      preLoaderRoute: typeof LayoutCoursesIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_headerOnly/games/': {
+      id: '/_headerOnly/games/'
+      path: '/games'
+      fullPath: '/games'
+      preLoaderRoute: typeof HeaderOnlyGamesIndexRouteImport
+      parentRoute: typeof HeaderOnlyRoute
     }
     '/mindmaps/$userId/$code': {
       id: '/mindmaps/$userId/$code'
@@ -1578,34 +1341,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorCourseIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/matrices/$id/generate': {
-      id: '/matrices/$id/generate'
-      path: '/matrices/$id/generate'
-      fullPath: '/matrices/$id/generate'
-      preLoaderRoute: typeof MatricesIdGenerateRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/matrices/$id/edit': {
-      id: '/matrices/$id/edit'
-      path: '/matrices/$id/edit'
-      fullPath: '/matrices/$id/edit'
-      preLoaderRoute: typeof MatricesIdEditRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/games/$id/play': {
-      id: '/games/$id/play'
-      path: '/games/$id/play'
-      fullPath: '/games/$id/play'
-      preLoaderRoute: typeof GamesIdPlayRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/courses/grade/$grade': {
-      id: '/courses/grade/$grade'
-      path: '/courses/grade/$grade'
-      fullPath: '/courses/grade/$grade'
-      preLoaderRoute: typeof CoursesGradeGradeRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/auth/google/callback': {
       id: '/auth/google/callback'
       path: '/auth/google/callback'
@@ -1627,110 +1362,460 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/templates/slidev/$id/edit': {
-      id: '/templates/slidev/$id/edit'
+    '/_layout/templates/template-preview': {
+      id: '/_layout/templates/template-preview'
+      path: '/templates/template-preview'
+      fullPath: '/templates/template-preview'
+      preLoaderRoute: typeof LayoutTemplatesTemplatePreviewRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/templates/dashboard': {
+      id: '/_layout/templates/dashboard'
+      path: '/templates/dashboard'
+      fullPath: '/templates/dashboard'
+      preLoaderRoute: typeof LayoutTemplatesDashboardRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/templates/$id': {
+      id: '/_layout/templates/$id'
+      path: '/templates/$id'
+      fullPath: '/templates/$id'
+      preLoaderRoute: typeof LayoutTemplatesIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/syllabuses/my': {
+      id: '/_layout/syllabuses/my'
+      path: '/syllabuses/my'
+      fullPath: '/syllabuses/my'
+      preLoaderRoute: typeof LayoutSyllabusesMyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/syllabuses/create': {
+      id: '/_layout/syllabuses/create'
+      path: '/syllabuses/create'
+      fullPath: '/syllabuses/create'
+      preLoaderRoute: typeof LayoutSyllabusesCreateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/questions/my': {
+      id: '/_layout/questions/my'
+      path: '/questions/my'
+      fullPath: '/questions/my'
+      preLoaderRoute: typeof LayoutQuestionsMyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/questions/generate-from-questions': {
+      id: '/_layout/questions/generate-from-questions'
+      path: '/questions/generate-from-questions'
+      fullPath: '/questions/generate-from-questions'
+      preLoaderRoute: typeof LayoutQuestionsGenerateFromQuestionsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/questions/create': {
+      id: '/_layout/questions/create'
+      path: '/questions/create'
+      fullPath: '/questions/create'
+      preLoaderRoute: typeof LayoutQuestionsCreateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/presentations/$id': {
+      id: '/_layout/presentations/$id'
+      path: '/presentations/$id'
+      fullPath: '/presentations/$id'
+      preLoaderRoute: typeof LayoutPresentationsIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/news/$id': {
+      id: '/_layout/news/$id'
+      path: '/news/$id'
+      fullPath: '/news/$id'
+      preLoaderRoute: typeof LayoutNewsIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/matrices/my': {
+      id: '/_layout/matrices/my'
+      path: '/matrices/my'
+      fullPath: '/matrices/my'
+      preLoaderRoute: typeof LayoutMatricesMyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/matrices/import': {
+      id: '/_layout/matrices/import'
+      path: '/matrices/import'
+      fullPath: '/matrices/import'
+      preLoaderRoute: typeof LayoutMatricesImportRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/matrices/create': {
+      id: '/_layout/matrices/create'
+      path: '/matrices/create'
+      fullPath: '/matrices/create'
+      preLoaderRoute: typeof LayoutMatricesCreateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/lectures/$id': {
+      id: '/_layout/lectures/$id'
+      path: '/lectures/$id'
+      fullPath: '/lectures/$id'
+      preLoaderRoute: typeof LayoutLecturesIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/internal/test-loader': {
+      id: '/_layout/internal/test-loader'
+      path: '/internal/test-loader'
+      fullPath: '/internal/test-loader'
+      preLoaderRoute: typeof LayoutInternalTestLoaderRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/exams/my-exams': {
+      id: '/_layout/exams/my-exams'
+      path: '/exams/my-exams'
+      fullPath: '/exams/my-exams'
+      preLoaderRoute: typeof LayoutExamsMyExamsRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/exams/generate': {
+      id: '/_layout/exams/generate'
+      path: '/exams/generate'
+      fullPath: '/exams/generate'
+      preLoaderRoute: typeof LayoutExamsGenerateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/exams/$id': {
+      id: '/_layout/exams/$id'
+      path: '/exams/$id'
+      fullPath: '/exams/$id'
+      preLoaderRoute: typeof LayoutExamsIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/courses/web-development': {
+      id: '/_layout/courses/web-development'
+      path: '/courses/web-development'
+      fullPath: '/courses/web-development'
+      preLoaderRoute: typeof LayoutCoursesWebDevelopmentRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/courses/mobile-development': {
+      id: '/_layout/courses/mobile-development'
+      path: '/courses/mobile-development'
+      fullPath: '/courses/mobile-development'
+      preLoaderRoute: typeof LayoutCoursesMobileDevelopmentRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/courses/data-science': {
+      id: '/_layout/courses/data-science'
+      path: '/courses/data-science'
+      fullPath: '/courses/data-science'
+      preLoaderRoute: typeof LayoutCoursesDataScienceRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/courses/backend-development': {
+      id: '/_layout/courses/backend-development'
+      path: '/courses/backend-development'
+      fullPath: '/courses/backend-development'
+      preLoaderRoute: typeof LayoutCoursesBackendDevelopmentRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/courses/$id': {
+      id: '/_layout/courses/$id'
+      path: '/courses/$id'
+      fullPath: '/courses/$id'
+      preLoaderRoute: typeof LayoutCoursesIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_headerOnly/games/list': {
+      id: '/_headerOnly/games/list'
+      path: '/games/list'
+      fullPath: '/games/list'
+      preLoaderRoute: typeof HeaderOnlyGamesListRouteImport
+      parentRoute: typeof HeaderOnlyRoute
+    }
+    '/_layout/templates/slidev/': {
+      id: '/_layout/templates/slidev/'
+      path: '/templates/slidev'
+      fullPath: '/templates/slidev'
+      preLoaderRoute: typeof LayoutTemplatesSlidevIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/syllabuses/$id/': {
+      id: '/_layout/syllabuses/$id/'
+      path: '/syllabuses/$id'
+      fullPath: '/syllabuses/$id'
+      preLoaderRoute: typeof LayoutSyllabusesIdIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/questions/$id/': {
+      id: '/_layout/questions/$id/'
+      path: '/questions/$id'
+      fullPath: '/questions/$id'
+      preLoaderRoute: typeof LayoutQuestionsIdIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_headerOnly/games/$id/': {
+      id: '/_headerOnly/games/$id/'
+      path: '/games/$id'
+      fullPath: '/games/$id'
+      preLoaderRoute: typeof HeaderOnlyGamesIdIndexRouteImport
+      parentRoute: typeof HeaderOnlyRoute
+    }
+    '/_layout/templates/slidev/create': {
+      id: '/_layout/templates/slidev/create'
+      path: '/templates/slidev/create'
+      fullPath: '/templates/slidev/create'
+      preLoaderRoute: typeof LayoutTemplatesSlidevCreateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/syllabuses/$id/edit': {
+      id: '/_layout/syllabuses/$id/edit'
+      path: '/syllabuses/$id/edit'
+      fullPath: '/syllabuses/$id/edit'
+      preLoaderRoute: typeof LayoutSyllabusesIdEditRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/questions/$id/edit': {
+      id: '/_layout/questions/$id/edit'
+      path: '/questions/$id/edit'
+      fullPath: '/questions/$id/edit'
+      preLoaderRoute: typeof LayoutQuestionsIdEditRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/presentations/$id/view': {
+      id: '/_layout/presentations/$id/view'
+      path: '/view'
+      fullPath: '/presentations/$id/view'
+      preLoaderRoute: typeof LayoutPresentationsIdViewRouteImport
+      parentRoute: typeof LayoutPresentationsIdRoute
+    }
+    '/_layout/presentations/$id/presenter': {
+      id: '/_layout/presentations/$id/presenter'
+      path: '/presenter'
+      fullPath: '/presentations/$id/presenter'
+      preLoaderRoute: typeof LayoutPresentationsIdPresenterRouteImport
+      parentRoute: typeof LayoutPresentationsIdRoute
+    }
+    '/_layout/presentations/$id/overview': {
+      id: '/_layout/presentations/$id/overview'
+      path: '/overview'
+      fullPath: '/presentations/$id/overview'
+      preLoaderRoute: typeof LayoutPresentationsIdOverviewRouteImport
+      parentRoute: typeof LayoutPresentationsIdRoute
+    }
+    '/_layout/matrices/$id/generate': {
+      id: '/_layout/matrices/$id/generate'
+      path: '/matrices/$id/generate'
+      fullPath: '/matrices/$id/generate'
+      preLoaderRoute: typeof LayoutMatricesIdGenerateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/matrices/$id/edit': {
+      id: '/_layout/matrices/$id/edit'
+      path: '/matrices/$id/edit'
+      fullPath: '/matrices/$id/edit'
+      preLoaderRoute: typeof LayoutMatricesIdEditRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/courses/grade/$grade': {
+      id: '/_layout/courses/grade/$grade'
+      path: '/courses/grade/$grade'
+      fullPath: '/courses/grade/$grade'
+      preLoaderRoute: typeof LayoutCoursesGradeGradeRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_headerOnly/games/$id/play': {
+      id: '/_headerOnly/games/$id/play'
+      path: '/games/$id/play'
+      fullPath: '/games/$id/play'
+      preLoaderRoute: typeof HeaderOnlyGamesIdPlayRouteImport
+      parentRoute: typeof HeaderOnlyRoute
+    }
+    '/_layout/templates/slidev/$id/edit': {
+      id: '/_layout/templates/slidev/$id/edit'
       path: '/templates/slidev/$id/edit'
       fullPath: '/templates/slidev/$id/edit'
-      preLoaderRoute: typeof TemplatesSlidevIdEditRouteImport
-      parentRoute: typeof rootRouteImport
+      preLoaderRoute: typeof LayoutTemplatesSlidevIdEditRouteImport
+      parentRoute: typeof LayoutRoute
     }
   }
 }
 
-interface PresentationsIdRouteChildren {
-  PresentationsIdOverviewRoute: typeof PresentationsIdOverviewRoute
-  PresentationsIdPresenterRoute: typeof PresentationsIdPresenterRoute
-  PresentationsIdViewRoute: typeof PresentationsIdViewRoute
+interface HeaderOnlyRouteChildren {
+  HeaderOnlyAiChatbotRoute: typeof HeaderOnlyAiChatbotRoute
+  HeaderOnlyUserProfileRoute: typeof HeaderOnlyUserProfileRoute
+  HeaderOnlyGamesListRoute: typeof HeaderOnlyGamesListRoute
+  HeaderOnlyGamesIndexRoute: typeof HeaderOnlyGamesIndexRoute
+  HeaderOnlyGamesIdPlayRoute: typeof HeaderOnlyGamesIdPlayRoute
+  HeaderOnlyGamesIdIndexRoute: typeof HeaderOnlyGamesIdIndexRoute
 }
 
-const PresentationsIdRouteChildren: PresentationsIdRouteChildren = {
-  PresentationsIdOverviewRoute: PresentationsIdOverviewRoute,
-  PresentationsIdPresenterRoute: PresentationsIdPresenterRoute,
-  PresentationsIdViewRoute: PresentationsIdViewRoute,
+const HeaderOnlyRouteChildren: HeaderOnlyRouteChildren = {
+  HeaderOnlyAiChatbotRoute: HeaderOnlyAiChatbotRoute,
+  HeaderOnlyUserProfileRoute: HeaderOnlyUserProfileRoute,
+  HeaderOnlyGamesListRoute: HeaderOnlyGamesListRoute,
+  HeaderOnlyGamesIndexRoute: HeaderOnlyGamesIndexRoute,
+  HeaderOnlyGamesIdPlayRoute: HeaderOnlyGamesIdPlayRoute,
+  HeaderOnlyGamesIdIndexRoute: HeaderOnlyGamesIdIndexRoute,
 }
 
-const PresentationsIdRouteWithChildren = PresentationsIdRoute._addFileChildren(
-  PresentationsIdRouteChildren,
+const HeaderOnlyRouteWithChildren = HeaderOnlyRoute._addFileChildren(
+  HeaderOnlyRouteChildren,
 )
 
+interface LayoutPresentationsIdRouteChildren {
+  LayoutPresentationsIdOverviewRoute: typeof LayoutPresentationsIdOverviewRoute
+  LayoutPresentationsIdPresenterRoute: typeof LayoutPresentationsIdPresenterRoute
+  LayoutPresentationsIdViewRoute: typeof LayoutPresentationsIdViewRoute
+}
+
+const LayoutPresentationsIdRouteChildren: LayoutPresentationsIdRouteChildren = {
+  LayoutPresentationsIdOverviewRoute: LayoutPresentationsIdOverviewRoute,
+  LayoutPresentationsIdPresenterRoute: LayoutPresentationsIdPresenterRoute,
+  LayoutPresentationsIdViewRoute: LayoutPresentationsIdViewRoute,
+}
+
+const LayoutPresentationsIdRouteWithChildren =
+  LayoutPresentationsIdRoute._addFileChildren(
+    LayoutPresentationsIdRouteChildren,
+  )
+
+interface LayoutRouteChildren {
+  LayoutAboutRoute: typeof LayoutAboutRoute
+  LayoutChatRoute: typeof LayoutChatRoute
+  LayoutConsultationRoute: typeof LayoutConsultationRoute
+  LayoutContactRoute: typeof LayoutContactRoute
+  LayoutCorporateTrainingRoute: typeof LayoutCorporateTrainingRoute
+  LayoutCustomTemplateRoute: typeof LayoutCustomTemplateRoute
+  LayoutDemoRoute: typeof LayoutDemoRoute
+  LayoutMentorshipRoute: typeof LayoutMentorshipRoute
+  LayoutOfflineCourseRoute: typeof LayoutOfflineCourseRoute
+  LayoutPrivacyRoute: typeof LayoutPrivacyRoute
+  LayoutTermsRoute: typeof LayoutTermsRoute
+  LayoutUploadRoute: typeof LayoutUploadRoute
+  LayoutWebDesignRoute: typeof LayoutWebDesignRoute
+  LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutCoursesIdRoute: typeof LayoutCoursesIdRoute
+  LayoutCoursesBackendDevelopmentRoute: typeof LayoutCoursesBackendDevelopmentRoute
+  LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
+  LayoutCoursesMobileDevelopmentRoute: typeof LayoutCoursesMobileDevelopmentRoute
+  LayoutCoursesWebDevelopmentRoute: typeof LayoutCoursesWebDevelopmentRoute
+  LayoutExamsIdRoute: typeof LayoutExamsIdRoute
+  LayoutExamsGenerateRoute: typeof LayoutExamsGenerateRoute
+  LayoutExamsMyExamsRoute: typeof LayoutExamsMyExamsRoute
+  LayoutInternalTestLoaderRoute: typeof LayoutInternalTestLoaderRoute
+  LayoutLecturesIdRoute: typeof LayoutLecturesIdRoute
+  LayoutMatricesCreateRoute: typeof LayoutMatricesCreateRoute
+  LayoutMatricesImportRoute: typeof LayoutMatricesImportRoute
+  LayoutMatricesMyRoute: typeof LayoutMatricesMyRoute
+  LayoutNewsIdRoute: typeof LayoutNewsIdRoute
+  LayoutPresentationsIdRoute: typeof LayoutPresentationsIdRouteWithChildren
+  LayoutQuestionsCreateRoute: typeof LayoutQuestionsCreateRoute
+  LayoutQuestionsGenerateFromQuestionsRoute: typeof LayoutQuestionsGenerateFromQuestionsRoute
+  LayoutQuestionsMyRoute: typeof LayoutQuestionsMyRoute
+  LayoutSyllabusesCreateRoute: typeof LayoutSyllabusesCreateRoute
+  LayoutSyllabusesMyRoute: typeof LayoutSyllabusesMyRoute
+  LayoutTemplatesIdRoute: typeof LayoutTemplatesIdRoute
+  LayoutTemplatesDashboardRoute: typeof LayoutTemplatesDashboardRoute
+  LayoutTemplatesTemplatePreviewRoute: typeof LayoutTemplatesTemplatePreviewRoute
+  LayoutCoursesIndexRoute: typeof LayoutCoursesIndexRoute
+  LayoutMatricesIndexRoute: typeof LayoutMatricesIndexRoute
+  LayoutNewsIndexRoute: typeof LayoutNewsIndexRoute
+  LayoutPresentationsIndexRoute: typeof LayoutPresentationsIndexRoute
+  LayoutQuestionsIndexRoute: typeof LayoutQuestionsIndexRoute
+  LayoutSyllabusesIndexRoute: typeof LayoutSyllabusesIndexRoute
+  LayoutTemplatesIndexRoute: typeof LayoutTemplatesIndexRoute
+  LayoutCoursesGradeGradeRoute: typeof LayoutCoursesGradeGradeRoute
+  LayoutMatricesIdEditRoute: typeof LayoutMatricesIdEditRoute
+  LayoutMatricesIdGenerateRoute: typeof LayoutMatricesIdGenerateRoute
+  LayoutQuestionsIdEditRoute: typeof LayoutQuestionsIdEditRoute
+  LayoutSyllabusesIdEditRoute: typeof LayoutSyllabusesIdEditRoute
+  LayoutTemplatesSlidevCreateRoute: typeof LayoutTemplatesSlidevCreateRoute
+  LayoutQuestionsIdIndexRoute: typeof LayoutQuestionsIdIndexRoute
+  LayoutSyllabusesIdIndexRoute: typeof LayoutSyllabusesIdIndexRoute
+  LayoutTemplatesSlidevIndexRoute: typeof LayoutTemplatesSlidevIndexRoute
+  LayoutTemplatesSlidevIdEditRoute: typeof LayoutTemplatesSlidevIdEditRoute
+}
+
+const LayoutRouteChildren: LayoutRouteChildren = {
+  LayoutAboutRoute: LayoutAboutRoute,
+  LayoutChatRoute: LayoutChatRoute,
+  LayoutConsultationRoute: LayoutConsultationRoute,
+  LayoutContactRoute: LayoutContactRoute,
+  LayoutCorporateTrainingRoute: LayoutCorporateTrainingRoute,
+  LayoutCustomTemplateRoute: LayoutCustomTemplateRoute,
+  LayoutDemoRoute: LayoutDemoRoute,
+  LayoutMentorshipRoute: LayoutMentorshipRoute,
+  LayoutOfflineCourseRoute: LayoutOfflineCourseRoute,
+  LayoutPrivacyRoute: LayoutPrivacyRoute,
+  LayoutTermsRoute: LayoutTermsRoute,
+  LayoutUploadRoute: LayoutUploadRoute,
+  LayoutWebDesignRoute: LayoutWebDesignRoute,
+  LayoutIndexRoute: LayoutIndexRoute,
+  LayoutCoursesIdRoute: LayoutCoursesIdRoute,
+  LayoutCoursesBackendDevelopmentRoute: LayoutCoursesBackendDevelopmentRoute,
+  LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
+  LayoutCoursesMobileDevelopmentRoute: LayoutCoursesMobileDevelopmentRoute,
+  LayoutCoursesWebDevelopmentRoute: LayoutCoursesWebDevelopmentRoute,
+  LayoutExamsIdRoute: LayoutExamsIdRoute,
+  LayoutExamsGenerateRoute: LayoutExamsGenerateRoute,
+  LayoutExamsMyExamsRoute: LayoutExamsMyExamsRoute,
+  LayoutInternalTestLoaderRoute: LayoutInternalTestLoaderRoute,
+  LayoutLecturesIdRoute: LayoutLecturesIdRoute,
+  LayoutMatricesCreateRoute: LayoutMatricesCreateRoute,
+  LayoutMatricesImportRoute: LayoutMatricesImportRoute,
+  LayoutMatricesMyRoute: LayoutMatricesMyRoute,
+  LayoutNewsIdRoute: LayoutNewsIdRoute,
+  LayoutPresentationsIdRoute: LayoutPresentationsIdRouteWithChildren,
+  LayoutQuestionsCreateRoute: LayoutQuestionsCreateRoute,
+  LayoutQuestionsGenerateFromQuestionsRoute:
+    LayoutQuestionsGenerateFromQuestionsRoute,
+  LayoutQuestionsMyRoute: LayoutQuestionsMyRoute,
+  LayoutSyllabusesCreateRoute: LayoutSyllabusesCreateRoute,
+  LayoutSyllabusesMyRoute: LayoutSyllabusesMyRoute,
+  LayoutTemplatesIdRoute: LayoutTemplatesIdRoute,
+  LayoutTemplatesDashboardRoute: LayoutTemplatesDashboardRoute,
+  LayoutTemplatesTemplatePreviewRoute: LayoutTemplatesTemplatePreviewRoute,
+  LayoutCoursesIndexRoute: LayoutCoursesIndexRoute,
+  LayoutMatricesIndexRoute: LayoutMatricesIndexRoute,
+  LayoutNewsIndexRoute: LayoutNewsIndexRoute,
+  LayoutPresentationsIndexRoute: LayoutPresentationsIndexRoute,
+  LayoutQuestionsIndexRoute: LayoutQuestionsIndexRoute,
+  LayoutSyllabusesIndexRoute: LayoutSyllabusesIndexRoute,
+  LayoutTemplatesIndexRoute: LayoutTemplatesIndexRoute,
+  LayoutCoursesGradeGradeRoute: LayoutCoursesGradeGradeRoute,
+  LayoutMatricesIdEditRoute: LayoutMatricesIdEditRoute,
+  LayoutMatricesIdGenerateRoute: LayoutMatricesIdGenerateRoute,
+  LayoutQuestionsIdEditRoute: LayoutQuestionsIdEditRoute,
+  LayoutSyllabusesIdEditRoute: LayoutSyllabusesIdEditRoute,
+  LayoutTemplatesSlidevCreateRoute: LayoutTemplatesSlidevCreateRoute,
+  LayoutQuestionsIdIndexRoute: LayoutQuestionsIdIndexRoute,
+  LayoutSyllabusesIdIndexRoute: LayoutSyllabusesIdIndexRoute,
+  LayoutTemplatesSlidevIndexRoute: LayoutTemplatesSlidevIndexRoute,
+  LayoutTemplatesSlidevIdEditRoute: LayoutTemplatesSlidevIdEditRoute,
+}
+
+const LayoutRouteWithChildren =
+  LayoutRoute._addFileChildren(LayoutRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
-  IndexRoute: IndexRoute,
   R404Route: R404Route,
-  AboutRoute: AboutRoute,
-  AiChatbotRoute: AiChatbotRoute,
-  ChatRoute: ChatRoute,
-  ConsultationRoute: ConsultationRoute,
-  ContactRoute: ContactRoute,
-  CorporateTrainingRoute: CorporateTrainingRoute,
-  CustomTemplateRoute: CustomTemplateRoute,
-  DemoRoute: DemoRoute,
+  HeaderOnlyRoute: HeaderOnlyRouteWithChildren,
+  LayoutRoute: LayoutRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  MentorshipRoute: MentorshipRoute,
-  OfflineCourseRoute: OfflineCourseRoute,
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentSucceededRoute: PaymentSucceededRoute,
-  PrivacyRoute: PrivacyRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SigninRoute: SigninRoute,
   Signin2faRoute: Signin2faRoute,
   SignupRoute: SignupRoute,
-  TermsRoute: TermsRoute,
-  UploadRoute: UploadRoute,
-  UserProfileRoute: UserProfileRoute,
-  WebDesignRoute: WebDesignRoute,
-  CoursesIdRoute: CoursesIdRoute,
-  CoursesBackendDevelopmentRoute: CoursesBackendDevelopmentRoute,
-  CoursesDataScienceRoute: CoursesDataScienceRoute,
-  CoursesMobileDevelopmentRoute: CoursesMobileDevelopmentRoute,
-  CoursesWebDevelopmentRoute: CoursesWebDevelopmentRoute,
-  ExamsIdRoute: ExamsIdRoute,
-  ExamsGenerateRoute: ExamsGenerateRoute,
-  ExamsMyExamsRoute: ExamsMyExamsRoute,
-  GamesListRoute: GamesListRoute,
-  InternalTestLoaderRoute: InternalTestLoaderRoute,
-  LecturesIdRoute: LecturesIdRoute,
-  MatricesCreateRoute: MatricesCreateRoute,
-  MatricesImportRoute: MatricesImportRoute,
-  MatricesMyRoute: MatricesMyRoute,
-  NewsIdRoute: NewsIdRoute,
-  PresentationsIdRoute: PresentationsIdRouteWithChildren,
-  QuestionsCreateRoute: QuestionsCreateRoute,
-  QuestionsGenerateFromQuestionsRoute: QuestionsGenerateFromQuestionsRoute,
-  QuestionsMyRoute: QuestionsMyRoute,
-  SyllabusesCreateRoute: SyllabusesCreateRoute,
-  SyllabusesMyRoute: SyllabusesMyRoute,
-  TemplatesIdRoute: TemplatesIdRoute,
-  TemplatesDashboardRoute: TemplatesDashboardRoute,
-  TemplatesTemplatePreviewRoute: TemplatesTemplatePreviewRoute,
-  CoursesIndexRoute: CoursesIndexRoute,
-  GamesIndexRoute: GamesIndexRoute,
-  MatricesIndexRoute: MatricesIndexRoute,
-  NewsIndexRoute: NewsIndexRoute,
-  PresentationsIndexRoute: PresentationsIndexRoute,
-  QuestionsIndexRoute: QuestionsIndexRoute,
-  SyllabusesIndexRoute: SyllabusesIndexRoute,
-  TemplatesIndexRoute: TemplatesIndexRoute,
+  TestWpmRoute: TestWpmRoute,
   ApiAuthActivateRoute: ApiAuthActivateRoute,
   AuthGithubCallbackRoute: AuthGithubCallbackRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
-  CoursesGradeGradeRoute: CoursesGradeGradeRoute,
-  GamesIdPlayRoute: GamesIdPlayRoute,
-  MatricesIdEditRoute: MatricesIdEditRoute,
-  MatricesIdGenerateRoute: MatricesIdGenerateRoute,
   MentorCourseIdRoute: MentorCourseIdRoute,
   MentorCourseCreateRoute: MentorCourseCreateRoute,
   MentorCourseListRoute: MentorCourseListRoute,
   MentorCourseQuizRoute: MentorCourseQuizRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
-  QuestionsIdEditRoute: QuestionsIdEditRoute,
-  SyllabusesIdEditRoute: SyllabusesIdEditRoute,
-  TemplatesSlidevCreateRoute: TemplatesSlidevCreateRoute,
-  GamesIdIndexRoute: GamesIdIndexRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
-  QuestionsIdIndexRoute: QuestionsIdIndexRoute,
-  SyllabusesIdIndexRoute: SyllabusesIdIndexRoute,
-  TemplatesSlidevIndexRoute: TemplatesSlidevIndexRoute,
-  TemplatesSlidevIdEditRoute: TemplatesSlidevIdEditRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

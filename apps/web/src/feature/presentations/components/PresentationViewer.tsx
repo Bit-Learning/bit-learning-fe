@@ -1,6 +1,4 @@
 import { API_PATH } from '@/shared/constants/endpoints'
-import { useLayout } from '@/shared/context/layout-context'
-import { useEffect } from 'react'
 
 type ViewerProps = {
     id: string
@@ -8,18 +6,6 @@ type ViewerProps = {
 }
 
 function PresentationViewer({ id, mode }: ViewerProps) {
-    const { setLayoutConfig } = useLayout()
-
-    useEffect(() => {
-        // Set layout config for this page: hide header hide footer
-        setLayoutConfig({ showHeader: false, showFooter: false })
-
-        // Reset to default when leaving the page
-        return () => {
-            setLayoutConfig({ showHeader: true, showFooter: true })
-        }
-    }, [setLayoutConfig])
-
     // This URL points DIRECTLY to your Spring Boot gatekeeper controller
     // This is the 'publicUrl' your builder service now sets
     const baseUrl = `${API_PATH.BASE_PRODUCT_URL}/products/presentations/view/${id}`
