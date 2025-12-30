@@ -1,4 +1,3 @@
-import { useLayout } from '@/shared/context/layout-context'
 import { Link, useNavigate } from '@tanstack/react-router'
 import { Button } from '@workspace/ui/components/Button'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@workspace/ui/components/Card'
@@ -8,12 +7,9 @@ import { useEffect, useState } from 'react'
 
 export default function PaymentFailed() {
     const navigate = useNavigate()
-    const { setLayoutConfig } = useLayout()
     const [countdown, setCountdown] = useState(5)
 
     useEffect(() => {
-        setLayoutConfig({ showHeader: false, showFooter: false })
-
         const countdownInterval = setInterval(() => {
             setCountdown(prev => {
                 if (prev <= 1) {
@@ -26,10 +22,9 @@ export default function PaymentFailed() {
         }, 1000)
 
         return () => {
-            setLayoutConfig({ showHeader: true, showFooter: true })
             clearInterval(countdownInterval)
         }
-    }, [setLayoutConfig, navigate])
+    }, [navigate])
 
     return (
         <div className="flex min-h-[80vh] items-center justify-center p-4 md:p-8">

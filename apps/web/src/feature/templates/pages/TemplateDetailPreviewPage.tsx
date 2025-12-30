@@ -4,7 +4,7 @@ import { useParams } from '@tanstack/react-router'
 import axios from 'axios'
 
 const TemplateDetailPreviewPage = () => {
-    const { id } = useParams({ from: '/templates/$id' })
+    const { id } = useParams({ from: '/_layout/templates/$id' })
 
     const { data: template, isLoading } = useQuery({
         queryKey: ['template', id],
