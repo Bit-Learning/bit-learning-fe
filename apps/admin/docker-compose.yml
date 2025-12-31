@@ -14,9 +14,9 @@ services:
     command: npm run dev -- --host
 
   # Production environment
-  bithub-admin-prod:
-    container_name: bithub-admin-prod
-    image: lcaohoanq/bithub-admin:enterprise
+  bitlearning-admin:
+    container_name: bit-admin
+    image: lcaohoanq/bithub-admin:nginx
     build:
       context: ../..
       dockerfile: apps/admin/Dockerfile.prod
