@@ -1,7 +1,7 @@
-declare module 'AppModels' {
-    export interface ApiResponse<T> {
-        data: T
-        message?: string
-        success: boolean
-    }
+declare module "AppModels" {
+	export interface ApiResponse<T> {
+		data: T;
+		message?: string;
+		success: boolean;
+	}
 }

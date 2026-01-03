@@ -1,11 +1,15 @@
 {
-    "extends": "@workspace/typescript-config/react-library.json",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "@workspace/ui/*": ["./src/*"]
-        }
-    },
-    "include": [".", "../../apps/web/src/routes/page.tsx", "../../apps/web/src/shared/components/profile-page"],
-    "exclude": ["node_modules", "dist"]
+	"extends": "@workspace/typescript-config/react-library.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@workspace/ui/*": ["./src/*"]
+		}
+	},
+	"include": [
+		".",
+		"../../apps/web/src/routes/page.tsx",
+		"../../apps/web/src/shared/components/profile-page"
+	],
+	"exclude": ["node_modules", "dist"]
 }

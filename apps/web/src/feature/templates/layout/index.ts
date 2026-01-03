@@ -1,3 +1,3 @@
-import PresentationLayout from './PresentationLayout'
+import PresentationLayout from "./PresentationLayout";
 
-export default PresentationLayout
+export default PresentationLayout;

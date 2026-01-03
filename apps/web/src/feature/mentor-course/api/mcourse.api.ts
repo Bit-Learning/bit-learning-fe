@@ -1,60 +1,80 @@
-import api from '@/shared/api/api'
-import { ApiResponse } from '@/shared/api/api.type'
-import { endpoints } from '@/shared/constants/endpoints'
-import { AxiosResponse } from 'axios'
-import { CreateCourseRequest, UpdateCourseRequest } from '../types/mcourse.type'
+import type { AxiosResponse } from "axios";
+import api from "@/shared/api/api";
+import type { ApiResponse } from "@/shared/api/api.type";
+import { endpoints } from "@/shared/constants/endpoints";
+import type {
+	CreateCourseRequest,
+	UpdateCourseRequest,
+} from "../types/mcourse.type";
 
 export const mcourseApi = {
-    createCourse(data: CreateCourseRequest, thumbnail: File): Promise<AxiosResponse<ApiResponse<void>>> {
-        const formData = new FormData()
-        const requestBlob = new Blob([JSON.stringify(data)], { type: 'application/json' })
-        formData.append('request', requestBlob)
-        formData.append('thumbnail', thumbnail)
+	createCourse(
+		data: CreateCourseRequest,
+		thumbnail: File,
+	): Promise<AxiosResponse<ApiResponse<void>>> {
+		const formData = new FormData();
+		const requestBlob = new Blob([JSON.stringify(data)], {
+			type: "application/json",
+		});
+		formData.append("request", requestBlob);
+		formData.append("thumbnail", thumbnail);
 
-        return api.post(endpoints.COURSES, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-    },
+		return api.post(endpoints.COURSES, formData, {
+			headers: {
+				"Content-Type": "multipart/form-data",
+			},
+		});
+	},
 
-    getCoursesByInstructor(
-        instructorId: number,
-        page: number = 0,
-        size: number = 10,
-    ): Promise<AxiosResponse<ApiResponse<any>>> {
-        return api.get(`${endpoints.COURSES}/instructor/${instructorId}`, {
-            params: { page, size },
-        })
-    },
+	getCoursesByInstructor(
+		instructorId: number,
+		page = 0,
+		size = 10,
+	): Promise<AxiosResponse<ApiResponse<any>>> {
+		return api.get(`${endpoints.COURSES}/instructor/${instructorId}`, {
+			params: { page, size },
+		});
+	},
 
-    updateCourse(id: number, data: UpdateCourseRequest): Promise<AxiosResponse<ApiResponse<void>>> {
-        return api.patch(`${endpoints.COURSES}/${id}`, data)
-    },
+	updateCourse(
+		id: number,
+		data: UpdateCourseRequest,
+	): Promise<AxiosResponse<ApiResponse<void>>> {
+		return api.patch(`${endpoints.COURSES}/${id}`, data);
+	},
 
-    deleteCourse(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
-        return api.delete(`${endpoints.COURSES}/${id}/force`)
-    },
+	deleteCourse(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+		return api.delete(`${endpoints.COURSES}/${id}/force`);
+	},
 
-    hideOrShowCourse(id: number, isHidden: boolean): Promise<AxiosResponse<ApiResponse<void>>> {
-        return api.delete(`${endpoints.COURSES}/${id}`, {
-            params: { isHidden },
-        })
-    },
+	hideOrShowCourse(
+		id: number,
+		isHidden: boolean,
+	): Promise<AxiosResponse<ApiResponse<void>>> {
+		return api.delete(`${endpoints.COURSES}/${id}`, {
+			params: { isHidden },
+		});
+	},
 
-    updateCourseThumbnail(id: number, thumbnail: File): Promise<AxiosResponse<ApiResponse<void>>> {
-        const formData = new FormData()
-        formData.append('thumbnail', thumbnail)
+	updateCourseThumbnail(
+		id: number,
+		thumbnail: File,
+	): Promise<AxiosResponse<ApiResponse<void>>> {
+		const formData = new FormData();
+		formData.append("thumbnail", thumbnail);
 
-        return api.patch(`${endpoints.COURSES}/${id}/thumbnail`, formData, {
-            headers: {
-                'Content-Type': 'multipart/form-data',
-            },
-        })
-    },
-    validateCourse(id: number, isAccepted: boolean): Promise<AxiosResponse<ApiResponse<void>>> {
-        return api.post(`${endpoints.COURSES}/validate/${id}`, null, {
-            params: { isAccepted },
-        })
-    },
-}
+		return api.patch(`${endpoints.COURSES}/${id}/thumbnail`, formData, {
+			headers: {
+				"Content-Type": "multipart/form-data",
+			},
+		});
+	},
+	validateCourse(
+		id: number,
+		isAccepted: boolean,
+	): Promise<AxiosResponse<ApiResponse<void>>> {
+		return api.post(`${endpoints.COURSES}/validate/${id}`, null, {
+			params: { isAccepted },
+		});
+	},
+};

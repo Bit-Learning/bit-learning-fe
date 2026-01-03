@@ -1,28 +1,25 @@
 {
-    "name": "base-stack",
-    "version": "0.0.1",
-    "private": true,
-    "scripts": {
-        "build": "turbo build",
-        "dev": "turbo dev",
-        "lint": "turbo lint",
-        "format": "prettier --write \"**/*.{ts,tsx,md}\"",
-        "prepare": "command -v git >/dev/null 2>&1 && lefthook install || echo 'Skipping lefthook (git not found)'"
-    },
-    "devDependencies": {
-        "@trivago/prettier-plugin-sort-imports": "^5.2.2",
-        "@workspace/eslint-config": "workspace:*",
-        "@workspace/typescript-config": "workspace:*",
-        "lefthook": "^1.11.8",
-        "prettier": "^3.6.2",
-        "prettier-plugin-tailwindcss": "^0.6.14",
-        "prettier-plugin-organize-imports": "^4.1.0",
-        "tsx": "^4.20.6",
-        "turbo": "^2.5.5",
-        "typescript": "^5.9.2"
-    },
-    "packageManager": "pnpm@10.19.0",
-    "engines": {
-        "node": ">=20"
-    }
+	"name": "base-stack",
+	"version": "0.0.1",
+	"private": true,
+	"scripts": {
+		"build": "turbo build",
+		"dev": "turbo dev",
+		"lint": "turbo lint",
+		"format": "biome format --write .",
+		"check": "biome check --write .",
+		"prepare": "command -v git >/dev/null 2>&1 && lefthook install || echo 'Skipping lefthook (git not found)'"
+	},
+	"devDependencies": {
+		"@biomejs/biome": "^2.3.10",
+		"@workspace/typescript-config": "workspace:*",
+		"lefthook": "^1.11.8",
+		"tsx": "^4.20.6",
+		"turbo": "^2.5.5",
+		"typescript": "^5.9.2"
+	},
+	"packageManager": "pnpm@10.19.0",
+	"engines": {
+		"node": ">=20"
+	}
 }

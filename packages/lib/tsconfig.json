@@ -1,11 +1,15 @@
 {
-    "extends": "@workspace/typescript-config/react-library.json",
-    "compilerOptions": {
-        "baseUrl": ".",
-        "paths": {
-            "@workspace/lib/*": ["./src/*"]
-        }
-    },
-    "include": [".", "../../apps/web/src/shared/lib/cookies.ts", "../../apps/web/src/shared/constants/endpoints.ts"],
-    "exclude": ["node_modules", "dist"]
+	"extends": "@workspace/typescript-config/react-library.json",
+	"compilerOptions": {
+		"baseUrl": ".",
+		"paths": {
+			"@workspace/lib/*": ["./src/*"]
+		}
+	},
+	"include": [
+		".",
+		"../../apps/web/src/shared/lib/cookies.ts",
+		"../../apps/web/src/shared/constants/endpoints.ts"
+	],
+	"exclude": ["node_modules", "dist"]
 }

@@ -1,13 +1,13 @@
-import { HeroCarousel } from './HeroCarousel'
-import { ServiceSections } from './ServiceSection'
+import { HeroCarousel } from "./HeroCarousel";
+import { ServiceSections } from "./ServiceSection";
 
 const HeroSection: React.FC = () => {
-    return (
-        <section className="relative">
-            <HeroCarousel />
-            <ServiceSections />
-        </section>
-    )
-}
+	return (
+		<section className="relative">
+			<HeroCarousel />
+			<ServiceSections />
+		</section>
+	);
+};
 
-export default HeroSection
+export default HeroSection;
