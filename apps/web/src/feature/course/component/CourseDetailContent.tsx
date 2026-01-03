@@ -1,4 +1,5 @@
 import CourseCurriculum from '@/feature/course/component/CourseCurriculum'
+import CourseQA from '@/feature/course/component/CourseQA'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -199,7 +200,7 @@ const CourseDetailContent: React.FC = () => {
                         <div className="rounded-2xl bg-white shadow-lg">
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                                 <div className="border-b border-gray-200">
-                                    <TabsList className="grid w-full grid-cols-3 bg-transparent">
+                                    <TabsList className="grid w-full grid-cols-4 bg-transparent">
                                         <TabsTrigger
                                             value="overview"
                                             className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
@@ -211,6 +212,13 @@ const CourseDetailContent: React.FC = () => {
                                             className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
                                         >
                                             Nội dung
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="qa"
+                                            className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+                                        >
+                                            <MessageCircle className="mr-1 h-4 w-4" />
+                                            Q&A
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="instructor"
@@ -266,6 +274,26 @@ const CourseDetailContent: React.FC = () => {
 
                                     <TabsContent value="curriculum" className="space-y-4">
                                         <CourseCurriculum courseId={course.id} />
+                                    </TabsContent>
+
+                                    <TabsContent value="qa" className="space-y-4">
+                                        {hasAccess ? (
+                                            <CourseQA lectureId={course.id} />
+                                        ) : (
+                                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
+                                                <MessageCircle className="mx-auto mb-3 h-12 w-12 text-gray-400" />
+                                                <p className="mb-4 text-gray-600">
+                                                    Bạn cần đăng ký khóa học để tham gia thảo luận
+                                                </p>
+                                                <Button
+                                                    onClick={handleEnroll}
+                                                    isDisabled={isPending}
+                                                    className="bg-blue-700 text-white hover:bg-blue-800"
+                                                >
+                                                    Đăng ký ngay
+                                                </Button>
+                                            </div>
+                                        )}
                                     </TabsContent>
 
                                     <TabsContent value="instructor" className="space-y-6">
