@@ -42,8 +42,8 @@ const Header: React.FC = () => {
 
     return (
         <SearchProvider>
-            <header className="sticky top-0 z-50 border-b border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:shadow-gray-800/50">
-                <div className="container mx-auto flex items-center justify-between py-4 max-[776px]:px-4 md:px-10">
+            <header className="container sticky top-5 z-50 mx-auto rounded-lg border-b border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:shadow-gray-800/50">
+                <div className="flex items-center justify-between py-4 max-[776px]:px-4 md:px-10">
                     <Link to="/" className="flex items-center space-x-2">
                         <div className="flex items-center space-x-2">
                             <img src="/Logo.png" alt="Bithub Learning" className="h-10 w-36 object-contain" />
