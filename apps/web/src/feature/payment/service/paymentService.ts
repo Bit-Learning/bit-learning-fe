@@ -1,9 +1,11 @@
-import api from '@/shared/api/api'
-import { endpoints } from '@/shared/constants/endpoints'
-import { ApiResponse } from 'AppModels'
-import { AxiosResponse } from 'axios'
-import { PaymentUrlRequest } from '../type/paymentType'
+import type { ApiResponse } from "AppModels";
+import type { AxiosResponse } from "axios";
+import api from "@/shared/api/api";
+import { endpoints } from "@/shared/constants/endpoints";
+import type { PaymentUrlRequest } from "../type/paymentType";
 
-export function CreatePaymentURL(requestBody: PaymentUrlRequest): Promise<AxiosResponse<ApiResponse<any>, any>> {
-    return api.post(`${endpoints.PAYMENT}/url`, requestBody)
+export function CreatePaymentURL(
+	requestBody: PaymentUrlRequest,
+): Promise<AxiosResponse<ApiResponse<any>, any>> {
+	return api.post(`${endpoints.PAYMENT}/url`, requestBody);
 }

@@ -1,6 +1,6 @@
-import CourseDetailPage from '@/feature/course/page/CourseDetail'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import CourseDetailPage from "@/feature/course/page/CourseDetail";
 
-export const Route = createFileRoute('/_layout/courses/$id')({
-    component: CourseDetailPage,
-})
+export const Route = createFileRoute("/_layout/courses/$id")({
+	component: CourseDetailPage,
+});

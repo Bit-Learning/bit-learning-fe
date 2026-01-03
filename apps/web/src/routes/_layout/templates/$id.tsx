@@ -1,9 +1,9 @@
-import TemplateDetailPreviewPage from '@/feature/templates/pages/TemplateDetailPreviewPage'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import TemplateDetailPreviewPage from "@/feature/templates/pages/TemplateDetailPreviewPage";
 
-export const Route = createFileRoute('/_layout/templates/$id')({
-    component: TemplateDetailPreviewPage,
-})
+export const Route = createFileRoute("/_layout/templates/$id")({
+	component: TemplateDetailPreviewPage,
+});
 
 // function TemplateDetailPreviewPage() {
 //     const { id } = Route.useParams()

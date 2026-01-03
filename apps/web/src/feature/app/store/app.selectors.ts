@@ -1,3 +1,3 @@
-import type { RootState } from '@/shared/redux/store'
+import type { RootState } from "@/shared/redux/store";
 
-export const selectAppStateInfo = (state: RootState) => state.app
+export const selectAppStateInfo = (state: RootState) => state.app;

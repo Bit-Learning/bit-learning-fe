@@ -1,17 +1,17 @@
-import api from '@/shared/api/api'
+import api from "@/shared/api/api";
 import type {
-  OrderDashboardStats,
-  UserDashboardStats,
-  PaymentDashboardStats,
-} from '../types/dashboard.types'
+	OrderDashboardStats,
+	PaymentDashboardStats,
+	UserDashboardStats,
+} from "../types/dashboard.types";
 
 /**
  * API response wrapper
  */
 interface ApiResponse<T> {
-  status: number
-  message: string
-  data: T
+	status: number;
+	message: string;
+	data: T;
 }
 
 /**
@@ -19,10 +19,10 @@ interface ApiResponse<T> {
  * @returns Order statistics including total orders, revenue, and status breakdown
  */
 export async function getOrderStats() {
-  const response = await api.get<ApiResponse<OrderDashboardStats>>(
-    '/orders/dashboard/stats'
-  )
-  return response.data.data
+	const response = await api.get<ApiResponse<OrderDashboardStats>>(
+		"/orders/dashboard/stats",
+	);
+	return response.data.data;
 }
 
 /**
@@ -30,10 +30,10 @@ export async function getOrderStats() {
  * @returns User statistics including total users, new users, and active users
  */
 export async function getUserStats() {
-  const response = await api.get<ApiResponse<UserDashboardStats>>(
-    '/users/dashboard/stats'
-  )
-  return response.data.data
+	const response = await api.get<ApiResponse<UserDashboardStats>>(
+		"/users/dashboard/stats",
+	);
+	return response.data.data;
 }
 
 /**
@@ -41,10 +41,10 @@ export async function getUserStats() {
  * @returns Payment statistics including total transactions, revenue, and status breakdown
  */
 export async function getPaymentStats() {
-  const response = await api.get<ApiResponse<PaymentDashboardStats>>(
-    '/payment/dashboard/stats'
-  )
-  return response.data.data
+	const response = await api.get<ApiResponse<PaymentDashboardStats>>(
+		"/payment/dashboard/stats",
+	);
+	return response.data.data;
 }
 
 /**
@@ -52,11 +52,11 @@ export async function getPaymentStats() {
  * @returns Combined statistics from all services
  */
 export async function getAllDashboardStats() {
-  const [orders, users, payments] = await Promise.all([
-    getOrderStats(),
-    getUserStats(),
-    getPaymentStats(),
-  ])
+	const [orders, users, payments] = await Promise.all([
+		getOrderStats(),
+		getUserStats(),
+		getPaymentStats(),
+	]);
 
-  return { orders, users, payments }
+	return { orders, users, payments };
 }

@@ -1,2 +1,2 @@
-export { GameHistory } from './GameHistory'
-export { Leaderboard } from './Leaderboard'
+export { GameHistory } from "./GameHistory";
+export { Leaderboard } from "./Leaderboard";

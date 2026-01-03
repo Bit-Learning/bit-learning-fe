@@ -1,9 +1,9 @@
 export const endpoints = {
-  AUTH: '/auth',
-  ACCOUNT: '/users',
-  PAYMENT: '/payment',
-}
+	AUTH: "/auth",
+	ACCOUNT: "/users",
+	PAYMENT: "/payment",
+};
 
 export const API_PATH = {
-  BASE_URL: import.meta.env.VITE_API_BASE_URL ?? '/api',
-}
+	BASE_URL: import.meta.env.VITE_API_BASE_URL ?? "/api",
+};

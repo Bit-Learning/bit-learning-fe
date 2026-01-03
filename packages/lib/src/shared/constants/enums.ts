@@ -1,5 +1,5 @@
 export const Roles = {
-    USER: 'USER',
-} as const
+	USER: "USER",
+} as const;
 
-export type Roles = keyof typeof Roles
+export type Roles = keyof typeof Roles;

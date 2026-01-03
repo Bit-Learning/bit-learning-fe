@@ -1,6 +1,6 @@
-import NewsPage from '@/feature/post/page/News'
-import { createFileRoute } from '@tanstack/react-router'
+import { createFileRoute } from "@tanstack/react-router";
+import NewsPage from "@/feature/post/page/News";
 
-export const Route = createFileRoute('/_layout/news/')({
-    component: NewsPage,
-})
+export const Route = createFileRoute("/_layout/news/")({
+	component: NewsPage,
+});

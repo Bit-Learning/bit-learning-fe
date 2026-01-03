@@ -1,40 +1,40 @@
-import { useNavigate, useParams } from '@tanstack/react-router'
-import { Badge } from '@workspace/ui/components/Badge'
-import { Button } from '@workspace/ui/components/Button'
-import { Card, CardContent } from '@workspace/ui/components/Card'
-import { toast } from '@workspace/ui/components/Sonner'
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { Badge } from "@workspace/ui/components/Badge";
+import { Button } from "@workspace/ui/components/Button";
+import { Card, CardContent } from "@workspace/ui/components/Card";
+import { toast } from "@workspace/ui/components/Sonner";
 import {
-    ArrowLeft,
-    Bookmark,
-    Calendar,
-    CheckCircle,
-    Clock,
-    Copy,
-    Eye,
-    Facebook,
-    Heart,
-    Linkedin,
-    Share2,
-    Tag,
-    Twitter,
-} from 'lucide-react'
-import React from 'react'
+	ArrowLeft,
+	Bookmark,
+	Calendar,
+	CheckCircle,
+	Clock,
+	Copy,
+	Eye,
+	Facebook,
+	Heart,
+	Linkedin,
+	Share2,
+	Tag,
+	Twitter,
+} from "lucide-react";
+import React from "react";
 
 const NewsDetail: React.FC = () => {
-    const { id } = useParams({ from: '/_layout/news/$id' })
-    const navigate = useNavigate()
-    const [isLiked, setIsLiked] = React.useState(false)
-    const [isBookmarked, setIsBookmarked] = React.useState(false)
-    const [copied, setCopied] = React.useState(false)
+	const { id } = useParams({ from: "/_layout/news/$id" });
+	const navigate = useNavigate();
+	const [isLiked, setIsLiked] = React.useState(false);
+	const [isBookmarked, setIsBookmarked] = React.useState(false);
+	const [copied, setCopied] = React.useState(false);
 
-    // Mock data - trong thực tế sẽ fetch từ API
-    const newsData = [
-        {
-            id: 1,
-            title: 'Xu hướng lập trình 2024: Những công nghệ đáng chú ý',
-            excerpt:
-                'Khám phá những xu hướng lập trình mới nhất trong năm 2024, từ AI/ML đến Web3 và các framework mới...',
-            content: `
+	// Mock data - trong thực tế sẽ fetch từ API
+	const newsData = [
+		{
+			id: 1,
+			title: "Xu hướng lập trình 2024: Những công nghệ đáng chú ý",
+			excerpt:
+				"Khám phá những xu hướng lập trình mới nhất trong năm 2024, từ AI/ML đến Web3 và các framework mới...",
+			content: `
         <p>Năm 2024 đánh dấu sự phát triển mạnh mẽ của nhiều công nghệ mới trong lĩnh vực lập trình. Từ trí tuệ nhân tạo đến blockchain, các developer đang chứng kiến những thay đổi đáng kể trong cách tiếp cận phát triển phần mềm.</p>
 
         <h2>1. Trí tuệ nhân tạo và Machine Learning</h2>
@@ -61,24 +61,26 @@ const NewsDetail: React.FC = () => {
 
         <p>Hãy bắt đầu với một công nghệ mà bạn quan tâm nhất và dành thời gian để thực hành. Chỉ có thực hành mới giúp bạn thành thạo và tự tin khi áp dụng vào các dự án thực tế.</p>
       `,
-            author: 'Nguyễn Ngọc Lâm',
-            authorAvatar: 'NL',
-            authorBio:
-                'Giám đốc & Giảng viên chính tại BithubLearning. Chuyên gia Full-stack Development với 8+ năm kinh nghiệm.',
-            date: '2024-01-15',
-            readTime: '5 phút',
-            views: 1250,
-            category: 'programming',
-            tags: ['JavaScript', 'React', 'AI', 'Web3', 'Trending', '2024'],
-            image: 'https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-            featured: true,
-            trending: true,
-        },
-        {
-            id: 2,
-            title: 'Hướng dẫn học React từ cơ bản đến nâng cao',
-            excerpt: 'Lộ trình học React hoàn chỉnh cho người mới bắt đầu, từ JSX cơ bản đến các pattern nâng cao...',
-            content: `
+			author: "Nguyễn Ngọc Lâm",
+			authorAvatar: "NL",
+			authorBio:
+				"Giám đốc & Giảng viên chính tại BithubLearning. Chuyên gia Full-stack Development với 8+ năm kinh nghiệm.",
+			date: "2024-01-15",
+			readTime: "5 phút",
+			views: 1250,
+			category: "programming",
+			tags: ["JavaScript", "React", "AI", "Web3", "Trending", "2024"],
+			image:
+				"https://images.unsplash.com/photo-1461749280684-dccba630e2f6?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+			featured: true,
+			trending: true,
+		},
+		{
+			id: 2,
+			title: "Hướng dẫn học React từ cơ bản đến nâng cao",
+			excerpt:
+				"Lộ trình học React hoàn chỉnh cho người mới bắt đầu, từ JSX cơ bản đến các pattern nâng cao...",
+			content: `
         <p>React là một trong những thư viện JavaScript phổ biến nhất hiện nay, được sử dụng bởi hàng triệu developer trên toàn thế giới. Trong bài viết này, chúng ta sẽ cùng tìm hiểu lộ trình học React từ cơ bản đến nâng cao.</p>
 
         <h2>1. Kiến thức cơ bản cần có</h2>
@@ -204,302 +206,348 @@ test('renders learn react link', () =&gt; {
 
         <p>Chúc bạn thành công trên con đường học React!</p>
       `,
-            author: 'Trần Thị Minh',
-            authorAvatar: 'TM',
-            authorBio:
-                'Giảng viên Frontend tại BithubLearning. Chuyên gia React, Vue.js và UI/UX Design với 5+ năm kinh nghiệm.',
-            date: '2024-01-12',
-            readTime: '8 phút',
-            views: 980,
-            category: 'programming',
-            tags: ['React', 'JavaScript', 'Frontend', 'Tutorial', 'Hooks'],
-            image: 'https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80',
-            featured: false,
-            trending: true,
-        },
-    ]
+			author: "Trần Thị Minh",
+			authorAvatar: "TM",
+			authorBio:
+				"Giảng viên Frontend tại BithubLearning. Chuyên gia React, Vue.js và UI/UX Design với 5+ năm kinh nghiệm.",
+			date: "2024-01-12",
+			readTime: "8 phút",
+			views: 980,
+			category: "programming",
+			tags: ["React", "JavaScript", "Frontend", "Tutorial", "Hooks"],
+			image:
+				"https://images.unsplash.com/photo-1633356122544-f134324a6cee?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80",
+			featured: false,
+			trending: true,
+		},
+	];
 
-    const currentNews = newsData.find(news => news.id === parseInt(id || '1'))
+	const currentNews = newsData.find(
+		(news) => news.id === Number.parseInt(id || "1", 10),
+	);
 
-    if (!currentNews) {
-        return (
-            <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-orange-50">
-                <div className="text-center">
-                    <h1 className="mb-4 text-2xl font-bold text-gray-900">Không tìm thấy bài viết</h1>
-                    <Button onClick={() => navigate({ to: '/news' })}>
-                        <ArrowLeft className="mr-2 h-4 w-4" />
-                        Quay lại tin tức
-                    </Button>
-                </div>
-            </div>
-        )
-    }
+	if (!currentNews) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-50 to-orange-50">
+				<div className="text-center">
+					<h1 className="mb-4 text-2xl font-bold text-gray-900">
+						Không tìm thấy bài viết
+					</h1>
+					<Button onClick={() => navigate({ to: "/news" })}>
+						<ArrowLeft className="mr-2 h-4 w-4" />
+						Quay lại tin tức
+					</Button>
+				</div>
+			</div>
+		);
+	}
 
-    const formatDate = (dateString: string) => {
-        const date = new Date(dateString)
-        return date.toLocaleDateString('vi-VN', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-        })
-    }
+	const formatDate = (dateString: string) => {
+		const date = new Date(dateString);
+		return date.toLocaleDateString("vi-VN", {
+			year: "numeric",
+			month: "long",
+			day: "numeric",
+		});
+	};
 
-    const handleShare = (platform: string) => {
-        const url = window.location.href
-        const title = currentNews.title
+	const handleShare = (platform: string) => {
+		const url = window.location.href;
+		const title = currentNews.title;
 
-        switch (platform) {
-            case 'facebook':
-                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank')
-                break
-            case 'twitter':
-                window.open(
-                    `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
-                    '_blank',
-                )
-                break
-            case 'linkedin':
-                window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank')
-                break
-            case 'copy':
-                navigator.clipboard.writeText(url)
-                setCopied(true)
-                toast.success({ title: 'Đã sao chép link!' })
-                setTimeout(() => setCopied(false), 2000)
-                break
-        }
-    }
+		switch (platform) {
+			case "facebook":
+				window.open(
+					`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
+					"_blank",
+				);
+				break;
+			case "twitter":
+				window.open(
+					`https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
+					"_blank",
+				);
+				break;
+			case "linkedin":
+				window.open(
+					`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`,
+					"_blank",
+				);
+				break;
+			case "copy":
+				navigator.clipboard.writeText(url);
+				setCopied(true);
+				toast.success({ title: "Đã sao chép link!" });
+				setTimeout(() => setCopied(false), 2000);
+				break;
+		}
+	};
 
-    const handleLike = () => {
-        setIsLiked(!isLiked)
-        toast.success({ title: isLiked ? 'Đã bỏ thích' : 'Đã thích bài viết!' })
-    }
+	const handleLike = () => {
+		setIsLiked(!isLiked);
+		toast.success({ title: isLiked ? "Đã bỏ thích" : "Đã thích bài viết!" });
+	};
 
-    const handleBookmark = () => {
-        setIsBookmarked(!isBookmarked)
-        toast.success({ title: isBookmarked ? 'Đã bỏ lưu' : 'Đã lưu bài viết!' })
-    }
+	const handleBookmark = () => {
+		setIsBookmarked(!isBookmarked);
+		toast.success({ title: isBookmarked ? "Đã bỏ lưu" : "Đã lưu bài viết!" });
+	};
 
-    return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
-            {/* Header */}
-            <div className="sticky top-0 z-10 border-b bg-white">
-                <div className="container mx-auto max-w-4xl px-4 py-4">
-                    <div className="flex items-center justify-between">
-                        <Button
-                            variant="ghost"
-                            onClick={() => navigate({ to: '/news' })}
-                            className="flex items-center gap-2"
-                        >
-                            <ArrowLeft className="h-4 w-4" />
-                            Quay lại tin tức
-                        </Button>
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleLike}
-                                className={isLiked ? 'text-red-500' : ''}
-                            >
-                                <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleBookmark}
-                                className={isBookmarked ? 'text-blue-500' : ''}
-                            >
-                                <Bookmark className={`h-4 w-4 ${isBookmarked ? 'fill-current' : ''}`} />
-                            </Button>
-                            <Button variant="ghost" size="sm" onClick={() => handleShare('copy')}>
-                                {copied ? (
-                                    <CheckCircle className="h-4 w-4 text-green-500" />
-                                ) : (
-                                    <Share2 className="h-4 w-4" />
-                                )}
-                            </Button>
-                        </div>
-                    </div>
-                </div>
-            </div>
+	return (
+		<div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
+			{/* Header */}
+			<div className="sticky top-0 z-10 border-b bg-white">
+				<div className="container mx-auto max-w-4xl px-4 py-4">
+					<div className="flex items-center justify-between">
+						<Button
+							variant="ghost"
+							onClick={() => navigate({ to: "/news" })}
+							className="flex items-center gap-2"
+						>
+							<ArrowLeft className="h-4 w-4" />
+							Quay lại tin tức
+						</Button>
+						<div className="flex items-center gap-2">
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={handleLike}
+								className={isLiked ? "text-red-500" : ""}
+							>
+								<Heart className={`h-4 w-4 ${isLiked ? "fill-current" : ""}`} />
+							</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={handleBookmark}
+								className={isBookmarked ? "text-blue-500" : ""}
+							>
+								<Bookmark
+									className={`h-4 w-4 ${isBookmarked ? "fill-current" : ""}`}
+								/>
+							</Button>
+							<Button
+								variant="ghost"
+								size="sm"
+								onClick={() => handleShare("copy")}
+							>
+								{copied ? (
+									<CheckCircle className="h-4 w-4 text-green-500" />
+								) : (
+									<Share2 className="h-4 w-4" />
+								)}
+							</Button>
+						</div>
+					</div>
+				</div>
+			</div>
 
-            {/* Article Content */}
-            <article className="container mx-auto max-w-4xl px-4 py-8">
-                {/* Article Header */}
-                <header className="mb-8">
-                    <div className="mb-4 flex items-center gap-2">
-                        <Badge className="bg-blue-700 text-white">
-                            {currentNews.category === 'programming'
-                                ? 'Lập trình'
-                                : currentNews.category === 'technology'
-                                  ? 'Công nghệ'
-                                  : currentNews.category === 'education'
-                                    ? 'Giáo dục'
-                                    : currentNews.category === 'career'
-                                      ? 'Nghề nghiệp'
-                                      : 'Mẹo hay'}
-                        </Badge>
-                        {currentNews.featured && <Badge className="bg-yellow-500 text-white">Nổi bật</Badge>}
-                        {currentNews.trending && <Badge className="bg-orange-500 text-white">Trending</Badge>}
-                    </div>
+			{/* Article Content */}
+			<article className="container mx-auto max-w-4xl px-4 py-8">
+				{/* Article Header */}
+				<header className="mb-8">
+					<div className="mb-4 flex items-center gap-2">
+						<Badge className="bg-blue-700 text-white">
+							{currentNews.category === "programming"
+								? "Lập trình"
+								: currentNews.category === "technology"
+									? "Công nghệ"
+									: currentNews.category === "education"
+										? "Giáo dục"
+										: currentNews.category === "career"
+											? "Nghề nghiệp"
+											: "Mẹo hay"}
+						</Badge>
+						{currentNews.featured && (
+							<Badge className="bg-yellow-500 text-white">Nổi bật</Badge>
+						)}
+						{currentNews.trending && (
+							<Badge className="bg-orange-500 text-white">Trending</Badge>
+						)}
+					</div>
 
-                    <h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
-                        {currentNews.title}
-                    </h1>
+					<h1 className="mb-6 text-3xl font-bold leading-tight text-gray-900 md:text-4xl">
+						{currentNews.title}
+					</h1>
 
-                    <p className="mb-6 text-xl leading-relaxed text-gray-600">{currentNews.excerpt}</p>
+					<p className="mb-6 text-xl leading-relaxed text-gray-600">
+						{currentNews.excerpt}
+					</p>
 
-                    {/* Article Meta */}
-                    <div className="mb-6 flex flex-wrap items-center gap-6 text-sm text-gray-500">
-                        <div className="flex items-center gap-2">
-                            <div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-700 to-orange-600 text-sm font-bold text-white">
-                                {currentNews.authorAvatar}
-                            </div>
-                            <div>
-                                <div className="font-medium text-gray-900">{currentNews.author}</div>
-                                <div className="text-xs text-gray-500">{currentNews.authorBio}</div>
-                            </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Calendar className="h-4 w-4" />
-                            {formatDate(currentNews.date)}
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Clock className="h-4 w-4" />
-                            {currentNews.readTime}
-                        </div>
-                        <div className="flex items-center gap-1">
-                            <Eye className="h-4 w-4" />
-                            {currentNews.views.toLocaleString()} lượt xem
-                        </div>
-                    </div>
+					{/* Article Meta */}
+					<div className="mb-6 flex flex-wrap items-center gap-6 text-sm text-gray-500">
+						<div className="flex items-center gap-2">
+							<div className="flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-r from-blue-700 to-orange-600 text-sm font-bold text-white">
+								{currentNews.authorAvatar}
+							</div>
+							<div>
+								<div className="font-medium text-gray-900">
+									{currentNews.author}
+								</div>
+								<div className="text-xs text-gray-500">
+									{currentNews.authorBio}
+								</div>
+							</div>
+						</div>
+						<div className="flex items-center gap-1">
+							<Calendar className="h-4 w-4" />
+							{formatDate(currentNews.date)}
+						</div>
+						<div className="flex items-center gap-1">
+							<Clock className="h-4 w-4" />
+							{currentNews.readTime}
+						</div>
+						<div className="flex items-center gap-1">
+							<Eye className="h-4 w-4" />
+							{currentNews.views.toLocaleString()} lượt xem
+						</div>
+					</div>
 
-                    {/* Tags */}
-                    <div className="mb-8 flex flex-wrap gap-2">
-                        {currentNews.tags.map(tag => (
-                            <Badge key={tag} variant="secondary" className="text-xs">
-                                <Tag className="mr-1 h-3 w-3" />
-                                {tag}
-                            </Badge>
-                        ))}
-                    </div>
-                </header>
+					{/* Tags */}
+					<div className="mb-8 flex flex-wrap gap-2">
+						{currentNews.tags.map((tag) => (
+							<Badge key={tag} variant="secondary" className="text-xs">
+								<Tag className="mr-1 h-3 w-3" />
+								{tag}
+							</Badge>
+						))}
+					</div>
+				</header>
 
-                {/* Featured Image */}
-                <div className="mb-8">
-                    <img
-                        src={currentNews.image}
-                        alt={currentNews.title}
-                        className="h-64 w-full rounded-xl object-cover shadow-lg md:h-96"
-                    />
-                </div>
+				{/* Featured Image */}
+				<div className="mb-8">
+					<img
+						src={currentNews.image}
+						alt={currentNews.title}
+						className="h-64 w-full rounded-xl object-cover shadow-lg md:h-96"
+					/>
+				</div>
 
-                {/* Article Body */}
-                <div
-                    className="prose prose-lg mb-8 max-w-none"
-                    dangerouslySetInnerHTML={{ __html: currentNews.content }}
-                />
+				{/* Article Body */}
+				<div
+					className="prose prose-lg mb-8 max-w-none"
+					dangerouslySetInnerHTML={{ __html: currentNews.content }}
+				/>
 
-                {/* Share Section */}
-                <div className="mb-8 rounded-xl border bg-white p-6 shadow-sm">
-                    <h3 className="mb-4 text-lg font-semibold text-gray-900">Chia sẻ bài viết</h3>
-                    <div className="flex flex-wrap gap-3">
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleShare('facebook')}
-                            className="flex items-center gap-2"
-                        >
-                            <Facebook className="h-4 w-4 text-blue-600" />
-                            Facebook
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleShare('twitter')}
-                            className="flex items-center gap-2"
-                        >
-                            <Twitter className="h-4 w-4 text-blue-400" />
-                            Twitter
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleShare('linkedin')}
-                            className="flex items-center gap-2"
-                        >
-                            <Linkedin className="h-4 w-4 text-blue-700" />
-                            LinkedIn
-                        </Button>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleShare('copy')}
-                            className="flex items-center gap-2"
-                        >
-                            {copied ? <CheckCircle className="h-4 w-4 text-green-500" /> : <Copy className="h-4 w-4" />}
-                            {copied ? 'Đã sao chép' : 'Sao chép link'}
-                        </Button>
-                    </div>
-                </div>
+				{/* Share Section */}
+				<div className="mb-8 rounded-xl border bg-white p-6 shadow-sm">
+					<h3 className="mb-4 text-lg font-semibold text-gray-900">
+						Chia sẻ bài viết
+					</h3>
+					<div className="flex flex-wrap gap-3">
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => handleShare("facebook")}
+							className="flex items-center gap-2"
+						>
+							<Facebook className="h-4 w-4 text-blue-600" />
+							Facebook
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => handleShare("twitter")}
+							className="flex items-center gap-2"
+						>
+							<Twitter className="h-4 w-4 text-blue-400" />
+							Twitter
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => handleShare("linkedin")}
+							className="flex items-center gap-2"
+						>
+							<Linkedin className="h-4 w-4 text-blue-700" />
+							LinkedIn
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							onClick={() => handleShare("copy")}
+							className="flex items-center gap-2"
+						>
+							{copied ? (
+								<CheckCircle className="h-4 w-4 text-green-500" />
+							) : (
+								<Copy className="h-4 w-4" />
+							)}
+							{copied ? "Đã sao chép" : "Sao chép link"}
+						</Button>
+					</div>
+				</div>
 
-                {/* Author Card */}
-                <Card className="mb-8">
-                    <CardContent className="p-6">
-                        <div className="flex items-start gap-4">
-                            <div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-700 to-orange-600 text-xl font-bold text-white">
-                                {currentNews.authorAvatar}
-                            </div>
-                            <div className="flex-1">
-                                <h3 className="mb-2 text-xl font-semibold text-gray-900">{currentNews.author}</h3>
-                                <p className="mb-4 text-gray-600">{currentNews.authorBio}</p>
-                                <Button variant="outline" size="sm">
-                                    Xem thêm bài viết
-                                </Button>
-                            </div>
-                        </div>
-                    </CardContent>
-                </Card>
+				{/* Author Card */}
+				<Card className="mb-8">
+					<CardContent className="p-6">
+						<div className="flex items-start gap-4">
+							<div className="flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-r from-blue-700 to-orange-600 text-xl font-bold text-white">
+								{currentNews.authorAvatar}
+							</div>
+							<div className="flex-1">
+								<h3 className="mb-2 text-xl font-semibold text-gray-900">
+									{currentNews.author}
+								</h3>
+								<p className="mb-4 text-gray-600">{currentNews.authorBio}</p>
+								<Button variant="outline" size="sm">
+									Xem thêm bài viết
+								</Button>
+							</div>
+						</div>
+					</CardContent>
+				</Card>
 
-                {/* Related Articles */}
-                <div className="rounded-xl border bg-white p-6 shadow-sm">
-                    <h3 className="mb-6 text-xl font-semibold text-gray-900">Bài viết liên quan</h3>
-                    <div className="grid gap-4 md:grid-cols-2">
-                        {newsData
-                            .filter(news => news.id !== currentNews.id && news.category === currentNews.category)
-                            .slice(0, 2)
-                            .map(news => (
-                                <Card
-                                    key={news.id}
-                                    className="cursor-pointer transition-shadow hover:shadow-md"
-                                    onClick={() => navigate({ to: '/news/$id', params: { id: news.id.toString() } })}
-                                >
-                                    <CardContent className="p-4">
-                                        <div className="flex gap-3">
-                                            <img
-                                                src={news.image}
-                                                alt={news.title}
-                                                className="h-20 w-20 flex-shrink-0 rounded-lg object-cover"
-                                            />
-                                            <div className="flex-1">
-                                                <h4 className="mb-2 line-clamp-2 font-semibold text-gray-900">
-                                                    {news.title}
-                                                </h4>
-                                                <div className="flex items-center gap-2 text-xs text-gray-500">
-                                                    <span>{formatDate(news.date)}</span>
-                                                    <span>•</span>
-                                                    <span>{news.readTime}</span>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                    </div>
-                </div>
-            </article>
-        </div>
-    )
-}
+				{/* Related Articles */}
+				<div className="rounded-xl border bg-white p-6 shadow-sm">
+					<h3 className="mb-6 text-xl font-semibold text-gray-900">
+						Bài viết liên quan
+					</h3>
+					<div className="grid gap-4 md:grid-cols-2">
+						{newsData
+							.filter(
+								(news) =>
+									news.id !== currentNews.id &&
+									news.category === currentNews.category,
+							)
+							.slice(0, 2)
+							.map((news) => (
+								<Card
+									key={news.id}
+									className="cursor-pointer transition-shadow hover:shadow-md"
+									onClick={() =>
+										navigate({
+											to: "/news/$id",
+											params: { id: news.id.toString() },
+										})
+									}
+								>
+									<CardContent className="p-4">
+										<div className="flex gap-3">
+											<img
+												src={news.image}
+												alt={news.title}
+												className="h-20 w-20 flex-shrink-0 rounded-lg object-cover"
+											/>
+											<div className="flex-1">
+												<h4 className="mb-2 line-clamp-2 font-semibold text-gray-900">
+													{news.title}
+												</h4>
+												<div className="flex items-center gap-2 text-xs text-gray-500">
+													<span>{formatDate(news.date)}</span>
+													<span>•</span>
+													<span>{news.readTime}</span>
+												</div>
+											</div>
+										</div>
+									</CardContent>
+								</Card>
+							))}
+					</div>
+				</div>
+			</article>
+		</div>
+	);
+};
 
-export default NewsDetail
+export default NewsDetail;

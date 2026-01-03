@@ -1,184 +1,234 @@
-import { useLogout } from '@/feature/auth/queries/useAuth'
-import { selectAuthStateInfo } from '@/feature/auth/store/auth.selectors'
-import { navItems } from '@/layouts/data/nav-items'
-import CodeButton from '@/shared/components/button/CodeButton'
-import { SearchProvider, useSearch } from '@/shared/context/search-context'
-import { mergeName } from '@/shared/lib/string-utils'
-import { Link, useNavigate } from '@tanstack/react-router'
-import { Avatar, AvatarFallback, AvatarImage } from '@workspace/ui/components/Avatar'
-import { Button } from '@workspace/ui/components/Button'
-import { Menu as DropdownMenu, MenuItem, MenuPopover, MenuSeparator, MenuTrigger } from '@workspace/ui/components/Menu'
+import { Link, useNavigate } from "@tanstack/react-router";
 import {
-    NavigationMenu,
-    NavigationMenuContent,
-    NavigationMenuItem,
-    NavigationMenuLink,
-    NavigationMenuList,
-    NavigationMenuTrigger,
-    navigationMenuTriggerStyle,
-} from '@workspace/ui/components/navigation-menu'
-import { Sheet, SheetClose, SheetContent, SheetTrigger } from '@workspace/ui/components/sheet'
-import { LogOut, Menu, Search, Settings, User, User2Icon, Wallet } from 'lucide-react'
-import { useState } from 'react'
-import { useSelector } from 'react-redux'
-import MobileSheetMenu from './mobile-sheet-menu'
+	Avatar,
+	AvatarFallback,
+	AvatarImage,
+} from "@workspace/ui/components/Avatar";
+import { Button } from "@workspace/ui/components/Button";
+import {
+	Menu as DropdownMenu,
+	MenuItem,
+	MenuPopover,
+	MenuSeparator,
+	MenuTrigger,
+} from "@workspace/ui/components/Menu";
+import {
+	NavigationMenu,
+	NavigationMenuContent,
+	NavigationMenuItem,
+	NavigationMenuLink,
+	NavigationMenuList,
+	NavigationMenuTrigger,
+	navigationMenuTriggerStyle,
+} from "@workspace/ui/components/navigation-menu";
+import {
+	Sheet,
+	SheetClose,
+	SheetContent,
+	SheetTrigger,
+} from "@workspace/ui/components/sheet";
+import {
+	LogOut,
+	Menu,
+	Search,
+	Settings,
+	User,
+	User2Icon,
+	Wallet,
+} from "lucide-react";
+import { useState } from "react";
+import { useSelector } from "react-redux";
+import { useLogout } from "@/feature/auth/queries/useAuth";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { navItems } from "@/layouts/data/nav-items";
+import CodeButton from "@/shared/components/button/CodeButton";
+import { SearchProvider, useSearch } from "@/shared/context/search-context";
+import { mergeName } from "@/shared/lib/string-utils";
+import MobileSheetMenu from "./mobile-sheet-menu";
 
 const Header: React.FC = () => {
-    const navigate = useNavigate()
-    const [isSheetOpen, setIsSheetOpen] = useState(false)
-    const { setOpen } = useSearch()
-    const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo)
-    const logout = useLogout()
+	const navigate = useNavigate();
+	const [isSheetOpen, setIsSheetOpen] = useState(false);
+	const { setOpen } = useSearch();
+	const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
+	const logout = useLogout();
 
-    const handleNavigate = (path: string) => {
-        navigate({ to: path })
-        setIsSheetOpen(false)
-    }
+	const handleNavigate = (path: string) => {
+		navigate({ to: path });
+		setIsSheetOpen(false);
+	};
 
-    const handleLogout = () => {
-        logout()
-        navigate({ to: '/signin' })
-    }
+	const handleLogout = () => {
+		logout();
+		navigate({ to: "/signin" });
+	};
 
-    return (
-        <SearchProvider>
-            <header className="container sticky top-5 z-50 mx-auto rounded-lg border-b border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:shadow-gray-800/50">
-                <div className="flex items-center justify-between py-4 max-[776px]:px-4 md:px-10">
-                    <Link to="/" className="flex items-center space-x-2">
-                        <div className="flex items-center space-x-2">
-                            <img src="/Logo.png" alt="Bithub Learning" className="h-10 w-36 object-contain" />
-                        </div>
-                    </Link>
+	return (
+		<SearchProvider>
+			<header className="container sticky top-5 z-50 mx-auto rounded-lg border-b border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:shadow-gray-800/50">
+				<div className="flex items-center justify-between py-4 max-[776px]:px-4 md:px-10">
+					<Link to="/" className="flex items-center space-x-2">
+						<div className="flex items-center space-x-2">
+							<img
+								src="/Logo.png"
+								alt="Bithub Learning"
+								className="h-10 w-36 object-contain"
+							/>
+						</div>
+					</Link>
 
-                    <NavigationMenu className="hidden md:block">
-                        <NavigationMenuList>
-                            {navItems.map(item => (
-                                <NavigationMenuItem key={item.title}>
-                                    {item.items ? (
-                                        <>
-                                            <NavigationMenuTrigger className="transition-colors hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
-                                                {item.title}
-                                            </NavigationMenuTrigger>
-                                            <NavigationMenuContent className="dark:bg-gray-800">
-                                                <ul className="grid w-[300px] gap-3 p-4 md:w-[400px] lg:w-[500px] dark:text-gray-200">
-                                                    {item.items.map(subItem => (
-                                                        <li key={subItem.title} className="p-2">
-                                                            <NavigationMenuLink asChild>
-                                                                <Link
-                                                                    to={subItem.to}
-                                                                    className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-blue-50 dark:hover:bg-gray-700"
-                                                                >
-                                                                    <div className="text-sm font-medium leading-none hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
-                                                                        {subItem.title}
-                                                                    </div>
-                                                                    <p className="text-muted-foreground line-clamp-2 text-sm leading-snug dark:text-gray-400">
-                                                                        {subItem.description}
-                                                                    </p>
-                                                                </Link>
-                                                            </NavigationMenuLink>
-                                                        </li>
-                                                    ))}
-                                                </ul>
-                                            </NavigationMenuContent>
-                                        </>
-                                    ) : (
-                                        <NavigationMenuLink asChild>
-                                            <Link
-                                                to={item.to!}
-                                                className={
-                                                    navigationMenuTriggerStyle() +
-                                                    ' transition-colors hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400'
-                                                }
-                                            >
-                                                {item.title}
-                                            </Link>
-                                        </NavigationMenuLink>
-                                    )}
-                                </NavigationMenuItem>
-                            ))}
-                        </NavigationMenuList>
-                    </NavigationMenu>
+					<NavigationMenu className="hidden md:block">
+						<NavigationMenuList>
+							{navItems.map((item) => (
+								<NavigationMenuItem key={item.title}>
+									{item.items ? (
+										<>
+											<NavigationMenuTrigger className="transition-colors hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
+												{item.title}
+											</NavigationMenuTrigger>
+											<NavigationMenuContent className="dark:bg-gray-800">
+												<ul className="grid w-[300px] gap-3 p-4 md:w-[400px] lg:w-[500px] dark:text-gray-200">
+													{item.items.map((subItem) => (
+														<li key={subItem.title} className="p-2">
+															<NavigationMenuLink asChild>
+																<Link
+																	to={subItem.to}
+																	className="block select-none space-y-1 rounded-md p-2 leading-none no-underline outline-none transition-colors hover:bg-blue-50 dark:hover:bg-gray-700"
+																>
+																	<div className="text-sm font-medium leading-none hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400">
+																		{subItem.title}
+																	</div>
+																	<p className="text-muted-foreground line-clamp-2 text-sm leading-snug dark:text-gray-400">
+																		{subItem.description}
+																	</p>
+																</Link>
+															</NavigationMenuLink>
+														</li>
+													))}
+												</ul>
+											</NavigationMenuContent>
+										</>
+									) : (
+										<NavigationMenuLink asChild>
+											<Link
+												to={item.to!}
+												className={
+													navigationMenuTriggerStyle() +
+													" transition-colors hover:text-blue-700 dark:text-gray-200 dark:hover:text-blue-400"
+												}
+											>
+												{item.title}
+											</Link>
+										</NavigationMenuLink>
+									)}
+								</NavigationMenuItem>
+							))}
+						</NavigationMenuList>
+					</NavigationMenu>
 
-                    <div className="hidden items-center space-x-4 md:flex">
-                        {isAuthenticated && userInfo ? (
-                            <MenuTrigger>
-                                <Button variant="ghost" className="flex items-center gap-2 px-2">
-                                    <Avatar className="h-8 w-8">
-                                        <AvatarImage src={userInfo.avatar} alt={userInfo.username} />
-                                        <AvatarFallback>{userInfo.avatar?.slice(0, 2).toUpperCase()}</AvatarFallback>
-                                    </Avatar>
-                                    <div className="flex flex-col items-start">
-                                        <span className="text-md font-medium">
-                                            {mergeName(userInfo.firstName, userInfo.lastName)}
-                                        </span>
-                                        {/* <span className="text-xs text-gray-500">{userInfo.email}</span> */}
-                                    </div>
-                                </Button>
-                                <MenuPopover placement="bottom end">
-                                    <DropdownMenu>
-                                        <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
-                                            <User className="mr-2 h-4 w-4" />
-                                            <span>Hồ sơ cá nhân</span>
-                                        </MenuItem>
-                                        <MenuItem onAction={() => navigate({ to: '/user-profile' })}>
-                                            <Wallet className="mr-2 h-4 w-4" />
-                                            <span>
-                                                {(userInfo.wallet?.balance ?? 0).toLocaleString('vi-VN', {
-                                                    style: 'currency',
-                                                    currency: 'VND',
-                                                })}
-                                            </span>
-                                        </MenuItem>
-                                        <MenuItem onAction={() => navigate({ to: '/mentor/dashboard' })}>
-                                            <User2Icon className="mr-2 h-4 w-4" />
-                                            <span>Mentor</span>
-                                        </MenuItem>
-                                        <MenuItem isDisabled>
-                                            <Settings className="mr-2 h-4 w-4" />
-                                            <span>Cài đặt</span>
-                                        </MenuItem>
-                                        <MenuSeparator />
-                                        <MenuItem onAction={handleLogout}>
-                                            <LogOut className="mr-2 h-4 w-4" />
-                                            <span>Đăng xuất</span>
-                                        </MenuItem>
-                                    </DropdownMenu>
-                                </MenuPopover>
-                            </MenuTrigger>
-                        ) : (
-                            <CodeButton label="Đăng nhập" onClick={() => navigate({ to: '/signin' })} />
-                        )}
-                    </div>
+					<div className="hidden items-center space-x-4 md:flex">
+						{isAuthenticated && userInfo ? (
+							<MenuTrigger>
+								<Button
+									variant="ghost"
+									className="flex items-center gap-2 px-2"
+								>
+									<Avatar className="h-8 w-8">
+										<AvatarImage
+											src={userInfo.avatar}
+											alt={userInfo.username}
+										/>
+										<AvatarFallback>
+											{userInfo.avatar?.slice(0, 2).toUpperCase()}
+										</AvatarFallback>
+									</Avatar>
+									<div className="flex flex-col items-start">
+										<span className="text-md font-medium">
+											{mergeName(userInfo.firstName, userInfo.lastName)}
+										</span>
+										{/* <span className="text-xs text-gray-500">{userInfo.email}</span> */}
+									</div>
+								</Button>
+								<MenuPopover placement="bottom end">
+									<DropdownMenu>
+										<MenuItem
+											onAction={() => navigate({ to: "/user-profile" })}
+										>
+											<User className="mr-2 h-4 w-4" />
+											<span>Hồ sơ cá nhân</span>
+										</MenuItem>
+										<MenuItem
+											onAction={() => navigate({ to: "/user-profile" })}
+										>
+											<Wallet className="mr-2 h-4 w-4" />
+											<span>
+												{(userInfo.wallet?.balance ?? 0).toLocaleString(
+													"vi-VN",
+													{
+														style: "currency",
+														currency: "VND",
+													},
+												)}
+											</span>
+										</MenuItem>
+										<MenuItem
+											onAction={() => navigate({ to: "/mentor/dashboard" })}
+										>
+											<User2Icon className="mr-2 h-4 w-4" />
+											<span>Mentor</span>
+										</MenuItem>
+										<MenuItem isDisabled>
+											<Settings className="mr-2 h-4 w-4" />
+											<span>Cài đặt</span>
+										</MenuItem>
+										<MenuSeparator />
+										<MenuItem onAction={handleLogout}>
+											<LogOut className="mr-2 h-4 w-4" />
+											<span>Đăng xuất</span>
+										</MenuItem>
+									</DropdownMenu>
+								</MenuPopover>
+							</MenuTrigger>
+						) : (
+							<CodeButton
+								label="Đăng nhập"
+								onClick={() => navigate({ to: "/signin" })}
+							/>
+						)}
+					</div>
 
-                    <div className="flex items-center gap-2 md:hidden">
-                        <div className="border-r pr-4 max-[776px]:block dark:border-gray-700">
-                            <button
-                                type="button"
-                                onClick={() => setOpen(true)}
-                                className="relative mt-1.5 cursor-pointer text-gray-600 transition-colors hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400"
-                            >
-                                <Search size={18} />
-                            </button>
-                        </div>
-                        <Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
-                            <SheetClose asChild style={{ color: 'white !important' }} />
-                            <SheetTrigger asChild>
-                                <button className="rounded-lg p-2 transition-colors hover:bg-gray-100 md:hidden dark:hover:bg-gray-800">
-                                    <Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
-                                </button>
-                            </SheetTrigger>
-                            <SheetContent
-                                side="right"
-                                className="bg-linear-to-b w-[320px] from-white to-gray-50 p-0 sm:w-[400px] dark:from-gray-900 dark:to-gray-800"
-                            >
-                                <MobileSheetMenu onNavigate={handleNavigate} onClose={() => setIsSheetOpen(false)} />
-                            </SheetContent>
-                        </Sheet>
-                    </div>
-                </div>
-            </header>
-        </SearchProvider>
-    )
-}
+					<div className="flex items-center gap-2 md:hidden">
+						<div className="border-r pr-4 max-[776px]:block dark:border-gray-700">
+							<button
+								type="button"
+								onClick={() => setOpen(true)}
+								className="relative mt-1.5 cursor-pointer text-gray-600 transition-colors hover:text-blue-700 dark:text-gray-300 dark:hover:text-blue-400"
+							>
+								<Search size={18} />
+							</button>
+						</div>
+						<Sheet open={isSheetOpen} onOpenChange={setIsSheetOpen}>
+							<SheetClose asChild style={{ color: "white !important" }} />
+							<SheetTrigger asChild>
+								<button className="rounded-lg p-2 transition-colors hover:bg-gray-100 md:hidden dark:hover:bg-gray-800">
+									<Menu className="h-6 w-6 text-gray-700 dark:text-gray-300" />
+								</button>
+							</SheetTrigger>
+							<SheetContent
+								side="right"
+								className="bg-linear-to-b w-[320px] from-white to-gray-50 p-0 sm:w-[400px] dark:from-gray-900 dark:to-gray-800"
+							>
+								<MobileSheetMenu
+									onNavigate={handleNavigate}
+									onClose={() => setIsSheetOpen(false)}
+								/>
+							</SheetContent>
+						</Sheet>
+					</div>
+				</div>
+			</header>
+		</SearchProvider>
+	);
+};
 
-export default Header
+export default Header;

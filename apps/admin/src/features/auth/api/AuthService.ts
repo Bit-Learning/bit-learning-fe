@@ -1,36 +1,36 @@
-import type { AxiosResponse } from 'axios'
-import api from '@/shared/api/api'
-import { endpoints } from '@/shared/constants/endpoints'
+import type { AxiosResponse } from "axios";
+import api from "@/shared/api/api";
+import { endpoints } from "@/shared/constants/endpoints";
 import type {
-  TAdminLoginRequest,
-  TAdminLoginResponse,
-  TRefreshTokenRequest,
-  TAdminUser,
-} from '../types/auth.types'
+	TAdminLoginRequest,
+	TAdminLoginResponse,
+	TAdminUser,
+	TRefreshTokenRequest,
+} from "../types/auth.types";
 
 // Admin login - Only accepts ADMIN role
 export function AdminLogin(
-  requestBody: TAdminLoginRequest
+	requestBody: TAdminLoginRequest,
 ): Promise<AxiosResponse<{ data: TAdminLoginResponse }>> {
-  // Force ADMIN role for admin panel login
-  return api.post(`${endpoints.AUTH}/login-user`, {
-    ...requestBody,
-    role: 'ADMIN', // Always use ADMIN role
-  })
+	// Force ADMIN role for admin panel login
+	return api.post(`${endpoints.AUTH}/login-user`, {
+		...requestBody,
+		role: "ADMIN", // Always use ADMIN role
+	});
 }
 
 export function RefreshToken(
-  requestBody: TRefreshTokenRequest
+	requestBody: TRefreshTokenRequest,
 ): Promise<AxiosResponse<{ data: TAdminLoginResponse }>> {
-  return api.post(`${endpoints.AUTH}/refresh-token`, requestBody)
+	return api.post(`${endpoints.AUTH}/refresh-token`, requestBody);
 }
 
 export function GetAdminProfile(): Promise<
-  AxiosResponse<{ data: TAdminUser }>
+	AxiosResponse<{ data: TAdminUser }>
 > {
-  return api.get(`${endpoints.ACCOUNT}/profile`)
+	return api.get(`${endpoints.ACCOUNT}/profile`);
 }
 
 export function Logout(): Promise<AxiosResponse<any>> {
-  return api.post(`${endpoints.AUTH}/logout`)
+	return api.post(`${endpoints.AUTH}/logout`);
 }

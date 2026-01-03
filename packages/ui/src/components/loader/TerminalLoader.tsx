@@ -1,34 +1,34 @@
-import styled from 'styled-components'
+import styled from "styled-components";
 
 const Loader = () => {
-    return (
-        <div
-            style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                fontSize: '18px',
-                flexDirection: 'column',
-                gap: '16px',
-            }}
-        >
-            <StyledWrapper>
-                <div className="terminal-loader">
-                    <div className="terminal-header">
-                        <div className="terminal-title">Status</div>
-                        <div className="terminal-controls">
-                            <div className="control close" />
-                            <div className="control minimize" />
-                            <div className="control maximize" />
-                        </div>
-                    </div>
-                    <div className="text">Loading...</div>
-                </div>
-            </StyledWrapper>
-        </div>
-    )
-}
+	return (
+		<div
+			style={{
+				display: "flex",
+				justifyContent: "center",
+				alignItems: "center",
+				height: "100vh",
+				fontSize: "18px",
+				flexDirection: "column",
+				gap: "16px",
+			}}
+		>
+			<StyledWrapper>
+				<div className="terminal-loader">
+					<div className="terminal-header">
+						<div className="terminal-title">Status</div>
+						<div className="terminal-controls">
+							<div className="control close" />
+							<div className="control minimize" />
+							<div className="control maximize" />
+						</div>
+					</div>
+					<div className="text">Loading...</div>
+				</div>
+			</StyledWrapper>
+		</div>
+	);
+};
 
 const StyledWrapper = styled.div`
     @keyframes blinkCursor {
@@ -121,6 +121,6 @@ const StyledWrapper = styled.div`
             blinkCursor 0.5s step-end infinite alternate;
         margin-top: 1.5em;
     }
-`
+`;
 
-export default Loader
+export default Loader;

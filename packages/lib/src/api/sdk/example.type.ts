@@ -1,3 +1,3 @@
 export interface ExampleResponse {
-    message: string
+	message: string;
 }
