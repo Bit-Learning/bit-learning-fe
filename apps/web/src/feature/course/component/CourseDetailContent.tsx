@@ -1,4 +1,5 @@
 import CourseCurriculum from '@/feature/course/component/CourseCurriculum'
+import CourseQA from '@/feature/course/component/CourseQA'
 import { Link } from '@tanstack/react-router'
 import { Badge } from '@workspace/ui/components/Badge'
 import { Button } from '@workspace/ui/components/Button'
@@ -13,6 +14,7 @@ import {
     Clock,
     Download,
     Heart,
+    Loader2,
     MessageCircle,
     Play,
     Share2,
@@ -22,15 +24,19 @@ import {
 } from 'lucide-react'
 import React, { useState } from 'react'
 import { useCourseDetail } from '../queries/useCourse'
+import { useCourseAccess, useCourseProgress, useEnrollCourse } from '../queries/useEnroll'
 
 const CourseDetailContent: React.FC = () => {
     const [isLiked, setIsLiked] = useState(false)
     const [activeTab, setActiveTab] = useState('overview')
 
     const { data: course, isLoading, error } = useCourseDetail()
+    const { data: hasAccess } = useCourseAccess(course?.id || 0)
+    const { data: progress } = useCourseProgress(course?.id || 0, hasAccess === true)
+    const { mutate: enroll, isPending } = useEnrollCourse()
 
     const handleEnroll = () => {
-        toast.success({ title: 'Đăng ký khóa học thành công!' })
+        if (course?.id) enroll(course.id)
     }
 
     const handleLike = () => {
@@ -66,30 +72,14 @@ const CourseDetailContent: React.FC = () => {
         )
     }
 
-    if (error) {
+    if (error || !course) {
         return (
             <div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50">
                 <div className="container mx-auto max-w-7xl px-4 py-8">
                     <div className="py-12 text-center">
                         <BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
                         <h3 className="mb-2 text-xl font-semibold text-gray-900">Không tìm thấy khóa học</h3>
-                        <p className="mb-4 text-gray-600">{(error as Error).message}</p>
-                        <Link to="/courses">
-                            <Button className="bithub-button-primary">Về trang khóa học</Button>
-                        </Link>
-                    </div>
-                </div>
-            </div>
-        )
-    }
-
-    if (!course) {
-        return (
-            <div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50">
-                <div className="container mx-auto max-w-7xl px-4 py-8">
-                    <div className="py-12 text-center">
-                        <BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-                        <h3 className="mb-2 text-xl font-semibold text-gray-900">Không tìm thấy thông tin khóa học</h3>
+                        <p className="mb-4 text-gray-600">{error ? (error as Error).message : ''}</p>
                         <Link to="/courses">
                             <Button className="bithub-button-primary">Về trang khóa học</Button>
                         </Link>
@@ -127,6 +117,15 @@ const CourseDetailContent: React.FC = () => {
                                 <div className="absolute left-4 top-4 flex gap-2">
                                     <Badge className="bg-blue-700 text-white">Lớp {course.grade}</Badge>
                                     <Badge className="bg-orange-600 text-white">{course.level}</Badge>
+                                    {hasAccess && (
+                                        <Badge className="bg-green-600 text-white">
+                                            <CheckCircle className="mr-1 h-3 w-3" />
+                                            Đã đăng ký
+                                        </Badge>
+                                    )}
+                                    {hasAccess && progress !== undefined && (
+                                        <Badge className="bg-green-600 text-white">{Math.round(progress)}/100%</Badge>
+                                    )}
                                 </div>
 
                                 <div className="absolute bottom-4 left-4">
@@ -201,7 +200,7 @@ const CourseDetailContent: React.FC = () => {
                         <div className="rounded-2xl bg-white shadow-lg">
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                                 <div className="border-b border-gray-200">
-                                    <TabsList className="grid w-full grid-cols-3 bg-transparent">
+                                    <TabsList className="grid w-full grid-cols-5 bg-transparent">
                                         <TabsTrigger
                                             value="overview"
                                             className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
@@ -213,6 +212,20 @@ const CourseDetailContent: React.FC = () => {
                                             className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
                                         >
                                             Nội dung
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="qa"
+                                            className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+                                        >
+                                            <MessageCircle className="mr-1 h-4 w-4" />
+                                            Q&A
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="reviews"
+                                            className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+                                        >
+                                            <Star className="mr-1 h-4 w-4" />
+                                            Đánh giá
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="instructor"
@@ -270,6 +283,26 @@ const CourseDetailContent: React.FC = () => {
                                         <CourseCurriculum courseId={course.id} />
                                     </TabsContent>
 
+                                    <TabsContent value="qa" className="space-y-4">
+                                        {hasAccess ? (
+                                            <CourseQA lectureId={course.id} />
+                                        ) : (
+                                            <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
+                                                <MessageCircle className="mx-auto mb-3 h-12 w-12 text-gray-400" />
+                                                <p className="mb-4 text-gray-600">
+                                                    Bạn cần đăng ký khóa học để tham gia thảo luận
+                                                </p>
+                                                <Button
+                                                    onClick={handleEnroll}
+                                                    isDisabled={isPending}
+                                                    className="bg-blue-700 text-white hover:bg-blue-800"
+                                                >
+                                                    Đăng ký ngay
+                                                </Button>
+                                            </div>
+                                        )}
+                                    </TabsContent>
+
                                     <TabsContent value="instructor" className="space-y-6">
                                         <h3 className="mb-4 text-xl font-bold text-gray-900">Giảng viên</h3>
                                         <div className="flex items-start gap-6">
@@ -296,7 +329,7 @@ const CourseDetailContent: React.FC = () => {
                     </div>
 
                     <div className="space-y-6">
-                        <Card className="top-6">
+                        <Card className="sticky top-6">
                             <CardHeader>
                                 <CardTitle className="flex items-center gap-2">
                                     <Award className="h-5 w-5 text-orange-600" />
@@ -329,12 +362,27 @@ const CourseDetailContent: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <Button
-                                    onClick={handleEnroll}
-                                    className="bg-linear-to-r w-full rounded-lg from-blue-700 to-blue-800 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
-                                >
-                                    Đăng ký ngay
-                                </Button>
+                                {hasAccess ? (
+                                    <Button isDisabled className="w-full bg-green-600 py-3 font-semibold text-white">
+                                        <CheckCircle className="mr-2 h-5 w-5" />
+                                        Đã đăng ký
+                                    </Button>
+                                ) : (
+                                    <Button
+                                        onClick={handleEnroll}
+                                        isDisabled={isPending}
+                                        className="bg-linear-to-r w-full rounded-lg from-blue-700 to-blue-800 py-3 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl disabled:opacity-50"
+                                    >
+                                        {isPending ? (
+                                            <>
+                                                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                                                Đang xử lý...
+                                            </>
+                                        ) : (
+                                            'Đăng ký ngay'
+                                        )}
+                                    </Button>
+                                )}
                             </CardContent>
                         </Card>
 
