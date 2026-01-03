@@ -1,5 +1,5 @@
 {
-	"$schema": "https://biomejs.dev/schemas/2.3.10/schema.json",
+	"$schema": "https://biomejs.dev/schemas/2.2.0/schema.json",
 	"vcs": {
 		"enabled": false,
 		"clientKind": "git",
@@ -25,6 +25,13 @@
 		"enabled": true,
 		"rules": {
 			"recommended": true,
+			"a11y": {
+				"noSvgWithoutTitle": "off"
+			},
+			"suspicious": {
+				"noExplicitAny": "warn",
+				"noDocumentCookie": "warn"
+			},
 			"style": {
 				"noParameterAssign": "error",
 				"useAsConstAssertion": "error",
@@ -35,7 +42,14 @@
 				"noUnusedTemplateLiteral": "error",
 				"useNumberNamespace": "error",
 				"noInferrableTypes": "error",
-				"noUselessElse": "error"
+				"noUselessElse": "error",
+				"useImportType": "warn"
+			},
+			"correctness": {
+				"useParseIntRadix": "warn"
+			},
+			"complexity": {
+				"useIndexOf": "warn"
 			}
 		}
 	},
