@@ -10,7 +10,8 @@
 		"format": "biome format --write .",
 		"check": "biome check --write .",
 		"preview": "vite preview",
-		"knip": "knip"
+		"knip": "knip",
+		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
 		"@clerk/clerk-react": "^5.51.0",

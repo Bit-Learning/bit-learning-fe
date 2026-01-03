@@ -11,7 +11,8 @@
 		"serve": "vite preview",
 		"start": "vite",
 		"storybook": "storybook dev -p 6006",
-		"build-storybook": "storybook build"
+		"build-storybook": "storybook build",
+		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
