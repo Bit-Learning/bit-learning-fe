@@ -1,6 +1,7 @@
-import type { Table } from "@tanstack/react-table";
+import { useState, useEffect, useRef } from "react";
+import { type Table } from "@tanstack/react-table";
 import { X } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { cn } from "@/lib/utils";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
@@ -9,7 +10,6 @@ import {
 	TooltipContent,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
-import { cn } from "@/lib/utils";
 
 type DataTableBulkActionsProps<TData> = {
 	table: Table<TData>;
@@ -40,7 +40,9 @@ export function DataTableBulkActions<TData>({
 	// Announce selection changes to screen readers
 	useEffect(() => {
 		if (selectedCount > 0) {
-			const message = `${selectedCount} ${entityName}${selectedCount > 1 ? "s" : ""} selected. Bulk actions toolbar is available.`;
+			const message = `${selectedCount} ${entityName}${
+				selectedCount > 1 ? "s" : ""
+			} selected. Bulk actions toolbar is available.`;
 
 			// Use queueMicrotask to defer state update and avoid cascading renders
 			queueMicrotask(() => {
@@ -61,7 +63,9 @@ export function DataTableBulkActions<TData>({
 		const buttons = toolbarRef.current?.querySelectorAll("button");
 		if (!buttons) return;
 
-		const currentIndex = Array.from(buttons).indexOf(document.activeElement);
+		const currentIndex = Array.from(buttons).findIndex(
+			(button) => button === document.activeElement,
+		);
 
 		switch (event.key) {
 			case "ArrowRight": {

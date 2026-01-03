@@ -20,7 +20,7 @@ const GameWPMTestingPage = () => {
 	// loadParagraph()
 	useEffect(() => {
 		loadParagraph();
-	}, [loadParagraph]);
+	}, []);
 
 	const loadParagraph = () => {
 		const ranIndex = Math.floor(Math.random() * paragraphs.length);

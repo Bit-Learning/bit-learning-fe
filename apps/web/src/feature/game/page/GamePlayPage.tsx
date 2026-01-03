@@ -1,9 +1,8 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Clock, Trophy } from "lucide-react";
-import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 import { useCheckAnswer, useGameDetail, useSubmitGame } from "../hooks/useGame";
-import type { QuestionLog } from "../types";
+import { QuestionLog } from "../types";
 import { shuffleArray } from "../utils/arrayUtils";
 
 type GameState = "loading" | "ready" | "playing" | "result";
@@ -15,7 +14,7 @@ interface Props {
 export const GamePlayPage: React.FC<Props> = ({ id }) => {
 	console.log("=== GamePlayPage RENDER ===", { id });
 	const navigate = useNavigate();
-	const gameId = Number.parseInt(id || "0", 10);
+	const gameId = parseInt(id || "0");
 
 	const { data: game, isLoading } = useGameDetail(gameId);
 	const checkAnswer = useCheckAnswer();
@@ -55,12 +54,12 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 			}, 1000);
 			return () => clearInterval(timer);
 		}
-	}, [gameState, timeLeft, handleTimeout]);
+	}, [gameState, timeLeft]);
 
 	const handleStart = () => {
 		setGameState("playing");
 		setQuestionStartTime(Date.now());
-		setTimeLeft(game?.settings.timePerQuestion);
+		setTimeLeft(game!.settings.timePerQuestion);
 	};
 
 	const handleTimeout = () => {
@@ -68,7 +67,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 			// Auto-submit as incorrect
 			const timeSpent = (Date.now() - questionStartTime) / 1000;
 			const log: QuestionLog = {
-				questionId: game.questions[currentQuestionIndex]?.id,
+				questionId: game.questions[currentQuestionIndex]!.id,
 				selectedOptionId: "",
 				correct: false,
 				timeSpent,
@@ -94,7 +93,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 		const result = await checkAnswer.mutateAsync({
 			gameId,
 			request: {
-				questionId: game.questions[currentQuestionIndex]?.id,
+				questionId: game.questions[currentQuestionIndex]!.id,
 				selectedOptionId: optionId,
 				timeLeft: timeLeft,
 			},
@@ -111,7 +110,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 		// Save to history
 		const timeSpent = (Date.now() - questionStartTime) / 1000;
 		const log: QuestionLog = {
-			questionId: game.questions[currentQuestionIndex]?.id,
+			questionId: game.questions[currentQuestionIndex]!.id,
 			selectedOptionId: optionId,
 			correct: result.correct,
 			timeSpent,
@@ -150,7 +149,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 		const correctAnswers = finalHistory.filter((log) => log.correct).length;
 		const accuracy = (correctAnswers / finalHistory.length) * 100;
 
-		const _result = await submitGame.mutateAsync({
+		const result = await submitGame.mutateAsync({
 			gameId,
 			request: {
 				score,
@@ -166,7 +165,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 	if (isLoading || !game) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-white" />
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-white"></div>
 			</div>
 		);
 	}
