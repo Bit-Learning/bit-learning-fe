@@ -74,7 +74,7 @@
 		"@vitejs/plugin-react": "^4.3.4",
 		"@vitest/browser-playwright": "4.0.14",
 		"@vitest/coverage-v8": "^4.0.14",
-		"@biomejs/biome": "^2.3.10",
+		"@biomejs/biome": "^2.2.5",
 		"@workspace/typescript-config": "workspace:*",
 		"jsdom": "^27.2.0",
 		"playwright": "^1.57.0",
