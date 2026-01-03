@@ -1,3 +1,6 @@
+// @ts-nocheck
+// eslint-disable-next-line
+
 'use client'
 
 import { Loader2, Locate, Maximize, Minus, Plus, X } from 'lucide-react'

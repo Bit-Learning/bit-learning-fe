@@ -80,9 +80,9 @@ const AboutUs: React.FC = () => {
     ]
 
     return (
-        <div className="min-h-screen bg-gradient-to-br from-blue-50 to-orange-50">
+        <div className="bg-linear-to-br -mt-24 min-h-screen from-blue-50 to-orange-50">
             {/* Hero Section */}
-            <section className="relative bg-gradient-to-r from-blue-700 to-orange-600 py-20 text-white">
+            <section className="bg-linear-to-r relative from-blue-700 to-orange-600 py-20 text-white">
                 <div className="container mx-auto max-w-7xl px-4">
                     <div className="text-center">
                         <Badge className="mb-4 border-white/30 bg-white/20 text-white">Về chúng tôi</Badge>
@@ -159,7 +159,7 @@ const AboutUs: React.FC = () => {
                                 alt="BithubLearning Team"
                                 className="w-full rounded-xl shadow-2xl"
                             />
-                            <div className="absolute -right-6 -bottom-6 rounded-xl bg-white p-6 shadow-lg">
+                            <div className="absolute -bottom-6 -right-6 rounded-xl bg-white p-6 shadow-lg">
                                 <div className="text-center">
                                     <div className="text-2xl font-bold text-blue-700">5+</div>
                                     <div className="text-sm text-gray-600">Năm kinh nghiệm</div>

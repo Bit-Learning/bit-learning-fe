@@ -88,7 +88,7 @@ const heroSplideOptions = {
 
 export const HeroCarousel = () => {
     return (
-        <Splide options={heroSplideOptions} className="splide-hero">
+        <Splide options={heroSplideOptions} className="splide-hero -mt-24">
             {heroSlides.map(slide => (
                 <SplideSlide key={slide.id}>
                     <div className="bithub-gradient relative min-h-screen overflow-hidden">
@@ -102,9 +102,9 @@ export const HeroCarousel = () => {
 
                         {/* <div className="absolute inset-0 bg-gradient-to-br from-blue-600/90 via-blue-700/80 to-orange-600/70" /> */}
 
-                        <div className="absolute inset-0 bg-gradient-to-br from-slate-900/90 via-blue-900/80 to-blue-700/70" />
+                        <div className="bg-linear-to-br absolute inset-0 from-slate-900/90 via-blue-900/80 to-blue-700/70" />
 
-                        <div className="relative z-10 flex min-h-screen items-center justify-center">
+                        <div className="relative flex min-h-screen items-center justify-center">
                             <div className="max-w-7xl px-6 py-10 text-center text-white">
                                 <div className="mb-8 flex justify-center">{slide.icon}</div>
 

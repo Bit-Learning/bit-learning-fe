@@ -1,8 +1,8 @@
 export const navItems = [
-    {
-        title: 'Trang chủ',
-        to: '/',
-    },
+    // {
+    //     title: 'Trang chủ',
+    //     to: '/',
+    // },
     {
         title: 'Khóa học Online',
         to: '/courses',
@@ -127,8 +127,8 @@ export const navItems = [
         title: 'Tin tức',
         to: '/news',
     },
-    {
-        title: 'Về chúng tôi',
-        to: '/about',
-    },
+    // {
+    //     title: 'Về chúng tôi',
+    //     to: '/about',
+    // },
 ]

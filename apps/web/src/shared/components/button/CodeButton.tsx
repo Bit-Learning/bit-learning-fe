@@ -1,8 +1,8 @@
-type CodeButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
+type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
     label?: string
 }
 
-const CodeButton = ({ label, onClick, className, ...rest }: CodeButtonProps) => {
+const CodeButton = ({ label, onClick, className, ...rest }: Props) => {
     return (
         <button className="cssbuttons-io" onClick={onClick} {...rest}>
             <span>
