@@ -24,3 +24,17 @@ export interface CommentRequest {
     lectureId: number
     parentId?: number
 }
+
+export interface ReviewResponse {
+    id: number
+    user: UserSummary
+    rating: number
+    comment: string
+    createdAt: string
+}
+
+export interface ReviewRequest {
+    courseId: number
+    rating: number
+    comment?: string
+}

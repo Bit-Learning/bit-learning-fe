@@ -1,6 +1,6 @@
 import api from '@/shared/api/api'
 import { ApiResponse } from '@/shared/api/api.type'
-import { CommentRequest, CommentResponse } from '../types/interaction.type'
+import { CommentRequest, CommentResponse, ReviewRequest, ReviewResponse } from '../types/interaction.type'
 
 export const interactionApi = {
     getRootComments: async (
@@ -28,6 +28,24 @@ export const interactionApi = {
 
     toggleVote: async (commentId: number): Promise<ApiResponse<void>> => {
         const { data } = await api.post(`/interactions/comments/${commentId}/vote`)
+        return data
+    },
+
+    getCourseReviews: async (
+        courseId: number,
+        page = 0,
+        size = 5,
+        sort = 'createdAt',
+        direction = 'DESC',
+    ): Promise<ApiResponse<ReviewResponse[]>> => {
+        const { data } = await api.get(`/interactions/reviews/courses/${courseId}`, {
+            params: { page, size, sort, direction },
+        })
+        return data
+    },
+
+    postReview: async (request: ReviewRequest): Promise<ApiResponse<ReviewResponse>> => {
+        const { data } = await api.post('/interactions/reviews', request)
         return data
     },
 }

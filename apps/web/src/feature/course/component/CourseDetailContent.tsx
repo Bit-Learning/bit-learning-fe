@@ -200,7 +200,7 @@ const CourseDetailContent: React.FC = () => {
                         <div className="rounded-2xl bg-white shadow-lg">
                             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                                 <div className="border-b border-gray-200">
-                                    <TabsList className="grid w-full grid-cols-4 bg-transparent">
+                                    <TabsList className="grid w-full grid-cols-5 bg-transparent">
                                         <TabsTrigger
                                             value="overview"
                                             className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
@@ -219,6 +219,13 @@ const CourseDetailContent: React.FC = () => {
                                         >
                                             <MessageCircle className="mr-1 h-4 w-4" />
                                             Q&A
+                                        </TabsTrigger>
+                                        <TabsTrigger
+                                            value="reviews"
+                                            className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
+                                        >
+                                            <Star className="mr-1 h-4 w-4" />
+                                            Đánh giá
                                         </TabsTrigger>
                                         <TabsTrigger
                                             value="instructor"
