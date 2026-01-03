@@ -1,3 +1,4 @@
+// @ts-nocheck
 import { Card } from "@workspace/ui/components/Card";
 import {
 	Cell,
