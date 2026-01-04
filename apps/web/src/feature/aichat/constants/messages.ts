@@ -177,29 +177,29 @@ export const INFO_MESSAGES = {
 export const CODE_TO_MESSAGE_MAP: Record<string, string> = {
 	// Success codes
 	...Object.entries(SUCCESS_MESSAGES).reduce(
-		(acc, [key, value]) => ({
-			...acc,
-			[key]: value,
-		}),
-		{},
+		(acc, [key, value]) => {
+			acc[key] = value;
+			return acc;
+		},
+		{} as Record<string, string>,
 	),
 
 	// Service error codes
 	...Object.entries(SERVICE_ERROR_MESSAGES).reduce(
-		(acc, [key, value]) => ({
-			...acc,
-			[key]: value,
-		}),
-		{},
+		(acc, [key, value]) => {
+			acc[key] = value;
+			return acc;
+		},
+		{} as Record<string, string>,
 	),
 
 	// General error codes
 	...Object.entries(GENERAL_ERROR_MESSAGES).reduce(
-		(acc, [key, value]) => ({
-			...acc,
-			[key]: value,
-		}),
-		{},
+		(acc, [key, value]) => {
+			acc[key] = value;
+			return acc;
+		},
+		{} as Record<string, string>,
 	),
 } as const;
 

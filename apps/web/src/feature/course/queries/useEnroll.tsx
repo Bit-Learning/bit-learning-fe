@@ -33,10 +33,7 @@ export const useEnrollCourse = () => {
 	});
 };
 
-export const useCourseProgress = (
-	courseId: number,
-	enabled: boolean = true,
-) => {
+export const useCourseProgress = (courseId: number, enabled = true) => {
 	return useQuery({
 		queryKey: ["course-progress", courseId],
 		queryFn: async () => {

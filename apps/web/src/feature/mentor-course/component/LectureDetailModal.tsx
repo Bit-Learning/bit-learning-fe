@@ -51,6 +51,7 @@ export const LectureDetailModal = ({
 								className="h-full w-full"
 								poster="/video-placeholder.jpg"
 							>
+								<track kind="captions" srcLang="vi" label="Tiếng Việt" />
 								Trình duyệt không hỗ trợ video
 							</video>
 						</div>

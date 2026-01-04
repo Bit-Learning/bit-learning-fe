@@ -346,7 +346,9 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 			onMouseLeave={() => isPlaying && setShowControls(false)}
 			onClick={handlePlayPause}
 		>
-			<video ref={videoRef} className="h-full w-full" playsInline />
+			<video ref={videoRef} className="h-full w-full" playsInline>
+				<track kind="captions" srcLang="vi" label="Tiếng Việt" />
+			</video>
 
 			{!isPlaying && (
 				<div className="absolute inset-0 flex items-center justify-center">

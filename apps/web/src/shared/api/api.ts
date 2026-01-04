@@ -84,7 +84,7 @@ function handleRefreshToken(): Promise<string> {
 			console.log(
 				`[Token Refresh] Processing ${failedRequestQueue.length} queued requests`,
 			);
-			failedRequestQueue.forEach(({ resolve }) => resolve(accessToken));
+			failedRequestQueue.forEach(({ resolve }) => void resolve(accessToken));
 			failedRequestQueue = [];
 			return accessToken;
 		})
@@ -94,7 +94,7 @@ function handleRefreshToken(): Promise<string> {
 				error.response?.status,
 				error.response?.data,
 			);
-			failedRequestQueue.forEach(({ reject }) => reject(error));
+			failedRequestQueue.forEach(({ reject }) => void reject(error));
 			failedRequestQueue = [];
 
 			// Clear tokens and Redux state

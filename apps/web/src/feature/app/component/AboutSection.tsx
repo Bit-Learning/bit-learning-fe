@@ -99,13 +99,17 @@ const AboutSection: React.FC = () => {
 					<div className="mx-2 flex gap-4">
 						<Button
 							className="bithub-button-primary"
-							onClick={() => (window.location.href = "/about")}
+							onClick={() => {
+								window.location.href = "/about";
+							}}
 						>
 							TÌM HIỂU THÊM
 						</Button>
 						<Button
 							className="bithub-button-secondary"
-							onClick={() => (window.location.href = "/courses")}
+							onClick={() => {
+								window.location.href = "/courses";
+							}}
 						>
 							XEM KHÓA HỌC
 						</Button>

@@ -1,8 +1,9 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Clock, Trophy } from "lucide-react";
-import React, { useEffect, useMemo, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useCheckAnswer, useGameDetail, useSubmitGame } from "../hooks/useGame";
-import { QuestionLog } from "../types";
+import type { QuestionLog } from "../types";
 import { shuffleArray } from "../utils/arrayUtils";
 
 type GameState = "loading" | "ready" | "playing" | "result";
@@ -14,7 +15,7 @@ interface Props {
 export const GamePlayPage: React.FC<Props> = ({ id }) => {
 	console.log("=== GamePlayPage RENDER ===", { id });
 	const navigate = useNavigate();
-	const gameId = parseInt(id || "0");
+	const gameId = Number.parseInt(id || "0");
 
 	const { data: game, isLoading } = useGameDetail(gameId);
 	const checkAnswer = useCheckAnswer();
@@ -33,6 +34,83 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 	const [score, setScore] = useState(0);
 	const [history, setHistory] = useState<QuestionLog[]>([]);
 	const [questionStartTime, setQuestionStartTime] = useState(Date.now());
+
+	const handleStart = () => {
+		setGameState("playing");
+		setQuestionStartTime(Date.now());
+		setTimeLeft(game!.settings.timePerQuestion);
+	};
+
+	const finishGame = useCallback(
+		async (finalHistory: QuestionLog[]) => {
+			if (!game) return;
+
+			console.log("=== FINISHING GAME ===");
+			console.log("Final history:", finalHistory);
+			console.log("History length:", finalHistory.length);
+
+			const totalTime = finalHistory.reduce(
+				(sum, log) => sum + log.timeSpent,
+				0,
+			);
+			const correctAnswers = finalHistory.filter((log) => log.correct).length;
+			const accuracy = (correctAnswers / finalHistory.length) * 100;
+
+			const result = await submitGame.mutateAsync({
+				gameId,
+				request: {
+					score,
+					accuracy,
+					totalTime: Math.round(totalTime),
+					history: finalHistory,
+				},
+			});
+
+			setGameState("result");
+		},
+		[game, score, submitGame, gameId],
+	);
+
+	const moveToNextQuestion = useCallback(
+		(currentHistory?: QuestionLog[]) => {
+			if (!game) return;
+
+			if (currentQuestionIndex < game.questions.length - 1) {
+				setCurrentQuestionIndex((prev) => prev + 1);
+				setSelectedOption(null);
+				setAnswerResult(null);
+				setTimeLeft(game.settings.timePerQuestion);
+				setQuestionStartTime(Date.now());
+			} else {
+				finishGame(currentHistory || history);
+			}
+		},
+		[game, currentQuestionIndex, history, finishGame],
+	);
+
+	const handleTimeout = useCallback(() => {
+		if (!selectedOption && game && game.questions[currentQuestionIndex]) {
+			// Auto-submit as incorrect
+			const timeSpent = (Date.now() - questionStartTime) / 1000;
+			const log: QuestionLog = {
+				questionId: game.questions[currentQuestionIndex]!.id,
+				selectedOptionId: "",
+				correct: false,
+				timeSpent,
+			};
+			setHistory((prev) => [...prev, log]);
+
+			setTimeout(() => {
+				moveToNextQuestion();
+			}, 1000);
+		}
+	}, [
+		selectedOption,
+		game,
+		currentQuestionIndex,
+		questionStartTime,
+		moveToNextQuestion,
+	]);
 
 	useEffect(() => {
 		if (game && gameState === "loading") {
@@ -54,31 +132,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 			}, 1000);
 			return () => clearInterval(timer);
 		}
-	}, [gameState, timeLeft]);
-
-	const handleStart = () => {
-		setGameState("playing");
-		setQuestionStartTime(Date.now());
-		setTimeLeft(game!.settings.timePerQuestion);
-	};
-
-	const handleTimeout = () => {
-		if (!selectedOption && game && game.questions[currentQuestionIndex]) {
-			// Auto-submit as incorrect
-			const timeSpent = (Date.now() - questionStartTime) / 1000;
-			const log: QuestionLog = {
-				questionId: game.questions[currentQuestionIndex]!.id,
-				selectedOptionId: "",
-				correct: false,
-				timeSpent,
-			};
-			setHistory((prev) => [...prev, log]);
-
-			setTimeout(() => {
-				moveToNextQuestion();
-			}, 1000);
-		}
-	};
+	}, [gameState, timeLeft, handleTimeout]);
 
 	const handleSelectOption = async (optionId: string) => {
 		if (answerResult || !game) return;
@@ -124,54 +178,34 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 		}, 2000);
 	};
 
-	const moveToNextQuestion = (currentHistory?: QuestionLog[]) => {
-		if (!game) return;
+	const currentQuestion = game ? game.questions[currentQuestionIndex] : null;
+	const progress = game
+		? ((currentQuestionIndex + 1) / game.questions.length) * 100
+		: 0;
 
-		if (currentQuestionIndex < game.questions.length - 1) {
-			setCurrentQuestionIndex((prev) => prev + 1);
-			setSelectedOption(null);
-			setAnswerResult(null);
-			setTimeLeft(game.settings.timePerQuestion);
-			setQuestionStartTime(Date.now());
-		} else {
-			finishGame(currentHistory || history);
+	// Xử lý xáo trộn đáp án với useMemo để tránh re-shuffle khi render lại
+	const displayOptions = useMemo(() => {
+		if (!currentQuestion) return [];
+		// Ưu tiên config riêng của câu hỏi, nếu không có thì lấy config chung
+		const shouldShuffle =
+			currentQuestion.shuffle !== undefined
+				? currentQuestion.shuffle
+				: game?.settings.shuffleOptions !== false; // Default true
+
+		if (!shouldShuffle) {
+			return currentQuestion.options;
 		}
-	};
 
-	const finishGame = async (finalHistory: QuestionLog[]) => {
-		if (!game) return;
-
-		console.log("=== FINISHING GAME ===");
-		console.log("Final history:", finalHistory);
-		console.log("History length:", finalHistory.length);
-
-		const totalTime = finalHistory.reduce((sum, log) => sum + log.timeSpent, 0);
-		const correctAnswers = finalHistory.filter((log) => log.correct).length;
-		const accuracy = (correctAnswers / finalHistory.length) * 100;
-
-		const result = await submitGame.mutateAsync({
-			gameId,
-			request: {
-				score,
-				accuracy,
-				totalTime: Math.round(totalTime),
-				history: finalHistory,
-			},
-		});
-
-		setGameState("result");
-	};
+		return shuffleArray(currentQuestion.options);
+	}, [currentQuestion, game?.settings.shuffleOptions]);
 
 	if (isLoading || !game) {
 		return (
 			<div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-indigo-500 to-purple-600">
-				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-white"></div>
+				<div className="h-16 w-16 animate-spin rounded-full border-b-4 border-white" />
 			</div>
 		);
 	}
-
-	const currentQuestion = game.questions[currentQuestionIndex];
-	const progress = ((currentQuestionIndex + 1) / game.questions.length) * 100;
 
 	if (!currentQuestion) {
 		return (
@@ -180,21 +214,6 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 			</div>
 		);
 	}
-
-	// Xử lý xáo trộn đáp án với useMemo để tránh re-shuffle khi render lại
-	const displayOptions = useMemo(() => {
-		// Ưu tiên config riêng của câu hỏi, nếu không có thì lấy config chung
-		const shouldShuffle =
-			currentQuestion.shuffle !== undefined
-				? currentQuestion.shuffle
-				: game.settings.shuffleOptions !== false; // Default true
-
-		if (!shouldShuffle) {
-			return currentQuestion.options;
-		}
-
-		return shuffleArray(currentQuestion.options);
-	}, [currentQuestion, game.settings.shuffleOptions]);
 
 	// Ready Screen
 	if (gameState === "ready") {
@@ -361,6 +380,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 
 							return (
 								<button
+									type="button"
 									key={option.id}
 									onClick={() => handleSelectOption(option.id)}
 									disabled={!!answerResult}

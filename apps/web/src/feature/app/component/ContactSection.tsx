@@ -212,13 +212,17 @@ const ContactSection: React.FC = () => {
 					<div className="flex flex-col justify-center gap-4 sm:flex-row">
 						<Button
 							className="bithub-button-secondary px-8 py-4 text-lg"
-							onClick={() => (window.location.href = "/contact")}
+							onClick={() => {
+								window.location.href = "/contact";
+							}}
 						>
 							TƯ VẤN MIỄN PHÍ <ArrowRight className="ml-2 h-5 w-5" />
 						</Button>
 						<Button
 							className="border-2 border-white bg-white px-8 py-3 text-blue-600 hover:bg-blue-100"
-							onClick={() => (window.location.href = "/offline-course")}
+							onClick={() => {
+								window.location.href = "/offline-course";
+							}}
 						>
 							ĐĂNG KÝ KHÓA HỌC
 						</Button>

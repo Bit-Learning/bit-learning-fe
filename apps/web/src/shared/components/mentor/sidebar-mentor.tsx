@@ -123,9 +123,15 @@ export function SidebarMentor({
 			</aside>
 
 			{isMobileOpen && (
-				<div
+				<button
+					type="button"
 					className="fixed inset-0 z-30 bg-black/50 lg:hidden"
 					onClick={onMobileClose}
+					onKeyDown={(e) => {
+						if (e.key === "Enter" || e.key === " ") {
+							onMobileClose();
+						}
+					}}
 				/>
 			)}
 		</>

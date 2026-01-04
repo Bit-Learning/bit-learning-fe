@@ -75,7 +75,7 @@ function handleRefreshToken(refreshToken: string | undefined): Promise<string> {
 			console.log(
 				`[Token Refresh] Processing ${failedRequestQueue.length} queued requests`,
 			);
-			failedRequestQueue.forEach(({ resolve }) => resolve(accessToken));
+			failedRequestQueue.forEach(({ resolve }) => void resolve(accessToken));
 			failedRequestQueue = [];
 			return accessToken;
 		})
@@ -85,7 +85,7 @@ function handleRefreshToken(refreshToken: string | undefined): Promise<string> {
 				error.response?.status,
 				error.response?.data,
 			);
-			failedRequestQueue.forEach(({ reject }) => reject(error));
+			failedRequestQueue.forEach(({ reject }) => void reject(error));
 			failedRequestQueue = [];
 			clearAuthTokens();
 			console.log("[Token Refresh] Redirecting to signin");

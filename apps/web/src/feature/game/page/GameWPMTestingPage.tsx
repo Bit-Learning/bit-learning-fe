@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { paragraphs } from "../data/paragraphs";
 import "../styles/gamewpm.css";
 
@@ -17,12 +17,16 @@ const GameWPMTestingPage = () => {
 	const [isTyping, setIsTyping] = useState(false);
 	const [input, setInput] = useState("");
 
-	// loadParagraph()
-	useEffect(() => {
-		loadParagraph();
+	const resetStats = useCallback(() => {
+		clearInterval(timerRef.current!);
+		setCharIndex(0);
+		setMistakes(0);
+		setTimeLeft(MAX_TIME);
+		setIsTyping(false);
+		setInput("");
 	}, []);
 
-	const loadParagraph = () => {
+	const loadParagraph = useCallback(() => {
 		const ranIndex = Math.floor(Math.random() * paragraphs.length);
 		const paragraph = paragraphs[ranIndex];
 		if (paragraph) {
@@ -30,16 +34,12 @@ const GameWPMTestingPage = () => {
 		}
 		resetStats();
 		inputRef.current?.focus();
-	};
+	}, [resetStats]);
 
-	const resetStats = () => {
-		clearInterval(timerRef.current!);
-		setCharIndex(0);
-		setMistakes(0);
-		setTimeLeft(MAX_TIME);
-		setIsTyping(false);
-		setInput("");
-	};
+	// loadParagraph()
+	useEffect(() => {
+		loadParagraph();
+	}, [loadParagraph]);
 
 	// initTimer()
 	useEffect(() => {

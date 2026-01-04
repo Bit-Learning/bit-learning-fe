@@ -293,7 +293,9 @@ const AboutUs: React.FC = () => {
 							<Button
 								size="lg"
 								className="bithub-button-secondary px-8 py-4 text-lg"
-								onClick={() => (window.location.href = "/courses")}
+								onClick={() => {
+									window.location.href = "/courses";
+								}}
 							>
 								<BookOpen className="mr-2 h-5 w-5" />
 								Khám phá khóa học
@@ -301,7 +303,9 @@ const AboutUs: React.FC = () => {
 							<Button
 								size="lg"
 								className="bithub-button-primary px-8 py-4 text-lg"
-								onClick={() => (window.location.href = "/contact")}
+								onClick={() => {
+									window.location.href = "/contact";
+								}}
 							>
 								<Globe className="mr-2 h-5 w-5" />
 								Tham gia cộng đồng

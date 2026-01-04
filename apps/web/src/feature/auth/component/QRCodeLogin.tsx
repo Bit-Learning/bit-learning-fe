@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "@workspace/ui/components/Sonner";
 import { QRCodeSVG } from "qrcode.react";
-import React from "react";
+import React, { useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { GenerateQRToken } from "../api/auth.api";
 import { setErrorAction, setIsAuthenticatedAction } from "../store";
@@ -18,13 +18,11 @@ enum QRStatus {
 const QRCodeLogin: React.FC = () => {
 	const [qrToken, setQrToken] = React.useState<string>("");
 	const [status, setStatus] = React.useState<QRStatus>(QRStatus.LOADING);
-	const [eventSource, setEventSource] = React.useState<EventSource | null>(
-		null,
-	);
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
+	const eventSourceRef = useRef<EventSource | null>(null);
 
-	const generateQR = async () => {
+	const generateQR = useCallback(async () => {
 		try {
 			setStatus(QRStatus.LOADING);
 			const response = await GenerateQRToken();
@@ -103,7 +101,7 @@ const QRCodeLogin: React.FC = () => {
 				}
 			};
 
-			setEventSource(es);
+			eventSourceRef.current = es;
 		} catch (error: any) {
 			console.error("[QRCodeLogin] Error generating QR:", error);
 			setStatus(QRStatus.ERROR);
@@ -118,21 +116,21 @@ const QRCodeLogin: React.FC = () => {
 				description: errorMessage,
 			});
 		}
-	};
+	}, [dispatch, navigate, status]);
 
 	React.useEffect(() => {
 		generateQR();
 
 		return () => {
-			if (eventSource) {
-				eventSource.close();
+			if (eventSourceRef.current) {
+				eventSourceRef.current.close();
 			}
 		};
-	}, [eventSource, generateQR]);
+	}, [generateQR]);
 
 	const handleRefresh = () => {
-		if (eventSource) {
-			eventSource.close();
+		if (eventSourceRef.current) {
+			eventSourceRef.current.close();
 		}
 		generateQR();
 	};
@@ -302,6 +300,7 @@ const QRCodeLogin: React.FC = () => {
 							</p>
 
 							<button
+								type="button"
 								onClick={handleRefresh}
 								className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-blue-700"
 							>

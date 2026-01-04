@@ -3,6 +3,7 @@ import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { toast } from "@workspace/ui/components/Sonner";
+import DOMPurify from "dompurify";
 import {
 	ArrowLeft,
 	Bookmark,
@@ -426,7 +427,10 @@ test('renders learn react link', () =&gt; {
 				{/* Article Body */}
 				<div
 					className="prose prose-lg mb-8 max-w-none"
-					dangerouslySetInnerHTML={{ __html: currentNews.content }}
+					// biome-ignore lint/security/noDangerouslySetInnerHtml: HTML content is sanitized with DOMPurify
+					dangerouslySetInnerHTML={{
+						__html: DOMPurify.sanitize(currentNews.content),
+					}}
 				/>
 
 				{/* Share Section */}

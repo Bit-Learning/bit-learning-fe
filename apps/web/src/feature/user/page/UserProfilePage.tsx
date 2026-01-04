@@ -575,24 +575,24 @@ function UserProfilePage() {
 											<div className="grid gap-4 md:grid-cols-2">
 												{userInfo.pronouns && (
 													<div>
-														<label className="text-muted-foreground text-sm font-medium">
+														<span className="text-muted-foreground text-sm font-medium">
 															Đại từ
-														</label>
+														</span>
 														<p className="text-base">{userInfo.pronouns}</p>
 													</div>
 												)}
 												{userInfo.phoneNumber && (
 													<div>
-														<label className="text-muted-foreground text-sm font-medium">
+														<span className="text-muted-foreground text-sm font-medium">
 															Số điện thoại
-														</label>
+														</span>
 														<p className="text-base">{userInfo.phoneNumber}</p>
 													</div>
 												)}
 												<div>
-													<label className="text-muted-foreground text-sm font-medium">
+													<span className="text-muted-foreground text-sm font-medium">
 														Ngày tham gia
-													</label>
+													</span>
 													<p className="text-base">
 														{userInfo.createdAt.slice(0, 10) || "N/A"}
 													</p>
@@ -600,9 +600,9 @@ function UserProfilePage() {
 											</div>
 											{userInfo.bio && (
 												<div className="mt-4">
-													<label className="text-muted-foreground text-sm font-medium">
+													<span className="text-muted-foreground text-sm font-medium">
 														Tiểu sử
-													</label>
+													</span>
 													<p className="mt-1 text-base">{userInfo.bio}</p>
 												</div>
 											)}

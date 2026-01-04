@@ -7,11 +7,11 @@ import type {
 	GameDetail,
 	GameListItem,
 	GameLog,
-	GameSection,
 	LeaderboardEntry,
 	PageResponse,
 	SubmitGameRequest,
 	SubmitGameResponse,
+	TGameSection,
 } from "../types";
 
 const GAMES_ENDPOINT = "/games";
@@ -38,7 +38,7 @@ export const GameService = {
 	 */
 	getDashboardGames: (
 		limit = 10,
-	): Promise<AxiosResponse<ApiResponse<GameSection[]>>> => {
+	): Promise<AxiosResponse<ApiResponse<TGameSection[]>>> => {
 		return api.get(`${GAMES_ENDPOINT}/dashboard?limit=${limit}`);
 	},
 

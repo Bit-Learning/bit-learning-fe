@@ -131,7 +131,7 @@ function PresentationRoute() {
 							</div>
 							<div className="grid items-center gap-8 lg:grid-cols-2">
 								<div className="hidden items-center justify-center md:flex">
-									<img src="/robot.png" width="400" height="400" />
+									<img src="/robot.png" width="400" height="400" alt="Banner" />
 								</div>
 								<div
 									data-slot="card"

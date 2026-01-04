@@ -8,7 +8,7 @@ import {
 	Presentation,
 	Sparkles,
 } from "lucide-react";
-import * as React from "react";
+import React, { useCallback } from "react";
 import { PrismCodeBlock } from "@/shared/components/PrismCodeBlock";
 import { useConversationMessages, useSendMessage } from "../hooks";
 
@@ -24,9 +24,12 @@ const parseMessageContent = (content: string) => {
 	const parts = [];
 	const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
 	let lastIndex = 0;
-	let match;
+	let match: RegExpExecArray | null;
 
-	while ((match = codeBlockRegex.exec(content)) !== null) {
+	while (true) {
+		match = codeBlockRegex.exec(content);
+		if (!match) break;
+
 		if (match.index > lastIndex) {
 			parts.push({
 				type: "text",
@@ -55,9 +58,10 @@ const parseMessageContent = (content: string) => {
 
 const formatText = (text: string) => {
 	const parts = text.split(/(\*\*.*?\*\*)/);
-	return parts.map((part, index) => {
+	let keyCounter = 0;
+	return parts.map((part) => {
 		if (part.startsWith("**") && part.endsWith("**")) {
-			return <strong key={index}>{part.slice(2, -2)}</strong>;
+			return <strong key={`bold-${keyCounter++}`}>{part.slice(2, -2)}</strong>;
 		}
 		return part;
 	});
@@ -65,14 +69,15 @@ const formatText = (text: string) => {
 
 const MessageContent = ({ content }: { content: string }) => {
 	const parts = parseMessageContent(content);
+	let keyCounter = 0;
 
 	return (
 		<div>
-			{parts.map((part, index) => {
+			{parts.map((part) => {
 				if (part.type === "code") {
 					return (
 						<PrismCodeBlock
-							key={index}
+							key={`code-${keyCounter++}`}
 							code={part.content}
 							language={part.language || "text"}
 						/>
@@ -80,7 +85,7 @@ const MessageContent = ({ content }: { content: string }) => {
 				}
 				return (
 					<p
-						key={index}
+						key={`text-${keyCounter++}`}
 						className="whitespace-pre-wrap text-sm leading-relaxed"
 					>
 						{formatText(part.content)}
@@ -115,9 +120,9 @@ export const ChatTab = ({
 		undefined,
 	);
 
-	const scrollToBottom = () => {
+	const scrollToBottom = useCallback(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	};
+	}, []);
 
 	React.useEffect(() => {
 		scrollToBottom();

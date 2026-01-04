@@ -4,6 +4,7 @@ import { sentryVitePlugin } from "@sentry/vite-plugin";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react";
 import { defineConfig } from "vite";
+import ViteImagemin from "vite-plugin-imagemin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
@@ -19,6 +20,7 @@ export default defineConfig({
 			bundleName: "web",
 			uploadToken: process.env.CODECOV_TOKEN,
 		}),
+		ViteImagemin(),
 	],
 	resolve: {
 		alias: {
@@ -44,7 +46,25 @@ export default defineConfig({
 		reporters: ["default"],
 		include: ["src/**/*.{test,spec}.{ts,tsx}"],
 	},
-	build: { sourcemap: false },
+	build: {
+		sourcemap: false,
+		minify: "esbuild", // Enable esbuild for minification
+		cacheDir: ".vite_cache",
+		terserOptions: {
+			compress: {
+				drop_console: true, // Remove console logs for production
+			},
+		},
+		rollupOptions: {
+			output: {
+				manualChunks(id) {
+					if (id.includes("node_modules")) {
+						return "vendor";
+					}
+				},
+			},
+		},
+	},
 	// server: {
 	//     port: 5173,
 	//     proxy: {

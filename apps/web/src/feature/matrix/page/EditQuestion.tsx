@@ -183,10 +183,14 @@ export default function EditQuestion() {
 					<CardContent className="space-y-6">
 						{/* Question Level - Editable */}
 						<div>
-							<label className="mb-2 block text-sm font-semibold text-gray-700">
+							<label
+								htmlFor="question-level"
+								className="mb-2 block text-sm font-semibold text-gray-700"
+							>
 								Độ khó: <span className="text-red-500">*</span>
 							</label>
 							<select
+								id="question-level"
 								value={formData.questionLevel}
 								onChange={(e) =>
 									handleInputChange("questionLevel", e.target.value)
@@ -201,10 +205,14 @@ export default function EditQuestion() {
 
 						{/* Content - Editable */}
 						<div>
-							<label className="mb-2 block text-sm font-semibold text-gray-700">
+							<label
+								htmlFor="content"
+								className="mb-2 block text-sm font-semibold text-gray-700"
+							>
 								Nội dung câu hỏi: <span className="text-red-500">*</span>
 							</label>
 							<textarea
+								id="content"
 								value={formData.content}
 								onChange={(e) => handleInputChange("content", e.target.value)}
 								className="w-full rounded-md border border-gray-300 px-3 py-2 focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
@@ -251,11 +259,7 @@ export default function EditQuestion() {
 														handleOptionChange(index, e.target.value)
 													}
 													onClick={(e) => e.stopPropagation()}
-													className={`flex-1 ${
-														option.isCorrect
-															? "border-green-300 bg-white font-medium"
-															: ""
-													}`}
+													className={`flex-1 ${option.isCorrect ? "border-green-300 bg-white font-medium" : ""}`}
 													placeholder={`Nhập nội dung đáp án ${option.label}`}
 													required
 												/>
@@ -268,7 +272,10 @@ export default function EditQuestion() {
 
 						{/* Canonical Answer - Editable */}
 						<div>
-							<label className="mb-2 block text-sm font-semibold text-gray-700">
+							<label
+								htmlFor="canonical-answer"
+								className="mb-2 block text-sm font-semibold text-gray-700"
+							>
 								Đáp án chi tiết:
 								{question.questionType === "ESSAY" && (
 									<span className="text-red-500">*</span>
@@ -280,6 +287,7 @@ export default function EditQuestion() {
 								)}
 							</label>
 							<textarea
+								id="canonical-answer"
 								value={formData.canonicalAnswer}
 								onChange={(e) =>
 									handleInputChange("canonicalAnswer", e.target.value)

@@ -1,7 +1,8 @@
 import { Button } from "@workspace/ui/components/Button";
 import { Textarea } from "@workspace/ui/components/Textarea";
 import { Loader2, MessageSquare, Send, Star } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { useCourseReviews, usePostReview } from "../queries/useInteraction";
 import ReviewItem from "./ReviewItem";
 
@@ -53,9 +54,13 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
 				<h4 className="mb-4 font-semibold text-gray-900">Đánh giá khóa học</h4>
 
 				<div className="mb-4">
-					<label className="mb-2 block text-sm font-medium text-gray-700">
+					<label
+						htmlFor="rating"
+						className="mb-2 block text-sm font-medium text-gray-700"
+					>
 						Đánh giá của bạn
 					</label>
+					<input id="rating" type="hidden" value={rating} readOnly />
 					<div className="flex items-center gap-2">
 						{Array.from({ length: 5 }).map((_, index) => {
 							const starValue = index + 1;
@@ -87,10 +92,14 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
 				</div>
 
 				<div className="mb-4">
-					<label className="mb-2 block text-sm font-medium text-gray-700">
+					<label
+						htmlFor="comment"
+						className="mb-2 block text-sm font-medium text-gray-700"
+					>
 						Nhận xét (không bắt buộc)
 					</label>
 					<Textarea
+						id="comment"
 						value={comment}
 						onChange={(e) => setComment(e.target.value)}
 						placeholder="Chia sẻ trải nghiệm của bạn về khóa học này..."

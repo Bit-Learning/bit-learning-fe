@@ -1,7 +1,7 @@
 import { Button } from "@workspace/ui/components/update/button";
 import { Input } from "@workspace/ui/components/update/input";
 import { ArrowUp, Globe, MoreHorizontal, Plus } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { mockMessages } from "../data/chat-data";
 import { PrismCodeBlock } from "./PrismCodeBlock";
 
@@ -10,9 +10,12 @@ const parseMessageContent = (content: string) => {
 	const parts = [];
 	const codeBlockRegex = /```(\w+)?\n([\s\S]*?)```/g;
 	let lastIndex = 0;
-	let match;
+	let match: RegExpExecArray | null;
 
-	while ((match = codeBlockRegex.exec(content)) !== null) {
+	while (true) {
+		match = codeBlockRegex.exec(content);
+		if (!match) break;
+
 		// Add text before code block
 		if (match.index > lastIndex) {
 			parts.push({
@@ -86,9 +89,9 @@ export const ChatPrompt = () => {
 	const [messages, setMessages] = useState(mockMessages);
 	const messagesEndRef = useRef<HTMLDivElement>(null);
 
-	const scrollToBottom = () => {
+	const scrollToBottom = useCallback(() => {
 		messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-	};
+	}, []);
 
 	useEffect(() => {
 		scrollToBottom();

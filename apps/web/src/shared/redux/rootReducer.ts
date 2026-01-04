@@ -22,7 +22,7 @@ export type RootState = ReturnType<typeof combineReducer>;
 
 const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {
 	if (action.type === "logOut") {
-		state = {} as RootState;
+		return combineReducer({} as RootState, action);
 	}
 	return combineReducer(state, action);
 };

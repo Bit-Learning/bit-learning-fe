@@ -61,11 +61,14 @@ export const AddFundsDialog = ({
 
 					{/* Select phương thức nạp */}
 					<div>
-						<label className="mb-1 block text-sm font-medium">
+						<label
+							htmlFor="payment-method"
+							className="mb-1 block text-sm font-medium"
+						>
 							Phương thức nạp
 						</label>
 						<Select value={method} onValueChange={setMethod}>
-							<SelectTrigger className="w-full">
+							<SelectTrigger id="payment-method" className="w-full">
 								<SelectValue placeholder="Chọn phương thức" />
 							</SelectTrigger>
 							<SelectContent>
