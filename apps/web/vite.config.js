@@ -49,6 +49,7 @@ export default defineConfig({
 	build: {
 		sourcemap: false,
 		minify: "esbuild", // Enable esbuild for minification
+		reportCompressedSize: false,
 		cacheDir: ".vite_cache",
 		terserOptions: {
 			compress: {
