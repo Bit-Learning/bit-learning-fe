@@ -65,7 +65,17 @@ const Header: React.FC = () => {
 
 	return (
 		<SearchProvider>
-			<header className="container sticky top-5 z-50 mx-auto rounded-lg border-b border-gray-100 bg-white shadow-lg dark:border-gray-800 dark:bg-gray-900 dark:shadow-gray-800/50">
+			<header
+				className="
+    container sticky top-5 z-50 mx-auto
+    rounded-2xl
+    border border-white/20 dark:border-white/10
+    bg-white/60 dark:bg-gray-900/60
+    backdrop-blur-xl backdrop-saturate-150
+    shadow-lg shadow-black/5 dark:shadow-black/40
+    supports-backdrop-filter:bg-white/50
+  "
+			>
 				<div className="flex items-center justify-between py-4 max-[776px]:px-4 md:px-10">
 					<Link to="/" className="flex items-center space-x-2">
 						<div className="flex items-center space-x-2">
@@ -78,7 +88,7 @@ const Header: React.FC = () => {
 					</Link>
 
 					<NavigationMenu className="hidden md:block">
-						<NavigationMenuList>
+						<NavigationMenuList className="flex-wrap">
 							{navItems.map((item) => (
 								<NavigationMenuItem key={item.title}>
 									{item.items ? (
@@ -87,7 +97,7 @@ const Header: React.FC = () => {
 												{item.title}
 											</NavigationMenuTrigger>
 											<NavigationMenuContent className="dark:bg-gray-800">
-												<ul className="grid w-[300px] gap-3 p-4 md:w-[400px] lg:w-[500px] dark:text-gray-200">
+												<ul className="grid w-75 gap-3 p-4 md:w-100 lg:w-125 dark:text-gray-200">
 													{item.items.map((subItem) => (
 														<li key={subItem.title} className="p-2">
 															<NavigationMenuLink asChild>
