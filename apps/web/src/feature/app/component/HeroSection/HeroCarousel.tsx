@@ -1,8 +1,8 @@
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
-import { Button } from "@workspace/ui/components/Button";
-import { BookOpen, Code, GraduationCap, Laptop, Users } from "lucide-react";
 import GradientButton from "@workspace/ui/components/uiverse/mean-mayfly-77/GradientButton";
+import { BookOpen, Code, GraduationCap, Laptop, Users } from "lucide-react";
+
 interface HeroSlide {
 	id: number;
 	icon: React.ReactNode;
