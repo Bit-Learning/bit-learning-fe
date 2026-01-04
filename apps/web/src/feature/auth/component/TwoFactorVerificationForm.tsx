@@ -34,7 +34,7 @@ interface TwoFactorVerificationFormProps {
 
 const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({
 	email,
-	onBack,
+	onBack: _onBack,
 }) => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
@@ -166,7 +166,7 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({
 
 						<div className="space-y-3">
 							<Button
-								className="h-12 w-full rounded-xl bg-gradient-to-r from-blue-700 to-blue-800 font-semibold text-white shadow-lg hover:from-blue-800 hover:to-blue-900"
+								className="h-12 w-full rounded-xl bg-linear-to-r from-blue-700 to-blue-800 font-semibold text-white shadow-lg hover:from-blue-800 hover:to-blue-900"
 								type="submit"
 								isDisabled={
 									verifyMutation.isPending ||

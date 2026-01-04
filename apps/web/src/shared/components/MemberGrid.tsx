@@ -6,14 +6,12 @@ import { MEMBER_ITEMS } from "../data/member-data";
 
 interface Props {
 	title?: string;
-	description?: string;
 	badgeText?: string;
 	viewMoreLink?: string;
 }
 
 export default function MemberGrid({
 	title = "NHỮNG CHUYÊN GIA INNEDU",
-	description,
 	badgeText = "Giới thiệu",
 	viewMoreLink,
 }: Props) {

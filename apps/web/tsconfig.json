@@ -1,6 +1,8 @@
 {
 	"extends": "@workspace/typescript-config/react-library.json",
 	"compilerOptions": {
+		"noEmit": true,
+
 		"baseUrl": ".",
 		"paths": {
 			"@/*": ["./src/*"],

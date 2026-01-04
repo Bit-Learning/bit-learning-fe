@@ -25,8 +25,9 @@ function PresentationList() {
 		isLoading: templateLoading,
 		error,
 	} = useAvailablePresentationTemplates();
-	const { data: userPresentations, isLoading: presentationsLoading } =
-		useUserPresentations(userInfo?.id || 0);
+	const { isLoading: presentationsLoading } = useUserPresentations(
+		userInfo?.id || 0,
+	);
 	const createPresentation = useCreatePresentation();
 	const createOrder = useCreateOrder();
 	const [creatingTemplate, setCreatingTemplate] = useState<string | null>(null);

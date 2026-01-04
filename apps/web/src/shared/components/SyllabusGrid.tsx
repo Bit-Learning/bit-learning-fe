@@ -1,22 +1,15 @@
-import { useNavigate } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/Badge";
 import { SYLLABUS_ITEMS } from "../data/syllabus-data";
 
 interface Props {
 	title?: string;
-	description?: string;
 	badgeText?: string;
-	viewMoreLink?: string;
 }
 
 export default function SyllabusGrid({
 	title = "Giáo Án",
-	description,
 	badgeText = "Giới thiệu",
-	viewMoreLink,
 }: Props) {
-	const _navigate = useNavigate();
-
 	return (
 		<section className="container mx-auto px-6 py-12">
 			{/* Header */}

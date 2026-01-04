@@ -56,7 +56,7 @@ export const GamePlayPage: React.FC<Props> = ({ id }) => {
 			const correctAnswers = finalHistory.filter((log) => log.correct).length;
 			const accuracy = (correctAnswers / finalHistory.length) * 100;
 
-			const result = await submitGame.mutateAsync({
+			await submitGame.mutateAsync({
 				gameId,
 				request: {
 					score,

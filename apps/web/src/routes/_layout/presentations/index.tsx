@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 import PresentationList from "@/feature/presentations/pages/PresentationList";
 import PresentationBanner from "@/shared/components/PresentationBanner";
@@ -13,8 +13,6 @@ export const Route = createFileRoute("/_layout/presentations/")({
 });
 
 function PresentationRoute() {
-	const _navigate = useNavigate();
-
 	return (
 		// === PAGE LOAD ANIMATION ===
 		<motion.div

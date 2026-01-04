@@ -88,7 +88,7 @@ export default function GenerateExamFromQuestions() {
 			: userQuestionsQuery.error;
 
 	// Load generated exam if exists
-	const { data: examData, isLoading: examLoading } = useQuery({
+	const { data: examData } = useQuery({
 		...apiClient.exam.getExamById(generatedExamId!),
 		enabled: !!generatedExamId,
 	});

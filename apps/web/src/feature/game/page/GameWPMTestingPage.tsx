@@ -4,7 +4,7 @@ import "../styles/gamewpm.css";
 
 const MAX_TIME = 60;
 
-type CharStatus = "correct" | "incorrect" | "active" | "";
+// type CharStatus = "correct" | "incorrect" | "active" | "";
 
 const GameWPMTestingPage = () => {
 	const inputRef = useRef<HTMLInputElement>(null);
