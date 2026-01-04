@@ -18,18 +18,14 @@ const VideoPlayerWithNotes: React.FC<VideoPlayerWithNotesProps> = memo(
 
     const lastSeekTimestamp = useRef<number | null>(null);
 
-    // Store parent callbacks in ref to prevent re-renders
     const callbackRefs = useRef({ onComplete, onProgressUpdate });
     useEffect(() => {
       callbackRefs.current = { onComplete, onProgressUpdate };
     });
 
-    // Stable callbacks - won't change between renders
     const handleTimeUpdate = useCallback((time: number) => {
-      // Round to integer to reduce state updates
       const roundedTime = Math.floor(time);
       setCurrentVideoTime((prev) => {
-        // Only update if changed by at least 1 second
         if (Math.abs(prev - roundedTime) >= 1) {
           return roundedTime;
         }
@@ -63,13 +59,13 @@ const VideoPlayerWithNotes: React.FC<VideoPlayerWithNotesProps> = memo(
     return (
       <div className="relative flex h-full w-full flex-col lg:flex-row">
         <div className="relative flex-1">
-          {/* <VideoPlayer
+          <VideoPlayer
             lectureId={lectureId}
             onComplete={handleComplete}
             onProgressUpdate={handleProgressUpdate}
             onTimeUpdate={handleTimeUpdate}
             seekTo={videoSeekTo}
-          /> */}
+          />
 
           {!isNotesSidebarOpen && (
             <div className="absolute right-4 top-4 z-10">
