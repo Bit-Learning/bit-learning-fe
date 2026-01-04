@@ -43,14 +43,12 @@ const mockProducts = [
 
 interface Props {
 	title?: string;
-	description?: string;
 	badgeText?: string;
 	viewMoreLink?: string;
 }
 
 export default function ProductGrid({
 	title = "Featured Products",
-	description,
 	badgeText = "Text",
 	viewMoreLink,
 }: Props) {

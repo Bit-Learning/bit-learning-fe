@@ -9,7 +9,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@workspace/ui/components/Card";
-import { confirm } from "@workspace/ui/components/ConfirmDialog";
+// import { confirm } from "@workspace/ui/components/ConfirmDialog";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@workspace/ui/components/Sonner";
 import { ArrowLeft, BookOpen, Clock, Download, FileText } from "lucide-react";
@@ -38,7 +38,7 @@ export default function SyllabusDetail() {
 	});
 
 	// Delete mutation
-	const deleteMutation = useMutation({
+	const { mutate: deleteSyllabus } = useMutation({
 		...apiClient.syllabus.deleteSyllabus(),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["syllabuses"] });
@@ -79,25 +79,25 @@ export default function SyllabusDetail() {
 		}
 	};
 
-	const _handleDelete = () => {
-		console.log("Delete button clicked for syllabus:", syllabusId);
-		confirm({
-			title: "Xác nhận xóa giáo trình",
-			description: `Bạn có chắc chắn muốn xóa giáo trình "${syllabus?.name}"? Hành động này không thể hoàn tác.`,
-			variant: "destructive",
-			action: {
-				label: "Xóa",
-				onClick: () => {
-					console.log("Calling deleteMutation.mutate");
-					deleteMutation.mutate(syllabusId);
-				},
-			},
-			cancel: {
-				label: "Hủy",
-				onClick: () => {},
-			},
-		});
-	};
+	// const _handleDelete = () => {
+	// 	console.log("Delete button clicked for syllabus:", syllabusId);
+	// 	confirm({
+	// 		title: "Xác nhận xóa giáo trình",
+	// 		description: `Bạn có chắc chắn muốn xóa giáo trình "${syllabus?.name}"? Hành động này không thể hoàn tác.`,
+	// 		variant: "destructive",
+	// 		action: {
+	// 			label: "Xóa",
+	// 			onClick: () => {
+	// 				console.log("Calling deleteMutation.mutate");
+	// 				deleteMutation.mutate(syllabusId);
+	// 			},
+	// 		},
+	// 		cancel: {
+	// 			label: "Hủy",
+	// 			onClick: () => {},
+	// 		},
+	// 	});
+	// };
 
 	if (isLoading) {
 		return (

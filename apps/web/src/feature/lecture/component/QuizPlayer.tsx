@@ -118,7 +118,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId }) => {
 				<div className="space-y-6">
 					{quizData.quizzes.map((quiz, index) => {
 						const selectedAnswerId = selectedAnswers[quiz.id];
-						const _correctAnswer = quiz.answers.find((a) => a.isCorrect);
+						// const _correctAnswer = quiz.answers.find((a) => a.isCorrect);
 
 						return (
 							<div key={quiz.id} className="rounded-lg bg-gray-800 p-6">

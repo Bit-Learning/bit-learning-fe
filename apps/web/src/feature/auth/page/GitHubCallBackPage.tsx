@@ -11,7 +11,7 @@ interface Props {
 
 function GitHubCallbackPage() {
 	const navigate = useNavigate();
-	const { mutate: githubLogin, isPending, isError, error } = useGitHubLogin();
+	const { mutate: githubLogin, isError, error } = useGitHubLogin();
 	const [localError, setLocalError] = React.useState<string | null>(null);
 
 	React.useEffect(() => {

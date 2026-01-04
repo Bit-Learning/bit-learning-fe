@@ -122,24 +122,6 @@ export default function EditQuestion() {
 		);
 	};
 
-	const _getLevelBadge = (level: string) => {
-		const colors = {
-			EASY: "bg-green-500",
-			MEDIUM: "bg-yellow-500",
-			HARD: "bg-red-500",
-		};
-		const labels = {
-			EASY: "Dễ",
-			MEDIUM: "Trung bình",
-			HARD: "Khó",
-		};
-		return (
-			<Badge className={colors[level as keyof typeof colors]}>
-				{labels[level as keyof typeof labels]}
-			</Badge>
-		);
-	};
-
 	if (isLoading) {
 		return (
 			<div className="container mx-auto max-w-4xl px-4 py-8">

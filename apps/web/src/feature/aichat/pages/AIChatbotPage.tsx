@@ -23,14 +23,11 @@ import {
 } from "@workspace/ui/components/sidebar";
 import { TabPanel, Tabs } from "@workspace/ui/components/Tabs";
 import {
-	BookImage,
-	ClipboardPlus,
 	FileText,
 	Home,
 	MessageSquare,
 	Network,
 	Presentation,
-	Search,
 	SquarePen,
 } from "lucide-react";
 import * as React from "react";
@@ -49,13 +46,6 @@ const AIChatbotPage = () => {
 	const [_activeSection, _setActiveSection] = React.useState("newChat");
 
 	const { userInfo, isLoading } = useSelector(selectAuthStateInfo);
-
-	const _menuItems = [
-		{ id: "newChat", label: "Đoạn hội thoại mới", icon: SquarePen },
-		{ id: "search", label: "Tìm kiếm đoạn hội thoại", icon: Search },
-		{ id: "library", label: "Thư viện", icon: BookImage },
-		{ id: "project", label: "Dự án", icon: ClipboardPlus },
-	];
 
 	const handleSelectConversation = (id: string) => {
 		setCurrentConversationId(id);

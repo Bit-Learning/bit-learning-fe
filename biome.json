@@ -60,7 +60,8 @@
 			},
 			"correctness": {
 				"useParseIntRadix": "warn",
-				"noUnusedFunctionParameters": "warn"
+				"noUnusedFunctionParameters": "warn",
+				"noUnusedImports": "error"
 			},
 			"complexity": {
 				"useIndexOf": "warn"

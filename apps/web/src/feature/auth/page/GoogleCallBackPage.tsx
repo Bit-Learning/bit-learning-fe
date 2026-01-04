@@ -11,7 +11,7 @@ interface Props {
 
 function GoogleCallbackPage() {
 	const navigate = useNavigate();
-	const { mutate: googleLogin, isPending, isError, error } = useGoogleLogin();
+	const { mutate: googleLogin, isError, error } = useGoogleLogin();
 	const [localError, setLocalError] = React.useState<string | null>(null);
 
 	React.useEffect(() => {
