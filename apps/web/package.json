@@ -43,7 +43,7 @@
 		"i18next": "^25.3.1",
 		"i18next-browser-languagedetector": "^8.2.0",
 		"js-cookie": "^3.0.5",
-		"lucide-react": "^0.545.0",
+		"lucide-react": "^0.562.0",
 		"motion": "^12.23.6",
 		"prismjs": "^1.30.0",
 		"qrcode": "^1.5.4",
