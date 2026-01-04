@@ -9,27 +9,23 @@ export const interactionApi = {
     page = 0,
     size = 10,
     sort = "upVotes",
-    direction = "DESC",
+    direction = "DESC"
   ): Promise<AxiosResponse<ApiResponse<CommentResponse[]>>> => {
-    const { data } = await api.get(`/interactions/comments/lectures/${lectureId}`, {
+    return await api.get(`/interactions/comments/lectures/${lectureId}`, {
       params: { page, size, sort, direction },
     });
-    return data;
   },
 
   getReplies: async (parentId: number): Promise<AxiosResponse<ApiResponse<CommentResponse[]>>> => {
-    const { data } = await api.get(`/interactions/comments/${parentId}/replies`);
-    return data;
+    return await api.get(`/interactions/comments/${parentId}/replies`);
   },
 
   postComment: async (request: CommentRequest): Promise<AxiosResponse<ApiResponse<CommentResponse>>> => {
-    const { data } = await api.post("/interactions/comments", request);
-    return data;
+    return await api.post("/interactions/comments", request);
   },
 
   toggleVote: async (commentId: number): Promise<AxiosResponse<ApiResponse<void>>> => {
-    const { data } = await api.post(`/interactions/comments/${commentId}/vote`);
-    return data;
+    return await api.post(`/interactions/comments/${commentId}/vote`);
   },
 
   getCourseReviews: async (
@@ -37,16 +33,14 @@ export const interactionApi = {
     page = 0,
     size = 5,
     sort = "createdAt",
-    direction = "DESC",
+    direction = "DESC"
   ): Promise<AxiosResponse<ApiResponse<ReviewResponse[]>>> => {
-    const { data } = await api.get(`/interactions/reviews/courses/${courseId}`, {
+    return await api.get(`/interactions/reviews/courses/${courseId}`, {
       params: { page, size, sort, direction },
     });
-    return data;
   },
 
   postReview: async (request: ReviewRequest): Promise<AxiosResponse<ApiResponse<ReviewResponse>>> => {
-    const { data } = await api.post("/interactions/reviews", request);
-    return data;
+    return await api.post("/interactions/reviews", request);
   },
 };

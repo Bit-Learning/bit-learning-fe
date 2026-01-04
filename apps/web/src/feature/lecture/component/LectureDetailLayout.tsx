@@ -9,6 +9,7 @@ import CourseSidebar from "./CourseSidebar";
 import QuizPlayer from "./QuizPlayer";
 import TextContent from "./TextContent";
 import VideoPlayerWithNotes from "./VideoPlayerWithNotes";
+import LectureQA from "./LectureQA";
 
 interface LectureDetailLayoutProps {
   courseId: number;
@@ -23,7 +24,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   const navigate = useNavigate();
   const { data: sections, isLoading } = useSectionsByCourse(courseId);
 
-  // Use ref to store lectureId for callbacks
   const lectureIdRef = useRef(lectureId);
   useEffect(() => {
     lectureIdRef.current = lectureId;
@@ -59,7 +59,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
     [navigate]
   );
 
-  // FIXED: Use ref inside callback to get current lectureId
   const handleVideoComplete = useCallback(() => {
     const currentLectureId = lectureIdRef.current;
     setCompletedLectures((prev) => {
@@ -68,11 +67,9 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
     });
   }, []);
 
-  // FIXED: Use ref inside callback to get current lectureId
   const handleProgressUpdate = useCallback((percent: number) => {
     const currentLectureId = lectureIdRef.current;
     setLectureProgress((prev) => {
-      // Only update if changed significantly
       if (Math.abs((prev[currentLectureId] || 0) - percent) < 1) {
         return prev;
       }
@@ -147,26 +144,34 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
       </header>
 
       <div className="flex flex-1 overflow-hidden">
-        <div className="flex flex-1 flex-col">
-          <div className="flex-1 bg-black">
+        <div className="flex flex-1 flex-col overflow-y-auto">
+          <div className="shrink-0 bg-black">
             {currentLecture?.type === LectureType.VIDEO ? (
-              <VideoPlayerWithNotes
-                lectureId={lectureId}
-                onComplete={handleVideoComplete}
-                onProgressUpdate={handleProgressUpdate}
-              />
+              <div className="aspect-video w-full">
+                <VideoPlayerWithNotes
+                  lectureId={lectureId}
+                  onComplete={handleVideoComplete}
+                  onProgressUpdate={handleProgressUpdate}
+                />
+              </div>
             ) : currentLecture?.type === LectureType.QUIZ ? (
               <QuizPlayer lectureId={lectureId} />
             ) : currentLecture?.type === LectureType.TEXT ? (
               <TextContent lectureId={lectureId} />
             ) : (
-              <div className="flex h-full items-center justify-center text-gray-400">
+              <div className="flex h-96 items-center justify-center text-gray-400">
                 <p>Nội dung đang được cập nhật</p>
               </div>
             )}
           </div>
 
-          <div className="flex items-center justify-between border-t border-gray-800 bg-gray-950 px-4 py-3">
+          <div className="bg-gray-50 p-6">
+            <div className="mx-auto max-w-4xl">
+              <LectureQA lectureId={lectureId} />
+            </div>
+          </div>
+
+          <div className="sticky bottom-0 flex items-center justify-between border-t border-gray-800 bg-gray-950 px-4 py-3">
             <Button
               variant="outline"
               size="sm"

@@ -23,7 +23,6 @@ import {
 import type React from "react";
 import { useState } from "react";
 import CourseCurriculum from "@/feature/course/component/CourseCurriculum";
-import CourseQA from "@/feature/course/component/CourseQA";
 import { useCourseDetail } from "../queries/useCourse";
 import { useCourseAccess, useCourseProgress, useEnrollCourse } from "../queries/useEnroll";
 import CourseReviews from "./CourseReviews";
@@ -213,13 +212,6 @@ const CourseDetailContent: React.FC = () => {
                       Nội dung
                     </TabsTrigger>
                     <TabsTrigger
-                      value="qa"
-                      className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
-                    >
-                      <MessageCircle className="mr-1 h-4 w-4" />
-                      Q&A
-                    </TabsTrigger>
-                    <TabsTrigger
                       value="reviews"
                       className="data-[state=active]:bg-blue-50 data-[state=active]:text-blue-700"
                     >
@@ -276,24 +268,6 @@ const CourseDetailContent: React.FC = () => {
 
                   <TabsContent value="curriculum" className="space-y-4">
                     <CourseCurriculum courseId={course.id} />
-                  </TabsContent>
-
-                  <TabsContent value="qa" className="space-y-4">
-                    {hasAccess ? (
-                      <CourseQA lectureId={course.id} />
-                    ) : (
-                      <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
-                        <MessageCircle className="mx-auto mb-3 h-12 w-12 text-gray-400" />
-                        <p className="mb-4 text-gray-600">Bạn cần đăng ký khóa học để tham gia thảo luận</p>
-                        <Button
-                          onClick={handleEnroll}
-                          isDisabled={isPending}
-                          className="bg-blue-700 text-white hover:bg-blue-800"
-                        >
-                          Đăng ký ngay
-                        </Button>
-                      </div>
-                    )}
                   </TabsContent>
 
                   <TabsContent value="reviews" className="space-y-4">
