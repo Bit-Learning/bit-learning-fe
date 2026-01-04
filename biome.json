@@ -14,15 +14,17 @@
 			"!**/dist/**/*",
 			"!**/node_modules/**/*",
 			"!**/packages",
-			"apps/web/src/routeTree.gen.ts",
-			"apps/admin/src/routeTree.gen.ts"
+			"!apps/web/src/routeTree.gen.ts",
+			"!apps/admin/src/routeTree.gen.ts"
 		]
 	},
 	"formatter": {
 		"enabled": true,
 		"indentStyle": "tab"
 	},
-	"assist": { "actions": { "source": { "organizeImports": "on" } } },
+	"assist": {
+		"actions": { "source": { "organizeImports": "on", "recommended": true } }
+	},
 	"linter": {
 		"enabled": true,
 		"rules": {
