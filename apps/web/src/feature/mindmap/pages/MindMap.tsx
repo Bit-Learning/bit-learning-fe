@@ -38,7 +38,7 @@ function downloadImage(dataUrl: string) {
 const convertToEChartsData = (data: InputData): EChartsTreeData => {
 	const allNodes = new Map<string, InputNode>();
 	allNodes.set(data.centerNode.id, data.centerNode);
-	data.nodes.forEach((n) => allNodes.set(n.id, n));
+	data.nodes.forEach((n) => void allNodes.set(n.id, n));
 
 	const connections = new Map<string, string[]>();
 	data.connections.forEach((conn) => {
@@ -466,7 +466,7 @@ function Mindmap({ data }: { data: MindMap }) {
 						</div>
 
 						<div style={{ marginBottom: "20px" }}>
-							<label
+							<span
 								style={{
 									display: "block",
 									marginBottom: "8px",
@@ -475,7 +475,7 @@ function Mindmap({ data }: { data: MindMap }) {
 								}}
 							>
 								Nội dung
-							</label>
+							</span>
 							<input
 								type="text"
 								value={editText}
@@ -517,6 +517,7 @@ function Mindmap({ data }: { data: MindMap }) {
 							</button>
 							<button
 								onClick={() => updateNodeLabel(editingNodeId, editText)}
+								type="button"
 								style={{
 									padding: "8px 16px",
 									background: "#007bff",

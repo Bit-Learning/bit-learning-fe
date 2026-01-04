@@ -33,7 +33,7 @@ export default function SyllabusDetail() {
 
 	// Fetch details for latest version
 	const { data: syllabusDetails } = useQuery({
-		...apiClient.syllabus.getDetailsByVersion(latestVersion?.id!),
+		...apiClient.syllabus.getDetailsByVersion(latestVersion!.id),
 		enabled: !!latestVersion,
 	});
 

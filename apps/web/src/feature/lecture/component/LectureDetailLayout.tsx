@@ -57,9 +57,12 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({
 			? allLectures[currentIndex + 1]
 			: null;
 
-	const goToLecture = (newLectureId: number) => {
-		navigate({ to: "/lectures/$id", params: { id: String(newLectureId) } });
-	};
+	const goToLecture = useCallback(
+		(newLectureId: number) => {
+			navigate({ to: "/lectures/$id", params: { id: String(newLectureId) } });
+		},
+		[navigate],
+	);
 
 	const handleVideoComplete = useCallback(() => {
 		if (!completedLectures.includes(lectureId)) {

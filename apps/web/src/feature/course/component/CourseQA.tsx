@@ -2,7 +2,8 @@ import { Avatar, AvatarFallback } from "@workspace/ui/components/Avatar";
 import { Button } from "@workspace/ui/components/Button";
 import { Textarea } from "@workspace/ui/components/Textarea";
 import { Loader2, MessageCircle, Send } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { usePostComment, useRootComments } from "../queries/useInteraction";
 import CommentItem from "./CommentItem";
 

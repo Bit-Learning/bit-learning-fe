@@ -6,7 +6,7 @@ import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { motion } from "framer-motion";
 import { BookOpen, Code, Gamepad2, Keyboard, Trophy } from "lucide-react";
 import { GameService } from "@/feature/game/api/GameService";
-import type { GameSection } from "@/feature/game/types";
+import type { TGameSection } from "@/feature/game/types";
 import SeeMoreButton from "@/shared/components/button/SeeMoreButton";
 import PresentationBanner from "@/shared/components/PresentationBanner";
 import Contact from "../component/Contact";
@@ -66,7 +66,7 @@ const GameCard = ({ game }: { game: any }) => (
 	</Link>
 );
 
-const GameSection = ({ section }: { section: GameSection }) => (
+const GameSection = ({ section }: { section: TGameSection }) => (
 	<div className="mb-12">
 		<div className="mb-6 flex items-center justify-between">
 			<div className="flex items-center gap-3">

@@ -82,7 +82,9 @@ const TemplatePreviewPage = () => {
 					<Card
 						key={t.id}
 						className="cursor-pointer p-4 transition-shadow hover:shadow-md"
-						onClick={() => (window.location.href = `/templates/${t.id}`)}
+						onClick={() => {
+							window.location.href = `/templates/${t.id}`;
+						}}
 					>
 						<CardHeader className="p-0">
 							<CardTitle className="text-base font-medium text-blue-600 hover:underline">

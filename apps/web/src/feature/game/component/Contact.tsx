@@ -1,7 +1,7 @@
 const Contact = () => {
 	return (
 		<>
-			<section className="bg-gradient-to-r from-orange-400 to-red-400 py-16">
+			<section className="bg-linear-to-r from-orange-400 to-red-400 py-16">
 				<div className="container mx-auto px-4">
 					<div className="grid gap-8 text-center text-white md:grid-cols-3">
 						<div className="space-y-2">
@@ -78,7 +78,7 @@ const Contact = () => {
 					</div>
 					<div className="grid items-center gap-8 lg:grid-cols-2">
 						<div className="hidden items-center justify-center md:flex">
-							<img src="/robot.png" width="400" height="400" />
+							<img src="/robot.png" width="400" height="400" alt="Robot" />
 						</div>
 						<div
 							data-slot="card"

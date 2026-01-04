@@ -1,5 +1,3 @@
-import CourseCurriculum from "@/feature/course/component/CourseCurriculum";
-import CourseQA from "@/feature/course/component/CourseQA";
 import { Link } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
@@ -32,7 +30,10 @@ import {
 	Users,
 	Video,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
+import CourseCurriculum from "@/feature/course/component/CourseCurriculum";
+import CourseQA from "@/feature/course/component/CourseQA";
 import { useCourseDetail } from "../queries/useCourse";
 import {
 	useCourseAccess,
@@ -82,7 +83,7 @@ const CourseDetailContent: React.FC = () => {
 				<div className="container mx-auto max-w-7xl px-4 py-8">
 					<div className="flex h-96 items-center justify-center">
 						<div className="text-center">
-							<div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-700"></div>
+							<div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-700" />
 							<p className="text-gray-600">Đang tải thông tin khóa học...</p>
 						</div>
 					</div>
@@ -137,7 +138,7 @@ const CourseDetailContent: React.FC = () => {
 									alt={course.title}
 									className="h-full w-full object-cover"
 								/>
-								<div className="bg-linear-to-t absolute inset-0 from-black/60 to-transparent"></div>
+								<div className="bg-linear-to-t absolute inset-0 from-black/60 to-transparent" />
 
 								<div className="absolute left-4 top-4 flex gap-2">
 									<Badge className="bg-blue-700 text-white">

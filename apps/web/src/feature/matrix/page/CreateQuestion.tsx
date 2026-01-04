@@ -63,10 +63,14 @@ export default function CreateQuestion() {
 					<CardContent className="space-y-6">
 						{/* Question Type */}
 						<div>
-							<label className="mb-2 block text-sm font-medium">
+							<label
+								htmlFor="question-type"
+								className="mb-2 block text-sm font-medium"
+							>
 								Loại câu hỏi <span className="text-red-500">*</span>
 							</label>
 							<select
+								id="question-type"
 								value={formData.questionType}
 								onChange={(e) =>
 									handleInputChange("questionType", e.target.value)
@@ -81,10 +85,14 @@ export default function CreateQuestion() {
 
 						{/* Question Level */}
 						<div>
-							<label className="mb-2 block text-sm font-medium">
+							<label
+								htmlFor="question-level"
+								className="mb-2 block text-sm font-medium"
+							>
 								Độ khó <span className="text-red-500">*</span>
 							</label>
 							<select
+								id="question-level"
 								value={formData.questionLevel}
 								onChange={(e) =>
 									handleInputChange("questionLevel", e.target.value)
@@ -100,10 +108,14 @@ export default function CreateQuestion() {
 
 						{/* Content */}
 						<div>
-							<label className="mb-2 block text-sm font-medium">
+							<label
+								htmlFor="content"
+								className="mb-2 block text-sm font-medium"
+							>
 								Nội dung câu hỏi <span className="text-red-500">*</span>
 							</label>
 							<textarea
+								id="content"
 								value={formData.content}
 								onChange={(e) => handleInputChange("content", e.target.value)}
 								className="w-full rounded-md border border-gray-300 px-3 py-2"
@@ -115,10 +127,14 @@ export default function CreateQuestion() {
 
 						{/* Canonical Answer */}
 						<div>
-							<label className="mb-2 block text-sm font-medium">
+							<label
+								htmlFor="canonical-answer"
+								className="mb-2 block text-sm font-medium"
+							>
 								Đáp án chi tiết <span className="text-red-500">*</span>
 							</label>
 							<textarea
+								id="canonical-answer"
 								value={formData.canonicalAnswer}
 								onChange={(e) =>
 									handleInputChange("canonicalAnswer", e.target.value)
@@ -132,10 +148,14 @@ export default function CreateQuestion() {
 
 						{/* Subject ID */}
 						<div>
-							<label className="mb-2 block text-sm font-medium">
+							<label
+								htmlFor="subject-id"
+								className="mb-2 block text-sm font-medium"
+							>
 								ID Môn học <span className="text-red-500">*</span>
 							</label>
 							<Input
+								id="subject-id"
 								type="number"
 								value={formData.subjectId}
 								onChange={(e) =>
@@ -148,10 +168,14 @@ export default function CreateQuestion() {
 
 						{/* Lesson ID */}
 						<div>
-							<label className="mb-2 block text-sm font-medium">
+							<label
+								htmlFor="lesson-id"
+								className="mb-2 block text-sm font-medium"
+							>
 								ID Bài học <span className="text-red-500">*</span>
 							</label>
 							<Input
+								id="lesson-id"
 								type="number"
 								value={formData.lessonId}
 								onChange={(e) =>

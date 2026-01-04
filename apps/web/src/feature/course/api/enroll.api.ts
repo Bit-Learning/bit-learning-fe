@@ -1,6 +1,6 @@
+import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
-import { ApiResponse } from "@/shared/api/api.type";
-import { AxiosResponse } from "axios";
+import type { ApiResponse } from "@/shared/api/api.type";
 
 export const enrollApi = {
 	enrollCourse(courseId: number): Promise<AxiosResponse<ApiResponse<void>>> {

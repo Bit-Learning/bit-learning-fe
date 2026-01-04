@@ -7,8 +7,8 @@ import { Badge } from "@workspace/ui/components/Badge";
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Clock, Star } from "lucide-react";
-import React from "react";
-import { ReviewResponse } from "../types/interaction.type";
+import type React from "react";
+import type { ReviewResponse } from "../types/interaction.type";
 
 interface ReviewItemProps {
 	review: ReviewResponse;

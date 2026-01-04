@@ -296,9 +296,11 @@ export function TransactionManagement() {
 					</CardHeader>
 					<CardContent className="flex flex-wrap gap-4">
 						<div className="flex items-center gap-2">
-							<label className="text-sm font-medium">Type:</label>
+							<label htmlFor="type-filter" className="text-sm font-medium">
+								Type:
+							</label>
 							<Select value={typeFilter} onValueChange={setTypeFilter}>
-								<SelectTrigger className="w-[180px]">
+								<SelectTrigger id="type-filter" className="w-[180px]">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -311,9 +313,11 @@ export function TransactionManagement() {
 						</div>
 
 						<div className="flex items-center gap-2">
-							<label className="text-sm font-medium">Status:</label>
+							<label htmlFor="status-filter" className="text-sm font-medium">
+								Status:
+							</label>
 							<Select value={statusFilter} onValueChange={setStatusFilter}>
-								<SelectTrigger className="w-[180px]">
+								<SelectTrigger id="status-filter" className="w-[180px]">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>
@@ -326,7 +330,9 @@ export function TransactionManagement() {
 						</div>
 
 						<div className="flex items-center gap-2">
-							<label className="text-sm font-medium">Page Size:</label>
+							<label htmlFor="page-size" className="text-sm font-medium">
+								Page Size:
+							</label>
 							<Select
 								value={pageSize.toString()}
 								onValueChange={(value) => {
@@ -334,7 +340,7 @@ export function TransactionManagement() {
 									setPage(0);
 								}}
 							>
-								<SelectTrigger className="w-[100px]">
+								<SelectTrigger id="page-size" className="w-[100px]">
 									<SelectValue />
 								</SelectTrigger>
 								<SelectContent>

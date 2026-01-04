@@ -1,7 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@workspace/ui/components/Sonner";
 import { interactionApi } from "../api/interaction.api";
-import { CommentRequest, ReviewRequest } from "../types/interaction.type";
+import type { CommentRequest, ReviewRequest } from "../types/interaction.type";
 
 export const interactionKeys = {
 	all: ["interactions"] as const,

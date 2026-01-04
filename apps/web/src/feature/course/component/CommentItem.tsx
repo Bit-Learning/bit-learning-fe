@@ -18,13 +18,14 @@ import {
 	Pin,
 	Send,
 } from "lucide-react";
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import {
 	usePostComment,
 	useReplies,
 	useToggleVote,
 } from "../queries/useInteraction";
-import { CommentResponse } from "../types/interaction.type";
+import type { CommentResponse } from "../types/interaction.type";
 
 interface CommentItemProps {
 	comment: CommentResponse;

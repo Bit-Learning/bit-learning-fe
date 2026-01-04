@@ -29,6 +29,7 @@ const TemplateDetailPreviewPage = () => {
 				width="100%"
 				height="600"
 				className="rounded-lg border shadow"
+				title="Template Preview"
 			/>
 
 			{/* Preview mode using iframe */}
@@ -37,6 +38,7 @@ const TemplateDetailPreviewPage = () => {
 				width="100%"
 				height="600"
 				className="rounded-lg border shadow"
+				title="Reveal.js Template Preview"
 			/>
 		</PresentationLayout>
 	);

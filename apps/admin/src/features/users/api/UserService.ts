@@ -17,7 +17,7 @@ export function GetPagedUsers(
 	const queryParams = new URLSearchParams();
 	queryParams.append("page", page.toString());
 	queryParams.append("size", size.toString());
-	sort.forEach((s) => queryParams.append("sort", s));
+	sort.forEach((s) => void queryParams.append("sort", s));
 
 	return api.get(`${endpoints.ACCOUNT}/paged?${queryParams.toString()}`);
 }

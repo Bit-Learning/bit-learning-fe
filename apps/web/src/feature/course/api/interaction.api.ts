@@ -1,6 +1,6 @@
 import api from "@/shared/api/api";
-import { ApiResponse } from "@/shared/api/api.type";
-import {
+import type { ApiResponse } from "@/shared/api/api.type";
+import type {
 	CommentRequest,
 	CommentResponse,
 	ReviewRequest,

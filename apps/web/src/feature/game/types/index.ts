@@ -96,7 +96,7 @@ export interface LeaderboardEntry {
 	score: number;
 }
 
-export interface GameSection {
+export interface TGameSection {
 	type: string;
 	sectionTitle: string;
 	items: GameListItem[];

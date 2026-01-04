@@ -1,6 +1,6 @@
 const SeeMoreButton = () => {
 	return (
-		<button className="button">
+		<button type="button" className="smbutton">
 			<span>Xem thêm</span>
 			<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 66 43">
 				<polygon points="39.58,4.46 44.11,0 66,21.5 44.11,43 39.58,38.54 56.94,21.5" />
@@ -8,7 +8,7 @@ const SeeMoreButton = () => {
 				<polygon points="0,4.46 4.53,0 26.42,21.5 4.53,43 0,38.54 17.36,21.5" />
 			</svg>
 			<style>{`
-                .button {
+                .smbutton {
                     --main-size: 1em;
                     --color-text: #ffffff;
                     --color-background: #ff135a;
@@ -32,11 +32,11 @@ const SeeMoreButton = () => {
                     transition: 1s;
                 }
 
-                .button:active {
+                .smbutton:active {
                     transform: scale(0.95);
                 }
 
-                .button:hover {
+                .smbutton:hover {
                     outline: 0.1em solid transparent;
                     outline-offset: 0.2em;
                     box-shadow: 0 0 1em 0 var(--color-background);
@@ -46,20 +46,20 @@ const SeeMoreButton = () => {
                     transition: 0.5s;
                 }
 
-                .button span {
+                .smbutton span {
                     margin-right: 0.3em;
                     transition: 0.5s;
                 }
 
-                .button:hover span {
+                .smbutton:hover span {
                     text-shadow: 5px 5px 5px var(--color-shadow);
                 }
 
-                .button:active span {
+                .smbutton:active span {
                     text-shadow: none;
                 }
 
-                .button svg {
+                .smbutton svg {
                     height: 0.8em;
                     fill: var(--color-text);
                     margin-right: -0.16em;
@@ -67,37 +67,37 @@ const SeeMoreButton = () => {
                     transition: 0.5s;
                 }
 
-                .button:hover svg {
+                .smbutton:hover svg {
                     margin-right: 0.66em;
                     transition: 0.5s;
                     filter: drop-shadow(5px 5px 2.5px var(--color-shadow));
                 }
 
-                .button:active svg {
+                .smbutton:active svg {
                     filter: none;
                 }
 
-                .button svg polygon:nth-child(1) {
+                .smbutton svg polygon:nth-child(1) {
                     transition: 0.4s;
                     transform: translateX(-60%);
                 }
 
-                .button svg polygon:nth-child(2) {
+                .smbutton svg polygon:nth-child(2) {
                     transition: 0.5s;
                     transform: translateX(-30%);
                 }
 
-                .button:hover svg polygon:nth-child(1) {
+                .smbutton:hover svg polygon:nth-child(1) {
                     transform: translateX(0%);
                     animation: opacity 1s infinite 0.6s;
                 }
 
-                .button:hover svg polygon:nth-child(2) {
+                .smbutton:hover svg polygon:nth-child(2) {
                     transform: translateX(0%);
                     animation: opacity 1s infinite 0.4s;
                 }
 
-                .button:hover svg polygon:nth-child(3) {
+                .smbutton:hover svg polygon:nth-child(3) {
                     animation: opacity 1s infinite 0.2s;
                 }
 
