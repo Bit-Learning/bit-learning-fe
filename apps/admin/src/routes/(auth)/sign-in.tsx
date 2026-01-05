@@ -1,12 +1,23 @@
-import { z } from 'zod'
-import { createFileRoute } from '@tanstack/react-router'
-import { SignIn } from '@/features/auth/sign-in'
+import { createFileRoute, redirect } from "@tanstack/react-router";
+import { z } from "zod";
+import { SignIn } from "@/features/auth/sign-in";
+import { getAccessToken } from "@/lib/cookies";
 
 const searchSchema = z.object({
-  redirect: z.string().optional(),
-})
+	redirect: z.string().optional(),
+});
 
-export const Route = createFileRoute('/(auth)/sign-in')({
-  component: SignIn,
-  validateSearch: searchSchema,
-})
+export const Route = createFileRoute("/(auth)/sign-in")({
+	beforeLoad: async () => {
+		const accessToken = getAccessToken();
+
+		// If already logged in, redirect to dashboard
+		if (accessToken) {
+			throw redirect({
+				to: "/",
+			});
+		}
+	},
+	component: SignIn,
+	validateSearch: searchSchema,
+});

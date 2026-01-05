@@ -1,3 +1,4 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:ital,opsz,wght@0,14..32,100..900;1,14..32,100..900&display=swap");
 @import "tailwindcss";
 @import "tw-animate-css";
 
@@ -6,6 +7,7 @@
 @source "../**/*.{ts,tsx}";
 
 @plugin "@tailwindcss/typography";
+@plugin 'tailwind-scrollbar';
 
 @custom-variant dark (&:is(.dark *));
 
@@ -86,6 +88,10 @@
   --sidebar-primary-foreground: hsl(0 0% 100%);
 }
 
+@theme {
+  --font-inter: 'Inter', sans-serif;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-background-secondary: var(--background-secondary);
@@ -145,10 +151,17 @@
     font-weight: var(--shiki-dark-font-weight) !important;
     text-decoration: var(--shiki-dark-text-decoration) !important;
   }
+  .maplibregl-popup-content {
+    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+  }
+  .maplibregl-popup-tip {
+    @apply hidden!;
+  }
 }
 
 @layer utilities {
   .button-3d {
     @apply border border-black/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_1px_3px_0_rgba(0,0,0,0.15)] dark:border-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)];
   }
+
 }

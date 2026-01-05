@@ -40,3 +40,14 @@ npm-debug.log*
 
 # next.js
 next-env.d.ts
+
+# apps/web
+apps/web/.env.sentry-build-plugin
+apps/web/*.xml
+
+*storybook.log
+storybook-static
+
+# ignore all md files, except README.md
+*.md
+!README.md

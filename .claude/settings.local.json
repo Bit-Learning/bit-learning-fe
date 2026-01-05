@@ -1,0 +1,7 @@
+{
+	"permissions": {
+		"allow": ["Bash(npx tsr:*)", "Bash(npm run dev:*)"],
+		"deny": [],
+		"ask": []
+	}
+}
