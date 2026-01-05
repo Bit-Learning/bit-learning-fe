@@ -61,7 +61,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.2.5",
-		"@faker-js/faker": "^10.0.0",
+		"@faker-js/faker": "^10.2.0",
 		"@tanstack/react-query-devtools": "^5.90.2",
 		"@tanstack/react-router-devtools": "^1.132.51",
 		"@tanstack/router-plugin": "^1.132.51",
