@@ -1,3 +1,16 @@
+import TwoFactorSettings from "@/feature/auth/component/TwoFactorSettings";
+import {
+	setIsAuthenticatedAction,
+	setUserInfoAction,
+} from "@/feature/auth/store";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { useFetchOrdersByUserId } from "@/feature/order/hook/useOrder";
+import { useUserPresentations } from "@/feature/presentations/hooks/usePresentations";
+import { useFetchTransactionsByWalletId } from "@/feature/transaction/hook/useTransaction";
+import { clearAuthTokens } from "@/shared/lib/cookies";
+import { formatDateTime } from "@/shared/lib/date-time-utils";
+import { mergeName } from "@/shared/lib/string-utils";
+import { useAppDispatch } from "@/shared/redux/store";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
 	Avatar,
@@ -12,7 +25,7 @@ import {
 	CardHeader,
 	CardTitle,
 } from "@workspace/ui/components/Card";
-import Loader from "@workspace/ui/components/loader/OrangeBlockLoader";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import {
 	Popover,
 	PopoverDialog,
@@ -64,21 +77,6 @@ import {
 } from "lucide-react";
 import * as React from "react";
 import { useSelector } from "react-redux";
-import TwoFactorSettings from "@/feature/auth/component/TwoFactorSettings";
-import {
-	setIsAuthenticatedAction,
-	setUserInfoAction,
-} from "@/feature/auth/store";
-import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
-import { useFetchOrdersByUserId } from "@/feature/order/hook/useOrder";
-import { CreatePaymentURL } from "@/feature/payment/service/paymentService";
-import { useUserPresentations } from "@/feature/presentations/hooks/usePresentations";
-import { useFetchTransactionsByWalletId } from "@/feature/transaction/hook/useTransaction";
-import { clearAuthTokens } from "@/shared/lib/cookies";
-import { formatDateTime } from "@/shared/lib/date-time-utils";
-import { mergeName } from "@/shared/lib/string-utils";
-import { useAppDispatch } from "@/shared/redux/store";
-import { AddFundsDialog } from "../components/AddFundsDialog";
 import { ChangePasswordDialog } from "../components/ChangePasswordDialog";
 import { EditProfileDialog } from "../components/EditProfileDialog";
 import { useUploadAvatar, useUploadCoverImage } from "../queries/useUser";
@@ -91,7 +89,6 @@ function UserProfilePage() {
 	const { userInfo, isLoading } = useSelector(selectAuthStateInfo);
 	const [activeSection, setActiveSection] = React.useState("overview");
 	const [activeSettingTab, setActiveSettingTab] = React.useState("security");
-	const [openAddFunds, setOpenAddFunds] = React.useState(false);
 	const [openChangePassword, setOpenChangePassword] = React.useState(false);
 	const [openEditProfile, setOpenEditProfile] = React.useState(false);
 	const [transactionTypeFilter, setTransactionTypeFilter] =
@@ -221,19 +218,11 @@ function UserProfilePage() {
 		{ id: "presentations", label: "Bài thuyết trình", icon: Presentation },
 		{ id: "orders", label: "Đơn hàng", icon: Package },
 		{ id: "wallet", label: "Ví & Giao dịch", icon: Wallet },
+		{ id: "checkout", label: "Nạp tiền", icon: CreditCard, url: "/checkout" },
 		{ id: "activity", label: "Hoạt động", icon: Activity },
 		{ id: "notifications", label: "Thông báo", icon: Bell },
 		{ id: "settings", label: "Cài đặt", icon: Settings },
 	];
-
-	const handleAddFunds = async (amount: number) => {
-		const res = await CreatePaymentURL({
-			amount: amount,
-			description: "Nạp tiền vào ví",
-			walletId: userInfo.wallet.id,
-		});
-		window.location.href = res.data.data.url;
-	};
 
 	return (
 		<SidebarProvider defaultOpen>
@@ -253,7 +242,13 @@ function UserProfilePage() {
 									{menuItems.map((item) => (
 										<SidebarMenuItem key={item.id}>
 											<SidebarMenuButton
-												onClick={() => setActiveSection(item.id)}
+												onClick={() => {
+													if (item.url) {
+														navigate({ to: item.url });
+														return;
+													}
+													setActiveSection(item.id);
+												}}
 												isActive={activeSection === item.id}
 												tooltip={item.label}
 											>
@@ -620,9 +615,7 @@ function UserProfilePage() {
 											</h3>
 										</div>
 										{presentationsLoading ? (
-											<div className="flex justify-center py-8">
-												<Loader />
-											</div>
+											<Loader />
 										) : userPresentations && userPresentations.length > 0 ? (
 											<div className="grid gap-4 sm:grid-cols-2">
 												{userPresentations.map((pres) => (
@@ -705,9 +698,7 @@ function UserProfilePage() {
 											</Badge>
 										</div>
 										{ordersLoading ? (
-											<div className="flex justify-center py-8">
-												<Loader />
-											</div>
+											<Loader />
 										) : userOrders && userOrders.length > 0 ? (
 											<div className="space-y-4">
 												{userOrders.map((order) => (
@@ -933,16 +924,6 @@ function UserProfilePage() {
 										</Card>
 									</div>
 
-									<button
-										className="button-deposit"
-										onClick={() => setOpenAddFunds(true)}
-									>
-										<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 36 24">
-											<path d="m18 0 8 12 10-8-4 20H4L0 4l10 8 8-12z" />
-										</svg>
-										Nạp tiền
-									</button>
-
 									{/* Transaction History */}
 									<Card>
 										<CardContent className="p-6">
@@ -1095,9 +1076,7 @@ function UserProfilePage() {
 											</div>
 
 											{transactionsLoading ? (
-												<div className="flex justify-center py-8">
-													<Loader />
-												</div>
+												<Loader />
 											) : filteredTransactions &&
 												filteredTransactions.length > 0 ? (
 												<div className="overflow-x-auto">
@@ -1670,11 +1649,6 @@ function UserProfilePage() {
 						{/* Profile Tabs Content */}
 						{/* <ProfileContent /> */}
 					</div>
-					<AddFundsDialog
-						open={openAddFunds}
-						onOpenChange={setOpenAddFunds}
-						onConfirm={(amount) => handleAddFunds(amount)}
-					/>
 					<ChangePasswordDialog
 						open={openChangePassword}
 						onOpenChange={setOpenChangePassword}

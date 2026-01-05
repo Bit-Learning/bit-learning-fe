@@ -17,6 +17,7 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
 import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
+import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as HeaderOnlyRouteImport } from './routes/_headerOnly'
 import { Route as R404RouteImport } from './routes/404'
@@ -131,6 +132,11 @@ const PaymentFailedRoute = PaymentFailedRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CheckoutRoute = CheckoutRouteImport.update({
+  id: '/checkout',
+  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutRoute = LayoutRouteImport.update({
@@ -525,6 +531,7 @@ const LayoutTemplatesSlidevIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/404': typeof R404Route
+  '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
@@ -608,6 +615,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/404': typeof R404Route
+  '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
@@ -694,6 +702,7 @@ export interface FileRoutesById {
   '/404': typeof R404Route
   '/_headerOnly': typeof HeaderOnlyRouteWithChildren
   '/_layout': typeof LayoutRouteWithChildren
+  '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
@@ -779,6 +788,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/404'
+    | '/checkout'
     | '/forgot-password'
     | '/payment-failed'
     | '/payment-succeeded'
@@ -862,6 +872,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/404'
+    | '/checkout'
     | '/forgot-password'
     | '/payment-failed'
     | '/payment-succeeded'
@@ -947,6 +958,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/_headerOnly'
     | '/_layout'
+    | '/checkout'
     | '/forgot-password'
     | '/payment-failed'
     | '/payment-succeeded'
@@ -1033,6 +1045,7 @@ export interface RootRouteChildren {
   R404Route: typeof R404Route
   HeaderOnlyRoute: typeof HeaderOnlyRouteWithChildren
   LayoutRoute: typeof LayoutRouteWithChildren
+  CheckoutRoute: typeof CheckoutRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentSucceededRoute: typeof PaymentSucceededRoute
@@ -1108,6 +1121,13 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/checkout': {
+      id: '/checkout'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout': {
@@ -1799,6 +1819,7 @@ const rootRouteChildren: RootRouteChildren = {
   R404Route: R404Route,
   HeaderOnlyRoute: HeaderOnlyRouteWithChildren,
   LayoutRoute: LayoutRouteWithChildren,
+  CheckoutRoute: CheckoutRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentSucceededRoute: PaymentSucceededRoute,

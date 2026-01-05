@@ -155,7 +155,7 @@ const SignInForm: React.FC = () => {
 
 			<div className="flex flex-1 items-center justify-center px-6 pb-6">
 				<div className="w-full max-w-md">
-					<div className="mb-8 flex items-center justify-center lg:hidden">
+					<div className="mb-8 flex items-center justify-center">
 						<div className="flex items-center space-x-2">
 							<img
 								src="./Logo.png"
@@ -178,15 +178,6 @@ const SignInForm: React.FC = () => {
 						) : (
 							<>
 								<div className="mb-6 text-center">
-									<div className="mb-4 flex justify-center">
-										<div className="flex items-center space-x-2">
-											<img
-												src="./Logo.png"
-												alt="Bithub Logo"
-												className="h-8 w-24 object-contain"
-											/>
-										</div>
-									</div>
 									<h1 className="mb-2 text-xl font-bold text-gray-900">
 										Chào mừng trở lại!
 									</h1>

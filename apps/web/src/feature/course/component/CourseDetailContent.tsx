@@ -40,6 +40,7 @@ import {
 	useCourseProgress,
 	useEnrollCourse,
 } from "../queries/useEnroll";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 const CourseDetailContent: React.FC = () => {
 	const [isLiked, setIsLiked] = useState(false);
@@ -78,23 +79,12 @@ const CourseDetailContent: React.FC = () => {
 	};
 
 	if (isLoading) {
-		return (
-			<div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50">
-				<div className="container mx-auto max-w-7xl px-4 py-8">
-					<div className="flex h-96 items-center justify-center">
-						<div className="text-center">
-							<div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-700" />
-							<p className="text-gray-600">Đang tải thông tin khóa học...</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
+		return <Loader />;
 	}
 
 	if (error || !course) {
 		return (
-			<div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50">
+			<div className="min-h-screen">
 				<div className="container mx-auto max-w-7xl px-4 py-8">
 					<div className="py-12 text-center">
 						<BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
@@ -116,7 +106,7 @@ const CourseDetailContent: React.FC = () => {
 	}
 
 	return (
-		<div className="bg-linear-to-br min-h-screen from-gray-50 to-blue-50">
+		<div className="min-h-screen">
 			<div className="container mx-auto max-w-7xl px-4 py-8">
 				<div className="text-md mb-6 flex items-center gap-2">
 					<Link

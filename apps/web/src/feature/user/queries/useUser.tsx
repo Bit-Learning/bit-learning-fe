@@ -47,8 +47,7 @@ export function useUserProfile() {
 	useEffect(() => {
 		if (query.isError && query.error) {
 			const error = query.error as any;
-			const errorMessage =
-				error?.response?.data?.message || "Không thể tải thông tin người dùng";
+			const errorMessage = error?.response?.data?.message || "";
 			dispatch(setErrorAction(errorMessage));
 
 			if (error?.response?.status !== 401) {
