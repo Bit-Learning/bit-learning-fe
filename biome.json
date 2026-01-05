@@ -23,7 +23,7 @@
 		"indentStyle": "tab"
 	},
 	"assist": {
-		"actions": { "source": { "organizeImports": "on", "recommended": true } }
+		"actions": { "source": { "organizeImports": "off", "recommended": true } }
 	},
 	"linter": {
 		"enabled": true,

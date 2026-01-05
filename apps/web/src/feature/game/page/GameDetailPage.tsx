@@ -1,11 +1,11 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Spinner } from "@workspace/ui/components/Spinner";
 import { BookOpen, Clock, Target } from "lucide-react";
 import type React from "react";
 import { NotFoundErrorPage } from "@/feature/app/page/NotFound";
 import { GameHistory } from "../component/GameHistory";
 import { Leaderboard } from "../component/Leaderboard";
 import { useGameDetail } from "../hooks/useGame";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import "../styles/playbutton.css";
 
 interface Props {
@@ -18,11 +18,7 @@ export const GameDetailPage: React.FC<Props> = ({ id }) => {
 	const { data: game, isLoading, error } = useGameDetail(gameId);
 
 	if (isLoading) {
-		return (
-			<div className="flex h-[60vh] items-center justify-center">
-				<Spinner />
-			</div>
-		);
+		return <Loader />;
 	}
 
 	if (error) {

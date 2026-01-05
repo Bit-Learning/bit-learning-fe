@@ -1,17 +1,16 @@
+import { useInitializeAuth } from "@/feature/user/queries/useUser";
+import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import {
-	MutationCache,
 	matchQuery,
+	MutationCache,
 	QueryClient,
 	QueryClientProvider,
 } from "@tanstack/react-query";
-import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { ConfirmDialog } from "@workspace/ui/components/ConfirmDialog";
 import { BsProvider } from "@workspace/ui/components/Provider";
 import { useEffect } from "react";
 import { HelmetProvider } from "react-helmet-async";
 import { Provider } from "react-redux";
-import { useInitializeAuth } from "@/feature/user/queries/useUser";
-import { ThemeProvider } from "@/shared/components/ThemeProvider";
 import store from "../redux/store";
 
 const queryClient = new QueryClient({
@@ -54,7 +53,6 @@ export const Providers = ({ children }: { children: React.ReactNode }) => {
 							<AuthInitializer />
 							{children}
 							<ConfirmDialog />
-							<ReactQueryDevtools initialIsOpen={false} />
 						</QueryClientProvider>
 					</HelmetProvider>
 				</ThemeProvider>

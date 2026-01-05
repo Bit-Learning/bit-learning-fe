@@ -1,3 +1,9 @@
+import { useLogout } from "@/feature/auth/queries/useAuth";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { navItems } from "@/layouts/data/nav-items";
+import CodeButton from "@/shared/components/button/CodeButton";
+import { SearchProvider, useSearch } from "@/shared/context/search-context";
+import { mergeName } from "@/shared/lib/string-utils";
 import { Link, useNavigate } from "@tanstack/react-router";
 import {
 	Avatar,
@@ -27,23 +33,9 @@ import {
 	SheetContent,
 	SheetTrigger,
 } from "@workspace/ui/components/sheet";
-import {
-	LogOut,
-	Menu,
-	Search,
-	Settings,
-	User,
-	User2Icon,
-	Wallet,
-} from "lucide-react";
+import { LogOut, Menu, Search, Settings, User, User2Icon } from "lucide-react";
 import { useState } from "react";
 import { useSelector } from "react-redux";
-import { useLogout } from "@/feature/auth/queries/useAuth";
-import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
-import { navItems } from "@/layouts/data/nav-items";
-import CodeButton from "@/shared/components/button/CodeButton";
-import { SearchProvider, useSearch } from "@/shared/context/search-context";
-import { mergeName } from "@/shared/lib/string-utils";
 import MobileSheetMenu from "./mobile-sheet-menu";
 
 const TransparentHeader: React.FC = () => {
@@ -159,20 +151,7 @@ const TransparentHeader: React.FC = () => {
 											<User className="mr-2 h-4 w-4" />
 											<span>Hồ sơ cá nhân</span>
 										</MenuItem>
-										<MenuItem
-											onAction={() => navigate({ to: "/user-profile" })}
-										>
-											<Wallet className="mr-2 h-4 w-4" />
-											<span>
-												{(userInfo.wallet?.balance ?? 0).toLocaleString(
-													"vi-VN",
-													{
-														style: "currency",
-														currency: "VND",
-													},
-												)}
-											</span>
-										</MenuItem>
+
 										<MenuItem
 											onAction={() => navigate({ to: "/mentor/dashboard" })}
 										>

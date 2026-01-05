@@ -19,7 +19,7 @@ const ScrollToTop: React.FC = () => {
 	return visible ? (
 		<button
 			onClick={scrollToTop}
-			className="fixed right-4 bottom-8 z-50 cursor-pointer rounded-full bg-[#222] p-3 text-white shadow-lg transition hover:bg-red-600"
+			className="fixed right-4 bottom-20 z-50 cursor-pointer rounded-full bg-[#222] p-3 text-white shadow-lg transition hover:bg-red-600"
 			aria-label="Scroll to top"
 		>
 			<ChevronUp className="h-6 w-6" />
