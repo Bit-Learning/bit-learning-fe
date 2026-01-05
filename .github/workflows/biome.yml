@@ -2,7 +2,7 @@ name: Code quality
 
 on:
     push:
-        branches: [develop, feature/biome-ci]
+        branches: [feature/biome-ci]
     pull_request:
         branches: [develop]
 
@@ -18,4 +18,5 @@ jobs:
                   version: latest
             - name: Run Biome
               run: biome ci --reporter=github
+
 
