@@ -4,6 +4,8 @@ import { CheckCircle, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useSectionsByCourse } from "../queries/useSection";
+import { useMultipleLecturesCompleted, LEARNING_KEYS } from "../queries/useLearning";
+import { useQueryClient } from "@tanstack/react-query";
 import { LectureType } from "../types/lecture.type";
 import CourseSidebar from "./CourseSidebar";
 import QuizPlayer from "./QuizPlayer";
@@ -18,16 +20,28 @@ interface LectureDetailLayoutProps {
 
 const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lectureId }) => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [completedLectures, setCompletedLectures] = useState<number[]>([]);
+  const [localCompletedLectures, setLocalCompletedLectures] = useState<number[]>([]);
   const [lectureProgress, setLectureProgress] = useState<Record<number, number>>({});
 
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: sections, isLoading } = useSectionsByCourse(courseId);
 
   const lectureIdRef = useRef(lectureId);
   useEffect(() => {
     lectureIdRef.current = lectureId;
   }, [lectureId]);
+
+  const allLectureIds = useMemo(() => {
+    if (!sections) return [];
+    return sections.flatMap((s) => s.lectures?.map((l) => l.id) || []);
+  }, [sections]);
+
+  const { completedIds: serverCompletedIds } = useMultipleLecturesCompleted(allLectureIds);
+
+  const completedLectures = useMemo(() => {
+    return [...new Set([...serverCompletedIds, ...localCompletedLectures])];
+  }, [serverCompletedIds, localCompletedLectures]);
 
   const currentLecture = useMemo(() => {
     if (!sections) return null;
@@ -61,11 +75,12 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
 
   const handleVideoComplete = useCallback(() => {
     const currentLectureId = lectureIdRef.current;
-    setCompletedLectures((prev) => {
+    setLocalCompletedLectures((prev) => {
       if (prev.includes(currentLectureId)) return prev;
       return [...prev, currentLectureId];
     });
-  }, []);
+    queryClient.setQueryData(LEARNING_KEYS.isCompleted(currentLectureId), true);
+  }, [queryClient]);
 
   const handleProgressUpdate = useCallback((percent: number) => {
     const currentLectureId = lectureIdRef.current;
@@ -80,7 +95,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
-
       switch (e.key) {
         case "ArrowLeft":
           if (e.shiftKey && previousLecture) goToLecture(previousLecture.id);
@@ -131,7 +145,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
               Đã hoàn thành
             </span>
           )}
-
           <Button
             variant="ghost"
             size="sm"
@@ -155,9 +168,9 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                 />
               </div>
             ) : currentLecture?.type === LectureType.QUIZ ? (
-              <QuizPlayer lectureId={lectureId} />
+              <QuizPlayer lectureId={lectureId} onComplete={handleVideoComplete} />
             ) : currentLecture?.type === LectureType.TEXT ? (
-              <TextContent lectureId={lectureId} />
+              <TextContent lectureId={lectureId} onComplete={handleVideoComplete} />
             ) : (
               <div className="flex h-96 items-center justify-center text-gray-400">
                 <p>Nội dung đang được cập nhật</p>

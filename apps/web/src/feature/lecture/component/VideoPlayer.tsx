@@ -15,7 +15,7 @@ interface VideoPlayerProps {
   seekTo?: number | null;
 }
 
-const SYNC_INTERVAL = 5000;
+const SYNC_INTERVAL = 1000;
 const COMPLETION_THRESHOLD = 90;
 
 const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProgressUpdate, onTimeUpdate, seekTo }) => {
