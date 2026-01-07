@@ -44,6 +44,7 @@ import { Route as LayoutQuestionsIndexRouteImport } from './routes/_layout/quest
 import { Route as LayoutPresentationsIndexRouteImport } from './routes/_layout/presentations/index'
 import { Route as LayoutNewsIndexRouteImport } from './routes/_layout/news/index'
 import { Route as LayoutMatricesIndexRouteImport } from './routes/_layout/matrices/index'
+import { Route as LayoutDashboardIndexRouteImport } from './routes/_layout/dashboard/index'
 import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
 import { Route as HeaderOnlyGamesIndexRouteImport } from './routes/_headerOnly/games/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
@@ -266,6 +267,11 @@ const LayoutNewsIndexRoute = LayoutNewsIndexRouteImport.update({
 const LayoutMatricesIndexRoute = LayoutMatricesIndexRouteImport.update({
   id: '/matrices/',
   path: '/matrices/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutDashboardIndexRoute = LayoutDashboardIndexRouteImport.update({
+  id: '/dashboard/',
+  path: '/dashboard/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutCoursesIndexRoute = LayoutCoursesIndexRouteImport.update({
@@ -590,6 +596,7 @@ export interface FileRoutesByFullPath {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/games': typeof HeaderOnlyGamesIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
+  '/dashboard': typeof LayoutDashboardIndexRoute
   '/matrices': typeof LayoutMatricesIndexRoute
   '/news': typeof LayoutNewsIndexRoute
   '/presentations': typeof LayoutPresentationsIndexRoute
@@ -674,6 +681,7 @@ export interface FileRoutesByTo {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/games': typeof HeaderOnlyGamesIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
+  '/dashboard': typeof LayoutDashboardIndexRoute
   '/matrices': typeof LayoutMatricesIndexRoute
   '/news': typeof LayoutNewsIndexRoute
   '/presentations': typeof LayoutPresentationsIndexRoute
@@ -761,6 +769,7 @@ export interface FileRoutesById {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_headerOnly/games/': typeof HeaderOnlyGamesIndexRoute
   '/_layout/courses/': typeof LayoutCoursesIndexRoute
+  '/_layout/dashboard/': typeof LayoutDashboardIndexRoute
   '/_layout/matrices/': typeof LayoutMatricesIndexRoute
   '/_layout/news/': typeof LayoutNewsIndexRoute
   '/_layout/presentations/': typeof LayoutPresentationsIndexRoute
@@ -847,6 +856,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/games'
     | '/courses'
+    | '/dashboard'
     | '/matrices'
     | '/news'
     | '/presentations'
@@ -931,6 +941,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/games'
     | '/courses'
+    | '/dashboard'
     | '/matrices'
     | '/news'
     | '/presentations'
@@ -1017,6 +1028,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/_headerOnly/games/'
     | '/_layout/courses/'
+    | '/_layout/dashboard/'
     | '/_layout/matrices/'
     | '/_layout/news/'
     | '/_layout/presentations/'
@@ -1310,6 +1322,13 @@ declare module '@tanstack/react-router' {
       path: '/matrices'
       fullPath: '/matrices'
       preLoaderRoute: typeof LayoutMatricesIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/dashboard/': {
+      id: '/_layout/dashboard/'
+      path: '/dashboard'
+      fullPath: '/dashboard'
+      preLoaderRoute: typeof LayoutDashboardIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/courses/': {
@@ -1736,6 +1755,7 @@ interface LayoutRouteChildren {
   LayoutTemplatesDashboardRoute: typeof LayoutTemplatesDashboardRoute
   LayoutTemplatesTemplatePreviewRoute: typeof LayoutTemplatesTemplatePreviewRoute
   LayoutCoursesIndexRoute: typeof LayoutCoursesIndexRoute
+  LayoutDashboardIndexRoute: typeof LayoutDashboardIndexRoute
   LayoutMatricesIndexRoute: typeof LayoutMatricesIndexRoute
   LayoutNewsIndexRoute: typeof LayoutNewsIndexRoute
   LayoutPresentationsIndexRoute: typeof LayoutPresentationsIndexRoute
@@ -1794,6 +1814,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutTemplatesDashboardRoute: LayoutTemplatesDashboardRoute,
   LayoutTemplatesTemplatePreviewRoute: LayoutTemplatesTemplatePreviewRoute,
   LayoutCoursesIndexRoute: LayoutCoursesIndexRoute,
+  LayoutDashboardIndexRoute: LayoutDashboardIndexRoute,
   LayoutMatricesIndexRoute: LayoutMatricesIndexRoute,
   LayoutNewsIndexRoute: LayoutNewsIndexRoute,
   LayoutPresentationsIndexRoute: LayoutPresentationsIndexRoute,
