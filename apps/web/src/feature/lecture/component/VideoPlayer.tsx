@@ -8,382 +8,391 @@ import { useLectureProgress, useSyncProgress } from "../queries/useLearning";
 import { VideoControls } from "./VideoControls";
 
 interface VideoPlayerProps {
-	lectureId: number;
-	onComplete?: () => void;
-	onProgressUpdate?: (percent: number) => void;
+  lectureId: number;
+  onComplete?: () => void;
+  onProgressUpdate?: (percent: number) => void;
+  onTimeUpdate?: (time: number) => void;
+  seekTo?: number | null;
 }
 
 const SYNC_INTERVAL = 1000;
 const COMPLETION_THRESHOLD = 90;
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({
-	lectureId,
-	onComplete,
-	onProgressUpdate,
-}) => {
-	const videoRef = useRef<HTMLVideoElement>(null);
-	const containerRef = useRef<HTMLDivElement>(null);
-	const hlsRef = useRef<Hls | null>(null);
-	const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
-	const hasMarkedComplete = useRef(false);
-	const maxWatchedTime = useRef(0);
-	const lastValidTime = useRef(0);
+const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProgressUpdate, onTimeUpdate, seekTo }) => {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const hlsRef = useRef<Hls | null>(null);
+  const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
+  const hasMarkedComplete = useRef(false);
+  const maxWatchedTime = useRef(0);
+  const lastValidTime = useRef(0);
+  const lastProcessedSeekTo = useRef<number | null>(null);
 
-	const [isPlaying, setIsPlaying] = useState(false);
-	const [currentTime, setCurrentTime] = useState(0);
-	const [duration, setDuration] = useState(0);
-	const [buffered, setBuffered] = useState(0);
-	const [volume, setVolume] = useState(1);
-	const [isMuted, setIsMuted] = useState(false);
-	const [playbackSpeed, setPlaybackSpeed] = useState(1);
-	const [quality, setQuality] = useState("auto");
-	const [isFullscreen, setIsFullscreen] = useState(false);
-	const [showControls, setShowControls] = useState(true);
-	const [hasResumed, setHasResumed] = useState(false);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [buffered, setBuffered] = useState(0);
+  const [volume, setVolume] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [playbackSpeed, setPlaybackSpeed] = useState(1);
+  const [quality, setQuality] = useState("auto");
+  const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showControls, setShowControls] = useState(true);
+  const [hasResumed, setHasResumed] = useState(false);
 
-	const { data: lastWatchedSecond } = useLectureProgress(lectureId);
-	const syncProgressMutation = useSyncProgress();
+  const { data: lastWatchedSecond } = useLectureProgress(lectureId);
+  const syncProgressMutation = useSyncProgress();
 
-	const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
+  const onCompleteRef = useRef(onComplete);
+  const onProgressUpdateRef = useRef(onProgressUpdate);
+  const onTimeUpdateRef = useRef(onTimeUpdate);
 
-	const resetHideControlsTimer = useCallback(() => {
-		setShowControls(true);
-		if (hideControlsTimeout.current) clearTimeout(hideControlsTimeout.current);
-		if (isPlaying) {
-			hideControlsTimeout.current = setTimeout(
-				() => setShowControls(false),
-				3000,
-			);
-		}
-	}, [isPlaying]);
+  onCompleteRef.current = onComplete;
+  onProgressUpdateRef.current = onProgressUpdate;
+  onTimeUpdateRef.current = onTimeUpdate;
 
-	const syncProgress = useCallback(() => {
-		if (videoRef.current && videoRef.current.duration > 0) {
-			syncProgressMutation.mutate({
-				lectureId,
-				currentSecond: Math.floor(videoRef.current.currentTime),
-				totalDuration: Math.floor(videoRef.current.duration),
-			});
-		}
-	}, [lectureId, syncProgressMutation]);
+  const resetHideControlsTimer = useCallback(() => {
+    setShowControls(true);
+    if (hideControlsTimeout.current) clearTimeout(hideControlsTimeout.current);
+    if (isPlaying) {
+      hideControlsTimeout.current = setTimeout(() => setShowControls(false), 3000);
+    }
+  }, [isPlaying]);
 
-	useEffect(() => {
-		syncIntervalRef.current = setInterval(syncProgress, SYNC_INTERVAL);
-		return () => {
-			if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
-			syncProgress();
-		};
-	}, [syncProgress]);
+  const lectureIdRef = useRef(lectureId);
+  lectureIdRef.current = lectureId;
 
-	useEffect(() => {
-		hasMarkedComplete.current = false;
-		maxWatchedTime.current = 0;
-		lastValidTime.current = 0;
-		setHasResumed(false);
-	}, []);
+  const syncProgressRef = useRef(syncProgressMutation);
+  syncProgressRef.current = syncProgressMutation;
 
-	useEffect(() => {
-		if (
-			videoRef.current &&
-			lastWatchedSecond &&
-			lastWatchedSecond > 0 &&
-			!hasResumed &&
-			duration > 0
-		) {
-			videoRef.current.currentTime = lastWatchedSecond;
-			maxWatchedTime.current = lastWatchedSecond;
-			lastValidTime.current = lastWatchedSecond;
-			setHasResumed(true);
+  useEffect(() => {
+    const doSync = () => {
+      const video = videoRef.current;
+      if (video && video.duration > 0 && !syncProgressRef.current.isPending) {
+        syncProgressRef.current.mutate({
+          lectureId: lectureIdRef.current,
+          currentSecond: Math.floor(video.currentTime),
+          totalDuration: Math.floor(video.duration),
+        });
+      }
+    };
 
-			const progressPercent = (lastWatchedSecond / duration) * 100;
-			console.log(
-				"Resumed at",
-				Math.round(progressPercent),
-				"% (",
-				lastWatchedSecond,
-				"s)",
-			);
-		}
-	}, [lastWatchedSecond, hasResumed, duration]);
+    syncIntervalRef.current = setInterval(doSync, SYNC_INTERVAL);
+    return () => {
+      if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
+    };
+  }, []);
 
-	const onCompleteRef = useRef(onComplete);
-	const onProgressUpdateRef = useRef(onProgressUpdate);
+  useEffect(() => {
+    if (
+      seekTo != null &&
+      seekTo !== lastProcessedSeekTo.current &&
+      videoRef.current &&
+      videoRef.current.readyState >= 2
+    ) {
+      const video = videoRef.current;
+      if (seekTo <= maxWatchedTime.current && Math.abs(video.currentTime - seekTo) > 0.5) {
+        video.currentTime = seekTo;
+      }
+      lastProcessedSeekTo.current = seekTo;
+    }
+  }, [seekTo]);
 
-	useEffect(() => {
-		onCompleteRef.current = onComplete;
-		onProgressUpdateRef.current = onProgressUpdate;
-	}, [onComplete, onProgressUpdate]);
+  useEffect(() => {
+    hasMarkedComplete.current = false;
+    maxWatchedTime.current = 0;
+    lastValidTime.current = 0;
+    lastProcessedSeekTo.current = null;
+    setHasResumed(false);
+    setCurrentTime(0);
+    setDuration(0);
+    setIsPlaying(false);
+  }, [lectureId]);
 
-	useEffect(() => {
-		if (duration > 0 && currentTime > 0) {
-			const percent = (currentTime / duration) * 100;
-			onProgressUpdateRef.current?.(percent);
+  const lastWatchedSecondRef = useRef<number | undefined>(undefined);
+  useEffect(() => {
+    if (
+      lastWatchedSecond != null &&
+      lastWatchedSecond > 0 &&
+      lastWatchedSecond !== lastWatchedSecondRef.current &&
+      videoRef.current &&
+      duration > 0
+    ) {
+      lastWatchedSecondRef.current = lastWatchedSecond;
+      videoRef.current.currentTime = lastWatchedSecond;
+      maxWatchedTime.current = lastWatchedSecond;
+      lastValidTime.current = lastWatchedSecond;
+    }
+  }, [lastWatchedSecond, duration]);
 
-			if (percent >= COMPLETION_THRESHOLD && !hasMarkedComplete.current) {
-				hasMarkedComplete.current = true;
-				onCompleteRef.current?.();
-			}
-		}
-	}, [currentTime, duration]);
+  useEffect(() => {
+    if (!videoRef.current) return;
+    const video = videoRef.current;
+    let mounted = true;
 
-	useEffect(() => {
-		if (!videoRef.current) return;
-		const video = videoRef.current;
+    const loadVideo = async () => {
+      if (Hls.isSupported()) {
+        try {
+          const response = await lectureApi.fetchVideoM3u8(lectureId);
+          if (!mounted) return;
 
-		const loadVideo = async () => {
-			if (Hls.isSupported()) {
-				try {
-					const response = await lectureApi.fetchVideoM3u8(lectureId);
-					const manifest = response.data;
+          const manifest = response.data;
+          const blob = new Blob([manifest], { type: "application/vnd.apple.mpegurl" });
+          const manifestUrl = URL.createObjectURL(blob);
 
-					const blob = new Blob([manifest], {
-						type: "application/vnd.apple.mpegurl",
-					});
-					const manifestUrl = URL.createObjectURL(blob);
+          const hls = new Hls({
+            enableWorker: true,
+            lowLatencyMode: true,
+            xhrSetup: (xhr: XMLHttpRequest, url: string) => {
+              const token = getAccessToken();
+              const segmentMatch = url.match(/segment_\d+\.ts/);
+              if (segmentMatch) {
+                const segment = segmentMatch[0];
+                const fullUrl = `${api.defaults.baseURL}lectures/lecture-videos/${lectureId}/${segment}`;
+                xhr.open("GET", fullUrl, true);
+                if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
+                xhr.responseType = "arraybuffer";
+              }
+            },
+          });
 
-					const hls = new Hls({
-						enableWorker: true,
-						lowLatencyMode: true,
-						xhrSetup: (xhr: XMLHttpRequest, url: string) => {
-							const token = getAccessToken();
-							const segmentMatch = url.match(/segment_\d+\.ts/);
-							if (segmentMatch) {
-								const segment = segmentMatch[0];
-								const fullUrl = `${api.defaults.baseURL}lectures/lecture-videos/${lectureId}/${segment}`;
-								xhr.open("GET", fullUrl, true);
-								if (token)
-									xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-								xhr.responseType = "arraybuffer";
-							}
-						},
-					});
+          hlsRef.current = hls;
+          hls.loadSource(manifestUrl);
+          hls.attachMedia(video);
 
-					hlsRef.current = hls;
-					hls.loadSource(manifestUrl);
-					hls.attachMedia(video);
+          hls.on(Hls.Events.MANIFEST_PARSED, () => URL.revokeObjectURL(manifestUrl));
+          hls.on(Hls.Events.ERROR, (_event, data) => {
+            if (data.fatal) {
+              if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+              else if (data.type === Hls.ErrorTypes.MEDIA_ERROR) hls.recoverMediaError();
+              else {
+                hls.destroy();
+                hlsRef.current = null;
+              }
+            }
+          });
+        } catch (error) {
+          console.error("Failed to initialize video:", error);
+        }
+      } else if (video.canPlayType("application/vnd.apple.mpegurl")) {
+        const response = await lectureApi.fetchVideoM3u8(lectureId);
+        if (!mounted) return;
 
-					hls.on(Hls.Events.MANIFEST_PARSED, () => {
-						URL.revokeObjectURL(manifestUrl);
-					});
+        const manifest = response.data;
+        const rewrittenManifest = manifest.replace(/segment_\d+\.ts/g, (segment: string) =>
+          lectureApi.getVideoSegmentUrl(lectureId, segment)
+        );
+        const blob = new Blob([rewrittenManifest], { type: "application/vnd.apple.mpegurl" });
+        video.src = URL.createObjectURL(blob);
+      }
+    };
 
-					hls.on(Hls.Events.ERROR, (_event, data) => {
-						if (data.fatal) {
-							switch (data.type) {
-								case Hls.ErrorTypes.NETWORK_ERROR:
-									hls.startLoad();
-									break;
-								case Hls.ErrorTypes.MEDIA_ERROR:
-									hls.recoverMediaError();
-									break;
-								default:
-									hls.destroy();
-									hlsRef.current = null;
-							}
-						}
-					});
-				} catch (error) {
-					console.error("Failed to initialize video:", error);
-				}
-			} else if (video.canPlayType("application/vnd.apple.mpegurl")) {
-				const response = await lectureApi.fetchVideoM3u8(lectureId);
-				const manifest = response.data;
-				const rewrittenManifest = manifest.replace(
-					/segment_\d+\.ts/g,
-					(segment: string) =>
-						lectureApi.getVideoSegmentUrl(lectureId, segment),
-				);
-				const blob = new Blob([rewrittenManifest], {
-					type: "application/vnd.apple.mpegurl",
-				});
-				video.src = URL.createObjectURL(blob);
-			}
-		};
+    loadVideo();
 
-		loadVideo();
+    return () => {
+      mounted = false;
+      if (hlsRef.current) {
+        hlsRef.current.destroy();
+        hlsRef.current = null;
+      }
+    };
+  }, [lectureId]);
 
-		return () => {
-			if (hlsRef.current) {
-				hlsRef.current.destroy();
-				hlsRef.current = null;
-			}
-		};
-	}, [lectureId]);
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video) return;
 
-	useEffect(() => {
-		const video = videoRef.current;
-		if (!video) return;
+    let lastCallbackTime = 0;
 
-		const onPlay = () => setIsPlaying(true);
-		const onPause = () => setIsPlaying(false);
-		const onTimeUpdate = () => {
-			const current = video.currentTime;
-			setCurrentTime(current);
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+    const handleDurationChange = () => {
+      if (video.duration && !isNaN(video.duration)) {
+        setDuration(video.duration);
+      }
+    };
 
-			if (current > maxWatchedTime.current) {
-				maxWatchedTime.current = current;
-			}
-			lastValidTime.current = current;
-		};
-		const onDurationChange = () => setDuration(video.duration);
-		const onProgress = () => {
-			if (video.buffered.length > 0) {
-				setBuffered(video.buffered.end(video.buffered.length - 1));
-			}
-		};
-		const onEnded = () => {
-			setIsPlaying(false);
-			onComplete?.();
-		};
+    const handleTimeUpdate = () => {
+      const current = video.currentTime;
+      if (current > maxWatchedTime.current) maxWatchedTime.current = current;
+      lastValidTime.current = current;
 
-		const onSeeking = () => {
-			if (video.currentTime > maxWatchedTime.current) {
-				video.currentTime = lastValidTime.current;
-			}
-		};
+      setCurrentTime(current);
 
-		video.addEventListener("play", onPlay);
-		video.addEventListener("pause", onPause);
-		video.addEventListener("timeupdate", onTimeUpdate);
-		video.addEventListener("durationchange", onDurationChange);
-		video.addEventListener("progress", onProgress);
-		video.addEventListener("ended", onEnded);
-		video.addEventListener("seeking", onSeeking);
+      const now = Date.now();
+      if (now - lastCallbackTime < 500) return;
+      lastCallbackTime = now;
 
-		return () => {
-			video.removeEventListener("play", onPlay);
-			video.removeEventListener("pause", onPause);
-			video.removeEventListener("timeupdate", onTimeUpdate);
-			video.removeEventListener("durationchange", onDurationChange);
-			video.removeEventListener("progress", onProgress);
-			video.removeEventListener("ended", onEnded);
-			video.removeEventListener("seeking", onSeeking);
-		};
-	}, [onComplete]);
+      onTimeUpdateRef.current?.(current);
 
-	useEffect(() => {
-		const onFullscreenChange = () =>
-			setIsFullscreen(!!document.fullscreenElement);
-		document.addEventListener("fullscreenchange", onFullscreenChange);
-		return () =>
-			document.removeEventListener("fullscreenchange", onFullscreenChange);
-	}, []);
+      const dur = video.duration;
+      if (dur > 0) {
+        const percent = (current / dur) * 100;
+        onProgressUpdateRef.current?.(percent);
 
-	const handlePlayPause = () => {
-		if (videoRef.current) {
-			if (isPlaying) videoRef.current.pause();
-			else videoRef.current.play();
-		}
-	};
+        if (percent >= COMPLETION_THRESHOLD && !hasMarkedComplete.current) {
+          hasMarkedComplete.current = true;
+          onCompleteRef.current?.();
+        }
+      }
+    };
 
-	const handleSeek = (time: number) => {
-		if (videoRef.current) {
-			if (time <= maxWatchedTime.current) {
-				videoRef.current.currentTime = time;
-			}
-		}
-	};
+    const handleProgress = () => {
+      if (video.buffered.length > 0) {
+        setBuffered(video.buffered.end(video.buffered.length - 1));
+      }
+    };
 
-	const handleVolumeChange = (vol: number) => {
-		if (videoRef.current) {
-			videoRef.current.volume = vol;
-			setVolume(vol);
-			setIsMuted(vol === 0);
-		}
-	};
+    const handleEnded = () => {
+      setIsPlaying(false);
+      onCompleteRef.current?.();
+    };
 
-	const handleMuteToggle = () => {
-		if (videoRef.current) {
-			videoRef.current.muted = !isMuted;
-			setIsMuted(!isMuted);
-		}
-	};
+    const handleSeeking = () => {
+      if (video.currentTime > maxWatchedTime.current) {
+        video.currentTime = lastValidTime.current;
+      }
+    };
 
-	const handleSpeedChange = (speed: number) => {
-		if (videoRef.current) {
-			videoRef.current.playbackRate = speed;
-			setPlaybackSpeed(speed);
-		}
-	};
+    video.addEventListener("play", handlePlay);
+    video.addEventListener("pause", handlePause);
+    video.addEventListener("timeupdate", handleTimeUpdate);
+    video.addEventListener("durationchange", handleDurationChange);
+    video.addEventListener("progress", handleProgress);
+    video.addEventListener("ended", handleEnded);
+    video.addEventListener("seeking", handleSeeking);
 
-	const handleQualityChange = (q: string) => {
-		setQuality(q);
-		if (hlsRef.current) {
-			if (q === "auto") hlsRef.current.currentLevel = -1;
-			else {
-				const level = hlsRef.current.levels.findIndex(
-					(l) => l.height === Number.parseInt(q, 10),
-				);
-				if (level !== -1) hlsRef.current.currentLevel = level;
-			}
-		}
-	};
+    return () => {
+      video.removeEventListener("play", handlePlay);
+      video.removeEventListener("pause", handlePause);
+      video.removeEventListener("timeupdate", handleTimeUpdate);
+      video.removeEventListener("durationchange", handleDurationChange);
+      video.removeEventListener("progress", handleProgress);
+      video.removeEventListener("ended", handleEnded);
+      video.removeEventListener("seeking", handleSeeking);
+    };
+  }, []);
 
-	const handleFullscreenToggle = () => {
-		if (!containerRef.current) return;
-		if (isFullscreen) document.exitFullscreen();
-		else containerRef.current.requestFullscreen();
-	};
+  useEffect(() => {
+    const handleFullscreenChange = () => setIsFullscreen(!!document.fullscreenElement);
+    document.addEventListener("fullscreenchange", handleFullscreenChange);
+    return () => document.removeEventListener("fullscreenchange", handleFullscreenChange);
+  }, []);
 
-	const handleSkip = (seconds: number) => {
-		if (videoRef.current) {
-			const targetTime = currentTime + seconds;
+  const handlePlayPause = useCallback(() => {
+    const video = videoRef.current;
+    if (video) {
+      if (video.paused) video.play();
+      else video.pause();
+    }
+  }, []);
 
-			if (seconds < 0) {
-				videoRef.current.currentTime = Math.max(0, targetTime);
-			} else {
-				if (targetTime <= maxWatchedTime.current) {
-					videoRef.current.currentTime = Math.min(duration, targetTime);
-				}
-			}
-		}
-	};
+  const handleSeek = useCallback((time: number) => {
+    if (videoRef.current && time <= maxWatchedTime.current) {
+      videoRef.current.currentTime = time;
+      setCurrentTime(time);
+    }
+  }, []);
 
-	return (
-		<div
-			ref={containerRef}
-			className="relative h-full w-full bg-black"
-			onMouseMove={resetHideControlsTimer}
-			onMouseLeave={() => isPlaying && setShowControls(false)}
-			onClick={handlePlayPause}
-		>
-			<video ref={videoRef} className="h-full w-full" playsInline>
-				<track kind="captions" srcLang="vi" label="Tiếng Việt" />
-			</video>
+  const handleVolumeChange = useCallback((vol: number) => {
+    if (videoRef.current) {
+      videoRef.current.volume = vol;
+      setVolume(vol);
+      setIsMuted(vol === 0);
+    }
+  }, []);
 
-			{!isPlaying && (
-				<div className="absolute inset-0 flex items-center justify-center">
-					<button className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform hover:scale-110">
-						<div className="border-y-15 border-l-25 ml-1 h-0 w-0 border-y-transparent border-l-white" />
-					</button>
-				</div>
-			)}
+  const handleMuteToggle = useCallback(() => {
+    if (videoRef.current) {
+      videoRef.current.muted = !videoRef.current.muted;
+      setIsMuted(videoRef.current.muted);
+    }
+  }, []);
 
-			<div
-				className={`transition-opacity duration-300 ${showControls ? "opacity-100" : "pointer-events-none opacity-0"}`}
-				onClick={(e) => e.stopPropagation()}
-			>
-				<VideoControls
-					isPlaying={isPlaying}
-					currentTime={currentTime}
-					duration={duration}
-					buffered={buffered}
-					volume={volume}
-					isMuted={isMuted}
-					playbackSpeed={playbackSpeed}
-					quality={quality}
-					isFullscreen={isFullscreen}
-					onPlayPause={handlePlayPause}
-					onSeek={handleSeek}
-					onVolumeChange={handleVolumeChange}
-					onMuteToggle={handleMuteToggle}
-					onSpeedChange={handleSpeedChange}
-					onQualityChange={handleQualityChange}
-					onFullscreenToggle={handleFullscreenToggle}
-					onSkip={handleSkip}
-				/>
-			</div>
-		</div>
-	);
+  const handleSpeedChange = useCallback((speed: number) => {
+    if (videoRef.current) {
+      videoRef.current.playbackRate = speed;
+      setPlaybackSpeed(speed);
+    }
+  }, []);
+
+  const handleQualityChange = useCallback((q: string) => {
+    setQuality(q);
+    if (hlsRef.current) {
+      if (q === "auto") hlsRef.current.currentLevel = -1;
+      else {
+        const level = hlsRef.current.levels.findIndex((l) => l.height === parseInt(q, 10));
+        if (level !== -1) hlsRef.current.currentLevel = level;
+      }
+    }
+  }, []);
+
+  const handleFullscreenToggle = useCallback(() => {
+    if (!containerRef.current) return;
+    if (document.fullscreenElement) document.exitFullscreen();
+    else containerRef.current.requestFullscreen();
+  }, []);
+
+  const handleSkip = useCallback((seconds: number) => {
+    const video = videoRef.current;
+    if (!video) return;
+
+    const targetTime = video.currentTime + seconds;
+    if (seconds < 0) {
+      video.currentTime = Math.max(0, targetTime);
+    } else if (targetTime <= maxWatchedTime.current) {
+      video.currentTime = Math.min(video.duration || 0, targetTime);
+    }
+    setCurrentTime(video.currentTime);
+  }, []);
+
+  return (
+    <div
+      ref={containerRef}
+      className="relative h-full w-full bg-black"
+      onMouseMove={resetHideControlsTimer}
+      onMouseLeave={() => isPlaying && setShowControls(false)}
+      onClick={handlePlayPause}
+    >
+      <video ref={videoRef} className="h-full w-full" playsInline>
+        <track kind="captions" srcLang="vi" label="Tiếng Việt" />
+      </video>
+
+      {!isPlaying && (
+        <div className="absolute inset-0 flex items-center justify-center">
+          <button className="flex h-20 w-20 items-center justify-center rounded-full bg-white/20 backdrop-blur-sm transition-transform hover:scale-110">
+            <div className="border-y-15 border-l-25 ml-1 h-0 w-0 border-y-transparent border-l-white" />
+          </button>
+        </div>
+      )}
+
+      <div
+        className={`transition-opacity duration-300 ${showControls ? "opacity-100" : "pointer-events-none opacity-0"}`}
+        onClick={(e) => e.stopPropagation()}
+      >
+        <VideoControls
+          isPlaying={isPlaying}
+          currentTime={currentTime}
+          duration={duration}
+          buffered={buffered}
+          volume={volume}
+          isMuted={isMuted}
+          playbackSpeed={playbackSpeed}
+          quality={quality}
+          isFullscreen={isFullscreen}
+          onPlayPause={handlePlayPause}
+          onSeek={handleSeek}
+          onVolumeChange={handleVolumeChange}
+          onMuteToggle={handleMuteToggle}
+          onSpeedChange={handleSpeedChange}
+          onQualityChange={handleQualityChange}
+          onFullscreenToggle={handleFullscreenToggle}
+          onSkip={handleSkip}
+        />
+      </div>
+    </div>
+  );
 };
 
 export default VideoPlayer;
