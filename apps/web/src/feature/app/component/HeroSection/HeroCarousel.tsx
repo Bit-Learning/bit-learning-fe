@@ -1,6 +1,6 @@
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
-import { Button } from "@workspace/ui/components/Button";
+import GradientButton from "@workspace/ui/components/uiverse/mean-mayfly-77/GradientButton";
 import { BookOpen, Code, GraduationCap, Laptop, Users } from "lucide-react";
 
 interface HeroSlide {
@@ -116,29 +116,37 @@ export const HeroCarousel = () => {
 									{slide.subtitle}
 								</p>
 
-								<p className="mx-auto mb-12 max-w-4xl leading-relaxed opacity-80 md:text-lg">
+								<p className="mx-auto mb-12 max-w-2xl leading-relaxed opacity-80 md:text-lg">
 									{slide.description}
 								</p>
 
 								<div className="flex flex-col items-center justify-center gap-4 sm:flex-row">
-									<Button
-										size="lg"
-										className="bithub-button-secondary px-8 py-4 text-lg"
-										onClick={() => {
-											window.location.href = slide.buttonLink;
-										}}
-									>
-										{slide.buttonText}
-									</Button>
-									<Button
-										size="lg"
-										className="bithub-button-primary px-8 py-4 text-lg"
+									{/* <Button
+                    size="lg"
+                    className="bithub-button-secondary px-8 py-4 text-lg"
+                    onClick={() => {
+                      window.location.href = slide.buttonLink;
+                    }}
+                  >
+                    {slide.buttonText}
+                  </Button>
+                  <Button
+                    size="lg"
+                    className="bithub-button-primary px-8 py-4 text-lg"
+                    onClick={() => {
+                      window.location.href = "/contact";
+                    }}
+                  >
+                    Tư vấn miễn phí
+                  </Button> */}
+									<GradientButton
+										width={240}
+										height={60}
+										label="Tham gia ngay"
 										onClick={() => {
 											window.location.href = "/contact";
 										}}
-									>
-										Tư vấn miễn phí
-									</Button>
+									/>
 								</div>
 							</div>
 						</div>

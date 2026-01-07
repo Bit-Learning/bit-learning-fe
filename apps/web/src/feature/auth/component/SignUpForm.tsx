@@ -114,7 +114,7 @@ const SignUpForm: React.FC = () => {
 
 			<div className="flex flex-1 items-center justify-center px-6 pb-6">
 				<div className="w-full max-w-xl">
-					<div className="mb-8 flex items-center justify-center lg:hidden">
+					<div className="mb-8 flex items-center justify-center">
 						<img
 							src="./Logo.png"
 							alt="Bithub Logo"
@@ -124,13 +124,6 @@ const SignUpForm: React.FC = () => {
 
 					<div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
 						<div className="mb-6 text-center">
-							<div className="mb-4 flex justify-center">
-								<img
-									src="./Logo.png"
-									alt="Bithub Logo"
-									className="h-8 w-24 object-contain"
-								/>
-							</div>
 							<h1 className="mb-2 text-xl font-bold text-gray-900">
 								Tạo tài khoản mới
 							</h1>
