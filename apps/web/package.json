@@ -25,7 +25,7 @@
 		"@tanstack/react-query-devtools": "^5.87.1",
 		"@tanstack/react-router": "^1.132.37",
 		"@tanstack/react-router-devtools": "^1.132.37",
-		"@tanstack/router-plugin": "^1.145.4",
+		"@tanstack/router-plugin": "^1.145.11",
 		"@types/prismjs": "^1.26.5",
 		"@types/qrcode": "^1.5.6",
 		"@workspace/lib": "workspace:*",
@@ -40,7 +40,7 @@
 		"file-saver": "^2.0.5",
 		"framer-motion": "^12.23.24",
 		"hls.js": "^1.6.15",
-		"i18next": "^25.3.1",
+		"i18next": "^25.7.4",
 		"i18next-browser-languagedetector": "^8.2.0",
 		"js-cookie": "^3.0.5",
 		"lucide-react": "^0.562.0",
@@ -83,7 +83,7 @@
 		"playwright": "^1.57.0",
 		"storybook": "^10.0.8",
 		"typescript": "^5.9.2",
-		"vite": "^7.1.7",
+		"vite": "^7.3.1",
 		"vite-plugin-imagemin": "^0.6.1",
 		"vitest": "^4.0.14"
 	}
