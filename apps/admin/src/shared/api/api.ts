@@ -6,10 +6,9 @@ import axios, {
   type InternalAxiosRequestConfig,
 } from "axios";
 import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from "@/shared/lib/cookies";
-import { API_PATH } from "../constants/endpoints";
 
 const api: AxiosInstance = axios.create({
-  baseURL: API_PATH.BASE_URL,
+  baseURL: "http://localhost:8080/api/",
   headers: {
     "Content-Type": "application/json",
     "Accept-Language": localStorage.getItem("i18nextLng") || "vi",

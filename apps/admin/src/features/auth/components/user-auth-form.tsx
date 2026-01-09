@@ -1,6 +1,4 @@
 import { zodResolver } from "@hookform/resolvers/zod";
-import { useMutation } from "@tanstack/react-query";
-import { useNavigate } from "@tanstack/react-router";
 import { Loader2, LogIn } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
@@ -9,16 +7,12 @@ import { PasswordInput } from "@/components/password-input";
 import { Button } from "@/components/ui/button";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { setAuthTokens } from "@/shared/lib/cookies";
 import { cn } from "@/shared/lib/utils";
-// import { IconFacebook, IconGithub } from '@/assets/brand-icons'
-import { useAuthStore } from "@/shared/stores/auth-store";
-import { TAdminLoginRequest } from "../types/auth.types";
-import { AdminLogin } from "../api/auth.api";
+import { useBypassLogin, useLogin } from "../queries/useAuth";
 
 const formSchema = z.object({
-  email: z.string().min(1, "Please enter your email").email("Please enter a valid email"),
-  password: z.string().min(1, "Please enter your password").min(6, "Password must be at least 6 characters long"),
+  email: z.string().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
+  password: z.string().min(1, "Vui lòng nhập mật khẩu").min(6, "Mật khẩu phải có ít nhất 6 ký tự"),
 });
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
@@ -26,114 +20,32 @@ interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
 }
 
 export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormProps) {
-  const navigate = useNavigate();
-  const { auth } = useAuthStore();
+  const { mutate: login, isPending: isLoading } = useLogin({
+    redirectTo,
+    on2FARequired: (email: any) => {
+      toast.info(`Yêu cầu xác thực 2FA cho ${email}`);
+    },
+  });
+
+  const { bypassLogin } = useBypassLogin({ redirectTo });
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      email: "",
-      password: "",
-    },
-  });
-
-  // TanStack Query mutation for login
-  const loginMutation = useMutation({
-    mutationFn: (data: TAdminLoginRequest) => AdminLogin(data),
-    onSuccess: (response) => {
-      const { accessToken, refreshToken, user } = response.data.data;
-
-      // Verify user has ADMIN or STAFF role
-      if (user.role !== "ADMIN" && user.role !== "STAFF") {
-        toast.error("Access denied. Only administrators can access this panel.");
-        return;
-      }
-
-      // Set tokens in cookies using the helper function
-      setAuthTokens(accessToken, refreshToken);
-
-      // Update store state
-      auth.setAccessToken(accessToken);
-      auth.setRefreshToken(refreshToken);
-      auth.setUser({
-        accountNo: user.id.toString(),
-        email: user.email,
-        role: [user.role],
-        exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-        firstName: user.firstName,
-        lastName: user.lastName,
-        avatar: user.avatar,
-      });
-
-      toast.success(`Welcome back, ${user.firstName}!`);
-
-      // Redirect to the stored location or default to dashboard
-      const targetPath = redirectTo || "/";
-      navigate({ to: targetPath, replace: true });
-    },
-    onError: (error: any) => {
-      const errorMessage =
-        error?.response?.data?.message ||
-        error?.response?.data?.error ||
-        "Login failed. Please check your credentials.";
-
-      // Handle specific error cases
-      if (error?.response?.status === 401) {
-        if (errorMessage.toLowerCase().includes("not activated")) {
-          toast.error("Your account is not activated. Please check your email.");
-        } else if (errorMessage.toLowerCase().includes("invalid credentials")) {
-          toast.error("Invalid email or password.");
-        } else {
-          toast.error("Access denied. Only administrators can access this panel.");
-        }
-      } else {
-        toast.error(errorMessage);
-      }
-    },
+    defaultValues: { email: "", password: "" },
   });
 
   function onSubmit(data: z.infer<typeof formSchema>) {
-    loginMutation.mutate({
+    login({
       email: data.email,
       password: data.password,
-      role: "ADMIN", // Always use ADMIN role for admin panel
+      role: "ADMIN",
     });
   }
 
-  // Mock account for quick login (development only)
   const fillMockAccount = () => {
     form.setValue("email", "admin@gmail.com");
     form.setValue("password", "123456");
-    toast.info("Mock admin credentials filled");
-  };
-
-  // Bypass login - fake authentication (development only)
-  const bypassLogin = () => {
-    // Create fake tokens
-    const fakeAccessToken = `fake-access-token-${Date.now()}`;
-    const fakeRefreshToken = `fake-refresh-token-${Date.now()}`;
-
-    // Set fake tokens in cookies
-    setAuthTokens(fakeAccessToken, fakeRefreshToken);
-
-    // Set fake user data in store
-    auth.setAccessToken(fakeAccessToken);
-    auth.setRefreshToken(fakeRefreshToken);
-    auth.setUser({
-      accountNo: "1",
-      email: "admin@example.com",
-      role: ["ADMIN"],
-      exp: Date.now() + 24 * 60 * 60 * 1000, // 24 hours
-      firstName: "Admin",
-      lastName: "User",
-      avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Admin",
-    });
-
-    toast.success("🚀 Bypassed login - Welcome Admin!");
-
-    // Redirect to dashboard
-    const targetPath = redirectTo || "/";
-    navigate({ to: targetPath, replace: true });
+    toast.info("Đã điền thông tin tài khoản test");
   };
 
   return (
@@ -161,7 +73,7 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
           name="password"
           render={({ field }) => (
             <FormItem className="relative">
-              <FormLabel className="text-[#aaa]">Password</FormLabel>
+              <FormLabel className="text-[#aaa]">Mật khẩu</FormLabel>
               <FormControl>
                 <PasswordInput
                   placeholder="********"
@@ -170,25 +82,14 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
                 />
               </FormControl>
               <FormMessage />
-              {/* <Link
-                to='/forgot-password'
-                className='absolute end-0 -top-0.5 text-sm font-medium text-white hover:opacity-75'
-              >
-                Forgot password?
-              </Link> */}
             </FormItem>
           )}
         />
-        <Button
-          size={"lg"}
-          className="mt-2 bg-[#0f0] text-black hover:bg-[#00ff00]/80"
-          disabled={loginMutation.isPending}
-        >
-          {loginMutation.isPending ? <Loader2 className="animate-spin" /> : <LogIn />}
-          Sign in
+        <Button size="lg" className="mt-2 bg-[#0f0] text-black hover:bg-[#00ff00]/80" disabled={isLoading}>
+          {isLoading ? <Loader2 className="animate-spin" /> : <LogIn />}
+          Đăng nhập
         </Button>
 
-        {/* Development: Quick login with mock account */}
         {import.meta.env.DEV && (
           <div className="grid grid-cols-2 gap-2">
             <Button
@@ -197,9 +98,9 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
               size="sm"
               onClick={fillMockAccount}
               className="border-[#0f0]/30 text-[#0f0] hover:bg-[#0f0]/10 hover:text-[#0f0]"
-              disabled={loginMutation.isPending}
+              disabled={isLoading}
             >
-              � Fill Mock
+              📝 Điền Mock
             </Button>
             <Button
               type="button"
@@ -207,40 +108,12 @@ export function UserAuthForm({ className, redirectTo, ...props }: UserAuthFormPr
               size="sm"
               onClick={bypassLogin}
               className="border-[#0f0]/50 bg-[#0f0]/10 text-[#0f0] hover:bg-[#0f0]/20 hover:text-[#0f0]"
-              disabled={loginMutation.isPending}
+              disabled={isLoading}
             >
-              🚀 Bypass Login
+              🚀 Bypass
             </Button>
           </div>
         )}
-
-        {/* <div className='relative my-2'>
-          <div className='absolute inset-0 flex items-center'>
-            <span className='w-full border-t' />
-          </div>
-          <div className='relative flex justify-center text-xs uppercase'>
-            <span className='bg-background text-muted-foreground px-2'>
-              Or continue with
-            </span>
-          </div>
-        </div>
-
-        <div className='grid grid-cols-2 gap-2'>
-          <Button
-            variant='outline'
-            type='button'
-            disabled={loginMutation.isPending}
-          >
-            <IconGithub className='h-4 w-4' /> GitHub
-          </Button>
-          <Button
-            variant='outline'
-            type='button'
-            disabled={loginMutation.isPending}
-          >
-            <IconFacebook className='h-4 w-4' /> Facebook
-          </Button>
-        </div> */}
       </form>
     </Form>
   );
