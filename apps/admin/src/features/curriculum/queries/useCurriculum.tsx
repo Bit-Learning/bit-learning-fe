@@ -1,20 +1,21 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { lessonApi } from "../api/lesson.api";
-import type { TLessonRequest } from "../types/lesson.type";
+import { curriculumApi } from "../api/curriculum.api";
+import type { TCurriculumRequest } from "../types/curriculum.type";
 
-export const lessonKeys = {
-  all: ["lessons"] as const,
-  list: (page: number, size: number) => ["lessons", "list", page, size] as const,
-  byChapter: (chapterId: number) => ["lessons", "chapter", chapterId] as const,
-  detail: (id: number) => ["lessons", "detail", id] as const,
+export const curriculumKeys = {
+  all: ["curriculums"] as const,
+  list: (page: number, size: number) => ["curriculums", "list", page, size] as const,
+  listAll: () => ["curriculums", "listAll"] as const,
+  detail: (id: number) => ["curriculums", "detail", id] as const,
+  byCode: (code: string) => ["curriculums", "code", code] as const,
 };
 
-export const useLessons = (page = 0, size = 10) => {
+export const useCurriculums = (page = 0, size = 10) => {
   return useQuery({
-    queryKey: lessonKeys.list(page, size),
+    queryKey: curriculumKeys.list(page, size),
     queryFn: async () => {
-      const response = await lessonApi.getAll({ page, size });
+      const response = await curriculumApi.getAll({ page, size });
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
@@ -22,26 +23,24 @@ export const useLessons = (page = 0, size = 10) => {
   });
 };
 
-export const useLessonsByChapter = (chapterId?: number) => {
+export const useCurriculumsList = () => {
   return useQuery({
-    queryKey: lessonKeys.byChapter(chapterId ?? 0),
+    queryKey: curriculumKeys.listAll(),
     queryFn: async () => {
-      if (!chapterId) return null;
-      const response = await lessonApi.getByChapter(chapterId);
+      const response = await curriculumApi.getAllList();
       return response.data.data;
     },
-    enabled: !!chapterId,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });
 };
 
-export const useLessonDetail = (id?: number) => {
+export const useCurriculumDetail = (id?: number) => {
   return useQuery({
-    queryKey: lessonKeys.detail(id ?? 0),
+    queryKey: curriculumKeys.detail(id ?? 0),
     queryFn: async () => {
       if (!id) return null;
-      const response = await lessonApi.getById(id);
+      const response = await curriculumApi.getById(id);
       return response.data.data;
     },
     enabled: !!id,
@@ -50,50 +49,62 @@ export const useLessonDetail = (id?: number) => {
   });
 };
 
-export const useCreateLesson = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (data: TLessonRequest) => lessonApi.create(data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: lessonKeys.all });
-      queryClient.invalidateQueries({ queryKey: lessonKeys.byChapter(variables.chapterId) });
-      toast.success("Tạo bài học thành công");
+export const useCurriculumByCode = (code?: string) => {
+  return useQuery({
+    queryKey: curriculumKeys.byCode(code ?? ""),
+    queryFn: async () => {
+      if (!code) return null;
+      const response = await curriculumApi.getByCode(code);
+      return response.data.data;
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Tạo bài học thất bại");
-    },
+    enabled: !!code,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
   });
 };
 
-export const useUpdateLesson = () => {
+export const useCreateCurriculum = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: TLessonRequest }) => lessonApi.update(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: lessonKeys.all });
-      queryClient.invalidateQueries({ queryKey: lessonKeys.detail(variables.id) });
-      queryClient.invalidateQueries({ queryKey: lessonKeys.byChapter(variables.data.chapterId) });
-      toast.success("Cập nhật bài học thành công");
-    },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Cập nhật bài học thất bại");
-    },
-  });
-};
-
-export const useDeleteLesson = () => {
-  const queryClient = useQueryClient();
-
-  return useMutation({
-    mutationFn: (id: number) => lessonApi.delete(id),
+    mutationFn: (data: TCurriculumRequest) => curriculumApi.create(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: lessonKeys.all });
-      toast.success("Xóa bài học thành công");
+      queryClient.invalidateQueries({ queryKey: curriculumKeys.all });
+      toast.success("Tạo chương trình học thành công");
     },
     onError: (error: any) => {
-      toast.error(error?.response?.data?.message || "Xóa bài học thất bại");
+      toast.error(error?.response?.data?.message || "Tạo chương trình học thất bại");
+    },
+  });
+};
+
+export const useUpdateCurriculum = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: TCurriculumRequest }) => curriculumApi.update(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: curriculumKeys.all });
+      queryClient.invalidateQueries({ queryKey: curriculumKeys.detail(variables.id) });
+      toast.success("Cập nhật chương trình học thành công");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Cập nhật chương trình học thất bại");
+    },
+  });
+};
+
+export const useDeleteCurriculum = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => curriculumApi.delete(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: curriculumKeys.all });
+      toast.success("Xóa chương trình học thành công");
+    },
+    onError: (error: any) => {
+      toast.error(error?.response?.data?.message || "Xóa chương trình học thất bại");
     },
   });
 };
