@@ -1,17 +1,21 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { Plus, GraduationCap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useCurriculumsList, useDeleteCurriculum } from "../queries/useCurriculum";
+import { useSubjectsList, useDeleteSubject } from "../queries/useSubject";
 import CurriculumItem from "../components/CurriculumItem";
 import CurriculumFormModal from "../components/CurriculumFormModal";
 import SubjectFormModal from "../components/SubjectFormModal";
+import DeleteConfirmModal from "../../../components/DeleteConfirmModal";
 import type { TCurriculumResponse } from "../types/curriculum.type";
 import type { TSubjectResponse } from "../types/subject.type";
-import { useCurriculumsList } from "../queries/useCurriculum";
-import { useSubjectsList } from "../queries/useSubject";
 
 const CurriculumListPage: React.FC = () => {
+  const navigate = useNavigate();
+
   const [expandedIds, setExpandedIds] = useState<number[]>([]);
   const [curriculumModal, setCurriculumModal] = useState<{ open: boolean; data?: TCurriculumResponse | null }>({
     open: false,
@@ -21,15 +25,30 @@ const CurriculumListPage: React.FC = () => {
     data?: TSubjectResponse | null;
     curriculumId: number;
   }>({ open: false, curriculumId: 0 });
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; type: "curriculum" | "subject"; item: any }>({
+    open: false,
+    type: "curriculum",
+    item: null,
+  });
 
   const { data: curriculums, isLoading: loadingCurriculums } = useCurriculumsList();
   const { data: subjects, isLoading: loadingSubjects } = useSubjectsList();
+  const { mutate: deleteCurriculum, isPending: deletingCurriculum } = useDeleteCurriculum();
+  const { mutate: deleteSubject, isPending: deletingSubject } = useDeleteSubject();
 
   const getSubjectsByCurriculum = (curriculumId: number) =>
     subjects?.filter((s) => s.curriculum?.id === curriculumId) || [];
 
   const toggleExpand = (id: number) => {
     setExpandedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+  };
+
+  const handleDelete = () => {
+    if (deleteModal.type === "curriculum") {
+      deleteCurriculum(deleteModal.item.id, { onSuccess: () => setDeleteModal({ ...deleteModal, open: false }) });
+    } else {
+      deleteSubject(deleteModal.item.id, { onSuccess: () => setDeleteModal({ ...deleteModal, open: false }) });
+    }
   };
 
   if (loadingCurriculums) {
@@ -81,8 +100,11 @@ const CurriculumListPage: React.FC = () => {
               isLoading={loadingSubjects}
               onToggle={() => toggleExpand(curriculum.id)}
               onEdit={() => setCurriculumModal({ open: true, data: curriculum })}
+              onDelete={() => setDeleteModal({ open: true, type: "curriculum", item: curriculum })}
               onAddSubject={() => setSubjectModal({ open: true, curriculumId: curriculum.id })}
               onEditSubject={(subject) => setSubjectModal({ open: true, data: subject, curriculumId: curriculum.id })}
+              onDeleteSubject={(subject) => setDeleteModal({ open: true, type: "subject", item: subject })}
+              onSubjectClick={(subject) => navigate({ to: "/subject/$id", params: { id: subject.id.toString() } })}
             />
           ))}
         </div>
@@ -99,6 +121,14 @@ const CurriculumListPage: React.FC = () => {
         onClose={() => setSubjectModal({ open: false, curriculumId: 0 })}
         data={subjectModal.data}
         curriculumId={subjectModal.curriculumId}
+      />
+
+      <DeleteConfirmModal
+        open={deleteModal.open}
+        onClose={() => setDeleteModal({ ...deleteModal, open: false })}
+        onConfirm={handleDelete}
+        itemName={deleteModal.item?.name}
+        isPending={deletingCurriculum || deletingSubject}
       />
     </div>
   );

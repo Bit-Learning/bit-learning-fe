@@ -3,20 +3,31 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from "@/components/ui/collapsible";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useLessonsByChapter } from "../queries/useLesson";
 import type { TChapterResponse } from "../types/chapter.type";
 import type { TLessonResponse } from "../types/lesson.type";
-import { useLessonsByChapter } from "../queries/useLesson";
 
 interface Props {
   chapter: TChapterResponse;
   isExpanded: boolean;
   onToggle: () => void;
   onEdit: () => void;
+  onDelete: () => void;
   onAddLesson: () => void;
   onEditLesson: (lesson: TLessonResponse) => void;
+  onDeleteLesson: (lesson: TLessonResponse) => void;
 }
 
-const ChapterItem: React.FC<Props> = ({ chapter, isExpanded, onToggle, onEdit, onAddLesson, onEditLesson }) => {
+const ChapterItem: React.FC<Props> = ({
+  chapter,
+  isExpanded,
+  onToggle,
+  onEdit,
+  onDelete,
+  onAddLesson,
+  onEditLesson,
+  onDeleteLesson,
+}) => {
   const { data: lessons, isLoading } = useLessonsByChapter(isExpanded ? chapter.id : undefined);
   const sortedLessons = lessons?.sort((a, b) => a.lessonNo - b.lessonNo) || [];
 
@@ -50,7 +61,7 @@ const ChapterItem: React.FC<Props> = ({ chapter, isExpanded, onToggle, onEdit, o
             <Button variant="ghost" size="icon" onClick={onEdit}>
               <Pencil className="h-4 w-4" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-destructive">
+            <Button variant="ghost" size="icon" className="text-destructive" onClick={onDelete}>
               <Trash2 className="h-4 w-4" />
             </Button>
           </div>
@@ -91,7 +102,12 @@ const ChapterItem: React.FC<Props> = ({ chapter, isExpanded, onToggle, onEdit, o
                       <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => onEditLesson(lesson)}>
                         <Pencil className="h-3.5 w-3.5" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-8 w-8 text-destructive"
+                        onClick={() => onDeleteLesson(lesson)}
+                      >
                         <Trash2 className="h-3.5 w-3.5" />
                       </Button>
                     </div>

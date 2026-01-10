@@ -6,10 +6,12 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useSubjectDetail } from "../queries/useSubject";
-import { useChaptersBySubject } from "../queries/useChapter";
+import { useChaptersBySubject, useDeleteChapter } from "../queries/useChapter";
+import { useDeleteLesson } from "../queries/useLesson";
 import ChapterItem from "../components/ChapterItem";
 import ChapterFormModal from "../components/ChapterFormModal";
 import LessonFormModal from "../components/LessonFormModal";
+import DeleteConfirmModal from "../../../components/DeleteConfirmModal";
 import type { TChapterResponse } from "../types/chapter.type";
 import type { TLessonResponse } from "../types/lesson.type";
 
@@ -24,9 +26,16 @@ const SubjectDetailPage: React.FC = () => {
     open: false,
     chapterId: 0,
   });
+  const [deleteModal, setDeleteModal] = useState<{ open: boolean; type: "chapter" | "lesson"; item: any }>({
+    open: false,
+    type: "chapter",
+    item: null,
+  });
 
   const { data: subject, isLoading: loadingSubject } = useSubjectDetail(id);
   const { data: chapters, isLoading: loadingChapters } = useChaptersBySubject(id);
+  const { mutate: deleteChapter, isPending: deletingChapter } = useDeleteChapter();
+  const { mutate: deleteLesson, isPending: deletingLesson } = useDeleteLesson();
 
   const sortedChapters = chapters?.sort((a, b) => a.chapterNo - b.chapterNo) || [];
   const nextChapterNo = (chapters?.length || 0) + 1;
@@ -34,6 +43,14 @@ const SubjectDetailPage: React.FC = () => {
 
   const toggleExpand = (id: number) => {
     setExpandedIds((prev) => (prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]));
+  };
+
+  const handleDelete = () => {
+    if (deleteModal.type === "chapter") {
+      deleteChapter(deleteModal.item.id, { onSuccess: () => setDeleteModal({ ...deleteModal, open: false }) });
+    } else {
+      deleteLesson(deleteModal.item.id, { onSuccess: () => setDeleteModal({ ...deleteModal, open: false }) });
+    }
   };
 
   if (loadingSubject) {
@@ -133,8 +150,10 @@ const SubjectDetailPage: React.FC = () => {
                   isExpanded={expandedIds.includes(chapter.id)}
                   onToggle={() => toggleExpand(chapter.id)}
                   onEdit={() => setChapterModal({ open: true, data: chapter })}
+                  onDelete={() => setDeleteModal({ open: true, type: "chapter", item: chapter })}
                   onAddLesson={() => setLessonModal({ open: true, chapterId: chapter.id })}
                   onEditLesson={(lesson) => setLessonModal({ open: true, data: lesson, chapterId: chapter.id })}
+                  onDeleteLesson={(lesson) => setDeleteModal({ open: true, type: "lesson", item: lesson })}
                 />
               ))}
             </div>
@@ -155,6 +174,14 @@ const SubjectDetailPage: React.FC = () => {
         onClose={() => setLessonModal({ open: false, chapterId: 0 })}
         data={lessonModal.data}
         chapterId={lessonModal.chapterId}
+      />
+
+      <DeleteConfirmModal
+        open={deleteModal.open}
+        onClose={() => setDeleteModal({ ...deleteModal, open: false })}
+        onConfirm={handleDelete}
+        itemName={deleteModal.item?.name}
+        isPending={deletingChapter || deletingLesson}
       />
     </div>
   );

@@ -14,8 +14,11 @@ interface Props {
   isLoading?: boolean;
   onToggle: () => void;
   onEdit: () => void;
+  onDelete: () => void;
   onAddSubject: () => void;
   onEditSubject: (subject: TSubjectResponse) => void;
+  onDeleteSubject: (subject: TSubjectResponse) => void;
+  onSubjectClick: (subject: TSubjectResponse) => void;
 }
 
 const CurriculumItem: React.FC<Props> = ({
@@ -25,8 +28,11 @@ const CurriculumItem: React.FC<Props> = ({
   isLoading,
   onToggle,
   onEdit,
+  onDelete,
   onAddSubject,
   onEditSubject,
+  onDeleteSubject,
+  onSubjectClick,
 }) => {
   return (
     <Collapsible open={isExpanded} onOpenChange={onToggle}>
@@ -59,7 +65,7 @@ const CurriculumItem: React.FC<Props> = ({
               <Button variant="ghost" size="icon" onClick={onEdit}>
                 <Pencil className="h-4 w-4" />
               </Button>
-              <Button variant="ghost" size="icon" className="text-destructive">
+              <Button variant="ghost" size="icon" className="text-destructive" onClick={onDelete}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </div>
@@ -81,6 +87,7 @@ const CurriculumItem: React.FC<Props> = ({
                     <div
                       key={subject.id}
                       className="flex items-center justify-between p-3 rounded-lg bg-background border hover:bg-accent cursor-pointer transition-colors"
+                      onClick={() => onSubjectClick(subject)}
                     >
                       <div className="flex items-center gap-3">
                         <div className="p-1.5 rounded bg-blue-100 dark:bg-blue-900">
@@ -108,7 +115,15 @@ const CurriculumItem: React.FC<Props> = ({
                         >
                           <Pencil className="h-3.5 w-3.5" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 text-destructive">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          className="h-8 w-8 text-destructive"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onDeleteSubject(subject);
+                          }}
+                        >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
                         <ChevronRight className="h-4 w-4 text-muted-foreground" />
