@@ -7,8 +7,6 @@ services:
             dockerfile: apps/web/Dockerfile.dev
         ports:
             - '5173:5173'
-        environment:
-            - NODE_ENV=development
         networks:
             - app-net
         command: npm run dev -- --host
@@ -22,9 +20,6 @@ services:
             dockerfile: apps/web/Dockerfile.prod
         ports:
             - '5174:5173'
-        environment:
-            - NODE_ENV=production
-            - VITE_API_BASE_URL=/api
         networks:
             - app-net
 
