@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'node22'
+    }
+
     environment {
         NODE_ENV = 'production'
     }
@@ -22,12 +26,10 @@ pipeline {
         stage('Setup Node & PNPM') {
             steps {
                 sh '''
-                node -v
-                if ! command -v pnpm >/dev/null 2>&1; then
-                  echo "Installing pnpm..."
+                  node -v
+                  npm -v
                   npm install -g pnpm
-                fi
-                pnpm -v
+                  pnpm -v
                 '''
             }
         }
@@ -101,3 +103,4 @@ def notifyDiscord(title, color) {
         }
     }
 }
+
