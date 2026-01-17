@@ -1,0 +1,14 @@
+import PageMeta from "@/shared/components/seo/page-meta";
+import MyQuestionsContent from "../components/MyQuestionContent";
+import CreateQuestionForm from "../components/CreateQuestionForm";
+
+const CreateQuestionPage: React.FC = () => {
+  return (
+    <>
+      <PageMeta title="Tạo câu hỏi - Bit Learning" description="Tạo câu hỏi mới" />
+      <CreateQuestionForm />
+    </>
+  );
+};
+
+export default CreateQuestionPage;

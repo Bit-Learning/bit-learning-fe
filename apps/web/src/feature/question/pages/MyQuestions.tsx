@@ -4,7 +4,7 @@ import MyQuestionsContent from "../components/MyQuestionContent";
 const MyQuestionsPage: React.FC = () => {
   return (
     <>
-      <PageMeta title="Danh sách câu hỏi của tôi- Bit Learning" description="Quản lý danh sách câu hỏi của tôi" />
+      <PageMeta title="Danh sách câu hỏi của tôi - Bit Learning" description="Quản lý danh sách câu hỏi của tôi" />
       <MyQuestionsContent />
     </>
   );
