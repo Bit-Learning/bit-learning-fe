@@ -1,10 +1,8 @@
-// matrix.queries.ts
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@workspace/ui/components/Sonner";
 import { matrixApi, matrixVersionApi, matrixDetailApi } from "../api/matrix.api";
 import type { TMatrixRequest, TMatrixVersionRequest, TMatrixDetailRequest } from "../types/matrix.type";
 
-// ============== Query Keys ==============
 export const matrixKeys = {
   all: ["matrices"] as const,
   list: (page: number, size: number) => ["matrices", "list", page, size] as const,
@@ -25,7 +23,6 @@ export const detailKeys = {
   byVersion: (versionId: number) => ["matrix-details", "version", versionId] as const,
 };
 
-// ============== Matrix Queries ==============
 export const useMatrices = (page = 0, size = 10) => {
   return useQuery({
     queryKey: matrixKeys.list(page, size),
@@ -86,7 +83,6 @@ export const useSearchMatrices = (keyword: string) => {
   });
 };
 
-// ============== Matrix Mutations ==============
 export const useCreateMatrix = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -148,7 +144,6 @@ export const useToggleMatrixActive = () => {
   });
 };
 
-// ============== Version Queries ==============
 export const useMatrixVersions = (matrixId?: number) => {
   return useQuery({
     queryKey: versionKeys.byMatrix(matrixId ?? 0),
@@ -188,7 +183,6 @@ export const useVersionDetail = (versionId?: number) => {
   });
 };
 
-// ============== Version Mutations ==============
 export const useCreateVersion = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -218,7 +212,6 @@ export const useDeleteVersion = () => {
   });
 };
 
-// ============== Detail Queries ==============
 export const useMatrixDetails = (versionId?: number) => {
   return useQuery({
     queryKey: detailKeys.byVersion(versionId ?? 0),
@@ -232,7 +225,6 @@ export const useMatrixDetails = (versionId?: number) => {
   });
 };
 
-// ============== Detail Mutations ==============
 export const useUpdateMatrixDetail = () => {
   const qc = useQueryClient();
   return useMutation({
