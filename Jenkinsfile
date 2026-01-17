@@ -1,0 +1,103 @@
+pipeline {
+    agent any
+
+    environment {
+        NODE_ENV = 'production'
+    }
+
+    stages {
+        stage('Checkout PR') {
+            steps {
+                checkout([
+                    $class: 'GitSCM',
+                    branches: [[name: env.CHANGE_BRANCH ?: 'develop']],
+                    userRemoteConfigs: [[
+                        url: 'https://github.com/lcaohoanq/bit-learning-fe.git',
+                        credentialsId: 'lcaohoanq-github-pat'
+                    ]]
+                ])
+            }
+        }
+
+        stage('Setup Node & PNPM') {
+            steps {
+                sh '''
+                node -v
+                if ! command -v pnpm >/dev/null 2>&1; then
+                  echo "Installing pnpm..."
+                  npm install -g pnpm
+                fi
+                pnpm -v
+                '''
+            }
+        }
+
+        stage('Install Dependencies') {
+            steps {
+                sh 'pnpm install'
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'pnpm run build'
+            }
+        }
+    }
+
+    post {
+        success {
+            notifyDiscord(
+                "✅ Jenkins PR BUILD SUCCESS",
+                3066993
+            )
+        }
+
+        failure {
+            notifyDiscord(
+                "❌ Jenkins PR BUILD FAILED",
+                15158332
+            )
+        }
+    }
+}
+
+/* =========================
+   Discord Notification
+   ========================= */
+def notifyDiscord(title, color) {
+    withCredentials([string(credentialsId: 'discord_webhook_capstone', variable: 'WEBHOOK')]) {
+        script {
+            def ts = new Date().format(
+                "yyyy-MM-dd HH:mm:ss",
+                TimeZone.getTimeZone('Asia/Ho_Chi_Minh')
+            )
+
+            def payload = groovy.json.JsonOutput.toJson([
+                embeds: [[
+                    title: title,
+                    color: color,
+                    fields: [
+                        [name: "Repo", value: env.JOB_NAME, inline: true],
+                        [name: "PR Branch", value: env.CHANGE_BRANCH ?: 'N/A', inline: true],
+                        [name: "Target", value: env.CHANGE_TARGET ?: 'main', inline: true],
+                        [name: "Build", value: "#${env.BUILD_NUMBER}", inline: true],
+                        [name: "Timestamp", value: ts, inline: false],
+                        [name: "URL", value: env.BUILD_URL, inline: false]
+                    ],
+                    footer: [
+                        text: "Jenkins CI"
+                    ],
+                    timestamp: new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX")
+                ]]
+            ])
+
+            sh """
+            curl -s -X POST \
+              -H "Content-Type: application/json" \
+              -d '${payload}' \
+              $WEBHOOK
+            """
+        }
+    }
+}
