@@ -6,6 +6,7 @@ pipeline {
     }
 
     environment {
+        TIME_STAMP_FORMAT = "dd-MM-yyyy HH:mm:ss"
         NODE_ENV = 'production'
         GITHUB_PR_URL = 'https://github.com/lcaohoanq/bit-learning-fe/pull/'
         IMAGE_WEB = 'lcaohoanq/bitlearning-web'
@@ -91,7 +92,7 @@ def notifyDiscord(title, color) {
     withCredentials([string(credentialsId: 'discord_webhook_capstone', variable: 'WEBHOOK')]) {
         script {
             def ts = new Date().format(
-                "yyyy-MM-dd HH:mm:ss",
+                ${TIME_STAMP_FORMAT},
                 TimeZone.getTimeZone('Asia/Ho_Chi_Minh')
             )
 
@@ -132,7 +133,7 @@ def notifyDiscord(title, color) {
 def notifyReleaseDiscord(title, color) {
     withCredentials([string(credentialsId: 'discord_webhook_capstone', variable: 'WEBHOOK')]) {
         script {
-            def ts = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Ho_Chi_Minh'))
+            def ts = new Date().format(${TIME_STAMP_FORMAT}, TimeZone.getTimeZone('Asia/Ho_Chi_Minh'))
 
             // Link Docker Hub
             def webUrl = "https://hub.docker.com/r/${env.IMAGE_WEB}/tags"
