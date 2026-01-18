@@ -6,7 +6,8 @@ pipeline {
     }
 
     environment {
-        NODE_ENV = 'production'
+        NODE_ENV = 'production',
+        GITHUB_PR_URL = 'https://github.com/lcaohoanq/bit-learning-fe/pull/'
     }
 
     stages {
@@ -27,8 +28,7 @@ pipeline {
             steps {
                 sh '''
                   node -v
-                  npm -v
-                  npm install -g pnpm
+                  corepack enable
                   pnpm -v
                 '''
             }
@@ -36,7 +36,7 @@ pipeline {
 
         stage('Install Dependencies') {
             steps {
-                sh 'pnpm install'
+                sh 'pnpm install --frozen-lockfile --prefer-offline'
             }
         }
 
@@ -50,14 +50,14 @@ pipeline {
     post {
         success {
             notifyDiscord(
-                "✅ Jenkins PR BUILD SUCCESS",
+                "✅ [FE] Jenkins PR BUILD SUCCESS",
                 3066993
             )
         }
 
         failure {
             notifyDiscord(
-                "❌ Jenkins PR BUILD FAILED",
+                "❌ [FE] Jenkins PR BUILD FAILED",
                 15158332
             )
         }
@@ -80,12 +80,13 @@ def notifyDiscord(title, color) {
                     title: title,
                     color: color,
                     fields: [
-                        [name: "Repo", value: env.JOB_NAME, inline: true],
+                        [name: "Job", value: env.JOB_NAME, inline: true],
                         [name: "PR Branch", value: env.CHANGE_BRANCH ?: 'N/A', inline: true],
                         [name: "Target", value: env.CHANGE_TARGET ?: 'main', inline: true],
                         [name: "Build", value: "#${env.BUILD_NUMBER}", inline: true],
                         [name: "Timestamp", value: ts, inline: false],
-                        [name: "URL", value: env.BUILD_URL, inline: false]
+                        [name: "URL", value: env.BUILD_URL, inline: false],
+                        [name: "GitHub", value: "${env.GITHUB_PR_URL}${env.CHANGE_ID ?: ''}", inline: false]
                     ],
                     footer: [
                         text: "Jenkins CI"
