@@ -102,10 +102,10 @@ def notifyDiscord(title, color) {
                     color: color,
                     fields: [
                         [name: "Job", value: env.JOB_NAME, inline: true],
-                        [name: "PR", value: "#${env.CHANGE_ID}" ?: 'N/A', inline: true],
                         [name: "Source", value: env.CHANGE_BRANCH ?: 'N/A', inline: true],
                         [name: "Target", value: env.CHANGE_TARGET ?: 'main', inline: true],
-                        [name: "Build", value: "#${env.BUILD_NUMBER}", inline: true],
+                        [name: "PR", value: "#${env.CHANGE_ID}" ?: 'N/A', inline: false],
+                        [name: "Build", value: "#${env.BUILD_NUMBER}", inline: false],
                         [name: "Timestamp", value: ts, inline: false],
                         [name: "URL", value: env.BUILD_URL, inline: false],
                         [name: "GitHub", value: "${env.GITHUB_PR_URL}${env.CHANGE_ID ?: ''}", inline: false]
