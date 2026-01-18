@@ -11,6 +11,8 @@ interface VideoPlayerProps {
 	lectureId: number;
 	onComplete?: () => void;
 	onProgressUpdate?: (percent: number) => void;
+	onTimeUpdate?: (time: number) => void;
+	seekTo?: number | null;
 }
 
 const SYNC_INTERVAL = 1000;
@@ -20,14 +22,18 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 	lectureId,
 	onComplete,
 	onProgressUpdate,
+	onTimeUpdate,
+	seekTo,
 }) => {
 	const videoRef = useRef<HTMLVideoElement>(null);
 	const containerRef = useRef<HTMLDivElement>(null);
 	const hlsRef = useRef<Hls | null>(null);
 	const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
+	const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
 	const hasMarkedComplete = useRef(false);
 	const maxWatchedTime = useRef(0);
 	const lastValidTime = useRef(0);
+	const lastProcessedSeekTo = useRef<number | null>(null);
 
 	const [isPlaying, setIsPlaying] = useState(false);
 	const [currentTime, setCurrentTime] = useState(0);
@@ -44,7 +50,13 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 	const { data: lastWatchedSecond } = useLectureProgress(lectureId);
 	const syncProgressMutation = useSyncProgress();
 
-	const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
+	const onCompleteRef = useRef(onComplete);
+	const onProgressUpdateRef = useRef(onProgressUpdate);
+	const onTimeUpdateRef = useRef(onTimeUpdate);
+
+	onCompleteRef.current = onComplete;
+	onProgressUpdateRef.current = onProgressUpdate;
+	onTimeUpdateRef.current = onTimeUpdate;
 
 	const resetHideControlsTimer = useCallback(() => {
 		setShowControls(true);
@@ -57,85 +69,88 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 		}
 	}, [isPlaying]);
 
-	const syncProgress = useCallback(() => {
-		if (videoRef.current && videoRef.current.duration > 0) {
-			syncProgressMutation.mutate({
-				lectureId,
-				currentSecond: Math.floor(videoRef.current.currentTime),
-				totalDuration: Math.floor(videoRef.current.duration),
-			});
-		}
-	}, [lectureId, syncProgressMutation]);
+	const lectureIdRef = useRef(lectureId);
+	lectureIdRef.current = lectureId;
+
+	const syncProgressRef = useRef(syncProgressMutation);
+	syncProgressRef.current = syncProgressMutation;
 
 	useEffect(() => {
-		syncIntervalRef.current = setInterval(syncProgress, SYNC_INTERVAL);
+		const doSync = () => {
+			const video = videoRef.current;
+			if (video && video.duration > 0 && !syncProgressRef.current.isPending) {
+				syncProgressRef.current.mutate({
+					lectureId: lectureIdRef.current,
+					currentSecond: Math.floor(video.currentTime),
+					totalDuration: Math.floor(video.duration),
+				});
+			}
+		};
+
+		syncIntervalRef.current = setInterval(doSync, SYNC_INTERVAL);
 		return () => {
 			if (syncIntervalRef.current) clearInterval(syncIntervalRef.current);
-			syncProgress();
 		};
-	}, [syncProgress]);
+	}, []);
+
+	useEffect(() => {
+		if (
+			seekTo != null &&
+			seekTo !== lastProcessedSeekTo.current &&
+			videoRef.current &&
+			videoRef.current.readyState >= 2
+		) {
+			const video = videoRef.current;
+			if (
+				seekTo <= maxWatchedTime.current &&
+				Math.abs(video.currentTime - seekTo) > 0.5
+			) {
+				video.currentTime = seekTo;
+			}
+			lastProcessedSeekTo.current = seekTo;
+		}
+	}, [seekTo]);
 
 	useEffect(() => {
 		hasMarkedComplete.current = false;
 		maxWatchedTime.current = 0;
 		lastValidTime.current = 0;
+		lastProcessedSeekTo.current = null;
 		setHasResumed(false);
+		setCurrentTime(0);
+		setDuration(0);
+		setIsPlaying(false);
 	}, []);
 
+	const lastWatchedSecondRef = useRef<number | undefined>(undefined);
 	useEffect(() => {
+		const watchedSecond = lastWatchedSecond?.data;
 		if (
+			watchedSecond != null &&
+			watchedSecond > 0 &&
+			watchedSecond !== lastWatchedSecondRef.current &&
 			videoRef.current &&
-			lastWatchedSecond &&
-			lastWatchedSecond > 0 &&
-			!hasResumed &&
 			duration > 0
 		) {
-			videoRef.current.currentTime = lastWatchedSecond;
-			maxWatchedTime.current = lastWatchedSecond;
-			lastValidTime.current = lastWatchedSecond;
-			setHasResumed(true);
-
-			const progressPercent = (lastWatchedSecond / duration) * 100;
-			console.log(
-				"Resumed at",
-				Math.round(progressPercent),
-				"% (",
-				lastWatchedSecond,
-				"s)",
-			);
+			lastWatchedSecondRef.current = watchedSecond;
+			videoRef.current.currentTime = watchedSecond;
+			maxWatchedTime.current = watchedSecond;
+			lastValidTime.current = watchedSecond;
 		}
-	}, [lastWatchedSecond, hasResumed, duration]);
-
-	const onCompleteRef = useRef(onComplete);
-	const onProgressUpdateRef = useRef(onProgressUpdate);
-
-	useEffect(() => {
-		onCompleteRef.current = onComplete;
-		onProgressUpdateRef.current = onProgressUpdate;
-	}, [onComplete, onProgressUpdate]);
-
-	useEffect(() => {
-		if (duration > 0 && currentTime > 0) {
-			const percent = (currentTime / duration) * 100;
-			onProgressUpdateRef.current?.(percent);
-
-			if (percent >= COMPLETION_THRESHOLD && !hasMarkedComplete.current) {
-				hasMarkedComplete.current = true;
-				onCompleteRef.current?.();
-			}
-		}
-	}, [currentTime, duration]);
+	}, [lastWatchedSecond, duration]);
 
 	useEffect(() => {
 		if (!videoRef.current) return;
 		const video = videoRef.current;
+		let mounted = true;
 
 		const loadVideo = async () => {
 			if (Hls.isSupported()) {
 				try {
 					const response = await lectureApi.fetchVideoM3u8(lectureId);
-					const manifest = response.data;
+					if (!mounted) return;
 
+					const manifest = response.data;
 					const blob = new Blob([manifest], {
 						type: "application/vnd.apple.mpegurl",
 					});
@@ -162,22 +177,17 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 					hls.loadSource(manifestUrl);
 					hls.attachMedia(video);
 
-					hls.on(Hls.Events.MANIFEST_PARSED, () => {
-						URL.revokeObjectURL(manifestUrl);
-					});
-
+					hls.on(Hls.Events.MANIFEST_PARSED, () =>
+						URL.revokeObjectURL(manifestUrl),
+					);
 					hls.on(Hls.Events.ERROR, (_event, data) => {
 						if (data.fatal) {
-							switch (data.type) {
-								case Hls.ErrorTypes.NETWORK_ERROR:
-									hls.startLoad();
-									break;
-								case Hls.ErrorTypes.MEDIA_ERROR:
-									hls.recoverMediaError();
-									break;
-								default:
-									hls.destroy();
-									hlsRef.current = null;
+							if (data.type === Hls.ErrorTypes.NETWORK_ERROR) hls.startLoad();
+							else if (data.type === Hls.ErrorTypes.MEDIA_ERROR)
+								hls.recoverMediaError();
+							else {
+								hls.destroy();
+								hlsRef.current = null;
 							}
 						}
 					});
@@ -186,6 +196,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 				}
 			} else if (video.canPlayType("application/vnd.apple.mpegurl")) {
 				const response = await lectureApi.fetchVideoM3u8(lectureId);
+				if (!mounted) return;
+
 				const manifest = response.data;
 				const rewrittenManifest = manifest.replace(
 					/segment_\d+\.ts/g,
@@ -202,6 +214,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 		loadVideo();
 
 		return () => {
+			mounted = false;
 			if (hlsRef.current) {
 				hlsRef.current.destroy();
 				hlsRef.current = null;
@@ -213,99 +226,123 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 		const video = videoRef.current;
 		if (!video) return;
 
-		const onPlay = () => setIsPlaying(true);
-		const onPause = () => setIsPlaying(false);
-		const onTimeUpdate = () => {
+		let lastCallbackTime = 0;
+
+		const handlePlay = () => setIsPlaying(true);
+		const handlePause = () => setIsPlaying(false);
+		const handleDurationChange = () => {
+			if (video.duration && !isNaN(video.duration)) {
+				setDuration(video.duration);
+			}
+		};
+
+		const handleTimeUpdate = () => {
 			const current = video.currentTime;
+			if (current > maxWatchedTime.current) maxWatchedTime.current = current;
+			lastValidTime.current = current;
+
 			setCurrentTime(current);
 
-			if (current > maxWatchedTime.current) {
-				maxWatchedTime.current = current;
+			const now = Date.now();
+			if (now - lastCallbackTime < 500) return;
+			lastCallbackTime = now;
+
+			onTimeUpdateRef.current?.(current);
+
+			const dur = video.duration;
+			if (dur > 0) {
+				const percent = (current / dur) * 100;
+				onProgressUpdateRef.current?.(percent);
+
+				if (percent >= COMPLETION_THRESHOLD && !hasMarkedComplete.current) {
+					hasMarkedComplete.current = true;
+					onCompleteRef.current?.();
+				}
 			}
-			lastValidTime.current = current;
 		};
-		const onDurationChange = () => setDuration(video.duration);
-		const onProgress = () => {
+
+		const handleProgress = () => {
 			if (video.buffered.length > 0) {
 				setBuffered(video.buffered.end(video.buffered.length - 1));
 			}
 		};
-		const onEnded = () => {
+
+		const handleEnded = () => {
 			setIsPlaying(false);
-			onComplete?.();
+			onCompleteRef.current?.();
 		};
 
-		const onSeeking = () => {
+		const handleSeeking = () => {
 			if (video.currentTime > maxWatchedTime.current) {
 				video.currentTime = lastValidTime.current;
 			}
 		};
 
-		video.addEventListener("play", onPlay);
-		video.addEventListener("pause", onPause);
-		video.addEventListener("timeupdate", onTimeUpdate);
-		video.addEventListener("durationchange", onDurationChange);
-		video.addEventListener("progress", onProgress);
-		video.addEventListener("ended", onEnded);
-		video.addEventListener("seeking", onSeeking);
+		video.addEventListener("play", handlePlay);
+		video.addEventListener("pause", handlePause);
+		video.addEventListener("timeupdate", handleTimeUpdate);
+		video.addEventListener("durationchange", handleDurationChange);
+		video.addEventListener("progress", handleProgress);
+		video.addEventListener("ended", handleEnded);
+		video.addEventListener("seeking", handleSeeking);
 
 		return () => {
-			video.removeEventListener("play", onPlay);
-			video.removeEventListener("pause", onPause);
-			video.removeEventListener("timeupdate", onTimeUpdate);
-			video.removeEventListener("durationchange", onDurationChange);
-			video.removeEventListener("progress", onProgress);
-			video.removeEventListener("ended", onEnded);
-			video.removeEventListener("seeking", onSeeking);
+			video.removeEventListener("play", handlePlay);
+			video.removeEventListener("pause", handlePause);
+			video.removeEventListener("timeupdate", handleTimeUpdate);
+			video.removeEventListener("durationchange", handleDurationChange);
+			video.removeEventListener("progress", handleProgress);
+			video.removeEventListener("ended", handleEnded);
+			video.removeEventListener("seeking", handleSeeking);
 		};
-	}, [onComplete]);
-
-	useEffect(() => {
-		const onFullscreenChange = () =>
-			setIsFullscreen(!!document.fullscreenElement);
-		document.addEventListener("fullscreenchange", onFullscreenChange);
-		return () =>
-			document.removeEventListener("fullscreenchange", onFullscreenChange);
 	}, []);
 
-	const handlePlayPause = () => {
-		if (videoRef.current) {
-			if (isPlaying) videoRef.current.pause();
-			else videoRef.current.play();
-		}
-	};
+	useEffect(() => {
+		const handleFullscreenChange = () =>
+			setIsFullscreen(!!document.fullscreenElement);
+		document.addEventListener("fullscreenchange", handleFullscreenChange);
+		return () =>
+			document.removeEventListener("fullscreenchange", handleFullscreenChange);
+	}, []);
 
-	const handleSeek = (time: number) => {
-		if (videoRef.current) {
-			if (time <= maxWatchedTime.current) {
-				videoRef.current.currentTime = time;
-			}
+	const handlePlayPause = useCallback(() => {
+		const video = videoRef.current;
+		if (video) {
+			if (video.paused) video.play();
+			else video.pause();
 		}
-	};
+	}, []);
 
-	const handleVolumeChange = (vol: number) => {
+	const handleSeek = useCallback((time: number) => {
+		if (videoRef.current && time <= maxWatchedTime.current) {
+			videoRef.current.currentTime = time;
+			setCurrentTime(time);
+		}
+	}, []);
+
+	const handleVolumeChange = useCallback((vol: number) => {
 		if (videoRef.current) {
 			videoRef.current.volume = vol;
 			setVolume(vol);
 			setIsMuted(vol === 0);
 		}
-	};
+	}, []);
 
-	const handleMuteToggle = () => {
+	const handleMuteToggle = useCallback(() => {
 		if (videoRef.current) {
-			videoRef.current.muted = !isMuted;
-			setIsMuted(!isMuted);
+			videoRef.current.muted = !videoRef.current.muted;
+			setIsMuted(videoRef.current.muted);
 		}
-	};
+	}, []);
 
-	const handleSpeedChange = (speed: number) => {
+	const handleSpeedChange = useCallback((speed: number) => {
 		if (videoRef.current) {
 			videoRef.current.playbackRate = speed;
 			setPlaybackSpeed(speed);
 		}
-	};
+	}, []);
 
-	const handleQualityChange = (q: string) => {
+	const handleQualityChange = useCallback((q: string) => {
 		setQuality(q);
 		if (hlsRef.current) {
 			if (q === "auto") hlsRef.current.currentLevel = -1;
@@ -316,27 +353,26 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({
 				if (level !== -1) hlsRef.current.currentLevel = level;
 			}
 		}
-	};
+	}, []);
 
-	const handleFullscreenToggle = () => {
+	const handleFullscreenToggle = useCallback(() => {
 		if (!containerRef.current) return;
-		if (isFullscreen) document.exitFullscreen();
+		if (document.fullscreenElement) document.exitFullscreen();
 		else containerRef.current.requestFullscreen();
-	};
+	}, []);
 
-	const handleSkip = (seconds: number) => {
-		if (videoRef.current) {
-			const targetTime = currentTime + seconds;
+	const handleSkip = useCallback((seconds: number) => {
+		const video = videoRef.current;
+		if (!video) return;
 
-			if (seconds < 0) {
-				videoRef.current.currentTime = Math.max(0, targetTime);
-			} else {
-				if (targetTime <= maxWatchedTime.current) {
-					videoRef.current.currentTime = Math.min(duration, targetTime);
-				}
-			}
+		const targetTime = video.currentTime + seconds;
+		if (seconds < 0) {
+			video.currentTime = Math.max(0, targetTime);
+		} else if (targetTime <= maxWatchedTime.current) {
+			video.currentTime = Math.min(video.duration || 0, targetTime);
 		}
-	};
+		setCurrentTime(video.currentTime);
+	}, []);
 
 	return (
 		<div

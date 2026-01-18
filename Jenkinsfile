@@ -1,8 +1,13 @@
 pipeline {
     agent any
 
+    tools {
+        nodejs 'node22'
+    }
+
     environment {
         NODE_ENV = 'production'
+        GITHUB_PR_URL = 'https://github.com/lcaohoanq/bit-learning-fe/pull/'
     }
 
     stages {
@@ -22,19 +27,16 @@ pipeline {
         stage('Setup Node & PNPM') {
             steps {
                 sh '''
-                node -v
-                if ! command -v pnpm >/dev/null 2>&1; then
-                  echo "Installing pnpm..."
-                  npm install -g pnpm
-                fi
-                pnpm -v
+                  node -v
+                  corepack enable
+                  pnpm -v
                 '''
             }
         }
 
         stage('Install Dependencies') {
             steps {
-                sh 'pnpm install'
+                sh 'pnpm install --frozen-lockfile --prefer-offline'
             }
         }
 
@@ -43,19 +45,40 @@ pipeline {
                 sh 'pnpm run build'
             }
         }
+
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh '''
+                  echo "🚀 Deploying FE to production..."
+                  # rsync / docker / vercel / nginx / whatever here
+                '''
+            }
+        }
     }
 
     post {
         success {
-            notifyDiscord(
-                "✅ Jenkins PR BUILD SUCCESS",
-                3066993
-            )
+            script {
+                if (env.CHANGE_ID) {
+                    notifyDiscord(
+                        "✅ [FE] Jenkins PR BUILD SUCCESS",
+                        3066993
+                    )
+                } else if (env.BRANCH_NAME == 'main') {
+                    notifyDiscord(
+                        "🚀 [FE] RELEASE DEPLOYED",
+                        5763719
+                    )
+                }
+            }
         }
 
         failure {
             notifyDiscord(
-                "❌ Jenkins PR BUILD FAILED",
+                "❌ [FE] Jenkins PR BUILD FAILED",
                 15158332
             )
         }
@@ -78,12 +101,14 @@ def notifyDiscord(title, color) {
                     title: title,
                     color: color,
                     fields: [
-                        [name: "Repo", value: env.JOB_NAME, inline: true],
-                        [name: "PR Branch", value: env.CHANGE_BRANCH ?: 'N/A', inline: true],
+                        [name: "Job", value: env.JOB_NAME, inline: true],
+                        [name: "Source", value: env.CHANGE_BRANCH ?: 'N/A', inline: true],
                         [name: "Target", value: env.CHANGE_TARGET ?: 'main', inline: true],
-                        [name: "Build", value: "#${env.BUILD_NUMBER}", inline: true],
+                        [name: "PR", value: "#${env.CHANGE_ID}" ?: 'N/A', inline: false],
+                        [name: "Build", value: "#${env.BUILD_NUMBER}", inline: false],
                         [name: "Timestamp", value: ts, inline: false],
-                        [name: "URL", value: env.BUILD_URL, inline: false]
+                        [name: "URL", value: env.BUILD_URL, inline: false],
+                        [name: "GitHub", value: "${env.GITHUB_PR_URL}${env.CHANGE_ID ?: ''}", inline: false]
                     ],
                     footer: [
                         text: "Jenkins CI"
@@ -101,3 +126,4 @@ def notifyDiscord(title, color) {
         }
     }
 }
+
