@@ -45,14 +45,35 @@ pipeline {
                 sh 'pnpm run build'
             }
         }
+
+        stage('Deploy') {
+            when {
+                branch 'main'
+            }
+            steps {
+                sh '''
+                  echo "🚀 Deploying FE to production..."
+                  # rsync / docker / vercel / nginx / whatever here
+                '''
+            }
+        }
     }
 
     post {
         success {
-            notifyDiscord(
-                "✅ [FE] Jenkins PR BUILD SUCCESS",
-                3066993
-            )
+            script {
+                if (env.CHANGE_ID) {
+                    notifyDiscord(
+                        "✅ [FE] Jenkins PR BUILD SUCCESS",
+                        3066993
+                    )
+                } else if (env.BRANCH_NAME == 'main') {
+                    notifyDiscord(
+                        "🚀 [FE] RELEASE DEPLOYED",
+                        5763719
+                    )
+                }
+            }
         }
 
         failure {
@@ -81,7 +102,8 @@ def notifyDiscord(title, color) {
                     color: color,
                     fields: [
                         [name: "Job", value: env.JOB_NAME, inline: true],
-                        [name: "PR Branch", value: env.CHANGE_BRANCH ?: 'N/A', inline: true],
+                        [name: "PR", value: "#${env.CHANGE_ID}" ?: 'N/A', inline: true],
+                        [name: "Source", value: env.CHANGE_BRANCH ?: 'N/A', inline: true],
                         [name: "Target", value: env.CHANGE_TARGET ?: 'main', inline: true],
                         [name: "Build", value: "#${env.BUILD_NUMBER}", inline: true],
                         [name: "Timestamp", value: ts, inline: false],
