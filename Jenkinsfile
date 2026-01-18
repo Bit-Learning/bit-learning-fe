@@ -8,6 +8,9 @@ pipeline {
     environment {
         NODE_ENV = 'production'
         GITHUB_PR_URL = 'https://github.com/lcaohoanq/bit-learning-fe/pull/'
+        IMAGE_WEB = 'lcaohoanq/bitlearning-web'
+        IMAGE_ADMIN = 'lcaohoanq/bitlearning-admin'
+        DOCKER_CREDS_ID = 'lcaohoanq-dockerhub-credentials'
     }
 
     stages {
@@ -24,37 +27,53 @@ pipeline {
             }
         }
 
-        stage('Setup Node & PNPM') {
+        stage('Setup & Install') {
             steps {
-                sh '''
-                  node -v
-                  corepack enable
-                  pnpm -v
-                '''
+                sh 'corepack enable && pnpm install --frozen-lockfile --prefer-offline'
             }
         }
 
-        stage('Install Dependencies') {
-            steps {
-                sh 'pnpm install --frozen-lockfile --prefer-offline'
-            }
-        }
-
-        stage('Build') {
+        stage('Build Source') {
             steps {
                 sh 'pnpm run build'
             }
         }
 
-        stage('Deploy') {
+        stage('Build & Push Docker') {
             when {
                 branch 'main'
             }
             steps {
-                sh '''
-                  echo "🚀 Deploying FE to production..."
-                  # rsync / docker / vercel / nginx / whatever here
-                '''
+                script {
+                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDS_ID, usernameVariable: 'D_USER', passwordVariable: 'D_PASS')]) {
+
+                        // 1. Login
+                        sh 'echo $D_PASS | docker login -u $D_USER --password-stdin'
+
+                        // 2. Build Web (Dual Tagging: latest & build_number)
+                        sh """
+                            docker build \
+                            -t ${IMAGE_WEB}:latest \
+                            -t ${IMAGE_WEB}:${env.BUILD_NUMBER} \
+                            -f apps/web/Dockerfile.prod .
+                        """
+
+                        // 3. Build Admin (Dual Tagging: latest & build_number)
+                        sh """
+                            docker build \
+                            -t ${IMAGE_ADMIN}:latest \
+                            -t ${IMAGE_ADMIN}:${env.BUILD_NUMBER} \
+                            -f apps/admin/Dockerfile.prod .
+                        """
+
+                        // 4. Push All
+                        sh "docker push ${IMAGE_WEB}:latest"
+                        sh "docker push ${IMAGE_WEB}:${env.BUILD_NUMBER}"
+
+                        sh "docker push ${IMAGE_ADMIN}:latest"
+                        sh "docker push ${IMAGE_ADMIN}:${env.BUILD_NUMBER}"
+                    }
+                }
             }
         }
     }
@@ -63,30 +82,20 @@ pipeline {
         success {
             script {
                 if (env.CHANGE_ID) {
-                    notifyDiscord(
-                        "✅ [FE] Jenkins PR BUILD SUCCESS",
-                        3066993
-                    )
+                    notifyDiscord("✅ [FE] Jenkins PR BUILD SUCCESS", 3066993)
                 } else if (env.BRANCH_NAME == 'main') {
-                    notifyDiscord(
-                        "🚀 [FE] RELEASE DEPLOYED",
-                        5763719
-                    )
+                    notifyReleaseDiscord("🚀 [FE] RELEASE DEPLOYED", 5763719)
                 }
             }
         }
-
         failure {
-            notifyDiscord(
-                "❌ [FE] Jenkins PR BUILD FAILED",
-                15158332
-            )
+            notifyDiscord("❌ [FE] Jenkins PR BUILD FAILED", 15158332)
         }
     }
 }
 
 /* =========================
-   Discord Notification
+   Discord Notification (PR)
    ========================= */
 def notifyDiscord(title, color) {
     withCredentials([string(credentialsId: 'discord_webhook_capstone', variable: 'WEBHOOK')]) {
@@ -127,3 +136,45 @@ def notifyDiscord(title, color) {
     }
 }
 
+/* =========================
+   Discord Notification (RELEASE) - CẬP NHẬT 2 IMAGES
+   ========================= */
+def notifyReleaseDiscord(title, color) {
+    withCredentials([string(credentialsId: 'discord_webhook_capstone', variable: 'WEBHOOK')]) {
+        script {
+            def ts = new Date().format("yyyy-MM-dd HH:mm:ss", TimeZone.getTimeZone('Asia/Ho_Chi_Minh'))
+
+            // Link Docker Hub
+            def webUrl = "https://hub.docker.com/r/${env.IMAGE_WEB}/tags"
+            def adminUrl = "https://hub.docker.com/r/${env.IMAGE_ADMIN}/tags"
+
+            def payload = groovy.json.JsonOutput.toJson([
+                embeds: [[
+                    title: title,
+                    color: color,
+                    fields: [
+                        [name: "Job", value: env.JOB_NAME, inline: true],
+                        [name: "Build", value: "#${env.BUILD_NUMBER}", inline: true],
+                        [name: "Timestamp", value: ts, inline: false],
+                        [name: "Jenkins URL", value: env.BUILD_URL, inline: false],
+
+                        // Thông tin Image Web
+                        [name: "🐳 Web Image", value: "**${env.IMAGE_WEB}**\nTags: `latest`, `${env.BUILD_NUMBER}`\n[View on Hub](${webUrl})", inline: false],
+
+                        // Thông tin Image Admin
+                        [name: "🐳 Admin Image", value: "**${env.IMAGE_ADMIN}**\nTags: `latest`, `${env.BUILD_NUMBER}`\n[View on Hub](${adminUrl})", inline: false]
+                    ],
+                    footer: [text: "Jenkins CI - Release"],
+                    timestamp: new Date().format("yyyy-MM-dd'T'HH:mm:ssXXX")
+                ]]
+            ])
+
+            sh """
+            curl -s -X POST \
+              -H "Content-Type: application/json" \
+              -d '${payload}' \
+              $WEBHOOK
+            """
+        }
+    }
+}
