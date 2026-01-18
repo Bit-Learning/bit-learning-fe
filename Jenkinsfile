@@ -39,23 +39,29 @@ pipeline {
             when {
                 branch 'main'
             }
-            steps {
-                script {
-                    // Build images (Gán version tag mặc định là BUILD_NUMBER)
-                    // Context là '.' (root)
-                    def webImg = docker.build("${IMAGE_WEB}:${env.BUILD_NUMBER}", "-f apps/web/Dockerfile.prod .")
-                    def adminImg = docker.build("${IMAGE_ADMIN}:${env.BUILD_NUMBER}", "-f apps/admin/Dockerfile.prod .")
 
-                    // Push images (Kèm credential)
-                    docker.withRegistry(REGISTRY_URL, REGISTRY_CREDENTIAL) {
+            parallel {
+                stage('Web App') {
+                    steps {
+                        script {
+                            def webImg = docker.build("${IMAGE_WEB}:${env.BUILD_NUMBER}", "-f apps/web/Dockerfile.prod .")
+                            docker.withRegistry(REGISTRY_URL, REGISTRY_CREDENTIAL) {
+                                webImg.push()
+                                webImg.push('latest')
+                            }
+                        }
+                    }
+                }
 
-                        // Push tag version (vd: :35)
-                        webImg.push()
-                        adminImg.push()
-
-                        // Push tag latest
-                        webImg.push('latest')
-                        adminImg.push('latest')
+                stage('Admin App') {
+                    steps {
+                        script {
+                            def adminImg = docker.build("${IMAGE_ADMIN}:${env.BUILD_NUMBER}", "-f apps/admin/Dockerfile.prod .")
+                            docker.withRegistry(REGISTRY_URL, REGISTRY_CREDENTIAL) {
+                                adminImg.push()
+                                adminImg.push('latest')
+                            }
+                        }
                     }
                 }
             }
