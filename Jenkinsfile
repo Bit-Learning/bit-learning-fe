@@ -92,7 +92,7 @@ def notifyDiscord(title, color) {
     withCredentials([string(credentialsId: 'discord_webhook_capstone', variable: 'WEBHOOK')]) {
         script {
             def ts = new Date().format(
-                ${TIME_STAMP_FORMAT},
+                env.TIME_STAMP_FORMAT,
                 TimeZone.getTimeZone('Asia/Ho_Chi_Minh')
             )
 
@@ -133,7 +133,7 @@ def notifyDiscord(title, color) {
 def notifyReleaseDiscord(title, color) {
     withCredentials([string(credentialsId: 'discord_webhook_capstone', variable: 'WEBHOOK')]) {
         script {
-            def ts = new Date().format(${TIME_STAMP_FORMAT}, TimeZone.getTimeZone('Asia/Ho_Chi_Minh'))
+            def ts = new Date().format(env.TIME_STAMP_FORMAT, TimeZone.getTimeZone('Asia/Ho_Chi_Minh'))
 
             // Link Docker Hub
             def webUrl = "https://hub.docker.com/r/${env.IMAGE_WEB}/tags"
