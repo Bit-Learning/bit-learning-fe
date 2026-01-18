@@ -10,7 +10,8 @@ pipeline {
         GITHUB_PR_URL = 'https://github.com/lcaohoanq/bit-learning-fe/pull/'
         IMAGE_WEB = 'lcaohoanq/bitlearning-web'
         IMAGE_ADMIN = 'lcaohoanq/bitlearning-admin'
-        DOCKER_CREDS_ID = 'lcaohoanq-dockerhub-credentials'
+        REGISTRY_CREDENTIAL = 'lcaohoanq-dockerhub-credentials'
+        REGISTRY_URL = 'https://index.docker.io/v1/'
     }
 
     stages {
@@ -24,11 +25,6 @@ pipeline {
                         credentialsId: 'lcaohoanq-github-pat'
                     ]]
                 ])
-            }
-        }
-
-        stage('Setup & Install') {
-            steps {
                 sh 'corepack enable && pnpm install --frozen-lockfile --prefer-offline'
             }
         }
@@ -45,33 +41,21 @@ pipeline {
             }
             steps {
                 script {
-                    withCredentials([usernamePassword(credentialsId: DOCKER_CREDS_ID, usernameVariable: 'D_USER', passwordVariable: 'D_PASS')]) {
+                    // Build images (Gán version tag mặc định là BUILD_NUMBER)
+                    // Context là '.' (root)
+                    def webImg = docker.build("${IMAGE_WEB}:${env.BUILD_NUMBER}", "-f apps/web/Dockerfile.prod .")
+                    def adminImg = docker.build("${IMAGE_ADMIN}:${env.BUILD_NUMBER}", "-f apps/admin/Dockerfile.prod .")
 
-                        // 1. Login
-                        sh 'echo $D_PASS | docker login -u $D_USER --password-stdin'
+                    // Push images (Kèm credential)
+                    docker.withRegistry(REGISTRY_URL, REGISTRY_CREDENTIAL) {
 
-                        // 2. Build Web (Dual Tagging: latest & build_number)
-                        sh """
-                            docker build \
-                            -t ${IMAGE_WEB}:latest \
-                            -t ${IMAGE_WEB}:${env.BUILD_NUMBER} \
-                            -f apps/web/Dockerfile.prod .
-                        """
+                        // Push tag version (vd: :35)
+                        webImg.push()
+                        adminImg.push()
 
-                        // 3. Build Admin (Dual Tagging: latest & build_number)
-                        sh """
-                            docker build \
-                            -t ${IMAGE_ADMIN}:latest \
-                            -t ${IMAGE_ADMIN}:${env.BUILD_NUMBER} \
-                            -f apps/admin/Dockerfile.prod .
-                        """
-
-                        // 4. Push All
-                        sh "docker push ${IMAGE_WEB}:latest"
-                        sh "docker push ${IMAGE_WEB}:${env.BUILD_NUMBER}"
-
-                        sh "docker push ${IMAGE_ADMIN}:latest"
-                        sh "docker push ${IMAGE_ADMIN}:${env.BUILD_NUMBER}"
+                        // Push tag latest
+                        webImg.push('latest')
+                        adminImg.push('latest')
                     }
                 }
             }
@@ -157,11 +141,7 @@ def notifyReleaseDiscord(title, color) {
                         [name: "Build", value: "#${env.BUILD_NUMBER}", inline: true],
                         [name: "Timestamp", value: ts, inline: false],
                         [name: "Jenkins URL", value: env.BUILD_URL, inline: false],
-
-                        // Thông tin Image Web
                         [name: "🐳 Web Image", value: "**${env.IMAGE_WEB}**\nTags: `latest`, `${env.BUILD_NUMBER}`\n[View on Hub](${webUrl})", inline: false],
-
-                        // Thông tin Image Admin
                         [name: "🐳 Admin Image", value: "**${env.IMAGE_ADMIN}**\nTags: `latest`, `${env.BUILD_NUMBER}`\n[View on Hub](${adminUrl})", inline: false]
                     ],
                     footer: [text: "Jenkins CI - Release"],
