@@ -6,7 +6,7 @@ pipeline {
     }
 
     environment {
-        NODE_ENV = 'production',
+        NODE_ENV = 'production'
         GITHUB_PR_URL = 'https://github.com/lcaohoanq/bit-learning-fe/pull/'
     }
 
