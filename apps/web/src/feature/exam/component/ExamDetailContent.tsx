@@ -11,7 +11,7 @@ const ExamDetailContent: React.FC = () => {
   const params = useParams({ strict: false });
   const examId = (params as any).id ? Number((params as any).id) : undefined;
 
-  const { data: exam, isLoading } = useExam(examId!);
+  const { data: exam, isLoading } = useExam(examId!, { enabled: !!examId });
   const downloadExam = useDownloadExam();
 
   const getLevelLabel = (level: QuestionLevel) => {

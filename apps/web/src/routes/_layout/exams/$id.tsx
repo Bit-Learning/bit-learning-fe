@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import ExamDetail from "@/feature/matrix/page/ExamDetail";
 import { ProtectedRoute } from "@/shared/components/ProtectedRoute";
+import { ExamDetailPage } from "@/feature/exam/pages/ExamDetail";
 
 export const Route = createFileRoute("/_layout/exams/$id")({
-	component: () => (
-		<ProtectedRoute>
-			<ExamDetail />
-		</ProtectedRoute>
-	),
+  component: () => (
+    <ProtectedRoute>
+      <ExamDetailPage />
+    </ProtectedRoute>
+  ),
 });

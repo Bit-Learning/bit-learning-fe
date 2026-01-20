@@ -211,8 +211,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                     >
                       <div className="flex items-start gap-3">
                         <Checkbox
-                          checked={selectedQuestions.has(question.id)}
-                          onCheckedChange={() => handleToggleQuestion(question.id)}
+                          isSelected={selectedQuestions.has(question.id)}
+                          onChange={() => handleToggleQuestion(question.id)}
                           className="mt-1"
                         />
                         <div className="flex-1 min-w-0">
@@ -343,8 +343,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
               <div className="flex items-center gap-2 border-t pt-4">
                 <Checkbox
                   id="shuffleOptions"
-                  checked={shuffleOptions}
-                  onCheckedChange={(checked) => setShuffleOptions(!!checked)}
+                  isSelected={shuffleOptions}
+                  onChange={(isSelected) => setShuffleOptions(!!isSelected)}
                 />
                 <Label htmlFor="shuffleOptions" className="cursor-pointer text-sm">
                   Xáo trộn thứ tự đáp án
