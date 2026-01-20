@@ -1,5 +1,5 @@
 import PageMeta from "@/shared/components/seo/page-meta";
-import CreateQuestionForm from "../components/CreateQuestionForm";
+import CreateQuestionForm from "../components/QuestionFormContent";
 
 const CreateQuestionPage: React.FC = () => {
   return (

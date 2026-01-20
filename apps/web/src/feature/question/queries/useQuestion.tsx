@@ -25,7 +25,7 @@ export const useSearchQuestions = (params?: QuestionSearchParams) => {
   });
 };
 
-export const useQuestion = (id: number) => {
+export const useQuestion = (id: number, _p0: { enabled: boolean }) => {
   return useQuery({
     queryKey: questionKeys.detail(id),
     queryFn: async () => {

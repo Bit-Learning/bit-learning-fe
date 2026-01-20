@@ -1,18 +1,30 @@
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { ArrowLeft, Plus, Trash2, AlertCircle, Check } from "lucide-react";
+import { useState, useEffect } from "react";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { ArrowLeft, Plus, Trash2, AlertCircle, Check, Save } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
 import { Label } from "@workspace/ui/components/label";
+import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@workspace/ui/components/Sonner";
-import { useCreateQuestion } from "../queries/useQuestion";
+import { useCreateQuestion, useUpdateQuestion, useQuestion } from "../queries/useQuestion";
 import type { QuestionRequest, OptionRequest, QuestionType, QuestionLevel } from "../types/question.type";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 
-const CreateQuestionForm: React.FC = () => {
+interface Props {
+  mode?: "create" | "edit";
+}
+
+const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   const navigate = useNavigate();
+  const params = useParams({ strict: false });
+  const questionId = mode === "edit" && (params as any).id ? Number((params as any).id) : undefined;
+
   const createQuestion = useCreateQuestion();
+  const updateQuestion = useUpdateQuestion();
+  const { data: existingQuestion, isLoading: loadingQuestion } = useQuestion(questionId!, {
+    enabled: mode === "edit" && !!questionId,
+  });
   const { data: subjects } = useSubjectsList();
 
   const [formData, setFormData] = useState<QuestionRequest>({
@@ -30,6 +42,32 @@ const CreateQuestionForm: React.FC = () => {
     { label: "A", content: "", isCorrect: false, orderNo: 0 },
     { label: "B", content: "", isCorrect: false, orderNo: 1 },
   ]);
+
+  useEffect(() => {
+    if (mode === "edit" && existingQuestion) {
+      setFormData({
+        content: existingQuestion.content,
+        canonicalAnswer: existingQuestion.canonicalAnswer || "",
+        questionType: existingQuestion.questionType,
+        questionLevel: existingQuestion.questionLevel,
+        subjectId: existingQuestion.subject?.id,
+        lessonId: existingQuestion.lesson?.id,
+        tagIds: existingQuestion.tags?.map((t) => t.id) || [],
+        options: [],
+      });
+
+      if (existingQuestion.questionType === "MCQ" && existingQuestion.options) {
+        setOptions(
+          existingQuestion.options.map((opt) => ({
+            label: opt.label || "",
+            content: opt.content,
+            isCorrect: opt.isCorrect,
+            orderNo: opt.orderNo,
+          })),
+        );
+      }
+    }
+  }, [mode, existingQuestion]);
 
   const handleInputChange = (field: keyof QuestionRequest, value: any) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
@@ -95,22 +133,59 @@ const CreateQuestionForm: React.FC = () => {
       options: formData.questionType === "MCQ" ? options : undefined,
     };
 
-    createQuestion.mutate(requestData, {
-      onSuccess: () => {
-        navigate({ to: "/questions/my" });
-      },
-    });
+    if (mode === "edit" && questionId) {
+      updateQuestion.mutate(
+        { id: questionId, data: requestData },
+        {
+          onSuccess: () => {
+            navigate({ to: `/questions/${questionId}` });
+          },
+        },
+      );
+    } else {
+      createQuestion.mutate(requestData, {
+        onSuccess: () => {
+          navigate({ to: "/questions" });
+        },
+      });
+    }
   };
+
+  if (mode === "edit" && loadingQuestion) {
+    return (
+      <div className="container mx-auto p-6 max-w-4xl">
+        <Skeleton className="h-8 w-32 mb-4" />
+        <Skeleton className="h-10 w-64 mb-8" />
+        <Card>
+          <CardContent className="p-6 space-y-4">
+            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-32 w-full" />
+            <Skeleton className="h-10 w-full" />
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const isSubmitting = mode === "edit" ? updateQuestion.isPending : createQuestion.isPending;
+  const title = mode === "edit" ? "Chỉnh sửa câu hỏi" : "Tạo câu hỏi mới";
+  const description = mode === "edit" ? "Cập nhật thông tin câu hỏi" : "Điền thông tin để tạo câu hỏi mới";
+  const submitButtonText = mode === "edit" ? "Lưu thay đổi" : "Tạo câu hỏi";
+  const submitIcon = mode === "edit" ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />;
 
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/questions/my" })} className="gap-2 mb-4">
+        <Button
+          variant="ghost"
+          onClick={() => navigate({ to: mode === "edit" ? `/questions/${questionId}` : "/questions" })}
+          className="gap-2 mb-4"
+        >
           <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách
+          Quay lại
         </Button>
-        <h1 className="text-3xl font-bold">Tạo câu hỏi mới</h1>
-        <p className="text-muted-foreground mt-1">Điền thông tin để tạo câu hỏi mới</p>
+        <h1 className="text-3xl font-bold">{title}</h1>
+        <p className="text-muted-foreground mt-1">{description}</p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
@@ -163,11 +238,12 @@ const CreateQuestionForm: React.FC = () => {
                 className="w-full mt-1.5 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
               >
                 <option value="">-- Chọn môn học --</option>
-                {subjects?.map((subject) => (
-                  <option key={subject.id} value={subject.id}>
-                    {subject.name}
-                  </option>
-                ))}
+                {subjects &&
+                  subjects.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </option>
+                  ))}
               </select>
             </div>
 
@@ -258,12 +334,16 @@ const CreateQuestionForm: React.FC = () => {
         )}
 
         <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={() => navigate({ to: "/questions" })}>
+          <Button
+            type="button"
+            variant="outline"
+            onClick={() => navigate({ to: mode === "edit" ? `/questions/${questionId}` : "/questions" })}
+          >
             Hủy
           </Button>
-          <Button type="submit" className="gap-2" isDisabled={createQuestion.isPending}>
-            <Plus className="h-4 w-4" />
-            {createQuestion.isPending ? "Đang tạo..." : "Tạo câu hỏi"}
+          <Button type="submit" className="gap-2" isDisabled={isSubmitting}>
+            {submitIcon}
+            {isSubmitting ? "Đang xử lý..." : submitButtonText}
           </Button>
         </div>
       </form>
@@ -271,4 +351,4 @@ const CreateQuestionForm: React.FC = () => {
   );
 };
 
-export default CreateQuestionForm;
+export default QuestionFormContent;
