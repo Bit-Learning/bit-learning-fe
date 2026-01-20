@@ -14,7 +14,7 @@ export const questionKeys = {
   myQuestions: (params?: QuestionSearchParams) => [...questionKeys.all, "my-questions", params] as const,
 };
 
-export const useSearchQuestions = (params?: QuestionSearchParams) => {
+export const useSearchQuestions = (params?: QuestionSearchParams, _p0?: { enabled: boolean }) => {
   return useQuery({
     queryKey: questionKeys.list(params),
     queryFn: async () => {
@@ -36,7 +36,7 @@ export const useQuestion = (id: number, _p0: { enabled: boolean }) => {
   });
 };
 
-export const useMyQuestions = (params?: QuestionSearchParams) => {
+export const useMyQuestions = (params?: QuestionSearchParams, _p0?: { enabled: boolean }) => {
   return useQuery({
     queryKey: questionKeys.myQuestions(params),
     queryFn: async () => {

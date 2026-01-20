@@ -19,7 +19,7 @@ export const examKeys = {
   matrixExams: (matrixId: number, params?: ExamSearchParams) => [...examKeys.all, "matrix", matrixId, params] as const,
 };
 
-export const useExam = (id: number) => {
+export const useExam = (id: number, _p0: { enabled: boolean }) => {
   return useQuery({
     queryKey: examKeys.detail(id),
     queryFn: async () => {
