@@ -1,3 +1,6 @@
+import { TLessonBriefResponse } from "./lesson.type";
+import { TSubjectBriefResponse } from "./subject.type";
+
 export type TMatrixRequest = {
   name: string;
   code: string;
@@ -87,16 +90,4 @@ export type TMatrixDetailResponse = {
   hardEssayScore: number;
   createdAt: string;
   updatedAt: string;
-};
-
-export type TLessonBriefResponse = {
-  id: number;
-  name: string;
-  lessonNo: number;
-};
-
-export type TSubjectBriefResponse = {
-  id: number;
-  name: string;
-  code: string;
 };
