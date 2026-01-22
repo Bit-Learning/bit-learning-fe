@@ -10,6 +10,7 @@ import { toast } from "@workspace/ui/components/Sonner";
 import { useCreateQuestion, useUpdateQuestion, useQuestion } from "../queries/useQuestion";
 import type { QuestionRequest, OptionRequest, QuestionType, QuestionLevel } from "../types/question.type";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
+import { useLessons } from "@/feature/matrix/queries/useLesson";
 
 interface Props {
   mode?: "create" | "edit";
@@ -26,6 +27,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     enabled: mode === "edit" && !!questionId,
   });
   const { data: subjects } = useSubjectsList();
+  const { data: lessons } = useLessons();
 
   const [formData, setFormData] = useState<QuestionRequest>({
     content: "",
@@ -33,7 +35,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     questionType: "MCQ" as QuestionType,
     questionLevel: "EASY" as QuestionLevel,
     subjectId: undefined,
-    lessonId: undefined,
+    lessonId: 2,
     tagIds: [],
     options: [],
   });
@@ -178,7 +180,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate({ to: mode === "edit" ? `/questions/${questionId}` : "/questions" })}
+          onClick={() => navigate({ to: mode === "edit" ? `/questions/${questionId}` : "/questions/my" })}
           className="gap-2 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -242,6 +244,24 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                   subjects.map((subject) => (
                     <option key={subject.id} value={subject.id}>
                       {subject.name}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div>
+              <Label htmlFor="lessonId">Bài học</Label>
+              <select
+                id="lessonId"
+                value={formData.lessonId || ""}
+                onChange={(e) => handleInputChange("lessonId", e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full mt-1.5 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="">-- Chọn bài học --</option>
+                {lessons &&
+                  lessons.map((lesson) => (
+                    <option key={lesson.id} value={lesson.id}>
+                      {lesson.name}
                     </option>
                   ))}
               </select>

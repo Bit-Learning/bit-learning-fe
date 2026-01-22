@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Plus, Search, FileText, Upload, Filter, BookOpen, FileQuestionIcon } from "lucide-react";
+import { Plus, Search, FileText, Upload, Filter, BookOpen, FileQuestionIcon, User2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Card, CardContent } from "@workspace/ui/components/Card";
@@ -39,6 +39,10 @@ const QuestionListContent: React.FC = () => {
             <FileQuestionIcon className="h-4 w-4" />
             Tạo câu hỏi
           </Button>
+          <Button variant="outline" onClick={() => navigate({ to: "/questions/my" })} className="gap-2">
+            <User2 className="h-4 w-4" />
+            Câu hỏi của tôi
+          </Button>
           <Button variant="outline" onClick={() => navigate({ to: "/matrices/import" })} className="gap-2">
             <Upload className="h-4 w-4" />
             Import
@@ -73,13 +77,10 @@ const QuestionListContent: React.FC = () => {
           <CardContent className="flex flex-col items-center justify-center py-16">
             <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">{search ? "Không tìm thấy câu hỏi" : "Chưa có câu hỏi nào"}</h3>
-            <p className="text-muted-foreground mb-6">
-              {search ? "Thử tìm kiếm với từ khóa khác" : "Bắt đầu bằng cách import câu hỏi đầu tiên"}
-            </p>
             {!search && (
-              <Button onClick={() => navigate({ to: "/matrices/import" })} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Import câu hỏi
+              <Button onClick={() => navigate({ to: "/questions/create" })} className="gap-2">
+                <FileQuestionIcon className="h-4 w-4" />
+                Tạo câu hỏi
               </Button>
             )}
           </CardContent>

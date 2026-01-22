@@ -3,6 +3,8 @@ import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Card } from "@workspace/ui/components/Card";
 import type { TMatrixDetailRequest } from "../types/matrix.type";
+import { useLessons } from "../queries/useLesson";
+import { TLessonBriefResponse } from "../types/lesson.type";
 
 interface Props {
   value: TMatrixDetailRequest[];
@@ -27,6 +29,7 @@ const emptyDetail: TMatrixDetailRequest = {
 };
 
 const MatrixDetailTable: React.FC<Props> = ({ value, onChange, targetTotalScore }) => {
+  const { data: lessons } = useLessons();
   const addRow = () => onChange([...value, { ...emptyDetail }]);
 
   const removeRow = (index: number) => onChange(value.filter((_, i) => i !== index));
@@ -80,13 +83,19 @@ const MatrixDetailTable: React.FC<Props> = ({ value, onChange, targetTotalScore 
                 <div className="flex-1 space-y-3">
                   <div>
                     <label className="text-sm font-medium">Lesson ID</label>
-                    <Input
-                      type="number"
-                      min={0}
+                    <select
+                      className="w-full border rounded px-3 py-2"
                       value={row.lessonId}
-                      onChange={(e) => updateRow(i, "lessonId", parseInt(e.target.value) || 0)}
-                      placeholder="Nhập Lesson ID"
-                    />
+                      onChange={(e) => updateRow(i, "lessonId", Number(e.target.value))}
+                    >
+                      <option value="">-- Chọn Lesson --</option>
+
+                      {lessons?.map((lesson: TLessonBriefResponse) => (
+                        <option key={lesson.id} value={lesson.id}>
+                          {lesson.name}
+                        </option>
+                      ))}
+                    </select>
                   </div>
 
                   <div className="grid grid-cols-3 gap-2">
