@@ -1,9 +1,6 @@
-import { createFileRoute } from '@tanstack/react-router'
+import { CreateProblemPage } from "@/feature/code-practice/pages/CreateProblem";
+import { createFileRoute } from "@tanstack/react-router";
 
-export const Route = createFileRoute('/mentor/problem/create')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
-  return <div>Hello "/mentor/problem/create"!</div>
-}
+export const Route = createFileRoute("/mentor/problem/create")({
+  component: CreateProblemPage,
+});
