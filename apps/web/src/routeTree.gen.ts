@@ -37,6 +37,7 @@ import { Route as LayoutChatRouteImport } from './routes/_layout/chat'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
 import { Route as HeaderOnlyUserProfileRouteImport } from './routes/_headerOnly/user-profile'
 import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
+import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
 import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
 import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
 import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
@@ -48,6 +49,7 @@ import { Route as LayoutDashboardIndexRouteImport } from './routes/_layout/dashb
 import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
 import { Route as HeaderOnlyGamesIndexRouteImport } from './routes/_headerOnly/games/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
+import { Route as MentorProblemCreateRouteImport } from './routes/mentor/problem/create'
 import { Route as MentorCourseQuizRouteImport } from './routes/mentor/course/quiz'
 import { Route as MentorCourseListRouteImport } from './routes/mentor/course/list'
 import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/create'
@@ -234,6 +236,11 @@ const HeaderOnlyAiChatbotRoute = HeaderOnlyAiChatbotRouteImport.update({
   path: '/ai-chatbot',
   getParentRoute: () => HeaderOnlyRoute,
 } as any)
+const MentorProblemIndexRoute = MentorProblemIndexRouteImport.update({
+  id: '/mentor/problem/',
+  path: '/mentor/problem/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentorDashboardIndexRoute = MentorDashboardIndexRouteImport.update({
   id: '/mentor/dashboard/',
   path: '/mentor/dashboard/',
@@ -288,6 +295,11 @@ const HeaderOnlyGamesIndexRoute = HeaderOnlyGamesIndexRouteImport.update({
 const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   id: '/mindmaps/$userId/$code',
   path: '/mindmaps/$userId/$code',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorProblemCreateRoute = MentorProblemCreateRouteImport.update({
+  id: '/mentor/problem/create',
+  path: '/mentor/problem/create',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentorCourseQuizRoute = MentorCourseQuizRouteImport.update({
@@ -600,6 +612,7 @@ export interface FileRoutesByFullPath {
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
+  '/mentor/problem/create': typeof MentorProblemCreateRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/games': typeof HeaderOnlyGamesIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
@@ -611,6 +624,7 @@ export interface FileRoutesByFullPath {
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
+  '/mentor/problem': typeof MentorProblemIndexRoute
   '/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
@@ -686,6 +700,7 @@ export interface FileRoutesByTo {
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
+  '/mentor/problem/create': typeof MentorProblemCreateRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/games': typeof HeaderOnlyGamesIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
@@ -697,6 +712,7 @@ export interface FileRoutesByTo {
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
+  '/mentor/problem': typeof MentorProblemIndexRoute
   '/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
@@ -775,6 +791,7 @@ export interface FileRoutesById {
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
+  '/mentor/problem/create': typeof MentorProblemCreateRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_headerOnly/games/': typeof HeaderOnlyGamesIndexRoute
   '/_layout/courses/': typeof LayoutCoursesIndexRoute
@@ -786,6 +803,7 @@ export interface FileRoutesById {
   '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/_layout/templates/': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
+  '/mentor/problem/': typeof MentorProblemIndexRoute
   '/_headerOnly/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/_layout/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
@@ -863,6 +881,7 @@ export interface FileRouteTypes {
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
+    | '/mentor/problem/create'
     | '/mindmaps/$userId/$code'
     | '/games'
     | '/courses'
@@ -874,6 +893,7 @@ export interface FileRouteTypes {
     | '/syllabuses'
     | '/templates'
     | '/mentor/dashboard'
+    | '/mentor/problem'
     | '/games/$id/play'
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
@@ -949,6 +969,7 @@ export interface FileRouteTypes {
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
+    | '/mentor/problem/create'
     | '/mindmaps/$userId/$code'
     | '/games'
     | '/courses'
@@ -960,6 +981,7 @@ export interface FileRouteTypes {
     | '/syllabuses'
     | '/templates'
     | '/mentor/dashboard'
+    | '/mentor/problem'
     | '/games/$id/play'
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
@@ -1037,6 +1059,7 @@ export interface FileRouteTypes {
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
+    | '/mentor/problem/create'
     | '/mindmaps/$userId/$code'
     | '/_headerOnly/games/'
     | '/_layout/courses/'
@@ -1048,6 +1071,7 @@ export interface FileRouteTypes {
     | '/_layout/syllabuses/'
     | '/_layout/templates/'
     | '/mentor/dashboard/'
+    | '/mentor/problem/'
     | '/_headerOnly/games/$id/play'
     | '/_layout/courses/grade/$grade'
     | '/_layout/matrices/$id/edit'
@@ -1085,8 +1109,10 @@ export interface RootRouteChildren {
   MentorCourseCreateRoute: typeof MentorCourseCreateRoute
   MentorCourseListRoute: typeof MentorCourseListRoute
   MentorCourseQuizRoute: typeof MentorCourseQuizRoute
+  MentorProblemCreateRoute: typeof MentorProblemCreateRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
+  MentorProblemIndexRoute: typeof MentorProblemIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1287,6 +1313,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HeaderOnlyAiChatbotRouteImport
       parentRoute: typeof HeaderOnlyRoute
     }
+    '/mentor/problem/': {
+      id: '/mentor/problem/'
+      path: '/mentor/problem'
+      fullPath: '/mentor/problem'
+      preLoaderRoute: typeof MentorProblemIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentor/dashboard/': {
       id: '/mentor/dashboard/'
       path: '/mentor/dashboard'
@@ -1362,6 +1395,13 @@ declare module '@tanstack/react-router' {
       path: '/mindmaps/$userId/$code'
       fullPath: '/mindmaps/$userId/$code'
       preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/problem/create': {
+      id: '/mentor/problem/create'
+      path: '/mentor/problem/create'
+      fullPath: '/mentor/problem/create'
+      preLoaderRoute: typeof MentorProblemCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor/course/quiz': {
@@ -1886,8 +1926,10 @@ const rootRouteChildren: RootRouteChildren = {
   MentorCourseCreateRoute: MentorCourseCreateRoute,
   MentorCourseListRoute: MentorCourseListRoute,
   MentorCourseQuizRoute: MentorCourseQuizRoute,
+  MentorProblemCreateRoute: MentorProblemCreateRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
+  MentorProblemIndexRoute: MentorProblemIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
