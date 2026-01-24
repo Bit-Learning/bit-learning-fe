@@ -66,6 +66,7 @@ import { Route as LayoutSyllabusesCreateRouteImport } from './routes/_layout/syl
 import { Route as LayoutQuestionsMyRouteImport } from './routes/_layout/questions/my'
 import { Route as LayoutQuestionsGenerateFromQuestionsRouteImport } from './routes/_layout/questions/generate-from-questions'
 import { Route as LayoutQuestionsCreateRouteImport } from './routes/_layout/questions/create'
+import { Route as LayoutProblemIdRouteImport } from './routes/_layout/problem/$id'
 import { Route as LayoutPresentationsIdRouteImport } from './routes/_layout/presentations/$id'
 import { Route as LayoutNewsIdRouteImport } from './routes/_layout/news/$id'
 import { Route as LayoutMatricesMyRouteImport } from './routes/_layout/matrices/my'
@@ -386,6 +387,11 @@ const LayoutQuestionsCreateRoute = LayoutQuestionsCreateRouteImport.update({
   path: '/questions/create',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutProblemIdRoute = LayoutProblemIdRouteImport.update({
+  id: '/problem/$id',
+  path: '/problem/$id',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutPresentationsIdRoute = LayoutPresentationsIdRouteImport.update({
   id: '/presentations/$id',
   path: '/presentations/$id',
@@ -603,6 +609,7 @@ export interface FileRoutesByFullPath {
   '/matrices/my': typeof LayoutMatricesMyRoute
   '/news/$id': typeof LayoutNewsIdRoute
   '/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
+  '/problem/$id': typeof LayoutProblemIdRoute
   '/questions/create': typeof LayoutQuestionsCreateRoute
   '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
   '/questions/my': typeof LayoutQuestionsMyRoute
@@ -692,6 +699,7 @@ export interface FileRoutesByTo {
   '/matrices/my': typeof LayoutMatricesMyRoute
   '/news/$id': typeof LayoutNewsIdRoute
   '/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
+  '/problem/$id': typeof LayoutProblemIdRoute
   '/questions/create': typeof LayoutQuestionsCreateRoute
   '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
   '/questions/my': typeof LayoutQuestionsMyRoute
@@ -784,6 +792,7 @@ export interface FileRoutesById {
   '/_layout/matrices/my': typeof LayoutMatricesMyRoute
   '/_layout/news/$id': typeof LayoutNewsIdRoute
   '/_layout/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
+  '/_layout/problem/$id': typeof LayoutProblemIdRoute
   '/_layout/questions/create': typeof LayoutQuestionsCreateRoute
   '/_layout/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
   '/_layout/questions/my': typeof LayoutQuestionsMyRoute
@@ -875,6 +884,7 @@ export interface FileRouteTypes {
     | '/matrices/my'
     | '/news/$id'
     | '/presentations/$id'
+    | '/problem/$id'
     | '/questions/create'
     | '/questions/generate-from-questions'
     | '/questions/my'
@@ -964,6 +974,7 @@ export interface FileRouteTypes {
     | '/matrices/my'
     | '/news/$id'
     | '/presentations/$id'
+    | '/problem/$id'
     | '/questions/create'
     | '/questions/generate-from-questions'
     | '/questions/my'
@@ -1055,6 +1066,7 @@ export interface FileRouteTypes {
     | '/_layout/matrices/my'
     | '/_layout/news/$id'
     | '/_layout/presentations/$id'
+    | '/_layout/problem/$id'
     | '/_layout/questions/create'
     | '/_layout/questions/generate-from-questions'
     | '/_layout/questions/my'
@@ -1528,6 +1540,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutQuestionsCreateRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/problem/$id': {
+      id: '/_layout/problem/$id'
+      path: '/problem/$id'
+      fullPath: '/problem/$id'
+      preLoaderRoute: typeof LayoutProblemIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/presentations/$id': {
       id: '/_layout/presentations/$id'
       path: '/presentations/$id'
@@ -1838,6 +1857,7 @@ interface LayoutRouteChildren {
   LayoutMatricesMyRoute: typeof LayoutMatricesMyRoute
   LayoutNewsIdRoute: typeof LayoutNewsIdRoute
   LayoutPresentationsIdRoute: typeof LayoutPresentationsIdRouteWithChildren
+  LayoutProblemIdRoute: typeof LayoutProblemIdRoute
   LayoutQuestionsCreateRoute: typeof LayoutQuestionsCreateRoute
   LayoutQuestionsGenerateFromQuestionsRoute: typeof LayoutQuestionsGenerateFromQuestionsRoute
   LayoutQuestionsMyRoute: typeof LayoutQuestionsMyRoute
@@ -1896,6 +1916,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutMatricesMyRoute: LayoutMatricesMyRoute,
   LayoutNewsIdRoute: LayoutNewsIdRoute,
   LayoutPresentationsIdRoute: LayoutPresentationsIdRouteWithChildren,
+  LayoutProblemIdRoute: LayoutProblemIdRoute,
   LayoutQuestionsCreateRoute: LayoutQuestionsCreateRoute,
   LayoutQuestionsGenerateFromQuestionsRoute:
     LayoutQuestionsGenerateFromQuestionsRoute,

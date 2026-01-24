@@ -11,6 +11,7 @@ import { Progress } from "@workspace/ui/components/Progress";
 import { cn } from "@workspace/ui/lib/utils";
 import { Difficulty, ProblemBriefResponse } from "../types/coding.type";
 import { useProblems, useUserSubmissionStats, useToggleFavorite } from "../queries/useCoding";
+import { StatCard } from "./StatCard";
 
 const difficultyConfig = {
   EASY: { label: "Easy", color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
@@ -26,27 +27,6 @@ const DifficultyBadge: React.FC<{ difficulty: Difficulty }> = ({ difficulty }) =
     </Badge>
   );
 };
-
-const StatCard: React.FC<{
-  icon: React.ElementType;
-  label: string;
-  value: number | string;
-  gradient: string;
-}> = ({ icon: Icon, label, value, gradient }) => (
-  <Card>
-    <CardContent className="p-4">
-      <div className="flex items-center gap-3">
-        <div className={cn("p-2 rounded-lg", gradient)}>
-          <Icon className="w-5 h-5 text-white" />
-        </div>
-        <div>
-          <p className="text-2xl font-bold">{value}</p>
-          <p className="text-sm text-muted-foreground">{label}</p>
-        </div>
-      </div>
-    </CardContent>
-  </Card>
-);
 
 const TableSkeleton: React.FC = () => (
   <div className="space-y-3">
@@ -203,7 +183,7 @@ const StudentProblemListContent: React.FC = () => {
                     <TableRow
                       key={problem.id}
                       className="cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => navigate({ to: `/problems/${problem.id}` })}
+                      onClick={() => navigate({ to: `/problem/${problem.id}` })}
                     >
                       <TableCell>
                         <button onClick={(e) => handleFavorite(e, problem.id)} className="p-1 rounded hover:bg-muted">

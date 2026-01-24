@@ -14,7 +14,6 @@ import type {
   ProblemFilters,
   SubmissionFilters,
   Language,
-  SubmissionStatus,
 } from "../types/coding.type";
 
 export const problemKeys = {
@@ -75,7 +74,7 @@ export const useProblemSubmissions = (problemId: string, filters?: ProblemFilter
     queryKey: problemKeys.submissions(problemId, filters),
     queryFn: async () => {
       const response = await problemApi.getProblemSubmissions(problemId, filters);
-      return response.data.data;
+      return response.data;
     },
     enabled: !!problemId,
   });

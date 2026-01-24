@@ -58,7 +58,7 @@ export const problemApi = {
   getProblemSubmissions(
     problemId: string,
     filters?: ProblemFilters,
-  ): Promise<AxiosResponse<ApiResponse<SubmissionBriefResponse>>> {
+  ): Promise<AxiosResponse<ApiResponse<SubmissionBriefResponse[]>>> {
     return api.get(`/problems/${problemId}/submissions`, { params: filters });
   },
 
