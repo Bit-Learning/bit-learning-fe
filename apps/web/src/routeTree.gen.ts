@@ -42,6 +42,7 @@ import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashbo
 import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
 import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
 import { Route as LayoutQuestionsIndexRouteImport } from './routes/_layout/questions/index'
+import { Route as LayoutProblemIndexRouteImport } from './routes/_layout/problem/index'
 import { Route as LayoutPresentationsIndexRouteImport } from './routes/_layout/presentations/index'
 import { Route as LayoutNewsIndexRouteImport } from './routes/_layout/news/index'
 import { Route as LayoutMatricesIndexRouteImport } from './routes/_layout/matrices/index'
@@ -259,6 +260,11 @@ const LayoutSyllabusesIndexRoute = LayoutSyllabusesIndexRouteImport.update({
 const LayoutQuestionsIndexRoute = LayoutQuestionsIndexRouteImport.update({
   id: '/questions/',
   path: '/questions/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutProblemIndexRoute = LayoutProblemIndexRouteImport.update({
+  id: '/problem/',
+  path: '/problem/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutPresentationsIndexRoute =
@@ -620,6 +626,7 @@ export interface FileRoutesByFullPath {
   '/matrices': typeof LayoutMatricesIndexRoute
   '/news': typeof LayoutNewsIndexRoute
   '/presentations': typeof LayoutPresentationsIndexRoute
+  '/problem': typeof LayoutProblemIndexRoute
   '/questions': typeof LayoutQuestionsIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
@@ -708,6 +715,7 @@ export interface FileRoutesByTo {
   '/matrices': typeof LayoutMatricesIndexRoute
   '/news': typeof LayoutNewsIndexRoute
   '/presentations': typeof LayoutPresentationsIndexRoute
+  '/problem': typeof LayoutProblemIndexRoute
   '/questions': typeof LayoutQuestionsIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
@@ -799,6 +807,7 @@ export interface FileRoutesById {
   '/_layout/matrices/': typeof LayoutMatricesIndexRoute
   '/_layout/news/': typeof LayoutNewsIndexRoute
   '/_layout/presentations/': typeof LayoutPresentationsIndexRoute
+  '/_layout/problem/': typeof LayoutProblemIndexRoute
   '/_layout/questions/': typeof LayoutQuestionsIndexRoute
   '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/_layout/templates/': typeof LayoutTemplatesIndexRoute
@@ -889,6 +898,7 @@ export interface FileRouteTypes {
     | '/matrices'
     | '/news'
     | '/presentations'
+    | '/problem'
     | '/questions'
     | '/syllabuses'
     | '/templates'
@@ -977,6 +987,7 @@ export interface FileRouteTypes {
     | '/matrices'
     | '/news'
     | '/presentations'
+    | '/problem'
     | '/questions'
     | '/syllabuses'
     | '/templates'
@@ -1067,6 +1078,7 @@ export interface FileRouteTypes {
     | '/_layout/matrices/'
     | '/_layout/news/'
     | '/_layout/presentations/'
+    | '/_layout/problem/'
     | '/_layout/questions/'
     | '/_layout/syllabuses/'
     | '/_layout/templates/'
@@ -1346,6 +1358,13 @@ declare module '@tanstack/react-router' {
       path: '/questions'
       fullPath: '/questions'
       preLoaderRoute: typeof LayoutQuestionsIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/problem/': {
+      id: '/_layout/problem/'
+      path: '/problem'
+      fullPath: '/problem'
+      preLoaderRoute: typeof LayoutProblemIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/presentations/': {
@@ -1832,6 +1851,7 @@ interface LayoutRouteChildren {
   LayoutMatricesIndexRoute: typeof LayoutMatricesIndexRoute
   LayoutNewsIndexRoute: typeof LayoutNewsIndexRoute
   LayoutPresentationsIndexRoute: typeof LayoutPresentationsIndexRoute
+  LayoutProblemIndexRoute: typeof LayoutProblemIndexRoute
   LayoutQuestionsIndexRoute: typeof LayoutQuestionsIndexRoute
   LayoutSyllabusesIndexRoute: typeof LayoutSyllabusesIndexRoute
   LayoutTemplatesIndexRoute: typeof LayoutTemplatesIndexRoute
@@ -1890,6 +1910,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutMatricesIndexRoute: LayoutMatricesIndexRoute,
   LayoutNewsIndexRoute: LayoutNewsIndexRoute,
   LayoutPresentationsIndexRoute: LayoutPresentationsIndexRoute,
+  LayoutProblemIndexRoute: LayoutProblemIndexRoute,
   LayoutQuestionsIndexRoute: LayoutQuestionsIndexRoute,
   LayoutSyllabusesIndexRoute: LayoutSyllabusesIndexRoute,
   LayoutTemplatesIndexRoute: LayoutTemplatesIndexRoute,
