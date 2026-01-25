@@ -37,26 +37,26 @@ const CourseTabs: React.FC<CourseTabsProps> = ({
           <TabsList className="grid w-full grid-cols-4 bg-transparent p-2">
             <TabsTrigger
               value="overview"
-              className="rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="rounded-xl cursor-pointer data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               Tổng quan
             </TabsTrigger>
             <TabsTrigger
               value="curriculum"
-              className="rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="rounded-xl cursor-pointer data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               Nội dung
             </TabsTrigger>
             <TabsTrigger
               value="reviews"
-              className="rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="rounded-xl cursor-pointer data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               <Star className="mr-1.5 h-4 w-4" />
               Đánh giá
             </TabsTrigger>
             <TabsTrigger
               value="instructor"
-              className="rounded-xl data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
+              className="rounded-xl cursor-pointer data-[state=active]:bg-linear-to-r data-[state=active]:from-blue-500 data-[state=active]:to-indigo-500 data-[state=active]:text-white data-[state=active]:shadow-lg"
             >
               Giảng viên
             </TabsTrigger>

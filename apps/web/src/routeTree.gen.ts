@@ -17,7 +17,6 @@ import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
 import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
-import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as HeaderOnlyRouteImport } from './routes/_headerOnly'
 import { Route as R404RouteImport } from './routes/404'
@@ -41,11 +40,11 @@ import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashbo
 import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
 import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
 import { Route as LayoutQuestionsIndexRouteImport } from './routes/_layout/questions/index'
-import { Route as LayoutPresentationsIndexRouteImport } from './routes/_layout/presentations/index'
 import { Route as LayoutNewsIndexRouteImport } from './routes/_layout/news/index'
 import { Route as LayoutMatricesIndexRouteImport } from './routes/_layout/matrices/index'
 import { Route as LayoutDashboardIndexRouteImport } from './routes/_layout/dashboard/index'
 import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
+import { Route as LayoutCheckoutIndexRouteImport } from './routes/_layout/checkout/index'
 import { Route as HeaderOnlyGamesIndexRouteImport } from './routes/_headerOnly/games/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as MentorCourseQuizRouteImport } from './routes/mentor/course/quiz'
@@ -63,7 +62,6 @@ import { Route as LayoutSyllabusesCreateRouteImport } from './routes/_layout/syl
 import { Route as LayoutQuestionsMyRouteImport } from './routes/_layout/questions/my'
 import { Route as LayoutQuestionsGenerateFromQuestionsRouteImport } from './routes/_layout/questions/generate-from-questions'
 import { Route as LayoutQuestionsCreateRouteImport } from './routes/_layout/questions/create'
-import { Route as LayoutPresentationsIdRouteImport } from './routes/_layout/presentations/$id'
 import { Route as LayoutNewsIdRouteImport } from './routes/_layout/news/$id'
 import { Route as LayoutMatricesMyRouteImport } from './routes/_layout/matrices/my'
 import { Route as LayoutMatricesImportRouteImport } from './routes/_layout/matrices/import'
@@ -87,9 +85,6 @@ import { Route as HeaderOnlyGamesIdIndexRouteImport } from './routes/_headerOnly
 import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
 import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
 import { Route as LayoutQuestionsIdEditRouteImport } from './routes/_layout/questions/$id/edit'
-import { Route as LayoutPresentationsIdViewRouteImport } from './routes/_layout/presentations/$id/view'
-import { Route as LayoutPresentationsIdPresenterRouteImport } from './routes/_layout/presentations/$id/presenter'
-import { Route as LayoutPresentationsIdOverviewRouteImport } from './routes/_layout/presentations/$id/overview'
 import { Route as LayoutMatricesIdGenerateRouteImport } from './routes/_layout/matrices/$id.generate'
 import { Route as LayoutMatricesIdEditRouteImport } from './routes/_layout/matrices/$id.edit'
 import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
@@ -134,11 +129,6 @@ const PaymentFailedRoute = PaymentFailedRouteImport.update({
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const CheckoutRoute = CheckoutRouteImport.update({
-  id: '/checkout',
-  path: '/checkout',
   getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutRoute = LayoutRouteImport.update({
@@ -254,12 +244,6 @@ const LayoutQuestionsIndexRoute = LayoutQuestionsIndexRouteImport.update({
   path: '/questions/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutPresentationsIndexRoute =
-  LayoutPresentationsIndexRouteImport.update({
-    id: '/presentations/',
-    path: '/presentations/',
-    getParentRoute: () => LayoutRoute,
-  } as any)
 const LayoutNewsIndexRoute = LayoutNewsIndexRouteImport.update({
   id: '/news/',
   path: '/news/',
@@ -278,6 +262,11 @@ const LayoutDashboardIndexRoute = LayoutDashboardIndexRouteImport.update({
 const LayoutCoursesIndexRoute = LayoutCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutCheckoutIndexRoute = LayoutCheckoutIndexRouteImport.update({
+  id: '/checkout/',
+  path: '/checkout/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const HeaderOnlyGamesIndexRoute = HeaderOnlyGamesIndexRouteImport.update({
@@ -366,11 +355,6 @@ const LayoutQuestionsGenerateFromQuestionsRoute =
 const LayoutQuestionsCreateRoute = LayoutQuestionsCreateRouteImport.update({
   id: '/questions/create',
   path: '/questions/create',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutPresentationsIdRoute = LayoutPresentationsIdRouteImport.update({
-  id: '/presentations/$id',
-  path: '/presentations/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutNewsIdRoute = LayoutNewsIdRouteImport.update({
@@ -495,24 +479,6 @@ const LayoutQuestionsIdEditRoute = LayoutQuestionsIdEditRouteImport.update({
   path: '/questions/$id/edit',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutPresentationsIdViewRoute =
-  LayoutPresentationsIdViewRouteImport.update({
-    id: '/view',
-    path: '/view',
-    getParentRoute: () => LayoutPresentationsIdRoute,
-  } as any)
-const LayoutPresentationsIdPresenterRoute =
-  LayoutPresentationsIdPresenterRouteImport.update({
-    id: '/presenter',
-    path: '/presenter',
-    getParentRoute: () => LayoutPresentationsIdRoute,
-  } as any)
-const LayoutPresentationsIdOverviewRoute =
-  LayoutPresentationsIdOverviewRouteImport.update({
-    id: '/overview',
-    path: '/overview',
-    getParentRoute: () => LayoutPresentationsIdRoute,
-  } as any)
 const LayoutMatricesIdGenerateRoute =
   LayoutMatricesIdGenerateRouteImport.update({
     id: '/generate',
@@ -543,7 +509,6 @@ const LayoutTemplatesSlidevIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/404': typeof R404Route
-  '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
@@ -584,7 +549,6 @@ export interface FileRoutesByFullPath {
   '/matrices/import': typeof LayoutMatricesImportRoute
   '/matrices/my': typeof LayoutMatricesMyRoute
   '/news/$id': typeof LayoutNewsIdRoute
-  '/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
   '/questions/create': typeof LayoutQuestionsCreateRoute
   '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
   '/questions/my': typeof LayoutQuestionsMyRoute
@@ -602,11 +566,11 @@ export interface FileRoutesByFullPath {
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/games': typeof HeaderOnlyGamesIndexRoute
+  '/checkout': typeof LayoutCheckoutIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
   '/dashboard': typeof LayoutDashboardIndexRoute
   '/matrices': typeof LayoutMatricesIndexRoute
   '/news': typeof LayoutNewsIndexRoute
-  '/presentations': typeof LayoutPresentationsIndexRoute
   '/questions': typeof LayoutQuestionsIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
@@ -615,9 +579,6 @@ export interface FileRoutesByFullPath {
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
   '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
-  '/presentations/$id/overview': typeof LayoutPresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof LayoutPresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof LayoutPresentationsIdViewRoute
   '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
@@ -629,7 +590,6 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/404': typeof R404Route
-  '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
@@ -670,7 +630,6 @@ export interface FileRoutesByTo {
   '/matrices/import': typeof LayoutMatricesImportRoute
   '/matrices/my': typeof LayoutMatricesMyRoute
   '/news/$id': typeof LayoutNewsIdRoute
-  '/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
   '/questions/create': typeof LayoutQuestionsCreateRoute
   '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
   '/questions/my': typeof LayoutQuestionsMyRoute
@@ -688,11 +647,11 @@ export interface FileRoutesByTo {
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/games': typeof HeaderOnlyGamesIndexRoute
+  '/checkout': typeof LayoutCheckoutIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
   '/dashboard': typeof LayoutDashboardIndexRoute
   '/matrices': typeof LayoutMatricesIndexRoute
   '/news': typeof LayoutNewsIndexRoute
-  '/presentations': typeof LayoutPresentationsIndexRoute
   '/questions': typeof LayoutQuestionsIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
@@ -701,9 +660,6 @@ export interface FileRoutesByTo {
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
   '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
-  '/presentations/$id/overview': typeof LayoutPresentationsIdOverviewRoute
-  '/presentations/$id/presenter': typeof LayoutPresentationsIdPresenterRoute
-  '/presentations/$id/view': typeof LayoutPresentationsIdViewRoute
   '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
@@ -718,7 +674,6 @@ export interface FileRoutesById {
   '/404': typeof R404Route
   '/_headerOnly': typeof HeaderOnlyRouteWithChildren
   '/_layout': typeof LayoutRouteWithChildren
-  '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
@@ -759,7 +714,6 @@ export interface FileRoutesById {
   '/_layout/matrices/import': typeof LayoutMatricesImportRoute
   '/_layout/matrices/my': typeof LayoutMatricesMyRoute
   '/_layout/news/$id': typeof LayoutNewsIdRoute
-  '/_layout/presentations/$id': typeof LayoutPresentationsIdRouteWithChildren
   '/_layout/questions/create': typeof LayoutQuestionsCreateRoute
   '/_layout/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
   '/_layout/questions/my': typeof LayoutQuestionsMyRoute
@@ -777,11 +731,11 @@ export interface FileRoutesById {
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_headerOnly/games/': typeof HeaderOnlyGamesIndexRoute
+  '/_layout/checkout/': typeof LayoutCheckoutIndexRoute
   '/_layout/courses/': typeof LayoutCoursesIndexRoute
   '/_layout/dashboard/': typeof LayoutDashboardIndexRoute
   '/_layout/matrices/': typeof LayoutMatricesIndexRoute
   '/_layout/news/': typeof LayoutNewsIndexRoute
-  '/_layout/presentations/': typeof LayoutPresentationsIndexRoute
   '/_layout/questions/': typeof LayoutQuestionsIndexRoute
   '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/_layout/templates/': typeof LayoutTemplatesIndexRoute
@@ -790,9 +744,6 @@ export interface FileRoutesById {
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/_layout/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
   '/_layout/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
-  '/_layout/presentations/$id/overview': typeof LayoutPresentationsIdOverviewRoute
-  '/_layout/presentations/$id/presenter': typeof LayoutPresentationsIdPresenterRoute
-  '/_layout/presentations/$id/view': typeof LayoutPresentationsIdViewRoute
   '/_layout/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
@@ -806,7 +757,6 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/404'
-    | '/checkout'
     | '/forgot-password'
     | '/payment-failed'
     | '/payment-succeeded'
@@ -847,7 +797,6 @@ export interface FileRouteTypes {
     | '/matrices/import'
     | '/matrices/my'
     | '/news/$id'
-    | '/presentations/$id'
     | '/questions/create'
     | '/questions/generate-from-questions'
     | '/questions/my'
@@ -865,11 +814,11 @@ export interface FileRouteTypes {
     | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
     | '/games'
+    | '/checkout'
     | '/courses'
     | '/dashboard'
     | '/matrices'
     | '/news'
-    | '/presentations'
     | '/questions'
     | '/syllabuses'
     | '/templates'
@@ -878,9 +827,6 @@ export interface FileRouteTypes {
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
-    | '/presentations/$id/overview'
-    | '/presentations/$id/presenter'
-    | '/presentations/$id/view'
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
@@ -892,7 +838,6 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/404'
-    | '/checkout'
     | '/forgot-password'
     | '/payment-failed'
     | '/payment-succeeded'
@@ -933,7 +878,6 @@ export interface FileRouteTypes {
     | '/matrices/import'
     | '/matrices/my'
     | '/news/$id'
-    | '/presentations/$id'
     | '/questions/create'
     | '/questions/generate-from-questions'
     | '/questions/my'
@@ -951,11 +895,11 @@ export interface FileRouteTypes {
     | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
     | '/games'
+    | '/checkout'
     | '/courses'
     | '/dashboard'
     | '/matrices'
     | '/news'
-    | '/presentations'
     | '/questions'
     | '/syllabuses'
     | '/templates'
@@ -964,9 +908,6 @@ export interface FileRouteTypes {
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
-    | '/presentations/$id/overview'
-    | '/presentations/$id/presenter'
-    | '/presentations/$id/view'
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
@@ -980,7 +921,6 @@ export interface FileRouteTypes {
     | '/404'
     | '/_headerOnly'
     | '/_layout'
-    | '/checkout'
     | '/forgot-password'
     | '/payment-failed'
     | '/payment-succeeded'
@@ -1021,7 +961,6 @@ export interface FileRouteTypes {
     | '/_layout/matrices/import'
     | '/_layout/matrices/my'
     | '/_layout/news/$id'
-    | '/_layout/presentations/$id'
     | '/_layout/questions/create'
     | '/_layout/questions/generate-from-questions'
     | '/_layout/questions/my'
@@ -1039,11 +978,11 @@ export interface FileRouteTypes {
     | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
     | '/_headerOnly/games/'
+    | '/_layout/checkout/'
     | '/_layout/courses/'
     | '/_layout/dashboard/'
     | '/_layout/matrices/'
     | '/_layout/news/'
-    | '/_layout/presentations/'
     | '/_layout/questions/'
     | '/_layout/syllabuses/'
     | '/_layout/templates/'
@@ -1052,9 +991,6 @@ export interface FileRouteTypes {
     | '/_layout/courses/grade/$grade'
     | '/_layout/matrices/$id/edit'
     | '/_layout/matrices/$id/generate'
-    | '/_layout/presentations/$id/overview'
-    | '/_layout/presentations/$id/presenter'
-    | '/_layout/presentations/$id/view'
     | '/_layout/questions/$id/edit'
     | '/_layout/syllabuses/$id/edit'
     | '/_layout/templates/slidev/create'
@@ -1069,7 +1005,6 @@ export interface RootRouteChildren {
   R404Route: typeof R404Route
   HeaderOnlyRoute: typeof HeaderOnlyRouteWithChildren
   LayoutRoute: typeof LayoutRouteWithChildren
-  CheckoutRoute: typeof CheckoutRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentSucceededRoute: typeof PaymentSucceededRoute
@@ -1145,13 +1080,6 @@ declare module '@tanstack/react-router' {
       path: '/forgot-password'
       fullPath: '/forgot-password'
       preLoaderRoute: typeof ForgotPasswordRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/checkout': {
-      id: '/checkout'
-      path: '/checkout'
-      fullPath: '/checkout'
-      preLoaderRoute: typeof CheckoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout': {
@@ -1315,13 +1243,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutQuestionsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/presentations/': {
-      id: '/_layout/presentations/'
-      path: '/presentations'
-      fullPath: '/presentations'
-      preLoaderRoute: typeof LayoutPresentationsIndexRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/news/': {
       id: '/_layout/news/'
       path: '/news'
@@ -1348,6 +1269,13 @@ declare module '@tanstack/react-router' {
       path: '/courses'
       fullPath: '/courses'
       preLoaderRoute: typeof LayoutCoursesIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/checkout/': {
+      id: '/_layout/checkout/'
+      path: '/checkout'
+      fullPath: '/checkout'
+      preLoaderRoute: typeof LayoutCheckoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_headerOnly/games/': {
@@ -1467,13 +1395,6 @@ declare module '@tanstack/react-router' {
       path: '/questions/create'
       fullPath: '/questions/create'
       preLoaderRoute: typeof LayoutQuestionsCreateRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/presentations/$id': {
-      id: '/_layout/presentations/$id'
-      path: '/presentations/$id'
-      fullPath: '/presentations/$id'
-      preLoaderRoute: typeof LayoutPresentationsIdRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/news/$id': {
@@ -1637,27 +1558,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutQuestionsIdEditRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/presentations/$id/view': {
-      id: '/_layout/presentations/$id/view'
-      path: '/view'
-      fullPath: '/presentations/$id/view'
-      preLoaderRoute: typeof LayoutPresentationsIdViewRouteImport
-      parentRoute: typeof LayoutPresentationsIdRoute
-    }
-    '/_layout/presentations/$id/presenter': {
-      id: '/_layout/presentations/$id/presenter'
-      path: '/presenter'
-      fullPath: '/presentations/$id/presenter'
-      preLoaderRoute: typeof LayoutPresentationsIdPresenterRouteImport
-      parentRoute: typeof LayoutPresentationsIdRoute
-    }
-    '/_layout/presentations/$id/overview': {
-      id: '/_layout/presentations/$id/overview'
-      path: '/overview'
-      fullPath: '/presentations/$id/overview'
-      preLoaderRoute: typeof LayoutPresentationsIdOverviewRouteImport
-      parentRoute: typeof LayoutPresentationsIdRoute
-    }
     '/_layout/matrices/$id/generate': {
       id: '/_layout/matrices/$id/generate'
       path: '/generate'
@@ -1731,23 +1631,6 @@ const LayoutMatricesIdRouteChildren: LayoutMatricesIdRouteChildren = {
 const LayoutMatricesIdRouteWithChildren =
   LayoutMatricesIdRoute._addFileChildren(LayoutMatricesIdRouteChildren)
 
-interface LayoutPresentationsIdRouteChildren {
-  LayoutPresentationsIdOverviewRoute: typeof LayoutPresentationsIdOverviewRoute
-  LayoutPresentationsIdPresenterRoute: typeof LayoutPresentationsIdPresenterRoute
-  LayoutPresentationsIdViewRoute: typeof LayoutPresentationsIdViewRoute
-}
-
-const LayoutPresentationsIdRouteChildren: LayoutPresentationsIdRouteChildren = {
-  LayoutPresentationsIdOverviewRoute: LayoutPresentationsIdOverviewRoute,
-  LayoutPresentationsIdPresenterRoute: LayoutPresentationsIdPresenterRoute,
-  LayoutPresentationsIdViewRoute: LayoutPresentationsIdViewRoute,
-}
-
-const LayoutPresentationsIdRouteWithChildren =
-  LayoutPresentationsIdRoute._addFileChildren(
-    LayoutPresentationsIdRouteChildren,
-  )
-
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
   LayoutChatRoute: typeof LayoutChatRoute
@@ -1778,7 +1661,6 @@ interface LayoutRouteChildren {
   LayoutMatricesImportRoute: typeof LayoutMatricesImportRoute
   LayoutMatricesMyRoute: typeof LayoutMatricesMyRoute
   LayoutNewsIdRoute: typeof LayoutNewsIdRoute
-  LayoutPresentationsIdRoute: typeof LayoutPresentationsIdRouteWithChildren
   LayoutQuestionsCreateRoute: typeof LayoutQuestionsCreateRoute
   LayoutQuestionsGenerateFromQuestionsRoute: typeof LayoutQuestionsGenerateFromQuestionsRoute
   LayoutQuestionsMyRoute: typeof LayoutQuestionsMyRoute
@@ -1787,11 +1669,11 @@ interface LayoutRouteChildren {
   LayoutTemplatesIdRoute: typeof LayoutTemplatesIdRoute
   LayoutTemplatesDashboardRoute: typeof LayoutTemplatesDashboardRoute
   LayoutTemplatesTemplatePreviewRoute: typeof LayoutTemplatesTemplatePreviewRoute
+  LayoutCheckoutIndexRoute: typeof LayoutCheckoutIndexRoute
   LayoutCoursesIndexRoute: typeof LayoutCoursesIndexRoute
   LayoutDashboardIndexRoute: typeof LayoutDashboardIndexRoute
   LayoutMatricesIndexRoute: typeof LayoutMatricesIndexRoute
   LayoutNewsIndexRoute: typeof LayoutNewsIndexRoute
-  LayoutPresentationsIndexRoute: typeof LayoutPresentationsIndexRoute
   LayoutQuestionsIndexRoute: typeof LayoutQuestionsIndexRoute
   LayoutSyllabusesIndexRoute: typeof LayoutSyllabusesIndexRoute
   LayoutTemplatesIndexRoute: typeof LayoutTemplatesIndexRoute
@@ -1835,7 +1717,6 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutMatricesImportRoute: LayoutMatricesImportRoute,
   LayoutMatricesMyRoute: LayoutMatricesMyRoute,
   LayoutNewsIdRoute: LayoutNewsIdRoute,
-  LayoutPresentationsIdRoute: LayoutPresentationsIdRouteWithChildren,
   LayoutQuestionsCreateRoute: LayoutQuestionsCreateRoute,
   LayoutQuestionsGenerateFromQuestionsRoute:
     LayoutQuestionsGenerateFromQuestionsRoute,
@@ -1845,11 +1726,11 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutTemplatesIdRoute: LayoutTemplatesIdRoute,
   LayoutTemplatesDashboardRoute: LayoutTemplatesDashboardRoute,
   LayoutTemplatesTemplatePreviewRoute: LayoutTemplatesTemplatePreviewRoute,
+  LayoutCheckoutIndexRoute: LayoutCheckoutIndexRoute,
   LayoutCoursesIndexRoute: LayoutCoursesIndexRoute,
   LayoutDashboardIndexRoute: LayoutDashboardIndexRoute,
   LayoutMatricesIndexRoute: LayoutMatricesIndexRoute,
   LayoutNewsIndexRoute: LayoutNewsIndexRoute,
-  LayoutPresentationsIndexRoute: LayoutPresentationsIndexRoute,
   LayoutQuestionsIndexRoute: LayoutQuestionsIndexRoute,
   LayoutSyllabusesIndexRoute: LayoutSyllabusesIndexRoute,
   LayoutTemplatesIndexRoute: LayoutTemplatesIndexRoute,
@@ -1870,7 +1751,6 @@ const rootRouteChildren: RootRouteChildren = {
   R404Route: R404Route,
   HeaderOnlyRoute: HeaderOnlyRouteWithChildren,
   LayoutRoute: LayoutRouteWithChildren,
-  CheckoutRoute: CheckoutRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentSucceededRoute: PaymentSucceededRoute,

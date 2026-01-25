@@ -21,15 +21,15 @@ const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   onBuyNow,
 }) => {
   return (
-    <Card className="sticky top-6 overflow-hidden rounded-3xl border-0 shadow-2xl">
-      <div className="bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 p-6">
-        <CardTitle className="flex items-center gap-2 text-white">
+    <Card className="top-4 overflow-hidden rounded-3xl border-0 shadow-2xl">
+      <div className="p-4">
+        <CardTitle className="flex items-center gap-2 text-black">
           <Award className="h-6 w-6" />
           <span className="text-xl">Đăng ký khóa học</span>
         </CardTitle>
       </div>
 
-      <CardContent className="space-y-6 p-6">
+      <CardContent className="space-y-4 p-4">
         <div className="text-center">
           <div className="mb-2 text-sm font-medium text-gray-600">Giá khóa học</div>
           <div className="bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-5xl font-black text-transparent">
@@ -67,9 +67,9 @@ const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
         {hasAccess ? (
           <Button
             isDisabled
-            className="w-full rounded-xl bg-linear-to-r from-green-500 to-emerald-500 py-4 text-lg font-semibold text-white shadow-xl"
+            className="w-full rounded-md bg-linear-to-r from-green-500 to-emerald-500 py-6 text-lg font-bold text-black"
           >
-            <CheckCircle className="mr-2 h-5 w-5" />
+            <CheckCircle className="mr-2 h-8 w-8" />
             Đã đăng ký
           </Button>
         ) : price === 0 ? (
@@ -95,7 +95,7 @@ const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
             <Button
               onClick={onBuyNow}
               isDisabled={isPending}
-              className="group w-full rounded-xl bg-linear-to-r from-blue-500 to-indigo-500 py-4 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-2xl"
+              className="group w-full rounded-xl bg-linear-to-r from-blue-500 to-indigo-500 py-5 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-2xl"
             >
               {isPending ? (
                 <>
@@ -113,19 +113,13 @@ const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
               onClick={onAddToCart}
               isDisabled={isPending}
               variant="outline"
-              className="w-full rounded-xl border-2 border-blue-600 py-4 text-lg font-semibold text-blue-600 transition-all hover:scale-105 hover:bg-blue-100"
+              className="w-full rounded-xl border-2 border-blue-600 py-5 text-lg font-semibold text-blue-600 transition-all hover:scale-105 hover:bg-blue-100"
             >
               <ShoppingCart className="mr-2 h-5 w-5" />
               Thêm vào giỏ hàng
             </Button>
           </div>
         )}
-
-        <div className="rounded-xl border border-green-200 bg-green-50 p-4 text-center">
-          <CheckCircle className="mx-auto mb-2 h-8 w-8 text-green-600" />
-          <p className="text-sm font-medium text-green-900">Đảm bảo hoàn tiền 100%</p>
-          <p className="text-xs text-green-700">Trong vòng 7 ngày đầu tiên</p>
-        </div>
       </CardContent>
     </Card>
   );

@@ -45,7 +45,6 @@ export const useCreateOrder = () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
 
       if (data) {
-        // Redirect to payment URL
         window.location.href = data;
       } else {
         toast.success({ title: "Đặt hàng thành công" });

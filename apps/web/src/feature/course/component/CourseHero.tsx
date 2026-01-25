@@ -80,7 +80,7 @@ const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, progress, is
 
       <div className="p-8">
         <div className="mb-6">
-          <h1 className="mb-3 bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-4xl font-bold text-transparent">
+          <h1 className="mb-3 bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-3xl font-bold text-transparent">
             {course.title}
           </h1>
           <p className="text-xl text-gray-600">{course.subtitle}</p>
