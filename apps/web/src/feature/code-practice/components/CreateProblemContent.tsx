@@ -235,7 +235,7 @@ const CreateProblemContent: React.FC = () => {
               </div>
             </div>
           </div>
-          <Button onClick={form.handleSubmit(onSubmit)} isDisabled={isSubmitting}>
+          <Button onClick={form.handleSubmit(onSubmit)}>
             {isSubmitting ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : <Save className="w-4 h-4 mr-2" />}
             Lưu Problem
           </Button>
