@@ -37,11 +37,7 @@ const CourseDetailContent: React.FC = () => {
 
   const handleBuyNow = () => {
     if (course?.id) {
-      addToCart(course.id, {
-        onSuccess: () => {
-          navigate({ to: "/checkout" });
-        },
-      });
+      navigate({ to: "/checkout", search: { courseId: course.id } });
     }
   };
 

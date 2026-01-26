@@ -129,14 +129,11 @@ const CartContent: React.FC = () => {
                         <h3 className="mb-2 text-lg font-bold text-gray-900 line-clamp-2">{course.title}</h3>
                         <p className="mb-3 text-sm text-gray-600">{course.instructorName}</p>
 
-                        <div className="mb-3 flex flex-wrap items-center gap-3 text-sm">
+                        <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
                             <Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
                             <span className="font-semibold">{course.ratingStar}</span>
                           </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
                           <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
                             Lớp {course.grade}
                           </span>
@@ -218,13 +215,15 @@ const CartContent: React.FC = () => {
                       <CheckCircle className="h-4 w-4 shrink-0" />
                       Truy cập khóa học trọn đời
                     </li>
+
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 shrink-0" />
                       Chứng chỉ sau khi hoàn thành
                     </li>
+
                     <li className="flex items-center gap-2">
                       <CheckCircle className="h-4 w-4 shrink-0" />
-                      Hoàn tiền trong 30 ngày
+                      Thanh toán đa dạng: Ví điện tử, thẻ ngân hàng, chuyển khoản
                     </li>
                   </ul>
                 </div>

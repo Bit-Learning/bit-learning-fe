@@ -1,15 +1,11 @@
 import { CheckCircle } from "lucide-react";
-import { PaymentMethod } from "../types/order.type";
 
 interface PaymentMethodCardProps {
-  method: PaymentMethod;
   selected: boolean;
   onClick: () => void;
   icon: React.ReactNode;
   title: string;
   description: string;
-  gradientFrom: string;
-  gradientTo: string;
   borderColor: string;
   bgGradient: string;
   iconBg: string;
