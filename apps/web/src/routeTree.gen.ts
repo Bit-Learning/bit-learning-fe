@@ -33,6 +33,7 @@ import { Route as LayoutCorporateTrainingRouteImport } from './routes/_layout/co
 import { Route as LayoutContactRouteImport } from './routes/_layout/contact'
 import { Route as LayoutConsultationRouteImport } from './routes/_layout/consultation'
 import { Route as LayoutChatRouteImport } from './routes/_layout/chat'
+import { Route as LayoutCartRouteImport } from './routes/_layout/cart'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
 import { Route as HeaderOnlyUserProfileRouteImport } from './routes/_headerOnly/user-profile'
 import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
@@ -207,6 +208,11 @@ const LayoutConsultationRoute = LayoutConsultationRouteImport.update({
 const LayoutChatRoute = LayoutChatRouteImport.update({
   id: '/chat',
   path: '/chat',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutCartRoute = LayoutCartRouteImport.update({
+  id: '/cart',
+  path: '/cart',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutAboutRoute = LayoutAboutRouteImport.update({
@@ -520,6 +526,7 @@ export interface FileRoutesByFullPath {
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
+  '/cart': typeof LayoutCartRoute
   '/chat': typeof LayoutChatRoute
   '/consultation': typeof LayoutConsultationRoute
   '/contact': typeof LayoutContactRoute
@@ -601,6 +608,7 @@ export interface FileRoutesByTo {
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
+  '/cart': typeof LayoutCartRoute
   '/chat': typeof LayoutChatRoute
   '/consultation': typeof LayoutConsultationRoute
   '/contact': typeof LayoutContactRoute
@@ -685,6 +693,7 @@ export interface FileRoutesById {
   '/_headerOnly/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/_headerOnly/user-profile': typeof HeaderOnlyUserProfileRoute
   '/_layout/about': typeof LayoutAboutRoute
+  '/_layout/cart': typeof LayoutCartRoute
   '/_layout/chat': typeof LayoutChatRoute
   '/_layout/consultation': typeof LayoutConsultationRoute
   '/_layout/contact': typeof LayoutContactRoute
@@ -768,6 +777,7 @@ export interface FileRouteTypes {
     | '/ai-chatbot'
     | '/user-profile'
     | '/about'
+    | '/cart'
     | '/chat'
     | '/consultation'
     | '/contact'
@@ -849,6 +859,7 @@ export interface FileRouteTypes {
     | '/ai-chatbot'
     | '/user-profile'
     | '/about'
+    | '/cart'
     | '/chat'
     | '/consultation'
     | '/contact'
@@ -932,6 +943,7 @@ export interface FileRouteTypes {
     | '/_headerOnly/ai-chatbot'
     | '/_headerOnly/user-profile'
     | '/_layout/about'
+    | '/_layout/cart'
     | '/_layout/chat'
     | '/_layout/consultation'
     | '/_layout/contact'
@@ -1192,6 +1204,13 @@ declare module '@tanstack/react-router' {
       path: '/chat'
       fullPath: '/chat'
       preLoaderRoute: typeof LayoutChatRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/cart': {
+      id: '/_layout/cart'
+      path: '/cart'
+      fullPath: '/cart'
+      preLoaderRoute: typeof LayoutCartRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/about': {
@@ -1633,6 +1652,7 @@ const LayoutMatricesIdRouteWithChildren =
 
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
+  LayoutCartRoute: typeof LayoutCartRoute
   LayoutChatRoute: typeof LayoutChatRoute
   LayoutConsultationRoute: typeof LayoutConsultationRoute
   LayoutContactRoute: typeof LayoutContactRoute
@@ -1689,6 +1709,7 @@ interface LayoutRouteChildren {
 
 const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAboutRoute: LayoutAboutRoute,
+  LayoutCartRoute: LayoutCartRoute,
   LayoutChatRoute: LayoutChatRoute,
   LayoutConsultationRoute: LayoutConsultationRoute,
   LayoutContactRoute: LayoutContactRoute,
