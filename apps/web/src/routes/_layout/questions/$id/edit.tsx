@@ -1,11 +1,11 @@
 import { createFileRoute } from "@tanstack/react-router";
-import EditQuestion from "@/feature/matrix/page/EditQuestion";
 import { ProtectedRoute } from "@/shared/components/ProtectedRoute";
+import EditQuestionPage from "@/feature/question/pages/EditQuestion";
 
 export const Route = createFileRoute("/_layout/questions/$id/edit")({
-	component: () => (
-		<ProtectedRoute>
-			<EditQuestion />
-		</ProtectedRoute>
-	),
+  component: () => (
+    <ProtectedRoute>
+      <EditQuestionPage />
+    </ProtectedRoute>
+  ),
 });

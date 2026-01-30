@@ -1,0 +1,210 @@
+import { useEffect } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Loader2, X } from "lucide-react";
+import { Button } from "@workspace/ui/components/Button";
+import { Card } from "@workspace/ui/components/Card";
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/Form";
+import { Input } from "@workspace/ui/components/Input";
+import { Textarea } from "@workspace/ui/components/Textarea";
+import { useCreateMatrix, useUpdateMatrix } from "../queries/useMatrix";
+import { useSubjectsList } from "../queries/useSubject";
+import type { TMatrixResponse } from "../types/matrix.type";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Vui lòng nhập tên"),
+  code: z.string().min(1, "Vui lòng nhập mã"),
+  description: z.string().optional(),
+  duration: z.number().min(1, "Thời gian phải lớn hơn 0"),
+  totalScore: z.number().min(0, "Tổng điểm phải >= 0"),
+  subjectId: z.number().min(1, "Vui lòng chọn môn học"),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+interface Props {
+  isOpen: boolean;
+  onClose: () => void;
+  data?: TMatrixResponse | null;
+}
+
+const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
+  const isEdit = !!data;
+  const { data: subjects } = useSubjectsList();
+
+  const form = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: { name: "", code: "", description: "", duration: 60, totalScore: 10, subjectId: 0 },
+  });
+
+  const { mutate: create, isPending: creating } = useCreateMatrix();
+  const { mutate: update, isPending: updating } = useUpdateMatrix();
+  const isPending = creating || updating;
+
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        name: data?.name || "",
+        code: data?.code || "",
+        description: data?.description || "",
+        duration: data?.duration || 60,
+        totalScore: data?.totalScore || 10,
+        subjectId: data?.subject?.id || 0,
+      });
+    }
+  }, [isOpen, data, form]);
+
+  const onSubmit = (values: FormValues) => {
+    if (isEdit && data) {
+      update({ id: data.id, data: values }, { onSuccess: onClose });
+    } else {
+      create(values, { onSuccess: onClose });
+    }
+  };
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <Card className="w-full max-w-lg p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-semibold">{isEdit ? "Sửa" : "Tạo"} ma trận đề thi</h2>
+          <Button variant="ghost" size="sm" onPress={onClose}>
+            <X className="h-4 w-4" />
+          </Button>
+        </div>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Tên ma trận <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="VD: Ma trận Toán lớp 10" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="code"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>
+                      Mã ma trận <span className="text-destructive">*</span>
+                    </FormLabel>
+                    <FormControl>
+                      <Input placeholder="VD: MT-TOAN-10" {...field} />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="subjectId"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>
+                    Môn học <span className="text-destructive">*</span>
+                  </FormLabel>
+                  <FormControl>
+                    <select
+                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      value={field.value || ""}
+                      onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                    >
+                      <option value="">-- Chọn môn học --</option>
+                      {subjects?.map((s: any) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name} ({s.code})
+                        </option>
+                      ))}
+                    </select>
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="duration"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Thời gian (phút)</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={1}
+                        {...field}
+                        onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              <FormField
+                control={form.control}
+                name="totalScore"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Tổng điểm</FormLabel>
+                    <FormControl>
+                      <Input
+                        type="number"
+                        min={0}
+                        step={0.5}
+                        {...field}
+                        onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+            </div>
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Mô tả</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Mô tả về ma trận..." rows={3} {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end gap-2 pt-4">
+              <Button type="button" variant="outline" onPress={onClose}>
+                Hủy
+              </Button>
+              <Button type="submit" isDisabled={isPending}>
+                {isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
+                {isEdit ? "Cập nhật" : "Tạo"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </Card>
+    </div>
+  );
+};
+
+export default MatrixFormModal;

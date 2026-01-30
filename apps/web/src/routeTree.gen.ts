@@ -69,6 +69,7 @@ import { Route as LayoutNewsIdRouteImport } from './routes/_layout/news/$id'
 import { Route as LayoutMatricesMyRouteImport } from './routes/_layout/matrices/my'
 import { Route as LayoutMatricesImportRouteImport } from './routes/_layout/matrices/import'
 import { Route as LayoutMatricesCreateRouteImport } from './routes/_layout/matrices/create'
+import { Route as LayoutMatricesIdRouteImport } from './routes/_layout/matrices/$id'
 import { Route as LayoutLecturesIdRouteImport } from './routes/_layout/lectures/$id'
 import { Route as LayoutInternalTestLoaderRouteImport } from './routes/_layout/internal/test-loader'
 import { Route as LayoutExamsMyExamsRouteImport } from './routes/_layout/exams/my-exams'
@@ -398,6 +399,11 @@ const LayoutMatricesCreateRoute = LayoutMatricesCreateRouteImport.update({
   path: '/matrices/create',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutMatricesIdRoute = LayoutMatricesIdRouteImport.update({
+  id: '/matrices/$id',
+  path: '/matrices/$id',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutLecturesIdRoute = LayoutLecturesIdRouteImport.update({
   id: '/lectures/$id',
   path: '/lectures/$id',
@@ -515,14 +521,14 @@ const LayoutPresentationsIdOverviewRoute =
   } as any)
 const LayoutMatricesIdGenerateRoute =
   LayoutMatricesIdGenerateRouteImport.update({
-    id: '/matrices/$id/generate',
-    path: '/matrices/$id/generate',
-    getParentRoute: () => LayoutRoute,
+    id: '/generate',
+    path: '/generate',
+    getParentRoute: () => LayoutMatricesIdRoute,
   } as any)
 const LayoutMatricesIdEditRoute = LayoutMatricesIdEditRouteImport.update({
-  id: '/matrices/$id/edit',
-  path: '/matrices/$id/edit',
-  getParentRoute: () => LayoutRoute,
+  id: '/edit',
+  path: '/edit',
+  getParentRoute: () => LayoutMatricesIdRoute,
 } as any)
 const LayoutCoursesGradeGradeRoute = LayoutCoursesGradeGradeRouteImport.update({
   id: '/courses/grade/$grade',
@@ -580,6 +586,7 @@ export interface FileRoutesByFullPath {
   '/exams/my-exams': typeof LayoutExamsMyExamsRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
+  '/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
   '/matrices/create': typeof LayoutMatricesCreateRoute
   '/matrices/import': typeof LayoutMatricesImportRoute
   '/matrices/my': typeof LayoutMatricesMyRoute
@@ -666,6 +673,7 @@ export interface FileRoutesByTo {
   '/exams/my-exams': typeof LayoutExamsMyExamsRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
+  '/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
   '/matrices/create': typeof LayoutMatricesCreateRoute
   '/matrices/import': typeof LayoutMatricesImportRoute
   '/matrices/my': typeof LayoutMatricesMyRoute
@@ -755,6 +763,7 @@ export interface FileRoutesById {
   '/_layout/exams/my-exams': typeof LayoutExamsMyExamsRoute
   '/_layout/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/_layout/lectures/$id': typeof LayoutLecturesIdRoute
+  '/_layout/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
   '/_layout/matrices/create': typeof LayoutMatricesCreateRoute
   '/_layout/matrices/import': typeof LayoutMatricesImportRoute
   '/_layout/matrices/my': typeof LayoutMatricesMyRoute
@@ -843,6 +852,7 @@ export interface FileRouteTypes {
     | '/exams/my-exams'
     | '/internal/test-loader'
     | '/lectures/$id'
+    | '/matrices/$id'
     | '/matrices/create'
     | '/matrices/import'
     | '/matrices/my'
@@ -929,6 +939,7 @@ export interface FileRouteTypes {
     | '/exams/my-exams'
     | '/internal/test-loader'
     | '/lectures/$id'
+    | '/matrices/$id'
     | '/matrices/create'
     | '/matrices/import'
     | '/matrices/my'
@@ -1017,6 +1028,7 @@ export interface FileRouteTypes {
     | '/_layout/exams/my-exams'
     | '/_layout/internal/test-loader'
     | '/_layout/lectures/$id'
+    | '/_layout/matrices/$id'
     | '/_layout/matrices/create'
     | '/_layout/matrices/import'
     | '/_layout/matrices/my'
@@ -1512,6 +1524,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutMatricesCreateRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/matrices/$id': {
+      id: '/_layout/matrices/$id'
+      path: '/matrices/$id'
+      fullPath: '/matrices/$id'
+      preLoaderRoute: typeof LayoutMatricesIdRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/lectures/$id': {
       id: '/_layout/lectures/$id'
       path: '/lectures/$id'
@@ -1661,17 +1680,17 @@ declare module '@tanstack/react-router' {
     }
     '/_layout/matrices/$id/generate': {
       id: '/_layout/matrices/$id/generate'
-      path: '/matrices/$id/generate'
+      path: '/generate'
       fullPath: '/matrices/$id/generate'
       preLoaderRoute: typeof LayoutMatricesIdGenerateRouteImport
-      parentRoute: typeof LayoutRoute
+      parentRoute: typeof LayoutMatricesIdRoute
     }
     '/_layout/matrices/$id/edit': {
       id: '/_layout/matrices/$id/edit'
-      path: '/matrices/$id/edit'
+      path: '/edit'
       fullPath: '/matrices/$id/edit'
       preLoaderRoute: typeof LayoutMatricesIdEditRouteImport
-      parentRoute: typeof LayoutRoute
+      parentRoute: typeof LayoutMatricesIdRoute
     }
     '/_layout/courses/grade/$grade': {
       id: '/_layout/courses/grade/$grade'
@@ -1719,6 +1738,19 @@ const HeaderOnlyRouteWithChildren = HeaderOnlyRoute._addFileChildren(
   HeaderOnlyRouteChildren,
 )
 
+interface LayoutMatricesIdRouteChildren {
+  LayoutMatricesIdEditRoute: typeof LayoutMatricesIdEditRoute
+  LayoutMatricesIdGenerateRoute: typeof LayoutMatricesIdGenerateRoute
+}
+
+const LayoutMatricesIdRouteChildren: LayoutMatricesIdRouteChildren = {
+  LayoutMatricesIdEditRoute: LayoutMatricesIdEditRoute,
+  LayoutMatricesIdGenerateRoute: LayoutMatricesIdGenerateRoute,
+}
+
+const LayoutMatricesIdRouteWithChildren =
+  LayoutMatricesIdRoute._addFileChildren(LayoutMatricesIdRouteChildren)
+
 interface LayoutPresentationsIdRouteChildren {
   LayoutPresentationsIdOverviewRoute: typeof LayoutPresentationsIdOverviewRoute
   LayoutPresentationsIdPresenterRoute: typeof LayoutPresentationsIdPresenterRoute
@@ -1761,6 +1793,7 @@ interface LayoutRouteChildren {
   LayoutExamsMyExamsRoute: typeof LayoutExamsMyExamsRoute
   LayoutInternalTestLoaderRoute: typeof LayoutInternalTestLoaderRoute
   LayoutLecturesIdRoute: typeof LayoutLecturesIdRoute
+  LayoutMatricesIdRoute: typeof LayoutMatricesIdRouteWithChildren
   LayoutMatricesCreateRoute: typeof LayoutMatricesCreateRoute
   LayoutMatricesImportRoute: typeof LayoutMatricesImportRoute
   LayoutMatricesMyRoute: typeof LayoutMatricesMyRoute
@@ -1783,8 +1816,6 @@ interface LayoutRouteChildren {
   LayoutSyllabusesIndexRoute: typeof LayoutSyllabusesIndexRoute
   LayoutTemplatesIndexRoute: typeof LayoutTemplatesIndexRoute
   LayoutCoursesGradeGradeRoute: typeof LayoutCoursesGradeGradeRoute
-  LayoutMatricesIdEditRoute: typeof LayoutMatricesIdEditRoute
-  LayoutMatricesIdGenerateRoute: typeof LayoutMatricesIdGenerateRoute
   LayoutQuestionsIdEditRoute: typeof LayoutQuestionsIdEditRoute
   LayoutSyllabusesIdEditRoute: typeof LayoutSyllabusesIdEditRoute
   LayoutTemplatesSlidevCreateRoute: typeof LayoutTemplatesSlidevCreateRoute
@@ -1819,6 +1850,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutExamsMyExamsRoute: LayoutExamsMyExamsRoute,
   LayoutInternalTestLoaderRoute: LayoutInternalTestLoaderRoute,
   LayoutLecturesIdRoute: LayoutLecturesIdRoute,
+  LayoutMatricesIdRoute: LayoutMatricesIdRouteWithChildren,
   LayoutMatricesCreateRoute: LayoutMatricesCreateRoute,
   LayoutMatricesImportRoute: LayoutMatricesImportRoute,
   LayoutMatricesMyRoute: LayoutMatricesMyRoute,
@@ -1842,8 +1874,6 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSyllabusesIndexRoute: LayoutSyllabusesIndexRoute,
   LayoutTemplatesIndexRoute: LayoutTemplatesIndexRoute,
   LayoutCoursesGradeGradeRoute: LayoutCoursesGradeGradeRoute,
-  LayoutMatricesIdEditRoute: LayoutMatricesIdEditRoute,
-  LayoutMatricesIdGenerateRoute: LayoutMatricesIdGenerateRoute,
   LayoutQuestionsIdEditRoute: LayoutQuestionsIdEditRoute,
   LayoutSyllabusesIdEditRoute: LayoutSyllabusesIdEditRoute,
   LayoutTemplatesSlidevCreateRoute: LayoutTemplatesSlidevCreateRoute,
