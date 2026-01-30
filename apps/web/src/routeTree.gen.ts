@@ -16,6 +16,7 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
 import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
+import { Route as NotificationsRouteImport } from './routes/notifications'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as LayoutRouteImport } from './routes/_layout'
@@ -128,6 +129,11 @@ const PaymentSucceededRoute = PaymentSucceededRouteImport.update({
 const PaymentFailedRoute = PaymentFailedRouteImport.update({
   id: '/payment-failed',
   path: '/payment-failed',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const NotificationsRoute = NotificationsRouteImport.update({
+  id: '/notifications',
+  path: '/notifications',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -539,6 +545,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof R404Route
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/notifications': typeof NotificationsRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -624,6 +631,7 @@ export interface FileRoutesByTo {
   '/404': typeof R404Route
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/notifications': typeof NotificationsRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -712,6 +720,7 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
+  '/notifications': typeof NotificationsRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -799,6 +808,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/checkout'
     | '/forgot-password'
+    | '/notifications'
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
@@ -884,6 +894,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/checkout'
     | '/forgot-password'
+    | '/notifications'
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
@@ -971,6 +982,7 @@ export interface FileRouteTypes {
     | '/_layout'
     | '/checkout'
     | '/forgot-password'
+    | '/notifications'
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
@@ -1059,6 +1071,7 @@ export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+  NotificationsRoute: typeof NotificationsRoute
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentSucceededRoute: typeof PaymentSucceededRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -1126,6 +1139,13 @@ declare module '@tanstack/react-router' {
       path: '/payment-failed'
       fullPath: '/payment-failed'
       preLoaderRoute: typeof PaymentFailedRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/notifications': {
+      id: '/notifications'
+      path: '/notifications'
+      fullPath: '/notifications'
+      preLoaderRoute: typeof NotificationsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1842,6 +1862,7 @@ const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+  NotificationsRoute: NotificationsRoute,
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentSucceededRoute: PaymentSucceededRoute,
   ResetPasswordRoute: ResetPasswordRoute,
