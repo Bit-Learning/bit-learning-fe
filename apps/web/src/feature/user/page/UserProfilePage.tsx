@@ -1,6 +1,7 @@
 import TwoFactorSettings from "@/feature/auth/component/TwoFactorSettings";
 import { setIsAuthenticatedAction, setUserInfoAction } from "@/feature/auth/store";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { NotificationsList } from "@/feature/user/components/NotificationsList";
 import { useFetchOrdersByUserId } from "@/feature/order/hook/useOrder";
 import { useUserPresentations } from "@/feature/presentations/hooks/usePresentations";
 import { useFetchTransactionsByWalletId } from "@/feature/transaction/hook/useTransaction";
@@ -48,6 +49,7 @@ import {
   Link2,
   LogOut,
   Mail,
+  Trash2,
   MapPin,
   Package,
   Presentation,
@@ -597,8 +599,8 @@ function UserProfilePage() {
                                         order.status === "COMPLETED"
                                           ? "default"
                                           : order.status === "PENDING"
-                                          ? "secondary"
-                                          : "destructive"
+                                            ? "secondary"
+                                            : "destructive"
                                       }
                                     >
                                       {order.status}
@@ -884,8 +886,8 @@ function UserProfilePage() {
                                         {transaction.type === "PURCHASE"
                                           ? "Mua hàng"
                                           : transaction.type === "DEPOSIT"
-                                          ? "Nạp tiền"
-                                          : "Sử dụng AI"}
+                                            ? "Nạp tiền"
+                                            : "Sử dụng AI"}
                                       </span>
                                     </div>
                                   </td>
@@ -903,22 +905,22 @@ function UserProfilePage() {
                                         transaction.status === "COMPLETED"
                                           ? "default"
                                           : transaction.status === "PENDING"
-                                          ? "secondary"
-                                          : "destructive"
+                                            ? "secondary"
+                                            : "destructive"
                                       }
                                       className={
                                         transaction.status === "COMPLETED"
                                           ? "bg-green-100 text-green-800"
                                           : transaction.status === "PENDING"
-                                          ? "bg-yellow-100 text-yellow-800"
-                                          : "bg-red-100 text-red-800"
+                                            ? "bg-yellow-100 text-yellow-800"
+                                            : "bg-red-100 text-red-800"
                                       }
                                     >
                                       {transaction.status === "COMPLETED"
                                         ? "Hoàn thành"
                                         : transaction.status === "PENDING"
-                                        ? "Đang xử lý"
-                                        : "Thất bại"}
+                                          ? "Đang xử lý"
+                                          : "Thất bại"}
                                     </Badge>
                                   </td>
                                   <td className="text-muted-foreground py-4 text-right text-sm">
@@ -964,14 +966,7 @@ function UserProfilePage() {
                 </Card>
               )}
 
-              {activeSection === "notifications" && (
-                <Card>
-                  <CardContent className="p-6">
-                    <h3 className="mb-4 text-lg font-semibold">Notifications</h3>
-                    <p className="text-muted-foreground">You have no new notifications.</p>
-                  </CardContent>
-                </Card>
-              )}
+              {activeSection === "notifications" && <NotificationsList />}
 
               {activeSection === "settings" && (
                 <div className="flex h-full">
@@ -981,51 +976,46 @@ function UserProfilePage() {
                     <nav className="space-y-1">
                       <button
                         onClick={() => setActiveSettingTab("security")}
-                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
-                          activeSettingTab === "security"
-                            ? "bg-blue-100 font-medium text-blue-700"
-                            : "hover:bg-gray-100"
-                        }`}
+                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${activeSettingTab === "security"
+                          ? "bg-blue-100 font-medium text-blue-700"
+                          : "hover:bg-gray-100"
+                          }`}
                       >
                         <Shield className="h-5 w-5" />
                         Bảo mật
                       </button>
                       <button
                         onClick={() => setActiveSettingTab("account")}
-                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
-                          activeSettingTab === "account" ? "bg-blue-100 font-medium text-blue-700" : "hover:bg-gray-100"
-                        }`}
+                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${activeSettingTab === "account" ? "bg-blue-100 font-medium text-blue-700" : "hover:bg-gray-100"
+                          }`}
                       >
                         <User className="h-5 w-5" />
                         Tài khoản
                       </button>
                       <button
                         onClick={() => setActiveSettingTab("notifications")}
-                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
-                          activeSettingTab === "notifications"
-                            ? "bg-blue-100 font-medium text-blue-700"
-                            : "hover:bg-gray-100"
-                        }`}
+                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${activeSettingTab === "notifications"
+                          ? "bg-blue-100 font-medium text-blue-700"
+                          : "hover:bg-gray-100"
+                          }`}
                       >
                         <Bell className="h-5 w-5" />
                         Thông báo
                       </button>
                       <button
                         onClick={() => setActiveSettingTab("privacy")}
-                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
-                          activeSettingTab === "privacy" ? "bg-blue-100 font-medium text-blue-700" : "hover:bg-gray-100"
-                        }`}
+                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${activeSettingTab === "privacy" ? "bg-blue-100 font-medium text-blue-700" : "hover:bg-gray-100"
+                          }`}
                       >
                         <Settings className="h-5 w-5" />
                         Quyền riêng tư
                       </button>
                       <button
                         onClick={() => setActiveSettingTab("appearance")}
-                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${
-                          activeSettingTab === "appearance"
-                            ? "bg-blue-100 font-medium text-blue-700"
-                            : "hover:bg-gray-100"
-                        }`}
+                        className={`flex w-full items-center gap-3 rounded-lg px-4 py-3 text-left transition-colors ${activeSettingTab === "appearance"
+                          ? "bg-blue-100 font-medium text-blue-700"
+                          : "hover:bg-gray-100"
+                          }`}
                       >
                         <CreditCard className="h-5 w-5" />
                         Giao diện
