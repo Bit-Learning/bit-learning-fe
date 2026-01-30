@@ -44,11 +44,8 @@ import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
-<<<<<<< Updated upstream
 import { Route as AuthenticatedCoursesIdRouteImport } from './routes/_authenticated/courses/$id'
-=======
 import { Route as AuthenticatedAppsGamesIndexRouteImport } from './routes/_authenticated/apps/games/index'
->>>>>>> Stashed changes
 
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
@@ -236,20 +233,17 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
-<<<<<<< Updated upstream
 const AuthenticatedCoursesIdRoute = AuthenticatedCoursesIdRouteImport.update({
   id: '/courses/$id',
   path: '/courses/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-=======
 const AuthenticatedAppsGamesIndexRoute =
   AuthenticatedAppsGamesIndexRouteImport.update({
     id: '/apps/games/',
     path: '/apps/games/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
->>>>>>> Stashed changes
 
 export interface FileRoutesByFullPath {
   '/': typeof AuthenticatedIndexRoute
@@ -264,11 +258,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-<<<<<<< Updated upstream
-  '/': typeof AuthenticatedIndexRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
-=======
->>>>>>> Stashed changes
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -278,20 +268,12 @@ export interface FileRoutesByFullPath {
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
-<<<<<<< Updated upstream
-  '/apps': typeof AuthenticatedAppsIndexRoute
-  '/chats': typeof AuthenticatedChatsIndexRoute
-  '/courses': typeof AuthenticatedCoursesIndexRoute
-  '/curriculum': typeof AuthenticatedCurriculumIndexRoute
-  '/help-center': typeof AuthenticatedHelpCenterIndexRoute
-  '/orders': typeof AuthenticatedOrdersIndexRoute
-=======
   '/apps/': typeof AuthenticatedAppsIndexRoute
   '/chats/': typeof AuthenticatedChatsIndexRoute
+  '/courses/': typeof AuthenticatedCoursesIndexRoute
   '/curriculum/': typeof AuthenticatedCurriculumIndexRoute
   '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
   '/orders/': typeof AuthenticatedOrdersIndexRoute
->>>>>>> Stashed changes
   '/settings/': typeof AuthenticatedSettingsIndexRoute
   '/tasks/': typeof AuthenticatedTasksIndexRoute
   '/templates/': typeof AuthenticatedTemplatesIndexRoute
@@ -389,11 +371,7 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
-<<<<<<< Updated upstream
-    | '/'
     | '/courses/$id'
-=======
->>>>>>> Stashed changes
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
@@ -403,20 +381,12 @@ export interface FileRouteTypes {
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
-<<<<<<< Updated upstream
-    | '/apps'
-    | '/chats'
-    | '/courses'
-    | '/curriculum'
-    | '/help-center'
-    | '/orders'
-=======
     | '/apps/'
     | '/chats/'
+    | '/courses/'
     | '/curriculum/'
     | '/help-center/'
     | '/orders/'
->>>>>>> Stashed changes
     | '/settings/'
     | '/tasks/'
     | '/templates/'
@@ -679,7 +649,7 @@ declare module '@tanstack/react-router' {
     '/_authenticated/courses/': {
       id: '/_authenticated/courses/'
       path: '/courses'
-      fullPath: '/courses'
+      fullPath: '/courses/'
       preLoaderRoute: typeof AuthenticatedCoursesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -760,19 +730,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-<<<<<<< Updated upstream
     '/_authenticated/courses/$id': {
       id: '/_authenticated/courses/$id'
       path: '/courses/$id'
       fullPath: '/courses/$id'
       preLoaderRoute: typeof AuthenticatedCoursesIdRouteImport
-=======
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/apps/games/': {
       id: '/_authenticated/apps/games/'
       path: '/apps/games'
       fullPath: '/apps/games/'
       preLoaderRoute: typeof AuthenticatedAppsGamesIndexRouteImport
->>>>>>> Stashed changes
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }

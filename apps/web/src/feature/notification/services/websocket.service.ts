@@ -26,20 +26,25 @@ class WebSocketService {
 				return;
 			}
 
-			const wsUrl =
-				import.meta.env.VITE_WS_URL ?? "http://localhost:8080/ws";
+			const wsUrl = import.meta.env.VITE_WS_URL ?? "http://localhost:8080/ws";
 			const accessToken = getAccessToken();
 
 			if (!accessToken) {
 				const error = "No access token found. Please log in.";
 				console.error("[WebSocket]", error);
-				toast.error(error);
+				toast.error({
+					title: "Kết nối thất bại",
+					description: error,
+				});
 				reject(new Error(error));
 				return;
 			}
 
 			console.log("[WebSocket] Connecting to:", wsUrl);
-			console.log("[WebSocket] Using token:", accessToken?.substring(0, 20) + "...");
+			console.log(
+				"[WebSocket] Using token:",
+				accessToken?.substring(0, 20) + "...",
+			);
 
 			// Create STOMP client with SockJS
 			this.client = new Client({
@@ -60,13 +65,19 @@ class WebSocketService {
 					console.log("[WebSocket] Connected successfully");
 					this.reconnectAttempts = 0;
 					this.isManualDisconnect = false;
-					toast.success("Connected to real-time updates");
+					toast.success({
+						title: "Kết nối thành công",
+						description: "Đã kết nối tới hệ thống thông báo thời gian thực.",
+					});
 					resolve();
 				},
 
 				onStompError: (frame) => {
 					console.error("[WebSocket] STOMP Error:", frame);
-					toast.error("WebSocket connection error");
+					toast.error({
+						title: "Kết nối thất bại",
+						description: frame.headers.message || "Lỗi kết nối WebSocket",
+					});
 					reject(new Error(frame.headers.message || "Connection failed"));
 				},
 
@@ -81,7 +92,10 @@ class WebSocketService {
 
 				onWebSocketError: (error) => {
 					console.error("[WebSocket] Error:", error);
-					toast.error("WebSocket connection failed");
+					toast.error({
+						title: "Kết nối thất bại",
+						description: "Lỗi kết nối WebSocket",
+					});
 				},
 			});
 
@@ -97,9 +111,11 @@ class WebSocketService {
 			console.error(
 				"[WebSocket] Max reconnection attempts reached. Please refresh the page.",
 			);
-			toast.error(
-				"Unable to connect to real-time updates. Please refresh the page.",
-			);
+			toast.error({
+				title: "Kết nối thất bại",
+				description:
+					"Không thể kết nối lại sau nhiều lần thử. Vui lòng làm mới trang.",
+			});
 			return;
 		}
 
@@ -180,7 +196,11 @@ class WebSocketService {
 	 * @param body - The message body (will be stringified)
 	 * @param headers - Optional headers
 	 */
-	send(destination: string, body: any, headers: Record<string, string> = {}): void {
+	send(
+		destination: string,
+		body: any,
+		headers: Record<string, string> = {},
+	): void {
 		if (!this.client?.connected) {
 			console.error("[WebSocket] Not connected. Cannot send message.");
 			throw new Error("WebSocket not connected");

@@ -3,13 +3,14 @@ import { wsService } from "@/feature/notification/services/websocket.service";
 
 /**
  * Base Channel Class
- * 
+ *
  * Abstract class that provides common functionality for all channels.
  * Each channel represents a specific feature/domain (e.g., notifications, chat, course updates)
  */
 export abstract class BaseChannel<TMessage = any> {
 	protected subscriptions: Map<string, StompSubscription> = new Map();
-	protected messageHandlers: Map<string, Set<(message: TMessage) => void>> = new Map();
+	protected messageHandlers: Map<string, Set<(message: TMessage) => void>> =
+		new Map();
 
 	/**
 	 * Get the destination path for this channel
@@ -28,17 +29,14 @@ export abstract class BaseChannel<TMessage = any> {
 	 * Validate incoming message
 	 * Override this to add channel-specific validation
 	 */
-	protected validateMessage(message: any): boolean {
+	protected validateMessage(_message: any): boolean {
 		return true;
 	}
 
 	/**
 	 * Subscribe to this channel
 	 */
-	subscribe(
-		callback: (message: TMessage) => void,
-		...args: any[]
-	): string {
+	subscribe(callback: (message: TMessage) => void, ...args: any[]): string {
 		const destination = this.getDestination(...args);
 
 		// Add callback to handlers
@@ -49,52 +47,74 @@ export abstract class BaseChannel<TMessage = any> {
 
 		// Subscribe to WebSocket if not already subscribed
 		if (!this.subscriptions.has(destination)) {
-			console.log(`[${this.constructor.name}] 📡 Setting up channel subscription to:`, destination);
+			console.log(
+				`[${this.constructor.name}] 📡 Setting up channel subscription to:`,
+				destination,
+			);
 			const subscription = wsService.subscribe(
 				destination,
 				(rawMessage) => {
-					console.log(`[${this.constructor.name}] 📨 Received message:`, rawMessage);
+					console.log(
+						`[${this.constructor.name}] 📨 Received message:`,
+						rawMessage,
+					);
 					try {
 						// Validate message
 						const isValid = this.validateMessage(rawMessage);
-						console.log(`[${this.constructor.name}] ✔️ Message validation:`, isValid);
+						console.log(
+							`[${this.constructor.name}] ✔️ Message validation:`,
+							isValid,
+						);
 						if (!isValid) {
 							console.warn(
 								`[${this.constructor.name}] ❌ Invalid message received:`,
-								rawMessage
+								rawMessage,
 							);
 							return;
 						}
 
 						// Transform message
 						const transformedMessage = this.transformMessage(rawMessage);
-						console.log(`[${this.constructor.name}] 🔄 Transformed message:`, transformedMessage);
+						console.log(
+							`[${this.constructor.name}] 🔄 Transformed message:`,
+							transformedMessage,
+						);
 
 						// Call all registered handlers
 						const handlers = this.messageHandlers.get(destination);
-						console.log(`[${this.constructor.name}] 👥 Number of handlers:`, handlers?.size || 0);
+						console.log(
+							`[${this.constructor.name}] 👥 Number of handlers:`,
+							handlers?.size || 0,
+						);
 						if (handlers) {
 							handlers.forEach((handler) => {
-								console.log(`[${this.constructor.name}] 🔔 Calling handler with message`);
+								console.log(
+									`[${this.constructor.name}] 🔔 Calling handler with message`,
+								);
 								handler(transformedMessage);
 							});
 						}
 					} catch (error) {
 						console.error(
 							`[${this.constructor.name}] Error processing message:`,
-							error
+							error,
 						);
 						this.onError(error as Error);
 					}
 				},
 				(error) => {
-					console.error(`[${this.constructor.name}] Subscription error:`, error);
+					console.error(
+						`[${this.constructor.name}] Subscription error:`,
+						error,
+					);
 					this.onError(error);
-				}
+				},
 			);
 
 			this.subscriptions.set(destination, subscription);
-			console.log(`[${this.constructor.name}] ✅ Channel subscription complete`);
+			console.log(
+				`[${this.constructor.name}] ✅ Channel subscription complete`,
+			);
 		}
 
 		return destination;

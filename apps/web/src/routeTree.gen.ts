@@ -16,11 +16,8 @@ import { Route as SigninRouteImport } from './routes/signin'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
 import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
-<<<<<<< Updated upstream
 import { Route as NotificationsRouteImport } from './routes/notifications'
-=======
 import { Route as HostLobbyRouteImport } from './routes/host-lobby'
->>>>>>> Stashed changes
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as LayoutRouteImport } from './routes/_layout'
@@ -136,15 +133,14 @@ const PaymentFailedRoute = PaymentFailedRouteImport.update({
   path: '/payment-failed',
   getParentRoute: () => rootRouteImport,
 } as any)
-<<<<<<< Updated upstream
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
-=======
+  getParentRoute: () => rootRouteImport,
+} as any)
 const HostLobbyRoute = HostLobbyRouteImport.update({
   id: '/host-lobby',
   path: '/host-lobby',
->>>>>>> Stashed changes
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -562,11 +558,8 @@ export interface FileRoutesByFullPath {
   '/': typeof LayoutIndexRoute
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
-<<<<<<< Updated upstream
-  '/notifications': typeof NotificationsRoute
-=======
   '/host-lobby': typeof HostLobbyRoute
->>>>>>> Stashed changes
+  '/notifications': typeof NotificationsRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -653,11 +646,8 @@ export interface FileRoutesByTo {
   '/': typeof LayoutIndexRoute
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
-<<<<<<< Updated upstream
-  '/notifications': typeof NotificationsRoute
-=======
   '/host-lobby': typeof HostLobbyRoute
->>>>>>> Stashed changes
+  '/notifications': typeof NotificationsRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -746,11 +736,8 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
-<<<<<<< Updated upstream
-  '/notifications': typeof NotificationsRoute
-=======
   '/host-lobby': typeof HostLobbyRoute
->>>>>>> Stashed changes
+  '/notifications': typeof NotificationsRoute
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
@@ -840,11 +827,8 @@ export interface FileRouteTypes {
     | '/'
     | '/checkout'
     | '/forgot-password'
-<<<<<<< Updated upstream
-    | '/notifications'
-=======
     | '/host-lobby'
->>>>>>> Stashed changes
+    | '/notifications'
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
@@ -931,11 +915,8 @@ export interface FileRouteTypes {
     | '/'
     | '/checkout'
     | '/forgot-password'
-<<<<<<< Updated upstream
-    | '/notifications'
-=======
     | '/host-lobby'
->>>>>>> Stashed changes
+    | '/notifications'
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
@@ -1023,11 +1004,8 @@ export interface FileRouteTypes {
     | '/_layout'
     | '/checkout'
     | '/forgot-password'
-<<<<<<< Updated upstream
-    | '/notifications'
-=======
     | '/host-lobby'
->>>>>>> Stashed changes
+    | '/notifications'
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
@@ -1117,11 +1095,8 @@ export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-<<<<<<< Updated upstream
-  NotificationsRoute: typeof NotificationsRoute
-=======
   HostLobbyRoute: typeof HostLobbyRoute
->>>>>>> Stashed changes
+  NotificationsRoute: typeof NotificationsRoute
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentSucceededRoute: typeof PaymentSucceededRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
@@ -1194,19 +1169,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaymentFailedRouteImport
       parentRoute: typeof rootRouteImport
     }
-<<<<<<< Updated upstream
     '/notifications': {
       id: '/notifications'
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
-=======
+      parentRoute: typeof rootRouteImport
+    }
     '/host-lobby': {
       id: '/host-lobby'
       path: '/host-lobby'
       fullPath: '/host-lobby'
       preLoaderRoute: typeof HostLobbyRouteImport
->>>>>>> Stashed changes
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1935,11 +1909,8 @@ const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
-<<<<<<< Updated upstream
-  NotificationsRoute: NotificationsRoute,
-=======
   HostLobbyRoute: HostLobbyRoute,
->>>>>>> Stashed changes
+  NotificationsRoute: NotificationsRoute,
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentSucceededRoute: PaymentSucceededRoute,
   ResetPasswordRoute: ResetPasswordRoute,
