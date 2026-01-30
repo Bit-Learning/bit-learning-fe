@@ -9,20 +9,25 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as TestWpmRouteImport } from './routes/test-wpm'
+import { Route as StudentLobbyRouteImport } from './routes/student-lobby'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as Signin2faRouteImport } from './routes/signin-2fa'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
 import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
+<<<<<<< Updated upstream
 import { Route as NotificationsRouteImport } from './routes/notifications'
+=======
+import { Route as HostLobbyRouteImport } from './routes/host-lobby'
+>>>>>>> Stashed changes
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as CheckoutRouteImport } from './routes/checkout'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as HeaderOnlyRouteImport } from './routes/_headerOnly'
 import { Route as R404RouteImport } from './routes/404'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as GamesListRouteImport } from './routes/games/list'
 import { Route as LayoutWebDesignRouteImport } from './routes/_layout/web-design'
 import { Route as LayoutUploadRouteImport } from './routes/_layout/upload'
 import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
@@ -39,6 +44,7 @@ import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
 import { Route as HeaderOnlyUserProfileRouteImport } from './routes/_headerOnly/user-profile'
 import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
 import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
+import { Route as GamesIdIndexRouteImport } from './routes/games/$id/index'
 import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
 import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
 import { Route as LayoutQuestionsIndexRouteImport } from './routes/_layout/questions/index'
@@ -53,6 +59,7 @@ import { Route as MentorCourseQuizRouteImport } from './routes/mentor/course/qui
 import { Route as MentorCourseListRouteImport } from './routes/mentor/course/list'
 import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/create'
 import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
+import { Route as GamesIdPlayRouteImport } from './routes/games/$id.play'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as AuthGithubCallbackRouteImport } from './routes/auth/github/callback'
 import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
@@ -80,11 +87,9 @@ import { Route as LayoutCoursesMobileDevelopmentRouteImport } from './routes/_la
 import { Route as LayoutCoursesDataScienceRouteImport } from './routes/_layout/courses/data-science'
 import { Route as LayoutCoursesBackendDevelopmentRouteImport } from './routes/_layout/courses/backend-development'
 import { Route as LayoutCoursesIdRouteImport } from './routes/_layout/courses/$id'
-import { Route as HeaderOnlyGamesListRouteImport } from './routes/_headerOnly/games/list'
 import { Route as LayoutTemplatesSlidevIndexRouteImport } from './routes/_layout/templates/slidev/index'
 import { Route as LayoutSyllabusesIdIndexRouteImport } from './routes/_layout/syllabuses/$id/index'
 import { Route as LayoutQuestionsIdIndexRouteImport } from './routes/_layout/questions/$id/index'
-import { Route as HeaderOnlyGamesIdIndexRouteImport } from './routes/_headerOnly/games/$id/index'
 import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
 import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
 import { Route as LayoutQuestionsIdEditRouteImport } from './routes/_layout/questions/$id/edit'
@@ -94,12 +99,11 @@ import { Route as LayoutPresentationsIdOverviewRouteImport } from './routes/_lay
 import { Route as LayoutMatricesIdGenerateRouteImport } from './routes/_layout/matrices/$id.generate'
 import { Route as LayoutMatricesIdEditRouteImport } from './routes/_layout/matrices/$id.edit'
 import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
-import { Route as HeaderOnlyGamesIdPlayRouteImport } from './routes/_headerOnly/games/$id.play'
 import { Route as LayoutTemplatesSlidevIdEditRouteImport } from './routes/_layout/templates/slidev/$id/edit'
 
-const TestWpmRoute = TestWpmRouteImport.update({
-  id: '/test-wpm',
-  path: '/test-wpm',
+const StudentLobbyRoute = StudentLobbyRouteImport.update({
+  id: '/student-lobby',
+  path: '/student-lobby',
   getParentRoute: () => rootRouteImport,
 } as any)
 const SignupRoute = SignupRouteImport.update({
@@ -132,9 +136,15 @@ const PaymentFailedRoute = PaymentFailedRouteImport.update({
   path: '/payment-failed',
   getParentRoute: () => rootRouteImport,
 } as any)
+<<<<<<< Updated upstream
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
+=======
+const HostLobbyRoute = HostLobbyRouteImport.update({
+  id: '/host-lobby',
+  path: '/host-lobby',
+>>>>>>> Stashed changes
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -164,6 +174,11 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
+} as any)
+const GamesListRoute = GamesListRouteImport.update({
+  id: '/games/list',
+  path: '/games/list',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutWebDesignRoute = LayoutWebDesignRouteImport.update({
   id: '/web-design',
@@ -245,6 +260,11 @@ const MentorDashboardIndexRoute = MentorDashboardIndexRouteImport.update({
   path: '/mentor/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const GamesIdIndexRoute = GamesIdIndexRouteImport.update({
+  id: '/games/$id/',
+  path: '/games/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutTemplatesIndexRoute = LayoutTemplatesIndexRouteImport.update({
   id: '/templates/',
   path: '/templates/',
@@ -314,6 +334,11 @@ const MentorCourseCreateRoute = MentorCourseCreateRouteImport.update({
 const MentorCourseIdRoute = MentorCourseIdRouteImport.update({
   id: '/mentor/course/$id',
   path: '/mentor/course/$id',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const GamesIdPlayRoute = GamesIdPlayRouteImport.update({
+  id: '/games/$id/play',
+  path: '/games/$id/play',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
@@ -459,11 +484,6 @@ const LayoutCoursesIdRoute = LayoutCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
-const HeaderOnlyGamesListRoute = HeaderOnlyGamesListRouteImport.update({
-  id: '/games/list',
-  path: '/games/list',
-  getParentRoute: () => HeaderOnlyRoute,
-} as any)
 const LayoutTemplatesSlidevIndexRoute =
   LayoutTemplatesSlidevIndexRouteImport.update({
     id: '/templates/slidev/',
@@ -479,11 +499,6 @@ const LayoutQuestionsIdIndexRoute = LayoutQuestionsIdIndexRouteImport.update({
   id: '/questions/$id/',
   path: '/questions/$id/',
   getParentRoute: () => LayoutRoute,
-} as any)
-const HeaderOnlyGamesIdIndexRoute = HeaderOnlyGamesIdIndexRouteImport.update({
-  id: '/games/$id/',
-  path: '/games/$id/',
-  getParentRoute: () => HeaderOnlyRoute,
 } as any)
 const LayoutTemplatesSlidevCreateRoute =
   LayoutTemplatesSlidevCreateRouteImport.update({
@@ -535,11 +550,6 @@ const LayoutCoursesGradeGradeRoute = LayoutCoursesGradeGradeRouteImport.update({
   path: '/courses/grade/$grade',
   getParentRoute: () => LayoutRoute,
 } as any)
-const HeaderOnlyGamesIdPlayRoute = HeaderOnlyGamesIdPlayRouteImport.update({
-  id: '/games/$id/play',
-  path: '/games/$id/play',
-  getParentRoute: () => HeaderOnlyRoute,
-} as any)
 const LayoutTemplatesSlidevIdEditRoute =
   LayoutTemplatesSlidevIdEditRouteImport.update({
     id: '/templates/slidev/$id/edit',
@@ -549,16 +559,21 @@ const LayoutTemplatesSlidevIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/404': typeof R404Route
+  '/': typeof LayoutIndexRoute
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
+<<<<<<< Updated upstream
   '/notifications': typeof NotificationsRoute
+=======
+  '/host-lobby': typeof HostLobbyRoute
+>>>>>>> Stashed changes
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/test-wpm': typeof TestWpmRoute
+  '/student-lobby': typeof StudentLobbyRoute
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
@@ -574,8 +589,7 @@ export interface FileRoutesByFullPath {
   '/terms': typeof LayoutTermsRoute
   '/upload': typeof LayoutUploadRoute
   '/web-design': typeof LayoutWebDesignRoute
-  '/': typeof LayoutIndexRoute
-  '/games/list': typeof HeaderOnlyGamesListRoute
+  '/games/list': typeof GamesListRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -603,22 +617,23 @@ export interface FileRoutesByFullPath {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/games/$id/play': typeof GamesIdPlayRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/games': typeof HeaderOnlyGamesIndexRoute
-  '/courses': typeof LayoutCoursesIndexRoute
-  '/dashboard': typeof LayoutDashboardIndexRoute
-  '/matrices': typeof LayoutMatricesIndexRoute
-  '/news': typeof LayoutNewsIndexRoute
-  '/presentations': typeof LayoutPresentationsIndexRoute
-  '/questions': typeof LayoutQuestionsIndexRoute
-  '/syllabuses': typeof LayoutSyllabusesIndexRoute
-  '/templates': typeof LayoutTemplatesIndexRoute
-  '/mentor/dashboard': typeof MentorDashboardIndexRoute
-  '/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
+  '/games/': typeof HeaderOnlyGamesIndexRoute
+  '/courses/': typeof LayoutCoursesIndexRoute
+  '/dashboard/': typeof LayoutDashboardIndexRoute
+  '/matrices/': typeof LayoutMatricesIndexRoute
+  '/news/': typeof LayoutNewsIndexRoute
+  '/presentations/': typeof LayoutPresentationsIndexRoute
+  '/questions/': typeof LayoutQuestionsIndexRoute
+  '/syllabuses/': typeof LayoutSyllabusesIndexRoute
+  '/templates/': typeof LayoutTemplatesIndexRoute
+  '/games/$id/': typeof GamesIdIndexRoute
+  '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
   '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
@@ -628,24 +643,28 @@ export interface FileRoutesByFullPath {
   '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/games/$id': typeof HeaderOnlyGamesIdIndexRoute
-  '/questions/$id': typeof LayoutQuestionsIdIndexRoute
-  '/syllabuses/$id': typeof LayoutSyllabusesIdIndexRoute
-  '/templates/slidev': typeof LayoutTemplatesSlidevIndexRoute
+  '/questions/$id/': typeof LayoutQuestionsIdIndexRoute
+  '/syllabuses/$id/': typeof LayoutSyllabusesIdIndexRoute
+  '/templates/slidev/': typeof LayoutTemplatesSlidevIndexRoute
   '/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRoutesByTo {
   '/404': typeof R404Route
+  '/': typeof LayoutIndexRoute
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
+<<<<<<< Updated upstream
   '/notifications': typeof NotificationsRoute
+=======
+  '/host-lobby': typeof HostLobbyRoute
+>>>>>>> Stashed changes
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/test-wpm': typeof TestWpmRoute
+  '/student-lobby': typeof StudentLobbyRoute
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
@@ -661,8 +680,7 @@ export interface FileRoutesByTo {
   '/terms': typeof LayoutTermsRoute
   '/upload': typeof LayoutUploadRoute
   '/web-design': typeof LayoutWebDesignRoute
-  '/': typeof LayoutIndexRoute
-  '/games/list': typeof HeaderOnlyGamesListRoute
+  '/games/list': typeof GamesListRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -690,6 +708,7 @@ export interface FileRoutesByTo {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/games/$id/play': typeof GamesIdPlayRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
@@ -704,8 +723,8 @@ export interface FileRoutesByTo {
   '/questions': typeof LayoutQuestionsIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
+  '/games/$id': typeof GamesIdIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
-  '/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
   '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
@@ -715,7 +734,6 @@ export interface FileRoutesByTo {
   '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/games/$id': typeof HeaderOnlyGamesIdIndexRoute
   '/questions/$id': typeof LayoutQuestionsIdIndexRoute
   '/syllabuses/$id': typeof LayoutSyllabusesIdIndexRoute
   '/templates/slidev': typeof LayoutTemplatesSlidevIndexRoute
@@ -728,14 +746,18 @@ export interface FileRoutesById {
   '/_layout': typeof LayoutRouteWithChildren
   '/checkout': typeof CheckoutRoute
   '/forgot-password': typeof ForgotPasswordRoute
+<<<<<<< Updated upstream
   '/notifications': typeof NotificationsRoute
+=======
+  '/host-lobby': typeof HostLobbyRoute
+>>>>>>> Stashed changes
   '/payment-failed': typeof PaymentFailedRoute
   '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/test-wpm': typeof TestWpmRoute
+  '/student-lobby': typeof StudentLobbyRoute
   '/_headerOnly/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/_headerOnly/user-profile': typeof HeaderOnlyUserProfileRoute
   '/_layout/about': typeof LayoutAboutRoute
@@ -751,8 +773,8 @@ export interface FileRoutesById {
   '/_layout/terms': typeof LayoutTermsRoute
   '/_layout/upload': typeof LayoutUploadRoute
   '/_layout/web-design': typeof LayoutWebDesignRoute
+  '/games/list': typeof GamesListRoute
   '/_layout/': typeof LayoutIndexRoute
-  '/_headerOnly/games/list': typeof HeaderOnlyGamesListRoute
   '/_layout/courses/$id': typeof LayoutCoursesIdRoute
   '/_layout/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -780,6 +802,7 @@ export interface FileRoutesById {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/games/$id/play': typeof GamesIdPlayRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
@@ -794,8 +817,8 @@ export interface FileRoutesById {
   '/_layout/questions/': typeof LayoutQuestionsIndexRoute
   '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/_layout/templates/': typeof LayoutTemplatesIndexRoute
+  '/games/$id/': typeof GamesIdIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
-  '/_headerOnly/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/_layout/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
   '/_layout/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
@@ -805,7 +828,6 @@ export interface FileRoutesById {
   '/_layout/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/_headerOnly/games/$id/': typeof HeaderOnlyGamesIdIndexRoute
   '/_layout/questions/$id/': typeof LayoutQuestionsIdIndexRoute
   '/_layout/syllabuses/$id/': typeof LayoutSyllabusesIdIndexRoute
   '/_layout/templates/slidev/': typeof LayoutTemplatesSlidevIndexRoute
@@ -815,16 +837,21 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/404'
+    | '/'
     | '/checkout'
     | '/forgot-password'
+<<<<<<< Updated upstream
     | '/notifications'
+=======
+    | '/host-lobby'
+>>>>>>> Stashed changes
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/test-wpm'
+    | '/student-lobby'
     | '/ai-chatbot'
     | '/user-profile'
     | '/about'
@@ -840,7 +867,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/upload'
     | '/web-design'
-    | '/'
     | '/games/list'
     | '/courses/$id'
     | '/courses/backend-development'
@@ -869,22 +895,23 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/games/$id/play'
     | '/mentor/course/$id'
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
-    | '/games'
-    | '/courses'
-    | '/dashboard'
-    | '/matrices'
-    | '/news'
-    | '/presentations'
-    | '/questions'
-    | '/syllabuses'
-    | '/templates'
-    | '/mentor/dashboard'
-    | '/games/$id/play'
+    | '/games/'
+    | '/courses/'
+    | '/dashboard/'
+    | '/matrices/'
+    | '/news/'
+    | '/presentations/'
+    | '/questions/'
+    | '/syllabuses/'
+    | '/templates/'
+    | '/games/$id/'
+    | '/mentor/dashboard/'
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
@@ -894,24 +921,28 @@ export interface FileRouteTypes {
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
-    | '/games/$id'
-    | '/questions/$id'
-    | '/syllabuses/$id'
-    | '/templates/slidev'
+    | '/questions/$id/'
+    | '/syllabuses/$id/'
+    | '/templates/slidev/'
     | '/templates/slidev/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/404'
+    | '/'
     | '/checkout'
     | '/forgot-password'
+<<<<<<< Updated upstream
     | '/notifications'
+=======
+    | '/host-lobby'
+>>>>>>> Stashed changes
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/test-wpm'
+    | '/student-lobby'
     | '/ai-chatbot'
     | '/user-profile'
     | '/about'
@@ -927,7 +958,6 @@ export interface FileRouteTypes {
     | '/terms'
     | '/upload'
     | '/web-design'
-    | '/'
     | '/games/list'
     | '/courses/$id'
     | '/courses/backend-development'
@@ -956,6 +986,7 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/games/$id/play'
     | '/mentor/course/$id'
     | '/mentor/course/create'
     | '/mentor/course/list'
@@ -970,8 +1001,8 @@ export interface FileRouteTypes {
     | '/questions'
     | '/syllabuses'
     | '/templates'
+    | '/games/$id'
     | '/mentor/dashboard'
-    | '/games/$id/play'
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
     | '/matrices/$id/generate'
@@ -981,7 +1012,6 @@ export interface FileRouteTypes {
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
-    | '/games/$id'
     | '/questions/$id'
     | '/syllabuses/$id'
     | '/templates/slidev'
@@ -993,14 +1023,18 @@ export interface FileRouteTypes {
     | '/_layout'
     | '/checkout'
     | '/forgot-password'
+<<<<<<< Updated upstream
     | '/notifications'
+=======
+    | '/host-lobby'
+>>>>>>> Stashed changes
     | '/payment-failed'
     | '/payment-succeeded'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/test-wpm'
+    | '/student-lobby'
     | '/_headerOnly/ai-chatbot'
     | '/_headerOnly/user-profile'
     | '/_layout/about'
@@ -1016,8 +1050,8 @@ export interface FileRouteTypes {
     | '/_layout/terms'
     | '/_layout/upload'
     | '/_layout/web-design'
+    | '/games/list'
     | '/_layout/'
-    | '/_headerOnly/games/list'
     | '/_layout/courses/$id'
     | '/_layout/courses/backend-development'
     | '/_layout/courses/data-science'
@@ -1045,6 +1079,7 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/games/$id/play'
     | '/mentor/course/$id'
     | '/mentor/course/create'
     | '/mentor/course/list'
@@ -1059,8 +1094,8 @@ export interface FileRouteTypes {
     | '/_layout/questions/'
     | '/_layout/syllabuses/'
     | '/_layout/templates/'
+    | '/games/$id/'
     | '/mentor/dashboard/'
-    | '/_headerOnly/games/$id/play'
     | '/_layout/courses/grade/$grade'
     | '/_layout/matrices/$id/edit'
     | '/_layout/matrices/$id/generate'
@@ -1070,7 +1105,6 @@ export interface FileRouteTypes {
     | '/_layout/questions/$id/edit'
     | '/_layout/syllabuses/$id/edit'
     | '/_layout/templates/slidev/create'
-    | '/_headerOnly/games/$id/'
     | '/_layout/questions/$id/'
     | '/_layout/syllabuses/$id/'
     | '/_layout/templates/slidev/'
@@ -1083,32 +1117,39 @@ export interface RootRouteChildren {
   LayoutRoute: typeof LayoutRouteWithChildren
   CheckoutRoute: typeof CheckoutRoute
   ForgotPasswordRoute: typeof ForgotPasswordRoute
+<<<<<<< Updated upstream
   NotificationsRoute: typeof NotificationsRoute
+=======
+  HostLobbyRoute: typeof HostLobbyRoute
+>>>>>>> Stashed changes
   PaymentFailedRoute: typeof PaymentFailedRoute
   PaymentSucceededRoute: typeof PaymentSucceededRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SigninRoute: typeof SigninRoute
   Signin2faRoute: typeof Signin2faRoute
   SignupRoute: typeof SignupRoute
-  TestWpmRoute: typeof TestWpmRoute
+  StudentLobbyRoute: typeof StudentLobbyRoute
+  GamesListRoute: typeof GamesListRoute
   ApiAuthActivateRoute: typeof ApiAuthActivateRoute
   AuthGithubCallbackRoute: typeof AuthGithubCallbackRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
+  GamesIdPlayRoute: typeof GamesIdPlayRoute
   MentorCourseIdRoute: typeof MentorCourseIdRoute
   MentorCourseCreateRoute: typeof MentorCourseCreateRoute
   MentorCourseListRoute: typeof MentorCourseListRoute
   MentorCourseQuizRoute: typeof MentorCourseQuizRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
+  GamesIdIndexRoute: typeof GamesIdIndexRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/test-wpm': {
-      id: '/test-wpm'
-      path: '/test-wpm'
-      fullPath: '/test-wpm'
-      preLoaderRoute: typeof TestWpmRouteImport
+    '/student-lobby': {
+      id: '/student-lobby'
+      path: '/student-lobby'
+      fullPath: '/student-lobby'
+      preLoaderRoute: typeof StudentLobbyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/signup': {
@@ -1153,11 +1194,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PaymentFailedRouteImport
       parentRoute: typeof rootRouteImport
     }
+<<<<<<< Updated upstream
     '/notifications': {
       id: '/notifications'
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
+=======
+    '/host-lobby': {
+      id: '/host-lobby'
+      path: '/host-lobby'
+      fullPath: '/host-lobby'
+      preLoaderRoute: typeof HostLobbyRouteImport
+>>>>>>> Stashed changes
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1177,14 +1226,14 @@ declare module '@tanstack/react-router' {
     '/_layout': {
       id: '/_layout'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_headerOnly': {
       id: '/_headerOnly'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof HeaderOnlyRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -1201,6 +1250,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/games/list': {
+      id: '/games/list'
+      path: '/games/list'
+      fullPath: '/games/list'
+      preLoaderRoute: typeof GamesListRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/web-design': {
       id: '/_layout/web-design'
@@ -1310,70 +1366,77 @@ declare module '@tanstack/react-router' {
     '/mentor/dashboard/': {
       id: '/mentor/dashboard/'
       path: '/mentor/dashboard'
-      fullPath: '/mentor/dashboard'
+      fullPath: '/mentor/dashboard/'
       preLoaderRoute: typeof MentorDashboardIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/$id/': {
+      id: '/games/$id/'
+      path: '/games/$id'
+      fullPath: '/games/$id/'
+      preLoaderRoute: typeof GamesIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/templates/': {
       id: '/_layout/templates/'
       path: '/templates'
-      fullPath: '/templates'
+      fullPath: '/templates/'
       preLoaderRoute: typeof LayoutTemplatesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/syllabuses/': {
       id: '/_layout/syllabuses/'
       path: '/syllabuses'
-      fullPath: '/syllabuses'
+      fullPath: '/syllabuses/'
       preLoaderRoute: typeof LayoutSyllabusesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/questions/': {
       id: '/_layout/questions/'
       path: '/questions'
-      fullPath: '/questions'
+      fullPath: '/questions/'
       preLoaderRoute: typeof LayoutQuestionsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/presentations/': {
       id: '/_layout/presentations/'
       path: '/presentations'
-      fullPath: '/presentations'
+      fullPath: '/presentations/'
       preLoaderRoute: typeof LayoutPresentationsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/news/': {
       id: '/_layout/news/'
       path: '/news'
-      fullPath: '/news'
+      fullPath: '/news/'
       preLoaderRoute: typeof LayoutNewsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/matrices/': {
       id: '/_layout/matrices/'
       path: '/matrices'
-      fullPath: '/matrices'
+      fullPath: '/matrices/'
       preLoaderRoute: typeof LayoutMatricesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/dashboard/': {
       id: '/_layout/dashboard/'
       path: '/dashboard'
-      fullPath: '/dashboard'
+      fullPath: '/dashboard/'
       preLoaderRoute: typeof LayoutDashboardIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/courses/': {
       id: '/_layout/courses/'
       path: '/courses'
-      fullPath: '/courses'
+      fullPath: '/courses/'
       preLoaderRoute: typeof LayoutCoursesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_headerOnly/games/': {
       id: '/_headerOnly/games/'
       path: '/games'
-      fullPath: '/games'
+      fullPath: '/games/'
       preLoaderRoute: typeof HeaderOnlyGamesIndexRouteImport
       parentRoute: typeof HeaderOnlyRoute
     }
@@ -1410,6 +1473,13 @@ declare module '@tanstack/react-router' {
       path: '/mentor/course/$id'
       fullPath: '/mentor/course/$id'
       preLoaderRoute: typeof MentorCourseIdRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/games/$id/play': {
+      id: '/games/$id/play'
+      path: '/games/$id/play'
+      fullPath: '/games/$id/play'
+      preLoaderRoute: typeof GamesIdPlayRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/auth/google/callback': {
@@ -1601,40 +1671,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCoursesIdRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_headerOnly/games/list': {
-      id: '/_headerOnly/games/list'
-      path: '/games/list'
-      fullPath: '/games/list'
-      preLoaderRoute: typeof HeaderOnlyGamesListRouteImport
-      parentRoute: typeof HeaderOnlyRoute
-    }
     '/_layout/templates/slidev/': {
       id: '/_layout/templates/slidev/'
       path: '/templates/slidev'
-      fullPath: '/templates/slidev'
+      fullPath: '/templates/slidev/'
       preLoaderRoute: typeof LayoutTemplatesSlidevIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/syllabuses/$id/': {
       id: '/_layout/syllabuses/$id/'
       path: '/syllabuses/$id'
-      fullPath: '/syllabuses/$id'
+      fullPath: '/syllabuses/$id/'
       preLoaderRoute: typeof LayoutSyllabusesIdIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/questions/$id/': {
       id: '/_layout/questions/$id/'
       path: '/questions/$id'
-      fullPath: '/questions/$id'
+      fullPath: '/questions/$id/'
       preLoaderRoute: typeof LayoutQuestionsIdIndexRouteImport
       parentRoute: typeof LayoutRoute
-    }
-    '/_headerOnly/games/$id/': {
-      id: '/_headerOnly/games/$id/'
-      path: '/games/$id'
-      fullPath: '/games/$id'
-      preLoaderRoute: typeof HeaderOnlyGamesIdIndexRouteImport
-      parentRoute: typeof HeaderOnlyRoute
     }
     '/_layout/templates/slidev/create': {
       id: '/_layout/templates/slidev/create'
@@ -1699,13 +1755,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCoursesGradeGradeRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_headerOnly/games/$id/play': {
-      id: '/_headerOnly/games/$id/play'
-      path: '/games/$id/play'
-      fullPath: '/games/$id/play'
-      preLoaderRoute: typeof HeaderOnlyGamesIdPlayRouteImport
-      parentRoute: typeof HeaderOnlyRoute
-    }
     '/_layout/templates/slidev/$id/edit': {
       id: '/_layout/templates/slidev/$id/edit'
       path: '/templates/slidev/$id/edit'
@@ -1719,19 +1768,13 @@ declare module '@tanstack/react-router' {
 interface HeaderOnlyRouteChildren {
   HeaderOnlyAiChatbotRoute: typeof HeaderOnlyAiChatbotRoute
   HeaderOnlyUserProfileRoute: typeof HeaderOnlyUserProfileRoute
-  HeaderOnlyGamesListRoute: typeof HeaderOnlyGamesListRoute
   HeaderOnlyGamesIndexRoute: typeof HeaderOnlyGamesIndexRoute
-  HeaderOnlyGamesIdPlayRoute: typeof HeaderOnlyGamesIdPlayRoute
-  HeaderOnlyGamesIdIndexRoute: typeof HeaderOnlyGamesIdIndexRoute
 }
 
 const HeaderOnlyRouteChildren: HeaderOnlyRouteChildren = {
   HeaderOnlyAiChatbotRoute: HeaderOnlyAiChatbotRoute,
   HeaderOnlyUserProfileRoute: HeaderOnlyUserProfileRoute,
-  HeaderOnlyGamesListRoute: HeaderOnlyGamesListRoute,
   HeaderOnlyGamesIndexRoute: HeaderOnlyGamesIndexRoute,
-  HeaderOnlyGamesIdPlayRoute: HeaderOnlyGamesIdPlayRoute,
-  HeaderOnlyGamesIdIndexRoute: HeaderOnlyGamesIdIndexRoute,
 }
 
 const HeaderOnlyRouteWithChildren = HeaderOnlyRoute._addFileChildren(
@@ -1892,22 +1935,29 @@ const rootRouteChildren: RootRouteChildren = {
   LayoutRoute: LayoutRouteWithChildren,
   CheckoutRoute: CheckoutRoute,
   ForgotPasswordRoute: ForgotPasswordRoute,
+<<<<<<< Updated upstream
   NotificationsRoute: NotificationsRoute,
+=======
+  HostLobbyRoute: HostLobbyRoute,
+>>>>>>> Stashed changes
   PaymentFailedRoute: PaymentFailedRoute,
   PaymentSucceededRoute: PaymentSucceededRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SigninRoute: SigninRoute,
   Signin2faRoute: Signin2faRoute,
   SignupRoute: SignupRoute,
-  TestWpmRoute: TestWpmRoute,
+  StudentLobbyRoute: StudentLobbyRoute,
+  GamesListRoute: GamesListRoute,
   ApiAuthActivateRoute: ApiAuthActivateRoute,
   AuthGithubCallbackRoute: AuthGithubCallbackRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
+  GamesIdPlayRoute: GamesIdPlayRoute,
   MentorCourseIdRoute: MentorCourseIdRoute,
   MentorCourseCreateRoute: MentorCourseCreateRoute,
   MentorCourseListRoute: MentorCourseListRoute,
   MentorCourseQuizRoute: MentorCourseQuizRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
+  GamesIdIndexRoute: GamesIdIndexRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
 }
 export const routeTree = rootRouteImport

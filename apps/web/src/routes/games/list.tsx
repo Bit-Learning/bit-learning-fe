@@ -1,20 +1,17 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GeneralError } from "@/feature/errors/general-error";
-import { GameDashboardPage } from "@/feature/gamification/page";
+import { GameListPage } from "@/feature/gamification/page";
 
 type GameSearchParams = {
 	type?: string;
 };
 
-export const Route = createFileRoute("/_headerOnly/games/")({
-	component: GameDashboardPage,
+export const Route = createFileRoute("/games/list")({
+	component: GameListPage,
 	errorComponent: () => <GeneralError />,
-	staticData: {
-		headerStyle: "game",
-	},
 	validateSearch: (search: Record<string, unknown>): GameSearchParams => {
 		return {
-			type: (search.type as string) || undefined,
+			type: search.type ? String(search.type) : undefined,
 		};
 	},
 });

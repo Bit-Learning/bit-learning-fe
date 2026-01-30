@@ -44,7 +44,11 @@ import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_auth
 import { Route as AuthenticatedSettingsAppearanceRouteImport } from './routes/_authenticated/settings/appearance'
 import { Route as AuthenticatedSettingsAccountRouteImport } from './routes/_authenticated/settings/account'
 import { Route as AuthenticatedErrorsErrorRouteImport } from './routes/_authenticated/errors/$error'
+<<<<<<< Updated upstream
 import { Route as AuthenticatedCoursesIdRouteImport } from './routes/_authenticated/courses/$id'
+=======
+import { Route as AuthenticatedAppsGamesIndexRouteImport } from './routes/_authenticated/apps/games/index'
+>>>>>>> Stashed changes
 
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
@@ -232,13 +236,23 @@ const AuthenticatedErrorsErrorRoute =
     path: '/errors/$error',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+<<<<<<< Updated upstream
 const AuthenticatedCoursesIdRoute = AuthenticatedCoursesIdRouteImport.update({
   id: '/courses/$id',
   path: '/courses/$id',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
+=======
+const AuthenticatedAppsGamesIndexRoute =
+  AuthenticatedAppsGamesIndexRouteImport.update({
+    id: '/apps/games/',
+    path: '/apps/games/',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+>>>>>>> Stashed changes
 
 export interface FileRoutesByFullPath {
+  '/': typeof AuthenticatedIndexRoute
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
   '/settings': typeof AuthenticatedSettingsRouteRouteWithChildren
   '/forgot-password': typeof authForgotPasswordRoute
@@ -250,8 +264,11 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
+<<<<<<< Updated upstream
   '/': typeof AuthenticatedIndexRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
+=======
+>>>>>>> Stashed changes
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
   '/settings/account': typeof AuthenticatedSettingsAccountRoute
   '/settings/appearance': typeof AuthenticatedSettingsAppearanceRoute
@@ -261,17 +278,26 @@ export interface FileRoutesByFullPath {
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
+<<<<<<< Updated upstream
   '/apps': typeof AuthenticatedAppsIndexRoute
   '/chats': typeof AuthenticatedChatsIndexRoute
   '/courses': typeof AuthenticatedCoursesIndexRoute
   '/curriculum': typeof AuthenticatedCurriculumIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
   '/orders': typeof AuthenticatedOrdersIndexRoute
+=======
+  '/apps/': typeof AuthenticatedAppsIndexRoute
+  '/chats/': typeof AuthenticatedChatsIndexRoute
+  '/curriculum/': typeof AuthenticatedCurriculumIndexRoute
+  '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
+  '/orders/': typeof AuthenticatedOrdersIndexRoute
+>>>>>>> Stashed changes
   '/settings/': typeof AuthenticatedSettingsIndexRoute
-  '/tasks': typeof AuthenticatedTasksIndexRoute
-  '/templates': typeof AuthenticatedTemplatesIndexRoute
-  '/transactions': typeof AuthenticatedTransactionsIndexRoute
-  '/users': typeof AuthenticatedUsersIndexRoute
+  '/tasks/': typeof AuthenticatedTasksIndexRoute
+  '/templates/': typeof AuthenticatedTemplatesIndexRoute
+  '/transactions/': typeof AuthenticatedTransactionsIndexRoute
+  '/users/': typeof AuthenticatedUsersIndexRoute
+  '/apps/games/': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRoutesByTo {
   '/clerk': typeof ClerkAuthenticatedRouteRouteWithChildren
@@ -306,6 +332,7 @@ export interface FileRoutesByTo {
   '/templates': typeof AuthenticatedTemplatesIndexRoute
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
+  '/apps/games': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -345,10 +372,12 @@ export interface FileRoutesById {
   '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
   '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
+  '/_authenticated/apps/games/': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
+    | '/'
     | '/clerk'
     | '/settings'
     | '/forgot-password'
@@ -360,8 +389,11 @@ export interface FileRouteTypes {
     | '/404'
     | '/500'
     | '/503'
+<<<<<<< Updated upstream
     | '/'
     | '/courses/$id'
+=======
+>>>>>>> Stashed changes
     | '/errors/$error'
     | '/settings/account'
     | '/settings/appearance'
@@ -371,17 +403,26 @@ export interface FileRouteTypes {
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
+<<<<<<< Updated upstream
     | '/apps'
     | '/chats'
     | '/courses'
     | '/curriculum'
     | '/help-center'
     | '/orders'
+=======
+    | '/apps/'
+    | '/chats/'
+    | '/curriculum/'
+    | '/help-center/'
+    | '/orders/'
+>>>>>>> Stashed changes
     | '/settings/'
-    | '/tasks'
-    | '/templates'
-    | '/transactions'
-    | '/users'
+    | '/tasks/'
+    | '/templates/'
+    | '/transactions/'
+    | '/users/'
+    | '/apps/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/clerk'
@@ -416,6 +457,7 @@ export interface FileRouteTypes {
     | '/templates'
     | '/transactions'
     | '/users'
+    | '/apps/games'
   id:
     | '__root__'
     | '/_authenticated'
@@ -454,6 +496,7 @@ export interface FileRouteTypes {
     | '/_authenticated/templates/'
     | '/_authenticated/transactions/'
     | '/_authenticated/users/'
+    | '/_authenticated/apps/games/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -482,7 +525,7 @@ declare module '@tanstack/react-router' {
     '/_authenticated': {
       id: '/_authenticated'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -580,28 +623,28 @@ declare module '@tanstack/react-router' {
     '/_authenticated/users/': {
       id: '/_authenticated/users/'
       path: '/users'
-      fullPath: '/users'
+      fullPath: '/users/'
       preLoaderRoute: typeof AuthenticatedUsersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/transactions/': {
       id: '/_authenticated/transactions/'
       path: '/transactions'
-      fullPath: '/transactions'
+      fullPath: '/transactions/'
       preLoaderRoute: typeof AuthenticatedTransactionsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/templates/': {
       id: '/_authenticated/templates/'
       path: '/templates'
-      fullPath: '/templates'
+      fullPath: '/templates/'
       preLoaderRoute: typeof AuthenticatedTemplatesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/tasks/': {
       id: '/_authenticated/tasks/'
       path: '/tasks'
-      fullPath: '/tasks'
+      fullPath: '/tasks/'
       preLoaderRoute: typeof AuthenticatedTasksIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -615,21 +658,21 @@ declare module '@tanstack/react-router' {
     '/_authenticated/orders/': {
       id: '/_authenticated/orders/'
       path: '/orders'
-      fullPath: '/orders'
+      fullPath: '/orders/'
       preLoaderRoute: typeof AuthenticatedOrdersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/help-center/': {
       id: '/_authenticated/help-center/'
       path: '/help-center'
-      fullPath: '/help-center'
+      fullPath: '/help-center/'
       preLoaderRoute: typeof AuthenticatedHelpCenterIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/curriculum/': {
       id: '/_authenticated/curriculum/'
       path: '/curriculum'
-      fullPath: '/curriculum'
+      fullPath: '/curriculum/'
       preLoaderRoute: typeof AuthenticatedCurriculumIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -643,14 +686,14 @@ declare module '@tanstack/react-router' {
     '/_authenticated/chats/': {
       id: '/_authenticated/chats/'
       path: '/chats'
-      fullPath: '/chats'
+      fullPath: '/chats/'
       preLoaderRoute: typeof AuthenticatedChatsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/apps/': {
       id: '/_authenticated/apps/'
       path: '/apps'
-      fullPath: '/apps'
+      fullPath: '/apps/'
       preLoaderRoute: typeof AuthenticatedAppsIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
@@ -717,11 +760,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedErrorsErrorRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+<<<<<<< Updated upstream
     '/_authenticated/courses/$id': {
       id: '/_authenticated/courses/$id'
       path: '/courses/$id'
       fullPath: '/courses/$id'
       preLoaderRoute: typeof AuthenticatedCoursesIdRouteImport
+=======
+    '/_authenticated/apps/games/': {
+      id: '/_authenticated/apps/games/'
+      path: '/apps/games'
+      fullPath: '/apps/games/'
+      preLoaderRoute: typeof AuthenticatedAppsGamesIndexRouteImport
+>>>>>>> Stashed changes
       parentRoute: typeof AuthenticatedRouteRoute
     }
   }
@@ -766,6 +817,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
   AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedAppsGamesIndexRoute: typeof AuthenticatedAppsGamesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
@@ -784,6 +836,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
   AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedAppsGamesIndexRoute: AuthenticatedAppsGamesIndexRoute,
 }
 
 const AuthenticatedRouteRouteWithChildren =
