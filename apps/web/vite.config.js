@@ -8,6 +8,9 @@ import ViteImagemin from "vite-plugin-imagemin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+	define: {
+		global: "globalThis",
+	},
 	plugins: [
 		tanstackRouter({ target: "react", autoCodeSplitting: true }),
 		react(),
@@ -26,9 +29,6 @@ export default defineConfig({
 		alias: {
 			"@": resolve(__dirname, "./src"),
 		},
-	},
-	define: {
-		global: "globalThis",
 	},
 	test: {
 		globals: true,

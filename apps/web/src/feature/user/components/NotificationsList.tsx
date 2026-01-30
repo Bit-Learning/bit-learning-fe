@@ -1,6 +1,10 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useNotifications, useMarkAsRead, useDeleteNotification } from "@/feature/notification/queries/use-notification-queries";
+import {
+	useNotifications,
+	useMarkAsRead,
+	useDeleteNotification,
+} from "@/feature/notification/queries/use-notification-queries";
 import type { NotificationMessage } from "@/feature/notification/channel";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
@@ -30,11 +34,18 @@ export function NotificationsList() {
 
 		if (notification.targetUrl) {
 			// Check if it's an external URL
-			if (notification.targetUrl.startsWith('http://') || notification.targetUrl.startsWith('https://')) {
-				window.open(notification.targetUrl, '_blank');
-			} else if (notification.targetUrl.includes('.com') || notification.targetUrl.includes('.net') || notification.targetUrl.includes('.org')) {
+			if (
+				notification.targetUrl.startsWith("http://") ||
+				notification.targetUrl.startsWith("https://")
+			) {
+				window.open(notification.targetUrl, "_blank");
+			} else if (
+				notification.targetUrl.includes(".com") ||
+				notification.targetUrl.includes(".net") ||
+				notification.targetUrl.includes(".org")
+			) {
 				// Domain without protocol
-				window.open(`https://${notification.targetUrl}`, '_blank');
+				window.open(`https://${notification.targetUrl}`, "_blank");
 			} else {
 				// Internal route - extract pathname if it's a full URL with localhost
 				let path = notification.targetUrl;
@@ -83,10 +94,11 @@ export function NotificationsList() {
 						{notifications.map((notif) => (
 							<div
 								key={notif.id}
-								className={`rounded-lg border p-4 transition-all cursor-pointer hover:shadow-md ${notif.isRead
-									? "border-gray-200 dark:border-gray-700"
-									: "border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10"
-									}`}
+								className={`rounded-lg border p-4 transition-all cursor-pointer hover:shadow-md ${
+									notif.isRead
+										? "border-gray-200 dark:border-gray-700"
+										: "border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10"
+								}`}
 								onClick={() => handleNotificationClick(notif)}
 							>
 								<div className="flex items-start gap-3">
@@ -100,14 +112,15 @@ export function NotificationsList() {
 											/>
 										) : (
 											<div
-												className={`h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-medium ${notif.type === "PAYMENT"
-													? "bg-green-500"
-													: notif.type === "LEARNING"
-														? "bg-purple-500"
-														: notif.type === "SYSTEM"
-															? "bg-blue-500"
-															: "bg-gray-500"
-													}`}
+												className={`h-10 w-10 rounded-full flex items-center justify-center text-white text-sm font-medium ${
+													notif.type === "PAYMENT"
+														? "bg-green-500"
+														: notif.type === "LEARNING"
+															? "bg-purple-500"
+															: notif.type === "SYSTEM"
+																? "bg-blue-500"
+																: "bg-gray-500"
+												}`}
 											>
 												{notif.type[0]}
 											</div>
@@ -119,7 +132,9 @@ export function NotificationsList() {
 										<div className="flex items-start justify-between gap-2">
 											<div className="flex-1">
 												<div className="flex items-center gap-2">
-													<h4 className="font-semibold text-sm">{notif.title}</h4>
+													<h4 className="font-semibold text-sm">
+														{notif.title}
+													</h4>
 													{!notif.isRead && (
 														<div className="h-2 w-2 rounded-full bg-blue-600" />
 													)}
@@ -127,7 +142,8 @@ export function NotificationsList() {
 												<p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
 													{notif.sender?.firstName || notif.sender?.lastName ? (
 														<span>
-															Từ: {notif.sender.firstName} {notif.sender.lastName}
+															Từ: {notif.sender.firstName}{" "}
+															{notif.sender.lastName}
 														</span>
 													) : (
 														<span>Từ: Hệ thống</span>
@@ -146,14 +162,15 @@ export function NotificationsList() {
 														})}
 													</p>
 													<span
-														className={`text-xs px-2 py-0.5 rounded-full font-medium ${notif.type === "INTERACTION"
-															? "bg-gray-100 text-gray-600"
-															: notif.type === "SYSTEM"
-																? "bg-blue-100 text-blue-600"
-																: notif.type === "PAYMENT"
-																	? "bg-green-100 text-green-600"
-																	: "bg-purple-100 text-purple-600"
-															}`}
+														className={`text-xs px-2 py-0.5 rounded-full font-medium ${
+															notif.type === "INTERACTION"
+																? "bg-gray-100 text-gray-600"
+																: notif.type === "SYSTEM"
+																	? "bg-blue-100 text-blue-600"
+																	: notif.type === "PAYMENT"
+																		? "bg-green-100 text-green-600"
+																		: "bg-purple-100 text-purple-600"
+														}`}
 													>
 														{notif.type}
 													</span>
@@ -180,7 +197,7 @@ export function NotificationsList() {
 					<div className="mt-4 flex items-center justify-center gap-2">
 						<Button
 							onClick={() => setPage((p) => Math.max(0, p - 1))}
-							disabled={data.first || isLoading}
+							isDisabled={data.first || isLoading}
 							variant="outline"
 							size="sm"
 						>
@@ -191,7 +208,7 @@ export function NotificationsList() {
 						</span>
 						<Button
 							onClick={() => setPage((p) => p + 1)}
-							disabled={data.last || isLoading}
+							isDisabled={data.last || isLoading}
 							variant="outline"
 							size="sm"
 						>
