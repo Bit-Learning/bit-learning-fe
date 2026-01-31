@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GeneralError } from "@/feature/errors/general-error";
-import { GameDashboardPage } from "@/feature/game/page";
+import { GameDashboardPage } from "@/feature/gamification/page";
 
 type GameSearchParams = {
 	type?: string;
