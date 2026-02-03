@@ -3,6 +3,7 @@ import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { selectCartItemCount } from "@/feature/order/stores/cart.store";
 import { navItems } from "@/layouts/data/nav-items";
 import CodeButton from "@/shared/components/button/CodeButton";
+import { NotificationBell } from "@/feature/notification/component/notification-bell";
 import { SearchProvider } from "@/shared/context/search-context";
 import { mergeName } from "@/shared/lib/string-utils";
 import { Link, useNavigate } from "@tanstack/react-router";
@@ -264,6 +265,10 @@ const Header: React.FC = () => {
               </button>
             )}
 
+            {/* Notification Bell - Only show when authenticated */}
+            {isAuthenticated && userInfo && <NotificationBell />}
+
+            {/* User Menu / Login */}
             {isAuthenticated && userInfo ? (
               <MenuTrigger>
                 <Button
