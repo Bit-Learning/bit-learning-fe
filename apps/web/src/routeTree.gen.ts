@@ -14,8 +14,6 @@ import { Route as SignupRouteImport } from './routes/signup'
 import { Route as Signin2faRouteImport } from './routes/signin-2fa'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
-import { Route as PaymentSucceededRouteImport } from './routes/payment-succeeded'
-import { Route as PaymentFailedRouteImport } from './routes/payment-failed'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as HeaderOnlyRouteImport } from './routes/_headerOnly'
@@ -25,6 +23,7 @@ import { Route as LayoutWebDesignRouteImport } from './routes/_layout/web-design
 import { Route as LayoutUploadRouteImport } from './routes/_layout/upload'
 import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
 import { Route as LayoutPrivacyRouteImport } from './routes/_layout/privacy'
+import { Route as LayoutPaymentResultRouteImport } from './routes/_layout/payment-result'
 import { Route as LayoutOfflineCourseRouteImport } from './routes/_layout/offline-course'
 import { Route as LayoutMentorshipRouteImport } from './routes/_layout/mentorship'
 import { Route as LayoutDemoRouteImport } from './routes/_layout/demo'
@@ -117,16 +116,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
   path: '/reset-password',
   getParentRoute: () => rootRouteImport,
 } as any)
-const PaymentSucceededRoute = PaymentSucceededRouteImport.update({
-  id: '/payment-succeeded',
-  path: '/payment-succeeded',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const PaymentFailedRoute = PaymentFailedRouteImport.update({
-  id: '/payment-failed',
-  path: '/payment-failed',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
   id: '/forgot-password',
   path: '/forgot-password',
@@ -168,6 +157,11 @@ const LayoutTermsRoute = LayoutTermsRouteImport.update({
 const LayoutPrivacyRoute = LayoutPrivacyRouteImport.update({
   id: '/privacy',
   path: '/privacy',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutPaymentResultRoute = LayoutPaymentResultRouteImport.update({
+  id: '/payment-result',
+  path: '/payment-result',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutOfflineCourseRoute = LayoutOfflineCourseRouteImport.update({
@@ -515,9 +509,8 @@ const LayoutTemplatesSlidevIdEditRoute =
 
 export interface FileRoutesByFullPath {
   '/404': typeof R404Route
+  '/': typeof LayoutIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/payment-failed': typeof PaymentFailedRoute
-  '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
@@ -535,11 +528,11 @@ export interface FileRoutesByFullPath {
   '/demo': typeof LayoutDemoRoute
   '/mentorship': typeof LayoutMentorshipRoute
   '/offline-course': typeof LayoutOfflineCourseRoute
+  '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
   '/upload': typeof LayoutUploadRoute
   '/web-design': typeof LayoutWebDesignRoute
-  '/': typeof LayoutIndexRoute
   '/games/list': typeof HeaderOnlyGamesListRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
@@ -572,16 +565,16 @@ export interface FileRoutesByFullPath {
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
-  '/games': typeof HeaderOnlyGamesIndexRoute
-  '/checkout': typeof LayoutCheckoutIndexRoute
-  '/courses': typeof LayoutCoursesIndexRoute
-  '/dashboard': typeof LayoutDashboardIndexRoute
-  '/matrices': typeof LayoutMatricesIndexRoute
-  '/news': typeof LayoutNewsIndexRoute
-  '/questions': typeof LayoutQuestionsIndexRoute
-  '/syllabuses': typeof LayoutSyllabusesIndexRoute
-  '/templates': typeof LayoutTemplatesIndexRoute
-  '/mentor/dashboard': typeof MentorDashboardIndexRoute
+  '/games/': typeof HeaderOnlyGamesIndexRoute
+  '/checkout/': typeof LayoutCheckoutIndexRoute
+  '/courses/': typeof LayoutCoursesIndexRoute
+  '/dashboard/': typeof LayoutDashboardIndexRoute
+  '/matrices/': typeof LayoutMatricesIndexRoute
+  '/news/': typeof LayoutNewsIndexRoute
+  '/questions/': typeof LayoutQuestionsIndexRoute
+  '/syllabuses/': typeof LayoutSyllabusesIndexRoute
+  '/templates/': typeof LayoutTemplatesIndexRoute
+  '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/games/$id/play': typeof HeaderOnlyGamesIdPlayRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
@@ -589,17 +582,16 @@ export interface FileRoutesByFullPath {
   '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/games/$id': typeof HeaderOnlyGamesIdIndexRoute
-  '/questions/$id': typeof LayoutQuestionsIdIndexRoute
-  '/syllabuses/$id': typeof LayoutSyllabusesIdIndexRoute
-  '/templates/slidev': typeof LayoutTemplatesSlidevIndexRoute
+  '/games/$id/': typeof HeaderOnlyGamesIdIndexRoute
+  '/questions/$id/': typeof LayoutQuestionsIdIndexRoute
+  '/syllabuses/$id/': typeof LayoutSyllabusesIdIndexRoute
+  '/templates/slidev/': typeof LayoutTemplatesSlidevIndexRoute
   '/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRoutesByTo {
   '/404': typeof R404Route
+  '/': typeof LayoutIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/payment-failed': typeof PaymentFailedRoute
-  '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
@@ -617,11 +609,11 @@ export interface FileRoutesByTo {
   '/demo': typeof LayoutDemoRoute
   '/mentorship': typeof LayoutMentorshipRoute
   '/offline-course': typeof LayoutOfflineCourseRoute
+  '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
   '/upload': typeof LayoutUploadRoute
   '/web-design': typeof LayoutWebDesignRoute
-  '/': typeof LayoutIndexRoute
   '/games/list': typeof HeaderOnlyGamesListRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
@@ -683,8 +675,6 @@ export interface FileRoutesById {
   '/_headerOnly': typeof HeaderOnlyRouteWithChildren
   '/_layout': typeof LayoutRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
-  '/payment-failed': typeof PaymentFailedRoute
-  '/payment-succeeded': typeof PaymentSucceededRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
@@ -702,6 +692,7 @@ export interface FileRoutesById {
   '/_layout/demo': typeof LayoutDemoRoute
   '/_layout/mentorship': typeof LayoutMentorshipRoute
   '/_layout/offline-course': typeof LayoutOfflineCourseRoute
+  '/_layout/payment-result': typeof LayoutPaymentResultRoute
   '/_layout/privacy': typeof LayoutPrivacyRoute
   '/_layout/terms': typeof LayoutTermsRoute
   '/_layout/upload': typeof LayoutUploadRoute
@@ -766,9 +757,8 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/404'
+    | '/'
     | '/forgot-password'
-    | '/payment-failed'
-    | '/payment-succeeded'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
@@ -786,11 +776,11 @@ export interface FileRouteTypes {
     | '/demo'
     | '/mentorship'
     | '/offline-course'
+    | '/payment-result'
     | '/privacy'
     | '/terms'
     | '/upload'
     | '/web-design'
-    | '/'
     | '/games/list'
     | '/courses/$id'
     | '/courses/backend-development'
@@ -823,16 +813,16 @@ export interface FileRouteTypes {
     | '/mentor/course/list'
     | '/mentor/course/quiz'
     | '/mindmaps/$userId/$code'
-    | '/games'
-    | '/checkout'
-    | '/courses'
-    | '/dashboard'
-    | '/matrices'
-    | '/news'
-    | '/questions'
-    | '/syllabuses'
-    | '/templates'
-    | '/mentor/dashboard'
+    | '/games/'
+    | '/checkout/'
+    | '/courses/'
+    | '/dashboard/'
+    | '/matrices/'
+    | '/news/'
+    | '/questions/'
+    | '/syllabuses/'
+    | '/templates/'
+    | '/mentor/dashboard/'
     | '/games/$id/play'
     | '/courses/grade/$grade'
     | '/matrices/$id/edit'
@@ -840,17 +830,16 @@ export interface FileRouteTypes {
     | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
-    | '/games/$id'
-    | '/questions/$id'
-    | '/syllabuses/$id'
-    | '/templates/slidev'
+    | '/games/$id/'
+    | '/questions/$id/'
+    | '/syllabuses/$id/'
+    | '/templates/slidev/'
     | '/templates/slidev/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/404'
+    | '/'
     | '/forgot-password'
-    | '/payment-failed'
-    | '/payment-succeeded'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
@@ -868,11 +857,11 @@ export interface FileRouteTypes {
     | '/demo'
     | '/mentorship'
     | '/offline-course'
+    | '/payment-result'
     | '/privacy'
     | '/terms'
     | '/upload'
     | '/web-design'
-    | '/'
     | '/games/list'
     | '/courses/$id'
     | '/courses/backend-development'
@@ -933,8 +922,6 @@ export interface FileRouteTypes {
     | '/_headerOnly'
     | '/_layout'
     | '/forgot-password'
-    | '/payment-failed'
-    | '/payment-succeeded'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
@@ -952,6 +939,7 @@ export interface FileRouteTypes {
     | '/_layout/demo'
     | '/_layout/mentorship'
     | '/_layout/offline-course'
+    | '/_layout/payment-result'
     | '/_layout/privacy'
     | '/_layout/terms'
     | '/_layout/upload'
@@ -1018,8 +1006,6 @@ export interface RootRouteChildren {
   HeaderOnlyRoute: typeof HeaderOnlyRouteWithChildren
   LayoutRoute: typeof LayoutRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  PaymentFailedRoute: typeof PaymentFailedRoute
-  PaymentSucceededRoute: typeof PaymentSucceededRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SigninRoute: typeof SigninRoute
   Signin2faRoute: typeof Signin2faRoute
@@ -1073,20 +1059,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ResetPasswordRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/payment-succeeded': {
-      id: '/payment-succeeded'
-      path: '/payment-succeeded'
-      fullPath: '/payment-succeeded'
-      preLoaderRoute: typeof PaymentSucceededRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/payment-failed': {
-      id: '/payment-failed'
-      path: '/payment-failed'
-      fullPath: '/payment-failed'
-      preLoaderRoute: typeof PaymentFailedRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/forgot-password': {
       id: '/forgot-password'
       path: '/forgot-password'
@@ -1097,14 +1069,14 @@ declare module '@tanstack/react-router' {
     '/_layout': {
       id: '/_layout'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof LayoutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_headerOnly': {
       id: '/_headerOnly'
       path: ''
-      fullPath: ''
+      fullPath: '/'
       preLoaderRoute: typeof HeaderOnlyRouteImport
       parentRoute: typeof rootRouteImport
     }
@@ -1148,6 +1120,13 @@ declare module '@tanstack/react-router' {
       path: '/privacy'
       fullPath: '/privacy'
       preLoaderRoute: typeof LayoutPrivacyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/payment-result': {
+      id: '/_layout/payment-result'
+      path: '/payment-result'
+      fullPath: '/payment-result'
+      preLoaderRoute: typeof LayoutPaymentResultRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/offline-course': {
@@ -1237,70 +1216,70 @@ declare module '@tanstack/react-router' {
     '/mentor/dashboard/': {
       id: '/mentor/dashboard/'
       path: '/mentor/dashboard'
-      fullPath: '/mentor/dashboard'
+      fullPath: '/mentor/dashboard/'
       preLoaderRoute: typeof MentorDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_layout/templates/': {
       id: '/_layout/templates/'
       path: '/templates'
-      fullPath: '/templates'
+      fullPath: '/templates/'
       preLoaderRoute: typeof LayoutTemplatesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/syllabuses/': {
       id: '/_layout/syllabuses/'
       path: '/syllabuses'
-      fullPath: '/syllabuses'
+      fullPath: '/syllabuses/'
       preLoaderRoute: typeof LayoutSyllabusesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/questions/': {
       id: '/_layout/questions/'
       path: '/questions'
-      fullPath: '/questions'
+      fullPath: '/questions/'
       preLoaderRoute: typeof LayoutQuestionsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/news/': {
       id: '/_layout/news/'
       path: '/news'
-      fullPath: '/news'
+      fullPath: '/news/'
       preLoaderRoute: typeof LayoutNewsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/matrices/': {
       id: '/_layout/matrices/'
       path: '/matrices'
-      fullPath: '/matrices'
+      fullPath: '/matrices/'
       preLoaderRoute: typeof LayoutMatricesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/dashboard/': {
       id: '/_layout/dashboard/'
       path: '/dashboard'
-      fullPath: '/dashboard'
+      fullPath: '/dashboard/'
       preLoaderRoute: typeof LayoutDashboardIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/courses/': {
       id: '/_layout/courses/'
       path: '/courses'
-      fullPath: '/courses'
+      fullPath: '/courses/'
       preLoaderRoute: typeof LayoutCoursesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/checkout/': {
       id: '/_layout/checkout/'
       path: '/checkout'
-      fullPath: '/checkout'
+      fullPath: '/checkout/'
       preLoaderRoute: typeof LayoutCheckoutIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_headerOnly/games/': {
       id: '/_headerOnly/games/'
       path: '/games'
-      fullPath: '/games'
+      fullPath: '/games/'
       preLoaderRoute: typeof HeaderOnlyGamesIndexRouteImport
       parentRoute: typeof HeaderOnlyRoute
     }
@@ -1531,28 +1510,28 @@ declare module '@tanstack/react-router' {
     '/_layout/templates/slidev/': {
       id: '/_layout/templates/slidev/'
       path: '/templates/slidev'
-      fullPath: '/templates/slidev'
+      fullPath: '/templates/slidev/'
       preLoaderRoute: typeof LayoutTemplatesSlidevIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/syllabuses/$id/': {
       id: '/_layout/syllabuses/$id/'
       path: '/syllabuses/$id'
-      fullPath: '/syllabuses/$id'
+      fullPath: '/syllabuses/$id/'
       preLoaderRoute: typeof LayoutSyllabusesIdIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/questions/$id/': {
       id: '/_layout/questions/$id/'
       path: '/questions/$id'
-      fullPath: '/questions/$id'
+      fullPath: '/questions/$id/'
       preLoaderRoute: typeof LayoutQuestionsIdIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_headerOnly/games/$id/': {
       id: '/_headerOnly/games/$id/'
       path: '/games/$id'
-      fullPath: '/games/$id'
+      fullPath: '/games/$id/'
       preLoaderRoute: typeof HeaderOnlyGamesIdIndexRouteImport
       parentRoute: typeof HeaderOnlyRoute
     }
@@ -1661,6 +1640,7 @@ interface LayoutRouteChildren {
   LayoutDemoRoute: typeof LayoutDemoRoute
   LayoutMentorshipRoute: typeof LayoutMentorshipRoute
   LayoutOfflineCourseRoute: typeof LayoutOfflineCourseRoute
+  LayoutPaymentResultRoute: typeof LayoutPaymentResultRoute
   LayoutPrivacyRoute: typeof LayoutPrivacyRoute
   LayoutTermsRoute: typeof LayoutTermsRoute
   LayoutUploadRoute: typeof LayoutUploadRoute
@@ -1718,6 +1698,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutDemoRoute: LayoutDemoRoute,
   LayoutMentorshipRoute: LayoutMentorshipRoute,
   LayoutOfflineCourseRoute: LayoutOfflineCourseRoute,
+  LayoutPaymentResultRoute: LayoutPaymentResultRoute,
   LayoutPrivacyRoute: LayoutPrivacyRoute,
   LayoutTermsRoute: LayoutTermsRoute,
   LayoutUploadRoute: LayoutUploadRoute,
@@ -1773,8 +1754,6 @@ const rootRouteChildren: RootRouteChildren = {
   HeaderOnlyRoute: HeaderOnlyRouteWithChildren,
   LayoutRoute: LayoutRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  PaymentFailedRoute: PaymentFailedRoute,
-  PaymentSucceededRoute: PaymentSucceededRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SigninRoute: SigninRoute,
   Signin2faRoute: Signin2faRoute,
