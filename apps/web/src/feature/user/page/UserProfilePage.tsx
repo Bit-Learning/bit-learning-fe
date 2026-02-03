@@ -83,62 +83,6 @@ function UserProfilePage() {
   const { mutate: uploadCoverImage, isPending: isUploadingCover } = useUploadCoverImage();
   const avatarInputRef = React.useRef<HTMLInputElement>(null);
   const coverInputRef = React.useRef<HTMLInputElement>(null);
-  const { data: userPresentations, isLoading: presentationsLoading } = useUserPresentations(userInfo?.id || 0);
-  const { data: userOrders, isLoading: ordersLoading } = useFetchOrdersByUserId(userInfo?.id || 0);
-  const { data: userTransactions, isLoading: transactionsLoading } = useFetchTransactionsByWalletId(
-    userInfo?.wallet?.id || 0
-  );
-
-  const filteredTransactions = React.useMemo(() => {
-    if (!userTransactions) return [];
-
-    return userTransactions.filter((transaction) => {
-      const typeMatch = transactionTypeFilter === "ALL" || transaction.type === transactionTypeFilter;
-      const statusMatch = transactionStatusFilter === "ALL" || transaction.status === transactionStatusFilter;
-      return typeMatch && statusMatch;
-    });
-  }, [userTransactions, transactionTypeFilter, transactionStatusFilter]);
-
-  const transactionStats = React.useMemo(() => {
-    if (!userTransactions || userTransactions.length === 0) {
-      return {
-        totalDeposit: 0,
-        totalSpent: 0,
-        totalTransactions: 0,
-        completedCount: 0,
-        pendingCount: 0,
-        failedCount: 0,
-      };
-    }
-
-    return userTransactions.reduce(
-      (acc, transaction) => {
-        if (transaction.type === "DEPOSIT" && transaction.status === "COMPLETED") {
-          acc.totalDeposit += transaction.amount;
-        }
-        if (
-          (transaction.type === "PURCHASE" || transaction.type === "AI_REQUEST") &&
-          transaction.status === "COMPLETED"
-        ) {
-          acc.totalSpent += transaction.amount;
-        }
-        if (transaction.status === "COMPLETED") acc.completedCount++;
-        if (transaction.status === "PENDING") acc.pendingCount++;
-        if (transaction.status === "FAILED") acc.failedCount++;
-        acc.totalTransactions++;
-        return acc;
-      },
-      {
-        totalDeposit: 0,
-        totalSpent: 0,
-        totalTransactions: 0,
-        completedCount: 0,
-        pendingCount: 0,
-        failedCount: 0,
-      }
-    );
-  }, [userTransactions]);
-
   // User is guaranteed to exist here because of route-level protection
   if (isLoading || !userInfo) {
     return <Loader />;

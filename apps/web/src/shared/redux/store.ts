@@ -6,36 +6,28 @@ import storage from "redux-persist/lib/storage";
 import rootReducer from "./rootReducer";
 
 const persistConfig = {
-	key: "root",
-	storage,
-	whitelist: [
-		"app",
-		"auth",
-		"course",
-		"section",
-		"lecture",
-		"mlecture",
-		"learning",
-	],
+  key: "root",
+  storage,
+  whitelist: ["app", "auth", "course", "section", "lecture", "mlecture", "learning", "cart"],
 };
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
 
 const sentryReduxEnhancer = Sentry.createReduxEnhancer({
-	// Optionally pass options listed below
+  // Optionally pass options listed below
 });
 
 const store = configureStore({
-	reducer: persistedReducer,
-	middleware: (getDefaultMiddleware) =>
-		getDefaultMiddleware({
-			serializableCheck: {
-				ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
-			},
-		}),
-	enhancers: (getDefaultEnhancers) => {
-		return getDefaultEnhancers().concat(sentryReduxEnhancer);
-	},
+  reducer: persistedReducer,
+  middleware: (getDefaultMiddleware) =>
+    getDefaultMiddleware({
+      serializableCheck: {
+        ignoredActions: ["persist/PERSIST", "persist/REHYDRATE"],
+      },
+    }),
+  enhancers: (getDefaultEnhancers) => {
+    return getDefaultEnhancers().concat(sentryReduxEnhancer);
+  },
 });
 
 export const persistor = persistStore(store);

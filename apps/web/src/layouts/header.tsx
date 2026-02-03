@@ -1,5 +1,6 @@
 import { useLogout } from "@/feature/auth/queries/useAuth";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { selectCartItemCount } from "@/feature/order/stores/cart.store";
 import { navItems } from "@/layouts/data/nav-items";
 import CodeButton from "@/shared/components/button/CodeButton";
 import { NotificationBell } from "@/feature/notification/component/notification-bell";
@@ -11,7 +12,7 @@ import { Button } from "@workspace/ui/components/Button";
 import { Menu as DropdownMenu, MenuItem, MenuPopover, MenuSeparator, MenuTrigger } from "@workspace/ui/components/Menu";
 import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
 import { cn } from "@workspace/ui/lib/utils";
-import { Book, ChevronRight, LogOut, Menu, Search, Settings, User, User2Icon } from "lucide-react";
+import { Book, ChevronRight, LogOut, Menu, Search, Settings, User, User2Icon, ShoppingCart } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 
@@ -21,6 +22,7 @@ const Header: React.FC = () => {
   const [isDesktopMenuOpen, setIsDesktopMenuOpen] = useState(false);
   const [hoveredItem, setHoveredItem] = useState<string | null>(null);
   const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
+  const cartItemCount = useSelector(selectCartItemCount);
   const logout = useLogout();
   const desktopMenuRef = useRef<HTMLDivElement>(null);
 
@@ -36,7 +38,10 @@ const Header: React.FC = () => {
     navigate({ to: "/signin" });
   };
 
-  // Close desktop menu when clicking outside
+  const handleCartClick = () => {
+    navigate({ to: "/cart" });
+  };
+
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (desktopMenuRef.current && !desktopMenuRef.current.contains(event.target as Node)) {
@@ -80,9 +85,7 @@ const Header: React.FC = () => {
         "
       >
         <div className="relative z-10 flex items-center justify-between gap-4 py-4 px-4 md:px-6">
-          {/* Left: Hamburger Menu + Logo */}
           <div className="flex items-center gap-3">
-            {/* Desktop Navigation Dropdown */}
             <div className="hidden md:block relative" ref={desktopMenuRef}>
               <button
                 onClick={() => setIsDesktopMenuOpen(!isDesktopMenuOpen)}
@@ -93,7 +96,6 @@ const Header: React.FC = () => {
 
               {isDesktopMenuOpen && (
                 <div className="absolute left-0 top-full mt-7 w-64 rounded-2xl border border-white/40 dark:border-white/20 bg-white/80 dark:bg-gray-800/80 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] py-2 z-9999 overflow-visible">
-                  {/* Inner glow */}
                   <div className="absolute inset-0 bg-linear-to-br from-white/40 via-transparent to-transparent pointer-events-none rounded-2xl" />
 
                   <div className="relative z-10">
@@ -116,13 +118,11 @@ const Header: React.FC = () => {
                                 "absolute left-full top-0 pl-2 transition-all duration-200 ease-out will-change-transform",
                                 hoveredItem === item.title
                                   ? "opacity-100 translate-x-0 scale-100 pointer-events-auto"
-                                  : "opacity-0 translate-x-2 scale-95 pointer-events-none"
+                                  : "opacity-0 translate-x-2 scale-95 pointer-events-none",
                               )}
                             >
-                              {/* Hover bridge */}
                               <div className="absolute -left-2 top-0 h-full w-8" />
 
-                              {/* Submenu */}
                               <div className="w-80 rounded-2xl border border-white/40 dark:border-white/20 bg-white/90 dark:bg-gray-800/90 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)] p-2 overflow-hidden">
                                 <div className="absolute inset-0 bg-linear-to-br from-white/40 via-transparent to-transparent pointer-events-none" />
 
@@ -160,7 +160,6 @@ const Header: React.FC = () => {
               )}
             </div>
 
-            {/* Mobile Navigation Sheet */}
             <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <button className="rounded-xl p-2 transition-all duration-200 hover:bg-white/50 dark:hover:bg-white/10 backdrop-blur-sm">
@@ -215,7 +214,6 @@ const Header: React.FC = () => {
             </Link>
           </div>
 
-          {/* Center: Search Bar */}
           <div className="hidden flex-1 max-w-xl md:block">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-gray-400 z-10" />
@@ -245,15 +243,27 @@ const Header: React.FC = () => {
             </div>
           </div>
 
-          {/* Right: User Menu or Login Button */}
           <div className="flex items-center gap-2">
-            {/* Mobile Search Icon */}
             <button
               type="button"
               className="rounded-xl p-2 transition-all duration-200 hover:bg-white/50 dark:hover:bg-white/10 md:hidden backdrop-blur-sm"
             >
               <Search className="h-5 w-5 text-gray-600 dark:text-gray-300" />
             </button>
+
+            {isAuthenticated && (
+              <button
+                onClick={handleCartClick}
+                className="relative cursor-pointer rounded-xl p-2 transition-all duration-200 hover:bg-white/50 dark:hover:bg-white/10 backdrop-blur-sm group"
+              >
+                <ShoppingCart className="h-6 w-6 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+                {cartItemCount > 0 && (
+                  <span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-r from-red-500 to-pink-500 text-[10px] font-bold text-white shadow-lg ring-2 ring-white dark:ring-gray-900 animate-pulse">
+                    {cartItemCount > 9 ? "9+" : cartItemCount}
+                  </span>
+                )}
+              </button>
+            )}
 
             {/* Notification Bell - Only show when authenticated */}
             {isAuthenticated && userInfo && <NotificationBell />}
@@ -286,6 +296,10 @@ const Header: React.FC = () => {
                     <MenuItem onAction={() => navigate({ to: "/dashboard" })}>
                       <Book className="mr-2 h-4 w-4" />
                       <span>Báo cáo học tập</span>
+                    </MenuItem>
+                    <MenuItem onAction={() => navigate({ to: "/cart" })}>
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      <span>Giỏ hàng {cartItemCount > 0 && `(${cartItemCount})`}</span>
                     </MenuItem>
                     <MenuItem isDisabled>
                       <Settings className="mr-2 h-4 w-4" />
