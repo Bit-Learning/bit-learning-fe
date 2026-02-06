@@ -59,7 +59,7 @@ import { Route as MentorCourseListRouteImport } from './routes/mentor/course/lis
 import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/create'
 import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
 import { Route as GamesStudentsUserIdRouteImport } from './routes/games/students/$userId'
-import { Route as GamesIdPlayRouteImport } from './routes/games/$id.play'
+import { Route as GamesIdPlayRouteImport } from './routes/games/$id/play'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as AuthGithubCallbackRouteImport } from './routes/auth/github/callback'
 import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
