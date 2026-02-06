@@ -1,0 +1,17 @@
+import { createFileRoute } from "@tanstack/react-router";
+import { GeneralError } from "@/feature/errors/general-error";
+import GameDetailPage from "@/feature/game/components/GameDetailPage";
+
+export const Route = createFileRoute("/games/$id/")({
+  component: function GameDetailRoute() {
+    const { id } = Route.useParams();
+    const gameId = Number(id);
+
+    if (Number.isNaN(gameId)) {
+      return <GeneralError />;
+    }
+
+    return <GameDetailPage id={gameId} />;
+  },
+  errorComponent: () => <GeneralError />,
+});

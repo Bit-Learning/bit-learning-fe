@@ -1,70 +1,102 @@
 import api from "@/shared/api/api";
 import type { AxiosResponse } from "axios";
-
-export interface ApiResponse<T> {
-	data: T;
-	message: string;
-	status: number;
-}
-
-export interface ExcelImportResult {
-	success: boolean;
-	message: string;
-	totalRows: number;
-	successCount: number;
-	failureCount: number;
-	errors: string[];
-	createdGameIds: number[];
-}
-
-export interface GameImportPreviewItem {
-	title: string;
-	thumbnailUrl?: string;
-	topic?: string;
-	description?: string;
-	difficulty?: string;
-	lessonId?: number;
-	courseId?: number;
-	status?: string;
-}
+import type { ApiResponse } from "@/shared/api/api.type";
 
 const ADMIN_GAMES_ENDPOINT = "/admin/games";
 
+// This mirrors the backend Game entity JSON we actually use in admin.
+export interface AdminGameDto {
+	id: number;
+	title: string;
+	description?: string;
+	minioObjectName?: string;
+	thumbnailUrl?: string;
+	status?: string;
+	difficulty?: string;
+	categoryId?: number | null;
+	views?: number;
+	likes?: number;
+}
+
+export interface CreateGamePayload {
+	file: File;
+	title: string;
+	desc: string;
+	difficulty?: string;
+	categoryId?: number;
+	thumbnailUrl?: string;
+	thumbnail?: File;
+}
+
+export interface UpdateGamePayload {
+	file?: File;
+	title: string;
+	desc: string;
+	difficulty?: string;
+	categoryId?: number;
+	thumbnailUrl?: string;
+	thumbnail?: File;
+}
+
 export const adminGamesApi = {
-	/** Download Excel template for game import */
-	downloadTemplate: (): Promise<AxiosResponse<ArrayBuffer>> => {
-		return api.get(`${ADMIN_GAMES_ENDPOINT}/excel/template`, {
-			responseType: "arraybuffer",
-		});
+	listGames: (): Promise<AxiosResponse<ApiResponse<AdminGameDto[]>>> => {
+		return api.get(ADMIN_GAMES_ENDPOINT);
 	},
 
-	/** Export all games to Excel (optionally filtered by status) */
-	exportGames: (status?: string): Promise<AxiosResponse<ArrayBuffer>> => {
-		const params = status ? `?status=${encodeURIComponent(status)}` : "";
-		return api.get(`${ADMIN_GAMES_ENDPOINT}/excel/export${params}`, {
-			responseType: "arraybuffer",
-		});
-	},
-
-	/** Import games from an Excel file */
-	importGames: (
-		file: File,
-	): Promise<AxiosResponse<ApiResponse<ExcelImportResult>>> => {
+	createGame: (
+		payload: CreateGamePayload,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto>>> => {
 		const formData = new FormData();
-		formData.append("file", file);
-		return api.post(`${ADMIN_GAMES_ENDPOINT}/excel/import`, formData, {
+		formData.append("file", payload.file);
+		formData.append("title", payload.title);
+		formData.append("desc", payload.desc);
+		if (payload.difficulty) {
+			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.categoryId !== undefined) {
+			formData.append("categoryId", String(payload.categoryId));
+		}
+		if (payload.thumbnailUrl) {
+			formData.append("thumbnailUrl", payload.thumbnailUrl);
+		}
+		if (payload.thumbnail) {
+			formData.append("thumbnail", payload.thumbnail);
+		}
+
+		return api.post(ADMIN_GAMES_ENDPOINT, formData, {
 			headers: { "Content-Type": "multipart/form-data" },
 		});
 	},
 
-	/** Preview games from an Excel file without persisting */
-	previewImport: (
-		file: File,
-	): Promise<AxiosResponse<ApiResponse<GameImportPreviewItem[]>>> => {
+	updateGame: (
+		id: number,
+		payload: UpdateGamePayload,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto>>> => {
 		const formData = new FormData();
-		formData.append("file", file);
-		return api.post(`${ADMIN_GAMES_ENDPOINT}/excel/preview`, formData, {
+		if (payload.file) {
+			formData.append("file", payload.file);
+		}
+		formData.append("title", payload.title);
+		formData.append("desc", payload.desc);
+		if (payload.difficulty) {
+			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.categoryId !== undefined) {
+			formData.append("categoryId", String(payload.categoryId));
+		}
+		if (payload.thumbnailUrl) {
+			formData.append("thumbnailUrl", payload.thumbnailUrl);
+		}
+		if (payload.thumbnail) {
+			formData.append("thumbnail", payload.thumbnail);
+		}
+
+		return api.put(`${ADMIN_GAMES_ENDPOINT}/${id}`, formData, {
 			headers: { "Content-Type": "multipart/form-data" },
 		});
+	},
+
+	deleteGame: (id: number): Promise<AxiosResponse<ApiResponse<void>>> => {
+		return api.delete(`${ADMIN_GAMES_ENDPOINT}/${id}`);
 	},
 };

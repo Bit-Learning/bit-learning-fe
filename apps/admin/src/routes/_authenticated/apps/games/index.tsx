@@ -1,23 +1,20 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GamesExcelManager } from "@/features/games/components/GamesExcelManager";
+import { GamesCrudManager } from "@/features/games/components/GamesCrudManager";
 
 export const Route = createFileRoute("/_authenticated/apps/games/")({
-	component: GamesExcelRoute,
+	component: GamesRoute,
 });
 
-function GamesExcelRoute() {
+function GamesRoute() {
 	return (
 		<div className="space-y-6">
 			<div>
-				<h1 className="text-2xl font-bold tracking-tight">
-					Quản lý game (Excel)
-				</h1>
+				<h1 className="text-2xl font-bold tracking-tight">Quản lý game</h1>
 				<p className="text-sm text-muted-foreground">
-					Admin có thể tải template, export toàn bộ game và import/preview game
-					từ file Excel với kiểm tra lỗi.
+					Xem danh sách, tạo/cập nhật và lưu trữ game trực tiếp trong hệ thống.
 				</p>
 			</div>
-			<GamesExcelManager />
+			<GamesCrudManager />
 		</div>
 	);
 }

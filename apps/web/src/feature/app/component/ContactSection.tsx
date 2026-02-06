@@ -148,67 +148,6 @@ const ContactSection: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="mb-8">
-						<Card className="h-[600px] overflow-hidden p-0">
-							<Map center={[106.63721742496388, 10.799615359777903]} zoom={11}>
-								<MapMarker
-									key={place.id}
-									longitude={place.lng}
-									latitude={place.lat}
-								>
-									<MarkerContent>
-										<div className="size-5 cursor-pointer rounded-full border-2 border-white bg-rose-500 shadow-lg transition-transform hover:scale-110" />
-										<MarkerLabel position="bottom">{place.label}</MarkerLabel>
-									</MarkerContent>
-									<MarkerPopup className="w-62 p-0">
-										<div className="relative h-20 overflow-hidden rounded-t-md">
-											{/* <Image fill src={place.image} alt={place.name} className="object-cover" /> */}
-											<img
-												src={place.image}
-												alt={place.name}
-												className="absolute inset-0 h-full w-full object-cover"
-											/>
-										</div>
-										<div className="space-y-2 p-3">
-											<div>
-												<span className="text-muted-foreground text-xs font-medium uppercase tracking-wide">
-													{place.category}
-												</span>
-												<h3 className="text-foreground font-semibold leading-tight">
-													{place.name}
-												</h3>
-											</div>
-											<div className="flex items-center gap-3 text-sm">
-												<div className="flex items-center gap-1">
-													<Star className="size-3.5 fill-amber-400 text-amber-400" />
-													<span className="font-medium">{place.rating}</span>
-													<span className="text-muted-foreground">
-														({place.reviews.toLocaleString()})
-													</span>
-												</div>
-											</div>
-											<div className="text-muted-foreground flex items-center gap-1.5 text-sm">
-												<Clock className="size-3.5" />
-												<span>{place.hours}</span>
-											</div>
-											<div className="flex gap-2 pt-1">
-												<Button size="sm" className="h-8 flex-1">
-													<Navigation className="mr-1.5 size-3.5" />
-													Directions
-												</Button>
-												<Button size="sm" variant="outline" className="h-8">
-													<ExternalLink className="size-3.5" />
-												</Button>
-											</div>
-										</div>
-									</MarkerPopup>
-								</MapMarker>
-								<MapControls />
-								<MapController />
-							</Map>
-						</Card>
-					</div>
-
 					<div className="flex flex-col justify-center gap-4 sm:flex-row">
 						<Button
 							className="bithub-button-secondary px-8 py-4 text-lg"
