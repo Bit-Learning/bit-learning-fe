@@ -110,7 +110,7 @@ const AIChatbotPage = () => {
 									</SidebarMenuItem>
 									<SidebarMenuItem>
 										<SidebarMenuButton asChild tooltip="Presentations">
-											<Link to="/presentations">
+											<Link to="/templates">
 												<FileText />
 												<span>Bài thuyết trình</span>
 											</Link>

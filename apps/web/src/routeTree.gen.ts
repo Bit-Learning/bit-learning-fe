@@ -9,13 +9,11 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
-import { Route as StudentLobbyRouteImport } from './routes/student-lobby'
 import { Route as SignupRouteImport } from './routes/signup'
 import { Route as Signin2faRouteImport } from './routes/signin-2fa'
 import { Route as SigninRouteImport } from './routes/signin'
 import { Route as ResetPasswordRouteImport } from './routes/reset-password'
 import { Route as NotificationsRouteImport } from './routes/notifications'
-import { Route as HostLobbyRouteImport } from './routes/host-lobby'
 import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as HeaderOnlyRouteImport } from './routes/_headerOnly'
@@ -101,11 +99,6 @@ import { Route as LayoutForumPostIdRouteImport } from './routes/_layout/forum/po
 import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
 import { Route as LayoutTemplatesSlidevIdEditRouteImport } from './routes/_layout/templates/slidev/$id/edit'
 
-const StudentLobbyRoute = StudentLobbyRouteImport.update({
-  id: '/student-lobby',
-  path: '/student-lobby',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const SignupRoute = SignupRouteImport.update({
   id: '/signup',
   path: '/signup',
@@ -129,11 +122,6 @@ const ResetPasswordRoute = ResetPasswordRouteImport.update({
 const NotificationsRoute = NotificationsRouteImport.update({
   id: '/notifications',
   path: '/notifications',
-  getParentRoute: () => rootRouteImport,
-} as any)
-const HostLobbyRoute = HostLobbyRouteImport.update({
-  id: '/host-lobby',
-  path: '/host-lobby',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ForgotPasswordRoute = ForgotPasswordRouteImport.update({
@@ -571,13 +559,11 @@ export interface FileRoutesByFullPath {
   '/404': typeof R404Route
   '/': typeof LayoutIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/host-lobby': typeof HostLobbyRoute
   '/notifications': typeof NotificationsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/student-lobby': typeof StudentLobbyRoute
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
@@ -662,13 +648,11 @@ export interface FileRoutesByTo {
   '/404': typeof R404Route
   '/': typeof LayoutIndexRoute
   '/forgot-password': typeof ForgotPasswordRoute
-  '/host-lobby': typeof HostLobbyRoute
   '/notifications': typeof NotificationsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/student-lobby': typeof StudentLobbyRoute
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
@@ -755,13 +739,11 @@ export interface FileRoutesById {
   '/_headerOnly': typeof HeaderOnlyRouteWithChildren
   '/_layout': typeof LayoutRouteWithChildren
   '/forgot-password': typeof ForgotPasswordRoute
-  '/host-lobby': typeof HostLobbyRoute
   '/notifications': typeof NotificationsRoute
   '/reset-password': typeof ResetPasswordRoute
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/student-lobby': typeof StudentLobbyRoute
   '/_headerOnly/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/_headerOnly/user-profile': typeof HeaderOnlyUserProfileRoute
   '/_layout/about': typeof LayoutAboutRoute
@@ -849,13 +831,11 @@ export interface FileRouteTypes {
     | '/404'
     | '/'
     | '/forgot-password'
-    | '/host-lobby'
     | '/notifications'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/student-lobby'
     | '/ai-chatbot'
     | '/user-profile'
     | '/about'
@@ -940,13 +920,11 @@ export interface FileRouteTypes {
     | '/404'
     | '/'
     | '/forgot-password'
-    | '/host-lobby'
     | '/notifications'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/student-lobby'
     | '/ai-chatbot'
     | '/user-profile'
     | '/about'
@@ -1032,13 +1010,11 @@ export interface FileRouteTypes {
     | '/_headerOnly'
     | '/_layout'
     | '/forgot-password'
-    | '/host-lobby'
     | '/notifications'
     | '/reset-password'
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/student-lobby'
     | '/_headerOnly/ai-chatbot'
     | '/_headerOnly/user-profile'
     | '/_layout/about'
@@ -1126,13 +1102,11 @@ export interface RootRouteChildren {
   HeaderOnlyRoute: typeof HeaderOnlyRouteWithChildren
   LayoutRoute: typeof LayoutRouteWithChildren
   ForgotPasswordRoute: typeof ForgotPasswordRoute
-  HostLobbyRoute: typeof HostLobbyRoute
   NotificationsRoute: typeof NotificationsRoute
   ResetPasswordRoute: typeof ResetPasswordRoute
   SigninRoute: typeof SigninRoute
   Signin2faRoute: typeof Signin2faRoute
   SignupRoute: typeof SignupRoute
-  StudentLobbyRoute: typeof StudentLobbyRoute
   GamesIdRoute: typeof GamesIdRouteWithChildren
   GamesLeaderboardRoute: typeof GamesLeaderboardRoute
   GamesIndexRoute: typeof GamesIndexRoute
@@ -1152,13 +1126,6 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
-    '/student-lobby': {
-      id: '/student-lobby'
-      path: '/student-lobby'
-      fullPath: '/student-lobby'
-      preLoaderRoute: typeof StudentLobbyRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/signup': {
       id: '/signup'
       path: '/signup'
@@ -1192,13 +1159,6 @@ declare module '@tanstack/react-router' {
       path: '/notifications'
       fullPath: '/notifications'
       preLoaderRoute: typeof NotificationsRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/host-lobby': {
-      id: '/host-lobby'
-      path: '/host-lobby'
-      fullPath: '/host-lobby'
-      preLoaderRoute: typeof HostLobbyRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/forgot-password': {
@@ -1965,13 +1925,11 @@ const rootRouteChildren: RootRouteChildren = {
   HeaderOnlyRoute: HeaderOnlyRouteWithChildren,
   LayoutRoute: LayoutRouteWithChildren,
   ForgotPasswordRoute: ForgotPasswordRoute,
-  HostLobbyRoute: HostLobbyRoute,
   NotificationsRoute: NotificationsRoute,
   ResetPasswordRoute: ResetPasswordRoute,
   SigninRoute: SigninRoute,
   Signin2faRoute: Signin2faRoute,
   SignupRoute: SignupRoute,
-  StudentLobbyRoute: StudentLobbyRoute,
   GamesIdRoute: GamesIdRouteWithChildren,
   GamesLeaderboardRoute: GamesLeaderboardRoute,
   GamesIndexRoute: GamesIndexRoute,
