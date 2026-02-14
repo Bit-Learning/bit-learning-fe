@@ -16,6 +16,7 @@ import type {
   CreatePostRequest,
   UpdatePostRequest,
   CreateCommentRequest,
+  UpdateCommentRequest,
   FilterByAuthorParams,
 } from "../types/forum.type";
 import { toast } from "@workspace/ui/components/Sonner";
@@ -109,6 +110,7 @@ export const useUpdateForumPost = () => {
       postApi.updatePost(id, data, attachments),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
       toast.success({ title: "Cập nhật bài viết thành công!" });
     },
     onError: (error: any) => {
@@ -124,6 +126,7 @@ export const useDeleteForumPost = () => {
     mutationFn: (id: number) => postApi.deletePost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
       toast.success({ title: "Xóa bài viết thành công!" });
     },
     onError: (error: any) => {
@@ -139,6 +142,7 @@ export const useLikeForumPost = () => {
     mutationFn: (id: number) => postApi.likePost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
     },
   });
 };
@@ -150,6 +154,7 @@ export const useDislikeForumPost = () => {
     mutationFn: (id: number) => postApi.dislikePost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
     },
   });
 };
@@ -161,6 +166,7 @@ export const useUnlikeOrUndislikeForumPost = () => {
     mutationFn: (id: number) => postApi.unlikeOrUndislikePost(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
     },
   });
 };
@@ -196,6 +202,36 @@ export const useCreateForumComment = () => {
   });
 };
 
+export const useUpdateForumComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: UpdateCommentRequest }) => commentApi.updateComment(id, data),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
+      toast.success({ title: "Cập nhật bình luận thành công!" });
+    },
+    onError: (error: any) => {
+      toast.error({ title: error.message || "Có lỗi xảy ra khi cập nhật bình luận" });
+    },
+  });
+};
+
+export const useDeleteForumComment = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => commentApi.deleteComment(id),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
+      toast.success({ title: "Xóa bình luận thành công!" });
+    },
+    onError: (error: any) => {
+      toast.error({ title: error.message || "Có lỗi xảy ra khi xóa bình luận" });
+    },
+  });
+};
+
 export const useReplyForumComment = () => {
   const queryClient = useQueryClient();
 
@@ -204,6 +240,9 @@ export const useReplyForumComment = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
       toast.success({ title: "Trả lời bình luận thành công!" });
+    },
+    onError: (error: any) => {
+      toast.error({ title: error.message || "Có lỗi xảy ra khi trả lời bình luận" });
     },
   });
 };

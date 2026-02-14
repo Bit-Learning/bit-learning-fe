@@ -7,11 +7,11 @@ import {
   MessageCircle,
   Share2,
   Bookmark,
-  MoreVertical,
   Clock,
   Eye,
   Edit,
   Trash2,
+  MoreVertical,
 } from "lucide-react";
 import { Card } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
@@ -27,6 +27,9 @@ import {
 import { formatDistanceToNow } from "date-fns";
 import { vi } from "date-fns/locale";
 import { CommentItem } from "./CommentItem";
+import { useSelector } from "react-redux";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import EditPostModal from "./EditPostModal";
 
 const PostDetailContent: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -34,6 +37,10 @@ const PostDetailContent: React.FC = () => {
   const [commentContent, setCommentContent] = useState("");
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
+  const [showMenu, setShowMenu] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+
+  const { userInfo } = useSelector(selectAuthStateInfo);
 
   const post = {
     id: Number(id),
@@ -73,6 +80,10 @@ Cảm ơn các bạn!`,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString(),
   };
+
+  const isAuthor = userInfo?.id === post.author.id;
+  const canEdit = isAuthor && post.isEditAllowed;
+  const canDelete = isAuthor;
 
   const { data: commentsData } = useForumComments(Number(id));
   const comments = commentsData?.data || [];
@@ -116,9 +127,23 @@ Cảm ơn các bạn!`,
   };
 
   const handleDelete = async () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này?")) {
+    if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.")) {
       await deletePost.mutateAsync(post.id);
       navigate({ to: "/forum" });
+    }
+  };
+
+  const handleShare = () => {
+    const url = window.location.href;
+    if (navigator.share) {
+      navigator.share({
+        title: post.title,
+        text: post.content.substring(0, 100),
+        url: url,
+      });
+    } else {
+      navigator.clipboard.writeText(url);
+      alert("Đã sao chép link vào clipboard!");
     }
   };
 
@@ -134,16 +159,40 @@ Cảm ơn các bạn!`,
 
             <div className="flex-1" />
 
-            {post.isEditAllowed && (
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Edit size={16} className="mr-2" />
-                  <span className="hidden sm:inline">Chỉnh sửa</span>
+            {isAuthor && (
+              <div className="relative">
+                <Button variant="ghost" size="sm" onClick={() => setShowMenu(!showMenu)}>
+                  <MoreVertical size={20} />
                 </Button>
-                <Button variant="destructive" size="sm" onClick={handleDelete}>
-                  <Trash2 size={16} className="mr-2" />
-                  <span className="hidden sm:inline">Xóa</span>
-                </Button>
+
+                {showMenu && (
+                  <div className="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-10">
+                    {canEdit && (
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          setIsEditModalOpen(true);
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+                      >
+                        <Edit size={16} className="mr-2" />
+                        Chỉnh sửa bài viết
+                      </button>
+                    )}
+                    {canDelete && (
+                      <button
+                        onClick={() => {
+                          setShowMenu(false);
+                          handleDelete();
+                        }}
+                        className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 size={16} className="mr-2" />
+                        Xóa bài viết
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             )}
           </div>
@@ -180,9 +229,6 @@ Cảm ơn các bạn!`,
                   </div>
                 </div>
               </div>
-              <Button variant="ghost" size="sm">
-                <MoreVertical size={18} />
-              </Button>
             </div>
 
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
@@ -246,12 +292,12 @@ Cảm ơn các bạn!`,
                 <span className="ml-2 hidden sm:inline">Không thích</span>
               </Button>
 
-              <Button variant="outline">
+              <Button variant="outline" onClick={() => document.getElementById("comment-input")?.focus()}>
                 <MessageCircle size={18} />
                 <span className="ml-2 hidden sm:inline">Bình luận</span>
               </Button>
 
-              <Button variant="outline">
+              <Button variant="outline" onClick={handleShare}>
                 <Share2 size={18} />
                 <span className="ml-2 hidden sm:inline">Chia sẻ</span>
               </Button>
@@ -270,12 +316,13 @@ Cảm ơn các bạn!`,
           <div className="p-6 border-b bg-gray-50">
             <div className="flex items-start gap-3">
               <img
-                src="/default-avatar.png"
+                src={userInfo?.avatar || "/default-avatar.png"}
                 alt="Your avatar"
                 className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
               />
               <div className="flex-1 space-y-3">
                 <textarea
+                  id="comment-input"
                   value={commentContent}
                   onChange={(e) => setCommentContent(e.target.value)}
                   placeholder="Viết bình luận của bạn..."
@@ -310,6 +357,8 @@ Cảm ơn các bạn!`,
           </div>
         </Card>
       </div>
+
+      <EditPostModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} post={post} />
     </div>
   );
 };
