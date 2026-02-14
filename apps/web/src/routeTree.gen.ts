@@ -80,6 +80,7 @@ import { Route as LayoutMatricesCreateRouteImport } from './routes/_layout/matri
 import { Route as LayoutMatricesIdRouteImport } from './routes/_layout/matrices/$id'
 import { Route as LayoutLecturesIdRouteImport } from './routes/_layout/lectures/$id'
 import { Route as LayoutInternalTestLoaderRouteImport } from './routes/_layout/internal/test-loader'
+import { Route as LayoutForumMyRouteImport } from './routes/_layout/forum/my'
 import { Route as LayoutExamsMyExamsRouteImport } from './routes/_layout/exams/my-exams'
 import { Route as LayoutExamsGenerateRouteImport } from './routes/_layout/exams/generate'
 import { Route as LayoutExamsIdRouteImport } from './routes/_layout/exams/$id'
@@ -457,6 +458,11 @@ const LayoutInternalTestLoaderRoute =
     path: '/internal/test-loader',
     getParentRoute: () => LayoutRoute,
   } as any)
+const LayoutForumMyRoute = LayoutForumMyRouteImport.update({
+  id: '/forum/my',
+  path: '/forum/my',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutExamsMyExamsRoute = LayoutExamsMyExamsRouteImport.update({
   id: '/exams/my-exams',
   path: '/exams/my-exams',
@@ -600,6 +606,7 @@ export interface FileRoutesByFullPath {
   '/exams/$id': typeof LayoutExamsIdRoute
   '/exams/generate': typeof LayoutExamsGenerateRoute
   '/exams/my-exams': typeof LayoutExamsMyExamsRoute
+  '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
   '/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
@@ -690,6 +697,7 @@ export interface FileRoutesByTo {
   '/exams/$id': typeof LayoutExamsIdRoute
   '/exams/generate': typeof LayoutExamsGenerateRoute
   '/exams/my-exams': typeof LayoutExamsMyExamsRoute
+  '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
   '/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
@@ -783,6 +791,7 @@ export interface FileRoutesById {
   '/_layout/exams/$id': typeof LayoutExamsIdRoute
   '/_layout/exams/generate': typeof LayoutExamsGenerateRoute
   '/_layout/exams/my-exams': typeof LayoutExamsMyExamsRoute
+  '/_layout/forum/my': typeof LayoutForumMyRoute
   '/_layout/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/_layout/lectures/$id': typeof LayoutLecturesIdRoute
   '/_layout/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
@@ -875,6 +884,7 @@ export interface FileRouteTypes {
     | '/exams/$id'
     | '/exams/generate'
     | '/exams/my-exams'
+    | '/forum/my'
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/matrices/$id'
@@ -965,6 +975,7 @@ export interface FileRouteTypes {
     | '/exams/$id'
     | '/exams/generate'
     | '/exams/my-exams'
+    | '/forum/my'
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/matrices/$id'
@@ -1057,6 +1068,7 @@ export interface FileRouteTypes {
     | '/_layout/exams/$id'
     | '/_layout/exams/generate'
     | '/_layout/exams/my-exams'
+    | '/_layout/forum/my'
     | '/_layout/internal/test-loader'
     | '/_layout/lectures/$id'
     | '/_layout/matrices/$id'
@@ -1637,6 +1649,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutInternalTestLoaderRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/forum/my': {
+      id: '/_layout/forum/my'
+      path: '/forum/my'
+      fullPath: '/forum/my'
+      preLoaderRoute: typeof LayoutForumMyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/exams/my-exams': {
       id: '/_layout/exams/my-exams'
       path: '/exams/my-exams'
@@ -1825,6 +1844,7 @@ interface LayoutRouteChildren {
   LayoutExamsIdRoute: typeof LayoutExamsIdRoute
   LayoutExamsGenerateRoute: typeof LayoutExamsGenerateRoute
   LayoutExamsMyExamsRoute: typeof LayoutExamsMyExamsRoute
+  LayoutForumMyRoute: typeof LayoutForumMyRoute
   LayoutInternalTestLoaderRoute: typeof LayoutInternalTestLoaderRoute
   LayoutLecturesIdRoute: typeof LayoutLecturesIdRoute
   LayoutMatricesIdRoute: typeof LayoutMatricesIdRouteWithChildren
@@ -1887,6 +1907,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutExamsIdRoute: LayoutExamsIdRoute,
   LayoutExamsGenerateRoute: LayoutExamsGenerateRoute,
   LayoutExamsMyExamsRoute: LayoutExamsMyExamsRoute,
+  LayoutForumMyRoute: LayoutForumMyRoute,
   LayoutInternalTestLoaderRoute: LayoutInternalTestLoaderRoute,
   LayoutLecturesIdRoute: LayoutLecturesIdRoute,
   LayoutMatricesIdRoute: LayoutMatricesIdRouteWithChildren,

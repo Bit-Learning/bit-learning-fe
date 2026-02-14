@@ -11,7 +11,13 @@ import {
   setLoadingAction,
   setErrorAction,
 } from "../stores/forum.store";
-import type { PaginationParams, CreatePostRequest, UpdatePostRequest, CreateCommentRequest } from "../types/forum.type";
+import type {
+  PaginationParams,
+  CreatePostRequest,
+  UpdatePostRequest,
+  CreateCommentRequest,
+  FilterByAuthorParams,
+} from "../types/forum.type";
 import { toast } from "@workspace/ui/components/Sonner";
 
 export const useForumPosts = (params: PaginationParams = {}) => {
@@ -43,6 +49,39 @@ export const useForumPosts = (params: PaginationParams = {}) => {
         dispatch(setLoadingAction(false));
       }
     },
+  });
+};
+
+export const useForumPostsByAuthor = (params: FilterByAuthorParams) => {
+  const dispatch = useDispatch();
+
+  return useQuery({
+    queryKey: ["forum-posts-by-author", params],
+    queryFn: async () => {
+      dispatch(setLoadingAction(true));
+      try {
+        const response = await postApi.getPostsByAuthor(params);
+        if (response.data) {
+          dispatch(setPostsAction(response.data));
+        }
+        if (response.page) {
+          dispatch(
+            setPaginationAction({
+              totalPages: response.page.totalPages,
+              page: response.page.page,
+              totalElements: response.page.totalElements,
+            }),
+          );
+        }
+        return response;
+      } catch (error: any) {
+        dispatch(setErrorAction(error.message));
+        throw error;
+      } finally {
+        dispatch(setLoadingAction(false));
+      }
+    },
+    enabled: !!params.authorId,
   });
 };
 
