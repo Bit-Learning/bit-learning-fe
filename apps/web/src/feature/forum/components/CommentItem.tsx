@@ -75,19 +75,24 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
   };
 
   return (
-    <div className="py-3">
-      <div className="flex items-start space-x-3">
-        <img
-          src={comment.author.avatar || "/default-avatar.png"}
-          alt={comment.author.name}
-          className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-gray-100"
-        />
-
+    <div className="py-2">
+      <div className="flex items-start space-x-2">
         <div className="flex-1 min-w-0">
-          <Card className="bg-gray-50 border-0">
+          <Card className="bg-gray-50 border-0 p-0">
             <div className="p-3">
               <div className="flex items-center justify-between mb-1">
-                <h5 className="font-semibold text-sm text-gray-900">{comment.author.name}</h5>
+                <div className="flex items-center space-x-2">
+                  <img
+                    src={comment.author.avatar || "/default-avatar.png"}
+                    alt={comment.author.firstName + " " + comment.author.lastName}
+                    className="w-9 h-9 rounded-full object-cover shrink-0 ring-2 ring-gray-100"
+                  />
+                  <div>
+                    <h5 className="font-semibold text-sm text-gray-900">
+                      {comment.author.firstName + " " + comment.author.lastName}
+                    </h5>
+                  </div>
+                </div>
 
                 {isAuthor && (
                   <div className="relative">
@@ -145,7 +150,9 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
                   </div>
                 </div>
               ) : (
-                <p className="text-sm text-gray-700 wrap-break-word">{comment.content}</p>
+                <div className="p-2">
+                  <p className="text-lg text-gray-700 wrap-break-word">{comment.content}</p>
+                </div>
               )}
             </div>
           </Card>

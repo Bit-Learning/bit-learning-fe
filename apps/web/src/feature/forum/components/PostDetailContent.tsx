@@ -12,11 +12,13 @@ import {
   Edit,
   Trash2,
   MoreVertical,
+  Loader2,
 } from "lucide-react";
 import { Card } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import {
+  useForumPostById,
   useLikeForumPost,
   useDislikeForumPost,
   useUnlikeOrUndislikeForumPost,
@@ -42,47 +44,11 @@ const PostDetailContent: React.FC = () => {
 
   const { userInfo } = useSelector(selectAuthStateInfo);
 
-  const post = {
-    id: Number(id),
-    code: "POST001",
-    title: "Làm thế nào để tối ưu performance React App?",
-    content: `Mình đang làm một dự án React khá lớn và gặp vấn đề về performance.
+  const { data: postData, isLoading: postLoading } = useForumPostById(Number(id));
+  const post = postData?.data;
 
-Cụ thể là khi scroll list có nhiều item thì bị lag. Mình đã thử dùng React.memo nhưng không thấy cải thiện nhiều.
-
-Các bạn có kinh nghiệm gì về việc tối ưu performance cho React không? Chia sẻ với mình nhé!
-
-Một số thông tin về dự án:
-- Sử dụng React 18
-- State management: Redux Toolkit
-- UI Library: Material-UI
-- List có khoảng 1000+ items
-
-Cảm ơn các bạn!`,
-    author: {
-      id: 1,
-      name: "Nguyễn Văn A",
-      avatar: "/avatar1.jpg",
-      email: "nguyenvana@example.com",
-    },
-    hashtags: [
-      { id: 1, name: "ReactJS" },
-      { id: 2, name: "Performance" },
-      { id: 3, name: "Optimization" },
-    ],
-    attachments: [],
-    likes: 45,
-    dislikes: 3,
-    views: 234,
-    isBanned: false,
-    isEdited: false,
-    isEditAllowed: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  };
-
-  const isAuthor = userInfo?.id === post.author.id;
-  const canEdit = isAuthor && post.isEditAllowed;
+  const isAuthor = userInfo?.id === post?.author.id;
+  const canEdit = isAuthor && post?.isEditAllowed;
   const canDelete = isAuthor;
 
   const { data: commentsData } = useForumComments(Number(id));
@@ -95,6 +61,7 @@ Cảm ơn các bạn!`,
   const deletePost = useDeleteForumPost();
 
   const handleLike = async () => {
+    if (!post) return;
     if (isLiked) {
       await unlikePost.mutateAsync(post.id);
       setIsLiked(false);
@@ -106,6 +73,7 @@ Cảm ơn các bạn!`,
   };
 
   const handleDislike = async () => {
+    if (!post) return;
     if (isDisliked) {
       await unlikePost.mutateAsync(post.id);
       setIsDisliked(false);
@@ -117,7 +85,7 @@ Cảm ơn các bạn!`,
   };
 
   const handleComment = async () => {
-    if (!commentContent.trim()) return;
+    if (!commentContent.trim() || !post) return;
 
     await createComment.mutateAsync({
       postId: post.id,
@@ -127,6 +95,7 @@ Cảm ơn các bạn!`,
   };
 
   const handleDelete = async () => {
+    if (!post) return;
     if (window.confirm("Bạn có chắc chắn muốn xóa bài viết này? Hành động này không thể hoàn tác.")) {
       await deletePost.mutateAsync(post.id);
       navigate({ to: "/forum" });
@@ -137,8 +106,8 @@ Cảm ơn các bạn!`,
     const url = window.location.href;
     if (navigator.share) {
       navigator.share({
-        title: post.title,
-        text: post.content.substring(0, 100),
+        title: post?.title,
+        text: post?.content.substring(0, 100),
         url: url,
       });
     } else {
@@ -147,10 +116,37 @@ Cảm ơn các bạn!`,
     }
   };
 
+  if (postLoading) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex items-center justify-center">
+        <div className="flex flex-col items-center">
+          <Loader2 className="animate-spin text-blue-600 mb-4" size={48} />
+          <p className="text-gray-500">Đang tải bài viết...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!post) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex items-center justify-center">
+        <Card className="p-12 text-center">
+          <div className="text-6xl mb-4">😕</div>
+          <h3 className="text-xl font-bold text-gray-900 mb-2">Không tìm thấy bài viết</h3>
+          <p className="text-gray-600 mb-6">Bài viết này có thể đã bị xóa hoặc không tồn tại</p>
+          <Button onClick={() => navigate({ to: "/forum" })}>
+            <ArrowLeft size={18} className="mr-2" />
+            Quay lại diễn đàn
+          </Button>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
       <div className="bg-white border-b sticky top-0 z-40 shadow-sm backdrop-blur-sm">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/forum" })}>
               <ArrowLeft size={20} className="mr-2" />
@@ -199,21 +195,21 @@ Cảm ơn các bạn!`,
         </div>
       </div>
 
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Card className="mb-6">
           <div className="p-6 border-b">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <img
-                  src={post.author.avatar}
-                  alt={post.author.name}
+                  src={post.author.avatar || "/default-avatar.png"}
+                  alt={post.author.firstName + " " + post.author.lastName}
                   className="w-12 h-12 rounded-full object-cover ring-2 ring-gray-100"
                   onError={(e) => {
                     e.currentTarget.src = "/default-avatar.png";
                   }}
                 />
                 <div>
-                  <h4 className="font-semibold text-gray-900">{post.author.name}</h4>
+                  <h4 className="font-semibold text-gray-900">{post.author.firstName + " " + post.author.lastName}</h4>
                   <div className="flex items-center gap-3 text-xs text-gray-500">
                     <span className="flex items-center gap-1">
                       <Clock size={14} />
@@ -222,10 +218,6 @@ Cảm ơn các bạn!`,
                         locale: vi,
                       })}
                     </span>
-                    <span className="flex items-center gap-1">
-                      <Eye size={14} />
-                      {post.views} lượt xem
-                    </span>
                   </div>
                 </div>
               </div>
@@ -233,15 +225,17 @@ Cảm ơn các bạn!`,
 
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
 
-            <div className="flex flex-wrap gap-2 mb-4">
-              {post.hashtags.map((tag) => (
-                <Link key={tag.id} to="/forum" search={{ tag: tag.name }}>
-                  <Badge variant="secondary" className="cursor-pointer hover:bg-blue-100 transition-colors">
-                    #{tag.name}
-                  </Badge>
-                </Link>
-              ))}
-            </div>
+            {post.hashtags && post.hashtags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-4">
+                {post.hashtags.map((tag) => (
+                  <Link key={tag.id} to="/forum" search={{ tag: tag.name }}>
+                    <Badge variant="secondary" className="cursor-pointer hover:bg-blue-100 transition-colors">
+                      #{tag.name}
+                    </Badge>
+                  </Link>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="p-6 border-b">
@@ -249,11 +243,17 @@ Cảm ơn các bạn!`,
               <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{post.content}</p>
             </div>
 
-            {post.attachments.length > 0 && (
+            {post.attachments && post.attachments.length > 0 && (
               <div className="mt-6 grid grid-cols-2 gap-3">
-                {post.attachments.map((attachment: any) => (
+                {post.attachments.map((attachment) => (
                   <div key={attachment.id} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                    <img src={attachment.url} alt="attachment" className="w-full h-full object-cover" />
+                    {attachment.type === "IMAGE" ? (
+                      <img src={attachment.url} alt="attachment" className="w-full h-full object-cover" />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-gray-500">📄 File đính kèm</span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -358,7 +358,7 @@ Cảm ơn các bạn!`,
         </Card>
       </div>
 
-      <EditPostModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} post={post} />
+      {post && <EditPostModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} post={post} />}
     </div>
   );
 };

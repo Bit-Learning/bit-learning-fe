@@ -5,7 +5,8 @@ export enum AttachmentType {
 
 export interface Author {
   id: number;
-  name: string;
+  firstName: string;
+  lastName: string;
   avatar?: string;
   email?: string;
 }

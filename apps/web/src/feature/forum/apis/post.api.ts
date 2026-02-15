@@ -18,6 +18,11 @@ export const postApi = {
     return response.data;
   },
 
+  getPostById: async (id: number) => {
+    const response = await api.get<ApiResponse<Post>>(`/posts/${id}`);
+    return response.data;
+  },
+
   getPostsByAuthor: async (params: FilterByAuthorParams) => {
     const { authorId, page = 0, size = 10 } = params;
     const response = await api.get<ApiResponse<Post[]>>("/posts/author", {

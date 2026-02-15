@@ -86,11 +86,13 @@ const PostCard: React.FC<PostCardProps> = ({ post, showActions = false }) => {
           <div className="flex items-center space-x-3">
             <img
               src={post.author.avatar || "/default-avatar.png"}
-              alt={post.author.name}
+              alt={post.author.firstName + " " + post.author.lastName}
               className="w-10 h-10 rounded-full object-cover ring-2 ring-gray-100"
             />
             <div>
-              <h4 className="font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">{post.author.name}</h4>
+              <h4 className="font-semibold text-gray-900 hover:text-blue-600 cursor-pointer">
+                {post.author.firstName + " " + post.author.lastName}
+              </h4>
               <p className="text-xs text-gray-500">
                 {formatDistanceToNow(new Date(post.createdAt), { addSuffix: true, locale: vi })}
                 {post.isEdited && " • Đã chỉnh sửa"}
@@ -172,7 +174,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, showActions = false }) => {
         </Link>
 
         <div className="px-4 pb-3">
-          <div className="flex items-center justify-between text-sm text-gray-500 mb-3 py-2 border-t">
+          <div className="flex items-center gap-3 text-sm text-gray-500 mb-3 py-2 border-t">
             <span className="flex items-center gap-1">
               <Heart size={16} className="text-red-500" />
               {post.likes} lượt thích

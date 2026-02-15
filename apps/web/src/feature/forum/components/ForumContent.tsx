@@ -127,49 +127,6 @@ const ForumContent: React.FC = () => {
                     </div>
                   </Card>
                 )}
-
-                <Card className="mt-6 bg-linear-to-br from-blue-500 to-indigo-600 text-white border-0 shadow-lg">
-                  <div className="p-6">
-                    <h3 className="font-bold mb-4 flex items-center">
-                      <TrendingUp size={20} className="mr-2" />
-                      Thống kê
-                    </h3>
-                    <div className="grid grid-cols-3 gap-4">
-                      <div className="flex flex-col items-center p-3 bg-white/10 rounded-lg backdrop-blur-sm">
-                        <span className="text-2xl font-bold">1,234</span>
-                        <span className="text-sm opacity-90 mt-1">Tổng bài viết</span>
-                      </div>
-                      <div className="flex flex-col items-center p-3 bg-white/10 rounded-lg backdrop-blur-sm">
-                        <span className="text-2xl font-bold">567</span>
-                        <span className="text-sm opacity-90 mt-1">Thành viên</span>
-                      </div>
-                      <div className="flex flex-col items-center p-3 bg-white/10 rounded-lg backdrop-blur-sm">
-                        <span className="text-2xl font-bold">8,901</span>
-                        <span className="text-sm opacity-90 mt-1">Bình luận</span>
-                      </div>
-                    </div>
-                  </div>
-                </Card>
-
-                <Card className="mt-6">
-                  <div className="p-6">
-                    <h3 className="font-bold text-gray-900 mb-3 flex items-center">💡 Mẹo hữu ích</h3>
-                    <ul className="space-y-2 text-sm text-gray-600">
-                      <li className="flex items-start p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <span className="text-blue-500 mr-2 shrink-0">✓</span>
-                        <span>Sử dụng hashtag để bài viết dễ tìm kiếm hơn</span>
-                      </li>
-                      <li className="flex items-start p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <span className="text-blue-500 mr-2 shrink-0">✓</span>
-                        <span>Đính kèm code/ảnh minh họa khi cần</span>
-                      </li>
-                      <li className="flex items-start p-2 rounded-lg hover:bg-gray-50 transition-colors">
-                        <span className="text-blue-500 mr-2 shrink-0">✓</span>
-                        <span>Tương tác tích cực với cộng đồng</span>
-                      </li>
-                    </ul>
-                  </div>
-                </Card>
               </>
             )}
           </main>

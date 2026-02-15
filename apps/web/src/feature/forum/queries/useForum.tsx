@@ -10,6 +10,7 @@ import {
   setPaginationAction,
   setLoadingAction,
   setErrorAction,
+  setSelectedPostAction,
 } from "../stores/forum.store";
 import type {
   PaginationParams,
@@ -50,6 +51,22 @@ export const useForumPosts = (params: PaginationParams = {}) => {
         dispatch(setLoadingAction(false));
       }
     },
+  });
+};
+
+export const useForumPostById = (id: number) => {
+  const dispatch = useDispatch();
+
+  return useQuery({
+    queryKey: ["forum-post", id],
+    queryFn: async () => {
+      const response = await postApi.getPostById(id);
+      if (response.data) {
+        dispatch(setSelectedPostAction(response.data));
+      }
+      return response;
+    },
+    enabled: !!id,
   });
 };
 
