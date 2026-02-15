@@ -12,6 +12,10 @@ export const navItems = [
     to: "/problem",
   },
   {
+    title: "Diễn đàn",
+    to: "/forum",
+  },
+  {
     title: "Kho ứng dụng & Công cụ",
     items: [
       {

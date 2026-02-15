@@ -8,6 +8,7 @@ import mlecture from "@/feature/mentor-course/stores/mlecture.store";
 import app from "../../feature/app/store";
 import auth from "../../feature/auth/store";
 import cart from "@/feature/order/stores/cart.store";
+import forum from "@/feature/forum/stores/forum.store";
 
 const combineReducer = combineReducers({
   app: app,
@@ -18,6 +19,7 @@ const combineReducer = combineReducers({
   mlecture: mlecture,
   learning: learning,
   cart: cart,
+  forum: forum,
 });
 
 export type RootState = ReturnType<typeof combineReducer>;
