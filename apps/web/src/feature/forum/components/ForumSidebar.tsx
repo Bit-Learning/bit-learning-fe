@@ -23,7 +23,7 @@ const ForumSidebar: React.FC = () => {
 
   return (
     <div className="space-y-4">
-      <Card className="overflow-hidden border-0 shadow-md">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
         <div className="px-4 py-3 bg-linear-to-r from-blue-500 to-indigo-600 border-b">
           <h3 className="font-bold text-white flex items-center">
             <TrendingUp size={18} className="mr-2" />
@@ -69,7 +69,7 @@ const ForumSidebar: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="overflow-hidden border-0 shadow-md">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
         <div className="px-4 py-3 bg-linear-to-r from-purple-500 to-pink-600 border-b">
           <h3 className="font-bold text-white flex items-center">
             <Hash size={18} className="mr-2" />
@@ -92,7 +92,7 @@ const ForumSidebar: React.FC = () => {
         </div>
       </Card>
 
-      <Card className="overflow-hidden border-0 shadow-md">
+      <Card className="overflow-hidden hover:shadow-lg transition-shadow duration-300 group">
         <div className="px-4 py-3 bg-linear-to-r from-green-500 to-emerald-600 border-b">
           <h3 className="font-bold text-white flex items-center">
             <Star size={18} className="mr-2" />

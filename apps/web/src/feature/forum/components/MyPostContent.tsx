@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Button } from "@workspace/ui/components/Button";
-import { Card } from "@workspace/ui/components/Card";
+import { Card, CardContent } from "@workspace/ui/components/Card";
 import { useForumPostsByAuthor } from "../queries/useForum";
 import { useSelector } from "react-redux";
 import { selectForumPosts, selectForumLoading, selectForumPagination } from "../stores/forum.store";
@@ -71,7 +71,7 @@ const MyPostContent: React.FC = () => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           <Card className="bg-linear-to-br from-blue-500 to-blue-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="p-6">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-blue-100 text-sm font-medium mb-1">Tổng bài viết</p>
@@ -81,11 +81,11 @@ const MyPostContent: React.FC = () => {
                   <FileText size={24} />
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
 
           <Card className="bg-linear-to-br from-green-500 to-green-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="p-6">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-green-100 text-sm font-medium mb-1">Đã xuất bản</p>
@@ -95,11 +95,11 @@ const MyPostContent: React.FC = () => {
                   <Calendar size={24} />
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
 
           <Card className="bg-linear-to-br from-red-500 to-red-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="p-6">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-red-100 text-sm font-medium mb-1">Bị ẩn</p>
@@ -109,11 +109,11 @@ const MyPostContent: React.FC = () => {
                   <Eye size={24} />
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
 
           <Card className="bg-linear-to-br from-pink-500 to-pink-600 text-white border-0 shadow-lg hover:shadow-xl transition-shadow">
-            <div className="p-6">
+            <CardContent className="p-6">
               <div className="flex items-center justify-between">
                 <div>
                   <p className="text-pink-100 text-sm font-medium mb-1">Tổng lượt thích</p>
@@ -123,40 +123,42 @@ const MyPostContent: React.FC = () => {
                   <Heart size={24} />
                 </div>
               </div>
-            </div>
+            </CardContent>
           </Card>
         </div>
 
-        <Card className="mb-6 p-4">
-          <div className="flex items-center gap-2 overflow-x-auto">
-            <Button
-              variant={filterStatus === "all" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setFilterStatus("all")}
-              className="whitespace-nowrap"
-            >
-              <Filter size={16} className="mr-2" />
-              Tất cả ({stats.total})
-            </Button>
-            <Button
-              variant={filterStatus === "published" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setFilterStatus("published")}
-              className="whitespace-nowrap"
-            >
-              <Calendar size={16} className="mr-2" />
-              Đã xuất bản ({stats.published})
-            </Button>
-            <Button
-              variant={filterStatus === "banned" ? "default" : "ghost"}
-              size="sm"
-              onClick={() => setFilterStatus("banned")}
-              className="whitespace-nowrap"
-            >
-              <Eye size={16} className="mr-2" />
-              Bị ẩn ({stats.banned})
-            </Button>
-          </div>
+        <Card className="mb-6">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 overflow-x-auto">
+              <Button
+                variant={filterStatus === "all" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setFilterStatus("all")}
+                className="whitespace-nowrap"
+              >
+                <Filter size={16} className="mr-2" />
+                Tất cả ({stats.total})
+              </Button>
+              <Button
+                variant={filterStatus === "published" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setFilterStatus("published")}
+                className="whitespace-nowrap"
+              >
+                <Calendar size={16} className="mr-2" />
+                Đã xuất bản ({stats.published})
+              </Button>
+              <Button
+                variant={filterStatus === "banned" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setFilterStatus("banned")}
+                className="whitespace-nowrap"
+              >
+                <Eye size={16} className="mr-2" />
+                Bị ẩn ({stats.banned})
+              </Button>
+            </div>
+          </CardContent>
         </Card>
 
         {isLoading ? (
@@ -168,84 +170,79 @@ const MyPostContent: React.FC = () => {
           </Card>
         ) : filteredPosts.length === 0 ? (
           <Card className="p-12 text-center">
-            <div className="text-6xl mb-4">📝</div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">
-              {filterStatus === "all"
-                ? "Chưa có bài viết nào"
-                : filterStatus === "published"
-                  ? "Chưa có bài viết đã xuất bản"
-                  : "Không có bài viết bị ẩn"}
-            </h3>
-            <p className="text-gray-600 mb-6">{filterStatus === "all" && "Hãy tạo bài viết đầu tiên của bạn!"}</p>
-            {filterStatus === "all" && (
-              <Button onClick={() => setIsCreateModalOpen(true)}>
-                <PlusCircle size={18} className="mr-2" />
-                Tạo bài viết đầu tiên
-              </Button>
-            )}
+            <CardContent>
+              <div className="text-6xl mb-4">📝</div>
+              <h3 className="text-xl font-bold text-gray-900 mb-2">
+                {filterStatus === "all"
+                  ? "Chưa có bài viết nào"
+                  : filterStatus === "published"
+                    ? "Chưa có bài viết đã xuất bản"
+                    : "Không có bài viết bị ẩn"}
+              </h3>
+              <p className="text-gray-600 mb-6">{filterStatus === "all" && "Hãy tạo bài viết đầu tiên của bạn!"}</p>
+              {filterStatus === "all" && (
+                <Button onClick={() => setIsCreateModalOpen(true)}>
+                  <PlusCircle size={18} className="mr-2" />
+                  Tạo bài viết đầu tiên
+                </Button>
+              )}
+            </CardContent>
           </Card>
         ) : (
           <div className="space-y-4">
             {filteredPosts.map((post) => (
-              <div key={post.id} className="relative">
-                {post.isBanned && (
-                  <div className="absolute top-4 right-4 z-10">
-                    <span className="bg-red-500 text-white px-3 py-1 rounded-full text-xs font-medium shadow-lg">
-                      Bị ẩn
-                    </span>
-                  </div>
-                )}
-                <PostCard post={post} />
-              </div>
+              <PostCard key={post.id} post={post} showBannedPosts />
             ))}
           </div>
         )}
 
         {pagination.totalPages > 1 && (
-          <Card className="mt-8 p-4">
-            <div className="flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage - 1)}
-                isDisabled={currentPage === 0}
-              >
-                Trước
-              </Button>
-              <div className="flex items-center gap-1">
-                {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
-                  let pageNum = i;
-                  if (pagination.totalPages > 5) {
-                    if (currentPage < 3) {
-                      pageNum = i;
-                    } else if (currentPage > pagination.totalPages - 3) {
-                      pageNum = pagination.totalPages - 5 + i;
-                    } else {
-                      pageNum = currentPage - 2 + i;
+          <Card className="mt-8">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  isDisabled={currentPage === 0}
+                >
+                  Trước
+                </Button>
+                <div className="flex items-center gap-1">
+                  {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                    let pageNum = i;
+                    if (pagination.totalPages > 5) {
+                      if (currentPage < 3) {
+                        pageNum = i;
+                      } else if (currentPage > pagination.totalPages - 3) {
+                        pageNum = pagination.totalPages - 5 + i;
+                      } else {
+                        pageNum = currentPage - 2 + i;
+                      }
                     }
-                  }
-                  return (
-                    <Button
-                      key={pageNum}
-                      variant={currentPage === pageNum ? "default" : "ghost"}
-                      size="sm"
-                      onClick={() => handlePageChange(pageNum)}
-                      className="w-10"
-                    >
-                      {pageNum + 1}
-                    </Button>
-                  );
-                })}
+                    return (
+                      <Button
+                        key={pageNum}
+                        variant={currentPage === pageNum ? "default" : "ghost"}
+                        size="sm"
+                        onClick={() => handlePageChange(pageNum)}
+                        className="w-10"
+                      >
+                        {pageNum + 1}
+                      </Button>
+                    );
+                  })}
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  isDisabled={currentPage === pagination.totalPages - 1}
+                >
+                  Sau
+                </Button>
               </div>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => handlePageChange(currentPage + 1)}
-                isDisabled={currentPage === pagination.totalPages - 1}
-              >
-                Sau
-              </Button>
-            </div>
+            </CardContent>
           </Card>
         )}
       </div>
