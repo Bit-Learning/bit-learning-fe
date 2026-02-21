@@ -1,7 +1,7 @@
 import React, { useState } from "react";
-import { Heart, MessageCircle, MoreVertical, Edit, Trash2 } from "lucide-react";
+import { Heart, MessageCircle, MoreVertical, Edit, Trash2, Ban, AlertTriangle } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
-import { Card } from "@workspace/ui/components/Card";
+import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Input } from "@workspace/ui/components/Input";
 import type { Comment } from "../types/forum.type";
 import {
@@ -74,12 +74,53 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
     setShowEditBox(false);
   };
 
+  const visibleReplies = comment.replies?.filter((reply) => !reply.isBanned || userInfo?.id === reply.author.id) || [];
+
+  if (comment.isBanned) {
+    return (
+      <div className="py-2">
+        <Card className="border-2 border-red-200 bg-red-50/50">
+          <CardContent>
+            <div className="flex items-start gap-3">
+              <div className="shrink-0">
+                <Ban size={20} className="text-red-600" />
+              </div>
+              <div className="flex-1">
+                <div className="flex items-center gap-2 mb-1">
+                  <AlertTriangle size={16} className="text-red-600" />
+                  <h5 className="text-sm font-bold text-red-900">Bình luận đã bị ẩn</h5>
+                </div>
+                {isAuthor ? (
+                  <div className="text-xs text-red-600 bg-red-100 border border-red-300 rounded p-2 mt-2">
+                    <p>Bình luận của bạn đã bị ẩn. Liên hệ quản trị viên nếu cần hỗ trợ.</p>
+                  </div>
+                ) : (
+                  <div className="text-xs text-red-600 bg-red-100 border border-red-300 rounded p-2 mt-2">
+                    <p>Bình luận này đã bị ẩn do vi phạm quy tắc cộng đồng.</p>
+                  </div>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {visibleReplies.length > 0 && (
+          <div className="mt-3 space-y-3 pl-4 border-l-2 border-gray-200">
+            {visibleReplies.map((reply) => (
+              <CommentItem key={reply.id} comment={reply} />
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="py-2">
       <div className="flex items-start space-x-2">
         <div className="flex-1 min-w-0">
           <Card className="bg-gray-50 border-0 p-0">
-            <div className="p-3">
+            <CardContent className="p-3">
               <div className="flex items-center justify-between mb-1">
                 <div className="flex items-center space-x-2">
                   <img
@@ -151,10 +192,10 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
                 </div>
               ) : (
                 <div className="p-2">
-                  <p className="text-lg text-gray-700 wrap-break-word">{comment.content}</p>
+                  <p className="text-sm text-gray-700 wrap-break-word">{comment.content}</p>
                 </div>
               )}
-            </div>
+            </CardContent>
           </Card>
 
           <div className="flex items-center space-x-4 mt-2 px-2 text-xs">
@@ -212,9 +253,9 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment }) => {
             </div>
           )}
 
-          {comment.replies && comment.replies.length > 0 && (
+          {visibleReplies.length > 0 && (
             <div className="mt-3 space-y-3 pl-4 border-l-2 border-gray-200">
-              {comment.replies.map((reply) => (
+              {visibleReplies.map((reply) => (
                 <CommentItem key={reply.id} comment={reply} />
               ))}
             </div>

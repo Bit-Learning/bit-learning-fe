@@ -8,13 +8,14 @@ import {
   Share2,
   Bookmark,
   Clock,
-  Eye,
   Edit,
   Trash2,
   MoreVertical,
   Loader2,
+  Ban,
+  AlertTriangle,
 } from "lucide-react";
-import { Card } from "@workspace/ui/components/Card";
+import { Card, CardContent, CardHeader, CardFooter } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import {
@@ -53,6 +54,9 @@ const PostDetailContent: React.FC = () => {
 
   const { data: commentsData } = useForumComments(Number(id));
   const comments = commentsData?.data || [];
+
+  // Filter out banned comments for non-authors
+  const visibleComments = comments.filter((comment) => !comment.isBanned || userInfo?.id === comment.author.id);
 
   const likePost = useLikeForumPost();
   const dislikePost = useDislikeForumPost();
@@ -131,14 +135,49 @@ const PostDetailContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-linear-to-b from-gray-50 to-white flex items-center justify-center">
         <Card className="p-12 text-center">
-          <div className="text-6xl mb-4">😕</div>
-          <h3 className="text-xl font-bold text-gray-900 mb-2">Không tìm thấy bài viết</h3>
-          <p className="text-gray-600 mb-6">Bài viết này có thể đã bị xóa hoặc không tồn tại</p>
-          <Button onClick={() => navigate({ to: "/forum" })}>
-            <ArrowLeft size={18} className="mr-2" />
-            Quay lại diễn đàn
-          </Button>
+          <CardContent>
+            <div className="text-6xl mb-4">😕</div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Không tìm thấy bài viết</h3>
+            <p className="text-gray-600 mb-6">Bài viết này có thể đã bị xóa hoặc không tồn tại</p>
+            <Button onClick={() => navigate({ to: "/forum" })}>
+              <ArrowLeft size={18} className="mr-2" />
+              Quay lại diễn đàn
+            </Button>
+          </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (post.isBanned && !isAuthor) {
+    return (
+      <div className="min-h-screen bg-linear-to-b from-gray-50 to-white">
+        <div className="bg-white border-b sticky top-0 z-40 shadow-sm backdrop-blur-sm">
+          <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <Button variant="ghost" size="sm" onClick={() => navigate({ to: "/forum" })}>
+              <ArrowLeft size={20} className="mr-2" />
+              Quay lại
+            </Button>
+          </div>
+        </div>
+
+        <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Card className="border-2 border-red-300 bg-red-50">
+            <CardContent className="py-12">
+              <div className="flex flex-col items-center text-center">
+                <Ban size={64} className="text-red-600 mb-4" />
+                <h2 className="text-2xl font-bold text-red-900 mb-3">Bài viết đã bị ẩn</h2>
+                <p className="text-red-700 mb-6 max-w-md">
+                  Bài viết này đã bị ẩn do vi phạm quy tắc cộng đồng và không còn khả dụng.
+                </p>
+                <Button onClick={() => navigate({ to: "/forum" })}>
+                  <ArrowLeft size={18} className="mr-2" />
+                  Quay lại diễn đàn
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     );
   }
@@ -196,8 +235,32 @@ const PostDetailContent: React.FC = () => {
       </div>
 
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {post.isBanned && isAuthor && (
+          <Card className="mb-6 border-2 border-red-500 bg-red-50">
+            <CardContent className="pt-6">
+              <div className="flex items-start gap-4">
+                <div className="shrink-0">
+                  <Ban size={32} className="text-red-600" />
+                </div>
+                <div className="flex-1">
+                  <h3 className="text-lg font-bold text-red-900 mb-2 flex items-center">
+                    <AlertTriangle size={20} className="mr-2" />
+                    Bài viết của bạn đã bị ẩn
+                  </h3>
+                  <p className="text-sm text-red-800 mb-3">
+                    Bài viết này đã bị ẩn do vi phạm quy tắc cộng đồng. Chỉ bạn mới có thể xem nội dung này.
+                  </p>
+                  <p className="text-xs text-red-700 bg-red-100 border border-red-300 rounded p-3">
+                    Vui lòng liên hệ quản trị viên nếu bạn cho rằng đây là nhầm lẫn hoặc cần thêm thông tin.
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        )}
+
         <Card className="mb-6">
-          <div className="p-6 border-b">
+          <CardHeader className="border-b">
             <div className="flex items-start justify-between mb-4">
               <div className="flex items-center gap-3">
                 <img
@@ -226,7 +289,7 @@ const PostDetailContent: React.FC = () => {
             <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
 
             {post.hashtags && post.hashtags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
+              <div className="flex flex-wrap gap-2">
                 {post.hashtags.map((tag) => (
                   <Link key={tag.id} to="/forum" search={{ tag: tag.name }}>
                     <Badge variant="secondary" className="cursor-pointer hover:bg-blue-100 transition-colors">
@@ -236,9 +299,9 @@ const PostDetailContent: React.FC = () => {
                 ))}
               </div>
             )}
-          </div>
+          </CardHeader>
 
-          <div className="p-6 border-b">
+          <CardContent className="border-b">
             <div className="prose max-w-none">
               <p className="text-gray-700 whitespace-pre-wrap leading-relaxed">{post.content}</p>
             </div>
@@ -258,10 +321,10 @@ const PostDetailContent: React.FC = () => {
                 ))}
               </div>
             )}
-          </div>
+          </CardContent>
 
-          <div className="p-6">
-            <div className="flex items-center justify-between mb-4 pb-4 border-b">
+          <CardFooter className="flex-col space-y-4">
+            <div className="w-full flex items-center justify-between pb-4 border-b">
               <div className="flex items-center gap-4 text-sm text-gray-600">
                 <span className="flex items-center gap-1">
                   <Heart size={16} className="text-red-500" />
@@ -273,7 +336,7 @@ const PostDetailContent: React.FC = () => {
                 </span>
                 <span className="flex items-center gap-1">
                   <MessageCircle size={16} className="text-blue-500" />
-                  {comments.length} bình luận
+                  {visibleComments.length} bình luận
                 </span>
               </div>
               <Button variant="ghost" size="sm">
@@ -281,7 +344,7 @@ const PostDetailContent: React.FC = () => {
               </Button>
             </div>
 
-            <div className="grid grid-cols-4 gap-2">
+            <div className="w-full grid grid-cols-4 gap-2">
               <Button variant={isLiked ? "default" : "outline"} onClick={handleLike}>
                 <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
                 <span className="ml-2 hidden sm:inline">Thích</span>
@@ -302,18 +365,18 @@ const PostDetailContent: React.FC = () => {
                 <span className="ml-2 hidden sm:inline">Chia sẻ</span>
               </Button>
             </div>
-          </div>
+          </CardFooter>
         </Card>
 
         <Card>
-          <div className="p-6 border-b">
+          <CardHeader className="border-b">
             <h3 className="text-xl font-bold text-gray-900 flex items-center">
               <MessageCircle size={22} className="mr-2 text-blue-600" />
-              Bình luận ({comments.length})
+              Bình luận ({visibleComments.length})
             </h3>
-          </div>
+          </CardHeader>
 
-          <div className="p-6 border-b bg-gray-50">
+          <CardContent className="border-b bg-gray-50">
             <div className="flex items-start gap-3">
               <img
                 src={userInfo?.avatar || "/default-avatar.png"}
@@ -336,25 +399,23 @@ const PostDetailContent: React.FC = () => {
                 </div>
               </div>
             </div>
-          </div>
+          </CardContent>
 
-          <div className="divide-y">
-            {comments.length === 0 ? (
-              <div className="p-12 text-center">
+          <CardContent>
+            {visibleComments.length === 0 ? (
+              <div className="py-12 text-center">
                 <MessageCircle size={48} className="mx-auto text-gray-300 mb-3" />
                 <p className="text-gray-500">Chưa có bình luận nào</p>
                 <p className="text-sm text-gray-400 mt-1">Hãy là người đầu tiên bình luận!</p>
               </div>
             ) : (
-              <div className="p-6">
-                <div className="space-y-4">
-                  {comments.map((comment) => (
-                    <CommentItem key={comment.id} comment={comment} />
-                  ))}
-                </div>
+              <div className="space-y-4">
+                {visibleComments.map((comment) => (
+                  <CommentItem key={comment.id} comment={comment} />
+                ))}
               </div>
             )}
-          </div>
+          </CardContent>
         </Card>
       </div>
 

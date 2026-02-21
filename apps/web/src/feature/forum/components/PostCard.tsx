@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link } from "@tanstack/react-router";
 import { Heart, MessageCircle, Share2, ThumbsDown, Edit, Trash2, MoreVertical } from "lucide-react";
-import { Card } from "@workspace/ui/components/Card";
+import { Card, CardContent, CardHeader, CardFooter } from "@workspace/ui/components/Card";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import type { Post } from "../types/forum.type";
@@ -21,9 +21,10 @@ interface PostCardProps {
   post: Post;
   onCommentClick?: () => void;
   showActions?: boolean;
+  showBannedPosts?: boolean;
 }
 
-const PostCard: React.FC<PostCardProps> = ({ post, showActions = false }) => {
+const PostCard: React.FC<PostCardProps> = ({ post, showActions = false, showBannedPosts = false }) => {
   const [isLiked, setIsLiked] = useState(false);
   const [isDisliked, setIsDisliked] = useState(false);
   const [showMenu, setShowMenu] = useState(false);
@@ -79,10 +80,22 @@ const PostCard: React.FC<PostCardProps> = ({ post, showActions = false }) => {
     }
   };
 
+  if (post.isBanned && !showBannedPosts) {
+    return null;
+  }
+
   return (
     <>
-      <Card className="hover:shadow-lg transition-shadow duration-200">
-        <div className="p-4 flex items-start justify-between border-b">
+      <Card className="hover:shadow-lg transition-shadow duration-200 relative">
+        {post.isBanned && showBannedPosts && (
+          <div className="absolute top-4 right-4 z-10">
+            <Badge variant="destructive" className="shadow-lg">
+              🔒 Bị khóa
+            </Badge>
+          </div>
+        )}
+
+        <CardHeader className="flex-row items-start justify-between border-b">
           <div className="flex items-center space-x-3">
             <img
               src={post.author.avatar || "/default-avatar.png"}
@@ -136,45 +149,51 @@ const PostCard: React.FC<PostCardProps> = ({ post, showActions = false }) => {
               )}
             </div>
           )}
-        </div>
+        </CardHeader>
 
-        <Link to="/forum/post/$id" params={{ id: post.id.toString() }} className="block p-4">
-          <h3 className="text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors">{post.title}</h3>
-          <p className="text-gray-700 line-clamp-3 mb-3">{post.content}</p>
+        <Link to="/forum/post/$id" params={{ id: post.id.toString() }}>
+          <CardContent className="pt-4">
+            <h3 className="text-xl font-bold text-gray-900 mb-2 hover:text-blue-600 transition-colors">{post.title}</h3>
+            <p className="text-gray-700 line-clamp-3 mb-3">{post.content}</p>
 
-          {post.hashtags && post.hashtags.length > 0 && (
-            <div className="flex flex-wrap gap-2 mb-3">
-              {post.hashtags.map((tag) => (
-                <Badge key={tag.id} variant="secondary" className="cursor-pointer hover:bg-blue-100 transition-colors">
-                  #{tag.name}
-                </Badge>
-              ))}
-            </div>
-          )}
+            {post.hashtags && post.hashtags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mb-3">
+                {post.hashtags.map((tag) => (
+                  <Badge
+                    key={tag.id}
+                    variant="secondary"
+                    className="cursor-pointer hover:bg-blue-100 transition-colors"
+                  >
+                    #{tag.name}
+                  </Badge>
+                ))}
+              </div>
+            )}
 
-          {post.attachments && post.attachments.length > 0 && (
-            <div className="grid grid-cols-2 gap-2 mb-3">
-              {post.attachments.slice(0, 4).map((attachment) => (
-                <div key={attachment.id} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
-                  {attachment.type === "IMAGE" ? (
-                    <img
-                      src={attachment.url}
-                      alt="attachment"
-                      className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
-                    />
-                  ) : (
-                    <div className="w-full h-full flex items-center justify-center">
-                      <span className="text-gray-500">📄 File đính kèm</span>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
+            {post.attachments && post.attachments.length > 0 && (
+              <div className="grid grid-cols-2 gap-2">
+                {post.attachments.slice(0, 4).map((attachment) => (
+                  <div key={attachment.id} className="relative aspect-video rounded-lg overflow-hidden bg-gray-100">
+                    {attachment.type === "IMAGE" ? (
+                      <img
+                        src={attachment.url}
+                        alt="attachment"
+                        className="w-full h-full object-cover hover:scale-105 transition-transform duration-200"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center">
+                        <span className="text-gray-500">📄 File đính kèm</span>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
         </Link>
 
-        <div className="px-4 pb-3">
-          <div className="flex items-center gap-3 text-sm text-gray-500 mb-3 py-2 border-t">
+        <CardFooter className="flex-col space-y-3 pt-0">
+          <div className="w-full flex items-center gap-3 text-sm text-gray-500 py-2 border-t">
             <span className="flex items-center gap-1">
               <Heart size={16} className="text-red-500" />
               {post.likes} lượt thích
@@ -185,7 +204,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, showActions = false }) => {
             </span>
           </div>
 
-          <div className="grid grid-cols-4 gap-2">
+          <div className="w-full grid grid-cols-4 gap-2">
             <Button variant={isLiked ? "default" : "ghost"} size="sm" onClick={handleLike} className="w-full">
               <Heart size={18} fill={isLiked ? "currentColor" : "none"} />
               <span className="ml-1 hidden sm:inline">Thích</span>
@@ -208,7 +227,7 @@ const PostCard: React.FC<PostCardProps> = ({ post, showActions = false }) => {
               <span className="ml-1 hidden sm:inline">Chia sẻ</span>
             </Button>
           </div>
-        </div>
+        </CardFooter>
       </Card>
 
       <EditPostModal isOpen={isEditModalOpen} onClose={() => setIsEditModalOpen(false)} post={post} />
