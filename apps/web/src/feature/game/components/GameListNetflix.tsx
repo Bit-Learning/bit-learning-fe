@@ -145,11 +145,13 @@ export default function GameListNetflix({
 		const droppedFiles = e.dataTransfer.files;
 		if (droppedFiles && droppedFiles.length > 0) {
 			const droppedFile = droppedFiles[0];
-			const fileExtension = droppedFile.name.split(".").pop()?.toLowerCase();
-			if (fileExtension === "html" || fileExtension === "zip") {
-				setFile(droppedFile);
-			} else {
-				alert("Please upload only .html or .zip files");
+			if (droppedFile) {
+				const fileExtension = droppedFile.name.split(".").pop()?.toLowerCase();
+				if (fileExtension === "html" || fileExtension === "zip") {
+					setFile(droppedFile);
+				} else {
+					alert("Please upload only .html or .zip files");
+				}
 			}
 		}
 	};
@@ -726,9 +728,7 @@ export default function GameListNetflix({
 											type="file"
 											id="file-upload"
 											accept=".html,.zip"
-											onChange={(e) =>
-												setFile(e.target.files ? e.target.files[0] : null)
-											}
+											onChange={(e) => setFile(e.target.files?.[0] || null)}
 											className="hidden"
 											required={!file}
 										/>
