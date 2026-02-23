@@ -1,9 +1,8 @@
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Plus, Search, Download, Eye, FileText, Clock, Award, Calendar } from "lucide-react";
+import { Plus, Search, Download, Eye, FileText, Clock, MoreVertical } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
-import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useMyExams, useDownloadExam } from "../queries/useExam";
 
@@ -12,6 +11,7 @@ const MyExamsContent: React.FC = () => {
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [size] = useState(10);
+  const [openMenuId, setOpenMenuId] = useState<number | null>(null);
 
   const { data: response, isLoading } = useMyExams({ page, size, search });
   const downloadExam = useDownloadExam();
@@ -21,180 +21,228 @@ const MyExamsContent: React.FC = () => {
 
   const handleDownload = (examId: number, examName: string, format: "pdf" | "docx") => {
     downloadExam.mutate({ id: examId, format, name: examName });
+    setOpenMenuId(null);
+  };
+
+  const getStatusBadge = (isPublished: boolean) => {
+    if (isPublished) {
+      return (
+        <span className="px-2 py-1 rounded text-xs font-medium bg-green-100 text-green-700 dark:bg-green-900 dark:text-green-300">
+          Đã xuất bản
+        </span>
+      );
+    }
+    return (
+      <span className="px-2 py-1 rounded text-xs font-medium bg-gray-100 text-gray-700 dark:bg-gray-800 dark:text-gray-300">
+        Nháp
+      </span>
+    );
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
-        <div>
-          <h1 className="text-3xl font-bold">Đề thi của tôi</h1>
-          <p className="text-muted-foreground">Quản lý các đề thi bạn đã tạo</p>
-        </div>
-        <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Tạo đề thi mới
-        </Button>
-      </div>
-
-      <div className="flex flex-col md:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm theo tên hoặc mã đề thi..."
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            className="pl-10"
-          />
-        </div>
-      </div>
-
-      {isLoading ? (
-        <div className="grid grid-cols-1 gap-4">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-48 w-full rounded-lg" />
-          ))}
-        </div>
-      ) : !exams.length ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-16">
-            <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-            <h3 className="text-xl font-semibold mb-2">{search ? "Không tìm thấy đề thi" : "Chưa có đề thi nào"}</h3>
-            <p className="text-muted-foreground mb-6">
-              {search ? "Thử tìm kiếm với từ khóa khác" : "Bắt đầu bằng cách tạo đề thi đầu tiên"}
-            </p>
-            {!search && (
-              <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
-                <Plus className="h-4 w-4" />
-                Tạo đề thi mới
-              </Button>
-            )}
-          </CardContent>
-        </Card>
-      ) : (
-        <>
-          <div className="mb-4 flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Tìm thấy <span className="font-semibold">{pagination?.totalElements || 0}</span> đề thi
-            </p>
-          </div>
-
-          <div className="space-y-4">
-            {exams.map((exam) => (
-              <Card key={exam.id} className="hover:shadow-lg transition-all duration-200 hover:border-primary/50">
-                <CardContent className="p-6">
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1 min-w-0">
-                      <div className="flex items-center gap-2 mb-2">
-                        <h3 className="text-lg font-semibold truncate">{exam.name}</h3>
-                        {exam.isPublished && (
-                          <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-                            Đã công bố
-                          </span>
-                        )}
-                      </div>
-                      <p className="text-sm text-muted-foreground mb-4">Mã đề: {exam.code}</p>
-
-                      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
-                            <Clock className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Thời gian</p>
-                            <p className="text-sm font-semibold">{exam.durationInMinutes} phút</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900">
-                            <Award className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Tổng điểm</p>
-                            <p className="text-sm font-semibold">{exam.totalScore}</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900">
-                            <FileText className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Câu hỏi</p>
-                            <p className="text-sm font-semibold">{exam.totalQuestions || 0} câu</p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2">
-                          <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-                            <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                          </div>
-                          <div>
-                            <p className="text-xs text-muted-foreground">Ngày tạo</p>
-                            <p className="text-sm font-semibold">
-                              {new Date(exam.createdAt).toLocaleDateString("vi-VN")}
-                            </p>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-
-                  <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => navigate({ to: `/exams/${exam.id}` })}
-                      className="gap-2"
-                    >
-                      <Eye className="h-4 w-4" />
-                      Xem chi tiết
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(exam.id, exam.name, "pdf")}
-                      className="gap-2"
-                      isDisabled={downloadExam.isPending}
-                    >
-                      <Download className="h-4 w-4" />
-                      Tải PDF
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleDownload(exam.id, exam.name, "docx")}
-                      className="gap-2"
-                      isDisabled={downloadExam.isPending}
-                    >
-                      <Download className="h-4 w-4" />
-                      Tải Word
-                    </Button>
-                  </div>
-                </CardContent>
-              </Card>
-            ))}
-          </div>
-
-          {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mt-8">
-              <Button variant="outline" onClick={() => setPage((p) => Math.max(0, p - 1))} isDisabled={page === 0}>
-                Trước
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Trang {page + 1} / {pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={() => setPage((p) => p + 1)}
-                isDisabled={page >= pagination.totalPages - 1}
-              >
-                Sau
-              </Button>
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="container mx-auto p-6 max-w-7xl">
+        <div className="mb-8">
+          <div className="flex items-center justify-between mb-2">
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Đề thi của tôi</h1>
+              <p className="text-gray-600 dark:text-gray-400 mt-1">Quản lý các đề thi bạn đã tạo cho học sinh</p>
             </div>
+            <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
+              <Plus className="h-4 w-4" />
+              Tạo đề thi mới
+            </Button>
+          </div>
+        </div>
+
+        <div className="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
+          <div className="p-6 border-b border-gray-200 dark:border-gray-700">
+            <div className="relative">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+              <Input
+                placeholder="Tìm kiếm theo tên hoặc mã đề thi..."
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                className="pl-10 bg-white dark:bg-gray-800"
+              />
+            </div>
+          </div>
+
+          {isLoading ? (
+            <div className="p-6 space-y-2">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
+            </div>
+          ) : !exams.length ? (
+            <div className="p-16 text-center">
+              <div className="flex flex-col items-center">
+                <FileText className="h-16 w-16 text-gray-400 mb-4" />
+                <h3 className="text-xl font-semibold mb-2 text-gray-900 dark:text-white">
+                  {search ? "Không tìm thấy đề thi" : "Chưa có đề thi nào"}
+                </h3>
+                <p className="text-gray-600 dark:text-gray-400 mb-6">
+                  {search ? "Thử tìm kiếm với từ khóa khác" : "Bắt đầu bằng cách tạo đề thi đầu tiên"}
+                </p>
+                {!search && (
+                  <Button
+                    onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
+                    className="gap-2"
+                  >
+                    <Plus className="h-4 w-4" />
+                    Tạo đề thi mới
+                  </Button>
+                )}
+              </div>
+            </div>
+          ) : (
+            <>
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead>
+                    <tr className="border-b border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800/50">
+                      <th className="text-left p-4 font-semibold text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        THÔNG TIN ĐỀ THI
+                      </th>
+                      <th className="text-left p-4 font-semibold text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        MÃ ĐỀ
+                      </th>
+                      <th className="text-left p-4 font-semibold text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        THỜI GIAN
+                      </th>
+                      <th className="text-left p-4 font-semibold text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        THÁNG ĐIỂM
+                      </th>
+                      <th className="text-left p-4 font-semibold text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        TRẠNG THÁI
+                      </th>
+                      <th className="text-center p-4 font-semibold text-xs text-gray-600 dark:text-gray-400 uppercase tracking-wider">
+                        THAO TÁC
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white dark:bg-gray-800">
+                    {exams.map((exam) => (
+                      <tr
+                        key={exam.id}
+                        className="border-b border-gray-200 dark:border-gray-700 last:border-b-0 hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors"
+                      >
+                        <td className="p-4">
+                          <div className="flex items-start gap-3">
+                            <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 shrink-0">
+                              <FileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <p className="font-semibold text-gray-900 dark:text-white line-clamp-1">{exam.name}</p>
+                              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">
+                                Cập nhật {new Date(exam.createdAt).toLocaleDateString("vi-VN")}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="font-mono text-sm text-gray-700 dark:text-gray-300">{exam.code}</span>
+                        </td>
+                        <td className="p-4">
+                          <div className="flex items-center gap-1 text-sm text-gray-700 dark:text-gray-300">
+                            <Clock className="h-4 w-4 text-gray-400" />
+                            <span>{exam.durationInMinutes} ph</span>
+                          </div>
+                        </td>
+                        <td className="p-4">
+                          <span className="text-sm font-semibold text-gray-900 dark:text-white">{exam.totalScore}</span>
+                        </td>
+                        <td className="p-4">{getStatusBadge(exam.isPublished)}</td>
+                        <td className="p-4">
+                          <div className="flex items-center justify-center gap-1 relative">
+                            <button
+                              className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 dark:text-gray-400 dark:hover:text-primary dark:hover:bg-gray-700 rounded transition-colors"
+                              onClick={() => navigate({ to: `/mentor/exam/${exam.id}` })}
+                              title="Xem chi tiết"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="p-4 border-t border-gray-200 dark:border-gray-700 flex items-center justify-between">
+                <p className="text-sm text-gray-600 dark:text-gray-400">
+                  Hiển thị <span className="font-semibold text-gray-900 dark:text-white">{page * size + 1}</span> đến{" "}
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {Math.min((page + 1) * size, pagination?.totalElements || exams.length)}
+                  </span>{" "}
+                  trong{" "}
+                  <span className="font-semibold text-gray-900 dark:text-white">
+                    {pagination?.totalElements || exams.length}
+                  </span>{" "}
+                  đề thi
+                </p>
+
+                {pagination && pagination.totalPages > 1 && (
+                  <div className="flex items-center gap-1">
+                    <button
+                      className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setPage((p) => Math.max(0, p - 1))}
+                      disabled={page === 0}
+                    >
+                      ‹
+                    </button>
+
+                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
+                      let pageNum = i;
+                      if (pagination.totalPages > 5) {
+                        if (page > 2 && page < pagination.totalPages - 3) {
+                          pageNum = page - 2 + i;
+                        } else if (page >= pagination.totalPages - 3) {
+                          pageNum = pagination.totalPages - 5 + i;
+                        }
+                      }
+                      return (
+                        <button
+                          key={pageNum}
+                          onClick={() => setPage(pageNum)}
+                          className={`min-w-8 h-8 px-3 rounded ${
+                            page === pageNum
+                              ? "bg-primary text-white"
+                              : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                          }`}
+                        >
+                          {pageNum + 1}
+                        </button>
+                      );
+                    })}
+
+                    {pagination.totalPages > 5 && page < pagination.totalPages - 3 && (
+                      <>
+                        <span className="px-2 text-gray-600 dark:text-gray-400">...</span>
+                        <button
+                          onClick={() => setPage(pagination.totalPages - 1)}
+                          className="min-w-8 h-8 px-3 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
+                        >
+                          {pagination.totalPages}
+                        </button>
+                      </>
+                    )}
+
+                    <button
+                      className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                      onClick={() => setPage((p) => p + 1)}
+                      disabled={page >= pagination.totalPages - 1}
+                    >
+                      ›
+                    </button>
+                  </div>
+                )}
+              </div>
+            </>
           )}
-        </>
-      )}
+        </div>
+      </div>
     </div>
   );
 };
