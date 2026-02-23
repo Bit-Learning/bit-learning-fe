@@ -2,7 +2,7 @@ import { useRouter } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import { cn } from "@workspace/ui/lib/utils";
-import { Award, BookOpen, ChevronLeft, Code, FileQuestion, LayoutDashboard, Puzzle } from "lucide-react";
+import { Award, BookOpen, ChevronLeft, Code, FileQuestion, FileText, LayoutDashboard, Puzzle } from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -37,6 +37,12 @@ const menuItems = [
     label: "Ma trận đề thi",
     icon: Puzzle,
     path: "/mentor/matrix",
+  },
+  {
+    id: "exams",
+    label: "Tạo đề thi",
+    icon: FileText,
+    path: "/mentor/exam/my",
   },
   {
     id: "questions",

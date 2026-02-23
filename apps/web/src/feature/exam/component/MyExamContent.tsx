@@ -30,7 +30,7 @@ const MyExamsContent: React.FC = () => {
           <h1 className="text-3xl font-bold">Đề thi của tôi</h1>
           <p className="text-muted-foreground">Quản lý các đề thi bạn đã tạo</p>
         </div>
-        <Button onClick={() => navigate({ to: "/questions/generate-from-questions" })} className="gap-2">
+        <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
           <Plus className="h-4 w-4" />
           Tạo đề thi mới
         </Button>
@@ -63,7 +63,7 @@ const MyExamsContent: React.FC = () => {
               {search ? "Thử tìm kiếm với từ khóa khác" : "Bắt đầu bằng cách tạo đề thi đầu tiên"}
             </p>
             {!search && (
-              <Button onClick={() => navigate({ to: "/questions/generate-from-questions" })} className="gap-2">
+              <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Tạo đề thi mới
               </Button>

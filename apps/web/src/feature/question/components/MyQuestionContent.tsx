@@ -42,7 +42,7 @@ const MyQuestionsContent: React.FC = () => {
           <h1 className="text-3xl font-bold">Câu hỏi của tôi</h1>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => navigate({ to: "/questions/generate-from-questions" })} className="gap-2">
+          <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
             <FileText className="h-4 w-4" />
             Tạo đề thi
           </Button>
@@ -84,7 +84,7 @@ const MyQuestionsContent: React.FC = () => {
               {search ? "Thử tìm kiếm với từ khóa khác" : "Bắt đầu bằng cách import câu hỏi đầu tiên của bạn"}
             </p>
             {!search && (
-              <Button onClick={() => navigate({ to: "/matrices/import" })} className="gap-2">
+              <Button onClick={() => navigate({ to: "/mentor/matrix/import" })} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Import câu hỏi
               </Button>

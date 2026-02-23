@@ -219,7 +219,7 @@ const ImportQuestionForm: React.FC = () => {
                       file khác.
                     </p>
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => navigate({ to: "/questions" })}>
+                      <Button size="sm" onClick={() => navigate({ to: "/mentor/question/my" })}>
                         Xem danh sách câu hỏi
                       </Button>
                       <Button size="sm" variant="outline" onClick={handleReset}>

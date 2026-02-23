@@ -52,7 +52,7 @@ const MatrixListContent: React.FC = () => {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => navigate({ to: "/exams/my-exams" })}>
+          <Button variant="outline" className="gap-2" onClick={() => navigate({ to: "/mentor/exam/my" })}>
             <FileText className="h-4 w-4" />
             Đề thi của tôi
           </Button>

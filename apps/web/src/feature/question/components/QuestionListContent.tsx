@@ -31,7 +31,7 @@ const QuestionListContent: React.FC = () => {
           <p className="text-muted-foreground">Quản lý và tìm kiếm câu hỏi</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => navigate({ to: "/questions/generate-from-questions" })} className="gap-2">
+          <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
             <FileText className="h-4 w-4" />
             Tạo đề thi
           </Button>
@@ -43,7 +43,7 @@ const QuestionListContent: React.FC = () => {
             <User2 className="h-4 w-4" />
             Câu hỏi của tôi
           </Button>
-          <Button variant="outline" onClick={() => navigate({ to: "/matrices/import" })} className="gap-2">
+          <Button variant="outline" onClick={() => navigate({ to: "/mentor/matrix/import" })} className="gap-2">
             <Upload className="h-4 w-4" />
             Import
           </Button>
