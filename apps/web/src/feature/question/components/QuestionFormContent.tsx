@@ -140,14 +140,14 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
         { id: questionId, data: requestData },
         {
           onSuccess: () => {
-            navigate({ to: `/questions/${questionId}` });
+            navigate({ to: `/mentor/question/${questionId}` });
           },
         },
       );
     } else {
       createQuestion.mutate(requestData, {
         onSuccess: () => {
-          navigate({ to: "/questions" });
+          navigate({ to: "/mentor/question" });
         },
       });
     }
@@ -180,7 +180,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
       <div className="mb-6">
         <Button
           variant="ghost"
-          onClick={() => navigate({ to: mode === "edit" ? `/questions/${questionId}` : "/questions/my" })}
+          onClick={() => navigate({ to: mode === "edit" ? `/mentor/question/${questionId}` : "/mentor/question/my" })}
           className="gap-2 mb-4"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -357,7 +357,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate({ to: mode === "edit" ? `/questions/${questionId}` : "/questions" })}
+            onClick={() => navigate({ to: mode === "edit" ? `/mentor/question/${questionId}` : "/mentor/question" })}
           >
             Hủy
           </Button>

@@ -35,11 +35,11 @@ const QuestionListContent: React.FC = () => {
             <FileText className="h-4 w-4" />
             Tạo đề thi
           </Button>
-          <Button onClick={() => navigate({ to: "/questions/create" })} className="gap-2">
+          <Button onClick={() => navigate({ to: "/mentor/question/create" })} className="gap-2">
             <FileQuestionIcon className="h-4 w-4" />
             Tạo câu hỏi
           </Button>
-          <Button variant="outline" onClick={() => navigate({ to: "/questions/my" })} className="gap-2">
+          <Button variant="outline" onClick={() => navigate({ to: "/mentor/question/my" })} className="gap-2">
             <User2 className="h-4 w-4" />
             Câu hỏi của tôi
           </Button>
@@ -78,7 +78,7 @@ const QuestionListContent: React.FC = () => {
             <BookOpen className="h-16 w-16 text-muted-foreground mb-4" />
             <h3 className="text-xl font-semibold mb-2">{search ? "Không tìm thấy câu hỏi" : "Chưa có câu hỏi nào"}</h3>
             {!search && (
-              <Button onClick={() => navigate({ to: "/questions/create" })} className="gap-2">
+              <Button onClick={() => navigate({ to: "/mentor/question/create" })} className="gap-2">
                 <FileQuestionIcon className="h-4 w-4" />
                 Tạo câu hỏi
               </Button>
@@ -98,8 +98,8 @@ const QuestionListContent: React.FC = () => {
               <QuestionCard
                 key={question.id}
                 question={question}
-                onView={() => navigate({ to: "/questions/$id", params: { id: question.id.toString() } })}
-                onEdit={() => navigate({ to: "/questions/$id/edit", params: { id: question.id.toString() } })}
+                onView={() => navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } })}
+                onEdit={() => navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } })}
               />
             ))}
           </div>
