@@ -122,9 +122,9 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/questions" })} className="gap-2 mb-4">
+        <Button variant="ghost" onClick={() => navigate({ to: "/mentor/exam/my" })} className="gap-2 mb-4">
           <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách câu hỏi
+          Quay lại danh sách
         </Button>
         <h1 className="text-3xl font-bold mb-2">Tạo đề thi từ ngân hàng câu hỏi</h1>
         <p className="text-muted-foreground">Chọn câu hỏi và tạo đề thi tùy chỉnh</p>

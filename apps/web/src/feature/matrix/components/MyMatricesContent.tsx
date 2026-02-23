@@ -22,13 +22,13 @@ const MyMatricesContent: React.FC = () => {
   const pagination = response?.page;
 
   const filtered = matrices.filter(
-    (m) => m.name.toLowerCase().includes(search.toLowerCase()) || m.code.toLowerCase().includes(search.toLowerCase())
+    (m) => m.name.toLowerCase().includes(search.toLowerCase()) || m.code.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
     <div className="container mx-auto p-6">
       <div className="mb-6">
-        <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate({ to: "/matrices" })}>
+        <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate({ to: "/mentor/matrix" })}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Quay lại
         </Button>
@@ -80,8 +80,8 @@ const MyMatricesContent: React.FC = () => {
                 key={matrix.id}
                 matrix={matrix}
                 onEdit={() => setModal({ open: true, data: matrix })}
-                onGenerate={() => navigate({ to: "/matrices/$id/generate", params: { id: matrix.id.toString() } })}
-                onViewDetail={() => navigate({ to: "/matrices/$id", params: { id: matrix.id.toString() } })}
+                onGenerate={() => navigate({ to: "/mentor/matrix/$id/generate", params: { id: matrix.id.toString() } })}
+                onViewDetail={() => navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } })}
               />
             ))}
           </div>

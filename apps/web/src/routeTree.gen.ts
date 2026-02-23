@@ -39,20 +39,29 @@ import { Route as LayoutCartRouteImport } from './routes/_layout/cart'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
 import { Route as HeaderOnlyUserProfileRouteImport } from './routes/_headerOnly/user-profile'
 import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
+import { Route as MentorQuestionIndexRouteImport } from './routes/mentor/question/index'
 import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
+import { Route as MentorMatrixIndexRouteImport } from './routes/mentor/matrix/index'
 import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
 import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
 import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
-import { Route as LayoutQuestionsIndexRouteImport } from './routes/_layout/questions/index'
 import { Route as LayoutProblemIndexRouteImport } from './routes/_layout/problem/index'
 import { Route as LayoutNewsIndexRouteImport } from './routes/_layout/news/index'
-import { Route as LayoutMatricesIndexRouteImport } from './routes/_layout/matrices/index'
 import { Route as LayoutForumIndexRouteImport } from './routes/_layout/forum/index'
 import { Route as LayoutDashboardIndexRouteImport } from './routes/_layout/dashboard/index'
 import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
 import { Route as LayoutCheckoutIndexRouteImport } from './routes/_layout/checkout/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
+import { Route as MentorQuestionMyRouteImport } from './routes/mentor/question/my'
+import { Route as MentorQuestionGenerateFromQuestionsRouteImport } from './routes/mentor/question/generate-from-questions'
+import { Route as MentorQuestionCreateRouteImport } from './routes/mentor/question/create'
 import { Route as MentorProblemCreateRouteImport } from './routes/mentor/problem/create'
+import { Route as MentorMatrixMyRouteImport } from './routes/mentor/matrix/my'
+import { Route as MentorMatrixImportRouteImport } from './routes/mentor/matrix/import'
+import { Route as MentorMatrixCreateRouteImport } from './routes/mentor/matrix/create'
+import { Route as MentorExamMyRouteImport } from './routes/mentor/exam/my'
+import { Route as MentorExamGenerateRouteImport } from './routes/mentor/exam/generate'
+import { Route as MentorExamIdRouteImport } from './routes/mentor/exam/$id'
 import { Route as MentorCourseQuizRouteImport } from './routes/mentor/course/quiz'
 import { Route as MentorCourseListRouteImport } from './routes/mentor/course/list'
 import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/create'
@@ -67,34 +76,25 @@ import { Route as LayoutTemplatesDashboardRouteImport } from './routes/_layout/t
 import { Route as LayoutTemplatesIdRouteImport } from './routes/_layout/templates/$id'
 import { Route as LayoutSyllabusesMyRouteImport } from './routes/_layout/syllabuses/my'
 import { Route as LayoutSyllabusesCreateRouteImport } from './routes/_layout/syllabuses/create'
-import { Route as LayoutQuestionsMyRouteImport } from './routes/_layout/questions/my'
-import { Route as LayoutQuestionsGenerateFromQuestionsRouteImport } from './routes/_layout/questions/generate-from-questions'
-import { Route as LayoutQuestionsCreateRouteImport } from './routes/_layout/questions/create'
 import { Route as LayoutProblemIdRouteImport } from './routes/_layout/problem/$id'
 import { Route as LayoutNewsIdRouteImport } from './routes/_layout/news/$id'
-import { Route as LayoutMatricesMyRouteImport } from './routes/_layout/matrices/my'
-import { Route as LayoutMatricesImportRouteImport } from './routes/_layout/matrices/import'
-import { Route as LayoutMatricesCreateRouteImport } from './routes/_layout/matrices/create'
-import { Route as LayoutMatricesIdRouteImport } from './routes/_layout/matrices/$id'
 import { Route as LayoutLecturesIdRouteImport } from './routes/_layout/lectures/$id'
 import { Route as LayoutInternalTestLoaderRouteImport } from './routes/_layout/internal/test-loader'
 import { Route as LayoutForumMyRouteImport } from './routes/_layout/forum/my'
-import { Route as LayoutExamsMyExamsRouteImport } from './routes/_layout/exams/my-exams'
-import { Route as LayoutExamsGenerateRouteImport } from './routes/_layout/exams/generate'
-import { Route as LayoutExamsIdRouteImport } from './routes/_layout/exams/$id'
 import { Route as LayoutCoursesWebDevelopmentRouteImport } from './routes/_layout/courses/web-development'
 import { Route as LayoutCoursesMobileDevelopmentRouteImport } from './routes/_layout/courses/mobile-development'
 import { Route as LayoutCoursesDataScienceRouteImport } from './routes/_layout/courses/data-science'
 import { Route as LayoutCoursesBackendDevelopmentRouteImport } from './routes/_layout/courses/backend-development'
 import { Route as LayoutCoursesIdRouteImport } from './routes/_layout/courses/$id'
+import { Route as MentorQuestionIdIndexRouteImport } from './routes/mentor/question/$id/index'
+import { Route as MentorMatrixIdIndexRouteImport } from './routes/mentor/matrix/$id/index'
 import { Route as LayoutTemplatesSlidevIndexRouteImport } from './routes/_layout/templates/slidev/index'
 import { Route as LayoutSyllabusesIdIndexRouteImport } from './routes/_layout/syllabuses/$id/index'
-import { Route as LayoutQuestionsIdIndexRouteImport } from './routes/_layout/questions/$id/index'
+import { Route as MentorQuestionIdEditRouteImport } from './routes/mentor/question/$id/edit'
+import { Route as MentorMatrixIdGenerateRouteImport } from './routes/mentor/matrix/$id/generate'
+import { Route as MentorMatrixIdEditRouteImport } from './routes/mentor/matrix/$id/edit'
 import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
 import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
-import { Route as LayoutQuestionsIdEditRouteImport } from './routes/_layout/questions/$id/edit'
-import { Route as LayoutMatricesIdGenerateRouteImport } from './routes/_layout/matrices/$id.generate'
-import { Route as LayoutMatricesIdEditRouteImport } from './routes/_layout/matrices/$id.edit'
 import { Route as LayoutForumPostIdRouteImport } from './routes/_layout/forum/post.$id'
 import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
 import { Route as LayoutTemplatesSlidevIdEditRouteImport } from './routes/_layout/templates/slidev/$id/edit'
@@ -247,9 +247,19 @@ const HeaderOnlyAiChatbotRoute = HeaderOnlyAiChatbotRouteImport.update({
   path: '/ai-chatbot',
   getParentRoute: () => HeaderOnlyRoute,
 } as any)
+const MentorQuestionIndexRoute = MentorQuestionIndexRouteImport.update({
+  id: '/mentor/question/',
+  path: '/mentor/question/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentorProblemIndexRoute = MentorProblemIndexRouteImport.update({
   id: '/mentor/problem/',
   path: '/mentor/problem/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMatrixIndexRoute = MentorMatrixIndexRouteImport.update({
+  id: '/mentor/matrix/',
+  path: '/mentor/matrix/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentorDashboardIndexRoute = MentorDashboardIndexRouteImport.update({
@@ -267,11 +277,6 @@ const LayoutSyllabusesIndexRoute = LayoutSyllabusesIndexRouteImport.update({
   path: '/syllabuses/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutQuestionsIndexRoute = LayoutQuestionsIndexRouteImport.update({
-  id: '/questions/',
-  path: '/questions/',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutProblemIndexRoute = LayoutProblemIndexRouteImport.update({
   id: '/problem/',
   path: '/problem/',
@@ -280,11 +285,6 @@ const LayoutProblemIndexRoute = LayoutProblemIndexRouteImport.update({
 const LayoutNewsIndexRoute = LayoutNewsIndexRouteImport.update({
   id: '/news/',
   path: '/news/',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutMatricesIndexRoute = LayoutMatricesIndexRouteImport.update({
-  id: '/matrices/',
-  path: '/matrices/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutForumIndexRoute = LayoutForumIndexRouteImport.update({
@@ -312,9 +312,55 @@ const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   path: '/mindmaps/$userId/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MentorQuestionMyRoute = MentorQuestionMyRouteImport.update({
+  id: '/mentor/question/my',
+  path: '/mentor/question/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorQuestionGenerateFromQuestionsRoute =
+  MentorQuestionGenerateFromQuestionsRouteImport.update({
+    id: '/mentor/question/generate-from-questions',
+    path: '/mentor/question/generate-from-questions',
+    getParentRoute: () => rootRouteImport,
+  } as any)
+const MentorQuestionCreateRoute = MentorQuestionCreateRouteImport.update({
+  id: '/mentor/question/create',
+  path: '/mentor/question/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const MentorProblemCreateRoute = MentorProblemCreateRouteImport.update({
   id: '/mentor/problem/create',
   path: '/mentor/problem/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMatrixMyRoute = MentorMatrixMyRouteImport.update({
+  id: '/mentor/matrix/my',
+  path: '/mentor/matrix/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMatrixImportRoute = MentorMatrixImportRouteImport.update({
+  id: '/mentor/matrix/import',
+  path: '/mentor/matrix/import',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMatrixCreateRoute = MentorMatrixCreateRouteImport.update({
+  id: '/mentor/matrix/create',
+  path: '/mentor/matrix/create',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorExamMyRoute = MentorExamMyRouteImport.update({
+  id: '/mentor/exam/my',
+  path: '/mentor/exam/my',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorExamGenerateRoute = MentorExamGenerateRouteImport.update({
+  id: '/mentor/exam/generate',
+  path: '/mentor/exam/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorExamIdRoute = MentorExamIdRouteImport.update({
+  id: '/mentor/exam/$id',
+  path: '/mentor/exam/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentorCourseQuizRoute = MentorCourseQuizRouteImport.update({
@@ -389,22 +435,6 @@ const LayoutSyllabusesCreateRoute = LayoutSyllabusesCreateRouteImport.update({
   path: '/syllabuses/create',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutQuestionsMyRoute = LayoutQuestionsMyRouteImport.update({
-  id: '/questions/my',
-  path: '/questions/my',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutQuestionsGenerateFromQuestionsRoute =
-  LayoutQuestionsGenerateFromQuestionsRouteImport.update({
-    id: '/questions/generate-from-questions',
-    path: '/questions/generate-from-questions',
-    getParentRoute: () => LayoutRoute,
-  } as any)
-const LayoutQuestionsCreateRoute = LayoutQuestionsCreateRouteImport.update({
-  id: '/questions/create',
-  path: '/questions/create',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutProblemIdRoute = LayoutProblemIdRouteImport.update({
   id: '/problem/$id',
   path: '/problem/$id',
@@ -413,26 +443,6 @@ const LayoutProblemIdRoute = LayoutProblemIdRouteImport.update({
 const LayoutNewsIdRoute = LayoutNewsIdRouteImport.update({
   id: '/news/$id',
   path: '/news/$id',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutMatricesMyRoute = LayoutMatricesMyRouteImport.update({
-  id: '/matrices/my',
-  path: '/matrices/my',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutMatricesImportRoute = LayoutMatricesImportRouteImport.update({
-  id: '/matrices/import',
-  path: '/matrices/import',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutMatricesCreateRoute = LayoutMatricesCreateRouteImport.update({
-  id: '/matrices/create',
-  path: '/matrices/create',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutMatricesIdRoute = LayoutMatricesIdRouteImport.update({
-  id: '/matrices/$id',
-  path: '/matrices/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutLecturesIdRoute = LayoutLecturesIdRouteImport.update({
@@ -449,21 +459,6 @@ const LayoutInternalTestLoaderRoute =
 const LayoutForumMyRoute = LayoutForumMyRouteImport.update({
   id: '/forum/my',
   path: '/forum/my',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutExamsMyExamsRoute = LayoutExamsMyExamsRouteImport.update({
-  id: '/exams/my-exams',
-  path: '/exams/my-exams',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutExamsGenerateRoute = LayoutExamsGenerateRouteImport.update({
-  id: '/exams/generate',
-  path: '/exams/generate',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutExamsIdRoute = LayoutExamsIdRouteImport.update({
-  id: '/exams/$id',
-  path: '/exams/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutCoursesWebDevelopmentRoute =
@@ -495,6 +490,16 @@ const LayoutCoursesIdRoute = LayoutCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
+const MentorQuestionIdIndexRoute = MentorQuestionIdIndexRouteImport.update({
+  id: '/mentor/question/$id/',
+  path: '/mentor/question/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMatrixIdIndexRoute = MentorMatrixIdIndexRouteImport.update({
+  id: '/mentor/matrix/$id/',
+  path: '/mentor/matrix/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutTemplatesSlidevIndexRoute =
   LayoutTemplatesSlidevIndexRouteImport.update({
     id: '/templates/slidev/',
@@ -506,10 +511,20 @@ const LayoutSyllabusesIdIndexRoute = LayoutSyllabusesIdIndexRouteImport.update({
   path: '/syllabuses/$id/',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutQuestionsIdIndexRoute = LayoutQuestionsIdIndexRouteImport.update({
-  id: '/questions/$id/',
-  path: '/questions/$id/',
-  getParentRoute: () => LayoutRoute,
+const MentorQuestionIdEditRoute = MentorQuestionIdEditRouteImport.update({
+  id: '/mentor/question/$id/edit',
+  path: '/mentor/question/$id/edit',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMatrixIdGenerateRoute = MentorMatrixIdGenerateRouteImport.update({
+  id: '/mentor/matrix/$id/generate',
+  path: '/mentor/matrix/$id/generate',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMatrixIdEditRoute = MentorMatrixIdEditRouteImport.update({
+  id: '/mentor/matrix/$id/edit',
+  path: '/mentor/matrix/$id/edit',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const LayoutTemplatesSlidevCreateRoute =
   LayoutTemplatesSlidevCreateRouteImport.update({
@@ -521,22 +536,6 @@ const LayoutSyllabusesIdEditRoute = LayoutSyllabusesIdEditRouteImport.update({
   id: '/syllabuses/$id/edit',
   path: '/syllabuses/$id/edit',
   getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutQuestionsIdEditRoute = LayoutQuestionsIdEditRouteImport.update({
-  id: '/questions/$id/edit',
-  path: '/questions/$id/edit',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutMatricesIdGenerateRoute =
-  LayoutMatricesIdGenerateRouteImport.update({
-    id: '/generate',
-    path: '/generate',
-    getParentRoute: () => LayoutMatricesIdRoute,
-  } as any)
-const LayoutMatricesIdEditRoute = LayoutMatricesIdEditRouteImport.update({
-  id: '/edit',
-  path: '/edit',
-  getParentRoute: () => LayoutMatricesIdRoute,
 } as any)
 const LayoutForumPostIdRoute = LayoutForumPostIdRouteImport.update({
   id: '/forum/post/$id',
@@ -589,21 +588,11 @@ export interface FileRoutesByFullPath {
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/exams/$id': typeof LayoutExamsIdRoute
-  '/exams/generate': typeof LayoutExamsGenerateRoute
-  '/exams/my-exams': typeof LayoutExamsMyExamsRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
-  '/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
-  '/matrices/create': typeof LayoutMatricesCreateRoute
-  '/matrices/import': typeof LayoutMatricesImportRoute
-  '/matrices/my': typeof LayoutMatricesMyRoute
   '/news/$id': typeof LayoutNewsIdRoute
   '/problem/$id': typeof LayoutProblemIdRoute
-  '/questions/create': typeof LayoutQuestionsCreateRoute
-  '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
-  '/questions/my': typeof LayoutQuestionsMyRoute
   '/syllabuses/create': typeof LayoutSyllabusesCreateRoute
   '/syllabuses/my': typeof LayoutSyllabusesMyRoute
   '/templates/$id': typeof LayoutTemplatesIdRoute
@@ -618,30 +607,40 @@ export interface FileRoutesByFullPath {
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
+  '/mentor/exam/$id': typeof MentorExamIdRoute
+  '/mentor/exam/generate': typeof MentorExamGenerateRoute
+  '/mentor/exam/my': typeof MentorExamMyRoute
+  '/mentor/matrix/create': typeof MentorMatrixCreateRoute
+  '/mentor/matrix/import': typeof MentorMatrixImportRoute
+  '/mentor/matrix/my': typeof MentorMatrixMyRoute
   '/mentor/problem/create': typeof MentorProblemCreateRoute
+  '/mentor/question/create': typeof MentorQuestionCreateRoute
+  '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
+  '/mentor/question/my': typeof MentorQuestionMyRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/checkout/': typeof LayoutCheckoutIndexRoute
   '/courses/': typeof LayoutCoursesIndexRoute
   '/dashboard/': typeof LayoutDashboardIndexRoute
   '/forum/': typeof LayoutForumIndexRoute
-  '/matrices/': typeof LayoutMatricesIndexRoute
   '/news/': typeof LayoutNewsIndexRoute
   '/problem/': typeof LayoutProblemIndexRoute
-  '/questions/': typeof LayoutQuestionsIndexRoute
   '/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/templates/': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
+  '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
+  '/mentor/question/': typeof MentorQuestionIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
-  '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
-  '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
-  '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/questions/$id/': typeof LayoutQuestionsIdIndexRoute
+  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
+  '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
+  '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
   '/syllabuses/$id/': typeof LayoutSyllabusesIdIndexRoute
   '/templates/slidev/': typeof LayoutTemplatesSlidevIndexRoute
+  '/mentor/matrix/$id/': typeof MentorMatrixIdIndexRoute
+  '/mentor/question/$id/': typeof MentorQuestionIdIndexRoute
   '/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRoutesByTo {
@@ -678,21 +677,11 @@ export interface FileRoutesByTo {
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/exams/$id': typeof LayoutExamsIdRoute
-  '/exams/generate': typeof LayoutExamsGenerateRoute
-  '/exams/my-exams': typeof LayoutExamsMyExamsRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
-  '/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
-  '/matrices/create': typeof LayoutMatricesCreateRoute
-  '/matrices/import': typeof LayoutMatricesImportRoute
-  '/matrices/my': typeof LayoutMatricesMyRoute
   '/news/$id': typeof LayoutNewsIdRoute
   '/problem/$id': typeof LayoutProblemIdRoute
-  '/questions/create': typeof LayoutQuestionsCreateRoute
-  '/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
-  '/questions/my': typeof LayoutQuestionsMyRoute
   '/syllabuses/create': typeof LayoutSyllabusesCreateRoute
   '/syllabuses/my': typeof LayoutSyllabusesMyRoute
   '/templates/$id': typeof LayoutTemplatesIdRoute
@@ -707,30 +696,40 @@ export interface FileRoutesByTo {
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
+  '/mentor/exam/$id': typeof MentorExamIdRoute
+  '/mentor/exam/generate': typeof MentorExamGenerateRoute
+  '/mentor/exam/my': typeof MentorExamMyRoute
+  '/mentor/matrix/create': typeof MentorMatrixCreateRoute
+  '/mentor/matrix/import': typeof MentorMatrixImportRoute
+  '/mentor/matrix/my': typeof MentorMatrixMyRoute
   '/mentor/problem/create': typeof MentorProblemCreateRoute
+  '/mentor/question/create': typeof MentorQuestionCreateRoute
+  '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
+  '/mentor/question/my': typeof MentorQuestionMyRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/checkout': typeof LayoutCheckoutIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
   '/dashboard': typeof LayoutDashboardIndexRoute
   '/forum': typeof LayoutForumIndexRoute
-  '/matrices': typeof LayoutMatricesIndexRoute
   '/news': typeof LayoutNewsIndexRoute
   '/problem': typeof LayoutProblemIndexRoute
-  '/questions': typeof LayoutQuestionsIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
+  '/mentor/matrix': typeof MentorMatrixIndexRoute
   '/mentor/problem': typeof MentorProblemIndexRoute
+  '/mentor/question': typeof MentorQuestionIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
-  '/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
-  '/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
-  '/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/questions/$id': typeof LayoutQuestionsIdIndexRoute
+  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
+  '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
+  '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
   '/syllabuses/$id': typeof LayoutSyllabusesIdIndexRoute
   '/templates/slidev': typeof LayoutTemplatesSlidevIndexRoute
+  '/mentor/matrix/$id': typeof MentorMatrixIdIndexRoute
+  '/mentor/question/$id': typeof MentorQuestionIdIndexRoute
   '/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRoutesById {
@@ -770,21 +769,11 @@ export interface FileRoutesById {
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/_layout/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/_layout/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/_layout/exams/$id': typeof LayoutExamsIdRoute
-  '/_layout/exams/generate': typeof LayoutExamsGenerateRoute
-  '/_layout/exams/my-exams': typeof LayoutExamsMyExamsRoute
   '/_layout/forum/my': typeof LayoutForumMyRoute
   '/_layout/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/_layout/lectures/$id': typeof LayoutLecturesIdRoute
-  '/_layout/matrices/$id': typeof LayoutMatricesIdRouteWithChildren
-  '/_layout/matrices/create': typeof LayoutMatricesCreateRoute
-  '/_layout/matrices/import': typeof LayoutMatricesImportRoute
-  '/_layout/matrices/my': typeof LayoutMatricesMyRoute
   '/_layout/news/$id': typeof LayoutNewsIdRoute
   '/_layout/problem/$id': typeof LayoutProblemIdRoute
-  '/_layout/questions/create': typeof LayoutQuestionsCreateRoute
-  '/_layout/questions/generate-from-questions': typeof LayoutQuestionsGenerateFromQuestionsRoute
-  '/_layout/questions/my': typeof LayoutQuestionsMyRoute
   '/_layout/syllabuses/create': typeof LayoutSyllabusesCreateRoute
   '/_layout/syllabuses/my': typeof LayoutSyllabusesMyRoute
   '/_layout/templates/$id': typeof LayoutTemplatesIdRoute
@@ -799,30 +788,40 @@ export interface FileRoutesById {
   '/mentor/course/create': typeof MentorCourseCreateRoute
   '/mentor/course/list': typeof MentorCourseListRoute
   '/mentor/course/quiz': typeof MentorCourseQuizRoute
+  '/mentor/exam/$id': typeof MentorExamIdRoute
+  '/mentor/exam/generate': typeof MentorExamGenerateRoute
+  '/mentor/exam/my': typeof MentorExamMyRoute
+  '/mentor/matrix/create': typeof MentorMatrixCreateRoute
+  '/mentor/matrix/import': typeof MentorMatrixImportRoute
+  '/mentor/matrix/my': typeof MentorMatrixMyRoute
   '/mentor/problem/create': typeof MentorProblemCreateRoute
+  '/mentor/question/create': typeof MentorQuestionCreateRoute
+  '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
+  '/mentor/question/my': typeof MentorQuestionMyRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_layout/checkout/': typeof LayoutCheckoutIndexRoute
   '/_layout/courses/': typeof LayoutCoursesIndexRoute
   '/_layout/dashboard/': typeof LayoutDashboardIndexRoute
   '/_layout/forum/': typeof LayoutForumIndexRoute
-  '/_layout/matrices/': typeof LayoutMatricesIndexRoute
   '/_layout/news/': typeof LayoutNewsIndexRoute
   '/_layout/problem/': typeof LayoutProblemIndexRoute
-  '/_layout/questions/': typeof LayoutQuestionsIndexRoute
   '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/_layout/templates/': typeof LayoutTemplatesIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
+  '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
+  '/mentor/question/': typeof MentorQuestionIndexRoute
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/_layout/forum/post/$id': typeof LayoutForumPostIdRoute
-  '/_layout/matrices/$id/edit': typeof LayoutMatricesIdEditRoute
-  '/_layout/matrices/$id/generate': typeof LayoutMatricesIdGenerateRoute
-  '/_layout/questions/$id/edit': typeof LayoutQuestionsIdEditRoute
   '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/_layout/questions/$id/': typeof LayoutQuestionsIdIndexRoute
+  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
+  '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
+  '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
   '/_layout/syllabuses/$id/': typeof LayoutSyllabusesIdIndexRoute
   '/_layout/templates/slidev/': typeof LayoutTemplatesSlidevIndexRoute
+  '/mentor/matrix/$id/': typeof MentorMatrixIdIndexRoute
+  '/mentor/question/$id/': typeof MentorQuestionIdIndexRoute
   '/_layout/templates/slidev/$id/edit': typeof LayoutTemplatesSlidevIdEditRoute
 }
 export interface FileRouteTypes {
@@ -861,21 +860,11 @@ export interface FileRouteTypes {
     | '/courses/data-science'
     | '/courses/mobile-development'
     | '/courses/web-development'
-    | '/exams/$id'
-    | '/exams/generate'
-    | '/exams/my-exams'
     | '/forum/my'
     | '/internal/test-loader'
     | '/lectures/$id'
-    | '/matrices/$id'
-    | '/matrices/create'
-    | '/matrices/import'
-    | '/matrices/my'
     | '/news/$id'
     | '/problem/$id'
-    | '/questions/create'
-    | '/questions/generate-from-questions'
-    | '/questions/my'
     | '/syllabuses/create'
     | '/syllabuses/my'
     | '/templates/$id'
@@ -890,30 +879,40 @@ export interface FileRouteTypes {
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
+    | '/mentor/exam/$id'
+    | '/mentor/exam/generate'
+    | '/mentor/exam/my'
+    | '/mentor/matrix/create'
+    | '/mentor/matrix/import'
+    | '/mentor/matrix/my'
     | '/mentor/problem/create'
+    | '/mentor/question/create'
+    | '/mentor/question/generate-from-questions'
+    | '/mentor/question/my'
     | '/mindmaps/$userId/$code'
     | '/checkout/'
     | '/courses/'
     | '/dashboard/'
     | '/forum/'
-    | '/matrices/'
     | '/news/'
     | '/problem/'
-    | '/questions/'
     | '/syllabuses/'
     | '/templates/'
     | '/mentor/dashboard/'
+    | '/mentor/matrix/'
     | '/mentor/problem/'
+    | '/mentor/question/'
     | '/courses/grade/$grade'
     | '/forum/post/$id'
-    | '/matrices/$id/edit'
-    | '/matrices/$id/generate'
-    | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
-    | '/questions/$id/'
+    | '/mentor/matrix/$id/edit'
+    | '/mentor/matrix/$id/generate'
+    | '/mentor/question/$id/edit'
     | '/syllabuses/$id/'
     | '/templates/slidev/'
+    | '/mentor/matrix/$id/'
+    | '/mentor/question/$id/'
     | '/templates/slidev/$id/edit'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -950,21 +949,11 @@ export interface FileRouteTypes {
     | '/courses/data-science'
     | '/courses/mobile-development'
     | '/courses/web-development'
-    | '/exams/$id'
-    | '/exams/generate'
-    | '/exams/my-exams'
     | '/forum/my'
     | '/internal/test-loader'
     | '/lectures/$id'
-    | '/matrices/$id'
-    | '/matrices/create'
-    | '/matrices/import'
-    | '/matrices/my'
     | '/news/$id'
     | '/problem/$id'
-    | '/questions/create'
-    | '/questions/generate-from-questions'
-    | '/questions/my'
     | '/syllabuses/create'
     | '/syllabuses/my'
     | '/templates/$id'
@@ -979,30 +968,40 @@ export interface FileRouteTypes {
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
+    | '/mentor/exam/$id'
+    | '/mentor/exam/generate'
+    | '/mentor/exam/my'
+    | '/mentor/matrix/create'
+    | '/mentor/matrix/import'
+    | '/mentor/matrix/my'
     | '/mentor/problem/create'
+    | '/mentor/question/create'
+    | '/mentor/question/generate-from-questions'
+    | '/mentor/question/my'
     | '/mindmaps/$userId/$code'
     | '/checkout'
     | '/courses'
     | '/dashboard'
     | '/forum'
-    | '/matrices'
     | '/news'
     | '/problem'
-    | '/questions'
     | '/syllabuses'
     | '/templates'
     | '/mentor/dashboard'
+    | '/mentor/matrix'
     | '/mentor/problem'
+    | '/mentor/question'
     | '/courses/grade/$grade'
     | '/forum/post/$id'
-    | '/matrices/$id/edit'
-    | '/matrices/$id/generate'
-    | '/questions/$id/edit'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
-    | '/questions/$id'
+    | '/mentor/matrix/$id/edit'
+    | '/mentor/matrix/$id/generate'
+    | '/mentor/question/$id/edit'
     | '/syllabuses/$id'
     | '/templates/slidev'
+    | '/mentor/matrix/$id'
+    | '/mentor/question/$id'
     | '/templates/slidev/$id/edit'
   id:
     | '__root__'
@@ -1041,21 +1040,11 @@ export interface FileRouteTypes {
     | '/_layout/courses/data-science'
     | '/_layout/courses/mobile-development'
     | '/_layout/courses/web-development'
-    | '/_layout/exams/$id'
-    | '/_layout/exams/generate'
-    | '/_layout/exams/my-exams'
     | '/_layout/forum/my'
     | '/_layout/internal/test-loader'
     | '/_layout/lectures/$id'
-    | '/_layout/matrices/$id'
-    | '/_layout/matrices/create'
-    | '/_layout/matrices/import'
-    | '/_layout/matrices/my'
     | '/_layout/news/$id'
     | '/_layout/problem/$id'
-    | '/_layout/questions/create'
-    | '/_layout/questions/generate-from-questions'
-    | '/_layout/questions/my'
     | '/_layout/syllabuses/create'
     | '/_layout/syllabuses/my'
     | '/_layout/templates/$id'
@@ -1070,30 +1059,40 @@ export interface FileRouteTypes {
     | '/mentor/course/create'
     | '/mentor/course/list'
     | '/mentor/course/quiz'
+    | '/mentor/exam/$id'
+    | '/mentor/exam/generate'
+    | '/mentor/exam/my'
+    | '/mentor/matrix/create'
+    | '/mentor/matrix/import'
+    | '/mentor/matrix/my'
     | '/mentor/problem/create'
+    | '/mentor/question/create'
+    | '/mentor/question/generate-from-questions'
+    | '/mentor/question/my'
     | '/mindmaps/$userId/$code'
     | '/_layout/checkout/'
     | '/_layout/courses/'
     | '/_layout/dashboard/'
     | '/_layout/forum/'
-    | '/_layout/matrices/'
     | '/_layout/news/'
     | '/_layout/problem/'
-    | '/_layout/questions/'
     | '/_layout/syllabuses/'
     | '/_layout/templates/'
     | '/mentor/dashboard/'
+    | '/mentor/matrix/'
     | '/mentor/problem/'
+    | '/mentor/question/'
     | '/_layout/courses/grade/$grade'
     | '/_layout/forum/post/$id'
-    | '/_layout/matrices/$id/edit'
-    | '/_layout/matrices/$id/generate'
-    | '/_layout/questions/$id/edit'
     | '/_layout/syllabuses/$id/edit'
     | '/_layout/templates/slidev/create'
-    | '/_layout/questions/$id/'
+    | '/mentor/matrix/$id/edit'
+    | '/mentor/matrix/$id/generate'
+    | '/mentor/question/$id/edit'
     | '/_layout/syllabuses/$id/'
     | '/_layout/templates/slidev/'
+    | '/mentor/matrix/$id/'
+    | '/mentor/question/$id/'
     | '/_layout/templates/slidev/$id/edit'
   fileRoutesById: FileRoutesById
 }
@@ -1118,10 +1117,26 @@ export interface RootRouteChildren {
   MentorCourseCreateRoute: typeof MentorCourseCreateRoute
   MentorCourseListRoute: typeof MentorCourseListRoute
   MentorCourseQuizRoute: typeof MentorCourseQuizRoute
+  MentorExamIdRoute: typeof MentorExamIdRoute
+  MentorExamGenerateRoute: typeof MentorExamGenerateRoute
+  MentorExamMyRoute: typeof MentorExamMyRoute
+  MentorMatrixCreateRoute: typeof MentorMatrixCreateRoute
+  MentorMatrixImportRoute: typeof MentorMatrixImportRoute
+  MentorMatrixMyRoute: typeof MentorMatrixMyRoute
   MentorProblemCreateRoute: typeof MentorProblemCreateRoute
+  MentorQuestionCreateRoute: typeof MentorQuestionCreateRoute
+  MentorQuestionGenerateFromQuestionsRoute: typeof MentorQuestionGenerateFromQuestionsRoute
+  MentorQuestionMyRoute: typeof MentorQuestionMyRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
+  MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
   MentorProblemIndexRoute: typeof MentorProblemIndexRoute
+  MentorQuestionIndexRoute: typeof MentorQuestionIndexRoute
+  MentorMatrixIdEditRoute: typeof MentorMatrixIdEditRoute
+  MentorMatrixIdGenerateRoute: typeof MentorMatrixIdGenerateRoute
+  MentorQuestionIdEditRoute: typeof MentorQuestionIdEditRoute
+  MentorMatrixIdIndexRoute: typeof MentorMatrixIdIndexRoute
+  MentorQuestionIdIndexRoute: typeof MentorQuestionIdIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -1336,11 +1351,25 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof HeaderOnlyAiChatbotRouteImport
       parentRoute: typeof HeaderOnlyRoute
     }
+    '/mentor/question/': {
+      id: '/mentor/question/'
+      path: '/mentor/question'
+      fullPath: '/mentor/question/'
+      preLoaderRoute: typeof MentorQuestionIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentor/problem/': {
       id: '/mentor/problem/'
       path: '/mentor/problem'
       fullPath: '/mentor/problem/'
       preLoaderRoute: typeof MentorProblemIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/matrix/': {
+      id: '/mentor/matrix/'
+      path: '/mentor/matrix'
+      fullPath: '/mentor/matrix/'
+      preLoaderRoute: typeof MentorMatrixIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor/dashboard/': {
@@ -1364,13 +1393,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSyllabusesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/questions/': {
-      id: '/_layout/questions/'
-      path: '/questions'
-      fullPath: '/questions/'
-      preLoaderRoute: typeof LayoutQuestionsIndexRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/problem/': {
       id: '/_layout/problem/'
       path: '/problem'
@@ -1383,13 +1405,6 @@ declare module '@tanstack/react-router' {
       path: '/news'
       fullPath: '/news/'
       preLoaderRoute: typeof LayoutNewsIndexRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/matrices/': {
-      id: '/_layout/matrices/'
-      path: '/matrices'
-      fullPath: '/matrices/'
-      preLoaderRoute: typeof LayoutMatricesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/forum/': {
@@ -1427,11 +1442,74 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/mentor/question/my': {
+      id: '/mentor/question/my'
+      path: '/mentor/question/my'
+      fullPath: '/mentor/question/my'
+      preLoaderRoute: typeof MentorQuestionMyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/question/generate-from-questions': {
+      id: '/mentor/question/generate-from-questions'
+      path: '/mentor/question/generate-from-questions'
+      fullPath: '/mentor/question/generate-from-questions'
+      preLoaderRoute: typeof MentorQuestionGenerateFromQuestionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/question/create': {
+      id: '/mentor/question/create'
+      path: '/mentor/question/create'
+      fullPath: '/mentor/question/create'
+      preLoaderRoute: typeof MentorQuestionCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/mentor/problem/create': {
       id: '/mentor/problem/create'
       path: '/mentor/problem/create'
       fullPath: '/mentor/problem/create'
       preLoaderRoute: typeof MentorProblemCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/matrix/my': {
+      id: '/mentor/matrix/my'
+      path: '/mentor/matrix/my'
+      fullPath: '/mentor/matrix/my'
+      preLoaderRoute: typeof MentorMatrixMyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/matrix/import': {
+      id: '/mentor/matrix/import'
+      path: '/mentor/matrix/import'
+      fullPath: '/mentor/matrix/import'
+      preLoaderRoute: typeof MentorMatrixImportRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/matrix/create': {
+      id: '/mentor/matrix/create'
+      path: '/mentor/matrix/create'
+      fullPath: '/mentor/matrix/create'
+      preLoaderRoute: typeof MentorMatrixCreateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/exam/my': {
+      id: '/mentor/exam/my'
+      path: '/mentor/exam/my'
+      fullPath: '/mentor/exam/my'
+      preLoaderRoute: typeof MentorExamMyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/exam/generate': {
+      id: '/mentor/exam/generate'
+      path: '/mentor/exam/generate'
+      fullPath: '/mentor/exam/generate'
+      preLoaderRoute: typeof MentorExamGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/exam/$id': {
+      id: '/mentor/exam/$id'
+      path: '/mentor/exam/$id'
+      fullPath: '/mentor/exam/$id'
+      preLoaderRoute: typeof MentorExamIdRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor/course/quiz': {
@@ -1532,27 +1610,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSyllabusesCreateRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/questions/my': {
-      id: '/_layout/questions/my'
-      path: '/questions/my'
-      fullPath: '/questions/my'
-      preLoaderRoute: typeof LayoutQuestionsMyRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/questions/generate-from-questions': {
-      id: '/_layout/questions/generate-from-questions'
-      path: '/questions/generate-from-questions'
-      fullPath: '/questions/generate-from-questions'
-      preLoaderRoute: typeof LayoutQuestionsGenerateFromQuestionsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/questions/create': {
-      id: '/_layout/questions/create'
-      path: '/questions/create'
-      fullPath: '/questions/create'
-      preLoaderRoute: typeof LayoutQuestionsCreateRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/problem/$id': {
       id: '/_layout/problem/$id'
       path: '/problem/$id'
@@ -1565,34 +1622,6 @@ declare module '@tanstack/react-router' {
       path: '/news/$id'
       fullPath: '/news/$id'
       preLoaderRoute: typeof LayoutNewsIdRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/matrices/my': {
-      id: '/_layout/matrices/my'
-      path: '/matrices/my'
-      fullPath: '/matrices/my'
-      preLoaderRoute: typeof LayoutMatricesMyRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/matrices/import': {
-      id: '/_layout/matrices/import'
-      path: '/matrices/import'
-      fullPath: '/matrices/import'
-      preLoaderRoute: typeof LayoutMatricesImportRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/matrices/create': {
-      id: '/_layout/matrices/create'
-      path: '/matrices/create'
-      fullPath: '/matrices/create'
-      preLoaderRoute: typeof LayoutMatricesCreateRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/matrices/$id': {
-      id: '/_layout/matrices/$id'
-      path: '/matrices/$id'
-      fullPath: '/matrices/$id'
-      preLoaderRoute: typeof LayoutMatricesIdRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/lectures/$id': {
@@ -1614,27 +1643,6 @@ declare module '@tanstack/react-router' {
       path: '/forum/my'
       fullPath: '/forum/my'
       preLoaderRoute: typeof LayoutForumMyRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/exams/my-exams': {
-      id: '/_layout/exams/my-exams'
-      path: '/exams/my-exams'
-      fullPath: '/exams/my-exams'
-      preLoaderRoute: typeof LayoutExamsMyExamsRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/exams/generate': {
-      id: '/_layout/exams/generate'
-      path: '/exams/generate'
-      fullPath: '/exams/generate'
-      preLoaderRoute: typeof LayoutExamsGenerateRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/exams/$id': {
-      id: '/_layout/exams/$id'
-      path: '/exams/$id'
-      fullPath: '/exams/$id'
-      preLoaderRoute: typeof LayoutExamsIdRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/courses/web-development': {
@@ -1672,6 +1680,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCoursesIdRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/mentor/question/$id/': {
+      id: '/mentor/question/$id/'
+      path: '/mentor/question/$id'
+      fullPath: '/mentor/question/$id/'
+      preLoaderRoute: typeof MentorQuestionIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/matrix/$id/': {
+      id: '/mentor/matrix/$id/'
+      path: '/mentor/matrix/$id'
+      fullPath: '/mentor/matrix/$id/'
+      preLoaderRoute: typeof MentorMatrixIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/templates/slidev/': {
       id: '/_layout/templates/slidev/'
       path: '/templates/slidev'
@@ -1686,12 +1708,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutSyllabusesIdIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/questions/$id/': {
-      id: '/_layout/questions/$id/'
-      path: '/questions/$id'
-      fullPath: '/questions/$id/'
-      preLoaderRoute: typeof LayoutQuestionsIdIndexRouteImport
-      parentRoute: typeof LayoutRoute
+    '/mentor/question/$id/edit': {
+      id: '/mentor/question/$id/edit'
+      path: '/mentor/question/$id/edit'
+      fullPath: '/mentor/question/$id/edit'
+      preLoaderRoute: typeof MentorQuestionIdEditRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/matrix/$id/generate': {
+      id: '/mentor/matrix/$id/generate'
+      path: '/mentor/matrix/$id/generate'
+      fullPath: '/mentor/matrix/$id/generate'
+      preLoaderRoute: typeof MentorMatrixIdGenerateRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/matrix/$id/edit': {
+      id: '/mentor/matrix/$id/edit'
+      path: '/mentor/matrix/$id/edit'
+      fullPath: '/mentor/matrix/$id/edit'
+      preLoaderRoute: typeof MentorMatrixIdEditRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_layout/templates/slidev/create': {
       id: '/_layout/templates/slidev/create'
@@ -1706,27 +1742,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/syllabuses/$id/edit'
       preLoaderRoute: typeof LayoutSyllabusesIdEditRouteImport
       parentRoute: typeof LayoutRoute
-    }
-    '/_layout/questions/$id/edit': {
-      id: '/_layout/questions/$id/edit'
-      path: '/questions/$id/edit'
-      fullPath: '/questions/$id/edit'
-      preLoaderRoute: typeof LayoutQuestionsIdEditRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/matrices/$id/generate': {
-      id: '/_layout/matrices/$id/generate'
-      path: '/generate'
-      fullPath: '/matrices/$id/generate'
-      preLoaderRoute: typeof LayoutMatricesIdGenerateRouteImport
-      parentRoute: typeof LayoutMatricesIdRoute
-    }
-    '/_layout/matrices/$id/edit': {
-      id: '/_layout/matrices/$id/edit'
-      path: '/edit'
-      fullPath: '/matrices/$id/edit'
-      preLoaderRoute: typeof LayoutMatricesIdEditRouteImport
-      parentRoute: typeof LayoutMatricesIdRoute
     }
     '/_layout/forum/post/$id': {
       id: '/_layout/forum/post/$id'
@@ -1766,19 +1781,6 @@ const HeaderOnlyRouteWithChildren = HeaderOnlyRoute._addFileChildren(
   HeaderOnlyRouteChildren,
 )
 
-interface LayoutMatricesIdRouteChildren {
-  LayoutMatricesIdEditRoute: typeof LayoutMatricesIdEditRoute
-  LayoutMatricesIdGenerateRoute: typeof LayoutMatricesIdGenerateRoute
-}
-
-const LayoutMatricesIdRouteChildren: LayoutMatricesIdRouteChildren = {
-  LayoutMatricesIdEditRoute: LayoutMatricesIdEditRoute,
-  LayoutMatricesIdGenerateRoute: LayoutMatricesIdGenerateRoute,
-}
-
-const LayoutMatricesIdRouteWithChildren =
-  LayoutMatricesIdRoute._addFileChildren(LayoutMatricesIdRouteChildren)
-
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
   LayoutCartRoute: typeof LayoutCartRoute
@@ -1801,21 +1803,11 @@ interface LayoutRouteChildren {
   LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
   LayoutCoursesMobileDevelopmentRoute: typeof LayoutCoursesMobileDevelopmentRoute
   LayoutCoursesWebDevelopmentRoute: typeof LayoutCoursesWebDevelopmentRoute
-  LayoutExamsIdRoute: typeof LayoutExamsIdRoute
-  LayoutExamsGenerateRoute: typeof LayoutExamsGenerateRoute
-  LayoutExamsMyExamsRoute: typeof LayoutExamsMyExamsRoute
   LayoutForumMyRoute: typeof LayoutForumMyRoute
   LayoutInternalTestLoaderRoute: typeof LayoutInternalTestLoaderRoute
   LayoutLecturesIdRoute: typeof LayoutLecturesIdRoute
-  LayoutMatricesIdRoute: typeof LayoutMatricesIdRouteWithChildren
-  LayoutMatricesCreateRoute: typeof LayoutMatricesCreateRoute
-  LayoutMatricesImportRoute: typeof LayoutMatricesImportRoute
-  LayoutMatricesMyRoute: typeof LayoutMatricesMyRoute
   LayoutNewsIdRoute: typeof LayoutNewsIdRoute
   LayoutProblemIdRoute: typeof LayoutProblemIdRoute
-  LayoutQuestionsCreateRoute: typeof LayoutQuestionsCreateRoute
-  LayoutQuestionsGenerateFromQuestionsRoute: typeof LayoutQuestionsGenerateFromQuestionsRoute
-  LayoutQuestionsMyRoute: typeof LayoutQuestionsMyRoute
   LayoutSyllabusesCreateRoute: typeof LayoutSyllabusesCreateRoute
   LayoutSyllabusesMyRoute: typeof LayoutSyllabusesMyRoute
   LayoutTemplatesIdRoute: typeof LayoutTemplatesIdRoute
@@ -1825,18 +1817,14 @@ interface LayoutRouteChildren {
   LayoutCoursesIndexRoute: typeof LayoutCoursesIndexRoute
   LayoutDashboardIndexRoute: typeof LayoutDashboardIndexRoute
   LayoutForumIndexRoute: typeof LayoutForumIndexRoute
-  LayoutMatricesIndexRoute: typeof LayoutMatricesIndexRoute
   LayoutNewsIndexRoute: typeof LayoutNewsIndexRoute
   LayoutProblemIndexRoute: typeof LayoutProblemIndexRoute
-  LayoutQuestionsIndexRoute: typeof LayoutQuestionsIndexRoute
   LayoutSyllabusesIndexRoute: typeof LayoutSyllabusesIndexRoute
   LayoutTemplatesIndexRoute: typeof LayoutTemplatesIndexRoute
   LayoutCoursesGradeGradeRoute: typeof LayoutCoursesGradeGradeRoute
   LayoutForumPostIdRoute: typeof LayoutForumPostIdRoute
-  LayoutQuestionsIdEditRoute: typeof LayoutQuestionsIdEditRoute
   LayoutSyllabusesIdEditRoute: typeof LayoutSyllabusesIdEditRoute
   LayoutTemplatesSlidevCreateRoute: typeof LayoutTemplatesSlidevCreateRoute
-  LayoutQuestionsIdIndexRoute: typeof LayoutQuestionsIdIndexRoute
   LayoutSyllabusesIdIndexRoute: typeof LayoutSyllabusesIdIndexRoute
   LayoutTemplatesSlidevIndexRoute: typeof LayoutTemplatesSlidevIndexRoute
   LayoutTemplatesSlidevIdEditRoute: typeof LayoutTemplatesSlidevIdEditRoute
@@ -1864,22 +1852,11 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
   LayoutCoursesMobileDevelopmentRoute: LayoutCoursesMobileDevelopmentRoute,
   LayoutCoursesWebDevelopmentRoute: LayoutCoursesWebDevelopmentRoute,
-  LayoutExamsIdRoute: LayoutExamsIdRoute,
-  LayoutExamsGenerateRoute: LayoutExamsGenerateRoute,
-  LayoutExamsMyExamsRoute: LayoutExamsMyExamsRoute,
   LayoutForumMyRoute: LayoutForumMyRoute,
   LayoutInternalTestLoaderRoute: LayoutInternalTestLoaderRoute,
   LayoutLecturesIdRoute: LayoutLecturesIdRoute,
-  LayoutMatricesIdRoute: LayoutMatricesIdRouteWithChildren,
-  LayoutMatricesCreateRoute: LayoutMatricesCreateRoute,
-  LayoutMatricesImportRoute: LayoutMatricesImportRoute,
-  LayoutMatricesMyRoute: LayoutMatricesMyRoute,
   LayoutNewsIdRoute: LayoutNewsIdRoute,
   LayoutProblemIdRoute: LayoutProblemIdRoute,
-  LayoutQuestionsCreateRoute: LayoutQuestionsCreateRoute,
-  LayoutQuestionsGenerateFromQuestionsRoute:
-    LayoutQuestionsGenerateFromQuestionsRoute,
-  LayoutQuestionsMyRoute: LayoutQuestionsMyRoute,
   LayoutSyllabusesCreateRoute: LayoutSyllabusesCreateRoute,
   LayoutSyllabusesMyRoute: LayoutSyllabusesMyRoute,
   LayoutTemplatesIdRoute: LayoutTemplatesIdRoute,
@@ -1889,18 +1866,14 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCoursesIndexRoute: LayoutCoursesIndexRoute,
   LayoutDashboardIndexRoute: LayoutDashboardIndexRoute,
   LayoutForumIndexRoute: LayoutForumIndexRoute,
-  LayoutMatricesIndexRoute: LayoutMatricesIndexRoute,
   LayoutNewsIndexRoute: LayoutNewsIndexRoute,
   LayoutProblemIndexRoute: LayoutProblemIndexRoute,
-  LayoutQuestionsIndexRoute: LayoutQuestionsIndexRoute,
   LayoutSyllabusesIndexRoute: LayoutSyllabusesIndexRoute,
   LayoutTemplatesIndexRoute: LayoutTemplatesIndexRoute,
   LayoutCoursesGradeGradeRoute: LayoutCoursesGradeGradeRoute,
   LayoutForumPostIdRoute: LayoutForumPostIdRoute,
-  LayoutQuestionsIdEditRoute: LayoutQuestionsIdEditRoute,
   LayoutSyllabusesIdEditRoute: LayoutSyllabusesIdEditRoute,
   LayoutTemplatesSlidevCreateRoute: LayoutTemplatesSlidevCreateRoute,
-  LayoutQuestionsIdIndexRoute: LayoutQuestionsIdIndexRoute,
   LayoutSyllabusesIdIndexRoute: LayoutSyllabusesIdIndexRoute,
   LayoutTemplatesSlidevIndexRoute: LayoutTemplatesSlidevIndexRoute,
   LayoutTemplatesSlidevIdEditRoute: LayoutTemplatesSlidevIdEditRoute,
@@ -1941,10 +1914,27 @@ const rootRouteChildren: RootRouteChildren = {
   MentorCourseCreateRoute: MentorCourseCreateRoute,
   MentorCourseListRoute: MentorCourseListRoute,
   MentorCourseQuizRoute: MentorCourseQuizRoute,
+  MentorExamIdRoute: MentorExamIdRoute,
+  MentorExamGenerateRoute: MentorExamGenerateRoute,
+  MentorExamMyRoute: MentorExamMyRoute,
+  MentorMatrixCreateRoute: MentorMatrixCreateRoute,
+  MentorMatrixImportRoute: MentorMatrixImportRoute,
+  MentorMatrixMyRoute: MentorMatrixMyRoute,
   MentorProblemCreateRoute: MentorProblemCreateRoute,
+  MentorQuestionCreateRoute: MentorQuestionCreateRoute,
+  MentorQuestionGenerateFromQuestionsRoute:
+    MentorQuestionGenerateFromQuestionsRoute,
+  MentorQuestionMyRoute: MentorQuestionMyRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
+  MentorMatrixIndexRoute: MentorMatrixIndexRoute,
   MentorProblemIndexRoute: MentorProblemIndexRoute,
+  MentorQuestionIndexRoute: MentorQuestionIndexRoute,
+  MentorMatrixIdEditRoute: MentorMatrixIdEditRoute,
+  MentorMatrixIdGenerateRoute: MentorMatrixIdGenerateRoute,
+  MentorQuestionIdEditRoute: MentorQuestionIdEditRoute,
+  MentorMatrixIdIndexRoute: MentorMatrixIdIndexRoute,
+  MentorQuestionIdIndexRoute: MentorQuestionIdIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

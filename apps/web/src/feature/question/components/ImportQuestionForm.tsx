@@ -102,7 +102,7 @@ const ImportQuestionForm: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-5xl">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/questions/my" })} className="gap-2 mb-4">
+        <Button variant="ghost" onClick={() => navigate({ to: "/mentor/question/my" })} className="gap-2 mb-4">
           <ArrowLeft className="h-4 w-4" />
           Quay lại danh sách
         </Button>
@@ -219,7 +219,7 @@ const ImportQuestionForm: React.FC = () => {
                       file khác.
                     </p>
                     <div className="flex gap-2">
-                      <Button size="sm" onClick={() => navigate({ to: "/questions" })}>
+                      <Button size="sm" onClick={() => navigate({ to: "/mentor/question/my" })}>
                         Xem danh sách câu hỏi
                       </Button>
                       <Button size="sm" variant="outline" onClick={handleReset}>

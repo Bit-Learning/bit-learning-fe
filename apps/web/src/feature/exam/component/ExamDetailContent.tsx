@@ -63,7 +63,7 @@ const ExamDetailContent: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/exams/my-exams" })} className="gap-2 mb-4">
+        <Button variant="ghost" onClick={() => navigate({ to: "/mentor/exam/my" })} className="gap-2 mb-4">
           <ArrowLeft className="h-4 w-4" />
           Quay lại
         </Button>

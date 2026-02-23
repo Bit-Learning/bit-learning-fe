@@ -76,7 +76,7 @@ const CreateMatrixContent: React.FC = () => {
 
   const handleStep1Submit = (values: Step1Values) => {
     if (isEdit && matrixId) {
-      updateMatrix({ id: matrixId, data: values }, { onSuccess: () => navigate({ to: "/matrices" }) });
+      updateMatrix({ id: matrixId, data: values }, { onSuccess: () => navigate({ to: "/mentor/matrix" }) });
     } else {
       createMatrix(values, {
         onSuccess: (res) => {
@@ -98,8 +98,8 @@ const CreateMatrixContent: React.FC = () => {
         matrixDetails: matrixDetails.filter((d) => d.lessonId),
       },
       {
-        onSuccess: () => navigate({ to: "/matrices" }),
-      }
+        onSuccess: () => navigate({ to: "/mentor/matrix" }),
+      },
     );
   };
 
@@ -108,7 +108,7 @@ const CreateMatrixContent: React.FC = () => {
   return (
     <div className="container mx-auto max-w-4xl p-6">
       <div className="mb-8">
-        <Button variant="ghost" size="sm" className="mb-4" onPress={() => navigate({ to: "/matrices" })}>
+        <Button variant="ghost" size="sm" className="mb-4" onPress={() => navigate({ to: "/mentor/matrix" })}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Quay lại
         </Button>
@@ -264,7 +264,7 @@ const CreateMatrixContent: React.FC = () => {
             </Card>
 
             <div className="flex justify-end gap-4">
-              <Button type="button" variant="outline" onPress={() => navigate({ to: "/matrices" })}>
+              <Button type="button" variant="outline" onPress={() => navigate({ to: "/mentor/matrix" })}>
                 Hủy
               </Button>
               <Button type="submit" isDisabled={isPending}>

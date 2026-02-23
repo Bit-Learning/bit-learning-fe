@@ -25,7 +25,7 @@ const MatrixListContent: React.FC = () => {
     (m) =>
       m.name.toLowerCase().includes(search.toLowerCase()) ||
       m.code.toLowerCase().includes(search.toLowerCase()) ||
-      m.subject?.name?.toLowerCase().includes(search.toLowerCase())
+      m.subject?.name?.toLowerCase().includes(search.toLowerCase()),
   );
 
   return (
@@ -52,7 +52,7 @@ const MatrixListContent: React.FC = () => {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" className="gap-2" onClick={() => navigate({ to: "/exams/my-exams" })}>
+          <Button variant="outline" className="gap-2" onClick={() => navigate({ to: "/mentor/exam/my" })}>
             <FileText className="h-4 w-4" />
             Đề thi của tôi
           </Button>
@@ -89,8 +89,8 @@ const MatrixListContent: React.FC = () => {
                 key={matrix.id}
                 matrix={matrix}
                 onEdit={() => setModal({ open: true, data: matrix })}
-                onGenerate={() => navigate({ to: "/matrices/$id/generate", params: { id: matrix.id.toString() } })}
-                onViewDetail={() => navigate({ to: "/matrices/$id", params: { id: matrix.id.toString() } })}
+                onGenerate={() => navigate({ to: "/mentor/matrix/$id/generate", params: { id: matrix.id.toString() } })}
+                onViewDetail={() => navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } })}
               />
             ))}
           </div>
@@ -129,7 +129,7 @@ const MatrixListContent: React.FC = () => {
         </Card>
         <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
-          onClick={() => navigate({ to: "/matrices/import" })}
+          onClick={() => navigate({ to: "/mentor/matrix/import" })}
         >
           <CardContent className="flex items-center gap-4 p-6">
             <div className="p-3 rounded-lg bg-green-100 dark:bg-green-900">

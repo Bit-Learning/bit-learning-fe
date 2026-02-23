@@ -12,7 +12,7 @@ import MatrixFormModal from "./MatrixFormModal";
 import VersionFormModal from "./VersionFormModal";
 
 const MatrixDetailContent: React.FC = () => {
-  const { id } = useParams({ from: "/_layout/matrices/$id" });
+  const { id } = useParams({ from: "/mentor/matrix/$id/" });
   const navigate = useNavigate();
   const matrixId = parseInt(id);
 
@@ -25,7 +25,7 @@ const MatrixDetailContent: React.FC = () => {
   const { mutate: toggleActive } = useToggleMatrixActive();
 
   const handleDelete = () => {
-    deleteMatrix(matrixId, { onSuccess: () => navigate({ to: "/matrices" }) });
+    deleteMatrix(matrixId, { onSuccess: () => navigate({ to: "/mentor/matrix" }) });
   };
 
   if (isLoading) {
@@ -44,7 +44,7 @@ const MatrixDetailContent: React.FC = () => {
         <Card>
           <CardContent className="flex flex-col items-center justify-center py-16">
             <p className="text-muted-foreground mb-4">Không tìm thấy ma trận</p>
-            <Button variant="outline" onClick={() => navigate({ to: "/matrices" })}>
+            <Button variant="outline" onClick={() => navigate({ to: "/mentor/matrix" })}>
               <ArrowLeft className="h-4 w-4 mr-2" />
               Quay lại
             </Button>
@@ -58,7 +58,7 @@ const MatrixDetailContent: React.FC = () => {
     <div className="container mx-auto p-6">
       {/* Header */}
       <div className="mb-6">
-        <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate({ to: "/matrices" })}>
+        <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate({ to: "/mentor/matrix" })}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           Quay lại
         </Button>
@@ -89,7 +89,7 @@ const MatrixDetailContent: React.FC = () => {
               <Trash2 className="h-4 w-4 mr-2" />
               Xóa
             </Button>
-            <Button onClick={() => navigate({ to: "/matrices/$id/generate", params: { id: id } })}>
+            <Button onClick={() => navigate({ to: "/mentor/matrix/$id/generate", params: { id: id } })}>
               <Play className="h-4 w-4 mr-2" />
               Tạo đề thi
             </Button>

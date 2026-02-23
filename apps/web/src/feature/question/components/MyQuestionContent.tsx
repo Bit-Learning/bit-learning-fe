@@ -31,7 +31,7 @@ const MyQuestionsContent: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/questions" })} className="gap-2 mb-4">
+        <Button variant="ghost" onClick={() => navigate({ to: "/mentor/question" })} className="gap-2 mb-4">
           <ArrowLeft className="h-4 w-4" />
           Quay lại danh sách
         </Button>
@@ -40,14 +40,13 @@ const MyQuestionsContent: React.FC = () => {
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold">Câu hỏi của tôi</h1>
-          <p className="text-muted-foreground">Các câu hỏi do bạn tạo</p>
         </div>
         <div className="flex gap-2">
-          <Button onClick={() => navigate({ to: "/questions/generate-from-questions" })} className="gap-2">
+          <Button onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })} className="gap-2">
             <FileText className="h-4 w-4" />
             Tạo đề thi
           </Button>
-          <Button onClick={() => navigate({ to: "/questions/create" })} className="gap-2">
+          <Button onClick={() => navigate({ to: "/mentor/question/create" })} className="gap-2">
             <FileQuestionIcon className="h-4 w-4" />
             Tạo câu hỏi
           </Button>
@@ -85,7 +84,7 @@ const MyQuestionsContent: React.FC = () => {
               {search ? "Thử tìm kiếm với từ khóa khác" : "Bắt đầu bằng cách import câu hỏi đầu tiên của bạn"}
             </p>
             {!search && (
-              <Button onClick={() => navigate({ to: "/matrices/import" })} className="gap-2">
+              <Button onClick={() => navigate({ to: "/mentor/matrix/import" })} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Import câu hỏi
               </Button>
@@ -105,8 +104,8 @@ const MyQuestionsContent: React.FC = () => {
               <QuestionCard
                 key={question.id}
                 question={question}
-                onView={() => navigate({ to: "/questions/$id", params: { id: question.id.toString() } })}
-                onEdit={() => navigate({ to: "/questions/$id/edit", params: { id: question.id.toString() } })}
+                onView={() => navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } })}
+                onEdit={() => navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } })}
                 onDelete={() => handleDelete(question.id, question.content)}
               />
             ))}

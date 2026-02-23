@@ -44,7 +44,7 @@ const QuestionDetailContent: React.FC = () => {
     if (confirm(`Bạn có chắc chắn muốn xóa câu hỏi:\n"${question?.content.substring(0, 50)}..."?`)) {
       deleteQuestion.mutate(questionId!, {
         onSuccess: () => {
-          navigate({ to: "/questions" });
+          navigate({ to: "/mentor/question" });
         },
       });
     }
@@ -81,7 +81,7 @@ const QuestionDetailContent: React.FC = () => {
   return (
     <div className="container mx-auto p-6 max-w-4xl">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/questions" })} className="gap-2 mb-4">
+        <Button variant="ghost" onClick={() => navigate({ to: "/mentor/question" })} className="gap-2 mb-4">
           <ArrowLeft className="h-4 w-4" />
           Quay lại danh sách
         </Button>
@@ -90,7 +90,7 @@ const QuestionDetailContent: React.FC = () => {
           <div className="flex gap-2">
             <Button
               variant="outline"
-              onClick={() => navigate({ to: `/questions/${questionId}/edit` })}
+              onClick={() => navigate({ to: `/mentor/question/${questionId}/edit` })}
               className="gap-2"
             >
               <Edit className="h-4 w-4" />
