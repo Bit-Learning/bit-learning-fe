@@ -50,7 +50,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
         notes: values.notes,
         matrixDetails: matrixDetails.filter((d) => d.lessonId),
       },
-      { onSuccess: onClose }
+      { onSuccess: onClose },
     );
   };
 
