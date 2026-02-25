@@ -18,8 +18,13 @@ import { Route as ForgotPasswordRouteImport } from './routes/forgot-password'
 import { Route as LayoutRouteImport } from './routes/_layout'
 import { Route as HeaderOnlyRouteImport } from './routes/_headerOnly'
 import { Route as R404RouteImport } from './routes/404'
+import { Route as MatchingIndexRouteImport } from './routes/matching/index'
 import { Route as GamesIndexRouteImport } from './routes/games/index'
 import { Route as LayoutIndexRouteImport } from './routes/_layout/index'
+import { Route as MatchingPathRouteImport } from './routes/matching/path'
+import { Route as MatchingLoadingRouteImport } from './routes/matching/loading'
+import { Route as MatchingGameRouteImport } from './routes/matching/game'
+import { Route as MatchingDashboardRouteImport } from './routes/matching/dashboard'
 import { Route as GamesLeaderboardRouteImport } from './routes/games/leaderboard'
 import { Route as GamesIdRouteImport } from './routes/games/$id'
 import { Route as LayoutWebDesignRouteImport } from './routes/_layout/web-design'
@@ -142,6 +147,11 @@ const R404Route = R404RouteImport.update({
   path: '/404',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MatchingIndexRoute = MatchingIndexRouteImport.update({
+  id: '/matching/',
+  path: '/matching/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const GamesIndexRoute = GamesIndexRouteImport.update({
   id: '/games/',
   path: '/games/',
@@ -151,6 +161,26 @@ const LayoutIndexRoute = LayoutIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => LayoutRoute,
+} as any)
+const MatchingPathRoute = MatchingPathRouteImport.update({
+  id: '/matching/path',
+  path: '/matching/path',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchingLoadingRoute = MatchingLoadingRouteImport.update({
+  id: '/matching/loading',
+  path: '/matching/loading',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchingGameRoute = MatchingGameRouteImport.update({
+  id: '/matching/game',
+  path: '/matching/game',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MatchingDashboardRoute = MatchingDashboardRouteImport.update({
+  id: '/matching/dashboard',
+  path: '/matching/dashboard',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const GamesLeaderboardRoute = GamesLeaderboardRouteImport.update({
   id: '/games/leaderboard',
@@ -582,7 +612,12 @@ export interface FileRoutesByFullPath {
   '/web-design': typeof LayoutWebDesignRoute
   '/games/$id': typeof GamesIdRouteWithChildren
   '/games/leaderboard': typeof GamesLeaderboardRoute
+  '/matching/dashboard': typeof MatchingDashboardRoute
+  '/matching/game': typeof MatchingGameRoute
+  '/matching/loading': typeof MatchingLoadingRoute
+  '/matching/path': typeof MatchingPathRoute
   '/games/': typeof GamesIndexRoute
+  '/matching/': typeof MatchingIndexRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -671,7 +706,12 @@ export interface FileRoutesByTo {
   '/web-design': typeof LayoutWebDesignRoute
   '/games/$id': typeof GamesIdRouteWithChildren
   '/games/leaderboard': typeof GamesLeaderboardRoute
+  '/matching/dashboard': typeof MatchingDashboardRoute
+  '/matching/game': typeof MatchingGameRoute
+  '/matching/loading': typeof MatchingLoadingRoute
+  '/matching/path': typeof MatchingPathRoute
   '/games': typeof GamesIndexRoute
+  '/matching': typeof MatchingIndexRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -762,8 +802,13 @@ export interface FileRoutesById {
   '/_layout/web-design': typeof LayoutWebDesignRoute
   '/games/$id': typeof GamesIdRouteWithChildren
   '/games/leaderboard': typeof GamesLeaderboardRoute
+  '/matching/dashboard': typeof MatchingDashboardRoute
+  '/matching/game': typeof MatchingGameRoute
+  '/matching/loading': typeof MatchingLoadingRoute
+  '/matching/path': typeof MatchingPathRoute
   '/_layout/': typeof LayoutIndexRoute
   '/games/': typeof GamesIndexRoute
+  '/matching/': typeof MatchingIndexRoute
   '/_layout/courses/$id': typeof LayoutCoursesIdRoute
   '/_layout/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -854,7 +899,12 @@ export interface FileRouteTypes {
     | '/web-design'
     | '/games/$id'
     | '/games/leaderboard'
+    | '/matching/dashboard'
+    | '/matching/game'
+    | '/matching/loading'
+    | '/matching/path'
     | '/games/'
+    | '/matching/'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -943,7 +993,12 @@ export interface FileRouteTypes {
     | '/web-design'
     | '/games/$id'
     | '/games/leaderboard'
+    | '/matching/dashboard'
+    | '/matching/game'
+    | '/matching/loading'
+    | '/matching/path'
     | '/games'
+    | '/matching'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -1033,8 +1088,13 @@ export interface FileRouteTypes {
     | '/_layout/web-design'
     | '/games/$id'
     | '/games/leaderboard'
+    | '/matching/dashboard'
+    | '/matching/game'
+    | '/matching/loading'
+    | '/matching/path'
     | '/_layout/'
     | '/games/'
+    | '/matching/'
     | '/_layout/courses/$id'
     | '/_layout/courses/backend-development'
     | '/_layout/courses/data-science'
@@ -1108,7 +1168,12 @@ export interface RootRouteChildren {
   SignupRoute: typeof SignupRoute
   GamesIdRoute: typeof GamesIdRouteWithChildren
   GamesLeaderboardRoute: typeof GamesLeaderboardRoute
+  MatchingDashboardRoute: typeof MatchingDashboardRoute
+  MatchingGameRoute: typeof MatchingGameRoute
+  MatchingLoadingRoute: typeof MatchingLoadingRoute
+  MatchingPathRoute: typeof MatchingPathRoute
   GamesIndexRoute: typeof GamesIndexRoute
+  MatchingIndexRoute: typeof MatchingIndexRoute
   ApiAuthActivateRoute: typeof ApiAuthActivateRoute
   AuthGithubCallbackRoute: typeof AuthGithubCallbackRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
@@ -1204,6 +1269,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof R404RouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/matching/': {
+      id: '/matching/'
+      path: '/matching'
+      fullPath: '/matching/'
+      preLoaderRoute: typeof MatchingIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/games/': {
       id: '/games/'
       path: '/games'
@@ -1217,6 +1289,34 @@ declare module '@tanstack/react-router' {
       fullPath: '/'
       preLoaderRoute: typeof LayoutIndexRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/matching/path': {
+      id: '/matching/path'
+      path: '/matching/path'
+      fullPath: '/matching/path'
+      preLoaderRoute: typeof MatchingPathRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matching/loading': {
+      id: '/matching/loading'
+      path: '/matching/loading'
+      fullPath: '/matching/loading'
+      preLoaderRoute: typeof MatchingLoadingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matching/game': {
+      id: '/matching/game'
+      path: '/matching/game'
+      fullPath: '/matching/game'
+      preLoaderRoute: typeof MatchingGameRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/matching/dashboard': {
+      id: '/matching/dashboard'
+      path: '/matching/dashboard'
+      fullPath: '/matching/dashboard'
+      preLoaderRoute: typeof MatchingDashboardRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/games/leaderboard': {
       id: '/games/leaderboard'
@@ -1905,7 +2005,12 @@ const rootRouteChildren: RootRouteChildren = {
   SignupRoute: SignupRoute,
   GamesIdRoute: GamesIdRouteWithChildren,
   GamesLeaderboardRoute: GamesLeaderboardRoute,
+  MatchingDashboardRoute: MatchingDashboardRoute,
+  MatchingGameRoute: MatchingGameRoute,
+  MatchingLoadingRoute: MatchingLoadingRoute,
+  MatchingPathRoute: MatchingPathRoute,
   GamesIndexRoute: GamesIndexRoute,
+  MatchingIndexRoute: MatchingIndexRoute,
   ApiAuthActivateRoute: ApiAuthActivateRoute,
   AuthGithubCallbackRoute: AuthGithubCallbackRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,

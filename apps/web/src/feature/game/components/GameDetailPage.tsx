@@ -5,6 +5,8 @@ import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 import type { Comment, Game } from "../services/gameService";
 import gameService from "../services/gameService";
+import styles from "./GameDetailPage.module.css";
+import { Link } from "@tanstack/react-router";
 
 interface GameDetailPageProps {
 	id: number;
@@ -178,8 +180,76 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 		comments.filter((c) => c.parentCommentId === parentId);
 
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-gray-900 via-gray-800 to-black text-white">
-			<div className="max-w-7xl mx-auto px-6 py-8">
+		<div className="min-h-screen bg-[#12080a] text-white">
+			<title>Bit Learning Game Center</title>
+			<link rel="preconnect" href="https://fonts.googleapis.com" />
+			<link
+				rel="preconnect"
+				href="https://fonts.gstatic.com"
+				crossOrigin="anonymous"
+			/>
+			<link
+				href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap"
+				rel="stylesheet"
+			/>
+			<link
+				href="https://fonts.googleapis.com/icon?family=Material+Icons"
+				rel="stylesheet"
+			/>
+			<nav className={styles.subNav}>
+				<div className={styles.subNavInner}>
+					<div className={styles.subNavLeft}>
+						<Link to="/" className={styles.subNavLogo}>
+							<span
+								className="material-icons"
+								style={{ fontSize: 28, color: "#ec1337" }}
+							>
+								keyboard
+							</span>
+							<span className={styles.subNavLogoText}>BIT LEARNING</span>
+						</Link>
+						<div className={styles.subNavLinks}>
+							<Link to="/" className={styles.subNavLink}>
+								Home
+							</Link>
+							<a
+								className={`${styles.subNavLink} ${styles.subNavLinkActive}`}
+								href="#"
+							>
+								Games
+							</a>
+							<a className={styles.subNavLink} href="#">
+								Leaderboards
+							</a>
+							<a className={styles.subNavLink} href="#">
+								Categories
+							</a>
+						</div>
+					</div>
+					<div className={styles.subNavRight}>
+						<span
+							className="material-icons"
+							style={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}
+						>
+							search
+						</span>
+						<span
+							className="material-icons"
+							style={{ color: "rgba(255,255,255,0.5)", cursor: "pointer" }}
+						>
+							notifications
+						</span>
+						<div className={styles.subNavAvatar}>
+							<img
+								src="https://lh3.googleusercontent.com/aida-public/AB6AXuDkRzqO_Av9NPkMdAwUEANWBel9w9n_tQzR9yl4OEBxVh382dUyFSpotilCBAIVHlbg4mJIXMqyv_rPhLAwFamWt_my2RPRcgo4afghfB5s9-76vPK4Z7IkYLsiiL16JriGaMpkNItjg4_y9P-ytSfEDTTjzOw1IcAohFS9kj6A6kyFIS9yDQVfAXW6Ez5XDb1DOCs3LUgQ2MEamsNBMhQZF5FptPyRN4msgKCY_RoCQptITcU-tB2b-CcMGrjABO3nOeu9UDTLjoTK"
+								alt="User"
+							/>
+						</div>
+					</div>
+				</div>
+			</nav>
+
+			<div className="max-w-7xl mx-auto px-6 py-16">
 				<button
 					onClick={() => navigate({ to: "/games" })}
 					className="mb-6 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
@@ -210,7 +280,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 							</button>
 						</div>
 
-						<div className="mt-6 flex items-center gap-4">
+						<div className="mt-6 mb-6 flex items-center gap-4">
 							<button
 								onClick={handlePlayGame}
 								className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
@@ -236,23 +306,47 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 							</div>
 						</div>
 
+						{/* Developer Card */}
+						<section className={styles.devCard}>
+							<div className={styles.devAvatarWrap}>
+								<img
+									src={
+										"https://lh3.googleusercontent.com/aida-public/AB6AXuBvcL9d3KBBZdbSMuCars2WvZvKStbOirEGuV7elK0pT9qIj4VhyUiTthc8qg-PmCabbAWNd58NDRgn915JPpdStQ0df2kzaCIXeMFq1OOkOhy4B9r0U2haGpmt6PlTIMHWUjtqfnW5hW9chufQEPDjNuAP3Ntyg0ZW3pAAkQhArQlwb_cSSL50FN7Ao_lnk-w_oy_y59WeMikQqQxNJZK-54xt2bPKo5jcCDyYyHEaH9xvV_HQG-QA94XpxUtnV9E02GZMhXYOE6fB"
+									}
+									alt="avatar dev"
+									className={styles.devAvatar}
+								/>
+							</div>
+							<div className={styles.devInfo}>
+								<div className={styles.devNameRow}>
+									<h3 className={styles.devName}>Bit Learning</h3>
+									<span className={styles.devBadge}>Top Developer</span>
+								</div>
+								<p className={styles.devBio}>
+									Specializing in rhythmic educational games. Creator of the
+									"Quest" series with over 5 million total plays.
+								</p>
+							</div>
+							<button className={styles.followBtn}>FOLLOW</button>
+						</section>
+
 						{/* Comments Section */}
-						<div className="mt-8 bg-gray-800/50 rounded-lg p-6">
+						<div className="mt-8  rounded-lg p-6">
 							<h2 className="text-2xl font-bold mb-6 flex items-center gap-2">
 								<MessageCircle className="w-6 h-6" />
-								Comments ({comments.length})
+								Community Comments ({comments.length})
 							</h2>
 
 							{username ? (
-								<form onSubmit={handleAddComment} className="mb-8">
+								<form onSubmit={handleAddComment} className="mb-12">
 									<textarea
 										value={commentText}
 										onChange={(e) => setCommentText(e.target.value)}
 										placeholder="Share your thoughts..."
-										className="w-full px-4 py-3 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 resize-none text-white"
+										className="w-full px-4 py-3 bg-[rgba(255,255,255,0.04)] border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 resize-none text-white"
 										rows={3}
 									/>
-									<div className="flex gap-3 mt-3">
+									<div className="flex justify-end gap-3 mt-3">
 										<button
 											type="submit"
 											className="bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-2 rounded-lg transition-colors"
@@ -269,14 +363,17 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 									</div>
 								</form>
 							) : (
-								<div className="mb-8 bg-gray-900 rounded-lg p-6 text-center">
+								<div className="mb-8 bg-[rgba(255,255,255,0.04)] rounded-lg p-6 text-center">
 									<p className="text-gray-400 mb-4">Sign in to comment</p>
 								</div>
 							)}
 
 							<div className="space-y-4">
 								{topLevelComments.map((comment) => (
-									<div key={comment.id} className="bg-gray-900 rounded-lg p-4">
+									<div
+										key={comment.id}
+										className="bg-[rgba(255,255,255,0.04)] rounded-lg p-4"
+									>
 										<div className="flex items-start gap-3">
 											<div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-500 to-blue-500 flex items-center justify-center font-bold">
 												{comment.username.charAt(0).toUpperCase()}
@@ -302,12 +399,12 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 												)}
 
 												{replyTo === comment.id && username && (
-													<div className="mt-3 bg-gray-800 rounded-lg p-3">
+													<div className="mt-3 bg-[rgba(255,255,255,0.04)] rounded-lg p-3">
 														<textarea
 															value={replyText}
 															onChange={(e) => setReplyText(e.target.value)}
 															placeholder="Write a reply..."
-															className="w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 resize-none text-white text-sm"
+															className="w-full px-3 py-2 bg-[rgba(255,255,255,0.04)] border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 resize-none text-white text-sm"
 															rows={2}
 														/>
 														<div className="flex gap-2 mt-2">
@@ -385,7 +482,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 							</p>
 							{detailGame.category && (
 								<div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-full">
-									<span>{detailGame.category.icon}</span>
 									<span className="font-bold">{detailGame.category.name}</span>
 								</div>
 							)}
@@ -421,6 +517,69 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 					</div>
 				</div>
 			</div>
+
+			<footer className={styles.footer}>
+				<div className={styles.footerGrid}>
+					<div>
+						<div className={styles.footerLogo}>
+							<span
+								className="material-icons"
+								style={{ color: "#ec1337", fontSize: 22 }}
+							>
+								keyboard
+							</span>
+							<span className={styles.footerLogoText}>BIT LEARNING</span>
+						</div>
+						<p className={styles.footerDesc}>
+							The #1 platform for educational typing games and competitive
+							keyboarding challenges worldwide.
+						</p>
+					</div>
+					{[
+						{
+							heading: "Platform",
+							links: ["All Games", "Tournaments", "Rankings", "Store"],
+						},
+						{
+							heading: "Support",
+							links: [
+								"Help Center",
+								"Privacy Policy",
+								"Terms of Service",
+								"Cookie Settings",
+							],
+						},
+					].map(({ heading, links }) => (
+						<div key={heading}>
+							<h4 className={styles.footerHeading}>{heading}</h4>
+							<ul className={styles.footerLinks}>
+								{links.map((l) => (
+									<li key={l}>
+										<a href="#" className={styles.footerLink}>
+											{l}
+										</a>
+									</li>
+								))}
+							</ul>
+						</div>
+					))}
+					<div>
+						<h4 className={styles.footerHeading}>Follow Us</h4>
+						<div className={styles.socialRow}>
+							{["facebook", "alternate_email", "movie"].map((icon) => (
+								<a key={icon} href="#" className={styles.socialBtn}>
+									<span className="material-icons" style={{ fontSize: 20 }}>
+										{icon}
+									</span>
+								</a>
+							))}
+						</div>
+					</div>
+				</div>
+				<div className={styles.footerCopy}>
+					© 2024 BIT LEARNING Gaming. All rights reserved.
+				</div>
+			</footer>
 		</div>
 	);
 }

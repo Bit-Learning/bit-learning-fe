@@ -1,0 +1,67 @@
+.card {
+  flex: none;
+  width: 176px;
+  cursor: pointer;
+  text-decoration: none;
+  color: inherit;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .card { width: 224px; }
+}
+
+.imageWrap {
+  position: relative;
+  aspect-ratio: 2/3;
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+  transform: scale(1);
+  transition: transform 0.3s ease, box-shadow 0.3s ease;
+  z-index: 1;
+}
+
+.card:hover .imageWrap {
+  transform: scale(1.05);
+  z-index: 20;
+  box-shadow: 0 0 0 2px #ec1337, 0 16px 40px rgba(236,19,55,0.2);
+}
+
+.image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to top, rgba(0,0,0,0.85), transparent);
+  display: flex;
+  align-items: flex-end;
+  padding: 1rem;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.card:hover .overlay { opacity: 1; }
+
+.playIcon {
+  color: white !important;
+  background: #ec1337;
+  border-radius: 50%;
+  padding: 6px;
+  font-size: 24px !important;
+}
+
+.title {
+  margin: 12px 0 0;
+  font-weight: 600;
+  font-size: 0.875rem;
+  color: #f1f5f9;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
