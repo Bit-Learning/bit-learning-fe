@@ -1,5 +1,4 @@
 import { useNavigate } from "@tanstack/react-router";
-import { useAudio } from "../../components/AudioProvider";
 import { useEffect, useState } from "react";
 import { SymbolAnimationMode } from "../../data";
 import { SymbolBackground } from "../../components/SymbolBackground";
@@ -9,7 +8,6 @@ import "../../styles/index.css";
 
 export default function HomePage() {
 	const navigate = useNavigate();
-	const { playSound } = useAudio();
 	const [symbolAnimation, setSymbolAnimation] = useState<SymbolAnimationMode>(
 		() => {
 			if (typeof window === "undefined") return SymbolAnimationMode.On;
@@ -27,16 +25,11 @@ export default function HomePage() {
 		window.localStorage.setItem("symbolAnimation", symbolAnimation);
 	}, [symbolAnimation]);
 
-	// Start background music once when home is visited
-	useEffect(() => {
-		playSound("game-background-music", { loop: true });
-	}, [playSound]);
-
 	const isAnimationOn = symbolAnimation === SymbolAnimationMode.On;
 
 	return (
 		<body className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-300 overflow-x-hidden min-h-screen">
-			<title>Trang chủ - Tin Học Vui</title>
+			<title>Trang chủ</title>
 			{/* Background Pattern Overlay */}
 			<SymbolBackground animationMode={symbolAnimation} size="lg" />
 
@@ -190,10 +183,7 @@ export default function HomePage() {
 							Liên hệ
 						</a>
 					</div>
-					<p className="text-slate-400 text-sm">
-						© 2024 Tin Học Vui. Nền tảng học tập sáng tạo dành cho trẻ em Việt
-						Nam.
-					</p>
+					<p className="text-slate-400 text-sm">© 2026 Bit Learning System</p>
 				</footer>
 			</div>
 		</body>

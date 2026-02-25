@@ -1,23 +1,38 @@
+import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
-import { useNavigate } from "@tanstack/react-router";
 import type { Game } from "../services/gameService";
+import { useAudio } from "./AudioProvider";
+import GameCard from "./GameRow";
+import styles from "./GameRow.module.css";
 
 interface CategoryRowProps {
 	categoryName: string;
 	categoryDescription: string;
-	categoryIcon: string;
 	games: Game[];
 }
 
 export default function CategoryRow({
 	categoryName,
 	categoryDescription,
-	categoryIcon,
 	games,
 }: CategoryRowProps) {
 	const navigate = useNavigate();
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
+	const { playSound } = useAudio();
+
+	const handleViewMore = () => {
+		switch (categoryName) {
+			case "MATCHING":
+				// Start background music on explicit user action
+				playSound("game-background-music", { loop: true });
+				navigate({ to: "/matching" });
+				break;
+			default:
+				navigate({ to: "/games" });
+				break;
+		}
+	};
 
 	const scroll = (direction: "left" | "right") => {
 		if (scrollContainerRef.current) {
@@ -33,15 +48,20 @@ export default function CategoryRow({
 	};
 
 	return (
-		<div className="mb-8">
-			<h2 className="text-xl font-bold text-white px-8 flex items-center gap-2">
-				<span>{categoryIcon}</span>
-				<span>{categoryName}</span>
-			</h2>
-			<span className="text-gray-300 text-sm px-8 mb-4">
-				{categoryDescription}
-			</span>
-
+		<section className={styles.section}>
+			<div className={styles.header}>
+				<h2 className="text-xl font-bold text-white px-8 flex flex-col items-start gap-2">
+					<div className="flex items-center gap-2">
+						<span className={styles.accent} />
+						{categoryName}
+					</div>
+					<span className="text-gray-300 text-sm">{categoryDescription}</span>
+				</h2>
+				<button className={styles.viewAll} onClick={() => handleViewMore()}>
+					{" "}
+					Xem tất cả{" "}
+				</button>
+			</div>
 			{games.length === 0 ? (
 				<div className="px-8">
 					<div className="bg-gray-800/30 rounded-lg p-8 text-center border border-gray-700/50">
@@ -72,38 +92,7 @@ export default function CategoryRow({
 						}}
 					>
 						{games.map((game) => (
-							<div
-								key={game.id}
-								onClick={() =>
-									navigate({
-										to: "/games/$id",
-										params: { id: String(game.id) },
-									})
-								}
-								className="flex-none w-64 cursor-pointer transform transition-transform duration-300 hover:scale-105"
-							>
-								<div className="relative aspect-video rounded-md overflow-hidden bg-linear-to-br from-purple-600 to-blue-500 shadow-lg">
-									{game.thumbnailUrl ? (
-										<img
-											src={game.thumbnailUrl}
-											alt={game.title}
-											className="w-full h-full object-cover"
-										/>
-									) : (
-										<div className="w-full h-full flex items-center justify-center text-5xl">
-											🎮
-										</div>
-									)}
-									<div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-										<h3 className="text-white font-bold text-sm truncate">
-											{game.title}
-										</h3>
-										<p className="text-white/80 text-xs truncate">
-											{game.description}
-										</p>
-									</div>
-								</div>
-							</div>
+							<GameCard game={game} categoryName={categoryName} key={game.id} />
 						))}
 					</div>
 
@@ -117,6 +106,6 @@ export default function CategoryRow({
 					</button>
 				</div>
 			)}
-		</div>
+		</section>
 	);
 }

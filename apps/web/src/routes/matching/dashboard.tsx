@@ -20,7 +20,7 @@ export default function DashboardPage() {
 							</span>
 						</div>
 						<h2 className="text-xl font-bold tracking-tight text-primary">
-							Tin Học Vui
+							Bit Learning
 						</h2>
 					</div>
 					<div className="flex items-center gap-4">

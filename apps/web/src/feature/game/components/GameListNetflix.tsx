@@ -3,33 +3,21 @@ import { useEffect, useRef, useState } from "react";
 import type { Comment, Game, GameCategory } from "../services/gameService";
 import gameService from "../services/gameService";
 import CategoryRow from "./CategoryRow";
-
+import { Navbar } from "./Navbar";
+import styles from "./HomePage.module.css";
+import { Link } from "@tanstack/react-router";
+import { featuredGame } from "../data/games";
 interface GameListNetflixProps {
 	username: string | null;
-	role: string | null;
 }
 
-export default function GameListNetflix({
-	username,
-	role,
-}: GameListNetflixProps) {
+export default function GameListNetflix({ username }: GameListNetflixProps) {
 	const [categoriesWithGames, setCategoriesWithGames] = useState<
 		GameCategory[]
 	>([]);
 	const [categories, setCategories] = useState<GameCategory[]>([]);
 	const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 	const [detailGame, setDetailGame] = useState<Game | null>(null);
-
-	// State for Upload Form
-	const [title, setTitle] = useState("");
-	const [desc, setDesc] = useState("");
-	const [instructions, setInstructions] = useState("");
-	const [categoryId, setCategoryId] = useState<number | null>(null);
-	const [thumbnailUrl, setThumbnailUrl] = useState("");
-	const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
-	const [file, setFile] = useState<File | null>(null);
-	const [showUpload, setShowUpload] = useState(false);
-	const [isDragging, setIsDragging] = useState(false);
 
 	// State for Fullscreen
 	const [isFullscreen, setIsFullscreen] = useState(false);
@@ -79,134 +67,6 @@ export default function GameListNetflix({
 			setCategories(data);
 		} catch (error) {
 			console.error("Failed to load categories", error);
-		}
-	};
-
-	const handleUpload = async (e: React.FormEvent) => {
-		e.preventDefault();
-		if (!file) return alert("Please select a file!");
-		if (!categoryId) return alert("Please select a category!");
-		if (!username) return alert("Please login to upload!");
-
-		const formData = new FormData();
-		formData.append("file", file);
-		formData.append("title", title);
-		formData.append("desc", desc);
-		formData.append("instructions", instructions);
-		formData.append("categoryId", categoryId.toString());
-		formData.append("username", username);
-
-		if (thumbnailFile) {
-			formData.append("thumbnail", thumbnailFile);
-		} else if (thumbnailUrl) {
-			formData.append("thumbnailUrl", thumbnailUrl);
-		}
-
-		try {
-			await gameService.uploadGame(formData);
-			alert("Game uploaded successfully!");
-			fetchCategoriesWithGames();
-			// Reset form
-			setTitle("");
-			setDesc("");
-			setInstructions("");
-			setCategoryId(null);
-			setThumbnailUrl("");
-			setThumbnailFile(null);
-			setFile(null);
-			setShowUpload(false);
-		} catch (error) {
-			alert("Upload failed");
-		}
-	};
-
-	const handleDragEnter = (e: React.DragEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		setIsDragging(true);
-	};
-
-	const handleDragLeave = (e: React.DragEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		setIsDragging(false);
-	};
-
-	const handleDragOver = (e: React.DragEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-	};
-
-	const handleDrop = (e: React.DragEvent) => {
-		e.preventDefault();
-		e.stopPropagation();
-		setIsDragging(false);
-
-		const droppedFiles = e.dataTransfer.files;
-		if (droppedFiles && droppedFiles.length > 0) {
-			const droppedFile = droppedFiles[0];
-			if (droppedFile) {
-				const fileExtension = droppedFile.name.split(".").pop()?.toLowerCase();
-				if (fileExtension === "html" || fileExtension === "zip") {
-					setFile(droppedFile);
-				} else {
-					alert("Please upload only .html or .zip files");
-				}
-			}
-		}
-	};
-
-	const handlePlay = async (game: Game) => {
-		setSelectedGame(game);
-		setIsFullscreen(false);
-		if (username) {
-			const randomScore = Math.floor(Math.random() * 1000);
-			try {
-				await gameService.trackPlay(game.id, username, randomScore);
-				console.log("Play tracked with score:", randomScore);
-			} catch (e) {
-				console.error("Tracking error", e);
-			}
-		}
-	};
-
-	const handleShowDetail = async (game: Game) => {
-		try {
-			const gameData = await gameService.getGameById(game.id);
-			setDetailGame(gameData);
-
-			const commentsData = await gameService.getComments(game.id);
-			setComments(commentsData);
-
-			if (username) {
-				const likeStatus = await gameService.checkLikeStatus(game.id, username);
-				setIsLiked(likeStatus);
-			} else {
-				setIsLiked(false);
-			}
-		} catch (e) {
-			console.error("Failed to load game details", e);
-		}
-	};
-
-	const handleDeleteGame = async (gameId: number) => {
-		if (!username || role !== "ADMIN") {
-			alert("Only admins can delete games!");
-			return;
-		}
-
-		if (!confirm("Are you sure you want to delete this game?")) {
-			return;
-		}
-
-		try {
-			await gameService.deleteGame(gameId, username);
-			alert("Game deleted successfully!");
-			setDetailGame(null);
-			fetchCategoriesWithGames();
-		} catch (error) {
-			alert("Failed to delete game");
-			console.error(error);
 		}
 	};
 
@@ -382,15 +242,6 @@ export default function GameListNetflix({
 									<Eye className="w-5 h-5" />
 									<span>{detailGame.views || 0}</span>
 								</div>
-
-								{role === "ADMIN" && (
-									<button
-										onClick={() => handleDeleteGame(detailGame.id)}
-										className="bg-gray-800 hover:bg-red-600 text-white px-6 py-3 rounded-lg font-bold transition-colors"
-									>
-										🗑️
-									</button>
-								)}
 							</div>
 
 							{/* Comments Section */}
@@ -547,7 +398,6 @@ export default function GameListNetflix({
 								</p>
 								{detailGame.category && (
 									<div className="mt-4 inline-flex items-center gap-2 bg-gradient-to-r from-purple-600 to-blue-600 px-4 py-2 rounded-full">
-										<span>{detailGame.category.icon}</span>
 										<span className="font-bold">
 											{detailGame.category.name}
 										</span>
@@ -591,223 +441,168 @@ export default function GameListNetflix({
 
 	// --- VIEW: Netflix-style Home ---
 	return (
-		<div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
-			{/* Hero Header */}
-			<div className="relative h-96 bg-gradient-to-r from-purple-900 to-blue-900 overflow-hidden">
-				<div className="absolute inset-0 bg-black/40" />
-				<div className="relative z-10 max-w-7xl mx-auto px-8 h-full flex flex-col justify-center">
-					<h1 className="text-5xl md:text-6xl font-bold mb-4">
-						🎮 Game Center
-					</h1>
-					<p className="text-xl text-gray-300 max-w-2xl">
-						Discover amazing games created by students. Play, learn, and have
-						fun!
-					</p>
+		<div className="min-h-screen bg-[#12080a] text-white">
+			<title>Bit Learning Game Center</title>
+			<link rel="preconnect" href="https://fonts.googleapis.com" />
+			<link
+				rel="preconnect"
+				href="https://fonts.gstatic.com"
+				crossOrigin="anonymous"
+			/>
+			<link
+				href="https://fonts.googleapis.com/css2?family=Spline+Sans:wght@300;400;500;600;700&display=swap"
+				rel="stylesheet"
+			/>
+			<link
+				href="https://fonts.googleapis.com/icon?family=Material+Icons"
+				rel="stylesheet"
+			/>
+			<Navbar />
 
-					{username && role === "ADMIN" && (
-						<button
-							onClick={() => setShowUpload(!showUpload)}
-							className="mt-6 bg-red-600 hover:bg-red-700 text-white px-8 py-3 rounded-lg font-bold inline-flex items-center gap-2 w-fit transition-colors"
-						>
-							<Upload className="w-5 h-5" />
-							{showUpload ? "Cancel Upload" : "Upload New Game"}
-						</button>
-					)}
+			{/* Hero */}
+			<section className={styles.hero}>
+				<div className={styles.heroBg}>
+					<img
+						src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1wWV_VAD5lyWQZbGNgh4vcyi65uAw_hT_rvT8jG0u5IYOuOQRL8vYCZpnQEOQDxkE95l8zwrFbr1Kvwurgb9wmlARDd8SAPmu9PV_DBNw_RaSVRxiLM583UqvAqK5Q2Qa_0TuCHyL90xF_AXSlxVYBz0pSnqCZwdumTIbxFK58RhN_dXSsBphatRDvXOkdr_yMxBevirnOnaTThpfcZJt7420ERKus8OsQNAktJcOGSpga4Q7Q9tVR71YnxvehM0V2zIMh_nnSDX9"
+						alt="Space Typer Hero"
+						className={styles.heroBgImg}
+					/>
+					<div className={styles.heroGradient} />
 				</div>
-			</div>
-
-			<div className="relative -mt-32 z-20">
-				{/* Upload Form */}
-				{showUpload && username && role === "ADMIN" && (
-					<div className="max-w-4xl mx-auto px-8 mb-12">
-						<div className="bg-gray-900 rounded-lg p-8 shadow-2xl border border-gray-800">
-							<h3 className="text-2xl font-bold mb-6">Upload New Game</h3>
-							<form onSubmit={handleUpload} className="space-y-6">
-								<div>
-									<label className="block font-bold mb-2">Title</label>
-									<input
-										type="text"
-										value={title}
-										onChange={(e) => setTitle(e.target.value)}
-										className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-										placeholder="Game title"
-										required
-									/>
-								</div>
-
-								<div>
-									<label className="block font-bold mb-2">Description</label>
-									<textarea
-										value={desc}
-										onChange={(e) => setDesc(e.target.value)}
-										className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 text-white resize-none"
-										rows={3}
-										placeholder="Brief description"
-									/>
-								</div>
-
-								<div>
-									<label className="block font-bold mb-2">Instructions</label>
-									<textarea
-										value={instructions}
-										onChange={(e) => setInstructions(e.target.value)}
-										className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 text-white resize-none"
-										rows={4}
-										placeholder="How to play"
-									/>
-								</div>
-
-								<div>
-									<label className="block font-bold mb-2">Category</label>
-									<select
-										value={categoryId || ""}
-										onChange={(e) =>
-											setCategoryId(
-												e.target.value ? Number(e.target.value) : null,
-											)
-										}
-										className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-										required
-									>
-										<option value="">Select a category...</option>
-										{categories.map((cat) => (
-											<option key={cat.id} value={cat.id}>
-												{cat.icon} {cat.name}
-											</option>
-										))}
-									</select>
-								</div>
-
-								<div>
-									<label className="block font-bold mb-2">Thumbnail</label>
-									<input
-										type="text"
-										value={thumbnailUrl}
-										onChange={(e) => {
-											setThumbnailUrl(e.target.value);
-											if (e.target.value) setThumbnailFile(null);
-										}}
-										className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 text-white mb-3"
-										placeholder="Thumbnail URL"
-										disabled={!!thumbnailFile}
-									/>
-									<div className="text-center text-gray-500 my-2">OR</div>
-									<input
-										type="file"
-										accept="image/*"
-										onChange={(e) => {
-											const selectedFile = e.target.files?.[0];
-											if (selectedFile) {
-												setThumbnailFile(selectedFile);
-												setThumbnailUrl("");
-											}
-										}}
-										className="w-full px-4 py-3 bg-gray-800 border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 text-white"
-										disabled={!!thumbnailUrl}
-									/>
-								</div>
-
-								<div>
-									<label className="block font-bold mb-2">
-										Game File (.html or .zip)
-									</label>
-									<div
-										onDragEnter={handleDragEnter}
-										onDragOver={handleDragOver}
-										onDragLeave={handleDragLeave}
-										onDrop={handleDrop}
-										className={`border-2 border-dashed rounded-lg p-12 text-center transition-all ${
-											isDragging
-												? "border-red-600 bg-red-900/20"
-												: file
-													? "border-green-600 bg-green-900/20"
-													: "border-gray-700 bg-gray-800/50"
-										}`}
-									>
-										<input
-											type="file"
-											id="file-upload"
-											accept=".html,.zip"
-											onChange={(e) => setFile(e.target.files?.[0] || null)}
-											className="hidden"
-											required={!file}
-										/>
-
-										{file ? (
-											<>
-												<div className="text-green-500 text-5xl mb-4">✓</div>
-												<p className="text-green-500 font-bold mb-2">
-													{file.name}
-												</p>
-												<p className="text-gray-500 text-sm">
-													{(file.size / 1024 / 1024).toFixed(2)} MB
-												</p>
-												<button
-													type="button"
-													onClick={() => setFile(null)}
-													className="text-red-500 hover:text-red-400 text-sm font-bold mt-3"
-												>
-													Remove file
-												</button>
-											</>
-										) : (
-											<>
-												<div className="text-gray-500 text-5xl mb-4">📁</div>
-												<p className="text-gray-400 font-bold mb-4">
-													Drag and drop or
-												</p>
-												<label
-													htmlFor="file-upload"
-													className="inline-block bg-red-600 hover:bg-red-700 text-white font-bold px-6 py-3 rounded-lg cursor-pointer transition-colors"
-												>
-													Choose File
-												</label>
-												<p className="text-gray-600 text-sm mt-4">
-													Supported: .html, .zip
-												</p>
-											</>
-										)}
-									</div>
-								</div>
-
-								<button
-									type="submit"
-									className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-4 rounded-lg transition-colors"
-								>
-									Upload Game
-								</button>
-							</form>
+				<div className={styles.heroContent}>
+					<div className={styles.heroInner}>
+						<div className={styles.heroBadges}>
+							<span className={styles.badge}>Featured Game</span>
+							<span className={styles.badgeSub}>#1 Trending in Typing</span>
+						</div>
+						<h1 className={styles.heroTitle}>
+							Space <br />
+							<span className={styles.heroAccent}>Typer</span>
+						</h1>
+						<p className={styles.heroDesc}>
+							Master your keyboard while navigating through the asteroid belt.
+							The faster you type, the quicker you dodge! Unlock legendary ships
+							and conquer the cosmos.
+						</p>
+						<div className={styles.heroActions}>
+							<Link
+								to="/games/$id"
+								params={{ id: featuredGame.id }}
+								className={styles.btnPlay}
+							>
+								<span className="material-icons">play_arrow</span>
+								PLAY NOW
+							</Link>
+							<button className={styles.btnInfo}>
+								<span className="material-icons" style={{ fontSize: 20 }}>
+									info
+								</span>
+								MORE INFO
+							</button>
 						</div>
 					</div>
-				)}
-
-				{/* Categories with Games - Netflix Style */}
-				<div className="space-y-12 pb-16 mt-36">
-					{categoriesWithGames.length > 0 ? (
-						categoriesWithGames.map((category) => (
-							<CategoryRow
-								key={category.id}
-								categoryName={category.name}
-								categoryDescription={category.description}
-								categoryIcon={category.icon}
-								games={category.games || []}
-							/>
-						))
-					) : (
-						<div className="text-center py-20 px-8">
-							<div className="text-6xl mb-6">🎮</div>
-							<p className="text-2xl font-bold text-gray-400 mb-2">
-								No games available yet
-							</p>
-							<p className="text-gray-600">
-								{username
-									? "Be the first to upload a game!"
-									: "Sign in to start playing"}
-							</p>
-						</div>
-					)}
 				</div>
-			</div>
+			</section>
+
+			<main className={styles.main}>
+				{/* Categories with Games - Netflix Style */}
+				{categoriesWithGames.length > 0 ? (
+					categoriesWithGames.map((category) => (
+						<CategoryRow
+							key={category.id}
+							categoryName={category.name}
+							categoryDescription={category.description}
+							games={category.games || []}
+						/>
+					))
+				) : (
+					<div className="text-center py-20 px-8">
+						<div className="text-6xl mb-6">🎮</div>
+						<p className="text-2xl font-bold text-gray-400 mb-2">
+							No games available yet
+						</p>
+					</div>
+				)}
+			</main>
+
+			<footer className={styles.footer}>
+				<div className={styles.footerGrid}>
+					<div className={styles.footerBrand}>
+						<div className={styles.footerLogo}>
+							<span className={styles.footerLogoIcon}>
+								<span
+									className="material-icons"
+									style={{ fontSize: 18, color: "white" }}
+								>
+									videogame_asset
+								</span>
+							</span>
+							<span className={styles.footerLogoText}>
+								Edu<span className={styles.footerLogoAccent}>Play</span>
+							</span>
+						</div>
+						<p className={styles.footerTagline}>
+							Elevating the learning experience through immersive, fun, and
+							competitive casual games for all ages.
+						</p>
+					</div>
+					<div>
+						<h4 className={styles.footerHeading}>Platform</h4>
+						<ul className={styles.footerLinks}>
+							{["Home", "Categories", "Tournaments", "Leaderboard"].map((l) => (
+								<li key={l}>
+									<a href="#" className={styles.footerLink}>
+										{l}
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+					<div>
+						<h4 className={styles.footerHeading}>Support</h4>
+						<ul className={styles.footerLinks}>
+							{[
+								"Help Center",
+								"Parents Guide",
+								"Safety Center",
+								"Contact Us",
+							].map((l) => (
+								<li key={l}>
+									<a href="#" className={styles.footerLink}>
+										{l}
+									</a>
+								</li>
+							))}
+						</ul>
+					</div>
+					<div>
+						<h4 className={styles.footerHeading}>Community</h4>
+						<div className={styles.socialRow}>
+							{["discord", "public"].map((icon) => (
+								<a key={icon} href="#" className={styles.socialBtn}>
+									<span className="material-icons" style={{ fontSize: 20 }}>
+										{icon}
+									</span>
+								</a>
+							))}
+						</div>
+					</div>
+				</div>
+				<div className={styles.footerBottom}>
+					<p className={styles.footerCopy}>
+						© 2024 EduPlay Game Center. All rights reserved.
+					</p>
+					<div className={styles.footerLegal}>
+						{["Privacy Policy", "Terms of Service", "Cookie Settings"].map(
+							(l) => (
+								<a key={l} href="#" className={styles.footerLegalLink}>
+									{l}
+								</a>
+							),
+						)}
+					</div>
+				</div>
+			</footer>
 		</div>
 	);
 }

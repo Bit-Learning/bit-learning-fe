@@ -9,6 +9,7 @@ import {
 import { useAudio } from "@/feature/game/components/AudioProvider";
 import { AudioToggle } from "@/feature/game/components/AudioToggle";
 import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
+import matchingGameService from "@/feature/game/services/matchingGameService";
 
 type GameSearch = {
 	grade?: number;
@@ -75,9 +76,38 @@ export default function GamePage() {
 	const { playSound, stopSound } = useAudio();
 	const { grade = 3, topic = "A" } = Route.useSearch();
 
-	const gradeData = CURRICULUM_DATA.grades.find((g) => g.id === grade);
-	const topicData = gradeData?.topics.find((t) => t.code === topic);
-	const gameData = topicData?.gameData ?? GAME_DATA;
+	const [gameData, setGameData] = useState(() => GAME_DATA);
+	const [loading, setLoading] = useState(true);
+	const [error, setError] = useState<string | null>(null);
+
+	useEffect(() => {
+		let isMounted = true;
+		setLoading(true);
+		setError(null);
+
+		matchingGameService
+			.getGameByCurriculum(grade, topic)
+			.then((data) => {
+				if (!isMounted) return;
+				setGameData(data);
+			})
+			.catch(() => {
+				// Fallback to local mock data if backend is not ready
+				if (!isMounted) return;
+				const gradeData = CURRICULUM_DATA.grades.find((g) => g.id === grade);
+				const topicData = gradeData?.topics.find((t) => t.code === topic);
+				setGameData(topicData?.gameData ?? GAME_DATA);
+				setError("Không tải được dữ liệu từ máy chủ. Đang dùng dữ liệu mẫu.");
+			})
+			.finally(() => {
+				if (!isMounted) return;
+				setLoading(false);
+			});
+
+		return () => {
+			isMounted = false;
+		};
+	}, [grade, topic]);
 
 	const [stageIndex, setStageIndex] = useState(0);
 	// Pause background music while in the game route
@@ -277,6 +307,14 @@ export default function GamePage() {
 			? Math.max(0, stageMaxMistakes - mistakesCount)
 			: null;
 
+	if (loading) {
+		return (
+			<div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
+				<p className="text-lg font-medium">Đang tải dữ liệu trò chơi...</p>
+			</div>
+		);
+	}
+
 	// const nextHintPair = currentStage.pairs.find((p) => !matchedPairIds.includes(p.id))
 	// const hintText = nextHintPair?.hint
 
@@ -391,7 +429,8 @@ export default function GamePage() {
 								</span>
 							</div>
 							{shuffledRightIds.map((answerId) => {
-								const pair = currentStage.pairs.find((p) => p.id === answerId)!;
+								const pair = currentStage.pairs.find((p) => p.id === answerId);
+								if (!pair) return null;
 								const isMatched = isPairMatched(pair.id);
 								const isSelected = selectedRightId === pair.id;
 								const isWrong = wrongPair?.rightId === pair.id;
@@ -484,7 +523,8 @@ export default function GamePage() {
 								</span>
 							</div>
 							{shuffledRightIds.map((pairId) => {
-								const pair = currentStage.pairs.find((p) => p.id === pairId)!;
+								const pair = currentStage.pairs.find((p) => p.id === pairId);
+								if (!pair) return null;
 								const isMatched = isPairMatched(pair.id);
 								const isSelected = selectedRightId === pair.id;
 								const isWrong = wrongPair?.rightId === pair.id;

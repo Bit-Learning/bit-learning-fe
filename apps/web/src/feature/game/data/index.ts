@@ -577,7 +577,8 @@ function createTopicsForGrade(grade: number): Topic[] {
 			code,
 			title: titles[code],
 			description: `Chủ đề ${code} - ${titles[code].toLowerCase()}`,
-			hasGame: !!gameDataForTopic,
+			// Chỉ cho phép chơi từ backend với Lớp 3 - A, B.
+			hasGame: false,
 			gameData: gameDataForTopic,
 		});
 	}

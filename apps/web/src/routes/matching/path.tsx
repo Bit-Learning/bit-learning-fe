@@ -70,9 +70,8 @@ export default function PathPage() {
 							Lộ trình học Tin học 3–12
 						</h2>
 						<p className="text-slate-500 dark:text-slate-400 text-lg max-w-3xl">
-							Lựa chọn lớp, sau đó cuộn ngang như Netflix để xem các chủ đề A–F.
-							Hiện tại, bạn có thể bắt đầu với{" "}
-							<b>Lớp 3 - Chủ đề A: MÁY TÍNH VÀ EM</b>.
+							Lựa chọn lớp, cuộn ngang để xem các chủ đề A–F. Hiện tại, bạn có
+							thể bắt đầu với <b>Lớp 3 - Chủ đề A: MÁY TÍNH VÀ EM</b>.
 						</p>
 					</div>
 

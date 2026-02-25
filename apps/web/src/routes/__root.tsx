@@ -13,29 +13,27 @@ function RootComponent() {
 	);
 	const content = <Outlet />;
 
-	if (isMatchingRoute) {
-		return (
-			<ThemeProvider>
-				<AudioProvider>{content}</AudioProvider>
-			</ThemeProvider>
-		);
-	}
-
 	return (
-		<Providers>
-			{content}
-			{import.meta.env.MODE === "development" && (
-				<>
-					<ReactQueryDevtools
-						position="bottom"
-						buttonPosition="bottom-left"
-						theme="system"
-						initialIsOpen={false}
-					/>
-					<TanStackRouterDevtools position="bottom-left" />
-				</>
+		<AudioProvider>
+			{isMatchingRoute ? (
+				<ThemeProvider>{content}</ThemeProvider>
+			) : (
+				<Providers>
+					{content}
+					{import.meta.env.MODE === "development" && (
+						<>
+							<ReactQueryDevtools
+								position="bottom"
+								buttonPosition="bottom-left"
+								theme="system"
+								initialIsOpen={false}
+							/>
+							<TanStackRouterDevtools position="bottom-left" />
+						</>
+					)}
+				</Providers>
 			)}
-		</Providers>
+		</AudioProvider>
 	);
 }
 
