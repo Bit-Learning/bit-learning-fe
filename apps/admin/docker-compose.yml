@@ -21,7 +21,7 @@ services:
       context: ../..
       dockerfile: apps/admin/Dockerfile.prod
     ports:
-      - "5174:8386"
+      - "8386:8386"
     environment:
       - NODE_ENV=production
     networks:

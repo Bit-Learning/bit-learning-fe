@@ -1,7 +1,7 @@
 import { NotFoundErrorPage } from "@/feature/app/pages/NotFound";
 import { Providers } from "@/shared/components/Providers";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
-import { createRootRoute, Outlet } from "@tanstack/react-router";
+import { createRootRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
 export const Route = createRootRoute({
   component: () => (

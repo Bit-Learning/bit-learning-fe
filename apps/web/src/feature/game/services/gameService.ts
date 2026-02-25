@@ -5,7 +5,6 @@ export interface GameCategory {
 	id: number;
 	name: string;
 	description: string;
-	icon: string;
 	games?: Game[];
 }
 
@@ -21,7 +20,7 @@ export interface Game {
 	views?: number;
 	thumbnailUrl?: string;
 	thumbnailFullUrl?: string;
-	category?: GameCategory;
+	category: GameCategory;
 	createdBy?: string;
 }
 

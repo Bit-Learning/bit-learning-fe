@@ -17,7 +17,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const [game, setGame] = useState<Game | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [loading, setLoading] = useState(true);
-	const gameContainerRef = useRef<HTMLDivElement>(null);
+	const gameContainerRef = useRef<HTMLIFrameElement>(null);
 
 	useEffect(() => {
 		loadGame();
@@ -127,7 +127,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			</div>
 			<div className="flex-1 relative">
 				<iframe
-					ref={gameContainerRef as React.RefObject<HTMLDivElement>}
+					ref={gameContainerRef}
 					src={gameUrl}
 					className="w-full h-full border-none"
 					title="Game Play"

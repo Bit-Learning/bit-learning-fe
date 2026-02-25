@@ -19,10 +19,10 @@ services:
             context: ../..
             dockerfile: apps/web/Dockerfile.prod
         ports:
-            - '5174:5173'
+            - '5173:5173'
         networks:
             - app-net
 
 networks:
     app-net:
-        external: true
+        driver: bridge

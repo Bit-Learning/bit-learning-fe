@@ -13,7 +13,7 @@ export const Route = createFileRoute("/games/")({
 		const auth = useSelector((state: RootState) => state.auth);
 		const username = auth.userInfo?.username ?? null;
 		const role = auth.userInfo?.role ?? null;
-		return <GameListNetflix username={username} role={role} />;
+		return <GameListNetflix username={username} />;
 	},
 	errorComponent: () => <GeneralError />,
 	staticData: {

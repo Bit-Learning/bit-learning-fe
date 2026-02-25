@@ -1,0 +1,17 @@
+body {
+  font-family: 'Lexend', sans-serif;
+}
+
+.match-card {
+  transition: all 0.2s ease-in-out;
+}
+
+.match-card:hover {
+  transform: translateY(-2px);
+}
+
+.confetti-bg {
+  background-image: radial-gradient(circle at 20% 30%, rgba(43, 140, 238, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 80% 10%, rgba(43, 140, 238, 0.1) 0%, transparent 20%),
+    radial-gradient(circle at 50% 80%, rgba(43, 140, 238, 0.1) 0%, transparent 20%);
+}
