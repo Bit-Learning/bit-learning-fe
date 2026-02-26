@@ -7,7 +7,4 @@ export const Route = createFileRoute("/_headerOnly/profile/notifications")({
     requireAuth(location);
   },
   component: NotificationsPage,
-  staticData: {
-    headerStyle: "transparent",
-  },
 });

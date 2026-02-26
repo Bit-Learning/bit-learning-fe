@@ -7,7 +7,4 @@ export const Route = createFileRoute("/_headerOnly/profile/password")({
     requireAuth(location);
   },
   component: PasswordPage,
-  staticData: {
-    headerStyle: "transparent",
-  },
 });

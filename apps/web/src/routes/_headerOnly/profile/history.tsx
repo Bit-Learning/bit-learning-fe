@@ -7,7 +7,4 @@ export const Route = createFileRoute("/_headerOnly/profile/history")({
     requireAuth(location);
   },
   component: HistoryPage,
-  staticData: {
-    headerStyle: "transparent",
-  },
 });

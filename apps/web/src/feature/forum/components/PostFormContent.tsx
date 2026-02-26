@@ -112,7 +112,7 @@ const PostFormContent: React.FC = () => {
             </Label>
             <Input
               id="post-title"
-              className="w-full h-14 bg-white border-gray-200 rounded-lg px-0 text-2xl font-semibold focus:ring-0 border-x-0 border-t-0 border-b-2 focus:border-blue-600"
+              className="w-full h-14 bg-white border-gray-200 rounded-lg px-2 text-2xl font-semibold focus:ring-0 border-x-0 border-t-0 border-b-2 focus:border-blue-600"
               placeholder="Nhập tiêu đề mô tả rõ ràng..."
               value={title}
               onChange={(e) => setTitle(e.target.value)}
@@ -147,7 +147,7 @@ const PostFormContent: React.FC = () => {
                   </Badge>
                 ))}
                 <Input
-                  className="bg-transparent border-none focus:ring-0 text-sm flex-1 min-w-30 p-0 h-auto"
+                  className="bg-transparent border-none focus:ring-0 text-sm flex-1 min-w-30 p-2 h-auto"
                   placeholder="Thêm thẻ..."
                   value={newTag}
                   onChange={(e) => setNewTag(e.target.value)}
@@ -170,7 +170,6 @@ const PostFormContent: React.FC = () => {
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-100">
             <div className="flex items-center gap-2 text-gray-400 text-sm italic">
               <CheckCircle2 className="w-4 h-4" />
-              Đã tự động lưu lúc 12:45 CH
             </div>
             <div className="flex items-center gap-4 w-full sm:w-auto">
               <Button

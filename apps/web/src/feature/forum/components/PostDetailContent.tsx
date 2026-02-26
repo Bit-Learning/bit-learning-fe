@@ -72,9 +72,6 @@ const PostDetailContent: React.FC = () => {
             <ArrowLeft className="w-4 h-4" />
             Quay lại
           </Button>
-          <div className="hidden sm:flex items-center gap-2 text-sm text-gray-500">
-            <span className="text-gray-900 font-semibold">{selectedPost.hashtags[0]?.name || "Diễn đàn"}</span>
-          </div>
         </div>
 
         <PostCard
