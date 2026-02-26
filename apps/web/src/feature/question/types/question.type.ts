@@ -9,6 +9,12 @@ export enum QuestionLevel {
   HARD = "HARD",
 }
 
+export enum ApprovalStatus {
+  NONE = "NONE",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
+}
 export interface OptionRequest {
   label?: string;
   content: string;
@@ -85,6 +91,24 @@ export interface QuestionResponse {
   options?: OptionResponse[];
   isActive: boolean;
   isPublic: boolean;
+  approvalStatus: ApprovalStatus;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface QuestionBriefResponse {
+  id: number;
+  content: string;
+  questionType: QuestionType;
+  questionLevel: QuestionLevel;
+  lesson?: LessonBriefResponse;
+}
+
+export interface RequestPublishDTO {
+  questionIds: number[];
+}
+
+export interface ApproveRejectDTO {
+  questionIds: number[];
+  rejectReason?: string;
 }

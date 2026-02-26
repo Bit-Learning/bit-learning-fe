@@ -57,6 +57,7 @@ import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses
 import { Route as LayoutCheckoutIndexRouteImport } from './routes/_layout/checkout/index'
 import { Route as HeaderOnlyProfileIndexRouteImport } from './routes/_headerOnly/profile/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
+import { Route as MentorQuestionMyRequestsRouteImport } from './routes/mentor/question/my-requests'
 import { Route as MentorQuestionMyRouteImport } from './routes/mentor/question/my'
 import { Route as MentorQuestionGenerateFromQuestionsRouteImport } from './routes/mentor/question/generate-from-questions'
 import { Route as MentorQuestionCreateRouteImport } from './routes/mentor/question/create'
@@ -347,6 +348,12 @@ const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   path: '/mindmaps/$userId/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MentorQuestionMyRequestsRoute =
+  MentorQuestionMyRequestsRouteImport.update({
+    id: '/mentor/question/my-requests',
+    path: '/mentor/question/my-requests',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MentorQuestionMyRoute = MentorQuestionMyRouteImport.update({
   id: '/mentor/question/my',
   path: '/mentor/question/my',
@@ -688,6 +695,7 @@ export interface FileRoutesByFullPath {
   '/mentor/question/create': typeof MentorQuestionCreateRoute
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
+  '/mentor/question/my-requests': typeof MentorQuestionMyRequestsRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile/': typeof HeaderOnlyProfileIndexRoute
   '/checkout/': typeof LayoutCheckoutIndexRoute
@@ -787,6 +795,7 @@ export interface FileRoutesByTo {
   '/mentor/question/create': typeof MentorQuestionCreateRoute
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
+  '/mentor/question/my-requests': typeof MentorQuestionMyRequestsRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile': typeof HeaderOnlyProfileIndexRoute
   '/checkout': typeof LayoutCheckoutIndexRoute
@@ -889,6 +898,7 @@ export interface FileRoutesById {
   '/mentor/question/create': typeof MentorQuestionCreateRoute
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
+  '/mentor/question/my-requests': typeof MentorQuestionMyRequestsRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_headerOnly/profile/': typeof HeaderOnlyProfileIndexRoute
   '/_layout/checkout/': typeof LayoutCheckoutIndexRoute
@@ -990,6 +1000,7 @@ export interface FileRouteTypes {
     | '/mentor/question/create'
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
+    | '/mentor/question/my-requests'
     | '/mindmaps/$userId/$code'
     | '/profile/'
     | '/checkout/'
@@ -1089,6 +1100,7 @@ export interface FileRouteTypes {
     | '/mentor/question/create'
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
+    | '/mentor/question/my-requests'
     | '/mindmaps/$userId/$code'
     | '/profile'
     | '/checkout'
@@ -1190,6 +1202,7 @@ export interface FileRouteTypes {
     | '/mentor/question/create'
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
+    | '/mentor/question/my-requests'
     | '/mindmaps/$userId/$code'
     | '/_headerOnly/profile/'
     | '/_layout/checkout/'
@@ -1255,6 +1268,7 @@ export interface RootRouteChildren {
   MentorQuestionCreateRoute: typeof MentorQuestionCreateRoute
   MentorQuestionGenerateFromQuestionsRoute: typeof MentorQuestionGenerateFromQuestionsRoute
   MentorQuestionMyRoute: typeof MentorQuestionMyRoute
+  MentorQuestionMyRequestsRoute: typeof MentorQuestionMyRequestsRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
   MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
@@ -1603,6 +1617,13 @@ declare module '@tanstack/react-router' {
       path: '/mindmaps/$userId/$code'
       fullPath: '/mindmaps/$userId/$code'
       preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/question/my-requests': {
+      id: '/mentor/question/my-requests'
+      path: '/mentor/question/my-requests'
+      fullPath: '/mentor/question/my-requests'
+      preLoaderRoute: typeof MentorQuestionMyRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor/question/my': {
@@ -2138,6 +2159,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentorQuestionGenerateFromQuestionsRoute:
     MentorQuestionGenerateFromQuestionsRoute,
   MentorQuestionMyRoute: MentorQuestionMyRoute,
+  MentorQuestionMyRequestsRoute: MentorQuestionMyRequestsRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
   MentorMatrixIndexRoute: MentorMatrixIndexRoute,

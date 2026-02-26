@@ -42,7 +42,7 @@ const MyExamsContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
-      <div className="container mx-auto p-6 max-w-7xl">
+      <div className="container mx-auto p-6">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <div>
