@@ -7,6 +7,7 @@ import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useSearchQuestions } from "../queries/useQuestion";
 import QuestionCard from "./QuestionCard";
+import { Pagination } from "@/shared/components/Pagination";
 
 const QuestionListContent: React.FC = () => {
   const navigate = useNavigate();
@@ -105,21 +106,7 @@ const QuestionListContent: React.FC = () => {
           </div>
 
           {pagination && pagination.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-4 mt-8">
-              <Button variant="outline" onClick={() => setPage((p) => Math.max(0, p - 1))} isDisabled={page === 0}>
-                Trước
-              </Button>
-              <span className="text-sm text-muted-foreground">
-                Trang {page + 1} / {pagination.totalPages}
-              </span>
-              <Button
-                variant="outline"
-                onClick={() => setPage((p) => p + 1)}
-                isDisabled={page >= pagination.totalPages - 1}
-              >
-                Sau
-              </Button>
-            </div>
+            <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
           )}
         </>
       )}

@@ -42,7 +42,6 @@ import { Route as LayoutConsultationRouteImport } from './routes/_layout/consult
 import { Route as LayoutChatRouteImport } from './routes/_layout/chat'
 import { Route as LayoutCartRouteImport } from './routes/_layout/cart'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
-import { Route as HeaderOnlyUserProfileRouteImport } from './routes/_headerOnly/user-profile'
 import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
 import { Route as MentorQuestionIndexRouteImport } from './routes/mentor/question/index'
 import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
@@ -56,6 +55,7 @@ import { Route as LayoutForumIndexRouteImport } from './routes/_layout/forum/ind
 import { Route as LayoutDashboardIndexRouteImport } from './routes/_layout/dashboard/index'
 import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
 import { Route as LayoutCheckoutIndexRouteImport } from './routes/_layout/checkout/index'
+import { Route as HeaderOnlyProfileIndexRouteImport } from './routes/_headerOnly/profile/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
 import { Route as MentorQuestionMyRouteImport } from './routes/mentor/question/my'
 import { Route as MentorQuestionGenerateFromQuestionsRouteImport } from './routes/mentor/question/generate-from-questions'
@@ -86,11 +86,15 @@ import { Route as LayoutNewsIdRouteImport } from './routes/_layout/news/$id'
 import { Route as LayoutLecturesIdRouteImport } from './routes/_layout/lectures/$id'
 import { Route as LayoutInternalTestLoaderRouteImport } from './routes/_layout/internal/test-loader'
 import { Route as LayoutForumMyRouteImport } from './routes/_layout/forum/my'
+import { Route as LayoutForumCreateRouteImport } from './routes/_layout/forum/create'
 import { Route as LayoutCoursesWebDevelopmentRouteImport } from './routes/_layout/courses/web-development'
 import { Route as LayoutCoursesMobileDevelopmentRouteImport } from './routes/_layout/courses/mobile-development'
 import { Route as LayoutCoursesDataScienceRouteImport } from './routes/_layout/courses/data-science'
 import { Route as LayoutCoursesBackendDevelopmentRouteImport } from './routes/_layout/courses/backend-development'
 import { Route as LayoutCoursesIdRouteImport } from './routes/_layout/courses/$id'
+import { Route as HeaderOnlyProfilePasswordRouteImport } from './routes/_headerOnly/profile/password'
+import { Route as HeaderOnlyProfileNotificationsRouteImport } from './routes/_headerOnly/profile/notifications'
+import { Route as HeaderOnlyProfileHistoryRouteImport } from './routes/_headerOnly/profile/history'
 import { Route as MentorQuestionIdIndexRouteImport } from './routes/mentor/question/$id/index'
 import { Route as MentorMatrixIdIndexRouteImport } from './routes/mentor/matrix/$id/index'
 import { Route as LayoutTemplatesSlidevIndexRouteImport } from './routes/_layout/templates/slidev/index'
@@ -101,6 +105,7 @@ import { Route as MentorMatrixIdEditRouteImport } from './routes/mentor/matrix/$
 import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
 import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
 import { Route as LayoutForumPostIdRouteImport } from './routes/_layout/forum/post.$id'
+import { Route as LayoutForumIdEditRouteImport } from './routes/_layout/forum/$id.edit'
 import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
 import { Route as LayoutTemplatesSlidevIdEditRouteImport } from './routes/_layout/templates/slidev/$id/edit'
 
@@ -267,11 +272,6 @@ const LayoutAboutRoute = LayoutAboutRouteImport.update({
   path: '/about',
   getParentRoute: () => LayoutRoute,
 } as any)
-const HeaderOnlyUserProfileRoute = HeaderOnlyUserProfileRouteImport.update({
-  id: '/user-profile',
-  path: '/user-profile',
-  getParentRoute: () => HeaderOnlyRoute,
-} as any)
 const HeaderOnlyAiChatbotRoute = HeaderOnlyAiChatbotRouteImport.update({
   id: '/ai-chatbot',
   path: '/ai-chatbot',
@@ -336,6 +336,11 @@ const LayoutCheckoutIndexRoute = LayoutCheckoutIndexRouteImport.update({
   id: '/checkout/',
   path: '/checkout/',
   getParentRoute: () => LayoutRoute,
+} as any)
+const HeaderOnlyProfileIndexRoute = HeaderOnlyProfileIndexRouteImport.update({
+  id: '/profile/',
+  path: '/profile/',
+  getParentRoute: () => HeaderOnlyRoute,
 } as any)
 const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   id: '/mindmaps/$userId/$code',
@@ -491,6 +496,11 @@ const LayoutForumMyRoute = LayoutForumMyRouteImport.update({
   path: '/forum/my',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutForumCreateRoute = LayoutForumCreateRouteImport.update({
+  id: '/forum/create',
+  path: '/forum/create',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutCoursesWebDevelopmentRoute =
   LayoutCoursesWebDevelopmentRouteImport.update({
     id: '/courses/web-development',
@@ -520,6 +530,24 @@ const LayoutCoursesIdRoute = LayoutCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
+const HeaderOnlyProfilePasswordRoute =
+  HeaderOnlyProfilePasswordRouteImport.update({
+    id: '/profile/password',
+    path: '/profile/password',
+    getParentRoute: () => HeaderOnlyRoute,
+  } as any)
+const HeaderOnlyProfileNotificationsRoute =
+  HeaderOnlyProfileNotificationsRouteImport.update({
+    id: '/profile/notifications',
+    path: '/profile/notifications',
+    getParentRoute: () => HeaderOnlyRoute,
+  } as any)
+const HeaderOnlyProfileHistoryRoute =
+  HeaderOnlyProfileHistoryRouteImport.update({
+    id: '/profile/history',
+    path: '/profile/history',
+    getParentRoute: () => HeaderOnlyRoute,
+  } as any)
 const MentorQuestionIdIndexRoute = MentorQuestionIdIndexRouteImport.update({
   id: '/mentor/question/$id/',
   path: '/mentor/question/$id/',
@@ -572,6 +600,11 @@ const LayoutForumPostIdRoute = LayoutForumPostIdRouteImport.update({
   path: '/forum/post/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutForumIdEditRoute = LayoutForumIdEditRouteImport.update({
+  id: '/forum/$id/edit',
+  path: '/forum/$id/edit',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutCoursesGradeGradeRoute = LayoutCoursesGradeGradeRouteImport.update({
   id: '/courses/grade/$grade',
   path: '/courses/grade/$grade',
@@ -594,7 +627,6 @@ export interface FileRoutesByFullPath {
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
-  '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
   '/cart': typeof LayoutCartRoute
   '/chat': typeof LayoutChatRoute
@@ -618,11 +650,15 @@ export interface FileRoutesByFullPath {
   '/matching/path': typeof MatchingPathRoute
   '/games/': typeof GamesIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/profile/history': typeof HeaderOnlyProfileHistoryRoute
+  '/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
+  '/profile/password': typeof HeaderOnlyProfilePasswordRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
+  '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
@@ -653,6 +689,7 @@ export interface FileRoutesByFullPath {
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
+  '/profile/': typeof HeaderOnlyProfileIndexRoute
   '/checkout/': typeof LayoutCheckoutIndexRoute
   '/courses/': typeof LayoutCoursesIndexRoute
   '/dashboard/': typeof LayoutDashboardIndexRoute
@@ -666,6 +703,7 @@ export interface FileRoutesByFullPath {
   '/mentor/problem/': typeof MentorProblemIndexRoute
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
+  '/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
@@ -688,7 +726,6 @@ export interface FileRoutesByTo {
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
   '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
-  '/user-profile': typeof HeaderOnlyUserProfileRoute
   '/about': typeof LayoutAboutRoute
   '/cart': typeof LayoutCartRoute
   '/chat': typeof LayoutChatRoute
@@ -712,11 +749,15 @@ export interface FileRoutesByTo {
   '/matching/path': typeof MatchingPathRoute
   '/games': typeof GamesIndexRoute
   '/matching': typeof MatchingIndexRoute
+  '/profile/history': typeof HeaderOnlyProfileHistoryRoute
+  '/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
+  '/profile/password': typeof HeaderOnlyProfilePasswordRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
+  '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
@@ -747,6 +788,7 @@ export interface FileRoutesByTo {
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
+  '/profile': typeof HeaderOnlyProfileIndexRoute
   '/checkout': typeof LayoutCheckoutIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
   '/dashboard': typeof LayoutDashboardIndexRoute
@@ -760,6 +802,7 @@ export interface FileRoutesByTo {
   '/mentor/problem': typeof MentorProblemIndexRoute
   '/mentor/question': typeof MentorQuestionIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
+  '/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
@@ -784,7 +827,6 @@ export interface FileRoutesById {
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
   '/_headerOnly/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
-  '/_headerOnly/user-profile': typeof HeaderOnlyUserProfileRoute
   '/_layout/about': typeof LayoutAboutRoute
   '/_layout/cart': typeof LayoutCartRoute
   '/_layout/chat': typeof LayoutChatRoute
@@ -809,11 +851,15 @@ export interface FileRoutesById {
   '/_layout/': typeof LayoutIndexRoute
   '/games/': typeof GamesIndexRoute
   '/matching/': typeof MatchingIndexRoute
+  '/_headerOnly/profile/history': typeof HeaderOnlyProfileHistoryRoute
+  '/_headerOnly/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
+  '/_headerOnly/profile/password': typeof HeaderOnlyProfilePasswordRoute
   '/_layout/courses/$id': typeof LayoutCoursesIdRoute
   '/_layout/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/_layout/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/_layout/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
+  '/_layout/forum/create': typeof LayoutForumCreateRoute
   '/_layout/forum/my': typeof LayoutForumMyRoute
   '/_layout/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/_layout/lectures/$id': typeof LayoutLecturesIdRoute
@@ -844,6 +890,7 @@ export interface FileRoutesById {
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
+  '/_headerOnly/profile/': typeof HeaderOnlyProfileIndexRoute
   '/_layout/checkout/': typeof LayoutCheckoutIndexRoute
   '/_layout/courses/': typeof LayoutCoursesIndexRoute
   '/_layout/dashboard/': typeof LayoutDashboardIndexRoute
@@ -857,6 +904,7 @@ export interface FileRoutesById {
   '/mentor/problem/': typeof MentorProblemIndexRoute
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
+  '/_layout/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/_layout/forum/post/$id': typeof LayoutForumPostIdRoute
   '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
@@ -881,7 +929,6 @@ export interface FileRouteTypes {
     | '/signin-2fa'
     | '/signup'
     | '/ai-chatbot'
-    | '/user-profile'
     | '/about'
     | '/cart'
     | '/chat'
@@ -905,11 +952,15 @@ export interface FileRouteTypes {
     | '/matching/path'
     | '/games/'
     | '/matching/'
+    | '/profile/history'
+    | '/profile/notifications'
+    | '/profile/password'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
     | '/courses/mobile-development'
     | '/courses/web-development'
+    | '/forum/create'
     | '/forum/my'
     | '/internal/test-loader'
     | '/lectures/$id'
@@ -940,6 +991,7 @@ export interface FileRouteTypes {
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
     | '/mindmaps/$userId/$code'
+    | '/profile/'
     | '/checkout/'
     | '/courses/'
     | '/dashboard/'
@@ -953,6 +1005,7 @@ export interface FileRouteTypes {
     | '/mentor/problem/'
     | '/mentor/question/'
     | '/courses/grade/$grade'
+    | '/forum/$id/edit'
     | '/forum/post/$id'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
@@ -975,7 +1028,6 @@ export interface FileRouteTypes {
     | '/signin-2fa'
     | '/signup'
     | '/ai-chatbot'
-    | '/user-profile'
     | '/about'
     | '/cart'
     | '/chat'
@@ -999,11 +1051,15 @@ export interface FileRouteTypes {
     | '/matching/path'
     | '/games'
     | '/matching'
+    | '/profile/history'
+    | '/profile/notifications'
+    | '/profile/password'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
     | '/courses/mobile-development'
     | '/courses/web-development'
+    | '/forum/create'
     | '/forum/my'
     | '/internal/test-loader'
     | '/lectures/$id'
@@ -1034,6 +1090,7 @@ export interface FileRouteTypes {
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
     | '/mindmaps/$userId/$code'
+    | '/profile'
     | '/checkout'
     | '/courses'
     | '/dashboard'
@@ -1047,6 +1104,7 @@ export interface FileRouteTypes {
     | '/mentor/problem'
     | '/mentor/question'
     | '/courses/grade/$grade'
+    | '/forum/$id/edit'
     | '/forum/post/$id'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
@@ -1070,7 +1128,6 @@ export interface FileRouteTypes {
     | '/signin-2fa'
     | '/signup'
     | '/_headerOnly/ai-chatbot'
-    | '/_headerOnly/user-profile'
     | '/_layout/about'
     | '/_layout/cart'
     | '/_layout/chat'
@@ -1095,11 +1152,15 @@ export interface FileRouteTypes {
     | '/_layout/'
     | '/games/'
     | '/matching/'
+    | '/_headerOnly/profile/history'
+    | '/_headerOnly/profile/notifications'
+    | '/_headerOnly/profile/password'
     | '/_layout/courses/$id'
     | '/_layout/courses/backend-development'
     | '/_layout/courses/data-science'
     | '/_layout/courses/mobile-development'
     | '/_layout/courses/web-development'
+    | '/_layout/forum/create'
     | '/_layout/forum/my'
     | '/_layout/internal/test-loader'
     | '/_layout/lectures/$id'
@@ -1130,6 +1191,7 @@ export interface FileRouteTypes {
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
     | '/mindmaps/$userId/$code'
+    | '/_headerOnly/profile/'
     | '/_layout/checkout/'
     | '/_layout/courses/'
     | '/_layout/dashboard/'
@@ -1143,6 +1205,7 @@ export interface FileRouteTypes {
     | '/mentor/problem/'
     | '/mentor/question/'
     | '/_layout/courses/grade/$grade'
+    | '/_layout/forum/$id/edit'
     | '/_layout/forum/post/$id'
     | '/_layout/syllabuses/$id/edit'
     | '/_layout/templates/slidev/create'
@@ -1437,13 +1500,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutAboutRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_headerOnly/user-profile': {
-      id: '/_headerOnly/user-profile'
-      path: '/user-profile'
-      fullPath: '/user-profile'
-      preLoaderRoute: typeof HeaderOnlyUserProfileRouteImport
-      parentRoute: typeof HeaderOnlyRoute
-    }
     '/_headerOnly/ai-chatbot': {
       id: '/_headerOnly/ai-chatbot'
       path: '/ai-chatbot'
@@ -1534,6 +1590,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/checkout/'
       preLoaderRoute: typeof LayoutCheckoutIndexRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/_headerOnly/profile/': {
+      id: '/_headerOnly/profile/'
+      path: '/profile'
+      fullPath: '/profile/'
+      preLoaderRoute: typeof HeaderOnlyProfileIndexRouteImport
+      parentRoute: typeof HeaderOnlyRoute
     }
     '/mindmaps/$userId/$code': {
       id: '/mindmaps/$userId/$code'
@@ -1745,6 +1808,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutForumMyRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/forum/create': {
+      id: '/_layout/forum/create'
+      path: '/forum/create'
+      fullPath: '/forum/create'
+      preLoaderRoute: typeof LayoutForumCreateRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/courses/web-development': {
       id: '/_layout/courses/web-development'
       path: '/courses/web-development'
@@ -1779,6 +1849,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/courses/$id'
       preLoaderRoute: typeof LayoutCoursesIdRouteImport
       parentRoute: typeof LayoutRoute
+    }
+    '/_headerOnly/profile/password': {
+      id: '/_headerOnly/profile/password'
+      path: '/profile/password'
+      fullPath: '/profile/password'
+      preLoaderRoute: typeof HeaderOnlyProfilePasswordRouteImport
+      parentRoute: typeof HeaderOnlyRoute
+    }
+    '/_headerOnly/profile/notifications': {
+      id: '/_headerOnly/profile/notifications'
+      path: '/profile/notifications'
+      fullPath: '/profile/notifications'
+      preLoaderRoute: typeof HeaderOnlyProfileNotificationsRouteImport
+      parentRoute: typeof HeaderOnlyRoute
+    }
+    '/_headerOnly/profile/history': {
+      id: '/_headerOnly/profile/history'
+      path: '/profile/history'
+      fullPath: '/profile/history'
+      preLoaderRoute: typeof HeaderOnlyProfileHistoryRouteImport
+      parentRoute: typeof HeaderOnlyRoute
     }
     '/mentor/question/$id/': {
       id: '/mentor/question/$id/'
@@ -1850,6 +1941,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutForumPostIdRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/forum/$id/edit': {
+      id: '/_layout/forum/$id/edit'
+      path: '/forum/$id/edit'
+      fullPath: '/forum/$id/edit'
+      preLoaderRoute: typeof LayoutForumIdEditRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/courses/grade/$grade': {
       id: '/_layout/courses/grade/$grade'
       path: '/courses/grade/$grade'
@@ -1869,12 +1967,18 @@ declare module '@tanstack/react-router' {
 
 interface HeaderOnlyRouteChildren {
   HeaderOnlyAiChatbotRoute: typeof HeaderOnlyAiChatbotRoute
-  HeaderOnlyUserProfileRoute: typeof HeaderOnlyUserProfileRoute
+  HeaderOnlyProfileHistoryRoute: typeof HeaderOnlyProfileHistoryRoute
+  HeaderOnlyProfileNotificationsRoute: typeof HeaderOnlyProfileNotificationsRoute
+  HeaderOnlyProfilePasswordRoute: typeof HeaderOnlyProfilePasswordRoute
+  HeaderOnlyProfileIndexRoute: typeof HeaderOnlyProfileIndexRoute
 }
 
 const HeaderOnlyRouteChildren: HeaderOnlyRouteChildren = {
   HeaderOnlyAiChatbotRoute: HeaderOnlyAiChatbotRoute,
-  HeaderOnlyUserProfileRoute: HeaderOnlyUserProfileRoute,
+  HeaderOnlyProfileHistoryRoute: HeaderOnlyProfileHistoryRoute,
+  HeaderOnlyProfileNotificationsRoute: HeaderOnlyProfileNotificationsRoute,
+  HeaderOnlyProfilePasswordRoute: HeaderOnlyProfilePasswordRoute,
+  HeaderOnlyProfileIndexRoute: HeaderOnlyProfileIndexRoute,
 }
 
 const HeaderOnlyRouteWithChildren = HeaderOnlyRoute._addFileChildren(
@@ -1903,6 +2007,7 @@ interface LayoutRouteChildren {
   LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
   LayoutCoursesMobileDevelopmentRoute: typeof LayoutCoursesMobileDevelopmentRoute
   LayoutCoursesWebDevelopmentRoute: typeof LayoutCoursesWebDevelopmentRoute
+  LayoutForumCreateRoute: typeof LayoutForumCreateRoute
   LayoutForumMyRoute: typeof LayoutForumMyRoute
   LayoutInternalTestLoaderRoute: typeof LayoutInternalTestLoaderRoute
   LayoutLecturesIdRoute: typeof LayoutLecturesIdRoute
@@ -1922,6 +2027,7 @@ interface LayoutRouteChildren {
   LayoutSyllabusesIndexRoute: typeof LayoutSyllabusesIndexRoute
   LayoutTemplatesIndexRoute: typeof LayoutTemplatesIndexRoute
   LayoutCoursesGradeGradeRoute: typeof LayoutCoursesGradeGradeRoute
+  LayoutForumIdEditRoute: typeof LayoutForumIdEditRoute
   LayoutForumPostIdRoute: typeof LayoutForumPostIdRoute
   LayoutSyllabusesIdEditRoute: typeof LayoutSyllabusesIdEditRoute
   LayoutTemplatesSlidevCreateRoute: typeof LayoutTemplatesSlidevCreateRoute
@@ -1952,6 +2058,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
   LayoutCoursesMobileDevelopmentRoute: LayoutCoursesMobileDevelopmentRoute,
   LayoutCoursesWebDevelopmentRoute: LayoutCoursesWebDevelopmentRoute,
+  LayoutForumCreateRoute: LayoutForumCreateRoute,
   LayoutForumMyRoute: LayoutForumMyRoute,
   LayoutInternalTestLoaderRoute: LayoutInternalTestLoaderRoute,
   LayoutLecturesIdRoute: LayoutLecturesIdRoute,
@@ -1971,6 +2078,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutSyllabusesIndexRoute: LayoutSyllabusesIndexRoute,
   LayoutTemplatesIndexRoute: LayoutTemplatesIndexRoute,
   LayoutCoursesGradeGradeRoute: LayoutCoursesGradeGradeRoute,
+  LayoutForumIdEditRoute: LayoutForumIdEditRoute,
   LayoutForumPostIdRoute: LayoutForumPostIdRoute,
   LayoutSyllabusesIdEditRoute: LayoutSyllabusesIdEditRoute,
   LayoutTemplatesSlidevCreateRoute: LayoutTemplatesSlidevCreateRoute,

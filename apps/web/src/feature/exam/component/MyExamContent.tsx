@@ -5,6 +5,7 @@ import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useMyExams, useDownloadExam } from "../queries/useExam";
+import { Pagination } from "@/shared/components/Pagination";
 
 const MyExamsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -184,59 +185,7 @@ const MyExamsContent: React.FC = () => {
                 </p>
 
                 {pagination && pagination.totalPages > 1 && (
-                  <div className="flex items-center gap-1">
-                    <button
-                      className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => setPage((p) => Math.max(0, p - 1))}
-                      disabled={page === 0}
-                    >
-                      ‹
-                    </button>
-
-                    {Array.from({ length: Math.min(5, pagination.totalPages) }, (_, i) => {
-                      let pageNum = i;
-                      if (pagination.totalPages > 5) {
-                        if (page > 2 && page < pagination.totalPages - 3) {
-                          pageNum = page - 2 + i;
-                        } else if (page >= pagination.totalPages - 3) {
-                          pageNum = pagination.totalPages - 5 + i;
-                        }
-                      }
-                      return (
-                        <button
-                          key={pageNum}
-                          onClick={() => setPage(pageNum)}
-                          className={`min-w-8 h-8 px-3 rounded ${
-                            page === pageNum
-                              ? "bg-primary text-white"
-                              : "text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                          }`}
-                        >
-                          {pageNum + 1}
-                        </button>
-                      );
-                    })}
-
-                    {pagination.totalPages > 5 && page < pagination.totalPages - 3 && (
-                      <>
-                        <span className="px-2 text-gray-600 dark:text-gray-400">...</span>
-                        <button
-                          onClick={() => setPage(pagination.totalPages - 1)}
-                          className="min-w-8 h-8 px-3 rounded text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-700"
-                        >
-                          {pagination.totalPages}
-                        </button>
-                      </>
-                    )}
-
-                    <button
-                      className="p-2 text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-white disabled:opacity-50 disabled:cursor-not-allowed"
-                      onClick={() => setPage((p) => p + 1)}
-                      disabled={page >= pagination.totalPages - 1}
-                    >
-                      ›
-                    </button>
-                  </div>
+                  <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
                 )}
               </div>
             </>
