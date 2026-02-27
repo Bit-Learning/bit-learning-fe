@@ -33,7 +33,7 @@ export const CreateCourseForm = () => {
       outcome: "",
       requirement: "",
       audience: "",
-      level: CourseLevel.BEGINNER,
+      level: CourseLevel.BEGINNING,
       grade: 1,
     },
   });
@@ -231,7 +231,7 @@ export const CreateCourseForm = () => {
               {...register("level")}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
             >
-              <option value="BEGINNER">Cơ bản</option>
+              <option value="BEGINNING">Cơ bản</option>
               <option value="INTERMEDIATE">Trung cấp</option>
               <option value="ADVANCED">Nâng cao</option>
             </select>

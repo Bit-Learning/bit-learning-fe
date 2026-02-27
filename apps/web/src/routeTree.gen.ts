@@ -32,7 +32,6 @@ import { Route as LayoutUploadRouteImport } from './routes/_layout/upload'
 import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
 import { Route as LayoutPrivacyRouteImport } from './routes/_layout/privacy'
 import { Route as LayoutPaymentResultRouteImport } from './routes/_layout/payment-result'
-import { Route as LayoutOfflineCourseRouteImport } from './routes/_layout/offline-course'
 import { Route as LayoutMentorshipRouteImport } from './routes/_layout/mentorship'
 import { Route as LayoutDemoRouteImport } from './routes/_layout/demo'
 import { Route as LayoutCustomTemplateRouteImport } from './routes/_layout/custom-template'
@@ -221,11 +220,6 @@ const LayoutPrivacyRoute = LayoutPrivacyRouteImport.update({
 const LayoutPaymentResultRoute = LayoutPaymentResultRouteImport.update({
   id: '/payment-result',
   path: '/payment-result',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutOfflineCourseRoute = LayoutOfflineCourseRouteImport.update({
-  id: '/offline-course',
-  path: '/offline-course',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutMentorshipRoute = LayoutMentorshipRouteImport.update({
@@ -643,7 +637,6 @@ export interface FileRoutesByFullPath {
   '/custom-template': typeof LayoutCustomTemplateRoute
   '/demo': typeof LayoutDemoRoute
   '/mentorship': typeof LayoutMentorshipRoute
-  '/offline-course': typeof LayoutOfflineCourseRoute
   '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
@@ -743,7 +736,6 @@ export interface FileRoutesByTo {
   '/custom-template': typeof LayoutCustomTemplateRoute
   '/demo': typeof LayoutDemoRoute
   '/mentorship': typeof LayoutMentorshipRoute
-  '/offline-course': typeof LayoutOfflineCourseRoute
   '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
@@ -845,7 +837,6 @@ export interface FileRoutesById {
   '/_layout/custom-template': typeof LayoutCustomTemplateRoute
   '/_layout/demo': typeof LayoutDemoRoute
   '/_layout/mentorship': typeof LayoutMentorshipRoute
-  '/_layout/offline-course': typeof LayoutOfflineCourseRoute
   '/_layout/payment-result': typeof LayoutPaymentResultRoute
   '/_layout/privacy': typeof LayoutPrivacyRoute
   '/_layout/terms': typeof LayoutTermsRoute
@@ -948,7 +939,6 @@ export interface FileRouteTypes {
     | '/custom-template'
     | '/demo'
     | '/mentorship'
-    | '/offline-course'
     | '/payment-result'
     | '/privacy'
     | '/terms'
@@ -1048,7 +1038,6 @@ export interface FileRouteTypes {
     | '/custom-template'
     | '/demo'
     | '/mentorship'
-    | '/offline-course'
     | '/payment-result'
     | '/privacy'
     | '/terms'
@@ -1149,7 +1138,6 @@ export interface FileRouteTypes {
     | '/_layout/custom-template'
     | '/_layout/demo'
     | '/_layout/mentorship'
-    | '/_layout/offline-course'
     | '/_layout/payment-result'
     | '/_layout/privacy'
     | '/_layout/terms'
@@ -1442,13 +1430,6 @@ declare module '@tanstack/react-router' {
       path: '/payment-result'
       fullPath: '/payment-result'
       preLoaderRoute: typeof LayoutPaymentResultRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/offline-course': {
-      id: '/_layout/offline-course'
-      path: '/offline-course'
-      fullPath: '/offline-course'
-      preLoaderRoute: typeof LayoutOfflineCourseRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/mentorship': {
@@ -2016,7 +1997,6 @@ interface LayoutRouteChildren {
   LayoutCustomTemplateRoute: typeof LayoutCustomTemplateRoute
   LayoutDemoRoute: typeof LayoutDemoRoute
   LayoutMentorshipRoute: typeof LayoutMentorshipRoute
-  LayoutOfflineCourseRoute: typeof LayoutOfflineCourseRoute
   LayoutPaymentResultRoute: typeof LayoutPaymentResultRoute
   LayoutPrivacyRoute: typeof LayoutPrivacyRoute
   LayoutTermsRoute: typeof LayoutTermsRoute
@@ -2067,7 +2047,6 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCustomTemplateRoute: LayoutCustomTemplateRoute,
   LayoutDemoRoute: LayoutDemoRoute,
   LayoutMentorshipRoute: LayoutMentorshipRoute,
-  LayoutOfflineCourseRoute: LayoutOfflineCourseRoute,
   LayoutPaymentResultRoute: LayoutPaymentResultRoute,
   LayoutPrivacyRoute: LayoutPrivacyRoute,
   LayoutTermsRoute: LayoutTermsRoute,

@@ -1,16 +1,15 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { toast } from "@workspace/ui/components/Sonner";
-import { BookOpen, ChevronLeft, Loader2 } from "lucide-react";
+import { BookOpen, ChevronLeft } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useCourseDetail } from "../queries/useCourse";
 import { useCourseAccess, useCourseProgress, useEnrollCourse } from "../queries/useEnroll";
 import { useAddToCart } from "@/feature/order/queries/useCart";
-import CourseHero from "./CourseHero";
-import CourseTabs from "./CourseTabs";
-import CoursePricingCard from "./CoursePricingCard";
-import CourseInfoCard from "./CourseInfoCard";
+import { CourseHero } from "./CourseHero";
+import { CourseTabs } from "./CourseTabs";
+import { CoursePricingCard } from "./CoursePricingCard";
 
 const CourseDetailContent: React.FC = () => {
   const navigate = useNavigate();
@@ -136,15 +135,6 @@ const CourseDetailContent: React.FC = () => {
               onEnroll={handleEnroll}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
-            />
-
-            <CourseInfoCard
-              level={course.level}
-              grade={course.grade}
-              language={course.language}
-              totalSections={course.totalSections}
-              totalLectures={course.totalLectures}
-              totalDuration={course.totalDuration}
             />
           </div>
         </div>

@@ -1,6 +1,7 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+// ============= LectureDetailLayout.tsx =============
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
-import { CheckCircle, ChevronLeft, ChevronRight, Menu, X } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight, Lock, Menu, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
 import { useSectionsByCourse } from "../queries/useSection";
@@ -12,6 +13,7 @@ import QuizPlayer from "./QuizPlayer";
 import TextContent from "./TextContent";
 import VideoPlayerWithNotes from "./VideoPlayerWithNotes";
 import LectureQA from "./LectureQA";
+import { useCourseAccess } from "@/feature/course/queries/useEnroll";
 
 interface LectureDetailLayoutProps {
   courseId: number;
@@ -25,6 +27,8 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
+
+  const { data: hasAccess = false } = useCourseAccess(courseId);
   const { data: sections, isLoading } = useSectionsByCourse(courseId);
 
   const lectureIdRef = useRef(lectureId);
@@ -66,11 +70,17 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   const previousLecture = currentIndex > 0 ? allLectures[currentIndex - 1] : null;
   const nextLecture = currentIndex < allLectures.length - 1 ? allLectures[currentIndex + 1] : null;
 
+  // Check if current lecture is accessible
+  const isCurrentLectureAccessible = useMemo(() => {
+    if (!currentLecture) return false;
+    return hasAccess || currentLecture.isPreviewable;
+  }, [hasAccess, currentLecture]);
+
   const goToLecture = useCallback(
     (newLectureId: number) => {
       navigate({ to: "/lectures/$id", params: { id: String(newLectureId) } });
     },
-    [navigate]
+    [navigate],
   );
 
   const handleVideoComplete = useCallback(() => {
@@ -97,16 +107,22 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
       if (e.target instanceof HTMLInputElement || e.target instanceof HTMLTextAreaElement) return;
       switch (e.key) {
         case "ArrowLeft":
-          if (e.shiftKey && previousLecture) goToLecture(previousLecture.id);
+          if (e.shiftKey && previousLecture) {
+            const canAccessPrev = hasAccess || previousLecture.isPreviewable;
+            if (canAccessPrev) goToLecture(previousLecture.id);
+          }
           break;
         case "ArrowRight":
-          if (e.shiftKey && nextLecture) goToLecture(nextLecture.id);
+          if (e.shiftKey && nextLecture) {
+            const canAccessNext = hasAccess || nextLecture.isPreviewable;
+            if (canAccessNext) goToLecture(nextLecture.id);
+          }
           break;
       }
     };
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [previousLecture, nextLecture, goToLecture]);
+  }, [previousLecture, nextLecture, goToLecture, hasAccess]);
 
   if (isLoading) {
     return (
@@ -120,6 +136,10 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   }
 
   const isCompleted = completedLectures.includes(lectureId);
+
+  // Check if previous/next lectures are accessible
+  const canAccessPrevious = previousLecture && (hasAccess || previousLecture.isPreviewable);
+  const canAccessNext = nextLecture && (hasAccess || nextLecture.isPreviewable);
 
   return (
     <div className="flex h-screen flex-col bg-gray-900">
@@ -139,6 +159,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
         </div>
 
         <div className="flex items-center gap-2">
+          {!hasAccess && currentLecture?.isPreviewable && <span className="text-xs text-yellow-400">Preview</span>}
           {isCompleted && (
             <span className="flex items-center gap-1 text-sm text-green-400">
               <CheckCircle className="h-4 w-4" />
@@ -159,7 +180,18 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
       <div className="flex flex-1 overflow-hidden">
         <div className="flex flex-1 flex-col overflow-y-auto">
           <div className="shrink-0 bg-black">
-            {currentLecture?.type === LectureType.VIDEO ? (
+            {!isCurrentLectureAccessible ? (
+              <div className="flex aspect-video w-full items-center justify-center bg-gray-800">
+                <div className="text-center">
+                  <Lock className="mx-auto mb-4 h-16 w-16 text-gray-500" />
+                  <h3 className="mb-2 text-xl font-semibold text-white">Bài học bị khóa</h3>
+                  <p className="mb-4 text-gray-400">Vui lòng đăng ký khóa học để xem bài học này</p>
+                  <Link to="/courses/$id" params={{ id: String(courseId) }}>
+                    <Button className="bg-blue-600 text-white hover:bg-blue-700">Xem thông tin khóa học</Button>
+                  </Link>
+                </div>
+              </div>
+            ) : currentLecture?.type === LectureType.VIDEO ? (
               <div className="aspect-video w-full">
                 <VideoPlayerWithNotes
                   lectureId={lectureId}
@@ -178,17 +210,19 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
             )}
           </div>
 
-          <div className="bg-gray-50 p-6">
-            <div className="mx-auto max-w-4xl">
-              <LectureQA lectureId={lectureId} />
+          {isCurrentLectureAccessible && (
+            <div className="bg-gray-50 p-6">
+              <div className="mx-auto max-w-4xl">
+                <LectureQA lectureId={lectureId} />
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="sticky bottom-0 flex items-center justify-between border-t border-gray-800 bg-gray-950 px-4 py-3">
             <Button
               variant="outline"
               size="sm"
-              isDisabled={!previousLecture}
+              isDisabled={!canAccessPrevious}
               onPress={() => previousLecture && goToLecture(previousLecture.id)}
               className="border-gray-700 bg-gray-800/50 text-white hover:bg-gray-700"
             >
@@ -205,7 +239,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
             <Button
               variant="outline"
               size="sm"
-              isDisabled={!nextLecture}
+              isDisabled={!canAccessNext}
               onPress={() => nextLecture && goToLecture(nextLecture.id)}
               className="border-gray-700 bg-gray-800/50 text-white hover:bg-gray-700"
             >
@@ -222,6 +256,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
           onNavigate={goToLecture}
           completedLectures={completedLectures}
           lectureProgress={lectureProgress}
+          hasAccess={hasAccess}
         />
       </div>
     </div>
