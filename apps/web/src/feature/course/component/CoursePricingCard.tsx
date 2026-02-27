@@ -1,5 +1,4 @@
 import { Button } from "@workspace/ui/components/Button";
-import { Card, CardContent, CardTitle } from "@workspace/ui/components/Card";
 import { Award, CheckCircle, Download, Loader2, MessageCircle, ShoppingCart, Video, Zap } from "lucide-react";
 import type React from "react";
 
@@ -12,7 +11,7 @@ interface CoursePricingCardProps {
   onBuyNow: () => void;
 }
 
-const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
+export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   price,
   hasAccess,
   isPending,
@@ -21,108 +20,101 @@ const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   onBuyNow,
 }) => {
   return (
-    <Card className="top-4 overflow-hidden rounded-3xl border-0 shadow-2xl">
-      <div className="p-4">
-        <CardTitle className="flex items-center gap-2 text-black">
-          <Award className="h-6 w-6" />
-          <span className="text-xl">Đăng ký khóa học</span>
-        </CardTitle>
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8 border border-slate-100 dark:border-slate-800">
+      <div className="flex items-center gap-2 mb-6">
+        <Award className="w-5 h-5 text-blue-600" />
+        <h3 className="font-bold text-slate-800 dark:text-white">Đăng ký khóa học</h3>
       </div>
 
-      <CardContent className="space-y-4 p-4">
-        <div className="text-center">
-          <div className="mb-2 text-sm font-medium text-gray-600">Giá khóa học</div>
-          <div className="bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-5xl font-black text-transparent">
-            {price === 0 ? "Miễn phí" : `${price.toLocaleString()}đ`}
-          </div>
-        </div>
+      <div className="text-center mb-8">
+        <p className="text-xs text-slate-400 uppercase tracking-widest mb-1 font-bold">Giá khóa học</p>
+        <p className="text-4xl font-bold text-blue-600 font-display">
+          {price === 0 ? "Miễn phí" : `${price.toLocaleString()}đ`}
+        </p>
+      </div>
 
-        <div className="space-y-3 rounded-2xl bg-linear-to-br from-gray-50 to-blue-50 p-4">
-          <div className="flex items-center gap-3 text-sm text-gray-700">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-blue-100">
-              <Video className="h-4 w-4 text-blue-600" />
-            </div>
-            <span>Học trực tuyến mọi lúc, mọi nơi</span>
+      <ul className="space-y-4 mb-8">
+        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+            <Video className="w-4 h-4" />
           </div>
-          <div className="flex items-center gap-3 text-sm text-gray-700">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-green-100">
-              <Download className="h-4 w-4 text-green-600" />
-            </div>
-            <span>Tài liệu học tập đầy đủ</span>
+          <span>Học trực tuyến mọi lúc, mọi nơi</span>
+        </li>
+        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+          <div className="w-8 h-8 rounded-lg bg-emerald-50 dark:bg-emerald-900/30 flex items-center justify-center text-emerald-600">
+            <Download className="w-4 h-4" />
           </div>
-          <div className="flex items-center gap-3 text-sm text-gray-700">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-purple-100">
-              <MessageCircle className="h-4 w-4 text-purple-600" />
-            </div>
-            <span>Hỗ trợ 24/7 từ giảng viên</span>
+          <span>Tài liệu học tập đầy đủ</span>
+        </li>
+        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+          <div className="w-8 h-8 rounded-lg bg-purple-50 dark:bg-purple-900/30 flex items-center justify-center text-purple-600">
+            <MessageCircle className="w-4 h-4" />
           </div>
-          <div className="flex items-center gap-3 text-sm text-gray-700">
-            <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-orange-100">
-              <Award className="h-4 w-4 text-orange-600" />
-            </div>
-            <span>Chứng chỉ được công nhận</span>
+          <span>Hỗ trợ 24/7 từ giảng viên</span>
+        </li>
+        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
+          <div className="w-8 h-8 rounded-lg bg-amber-50 dark:bg-amber-900/30 flex items-center justify-center text-amber-600">
+            <Award className="w-4 h-4" />
           </div>
-        </div>
+          <span>Chứng chỉ được công nhận</span>
+        </li>
+      </ul>
 
-        {hasAccess ? (
+      {hasAccess ? (
+        <Button
+          isDisabled
+          className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 opacity-50"
+        >
+          <CheckCircle className="w-5 h-5" />
+          Đã đăng ký
+        </Button>
+      ) : price === 0 ? (
+        <Button
+          onClick={onEnroll}
+          isDisabled={isPending}
+          className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+        >
+          {isPending ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              Đang xử lý...
+            </>
+          ) : (
+            <>
+              <Zap className="w-5 h-5" />
+              Đăng ký miễn phí
+            </>
+          )}
+        </Button>
+      ) : (
+        <div className="space-y-3">
           <Button
-            isDisabled
-            className="w-full rounded-md bg-linear-to-r from-green-500 to-emerald-500 py-6 text-lg font-bold text-black"
-          >
-            <CheckCircle className="mr-2 h-8 w-8" />
-            Đã đăng ký
-          </Button>
-        ) : price === 0 ? (
-          <Button
-            onClick={onEnroll}
+            onClick={onBuyNow}
             isDisabled={isPending}
-            className="w-full rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 py-4 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-2xl"
+            className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isPending ? (
               <>
-                <Loader2 className="mr-2 h-5 w-5 animate-spin" />
+                <Loader2 className="w-5 h-5 animate-spin" />
                 Đang xử lý...
               </>
             ) : (
               <>
-                <Zap className="mr-2 h-5 w-5" />
-                Đăng ký miễn phí
+                <Zap className="w-5 h-5" />
+                Mua ngay
               </>
             )}
           </Button>
-        ) : (
-          <div className="space-y-3">
-            <Button
-              onClick={onBuyNow}
-              isDisabled={isPending}
-              className="group w-full rounded-xl bg-linear-to-r from-blue-500 to-indigo-500 py-5 text-lg font-semibold text-white shadow-xl transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 hover:shadow-2xl"
-            >
-              {isPending ? (
-                <>
-                  <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Đang xử lý...
-                </>
-              ) : (
-                <>
-                  <Zap className="mr-2 h-5 w-5 transition-transform group-hover:scale-110" />
-                  Mua ngay
-                </>
-              )}
-            </Button>
-            <Button
-              onClick={onAddToCart}
-              isDisabled={isPending}
-              variant="outline"
-              className="w-full rounded-xl border-2 border-blue-600 py-5 text-lg font-semibold text-blue-600 transition-all hover:scale-105 hover:bg-blue-100"
-            >
-              <ShoppingCart className="mr-2 h-5 w-5" />
-              Thêm vào giỏ hàng
-            </Button>
-          </div>
-        )}
-      </CardContent>
-    </Card>
+          <Button
+            onClick={onAddToCart}
+            isDisabled={isPending}
+            className="w-full bg-transparent border-2 border-blue-600 text-blue-600 py-4 rounded-xl font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          >
+            <ShoppingCart className="w-5 h-5" />
+            Thêm vào giỏ hàng
+          </Button>
+        </div>
+      )}
+    </div>
   );
 };
-
-export default CoursePricingCard;

@@ -16,6 +16,10 @@ export const navItems = [
     to: "/forum",
   },
   {
+    title: "Đề thi",
+    to: "/",
+  },
+  {
     title: "Kho ứng dụng & Công cụ",
     items: [
       {
@@ -32,27 +36,6 @@ export const navItems = [
         title: "Game hóa học tập",
         to: "/games",
         description: "Tham gia các trò chơi tương tác để nâng cao kỹ năng lập trình của bạn.",
-      },
-    ],
-  },
-
-  {
-    title: "Quản lý đề thi",
-    items: [
-      {
-        title: "Ma trận đề thi",
-        to: "/matrices",
-        description: "Quản lý ma trận đề thi và tạo đề thi tự động",
-      },
-      {
-        title: "Giáo trình (Syllabus)",
-        to: "/syllabuses",
-        description: "Quản lý giáo trình và đề cương môn học",
-      },
-      {
-        title: "Ngân hàng câu hỏi",
-        to: "/questions/my",
-        description: "Quản lý câu hỏi của bạn",
       },
     ],
   },

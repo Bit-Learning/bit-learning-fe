@@ -147,7 +147,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     } else {
       createQuestion.mutate(requestData, {
         onSuccess: () => {
-          navigate({ to: "/mentor/question" });
+          navigate({ to: "/mentor/question/my" });
         },
       });
     }
@@ -357,7 +357,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
           <Button
             type="button"
             variant="outline"
-            onClick={() => navigate({ to: mode === "edit" ? `/mentor/question/${questionId}` : "/mentor/question" })}
+            onClick={() => navigate({ to: mode === "edit" ? `/mentor/question/${questionId}` : "/mentor/question/my" })}
           >
             Hủy
           </Button>

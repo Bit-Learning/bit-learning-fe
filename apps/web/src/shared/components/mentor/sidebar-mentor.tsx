@@ -2,7 +2,17 @@ import { useRouter } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import { cn } from "@workspace/ui/lib/utils";
-import { Award, BookOpen, ChevronLeft, Code, FileQuestion, FileText, LayoutDashboard, Puzzle } from "lucide-react";
+import {
+  Award,
+  BookOpen,
+  ChevronLeft,
+  Code,
+  FileCheck,
+  FileQuestion,
+  FileText,
+  LayoutDashboard,
+  Puzzle,
+} from "lucide-react";
 
 interface SidebarProps {
   isOpen: boolean;
@@ -49,6 +59,12 @@ const menuItems = [
     label: "Câu hỏi của tôi",
     icon: FileQuestion,
     path: "/mentor/question/my",
+  },
+  {
+    id: "my-requests",
+    label: "Yêu cầu duyệt câu hỏi",
+    icon: FileCheck,
+    path: "/mentor/question/my-requests",
   },
 ];
 
@@ -101,27 +117,33 @@ export function SidebarMentor({
             )}
           </div>
 
-          <nav className="flex-1 overflow-y-auto p-4">
-            <div className="space-y-1">
-              {menuItems.map((item) => (
-                <Button
+          <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
+            {menuItems.map((item) => {
+              const Icon = item.icon;
+              const isActive = activeMenu === item.id;
+
+              return (
+                <button
                   key={item.id}
-                  variant={activeMenu === item.id ? "default" : "ghost"}
                   onClick={() => handleMenuClick(item)}
                   className={cn(
-                    "w-full justify-between",
-                    activeMenu === item.id
-                      ? "bg-linear-to-br from-blue-600 to-indigo-600 text-white shadow-lg hover:from-blue-700 hover:to-indigo-700"
-                      : "text-slate-700 dark:text-gray-300",
+                    "w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-all group",
+                    "text-left",
+                    isActive
+                      ? "bg-primary text-white shadow-md shadow-blue-500/20"
+                      : "text-slate-600 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800",
+                    !isOpen && "lg:justify-center lg:px-2",
                   )}
                 >
-                  <div className="flex items-center space-x-3">
-                    <item.icon className={cn("h-5 w-5", !isOpen && "mx-auto")} />
-                    {isOpen && <span className="font-medium">{item.label}</span>}
-                  </div>
-                </Button>
-              ))}
-            </div>
+                  <Icon className={cn("w-5 h-5 shrink-0 transition-colors", !isActive && "group-hover:text-primary")} />
+                  <span
+                    className={cn("font-medium transition-opacity duration-200", !isOpen && "lg:opacity-0 lg:hidden")}
+                  >
+                    {item.label}
+                  </span>
+                </button>
+              );
+            })}
           </nav>
 
           <Button

@@ -15,20 +15,6 @@ export enum ApprovalStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
-export interface OptionRequest {
-  label?: string;
-  content: string;
-  isCorrect: boolean;
-  orderNo: number;
-}
-
-export interface OptionResponse {
-  id: number;
-  label?: string;
-  content: string;
-  isCorrect: boolean;
-  orderNo: number;
-}
 
 export interface SubjectBriefResponse {
   id: number;
@@ -54,28 +40,12 @@ export interface TagResponse {
   color?: string;
 }
 
-export interface QuestionRequest {
+export interface OptionResponse {
+  id: number;
+  label?: string;
   content: string;
-  canonicalAnswer?: string;
-  questionType: QuestionType;
-  questionLevel: QuestionLevel;
-  subjectId?: number;
-  lessonId?: number;
-  tagIds?: number[];
-  options?: OptionRequest[];
-}
-
-export interface QuestionImportRequest {
-  subjectCode: string;
-  classLevel: number;
-  curriculumCode: string;
-  lessonCode: string;
-  content: string;
-  canonicalAnswer?: string;
-  questionType: QuestionType;
-  questionLevel: QuestionLevel;
-  tagIds?: number[];
-  options?: OptionRequest[];
+  isCorrect: boolean;
+  orderNo: number;
 }
 
 export interface QuestionResponse {
@@ -94,18 +64,6 @@ export interface QuestionResponse {
   approvalStatus: ApprovalStatus;
   createdAt: string;
   updatedAt: string;
-}
-
-export interface QuestionBriefResponse {
-  id: number;
-  content: string;
-  questionType: QuestionType;
-  questionLevel: QuestionLevel;
-  lesson?: LessonBriefResponse;
-}
-
-export interface RequestPublishDTO {
-  questionIds: number[];
 }
 
 export interface ApproveRejectDTO {

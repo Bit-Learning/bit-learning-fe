@@ -25,7 +25,7 @@ const QuestionListContent: React.FC = () => {
   const pagination = response?.page;
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className="container mx-auto p-6">
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
         <div>
           <h1 className="text-3xl font-bold">Ngân hàng câu hỏi</h1>

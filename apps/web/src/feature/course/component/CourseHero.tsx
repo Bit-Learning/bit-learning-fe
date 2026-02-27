@@ -23,106 +23,127 @@ interface CourseHeroProps {
   onShare: () => void;
 }
 
-const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, progress, isLiked, onLike, onShare }) => {
+const getLevelLabel = (level: string): string => {
+  const labels: Record<string, string> = {
+    BEGINNING: "Cơ bản",
+    INTERMEDIATE: "Trung bình",
+    ADVANCED: "Nâng cao",
+  };
+  return labels[level] || level;
+};
+
+export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, progress, isLiked, onLike, onShare }) => {
   return (
-    <div className="group overflow-hidden rounded-3xl bg-white shadow-xl transition-all hover:shadow-2xl">
-      <div className="relative h-72 overflow-hidden md:h-96">
+    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+      <div className="relative group aspect-video overflow-hidden">
         <img
           src={course.thumbnailUrl}
           alt={course.title}
-          className="h-full w-full object-cover transition-transform duration-500 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
         <div className="absolute inset-0 bg-linear-to-t from-black/80 via-black/30 to-transparent" />
 
-        <div className="absolute left-6 top-6 flex flex-wrap gap-2">
-          <Badge className="bg-blue-600 px-3 py-1 text-white shadow-lg backdrop-blur-sm">Lớp {course.grade}</Badge>
-          <Badge className="bg-linear-to-r from-orange-500 to-pink-500 px-3 py-1 text-white shadow-lg">
-            {course.level}
+        <div className="absolute inset-0 flex items-center justify-center">
+          <button className="w-20 h-20 bg-white/20 backdrop-blur-md rounded-full flex items-center justify-center text-white border border-white/30 hover:bg-white/40 transition-all">
+            <Play className="ml-1 h-8 w-8" />
+          </button>
+        </div>
+
+        <div className="absolute top-6 left-6 flex gap-2 flex-wrap">
+          <Badge className="bg-blue-600 text-white text-xs font-bold px-3 py-1 uppercase tracking-wider">
+            Lớp {course.grade}
+          </Badge>
+          <Badge className="bg-rose-500 text-white text-xs font-bold px-3 py-1 uppercase tracking-wider">
+            {getLevelLabel(course.level)}
           </Badge>
           {hasAccess && (
-            <Badge className="bg-green-600 px-3 py-1 text-white shadow-lg backdrop-blur-sm">
-              <CheckCircle className="mr-1.5 h-3.5 w-3.5" />
+            <Badge className="bg-green-600 text-white text-xs font-bold px-3 py-1 flex items-center gap-1">
+              <CheckCircle className="w-3 h-3" />
               Đã đăng ký
             </Badge>
           )}
           {hasAccess && progress !== undefined && (
-            <Badge className="bg-linear-to-r from-green-500 to-emerald-500 px-3 py-1 text-white shadow-lg">
+            <Badge className="bg-emerald-500 text-white text-xs font-bold px-3 py-1">
               {Math.round(progress)}% hoàn thành
             </Badge>
           )}
         </div>
 
-        <div className="absolute bottom-6 left-6">
-          <button className="group/play flex h-16 w-16 items-center justify-center rounded-full bg-white/20 backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30">
-            <Play className="ml-1 h-7 w-7 text-white transition-transform group-hover/play:scale-110" />
-          </button>
-        </div>
-
         <div className="absolute bottom-6 right-6 flex gap-3">
           <button
             onClick={onLike}
-            className={`rounded-full p-3 backdrop-blur-md transition-all hover:scale-110 ${
-              isLiked
-                ? "bg-red-500/90 text-white shadow-lg shadow-red-500/50"
-                : "bg-white/20 text-white hover:bg-white/30"
+            className={`w-10 h-10 rounded-full backdrop-blur-md flex items-center justify-center border border-white/20 transition-all ${
+              isLiked ? "bg-rose-500 text-white" : "bg-white/20 text-white hover:bg-rose-500"
             }`}
           >
-            <Heart className={`h-5 w-5 ${isLiked ? "fill-current" : ""}`} />
+            <Heart className={`w-5 h-5 ${isLiked ? "fill-current" : ""}`} />
           </button>
           <button
             onClick={onShare}
-            className="rounded-full bg-white/20 p-3 text-white backdrop-blur-md transition-all hover:scale-110 hover:bg-white/30"
+            className="w-10 h-10 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center text-white border border-white/20 hover:bg-blue-600 transition-colors"
           >
-            <Share2 className="h-5 w-5" />
+            <Share2 className="w-5 h-5" />
           </button>
         </div>
       </div>
 
       <div className="p-8">
-        <div className="mb-6">
-          <h1 className="mb-3 bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-3xl font-bold text-transparent">
-            {course.title}
-          </h1>
-          <p className="text-xl text-gray-600">{course.subtitle}</p>
-        </div>
+        <h1 className="font-display text-3xl font-bold mb-3 text-slate-900 dark:text-white">{course.title}</h1>
+        <p className="text-slate-500 dark:text-slate-400 text-lg mb-6">{course.subtitle}</p>
 
-        <div className="mb-6 flex items-center gap-2">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500">
-            <Users className="h-6 w-6 text-white" />
+        <div className="flex items-center gap-4 mb-8">
+          <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-500/10">
+            <div className="w-full h-full bg-linear-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
+              <Users className="w-6 h-6 text-white" />
+            </div>
           </div>
           <div>
-            <p className="text-sm text-gray-600">Giảng viên</p>
-            <p className="font-semibold text-gray-900">{course.instructorName}</p>
+            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Giảng viên</p>
+            <p className="font-bold text-slate-900 dark:text-white">{course.instructorName}</p>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4 rounded-2xl bg-linear-to-br from-gray-50 to-blue-50 p-6 md:grid-cols-4">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
           <div className="text-center">
-            <Clock className="mx-auto mb-2 h-8 w-8 text-blue-600" />
-            <p className="text-sm text-gray-600">Thời lượng</p>
-            <p className="font-bold text-gray-900">{course.totalDuration} phút</p>
+            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <Clock className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">
+              Thời lượng
+            </p>
+            <p className="font-bold text-slate-900 dark:text-white">{course.totalDuration} phút</p>
           </div>
           <div className="text-center">
-            <Star className="mx-auto mb-2 h-8 w-8 fill-yellow-400 text-yellow-400" />
-            <p className="text-sm text-gray-600">Đánh giá</p>
-            <p className="font-bold text-gray-900">
+            <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <Star className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">
+              Đánh giá
+            </p>
+            <p className="font-bold text-slate-900 dark:text-white">
               {course.ratingStar}/5.0 ({course.ratingCount})
             </p>
           </div>
-          <div className="text-center">
-            <BookOpen className="mx-auto mb-2 h-8 w-8 text-indigo-600" />
-            <p className="text-sm text-gray-600">Chương</p>
-            <p className="font-bold text-gray-900">{course.totalSections}</p>
+          <div className="text-center border-x border-slate-200 dark:border-slate-700">
+            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <BookOpen className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">
+              Chương
+            </p>
+            <p className="font-bold text-slate-900 dark:text-white">{course.totalSections}</p>
           </div>
           <div className="text-center">
-            <Video className="mx-auto mb-2 h-8 w-8 text-purple-600" />
-            <p className="text-sm text-gray-600">Bài học</p>
-            <p className="font-bold text-gray-900">{course.totalLectures}</p>
+            <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+              <Video className="w-5 h-5" />
+            </div>
+            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">
+              Bài học
+            </p>
+            <p className="font-bold text-slate-900 dark:text-white">{course.totalLectures}</p>
           </div>
         </div>
       </div>
     </div>
   );
 };
-
-export default CourseHero;

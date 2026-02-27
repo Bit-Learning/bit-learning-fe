@@ -36,10 +36,16 @@ const MatrixListContent: React.FC = () => {
           <h1 className="text-3xl font-bold">Ma trận đề thi</h1>
           <p className="text-muted-foreground">Quản lý ma trận và tạo đề thi tự động</p>
         </div>
-        <Button onClick={() => setModal({ open: true })} className="gap-2">
-          <Plus className="h-4 w-4" />
-          Tạo ma trận
-        </Button>
+        <div className="flex gap-2">
+          <Button onClick={() => setModal({ open: true })} className="gap-2">
+            <Plus className="h-4 w-4" />
+            Tạo ma trận
+          </Button>
+          <Button variant="outline" className="gap-2" onClick={() => navigate({ to: "/mentor/matrix/my" })}>
+            <FileText className="h-4 w-4" />
+            Ma trận của tôi
+          </Button>
+        </div>
       </div>
 
       <div className="flex flex-col md:flex-row gap-4 mb-6">

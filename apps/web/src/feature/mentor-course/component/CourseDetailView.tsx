@@ -459,7 +459,12 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
       </Card>
 
       {modalState.type === "create-lecture" && (
-        <CreateLectureModal courseId={courseId} sectionId={modalState.sectionId} onClose={closeModal} />
+        <CreateLectureModal
+          courseId={courseId}
+          sectionId={modalState.sectionId}
+          onClose={closeModal}
+          existingLectures={sections?.find((s) => s.id === modalState.sectionId)?.lectures || []}
+        />
       )}
       {modalState.type === "view-lecture" && (
         <LectureDetailModal lecture={modalState.lecture} onClose={closeModal} onEdit={handleEditFromView} />

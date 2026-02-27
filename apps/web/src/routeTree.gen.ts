@@ -32,7 +32,6 @@ import { Route as LayoutUploadRouteImport } from './routes/_layout/upload'
 import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
 import { Route as LayoutPrivacyRouteImport } from './routes/_layout/privacy'
 import { Route as LayoutPaymentResultRouteImport } from './routes/_layout/payment-result'
-import { Route as LayoutOfflineCourseRouteImport } from './routes/_layout/offline-course'
 import { Route as LayoutMentorshipRouteImport } from './routes/_layout/mentorship'
 import { Route as LayoutDemoRouteImport } from './routes/_layout/demo'
 import { Route as LayoutCustomTemplateRouteImport } from './routes/_layout/custom-template'
@@ -57,6 +56,7 @@ import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses
 import { Route as LayoutCheckoutIndexRouteImport } from './routes/_layout/checkout/index'
 import { Route as HeaderOnlyProfileIndexRouteImport } from './routes/_headerOnly/profile/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
+import { Route as MentorQuestionMyRequestsRouteImport } from './routes/mentor/question/my-requests'
 import { Route as MentorQuestionMyRouteImport } from './routes/mentor/question/my'
 import { Route as MentorQuestionGenerateFromQuestionsRouteImport } from './routes/mentor/question/generate-from-questions'
 import { Route as MentorQuestionCreateRouteImport } from './routes/mentor/question/create'
@@ -222,11 +222,6 @@ const LayoutPaymentResultRoute = LayoutPaymentResultRouteImport.update({
   path: '/payment-result',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutOfflineCourseRoute = LayoutOfflineCourseRouteImport.update({
-  id: '/offline-course',
-  path: '/offline-course',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutMentorshipRoute = LayoutMentorshipRouteImport.update({
   id: '/mentorship',
   path: '/mentorship',
@@ -347,6 +342,12 @@ const MindmapsUserIdCodeRoute = MindmapsUserIdCodeRouteImport.update({
   path: '/mindmaps/$userId/$code',
   getParentRoute: () => rootRouteImport,
 } as any)
+const MentorQuestionMyRequestsRoute =
+  MentorQuestionMyRequestsRouteImport.update({
+    id: '/mentor/question/my-requests',
+    path: '/mentor/question/my-requests',
+    getParentRoute: () => rootRouteImport,
+  } as any)
 const MentorQuestionMyRoute = MentorQuestionMyRouteImport.update({
   id: '/mentor/question/my',
   path: '/mentor/question/my',
@@ -636,7 +637,6 @@ export interface FileRoutesByFullPath {
   '/custom-template': typeof LayoutCustomTemplateRoute
   '/demo': typeof LayoutDemoRoute
   '/mentorship': typeof LayoutMentorshipRoute
-  '/offline-course': typeof LayoutOfflineCourseRoute
   '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
@@ -688,6 +688,7 @@ export interface FileRoutesByFullPath {
   '/mentor/question/create': typeof MentorQuestionCreateRoute
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
+  '/mentor/question/my-requests': typeof MentorQuestionMyRequestsRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile/': typeof HeaderOnlyProfileIndexRoute
   '/checkout/': typeof LayoutCheckoutIndexRoute
@@ -735,7 +736,6 @@ export interface FileRoutesByTo {
   '/custom-template': typeof LayoutCustomTemplateRoute
   '/demo': typeof LayoutDemoRoute
   '/mentorship': typeof LayoutMentorshipRoute
-  '/offline-course': typeof LayoutOfflineCourseRoute
   '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
@@ -787,6 +787,7 @@ export interface FileRoutesByTo {
   '/mentor/question/create': typeof MentorQuestionCreateRoute
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
+  '/mentor/question/my-requests': typeof MentorQuestionMyRequestsRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile': typeof HeaderOnlyProfileIndexRoute
   '/checkout': typeof LayoutCheckoutIndexRoute
@@ -836,7 +837,6 @@ export interface FileRoutesById {
   '/_layout/custom-template': typeof LayoutCustomTemplateRoute
   '/_layout/demo': typeof LayoutDemoRoute
   '/_layout/mentorship': typeof LayoutMentorshipRoute
-  '/_layout/offline-course': typeof LayoutOfflineCourseRoute
   '/_layout/payment-result': typeof LayoutPaymentResultRoute
   '/_layout/privacy': typeof LayoutPrivacyRoute
   '/_layout/terms': typeof LayoutTermsRoute
@@ -889,6 +889,7 @@ export interface FileRoutesById {
   '/mentor/question/create': typeof MentorQuestionCreateRoute
   '/mentor/question/generate-from-questions': typeof MentorQuestionGenerateFromQuestionsRoute
   '/mentor/question/my': typeof MentorQuestionMyRoute
+  '/mentor/question/my-requests': typeof MentorQuestionMyRequestsRoute
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_headerOnly/profile/': typeof HeaderOnlyProfileIndexRoute
   '/_layout/checkout/': typeof LayoutCheckoutIndexRoute
@@ -938,7 +939,6 @@ export interface FileRouteTypes {
     | '/custom-template'
     | '/demo'
     | '/mentorship'
-    | '/offline-course'
     | '/payment-result'
     | '/privacy'
     | '/terms'
@@ -990,6 +990,7 @@ export interface FileRouteTypes {
     | '/mentor/question/create'
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
+    | '/mentor/question/my-requests'
     | '/mindmaps/$userId/$code'
     | '/profile/'
     | '/checkout/'
@@ -1037,7 +1038,6 @@ export interface FileRouteTypes {
     | '/custom-template'
     | '/demo'
     | '/mentorship'
-    | '/offline-course'
     | '/payment-result'
     | '/privacy'
     | '/terms'
@@ -1089,6 +1089,7 @@ export interface FileRouteTypes {
     | '/mentor/question/create'
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
+    | '/mentor/question/my-requests'
     | '/mindmaps/$userId/$code'
     | '/profile'
     | '/checkout'
@@ -1137,7 +1138,6 @@ export interface FileRouteTypes {
     | '/_layout/custom-template'
     | '/_layout/demo'
     | '/_layout/mentorship'
-    | '/_layout/offline-course'
     | '/_layout/payment-result'
     | '/_layout/privacy'
     | '/_layout/terms'
@@ -1190,6 +1190,7 @@ export interface FileRouteTypes {
     | '/mentor/question/create'
     | '/mentor/question/generate-from-questions'
     | '/mentor/question/my'
+    | '/mentor/question/my-requests'
     | '/mindmaps/$userId/$code'
     | '/_headerOnly/profile/'
     | '/_layout/checkout/'
@@ -1255,6 +1256,7 @@ export interface RootRouteChildren {
   MentorQuestionCreateRoute: typeof MentorQuestionCreateRoute
   MentorQuestionGenerateFromQuestionsRoute: typeof MentorQuestionGenerateFromQuestionsRoute
   MentorQuestionMyRoute: typeof MentorQuestionMyRoute
+  MentorQuestionMyRequestsRoute: typeof MentorQuestionMyRequestsRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
   MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
@@ -1430,13 +1432,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutPaymentResultRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/offline-course': {
-      id: '/_layout/offline-course'
-      path: '/offline-course'
-      fullPath: '/offline-course'
-      preLoaderRoute: typeof LayoutOfflineCourseRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/mentorship': {
       id: '/_layout/mentorship'
       path: '/mentorship'
@@ -1603,6 +1598,13 @@ declare module '@tanstack/react-router' {
       path: '/mindmaps/$userId/$code'
       fullPath: '/mindmaps/$userId/$code'
       preLoaderRoute: typeof MindmapsUserIdCodeRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/question/my-requests': {
+      id: '/mentor/question/my-requests'
+      path: '/mentor/question/my-requests'
+      fullPath: '/mentor/question/my-requests'
+      preLoaderRoute: typeof MentorQuestionMyRequestsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor/question/my': {
@@ -1995,7 +1997,6 @@ interface LayoutRouteChildren {
   LayoutCustomTemplateRoute: typeof LayoutCustomTemplateRoute
   LayoutDemoRoute: typeof LayoutDemoRoute
   LayoutMentorshipRoute: typeof LayoutMentorshipRoute
-  LayoutOfflineCourseRoute: typeof LayoutOfflineCourseRoute
   LayoutPaymentResultRoute: typeof LayoutPaymentResultRoute
   LayoutPrivacyRoute: typeof LayoutPrivacyRoute
   LayoutTermsRoute: typeof LayoutTermsRoute
@@ -2046,7 +2047,6 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCustomTemplateRoute: LayoutCustomTemplateRoute,
   LayoutDemoRoute: LayoutDemoRoute,
   LayoutMentorshipRoute: LayoutMentorshipRoute,
-  LayoutOfflineCourseRoute: LayoutOfflineCourseRoute,
   LayoutPaymentResultRoute: LayoutPaymentResultRoute,
   LayoutPrivacyRoute: LayoutPrivacyRoute,
   LayoutTermsRoute: LayoutTermsRoute,
@@ -2138,6 +2138,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentorQuestionGenerateFromQuestionsRoute:
     MentorQuestionGenerateFromQuestionsRoute,
   MentorQuestionMyRoute: MentorQuestionMyRoute,
+  MentorQuestionMyRequestsRoute: MentorQuestionMyRequestsRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
   MentorMatrixIndexRoute: MentorMatrixIndexRoute,
