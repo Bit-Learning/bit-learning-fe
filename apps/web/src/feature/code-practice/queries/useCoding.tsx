@@ -47,7 +47,7 @@ export const useProblems = (filters?: ProblemFilters) => {
   });
 };
 
-export const useProblemDetail = (problemId: string, language?: Language) => {
+export const useProblemDetail = (problemId: string, language?: Language, _p0?: { enabled: boolean }) => {
   return useQuery({
     queryKey: problemKeys.detail(problemId, language),
     queryFn: async () => {

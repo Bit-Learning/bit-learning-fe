@@ -1,12 +1,12 @@
 import PageMeta from "@/shared/components/seo/page-meta";
-import MentorProblemListContent from "../components/MentorProblemListContent";
 import MentorLayout from "@/layouts/mentor-layout";
+import MentorProblemDetailContent from "../components/MentorProblemDetailContent";
 
-export const MentorProblemListPage: React.FC = () => (
+export const MentorProblemDetailPage: React.FC = () => (
   <>
     <PageMeta title="Quản lý Problem - Mentor" description="Quản lý bài tập coding" />
     <MentorLayout>
-      <MentorProblemListContent />
+      <MentorProblemDetailContent />
     </MentorLayout>
   </>
 );
