@@ -91,9 +91,7 @@ const GameHeader: React.FC = () => {
 								</Button>
 								<MenuPopover placement="bottom end">
 									<DropdownMenu className="">
-										<MenuItem
-											onAction={() => navigate({ to: "/user-profile" })}
-										>
+										<MenuItem onAction={() => navigate({ to: "/profile" })}>
 											<User className="mr-2 h-4 w-4" />
 											<span>Hồ sơ cá nhân</span>
 										</MenuItem>

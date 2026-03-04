@@ -14,7 +14,7 @@ services:
     # Production environment
     bitlearning-web:
         container_name: bit-web
-        image: lcaohoanq/bithub-web:nginx
+        image: lcaohoanq/bitlearning-web:nginx
         build:
             context: ../..
             dockerfile: apps/web/Dockerfile.prod

@@ -92,14 +92,14 @@ const Footer: React.FC = () => {
 									Data Science & AI
 								</Link>
 							</li>
-							<li>
+							{/* <li>
 								<Link
 									to="/offline-course"
 									className="text-gray-300 transition-colors hover:text-blue-400"
 								>
 									Khóa học Offline
 								</Link>
-							</li>
+							</li> */}
 						</ul>
 					</div>
 

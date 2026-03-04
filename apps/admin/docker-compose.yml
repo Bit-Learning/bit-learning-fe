@@ -16,7 +16,7 @@ services:
   # Production environment
   bitlearning-admin:
     container_name: bit-admin
-    image: lcaohoanq/bithub-admin:nginx
+    image: lcaohoanq/bitlearning-admin:nginx
     build:
       context: ../..
       dockerfile: apps/admin/Dockerfile.prod
