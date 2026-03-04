@@ -46,11 +46,11 @@ const menuItems = [
     id: "matrices",
     label: "Ma trận đề thi",
     icon: Puzzle,
-    path: "/mentor/matrix",
+    path: "/mentor/matrix/my",
   },
   {
     id: "exams",
-    label: "Tạo đề thi",
+    label: "Đề thi",
     icon: FileText,
     path: "/mentor/exam/my",
   },

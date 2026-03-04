@@ -87,7 +87,7 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
                       Tên ma trận <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="VD: Ma trận Toán lớp 10" {...field} />
+                      <Input placeholder="VD: Ma trận Tin học lớp 10" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -102,7 +102,7 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
                       Mã ma trận <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="VD: MT-TOAN-10" {...field} />
+                      <Input placeholder="VD: MT-TIN-10" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>

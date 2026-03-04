@@ -63,7 +63,6 @@ import { Route as MentorQuestionCreateRouteImport } from './routes/mentor/questi
 import { Route as MentorProblemCreateRouteImport } from './routes/mentor/problem/create'
 import { Route as MentorMatrixMyRouteImport } from './routes/mentor/matrix/my'
 import { Route as MentorMatrixImportRouteImport } from './routes/mentor/matrix/import'
-import { Route as MentorMatrixCreateRouteImport } from './routes/mentor/matrix/create'
 import { Route as MentorExamMyRouteImport } from './routes/mentor/exam/my'
 import { Route as MentorExamGenerateRouteImport } from './routes/mentor/exam/generate'
 import { Route as MentorExamIdRouteImport } from './routes/mentor/exam/$id'
@@ -379,11 +378,6 @@ const MentorMatrixImportRoute = MentorMatrixImportRouteImport.update({
   path: '/mentor/matrix/import',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MentorMatrixCreateRoute = MentorMatrixCreateRouteImport.update({
-  id: '/mentor/matrix/create',
-  path: '/mentor/matrix/create',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const MentorExamMyRoute = MentorExamMyRouteImport.update({
   id: '/mentor/exam/my',
   path: '/mentor/exam/my',
@@ -681,7 +675,6 @@ export interface FileRoutesByFullPath {
   '/mentor/exam/$id': typeof MentorExamIdRoute
   '/mentor/exam/generate': typeof MentorExamGenerateRoute
   '/mentor/exam/my': typeof MentorExamMyRoute
-  '/mentor/matrix/create': typeof MentorMatrixCreateRoute
   '/mentor/matrix/import': typeof MentorMatrixImportRoute
   '/mentor/matrix/my': typeof MentorMatrixMyRoute
   '/mentor/problem/create': typeof MentorProblemCreateRoute
@@ -780,7 +773,6 @@ export interface FileRoutesByTo {
   '/mentor/exam/$id': typeof MentorExamIdRoute
   '/mentor/exam/generate': typeof MentorExamGenerateRoute
   '/mentor/exam/my': typeof MentorExamMyRoute
-  '/mentor/matrix/create': typeof MentorMatrixCreateRoute
   '/mentor/matrix/import': typeof MentorMatrixImportRoute
   '/mentor/matrix/my': typeof MentorMatrixMyRoute
   '/mentor/problem/create': typeof MentorProblemCreateRoute
@@ -882,7 +874,6 @@ export interface FileRoutesById {
   '/mentor/exam/$id': typeof MentorExamIdRoute
   '/mentor/exam/generate': typeof MentorExamGenerateRoute
   '/mentor/exam/my': typeof MentorExamMyRoute
-  '/mentor/matrix/create': typeof MentorMatrixCreateRoute
   '/mentor/matrix/import': typeof MentorMatrixImportRoute
   '/mentor/matrix/my': typeof MentorMatrixMyRoute
   '/mentor/problem/create': typeof MentorProblemCreateRoute
@@ -983,7 +974,6 @@ export interface FileRouteTypes {
     | '/mentor/exam/$id'
     | '/mentor/exam/generate'
     | '/mentor/exam/my'
-    | '/mentor/matrix/create'
     | '/mentor/matrix/import'
     | '/mentor/matrix/my'
     | '/mentor/problem/create'
@@ -1082,7 +1072,6 @@ export interface FileRouteTypes {
     | '/mentor/exam/$id'
     | '/mentor/exam/generate'
     | '/mentor/exam/my'
-    | '/mentor/matrix/create'
     | '/mentor/matrix/import'
     | '/mentor/matrix/my'
     | '/mentor/problem/create'
@@ -1183,7 +1172,6 @@ export interface FileRouteTypes {
     | '/mentor/exam/$id'
     | '/mentor/exam/generate'
     | '/mentor/exam/my'
-    | '/mentor/matrix/create'
     | '/mentor/matrix/import'
     | '/mentor/matrix/my'
     | '/mentor/problem/create'
@@ -1249,7 +1237,6 @@ export interface RootRouteChildren {
   MentorExamIdRoute: typeof MentorExamIdRoute
   MentorExamGenerateRoute: typeof MentorExamGenerateRoute
   MentorExamMyRoute: typeof MentorExamMyRoute
-  MentorMatrixCreateRoute: typeof MentorMatrixCreateRoute
   MentorMatrixImportRoute: typeof MentorMatrixImportRoute
   MentorMatrixMyRoute: typeof MentorMatrixMyRoute
   MentorProblemCreateRoute: typeof MentorProblemCreateRoute
@@ -1647,13 +1634,6 @@ declare module '@tanstack/react-router' {
       path: '/mentor/matrix/import'
       fullPath: '/mentor/matrix/import'
       preLoaderRoute: typeof MentorMatrixImportRouteImport
-      parentRoute: typeof rootRouteImport
-    }
-    '/mentor/matrix/create': {
-      id: '/mentor/matrix/create'
-      path: '/mentor/matrix/create'
-      fullPath: '/mentor/matrix/create'
-      preLoaderRoute: typeof MentorMatrixCreateRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor/exam/my': {
@@ -2130,7 +2110,6 @@ const rootRouteChildren: RootRouteChildren = {
   MentorExamIdRoute: MentorExamIdRoute,
   MentorExamGenerateRoute: MentorExamGenerateRoute,
   MentorExamMyRoute: MentorExamMyRoute,
-  MentorMatrixCreateRoute: MentorMatrixCreateRoute,
   MentorMatrixImportRoute: MentorMatrixImportRoute,
   MentorMatrixMyRoute: MentorMatrixMyRoute,
   MentorProblemCreateRoute: MentorProblemCreateRoute,
