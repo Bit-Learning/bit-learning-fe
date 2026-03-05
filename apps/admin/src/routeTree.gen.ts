@@ -52,7 +52,8 @@ import { Route as AuthenticatedCoursesIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedContestsCreateRouteImport } from './routes/_authenticated/contests/create'
 import { Route as AuthenticatedContestsIdRouteImport } from './routes/_authenticated/contests/$id'
 import { Route as AuthenticatedAppsGamesIndexRouteImport } from './routes/_authenticated/apps/games/index'
-import { Route as AuthenticatedContestsIdEditRouteImport } from './routes/_authenticated/contests/$id.edit'
+import { Route as AuthenticatedContestsIdManageProblemsRouteImport } from './routes/_authenticated/contests/$id_.manage-problems'
+import { Route as AuthenticatedContestsIdEditRouteImport } from './routes/_authenticated/contests/$id_.edit'
 
 const ClerkRouteRoute = ClerkRouteRouteImport.update({
   id: '/clerk',
@@ -284,11 +285,17 @@ const AuthenticatedAppsGamesIndexRoute =
     path: '/apps/games/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedContestsIdManageProblemsRoute =
+  AuthenticatedContestsIdManageProblemsRouteImport.update({
+    id: '/contests/$id_/manage-problems',
+    path: '/contests/$id/manage-problems',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedContestsIdEditRoute =
   AuthenticatedContestsIdEditRouteImport.update({
-    id: '/edit',
-    path: '/edit',
-    getParentRoute: () => AuthenticatedContestsIdRoute,
+    id: '/contests/$id_/edit',
+    path: '/contests/$id/edit',
+    getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
 
 export interface FileRoutesByFullPath {
@@ -304,7 +311,7 @@ export interface FileRoutesByFullPath {
   '/404': typeof errors404Route
   '/500': typeof errors500Route
   '/503': typeof errors503Route
-  '/contests/$id': typeof AuthenticatedContestsIdRouteWithChildren
+  '/contests/$id': typeof AuthenticatedContestsIdRoute
   '/contests/create': typeof AuthenticatedContestsCreateRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -332,6 +339,7 @@ export interface FileRoutesByFullPath {
   '/transactions/': typeof AuthenticatedTransactionsIndexRoute
   '/users/': typeof AuthenticatedUsersIndexRoute
   '/contests/$id/edit': typeof AuthenticatedContestsIdEditRoute
+  '/contests/$id/manage-problems': typeof AuthenticatedContestsIdManageProblemsRoute
   '/apps/games/': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -346,7 +354,7 @@ export interface FileRoutesByTo {
   '/500': typeof errors500Route
   '/503': typeof errors503Route
   '/': typeof AuthenticatedIndexRoute
-  '/contests/$id': typeof AuthenticatedContestsIdRouteWithChildren
+  '/contests/$id': typeof AuthenticatedContestsIdRoute
   '/contests/create': typeof AuthenticatedContestsCreateRoute
   '/courses/$id': typeof AuthenticatedCoursesIdRoute
   '/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -374,6 +382,7 @@ export interface FileRoutesByTo {
   '/transactions': typeof AuthenticatedTransactionsIndexRoute
   '/users': typeof AuthenticatedUsersIndexRoute
   '/contests/$id/edit': typeof AuthenticatedContestsIdEditRoute
+  '/contests/$id/manage-problems': typeof AuthenticatedContestsIdManageProblemsRoute
   '/apps/games': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRoutesById {
@@ -393,7 +402,7 @@ export interface FileRoutesById {
   '/(errors)/500': typeof errors500Route
   '/(errors)/503': typeof errors503Route
   '/_authenticated/': typeof AuthenticatedIndexRoute
-  '/_authenticated/contests/$id': typeof AuthenticatedContestsIdRouteWithChildren
+  '/_authenticated/contests/$id': typeof AuthenticatedContestsIdRoute
   '/_authenticated/contests/create': typeof AuthenticatedContestsCreateRoute
   '/_authenticated/courses/$id': typeof AuthenticatedCoursesIdRoute
   '/_authenticated/errors/$error': typeof AuthenticatedErrorsErrorRoute
@@ -420,7 +429,8 @@ export interface FileRoutesById {
   '/_authenticated/templates/': typeof AuthenticatedTemplatesIndexRoute
   '/_authenticated/transactions/': typeof AuthenticatedTransactionsIndexRoute
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
-  '/_authenticated/contests/$id/edit': typeof AuthenticatedContestsIdEditRoute
+  '/_authenticated/contests/$id_/edit': typeof AuthenticatedContestsIdEditRoute
+  '/_authenticated/contests/$id_/manage-problems': typeof AuthenticatedContestsIdManageProblemsRoute
   '/_authenticated/apps/games/': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRouteTypes {
@@ -466,6 +476,7 @@ export interface FileRouteTypes {
     | '/transactions/'
     | '/users/'
     | '/contests/$id/edit'
+    | '/contests/$id/manage-problems'
     | '/apps/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -508,6 +519,7 @@ export interface FileRouteTypes {
     | '/transactions'
     | '/users'
     | '/contests/$id/edit'
+    | '/contests/$id/manage-problems'
     | '/apps/games'
   id:
     | '__root__'
@@ -553,7 +565,8 @@ export interface FileRouteTypes {
     | '/_authenticated/templates/'
     | '/_authenticated/transactions/'
     | '/_authenticated/users/'
-    | '/_authenticated/contests/$id/edit'
+    | '/_authenticated/contests/$id_/edit'
+    | '/_authenticated/contests/$id_/manage-problems'
     | '/_authenticated/apps/games/'
   fileRoutesById: FileRoutesById
 }
@@ -874,12 +887,19 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsGamesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
-    '/_authenticated/contests/$id/edit': {
-      id: '/_authenticated/contests/$id/edit'
-      path: '/edit'
+    '/_authenticated/contests/$id_/manage-problems': {
+      id: '/_authenticated/contests/$id_/manage-problems'
+      path: '/contests/$id/manage-problems'
+      fullPath: '/contests/$id/manage-problems'
+      preLoaderRoute: typeof AuthenticatedContestsIdManageProblemsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/contests/$id_/edit': {
+      id: '/_authenticated/contests/$id_/edit'
+      path: '/contests/$id/edit'
       fullPath: '/contests/$id/edit'
       preLoaderRoute: typeof AuthenticatedContestsIdEditRouteImport
-      parentRoute: typeof AuthenticatedContestsIdRoute
+      parentRoute: typeof AuthenticatedRouteRoute
     }
   }
 }
@@ -907,24 +927,10 @@ const AuthenticatedSettingsRouteRouteWithChildren =
     AuthenticatedSettingsRouteRouteChildren,
   )
 
-interface AuthenticatedContestsIdRouteChildren {
-  AuthenticatedContestsIdEditRoute: typeof AuthenticatedContestsIdEditRoute
-}
-
-const AuthenticatedContestsIdRouteChildren: AuthenticatedContestsIdRouteChildren =
-  {
-    AuthenticatedContestsIdEditRoute: AuthenticatedContestsIdEditRoute,
-  }
-
-const AuthenticatedContestsIdRouteWithChildren =
-  AuthenticatedContestsIdRoute._addFileChildren(
-    AuthenticatedContestsIdRouteChildren,
-  )
-
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
-  AuthenticatedContestsIdRoute: typeof AuthenticatedContestsIdRouteWithChildren
+  AuthenticatedContestsIdRoute: typeof AuthenticatedContestsIdRoute
   AuthenticatedContestsCreateRoute: typeof AuthenticatedContestsCreateRoute
   AuthenticatedCoursesIdRoute: typeof AuthenticatedCoursesIdRoute
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
@@ -943,13 +949,15 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
   AuthenticatedTransactionsIndexRoute: typeof AuthenticatedTransactionsIndexRoute
   AuthenticatedUsersIndexRoute: typeof AuthenticatedUsersIndexRoute
+  AuthenticatedContestsIdEditRoute: typeof AuthenticatedContestsIdEditRoute
+  AuthenticatedContestsIdManageProblemsRoute: typeof AuthenticatedContestsIdManageProblemsRoute
   AuthenticatedAppsGamesIndexRoute: typeof AuthenticatedAppsGamesIndexRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedSettingsRouteRoute: AuthenticatedSettingsRouteRouteWithChildren,
   AuthenticatedIndexRoute: AuthenticatedIndexRoute,
-  AuthenticatedContestsIdRoute: AuthenticatedContestsIdRouteWithChildren,
+  AuthenticatedContestsIdRoute: AuthenticatedContestsIdRoute,
   AuthenticatedContestsCreateRoute: AuthenticatedContestsCreateRoute,
   AuthenticatedCoursesIdRoute: AuthenticatedCoursesIdRoute,
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
@@ -968,6 +976,9 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
   AuthenticatedTransactionsIndexRoute: AuthenticatedTransactionsIndexRoute,
   AuthenticatedUsersIndexRoute: AuthenticatedUsersIndexRoute,
+  AuthenticatedContestsIdEditRoute: AuthenticatedContestsIdEditRoute,
+  AuthenticatedContestsIdManageProblemsRoute:
+    AuthenticatedContestsIdManageProblemsRoute,
   AuthenticatedAppsGamesIndexRoute: AuthenticatedAppsGamesIndexRoute,
 }
 

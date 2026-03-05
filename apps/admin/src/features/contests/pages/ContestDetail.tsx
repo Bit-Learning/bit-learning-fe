@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useParams } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 // import { useContestDetail } from "../hooks/useContest";
 import { ContestStatus } from "../types/contest.type";
 import { Calendar, Edit2, StopCircle } from "lucide-react";
@@ -29,11 +29,12 @@ const MOCK_CONTEST = {
 
 const ContestDetailPage: React.FC = () => {
   const { id } = useParams({ from: "/_authenticated/contests/$id" });
-
+  const navigate = useNavigate();
   // const { data: contest, isLoading } = useContestDetail(contestId);
   const contest = MOCK_CONTEST;
   const isLoading = false;
   const [activeTab, setActiveTab] = useState("overview");
+
   const getStatusBadge = (status: ContestStatus) => {
     const config = {
       [ContestStatus.RUNNING]: {
@@ -83,6 +84,13 @@ const ContestDetailPage: React.FC = () => {
     return <div className="p-8">Loading...</div>;
   }
 
+  const handleEditContest = () => {
+    navigate({
+      to: "/contests/$id/edit",
+      params: { id },
+    });
+  };
+
   return (
     <div className="p-8">
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
@@ -107,7 +115,7 @@ const ContestDetailPage: React.FC = () => {
               Kết thúc sớm
             </Button>
           )}
-          <Button>
+          <Button onClick={handleEditContest}>
             <Edit2 className="w-4 h-4 mr-2" />
             Chỉnh sửa
           </Button>

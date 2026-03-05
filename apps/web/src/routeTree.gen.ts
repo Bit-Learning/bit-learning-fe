@@ -109,7 +109,6 @@ import { Route as LayoutSyllabusesIdIndexRouteImport } from './routes/_layout/sy
 import { Route as MentorQuestionIdEditRouteImport } from './routes/mentor/question/$id/edit'
 import { Route as MentorProblemIdEditRouteImport } from './routes/mentor/problem/$id.edit'
 import { Route as MentorMatrixIdGenerateRouteImport } from './routes/mentor/matrix/$id/generate'
-import { Route as MentorMatrixIdEditRouteImport } from './routes/mentor/matrix/$id/edit'
 import { Route as ContestsIdProblemsProblemIdRouteImport } from './routes/contests/$id/problems.$problemId'
 import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
 import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
@@ -629,11 +628,6 @@ const MentorMatrixIdGenerateRoute = MentorMatrixIdGenerateRouteImport.update({
   path: '/mentor/matrix/$id/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MentorMatrixIdEditRoute = MentorMatrixIdEditRouteImport.update({
-  id: '/mentor/matrix/$id/edit',
-  path: '/mentor/matrix/$id/edit',
-  getParentRoute: () => rootRouteImport,
-} as any)
 const ContestsIdProblemsProblemIdRoute =
   ContestsIdProblemsProblemIdRouteImport.update({
     id: '/$problemId',
@@ -771,7 +765,6 @@ export interface FileRoutesByFullPath {
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
   '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
-  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
@@ -879,7 +872,6 @@ export interface FileRoutesByTo {
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
   '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
-  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
@@ -990,7 +982,6 @@ export interface FileRoutesById {
   '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
   '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
-  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
@@ -1100,7 +1091,6 @@ export interface FileRouteTypes {
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
     | '/contests/$id/problems/$problemId'
-    | '/mentor/matrix/$id/edit'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
@@ -1208,7 +1198,6 @@ export interface FileRouteTypes {
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
     | '/contests/$id/problems/$problemId'
-    | '/mentor/matrix/$id/edit'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
@@ -1318,7 +1307,6 @@ export interface FileRouteTypes {
     | '/_layout/syllabuses/$id/edit'
     | '/_layout/templates/slidev/create'
     | '/contests/$id/problems/$problemId'
-    | '/mentor/matrix/$id/edit'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
@@ -1376,7 +1364,6 @@ export interface RootRouteChildren {
   MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
   MentorProblemIndexRoute: typeof MentorProblemIndexRoute
   MentorQuestionIndexRoute: typeof MentorQuestionIndexRoute
-  MentorMatrixIdEditRoute: typeof MentorMatrixIdEditRoute
   MentorMatrixIdGenerateRoute: typeof MentorMatrixIdGenerateRoute
   MentorQuestionIdEditRoute: typeof MentorQuestionIdEditRoute
   MentorMatrixIdIndexRoute: typeof MentorMatrixIdIndexRoute
@@ -2085,13 +2072,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorMatrixIdGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mentor/matrix/$id/edit': {
-      id: '/mentor/matrix/$id/edit'
-      path: '/mentor/matrix/$id/edit'
-      fullPath: '/mentor/matrix/$id/edit'
-      preLoaderRoute: typeof MentorMatrixIdEditRouteImport
-      parentRoute: typeof rootRouteImport
-    }
     '/contests/$id/problems/$problemId': {
       id: '/contests/$id/problems/$problemId'
       path: '/$problemId'
@@ -2353,7 +2333,6 @@ const rootRouteChildren: RootRouteChildren = {
   MentorMatrixIndexRoute: MentorMatrixIndexRoute,
   MentorProblemIndexRoute: MentorProblemIndexRoute,
   MentorQuestionIndexRoute: MentorQuestionIndexRoute,
-  MentorMatrixIdEditRoute: MentorMatrixIdEditRoute,
   MentorMatrixIdGenerateRoute: MentorMatrixIdGenerateRoute,
   MentorQuestionIdEditRoute: MentorQuestionIdEditRoute,
   MentorMatrixIdIndexRoute: MentorMatrixIdIndexRoute,

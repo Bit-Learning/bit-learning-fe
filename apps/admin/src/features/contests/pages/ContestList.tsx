@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus, Search, Eye, Edit, Trash2, Trophy, PlayCircle, Clock, History, TrendingUp, Filter } from "lucide-react";
-import { useContestList, useDeleteContest } from "../queries/useContest";
+// import { useContestList, useDeleteContest } from "../queries/useContest";
 import { ContestStatus, type ContestListDTO } from "../types/contest.type";
 import { Button } from "@/components/ui/button";
 import {

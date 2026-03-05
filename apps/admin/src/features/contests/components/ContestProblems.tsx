@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState } from "react";
 // import { useContestProblems } from "../hooks/useContest";
-import { Plus, Trash2 } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import { Plus, Trash2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -83,9 +84,12 @@ const MOCK_PROBLEMS = [
 ];
 
 export const ContestProblems: React.FC<ContestProblemsProps> = ({ contestId }) => {
+  const navigate = useNavigate();
   // const { data: problems, isLoading } = useContestProblems(contestId);
+
   const problems = MOCK_PROBLEMS;
   const isLoading = false;
+  const [showManageDialog, setShowManageDialog] = useState(false);
 
   const getDifficultyBadge = (difficulty: string) => {
     const config: Record<string, string> = {
@@ -109,112 +113,179 @@ export const ContestProblems: React.FC<ContestProblemsProps> = ({ contestId }) =
     return Math.round((accepted / total) * 100);
   };
 
+  const handleManageProblems = () => {
+    navigate({ to: "/contests/$id/manage-problems", params: { id: contestId } });
+  };
+
+  const handleRemoveProblem = (contestProblemId: string) => {
+    console.log("Remove problem:", contestProblemId);
+    // Call remove mutation here
+  };
+
   if (isLoading) {
-    return <div>Loading...</div>;
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3"></div>
+          <p className="text-slate-600 dark:text-slate-400">Đang tải danh sách bài tập...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
     <div className="max-w-7xl mx-auto">
+      {/* Header */}
       <div className="flex items-center justify-between mb-6">
         <div>
           <h3 className="text-lg font-bold text-slate-900 dark:text-white">Danh sách bài tập ({problems.length})</h3>
           <p className="text-sm text-slate-500 dark:text-slate-400">Quản lý các bài toán trong kỳ thi này</p>
         </div>
-        <Button>
-          <Plus className="w-4 h-4 mr-2" />
-          Thêm bài tập
-        </Button>
+        <div className="flex items-center gap-3">
+          <Button variant="outline" onClick={handleManageProblems} className="gap-2">
+            <Settings className="w-4 h-4" />
+            Quản lý bài tập
+          </Button>
+          <Button onClick={handleManageProblems} className="gap-2">
+            <Plus className="w-4 h-4" />
+            Thêm bài tập
+          </Button>
+        </div>
       </div>
 
+      {/* Problems Table */}
       <Card>
         <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead className="bg-slate-50 dark:bg-slate-800/50">
-                <tr>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Mã / Tên bài tập
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Độ khó
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
-                    Lượt nộp
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
-                    Đã giải
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
-                    Tỉ lệ AC
-                  </th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">
-                    Thao tác
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
-                {problems.map((problem) => {
-                  const acceptanceRate = calculateAcceptanceRate(problem.totalAccepted, problem.totalSubmissions);
-                  const progressColor = acceptanceRate > 60 ? "#22c55e" : acceptanceRate > 30 ? "#f59e0b" : "#ef4444";
+          {problems.length === 0 ? (
+            <div className="text-center py-12">
+              <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                <Plus className="w-8 h-8 text-slate-400" />
+              </div>
+              <h4 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Chưa có bài tập nào</h4>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mb-4">Thêm bài tập vào cuộc thi để bắt đầu</p>
+              <Button onClick={handleManageProblems} className="gap-2">
+                <Plus className="w-4 h-4" />
+                Thêm bài tập đầu tiên
+              </Button>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead className="bg-slate-50 dark:bg-slate-800/50">
+                  <tr>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Mã / Tên bài tập
+                    </th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Độ khó
+                    </th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
+                      Lượt nộp
+                    </th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
+                      Đã giải
+                    </th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+                      Tỉ lệ AC
+                    </th>
+                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">
+                      Thao tác
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-200 dark:divide-slate-800">
+                  {problems.map((problem) => {
+                    const acceptanceRate = calculateAcceptanceRate(problem.totalAccepted, problem.totalSubmissions);
+                    const progressColor = acceptanceRate > 60 ? "#22c55e" : acceptanceRate > 30 ? "#f59e0b" : "#ef4444";
 
-                  return (
-                    <tr
-                      key={problem.contestProblemId}
-                      className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex flex-col">
-                          <span className="text-xs font-bold text-primary mb-0.5">{problem.label}</span>
-                          <span className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-primary transition-colors">
-                            {problem.title}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">{getDifficultyBadge(problem.difficulty)}</td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-medium">{problem.totalSubmissions.toLocaleString()}</span>
-                      </td>
-                      <td className="px-6 py-4 text-center">
-                        <span className="text-sm font-medium">{problem.totalAccepted.toLocaleString()}</span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <div className="w-24 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
-                            <div
-                              className="h-full rounded-full transition-all"
-                              style={{
-                                width: `${acceptanceRate}%`,
-                                backgroundColor: progressColor,
-                              }}
-                            />
+                    return (
+                      <tr
+                        key={problem.contestProblemId}
+                        className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors group"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex flex-col">
+                            <span className="text-xs font-bold text-blue-600 dark:text-blue-400 mb-0.5">
+                              {problem.label}
+                            </span>
+                            <span className="text-sm font-semibold text-slate-900 dark:text-white group-hover:text-blue-600 transition-colors">
+                              {problem.title}
+                            </span>
                           </div>
-                          <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
-                            {acceptanceRate}%
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <button className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all">
-                          <Trash2 className="w-5 h-5" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+                        </td>
+                        <td className="px-6 py-4">{getDifficultyBadge(problem.difficulty)}</td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-sm font-medium">{problem.totalSubmissions.toLocaleString()}</span>
+                        </td>
+                        <td className="px-6 py-4 text-center">
+                          <span className="text-sm font-medium">{problem.totalAccepted.toLocaleString()}</span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <div className="w-24 h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+                              <div
+                                className="h-full rounded-full transition-all"
+                                style={{
+                                  width: `${acceptanceRate}%`,
+                                  backgroundColor: progressColor,
+                                }}
+                              />
+                            </div>
+                            <span className="text-xs font-semibold text-slate-600 dark:text-slate-400">
+                              {acceptanceRate}%
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 text-right">
+                          <button
+                            onClick={() => handleRemoveProblem(problem.contestProblemId)}
+                            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300 p-2 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 transition-all"
+                            title="Xóa bài tập"
+                          >
+                            <Trash2 className="w-5 h-5" />
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      <div className="mt-6 flex items-center justify-between">
-        <p className="text-sm text-slate-500 dark:text-slate-400 italic">
-          Mẹo: Kéo thả các bài tập để thay đổi thứ tự xuất hiện trong đề thi.
-        </p>
-        <div className="flex items-center gap-2">
-          <span className="text-sm text-slate-500 dark:text-slate-400">Trang 1 / 1</span>
+      {/* Footer */}
+      {problems.length > 0 && (
+        <div className="mt-6 flex items-center justify-between">
+          <p className="text-sm text-slate-500 dark:text-slate-400 italic">
+            💡 Tip: Nhấn "Quản lý bài tập" để thay đổi thứ tự và cấu hình chi tiết
+          </p>
+          <div className="flex items-center gap-2">
+            <span className="text-sm text-slate-500 dark:text-slate-400">Trang 1 / 1</span>
+          </div>
         </div>
-      </div>
+      )}
+
+      {/* Demo Dialog Notification */}
+      {showManageDialog && (
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl p-6 max-w-md mx-4 shadow-2xl">
+            <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-2">Chuyển trang</h3>
+            <p className="text-sm text-slate-600 dark:text-slate-400 mb-4">
+              Trong production, bạn sẽ được chuyển đến trang quản lý bài tập với component AddContestProblems
+            </p>
+            <div className="bg-slate-100 dark:bg-slate-800 p-3 rounded-lg mb-4">
+              <code className="text-xs text-slate-700 dark:text-slate-300">
+                /admin/contests/{contestId}/problems/manage
+              </code>
+            </div>
+            <Button onClick={() => setShowManageDialog(false)} className="w-full">
+              Đóng
+            </Button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
