@@ -112,7 +112,7 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
   const getProblemCell = (result: any) => {
     if (!result.solved && result.attempts === 0) {
       return (
-        <td className="min-w-[100px] text-center text-xs font-medium py-3 border-l border-slate-100 dark:border-slate-800/50">
+        <td className="min-w-25 text-center text-xs font-medium py-3 border-l border-slate-100 dark:border-slate-800/50">
           <div className="text-slate-300 dark:text-slate-700 font-bold">—</div>
         </td>
       );
@@ -120,7 +120,7 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
 
     if (!result.solved && result.attempts > 0) {
       return (
-        <td className="min-w-[100px] text-center text-xs font-medium py-3 bg-red-50 dark:bg-red-900/10 border-l border-slate-100 dark:border-slate-800/50">
+        <td className="min-w-25 text-center text-xs font-medium py-3 bg-red-50 dark:bg-red-900/10 border-l border-slate-100 dark:border-slate-800/50">
           <div className="text-red-600 dark:text-red-400 font-bold">-{result.attempts}</div>
           <div className="text-[10px] text-red-500 opacity-80">{result.attempts > 5 ? "Failed" : "In progress"}</div>
         </td>
@@ -133,7 +133,7 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
 
     return (
       <td
-        className={`min-w-[100px] text-center text-xs font-medium py-3 ${bgColor} border-l border-slate-100 dark:border-slate-800/50`}
+        className={`min-w-25 text-center text-xs font-medium py-3 ${bgColor} border-l border-slate-100 dark:border-slate-800/50`}
       >
         <div className={`${textColor} font-bold`}>+{result.attempts}</div>
         <div className={`text-[10px] ${textColor} opacity-80`}>{result.acTimeMinutes}m</div>
@@ -174,7 +174,7 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
 
       <Card>
         <CardContent className="p-0 overflow-x-auto">
-          <table className="w-full text-left border-collapse min-w-[1000px]">
+          <table className="w-full text-left border-collapse min-w-250">
             <thead className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
               <tr>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 w-16">
@@ -189,19 +189,19 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-center">
                   Penalty
                 </th>
-                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-[100px] py-3">
+                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-25 py-3">
                   A
                 </th>
-                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-[100px] py-3">
+                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-25 py-3">
                   B
                 </th>
-                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-[100px] py-3">
+                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-25 py-3">
                   C
                 </th>
-                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-[100px] py-3">
+                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-25 py-3">
                   D
                 </th>
-                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-[100px] py-3">
+                <th className="text-center text-xs text-slate-500 dark:text-slate-400 border-l border-slate-200 dark:border-slate-800 min-w-25 py-3">
                   E
                 </th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400 text-right">

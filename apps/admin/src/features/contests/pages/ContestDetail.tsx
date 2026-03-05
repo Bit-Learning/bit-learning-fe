@@ -10,6 +10,7 @@ import { ContestProblems } from "../components/ContestProblems";
 import { ContestParticipants } from "../components/ContestParticipants";
 import { ContestLeaderboard } from "../components/ContestLeaderboard";
 import { ContestSubmissions } from "../components/ContestSubmissions";
+import { ContestClarifications } from "../components/ContestClarifications";
 
 const MOCK_CONTEST = {
   contestId: "1",
@@ -191,7 +192,7 @@ const ContestDetailPage: React.FC = () => {
 
         {activeTab === "leaderboard" && <ContestLeaderboard contestId={id} />}
 
-        {activeTab === "qa" && <div>Q&A đang phát triển...</div>}
+        {activeTab === "qa" && <ContestClarifications contestId={id} />}
       </div>
     </div>
   );

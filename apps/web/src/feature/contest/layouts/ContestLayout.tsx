@@ -1,5 +1,5 @@
 import React from "react";
-import { Outlet, useParams } from "@tanstack/react-router";
+import { Outlet, useParams, useLocation } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { Timer, ListChecks, Trophy, MessageSquare, Bell, Terminal, Users } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@workspace/ui/components/Avatar";
@@ -13,8 +13,9 @@ interface ContestLayoutProps {
 
 export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
   const { id } = useParams({ strict: false });
-  // const { data: contest, isLoading: contestLoading } = useContestDetail(id || "");
+  const location = useLocation();
   const { data: userProfile } = useUserProfile();
+  // const { data: contest, isLoading: contestLoading } = useContestDetail(id || "");
 
   const mockContest = {
     id: id || "",
@@ -54,6 +55,10 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
   const timeLeft = "02:45:12";
   const myRank = contest.myRank || null;
 
+  const isActive = (path: string) => {
+    return location.pathname.includes(path);
+  };
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950 flex flex-col">
       <style>{`
@@ -92,7 +97,12 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
             <Link
               to="/contests/$id/problems"
               params={{ id: id || "" }}
-              className="px-4 py-2 rounded-lg bg-primary/10 text-primary font-bold text-sm flex items-center gap-2"
+              className={cn(
+                "px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors",
+                isActive("/problems")
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium",
+              )}
             >
               <ListChecks className="w-5 h-5" />
               Bài tập
@@ -100,7 +110,12 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
             <Link
               to="/contests/$id/leaderboard"
               params={{ id: id || "" }}
-              className="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium text-sm flex items-center gap-2"
+              className={cn(
+                "px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors",
+                isActive("/leaderboard")
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium",
+              )}
             >
               <Trophy className="w-5 h-5" />
               Bảng xếp hạng
@@ -108,10 +123,28 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
             <Link
               to="/contests/$id/submissions"
               params={{ id: id || "" }}
-              className="px-4 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium text-sm flex items-center gap-2"
+              className={cn(
+                "px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors",
+                isActive("/submissions")
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium",
+              )}
             >
               <ListChecks className="w-5 h-5" />
               Bài nộp của tôi
+            </Link>
+            <Link
+              to="/contests/$id/qa"
+              params={{ id: id || "" }}
+              className={cn(
+                "px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors",
+                isActive("/qa")
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium",
+              )}
+            >
+              <MessageSquare className="w-5 h-5" />
+              Hỏi đáp
             </Link>
           </nav>
 

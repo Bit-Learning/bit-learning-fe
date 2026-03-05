@@ -76,6 +76,7 @@ import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
 import { Route as GamesStudentsUserIdRouteImport } from './routes/games/students/$userId'
 import { Route as GamesIdPlayRouteImport } from './routes/games/$id.play'
 import { Route as ContestsIdSubmissionsRouteImport } from './routes/contests/$id/submissions'
+import { Route as ContestsIdQaRouteImport } from './routes/contests/$id/qa'
 import { Route as ContestsIdProblemsRouteImport } from './routes/contests/$id/problems'
 import { Route as ContestsIdLeaderboardRouteImport } from './routes/contests/$id/leaderboard'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
@@ -452,6 +453,11 @@ const ContestsIdSubmissionsRoute = ContestsIdSubmissionsRouteImport.update({
   path: '/contests/$id/submissions',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContestsIdQaRoute = ContestsIdQaRouteImport.update({
+  id: '/contests/$id/qa',
+  path: '/contests/$id/qa',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContestsIdProblemsRoute = ContestsIdProblemsRouteImport.update({
   id: '/contests/$id/problems',
   path: '/contests/$id/problems',
@@ -724,6 +730,7 @@ export interface FileRoutesByFullPath {
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
   '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/qa': typeof ContestsIdQaRoute
   '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
@@ -831,6 +838,7 @@ export interface FileRoutesByTo {
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
   '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/qa': typeof ContestsIdQaRoute
   '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
@@ -941,6 +949,7 @@ export interface FileRoutesById {
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
   '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
   '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/qa': typeof ContestsIdQaRoute
   '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
@@ -1050,6 +1059,7 @@ export interface FileRouteTypes {
     | '/auth/google/callback'
     | '/contests/$id/leaderboard'
     | '/contests/$id/problems'
+    | '/contests/$id/qa'
     | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
@@ -1157,6 +1167,7 @@ export interface FileRouteTypes {
     | '/auth/google/callback'
     | '/contests/$id/leaderboard'
     | '/contests/$id/problems'
+    | '/contests/$id/qa'
     | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
@@ -1266,6 +1277,7 @@ export interface FileRouteTypes {
     | '/auth/google/callback'
     | '/contests/$id/leaderboard'
     | '/contests/$id/problems'
+    | '/contests/$id/qa'
     | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
@@ -1340,6 +1352,7 @@ export interface RootRouteChildren {
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
   ContestsIdLeaderboardRoute: typeof ContestsIdLeaderboardRoute
   ContestsIdProblemsRoute: typeof ContestsIdProblemsRouteWithChildren
+  ContestsIdQaRoute: typeof ContestsIdQaRoute
   ContestsIdSubmissionsRoute: typeof ContestsIdSubmissionsRoute
   GamesStudentsUserIdRoute: typeof GamesStudentsUserIdRoute
   MentorCourseIdRoute: typeof MentorCourseIdRoute
@@ -1841,6 +1854,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ContestsIdSubmissionsRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contests/$id/qa': {
+      id: '/contests/$id/qa'
+      path: '/contests/$id/qa'
+      fullPath: '/contests/$id/qa'
+      preLoaderRoute: typeof ContestsIdQaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contests/$id/problems': {
       id: '/contests/$id/problems'
       path: '/contests/$id/problems'
@@ -2308,6 +2328,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
   ContestsIdLeaderboardRoute: ContestsIdLeaderboardRoute,
   ContestsIdProblemsRoute: ContestsIdProblemsRouteWithChildren,
+  ContestsIdQaRoute: ContestsIdQaRoute,
   ContestsIdSubmissionsRoute: ContestsIdSubmissionsRoute,
   GamesStudentsUserIdRoute: GamesStudentsUserIdRoute,
   MentorCourseIdRoute: MentorCourseIdRoute,
