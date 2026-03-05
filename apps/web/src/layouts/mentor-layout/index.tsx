@@ -97,7 +97,7 @@ export default function MentorLayout({ children }: MentorLayoutProps) {
             </div>
           </header>
 
-          <main className="p-6">{children}</main>
+          <main>{children}</main>
         </div>
       </div>
     </div>
