@@ -12,6 +12,7 @@ import {
   Palette,
   School,
   Settings,
+  Trophy,
   UserCog,
   Wrench,
 } from "lucide-react";
@@ -68,6 +69,11 @@ export const sidebarData: SidebarData = {
           title: "Quản lí câu hỏi",
           url: "/questions",
           icon: FileQuestion,
+        },
+        {
+          title: "Quản lí cuộc thi",
+          url: "/contests",
+          icon: Trophy,
         },
       ],
     },
