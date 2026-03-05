@@ -21,6 +21,7 @@ import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import { ContestListDTO, ContestStatus } from "../types/contest.type";
+import { Link } from "@tanstack/react-router";
 
 interface ContestCardProps {
   contest: ContestListDTO & {
@@ -220,10 +221,12 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
 
       <div className="mt-auto">
         {isOngoing && (
-          <Button className="w-full bg-blue-600 text-white font-bold py-5 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20">
-            <span>Vào phòng thi</span>
-            <LogIn className="w-5 h-5 ml-2" />
-          </Button>
+          <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
+            <Button className="w-full bg-blue-600 text-white font-bold py-5 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20">
+              <span>Vào phòng thi</span>
+              <LogIn className="w-5 h-5 ml-2" />
+            </Button>
+          </Link>
         )}
 
         {isUpcoming && contest.isRegistered && (

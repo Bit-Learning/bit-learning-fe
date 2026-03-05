@@ -46,6 +46,7 @@ import { Route as MentorQuestionIndexRouteImport } from './routes/mentor/questio
 import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
 import { Route as MentorMatrixIndexRouteImport } from './routes/mentor/matrix/index'
 import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
+import { Route as ContestsIdIndexRouteImport } from './routes/contests/$id/index'
 import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
 import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
 import { Route as LayoutProblemIndexRouteImport } from './routes/_layout/problem/index'
@@ -74,6 +75,9 @@ import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/c
 import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
 import { Route as GamesStudentsUserIdRouteImport } from './routes/games/students/$userId'
 import { Route as GamesIdPlayRouteImport } from './routes/games/$id.play'
+import { Route as ContestsIdSubmissionsRouteImport } from './routes/contests/$id/submissions'
+import { Route as ContestsIdProblemsRouteImport } from './routes/contests/$id/problems'
+import { Route as ContestsIdLeaderboardRouteImport } from './routes/contests/$id/leaderboard'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as AuthGithubCallbackRouteImport } from './routes/auth/github/callback'
 import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
@@ -105,6 +109,7 @@ import { Route as MentorQuestionIdEditRouteImport } from './routes/mentor/questi
 import { Route as MentorProblemIdEditRouteImport } from './routes/mentor/problem/$id.edit'
 import { Route as MentorMatrixIdGenerateRouteImport } from './routes/mentor/matrix/$id/generate'
 import { Route as MentorMatrixIdEditRouteImport } from './routes/mentor/matrix/$id/edit'
+import { Route as ContestsIdProblemsProblemIdRouteImport } from './routes/contests/$id/problems.$problemId'
 import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
 import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
 import { Route as LayoutForumPostIdRouteImport } from './routes/_layout/forum/post.$id'
@@ -295,6 +300,11 @@ const MentorDashboardIndexRoute = MentorDashboardIndexRouteImport.update({
   path: '/mentor/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContestsIdIndexRoute = ContestsIdIndexRouteImport.update({
+  id: '/contests/$id/',
+  path: '/contests/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutTemplatesIndexRoute = LayoutTemplatesIndexRouteImport.update({
   id: '/templates/',
   path: '/templates/',
@@ -436,6 +446,21 @@ const GamesIdPlayRoute = GamesIdPlayRouteImport.update({
   id: '/play',
   path: '/play',
   getParentRoute: () => GamesIdRoute,
+} as any)
+const ContestsIdSubmissionsRoute = ContestsIdSubmissionsRouteImport.update({
+  id: '/contests/$id/submissions',
+  path: '/contests/$id/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContestsIdProblemsRoute = ContestsIdProblemsRouteImport.update({
+  id: '/contests/$id/problems',
+  path: '/contests/$id/problems',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContestsIdLeaderboardRoute = ContestsIdLeaderboardRouteImport.update({
+  id: '/contests/$id/leaderboard',
+  path: '/contests/$id/leaderboard',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
   id: '/auth/google/callback',
@@ -603,6 +628,12 @@ const MentorMatrixIdEditRoute = MentorMatrixIdEditRouteImport.update({
   path: '/mentor/matrix/$id/edit',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContestsIdProblemsProblemIdRoute =
+  ContestsIdProblemsProblemIdRouteImport.update({
+    id: '/$problemId',
+    path: '/$problemId',
+    getParentRoute: () => ContestsIdProblemsRoute,
+  } as any)
 const LayoutTemplatesSlidevCreateRoute =
   LayoutTemplatesSlidevCreateRouteImport.update({
     id: '/templates/slidev/create',
@@ -691,6 +722,9 @@ export interface FileRoutesByFullPath {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
+  '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -719,6 +753,7 @@ export interface FileRoutesByFullPath {
   '/problem/': typeof LayoutProblemIndexRoute
   '/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/templates/': typeof LayoutTemplatesIndexRoute
+  '/contests/$id/': typeof ContestsIdIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
@@ -728,6 +763,7 @@ export interface FileRoutesByFullPath {
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
+  '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
   '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
@@ -793,6 +829,9 @@ export interface FileRoutesByTo {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
+  '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -821,6 +860,7 @@ export interface FileRoutesByTo {
   '/problem': typeof LayoutProblemIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
+  '/contests/$id': typeof ContestsIdIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
   '/mentor/matrix': typeof MentorMatrixIndexRoute
   '/mentor/problem': typeof MentorProblemIndexRoute
@@ -830,6 +870,7 @@ export interface FileRoutesByTo {
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
+  '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
   '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
@@ -898,6 +939,9 @@ export interface FileRoutesById {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
+  '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -926,6 +970,7 @@ export interface FileRoutesById {
   '/_layout/problem/': typeof LayoutProblemIndexRoute
   '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/_layout/templates/': typeof LayoutTemplatesIndexRoute
+  '/contests/$id/': typeof ContestsIdIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
@@ -935,6 +980,7 @@ export interface FileRoutesById {
   '/_layout/forum/post/$id': typeof LayoutForumPostIdRoute
   '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
+  '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
   '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
@@ -1002,6 +1048,9 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/contests/$id/leaderboard'
+    | '/contests/$id/problems'
+    | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
     | '/mentor/course/$id'
@@ -1030,6 +1079,7 @@ export interface FileRouteTypes {
     | '/problem/'
     | '/syllabuses/'
     | '/templates/'
+    | '/contests/$id/'
     | '/mentor/dashboard/'
     | '/mentor/matrix/'
     | '/mentor/problem/'
@@ -1039,6 +1089,7 @@ export interface FileRouteTypes {
     | '/forum/post/$id'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
+    | '/contests/$id/problems/$problemId'
     | '/mentor/matrix/$id/edit'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
@@ -1104,6 +1155,9 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/contests/$id/leaderboard'
+    | '/contests/$id/problems'
+    | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
     | '/mentor/course/$id'
@@ -1132,6 +1186,7 @@ export interface FileRouteTypes {
     | '/problem'
     | '/syllabuses'
     | '/templates'
+    | '/contests/$id'
     | '/mentor/dashboard'
     | '/mentor/matrix'
     | '/mentor/problem'
@@ -1141,6 +1196,7 @@ export interface FileRouteTypes {
     | '/forum/post/$id'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
+    | '/contests/$id/problems/$problemId'
     | '/mentor/matrix/$id/edit'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
@@ -1208,6 +1264,9 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/contests/$id/leaderboard'
+    | '/contests/$id/problems'
+    | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
     | '/mentor/course/$id'
@@ -1236,6 +1295,7 @@ export interface FileRouteTypes {
     | '/_layout/problem/'
     | '/_layout/syllabuses/'
     | '/_layout/templates/'
+    | '/contests/$id/'
     | '/mentor/dashboard/'
     | '/mentor/matrix/'
     | '/mentor/problem/'
@@ -1245,6 +1305,7 @@ export interface FileRouteTypes {
     | '/_layout/forum/post/$id'
     | '/_layout/syllabuses/$id/edit'
     | '/_layout/templates/slidev/create'
+    | '/contests/$id/problems/$problemId'
     | '/mentor/matrix/$id/edit'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
@@ -1277,6 +1338,9 @@ export interface RootRouteChildren {
   ApiAuthActivateRoute: typeof ApiAuthActivateRoute
   AuthGithubCallbackRoute: typeof AuthGithubCallbackRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
+  ContestsIdLeaderboardRoute: typeof ContestsIdLeaderboardRoute
+  ContestsIdProblemsRoute: typeof ContestsIdProblemsRouteWithChildren
+  ContestsIdSubmissionsRoute: typeof ContestsIdSubmissionsRoute
   GamesStudentsUserIdRoute: typeof GamesStudentsUserIdRoute
   MentorCourseIdRoute: typeof MentorCourseIdRoute
   MentorCourseCreateRoute: typeof MentorCourseCreateRoute
@@ -1294,6 +1358,7 @@ export interface RootRouteChildren {
   MentorQuestionMyRoute: typeof MentorQuestionMyRoute
   MentorQuestionMyRequestsRoute: typeof MentorQuestionMyRequestsRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
+  ContestsIdIndexRoute: typeof ContestsIdIndexRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
   MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
   MentorProblemIndexRoute: typeof MentorProblemIndexRoute
@@ -1566,6 +1631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contests/$id/': {
+      id: '/contests/$id/'
+      path: '/contests/$id'
+      fullPath: '/contests/$id/'
+      preLoaderRoute: typeof ContestsIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/templates/': {
       id: '/_layout/templates/'
       path: '/templates'
@@ -1761,6 +1833,27 @@ declare module '@tanstack/react-router' {
       fullPath: '/games/$id/play'
       preLoaderRoute: typeof GamesIdPlayRouteImport
       parentRoute: typeof GamesIdRoute
+    }
+    '/contests/$id/submissions': {
+      id: '/contests/$id/submissions'
+      path: '/contests/$id/submissions'
+      fullPath: '/contests/$id/submissions'
+      preLoaderRoute: typeof ContestsIdSubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contests/$id/problems': {
+      id: '/contests/$id/problems'
+      path: '/contests/$id/problems'
+      fullPath: '/contests/$id/problems'
+      preLoaderRoute: typeof ContestsIdProblemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contests/$id/leaderboard': {
+      id: '/contests/$id/leaderboard'
+      path: '/contests/$id/leaderboard'
+      fullPath: '/contests/$id/leaderboard'
+      preLoaderRoute: typeof ContestsIdLeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/auth/google/callback': {
       id: '/auth/google/callback'
@@ -1979,6 +2072,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorMatrixIdEditRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contests/$id/problems/$problemId': {
+      id: '/contests/$id/problems/$problemId'
+      path: '/$problemId'
+      fullPath: '/contests/$id/problems/$problemId'
+      preLoaderRoute: typeof ContestsIdProblemsProblemIdRouteImport
+      parentRoute: typeof ContestsIdProblemsRoute
+    }
     '/_layout/templates/slidev/create': {
       id: '/_layout/templates/slidev/create'
       path: '/templates/slidev/create'
@@ -2162,6 +2262,17 @@ const GamesIdRouteChildren: GamesIdRouteChildren = {
 const GamesIdRouteWithChildren =
   GamesIdRoute._addFileChildren(GamesIdRouteChildren)
 
+interface ContestsIdProblemsRouteChildren {
+  ContestsIdProblemsProblemIdRoute: typeof ContestsIdProblemsProblemIdRoute
+}
+
+const ContestsIdProblemsRouteChildren: ContestsIdProblemsRouteChildren = {
+  ContestsIdProblemsProblemIdRoute: ContestsIdProblemsProblemIdRoute,
+}
+
+const ContestsIdProblemsRouteWithChildren =
+  ContestsIdProblemsRoute._addFileChildren(ContestsIdProblemsRouteChildren)
+
 interface MentorProblemIdRouteChildren {
   MentorProblemIdEditRoute: typeof MentorProblemIdEditRoute
 }
@@ -2195,6 +2306,9 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthActivateRoute: ApiAuthActivateRoute,
   AuthGithubCallbackRoute: AuthGithubCallbackRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
+  ContestsIdLeaderboardRoute: ContestsIdLeaderboardRoute,
+  ContestsIdProblemsRoute: ContestsIdProblemsRouteWithChildren,
+  ContestsIdSubmissionsRoute: ContestsIdSubmissionsRoute,
   GamesStudentsUserIdRoute: GamesStudentsUserIdRoute,
   MentorCourseIdRoute: MentorCourseIdRoute,
   MentorCourseCreateRoute: MentorCourseCreateRoute,
@@ -2213,6 +2327,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentorQuestionMyRoute: MentorQuestionMyRoute,
   MentorQuestionMyRequestsRoute: MentorQuestionMyRequestsRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
+  ContestsIdIndexRoute: ContestsIdIndexRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
   MentorMatrixIndexRoute: MentorMatrixIndexRoute,
   MentorProblemIndexRoute: MentorProblemIndexRoute,
