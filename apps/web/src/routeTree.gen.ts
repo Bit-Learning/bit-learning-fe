@@ -53,6 +53,7 @@ import { Route as LayoutNewsIndexRouteImport } from './routes/_layout/news/index
 import { Route as LayoutForumIndexRouteImport } from './routes/_layout/forum/index'
 import { Route as LayoutDashboardIndexRouteImport } from './routes/_layout/dashboard/index'
 import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
+import { Route as LayoutContestsIndexRouteImport } from './routes/_layout/contests/index'
 import { Route as LayoutCheckoutIndexRouteImport } from './routes/_layout/checkout/index'
 import { Route as HeaderOnlyProfileIndexRouteImport } from './routes/_headerOnly/profile/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
@@ -92,6 +93,7 @@ import { Route as LayoutCoursesMobileDevelopmentRouteImport } from './routes/_la
 import { Route as LayoutCoursesDataScienceRouteImport } from './routes/_layout/courses/data-science'
 import { Route as LayoutCoursesBackendDevelopmentRouteImport } from './routes/_layout/courses/backend-development'
 import { Route as LayoutCoursesIdRouteImport } from './routes/_layout/courses/$id'
+import { Route as LayoutContestsMyRouteImport } from './routes/_layout/contests/my'
 import { Route as HeaderOnlyProfilePasswordRouteImport } from './routes/_headerOnly/profile/password'
 import { Route as HeaderOnlyProfileNotificationsRouteImport } from './routes/_headerOnly/profile/notifications'
 import { Route as HeaderOnlyProfileHistoryRouteImport } from './routes/_headerOnly/profile/history'
@@ -328,6 +330,11 @@ const LayoutCoursesIndexRoute = LayoutCoursesIndexRouteImport.update({
   path: '/courses/',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutContestsIndexRoute = LayoutContestsIndexRouteImport.update({
+  id: '/contests/',
+  path: '/contests/',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const LayoutCheckoutIndexRoute = LayoutCheckoutIndexRouteImport.update({
   id: '/checkout/',
   path: '/checkout/',
@@ -532,6 +539,11 @@ const LayoutCoursesIdRoute = LayoutCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutContestsMyRoute = LayoutContestsMyRouteImport.update({
+  id: '/contests/my',
+  path: '/contests/my',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const HeaderOnlyProfilePasswordRoute =
   HeaderOnlyProfilePasswordRouteImport.update({
     id: '/profile/password',
@@ -659,6 +671,7 @@ export interface FileRoutesByFullPath {
   '/profile/history': typeof HeaderOnlyProfileHistoryRoute
   '/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
   '/profile/password': typeof HeaderOnlyProfilePasswordRoute
+  '/contests/my': typeof LayoutContestsMyRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -698,6 +711,7 @@ export interface FileRoutesByFullPath {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile/': typeof HeaderOnlyProfileIndexRoute
   '/checkout/': typeof LayoutCheckoutIndexRoute
+  '/contests/': typeof LayoutContestsIndexRoute
   '/courses/': typeof LayoutCoursesIndexRoute
   '/dashboard/': typeof LayoutDashboardIndexRoute
   '/forum/': typeof LayoutForumIndexRoute
@@ -759,6 +773,7 @@ export interface FileRoutesByTo {
   '/profile/history': typeof HeaderOnlyProfileHistoryRoute
   '/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
   '/profile/password': typeof HeaderOnlyProfilePasswordRoute
+  '/contests/my': typeof LayoutContestsMyRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -798,6 +813,7 @@ export interface FileRoutesByTo {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile': typeof HeaderOnlyProfileIndexRoute
   '/checkout': typeof LayoutCheckoutIndexRoute
+  '/contests': typeof LayoutContestsIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
   '/dashboard': typeof LayoutDashboardIndexRoute
   '/forum': typeof LayoutForumIndexRoute
@@ -862,6 +878,7 @@ export interface FileRoutesById {
   '/_headerOnly/profile/history': typeof HeaderOnlyProfileHistoryRoute
   '/_headerOnly/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
   '/_headerOnly/profile/password': typeof HeaderOnlyProfilePasswordRoute
+  '/_layout/contests/my': typeof LayoutContestsMyRoute
   '/_layout/courses/$id': typeof LayoutCoursesIdRoute
   '/_layout/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -901,6 +918,7 @@ export interface FileRoutesById {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_headerOnly/profile/': typeof HeaderOnlyProfileIndexRoute
   '/_layout/checkout/': typeof LayoutCheckoutIndexRoute
+  '/_layout/contests/': typeof LayoutContestsIndexRoute
   '/_layout/courses/': typeof LayoutCoursesIndexRoute
   '/_layout/dashboard/': typeof LayoutDashboardIndexRoute
   '/_layout/forum/': typeof LayoutForumIndexRoute
@@ -964,6 +982,7 @@ export interface FileRouteTypes {
     | '/profile/history'
     | '/profile/notifications'
     | '/profile/password'
+    | '/contests/my'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -1003,6 +1022,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/profile/'
     | '/checkout/'
+    | '/contests/'
     | '/courses/'
     | '/dashboard/'
     | '/forum/'
@@ -1064,6 +1084,7 @@ export interface FileRouteTypes {
     | '/profile/history'
     | '/profile/notifications'
     | '/profile/password'
+    | '/contests/my'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -1103,6 +1124,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/profile'
     | '/checkout'
+    | '/contests'
     | '/courses'
     | '/dashboard'
     | '/forum'
@@ -1166,6 +1188,7 @@ export interface FileRouteTypes {
     | '/_headerOnly/profile/history'
     | '/_headerOnly/profile/notifications'
     | '/_headerOnly/profile/password'
+    | '/_layout/contests/my'
     | '/_layout/courses/$id'
     | '/_layout/courses/backend-development'
     | '/_layout/courses/data-science'
@@ -1205,6 +1228,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/_headerOnly/profile/'
     | '/_layout/checkout/'
+    | '/_layout/contests/'
     | '/_layout/courses/'
     | '/_layout/dashboard/'
     | '/_layout/forum/'
@@ -1591,6 +1615,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCoursesIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/contests/': {
+      id: '/_layout/contests/'
+      path: '/contests'
+      fullPath: '/contests/'
+      preLoaderRoute: typeof LayoutContestsIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_layout/checkout/': {
       id: '/_layout/checkout/'
       path: '/checkout'
@@ -1864,6 +1895,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCoursesIdRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/contests/my': {
+      id: '/_layout/contests/my'
+      path: '/contests/my'
+      fullPath: '/contests/my'
+      preLoaderRoute: typeof LayoutContestsMyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_headerOnly/profile/password': {
       id: '/_headerOnly/profile/password'
       path: '/profile/password'
@@ -2022,6 +2060,7 @@ interface LayoutRouteChildren {
   LayoutUploadRoute: typeof LayoutUploadRoute
   LayoutWebDesignRoute: typeof LayoutWebDesignRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutContestsMyRoute: typeof LayoutContestsMyRoute
   LayoutCoursesIdRoute: typeof LayoutCoursesIdRoute
   LayoutCoursesBackendDevelopmentRoute: typeof LayoutCoursesBackendDevelopmentRoute
   LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
@@ -2039,6 +2078,7 @@ interface LayoutRouteChildren {
   LayoutTemplatesDashboardRoute: typeof LayoutTemplatesDashboardRoute
   LayoutTemplatesTemplatePreviewRoute: typeof LayoutTemplatesTemplatePreviewRoute
   LayoutCheckoutIndexRoute: typeof LayoutCheckoutIndexRoute
+  LayoutContestsIndexRoute: typeof LayoutContestsIndexRoute
   LayoutCoursesIndexRoute: typeof LayoutCoursesIndexRoute
   LayoutDashboardIndexRoute: typeof LayoutDashboardIndexRoute
   LayoutForumIndexRoute: typeof LayoutForumIndexRoute
@@ -2072,6 +2112,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutUploadRoute: LayoutUploadRoute,
   LayoutWebDesignRoute: LayoutWebDesignRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutContestsMyRoute: LayoutContestsMyRoute,
   LayoutCoursesIdRoute: LayoutCoursesIdRoute,
   LayoutCoursesBackendDevelopmentRoute: LayoutCoursesBackendDevelopmentRoute,
   LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
@@ -2089,6 +2130,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutTemplatesDashboardRoute: LayoutTemplatesDashboardRoute,
   LayoutTemplatesTemplatePreviewRoute: LayoutTemplatesTemplatePreviewRoute,
   LayoutCheckoutIndexRoute: LayoutCheckoutIndexRoute,
+  LayoutContestsIndexRoute: LayoutContestsIndexRoute,
   LayoutCoursesIndexRoute: LayoutCoursesIndexRoute,
   LayoutDashboardIndexRoute: LayoutDashboardIndexRoute,
   LayoutForumIndexRoute: LayoutForumIndexRoute,
