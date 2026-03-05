@@ -46,6 +46,7 @@ import { Route as MentorQuestionIndexRouteImport } from './routes/mentor/questio
 import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
 import { Route as MentorMatrixIndexRouteImport } from './routes/mentor/matrix/index'
 import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
+import { Route as ContestsIdIndexRouteImport } from './routes/contests/$id/index'
 import { Route as LayoutTemplatesIndexRouteImport } from './routes/_layout/templates/index'
 import { Route as LayoutSyllabusesIndexRouteImport } from './routes/_layout/syllabuses/index'
 import { Route as LayoutProblemIndexRouteImport } from './routes/_layout/problem/index'
@@ -53,6 +54,7 @@ import { Route as LayoutNewsIndexRouteImport } from './routes/_layout/news/index
 import { Route as LayoutForumIndexRouteImport } from './routes/_layout/forum/index'
 import { Route as LayoutDashboardIndexRouteImport } from './routes/_layout/dashboard/index'
 import { Route as LayoutCoursesIndexRouteImport } from './routes/_layout/courses/index'
+import { Route as LayoutContestsIndexRouteImport } from './routes/_layout/contests/index'
 import { Route as LayoutCheckoutIndexRouteImport } from './routes/_layout/checkout/index'
 import { Route as HeaderOnlyProfileIndexRouteImport } from './routes/_headerOnly/profile/index'
 import { Route as MindmapsUserIdCodeRouteImport } from './routes/mindmaps/$userId/$code'
@@ -73,6 +75,10 @@ import { Route as MentorCourseCreateRouteImport } from './routes/mentor/course/c
 import { Route as MentorCourseIdRouteImport } from './routes/mentor/course/$id'
 import { Route as GamesStudentsUserIdRouteImport } from './routes/games/students/$userId'
 import { Route as GamesIdPlayRouteImport } from './routes/games/$id.play'
+import { Route as ContestsIdSubmissionsRouteImport } from './routes/contests/$id/submissions'
+import { Route as ContestsIdQaRouteImport } from './routes/contests/$id/qa'
+import { Route as ContestsIdProblemsRouteImport } from './routes/contests/$id/problems'
+import { Route as ContestsIdLeaderboardRouteImport } from './routes/contests/$id/leaderboard'
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as AuthGithubCallbackRouteImport } from './routes/auth/github/callback'
 import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
@@ -92,6 +98,7 @@ import { Route as LayoutCoursesMobileDevelopmentRouteImport } from './routes/_la
 import { Route as LayoutCoursesDataScienceRouteImport } from './routes/_layout/courses/data-science'
 import { Route as LayoutCoursesBackendDevelopmentRouteImport } from './routes/_layout/courses/backend-development'
 import { Route as LayoutCoursesIdRouteImport } from './routes/_layout/courses/$id'
+import { Route as LayoutContestsMyRouteImport } from './routes/_layout/contests/my'
 import { Route as HeaderOnlyProfilePasswordRouteImport } from './routes/_headerOnly/profile/password'
 import { Route as HeaderOnlyProfileNotificationsRouteImport } from './routes/_headerOnly/profile/notifications'
 import { Route as HeaderOnlyProfileHistoryRouteImport } from './routes/_headerOnly/profile/history'
@@ -102,7 +109,7 @@ import { Route as LayoutSyllabusesIdIndexRouteImport } from './routes/_layout/sy
 import { Route as MentorQuestionIdEditRouteImport } from './routes/mentor/question/$id/edit'
 import { Route as MentorProblemIdEditRouteImport } from './routes/mentor/problem/$id.edit'
 import { Route as MentorMatrixIdGenerateRouteImport } from './routes/mentor/matrix/$id/generate'
-import { Route as MentorMatrixIdEditRouteImport } from './routes/mentor/matrix/$id/edit'
+import { Route as ContestsIdProblemsProblemIdRouteImport } from './routes/contests/$id/problems.$problemId'
 import { Route as LayoutTemplatesSlidevCreateRouteImport } from './routes/_layout/templates/slidev/create'
 import { Route as LayoutSyllabusesIdEditRouteImport } from './routes/_layout/syllabuses/$id/edit'
 import { Route as LayoutForumPostIdRouteImport } from './routes/_layout/forum/post.$id'
@@ -293,6 +300,11 @@ const MentorDashboardIndexRoute = MentorDashboardIndexRouteImport.update({
   path: '/mentor/dashboard/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ContestsIdIndexRoute = ContestsIdIndexRouteImport.update({
+  id: '/contests/$id/',
+  path: '/contests/$id/',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const LayoutTemplatesIndexRoute = LayoutTemplatesIndexRouteImport.update({
   id: '/templates/',
   path: '/templates/',
@@ -326,6 +338,11 @@ const LayoutDashboardIndexRoute = LayoutDashboardIndexRouteImport.update({
 const LayoutCoursesIndexRoute = LayoutCoursesIndexRouteImport.update({
   id: '/courses/',
   path: '/courses/',
+  getParentRoute: () => LayoutRoute,
+} as any)
+const LayoutContestsIndexRoute = LayoutContestsIndexRouteImport.update({
+  id: '/contests/',
+  path: '/contests/',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutCheckoutIndexRoute = LayoutCheckoutIndexRouteImport.update({
@@ -430,6 +447,26 @@ const GamesIdPlayRoute = GamesIdPlayRouteImport.update({
   path: '/play',
   getParentRoute: () => GamesIdRoute,
 } as any)
+const ContestsIdSubmissionsRoute = ContestsIdSubmissionsRouteImport.update({
+  id: '/contests/$id/submissions',
+  path: '/contests/$id/submissions',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContestsIdQaRoute = ContestsIdQaRouteImport.update({
+  id: '/contests/$id/qa',
+  path: '/contests/$id/qa',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContestsIdProblemsRoute = ContestsIdProblemsRouteImport.update({
+  id: '/contests/$id/problems',
+  path: '/contests/$id/problems',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ContestsIdLeaderboardRoute = ContestsIdLeaderboardRouteImport.update({
+  id: '/contests/$id/leaderboard',
+  path: '/contests/$id/leaderboard',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const AuthGoogleCallbackRoute = AuthGoogleCallbackRouteImport.update({
   id: '/auth/google/callback',
   path: '/auth/google/callback',
@@ -532,6 +569,11 @@ const LayoutCoursesIdRoute = LayoutCoursesIdRouteImport.update({
   path: '/courses/$id',
   getParentRoute: () => LayoutRoute,
 } as any)
+const LayoutContestsMyRoute = LayoutContestsMyRouteImport.update({
+  id: '/contests/my',
+  path: '/contests/my',
+  getParentRoute: () => LayoutRoute,
+} as any)
 const HeaderOnlyProfilePasswordRoute =
   HeaderOnlyProfilePasswordRouteImport.update({
     id: '/profile/password',
@@ -586,11 +628,12 @@ const MentorMatrixIdGenerateRoute = MentorMatrixIdGenerateRouteImport.update({
   path: '/mentor/matrix/$id/generate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const MentorMatrixIdEditRoute = MentorMatrixIdEditRouteImport.update({
-  id: '/mentor/matrix/$id/edit',
-  path: '/mentor/matrix/$id/edit',
-  getParentRoute: () => rootRouteImport,
-} as any)
+const ContestsIdProblemsProblemIdRoute =
+  ContestsIdProblemsProblemIdRouteImport.update({
+    id: '/$problemId',
+    path: '/$problemId',
+    getParentRoute: () => ContestsIdProblemsRoute,
+  } as any)
 const LayoutTemplatesSlidevCreateRoute =
   LayoutTemplatesSlidevCreateRouteImport.update({
     id: '/templates/slidev/create',
@@ -659,6 +702,7 @@ export interface FileRoutesByFullPath {
   '/profile/history': typeof HeaderOnlyProfileHistoryRoute
   '/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
   '/profile/password': typeof HeaderOnlyProfilePasswordRoute
+  '/contests/my': typeof LayoutContestsMyRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -678,6 +722,10 @@ export interface FileRoutesByFullPath {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
+  '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/qa': typeof ContestsIdQaRoute
+  '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -698,6 +746,7 @@ export interface FileRoutesByFullPath {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile/': typeof HeaderOnlyProfileIndexRoute
   '/checkout/': typeof LayoutCheckoutIndexRoute
+  '/contests/': typeof LayoutContestsIndexRoute
   '/courses/': typeof LayoutCoursesIndexRoute
   '/dashboard/': typeof LayoutDashboardIndexRoute
   '/forum/': typeof LayoutForumIndexRoute
@@ -705,6 +754,7 @@ export interface FileRoutesByFullPath {
   '/problem/': typeof LayoutProblemIndexRoute
   '/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/templates/': typeof LayoutTemplatesIndexRoute
+  '/contests/$id/': typeof ContestsIdIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
@@ -714,7 +764,7 @@ export interface FileRoutesByFullPath {
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
+  '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
@@ -759,6 +809,7 @@ export interface FileRoutesByTo {
   '/profile/history': typeof HeaderOnlyProfileHistoryRoute
   '/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
   '/profile/password': typeof HeaderOnlyProfilePasswordRoute
+  '/contests/my': typeof LayoutContestsMyRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
   '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -778,6 +829,10 @@ export interface FileRoutesByTo {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
+  '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/qa': typeof ContestsIdQaRoute
+  '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -798,6 +853,7 @@ export interface FileRoutesByTo {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/profile': typeof HeaderOnlyProfileIndexRoute
   '/checkout': typeof LayoutCheckoutIndexRoute
+  '/contests': typeof LayoutContestsIndexRoute
   '/courses': typeof LayoutCoursesIndexRoute
   '/dashboard': typeof LayoutDashboardIndexRoute
   '/forum': typeof LayoutForumIndexRoute
@@ -805,6 +861,7 @@ export interface FileRoutesByTo {
   '/problem': typeof LayoutProblemIndexRoute
   '/syllabuses': typeof LayoutSyllabusesIndexRoute
   '/templates': typeof LayoutTemplatesIndexRoute
+  '/contests/$id': typeof ContestsIdIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
   '/mentor/matrix': typeof MentorMatrixIndexRoute
   '/mentor/problem': typeof MentorProblemIndexRoute
@@ -814,7 +871,7 @@ export interface FileRoutesByTo {
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
+  '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
@@ -862,6 +919,7 @@ export interface FileRoutesById {
   '/_headerOnly/profile/history': typeof HeaderOnlyProfileHistoryRoute
   '/_headerOnly/profile/notifications': typeof HeaderOnlyProfileNotificationsRoute
   '/_headerOnly/profile/password': typeof HeaderOnlyProfilePasswordRoute
+  '/_layout/contests/my': typeof LayoutContestsMyRoute
   '/_layout/courses/$id': typeof LayoutCoursesIdRoute
   '/_layout/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
@@ -881,6 +939,10 @@ export interface FileRoutesById {
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
+  '/contests/$id/leaderboard': typeof ContestsIdLeaderboardRoute
+  '/contests/$id/problems': typeof ContestsIdProblemsRouteWithChildren
+  '/contests/$id/qa': typeof ContestsIdQaRoute
+  '/contests/$id/submissions': typeof ContestsIdSubmissionsRoute
   '/games/$id/play': typeof GamesIdPlayRoute
   '/games/students/$userId': typeof GamesStudentsUserIdRoute
   '/mentor/course/$id': typeof MentorCourseIdRoute
@@ -901,6 +963,7 @@ export interface FileRoutesById {
   '/mindmaps/$userId/$code': typeof MindmapsUserIdCodeRoute
   '/_headerOnly/profile/': typeof HeaderOnlyProfileIndexRoute
   '/_layout/checkout/': typeof LayoutCheckoutIndexRoute
+  '/_layout/contests/': typeof LayoutContestsIndexRoute
   '/_layout/courses/': typeof LayoutCoursesIndexRoute
   '/_layout/dashboard/': typeof LayoutDashboardIndexRoute
   '/_layout/forum/': typeof LayoutForumIndexRoute
@@ -908,6 +971,7 @@ export interface FileRoutesById {
   '/_layout/problem/': typeof LayoutProblemIndexRoute
   '/_layout/syllabuses/': typeof LayoutSyllabusesIndexRoute
   '/_layout/templates/': typeof LayoutTemplatesIndexRoute
+  '/contests/$id/': typeof ContestsIdIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
@@ -917,7 +981,7 @@ export interface FileRoutesById {
   '/_layout/forum/post/$id': typeof LayoutForumPostIdRoute
   '/_layout/syllabuses/$id/edit': typeof LayoutSyllabusesIdEditRoute
   '/_layout/templates/slidev/create': typeof LayoutTemplatesSlidevCreateRoute
-  '/mentor/matrix/$id/edit': typeof MentorMatrixIdEditRoute
+  '/contests/$id/problems/$problemId': typeof ContestsIdProblemsProblemIdRoute
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
@@ -964,6 +1028,7 @@ export interface FileRouteTypes {
     | '/profile/history'
     | '/profile/notifications'
     | '/profile/password'
+    | '/contests/my'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -983,6 +1048,10 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/contests/$id/leaderboard'
+    | '/contests/$id/problems'
+    | '/contests/$id/qa'
+    | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
     | '/mentor/course/$id'
@@ -1003,6 +1072,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/profile/'
     | '/checkout/'
+    | '/contests/'
     | '/courses/'
     | '/dashboard/'
     | '/forum/'
@@ -1010,6 +1080,7 @@ export interface FileRouteTypes {
     | '/problem/'
     | '/syllabuses/'
     | '/templates/'
+    | '/contests/$id/'
     | '/mentor/dashboard/'
     | '/mentor/matrix/'
     | '/mentor/problem/'
@@ -1019,7 +1090,7 @@ export interface FileRouteTypes {
     | '/forum/post/$id'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
-    | '/mentor/matrix/$id/edit'
+    | '/contests/$id/problems/$problemId'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
@@ -1064,6 +1135,7 @@ export interface FileRouteTypes {
     | '/profile/history'
     | '/profile/notifications'
     | '/profile/password'
+    | '/contests/my'
     | '/courses/$id'
     | '/courses/backend-development'
     | '/courses/data-science'
@@ -1083,6 +1155,10 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/contests/$id/leaderboard'
+    | '/contests/$id/problems'
+    | '/contests/$id/qa'
+    | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
     | '/mentor/course/$id'
@@ -1103,6 +1179,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/profile'
     | '/checkout'
+    | '/contests'
     | '/courses'
     | '/dashboard'
     | '/forum'
@@ -1110,6 +1187,7 @@ export interface FileRouteTypes {
     | '/problem'
     | '/syllabuses'
     | '/templates'
+    | '/contests/$id'
     | '/mentor/dashboard'
     | '/mentor/matrix'
     | '/mentor/problem'
@@ -1119,7 +1197,7 @@ export interface FileRouteTypes {
     | '/forum/post/$id'
     | '/syllabuses/$id/edit'
     | '/templates/slidev/create'
-    | '/mentor/matrix/$id/edit'
+    | '/contests/$id/problems/$problemId'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
@@ -1166,6 +1244,7 @@ export interface FileRouteTypes {
     | '/_headerOnly/profile/history'
     | '/_headerOnly/profile/notifications'
     | '/_headerOnly/profile/password'
+    | '/_layout/contests/my'
     | '/_layout/courses/$id'
     | '/_layout/courses/backend-development'
     | '/_layout/courses/data-science'
@@ -1185,6 +1264,10 @@ export interface FileRouteTypes {
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
+    | '/contests/$id/leaderboard'
+    | '/contests/$id/problems'
+    | '/contests/$id/qa'
+    | '/contests/$id/submissions'
     | '/games/$id/play'
     | '/games/students/$userId'
     | '/mentor/course/$id'
@@ -1205,6 +1288,7 @@ export interface FileRouteTypes {
     | '/mindmaps/$userId/$code'
     | '/_headerOnly/profile/'
     | '/_layout/checkout/'
+    | '/_layout/contests/'
     | '/_layout/courses/'
     | '/_layout/dashboard/'
     | '/_layout/forum/'
@@ -1212,6 +1296,7 @@ export interface FileRouteTypes {
     | '/_layout/problem/'
     | '/_layout/syllabuses/'
     | '/_layout/templates/'
+    | '/contests/$id/'
     | '/mentor/dashboard/'
     | '/mentor/matrix/'
     | '/mentor/problem/'
@@ -1221,7 +1306,7 @@ export interface FileRouteTypes {
     | '/_layout/forum/post/$id'
     | '/_layout/syllabuses/$id/edit'
     | '/_layout/templates/slidev/create'
-    | '/mentor/matrix/$id/edit'
+    | '/contests/$id/problems/$problemId'
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
@@ -1253,6 +1338,10 @@ export interface RootRouteChildren {
   ApiAuthActivateRoute: typeof ApiAuthActivateRoute
   AuthGithubCallbackRoute: typeof AuthGithubCallbackRoute
   AuthGoogleCallbackRoute: typeof AuthGoogleCallbackRoute
+  ContestsIdLeaderboardRoute: typeof ContestsIdLeaderboardRoute
+  ContestsIdProblemsRoute: typeof ContestsIdProblemsRouteWithChildren
+  ContestsIdQaRoute: typeof ContestsIdQaRoute
+  ContestsIdSubmissionsRoute: typeof ContestsIdSubmissionsRoute
   GamesStudentsUserIdRoute: typeof GamesStudentsUserIdRoute
   MentorCourseIdRoute: typeof MentorCourseIdRoute
   MentorCourseCreateRoute: typeof MentorCourseCreateRoute
@@ -1270,11 +1359,11 @@ export interface RootRouteChildren {
   MentorQuestionMyRoute: typeof MentorQuestionMyRoute
   MentorQuestionMyRequestsRoute: typeof MentorQuestionMyRequestsRoute
   MindmapsUserIdCodeRoute: typeof MindmapsUserIdCodeRoute
+  ContestsIdIndexRoute: typeof ContestsIdIndexRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
   MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
   MentorProblemIndexRoute: typeof MentorProblemIndexRoute
   MentorQuestionIndexRoute: typeof MentorQuestionIndexRoute
-  MentorMatrixIdEditRoute: typeof MentorMatrixIdEditRoute
   MentorMatrixIdGenerateRoute: typeof MentorMatrixIdGenerateRoute
   MentorQuestionIdEditRoute: typeof MentorQuestionIdEditRoute
   MentorMatrixIdIndexRoute: typeof MentorMatrixIdIndexRoute
@@ -1542,6 +1631,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorDashboardIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/contests/$id/': {
+      id: '/contests/$id/'
+      path: '/contests/$id'
+      fullPath: '/contests/$id/'
+      preLoaderRoute: typeof ContestsIdIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/_layout/templates/': {
       id: '/_layout/templates/'
       path: '/templates'
@@ -1589,6 +1685,13 @@ declare module '@tanstack/react-router' {
       path: '/courses'
       fullPath: '/courses/'
       preLoaderRoute: typeof LayoutCoursesIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/contests/': {
+      id: '/_layout/contests/'
+      path: '/contests'
+      fullPath: '/contests/'
+      preLoaderRoute: typeof LayoutContestsIndexRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/checkout/': {
@@ -1731,6 +1834,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesIdPlayRouteImport
       parentRoute: typeof GamesIdRoute
     }
+    '/contests/$id/submissions': {
+      id: '/contests/$id/submissions'
+      path: '/contests/$id/submissions'
+      fullPath: '/contests/$id/submissions'
+      preLoaderRoute: typeof ContestsIdSubmissionsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contests/$id/qa': {
+      id: '/contests/$id/qa'
+      path: '/contests/$id/qa'
+      fullPath: '/contests/$id/qa'
+      preLoaderRoute: typeof ContestsIdQaRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contests/$id/problems': {
+      id: '/contests/$id/problems'
+      path: '/contests/$id/problems'
+      fullPath: '/contests/$id/problems'
+      preLoaderRoute: typeof ContestsIdProblemsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/contests/$id/leaderboard': {
+      id: '/contests/$id/leaderboard'
+      path: '/contests/$id/leaderboard'
+      fullPath: '/contests/$id/leaderboard'
+      preLoaderRoute: typeof ContestsIdLeaderboardRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/auth/google/callback': {
       id: '/auth/google/callback'
       path: '/auth/google/callback'
@@ -1864,6 +1995,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutCoursesIdRouteImport
       parentRoute: typeof LayoutRoute
     }
+    '/_layout/contests/my': {
+      id: '/_layout/contests/my'
+      path: '/contests/my'
+      fullPath: '/contests/my'
+      preLoaderRoute: typeof LayoutContestsMyRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/_headerOnly/profile/password': {
       id: '/_headerOnly/profile/password'
       path: '/profile/password'
@@ -1934,12 +2072,12 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorMatrixIdGenerateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/mentor/matrix/$id/edit': {
-      id: '/mentor/matrix/$id/edit'
-      path: '/mentor/matrix/$id/edit'
-      fullPath: '/mentor/matrix/$id/edit'
-      preLoaderRoute: typeof MentorMatrixIdEditRouteImport
-      parentRoute: typeof rootRouteImport
+    '/contests/$id/problems/$problemId': {
+      id: '/contests/$id/problems/$problemId'
+      path: '/$problemId'
+      fullPath: '/contests/$id/problems/$problemId'
+      preLoaderRoute: typeof ContestsIdProblemsProblemIdRouteImport
+      parentRoute: typeof ContestsIdProblemsRoute
     }
     '/_layout/templates/slidev/create': {
       id: '/_layout/templates/slidev/create'
@@ -2022,6 +2160,7 @@ interface LayoutRouteChildren {
   LayoutUploadRoute: typeof LayoutUploadRoute
   LayoutWebDesignRoute: typeof LayoutWebDesignRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
+  LayoutContestsMyRoute: typeof LayoutContestsMyRoute
   LayoutCoursesIdRoute: typeof LayoutCoursesIdRoute
   LayoutCoursesBackendDevelopmentRoute: typeof LayoutCoursesBackendDevelopmentRoute
   LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
@@ -2039,6 +2178,7 @@ interface LayoutRouteChildren {
   LayoutTemplatesDashboardRoute: typeof LayoutTemplatesDashboardRoute
   LayoutTemplatesTemplatePreviewRoute: typeof LayoutTemplatesTemplatePreviewRoute
   LayoutCheckoutIndexRoute: typeof LayoutCheckoutIndexRoute
+  LayoutContestsIndexRoute: typeof LayoutContestsIndexRoute
   LayoutCoursesIndexRoute: typeof LayoutCoursesIndexRoute
   LayoutDashboardIndexRoute: typeof LayoutDashboardIndexRoute
   LayoutForumIndexRoute: typeof LayoutForumIndexRoute
@@ -2072,6 +2212,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutUploadRoute: LayoutUploadRoute,
   LayoutWebDesignRoute: LayoutWebDesignRoute,
   LayoutIndexRoute: LayoutIndexRoute,
+  LayoutContestsMyRoute: LayoutContestsMyRoute,
   LayoutCoursesIdRoute: LayoutCoursesIdRoute,
   LayoutCoursesBackendDevelopmentRoute: LayoutCoursesBackendDevelopmentRoute,
   LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
@@ -2089,6 +2230,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutTemplatesDashboardRoute: LayoutTemplatesDashboardRoute,
   LayoutTemplatesTemplatePreviewRoute: LayoutTemplatesTemplatePreviewRoute,
   LayoutCheckoutIndexRoute: LayoutCheckoutIndexRoute,
+  LayoutContestsIndexRoute: LayoutContestsIndexRoute,
   LayoutCoursesIndexRoute: LayoutCoursesIndexRoute,
   LayoutDashboardIndexRoute: LayoutDashboardIndexRoute,
   LayoutForumIndexRoute: LayoutForumIndexRoute,
@@ -2119,6 +2261,17 @@ const GamesIdRouteChildren: GamesIdRouteChildren = {
 
 const GamesIdRouteWithChildren =
   GamesIdRoute._addFileChildren(GamesIdRouteChildren)
+
+interface ContestsIdProblemsRouteChildren {
+  ContestsIdProblemsProblemIdRoute: typeof ContestsIdProblemsProblemIdRoute
+}
+
+const ContestsIdProblemsRouteChildren: ContestsIdProblemsRouteChildren = {
+  ContestsIdProblemsProblemIdRoute: ContestsIdProblemsProblemIdRoute,
+}
+
+const ContestsIdProblemsRouteWithChildren =
+  ContestsIdProblemsRoute._addFileChildren(ContestsIdProblemsRouteChildren)
 
 interface MentorProblemIdRouteChildren {
   MentorProblemIdEditRoute: typeof MentorProblemIdEditRoute
@@ -2153,6 +2306,10 @@ const rootRouteChildren: RootRouteChildren = {
   ApiAuthActivateRoute: ApiAuthActivateRoute,
   AuthGithubCallbackRoute: AuthGithubCallbackRoute,
   AuthGoogleCallbackRoute: AuthGoogleCallbackRoute,
+  ContestsIdLeaderboardRoute: ContestsIdLeaderboardRoute,
+  ContestsIdProblemsRoute: ContestsIdProblemsRouteWithChildren,
+  ContestsIdQaRoute: ContestsIdQaRoute,
+  ContestsIdSubmissionsRoute: ContestsIdSubmissionsRoute,
   GamesStudentsUserIdRoute: GamesStudentsUserIdRoute,
   MentorCourseIdRoute: MentorCourseIdRoute,
   MentorCourseCreateRoute: MentorCourseCreateRoute,
@@ -2171,11 +2328,11 @@ const rootRouteChildren: RootRouteChildren = {
   MentorQuestionMyRoute: MentorQuestionMyRoute,
   MentorQuestionMyRequestsRoute: MentorQuestionMyRequestsRoute,
   MindmapsUserIdCodeRoute: MindmapsUserIdCodeRoute,
+  ContestsIdIndexRoute: ContestsIdIndexRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
   MentorMatrixIndexRoute: MentorMatrixIndexRoute,
   MentorProblemIndexRoute: MentorProblemIndexRoute,
   MentorQuestionIndexRoute: MentorQuestionIndexRoute,
-  MentorMatrixIdEditRoute: MentorMatrixIdEditRoute,
   MentorMatrixIdGenerateRoute: MentorMatrixIdGenerateRoute,
   MentorQuestionIdEditRoute: MentorQuestionIdEditRoute,
   MentorMatrixIdIndexRoute: MentorMatrixIdIndexRoute,

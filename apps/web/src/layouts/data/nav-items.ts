@@ -8,7 +8,7 @@ export const navItems = [
     items: [
       {
         title: "Bài tập thực hành",
-        to: "/problems",
+        to: "/problem",
         description: "Luyện tập và giải các bài tập theo từng chủ đề.",
       },
       {

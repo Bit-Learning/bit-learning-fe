@@ -9,6 +9,7 @@ import app from "../../feature/app/stores";
 import auth from "../../feature/auth/store";
 import cart from "@/feature/order/stores/cart.store";
 import forum from "@/feature/forum/stores/forum.store";
+import contest from "@/feature/contest/stores/contest.store";
 
 const combineReducer = combineReducers({
   app: app,
@@ -20,6 +21,7 @@ const combineReducer = combineReducers({
   learning: learning,
   cart: cart,
   forum: forum,
+  contest: contest,
 });
 
 export type RootState = ReturnType<typeof combineReducer>;
