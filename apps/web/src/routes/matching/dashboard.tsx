@@ -107,7 +107,7 @@ export default function DashboardPage() {
 						</div>
 
 						<div className="mt-8 text-center text-slate-400 dark:text-slate-500 text-sm">
-							<p>Học tập thật vui cùng Tin Học Vui © 2024</p>
+							<p>Học tập thật vui cùng Bit Learning © 2026</p>
 						</div>
 					</div>
 				</main>

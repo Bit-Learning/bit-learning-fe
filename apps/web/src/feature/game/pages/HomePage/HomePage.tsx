@@ -36,7 +36,13 @@ export default function HomePage() {
 			<div className="relative flex min-h-screen flex-col z-10">
 				{/* Header */}
 				<header className="flex items-center justify-between px-6 py-4 md:px-12 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 z-50">
-					<BrandLogo icon="terminal" className="group cursor-pointer" />
+					<BrandLogo
+						icon="terminal"
+						className="group cursor-pointer"
+						onClick={() => {
+							navigate({ to: "/games" });
+						}}
+					/>
 					<div className="flex items-center gap-4">
 						<nav className="hidden md:flex gap-8 mr-4">
 							<a

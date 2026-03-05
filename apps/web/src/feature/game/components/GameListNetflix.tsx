@@ -7,6 +7,7 @@ import { Navbar } from "./Navbar";
 import styles from "./HomePage.module.css";
 import { Link } from "@tanstack/react-router";
 import { featuredGame } from "../data/games";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 interface GameListNetflixProps {
 	username: string | null;
 }
@@ -463,8 +464,8 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 			<section className={styles.hero}>
 				<div className={styles.heroBg}>
 					<img
-						src="https://lh3.googleusercontent.com/aida-public/AB6AXuC1wWV_VAD5lyWQZbGNgh4vcyi65uAw_hT_rvT8jG0u5IYOuOQRL8vYCZpnQEOQDxkE95l8zwrFbr1Kvwurgb9wmlARDd8SAPmu9PV_DBNw_RaSVRxiLM583UqvAqK5Q2Qa_0TuCHyL90xF_AXSlxVYBz0pSnqCZwdumTIbxFK58RhN_dXSsBphatRDvXOkdr_yMxBevirnOnaTThpfcZJt7420ERKus8OsQNAktJcOGSpga4Q7Q9tVR71YnxvehM0V2zIMh_nnSDX9"
-						alt="Space Typer Hero"
+						src="/game-center-banner.jpg"
+						alt="Game Hero"
 						className={styles.heroBgImg}
 					/>
 					<div className={styles.heroGradient} />
@@ -473,16 +474,19 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 					<div className={styles.heroInner}>
 						<div className={styles.heroBadges}>
 							<span className={styles.badge}>Featured Game</span>
-							<span className={styles.badgeSub}>#1 Trending in Typing</span>
+							<span className={styles.badgeSub}>#1 Trending in Quiz</span>
 						</div>
 						<h1 className={styles.heroTitle}>
-							Space <br />
-							<span className={styles.heroAccent}>Typer</span>
+							Uma
+							<br />
+							Quiz
+							<br />
+							<span className={styles.heroAccent}>Run</span>
 						</h1>
 						<p className={styles.heroDesc}>
-							Master your keyboard while navigating through the asteroid belt.
-							The faster you type, the quicker you dodge! Unlock legendary ships
-							and conquer the cosmos.
+							Challenge your knowledge and speed in this fast-paced quiz game!
+							Test yourself against the clock and climb the leaderboard. Are you
+							ready to run?
 						</p>
 						<div className={styles.heroActions}>
 							<Link
@@ -516,12 +520,7 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 						/>
 					))
 				) : (
-					<div className="text-center py-20 px-8">
-						<div className="text-6xl mb-6">🎮</div>
-						<p className="text-2xl font-bold text-gray-400 mb-2">
-							No games available yet
-						</p>
-					</div>
+					<Loader />
 				)}
 			</main>
 
@@ -590,7 +589,7 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 				</div>
 				<div className={styles.footerBottom}>
 					<p className={styles.footerCopy}>
-						© 2024 EduPlay Game Center. All rights reserved.
+						© 2026 Bit Learning Game Center. All rights reserved.
 					</p>
 					<div className={styles.footerLegal}>
 						{["Privacy Policy", "Terms of Service", "Cookie Settings"].map(

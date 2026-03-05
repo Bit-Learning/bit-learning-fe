@@ -10,6 +10,7 @@ import { useAudio } from "@/feature/game/components/AudioProvider";
 import { AudioToggle } from "@/feature/game/components/AudioToggle";
 import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
 import matchingGameService from "@/feature/game/services/matchingGameService";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 type GameSearch = {
 	grade?: number;
@@ -308,11 +309,7 @@ export default function GamePage() {
 			: null;
 
 	if (loading) {
-		return (
-			<div className="min-h-screen flex items-center justify-center bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100">
-				<p className="text-lg font-medium">Đang tải dữ liệu trò chơi...</p>
-			</div>
-		);
+		return <Loader />;
 	}
 
 	// const nextHintPair = currentStage.pairs.find((p) => !matchedPairIds.includes(p.id))
