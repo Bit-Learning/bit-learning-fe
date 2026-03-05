@@ -187,7 +187,7 @@ export const quizGames: Game[] = [
 ];
 
 export const featuredGame: GameDetail = {
-	id: "typing-challenge",
+	id: "5",
 	title: "Typing Challenge",
 	subtitle: "Educational / Speed",
 	category: "Typing",
