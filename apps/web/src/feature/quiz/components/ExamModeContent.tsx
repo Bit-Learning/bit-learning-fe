@@ -3,9 +3,12 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { ChevronRight, Timer, BookOpen, CheckCircle2, Rocket, Edit3, AlertCircle } from "lucide-react";
 // import { useStartQuizAttempt, useStartQuizSession } from "../hooks/useQuiz";
 
-const ExamModeContent: React.FC = () => {
+interface ExamModeContentProps {
+  examId: string | number;
+}
+
+const ExamModeContent: React.FC<ExamModeContentProps> = ({ examId }) => {
   const navigate = useNavigate();
-  const { examId } = useParams({ from: "/_layout/exams/$examId_/mode" });
   console.log(examId);
 
   // const startAttemptMutation = useStartQuizAttempt();
