@@ -1,214 +1,318 @@
 import React, { useState } from "react";
-import { useNavigate, useSearch } from "@tanstack/react-router";
-import { Search, Code2, Flame, Zap, Trophy, Target, Sparkles, Hash, Heart, Clock, HardDrive } from "lucide-react";
+import { Search, Code2, Hash, Heart, Clock, HardDrive, Trophy, RefreshCw } from "lucide-react";
 import { Input } from "@workspace/ui/components/Input";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent } from "@workspace/ui/components/Card";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@workspace/ui/components/Table";
-import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { Progress } from "@workspace/ui/components/Progress";
 import { cn } from "@workspace/ui/lib/utils";
-import { Difficulty, ProblemBriefResponse } from "../types/coding.type";
-import { useProblems, useUserSubmissionStats, useToggleFavorite } from "../queries/useCoding";
-import { StatCard } from "./StatCard";
+import { Difficulty, ProblemBriefResponse, UserSubmissionStatsResponse } from "../types/coding.type";
+import { DifficultyBadge } from "./Component";
+import { useNavigate } from "@tanstack/react-router";
+import { Pagination } from "@/shared/components/Pagination";
 
-const difficultyConfig = {
-  EASY: { label: "Easy", color: "text-emerald-500", bg: "bg-emerald-500/10", border: "border-emerald-500/30" },
-  MEDIUM: { label: "Medium", color: "text-amber-500", bg: "bg-amber-500/10", border: "border-amber-500/30" },
-  HARD: { label: "Hard", color: "text-rose-500", bg: "bg-rose-500/10", border: "border-rose-500/30" },
+// Mock data
+const mockProblems: ProblemBriefResponse[] = [
+  {
+    id: "1",
+    title: "Tính tổng dãy số Fibonacci",
+    slug: "fibonacci-sum",
+    description: "Tính tổng các số Fibonacci",
+    difficulty: Difficulty.EASY,
+    timeLimitMs: 1000,
+    memoryLimitMb: 256,
+    tags: ["Đệ quy", "Cơ bản"],
+    isFavorite: false,
+    isPublic: true,
+    createdAt: "2024-01-01",
+    updatedAt: "2024-01-01",
+  },
+  {
+    id: "2",
+    title: "Bài toán cái túi (Knapsack)",
+    slug: "knapsack-problem",
+    description: "Giải bài toán cái túi",
+    difficulty: Difficulty.MEDIUM,
+    timeLimitMs: 2000,
+    memoryLimitMb: 512,
+    tags: ["QH Động", "Tối ưu"],
+    isFavorite: false,
+    isPublic: true,
+    createdAt: "2024-01-02",
+    updatedAt: "2024-01-02",
+  },
+  {
+    id: "3",
+    title: "Tìm đường đi ngắn nhất (Dijkstra)",
+    slug: "dijkstra-shortest-path",
+    description: "Thuật toán Dijkstra",
+    difficulty: Difficulty.HARD,
+    timeLimitMs: 3000,
+    memoryLimitMb: 512,
+    tags: ["Đồ thị", "Giải thuật"],
+    isFavorite: true,
+    isPublic: true,
+    createdAt: "2024-01-03",
+    updatedAt: "2024-01-03",
+  },
+  {
+    id: "4",
+    title: "Số nguyên tố và ước số",
+    slug: "prime-numbers",
+    description: "Kiểm tra số nguyên tố",
+    difficulty: Difficulty.EASY,
+    timeLimitMs: 1000,
+    memoryLimitMb: 256,
+    tags: ["Số học"],
+    isFavorite: false,
+    isPublic: true,
+    createdAt: "2024-01-04",
+    updatedAt: "2024-01-04",
+  },
+  {
+    id: "5",
+    title: "Dãy con tăng dài nhất",
+    slug: "longest-increasing-subsequence",
+    description: "Tìm dãy con tăng dài nhất",
+    difficulty: Difficulty.MEDIUM,
+    timeLimitMs: 2000,
+    memoryLimitMb: 512,
+    tags: ["QH Động", "Mảng"],
+    isFavorite: false,
+    isPublic: true,
+    createdAt: "2024-01-05",
+    updatedAt: "2024-01-05",
+  },
+  {
+    id: "6",
+    title: "Tìm kiếm nhị phân",
+    slug: "binary-search",
+    description: "Thuật toán tìm kiếm nhị phân",
+    difficulty: Difficulty.EASY,
+    timeLimitMs: 1000,
+    memoryLimitMb: 256,
+    tags: ["Tìm kiếm", "Mảng"],
+    isFavorite: true,
+    isPublic: true,
+    createdAt: "2024-01-06",
+    updatedAt: "2024-01-06",
+  },
+  {
+    id: "7",
+    title: "Cây nhị phân tìm kiếm",
+    slug: "binary-search-tree",
+    description: "Thao tác trên BST",
+    difficulty: Difficulty.MEDIUM,
+    timeLimitMs: 2000,
+    memoryLimitMb: 512,
+    tags: ["Cây", "Đệ quy"],
+    isFavorite: false,
+    isPublic: true,
+    createdAt: "2024-01-07",
+    updatedAt: "2024-01-07",
+  },
+  {
+    id: "8",
+    title: "Thuật toán sắp xếp nhanh",
+    slug: "quick-sort",
+    description: "Quick Sort algorithm",
+    difficulty: Difficulty.MEDIUM,
+    timeLimitMs: 2000,
+    memoryLimitMb: 512,
+    tags: ["Sắp xếp", "Divide & Conquer"],
+    isFavorite: false,
+    isPublic: true,
+    createdAt: "2024-01-08",
+    updatedAt: "2024-01-08",
+  },
+];
+
+const mockStats: UserSubmissionStatsResponse = {
+  userId: 1,
+  totalSubmissions: 156,
+  acceptedSubmissions: 87,
+  acceptanceRate: 55.8,
+  solvedProblems: 42,
+  totalProblems: 128,
 };
-
-const DifficultyBadge: React.FC<{ difficulty: Difficulty }> = ({ difficulty }) => {
-  const config = difficultyConfig[difficulty];
-  return (
-    <Badge variant="outline" className={cn("font-medium", config.color, config.bg, config.border)}>
-      {config.label}
-    </Badge>
-  );
-};
-
-const TableSkeleton: React.FC = () => (
-  <div className="space-y-3">
-    {[...Array(5)].map((_, i) => (
-      <Skeleton key={i} className="h-14 w-full" />
-    ))}
-  </div>
-);
 
 const StudentProblemListContent: React.FC = () => {
-  const navigate = useNavigate();
-  const searchParams = useSearch({ strict: false }) as { page?: string | number };
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState<string>("");
   const [difficulty, setDifficulty] = useState<string>("all");
+  const [page, setPage] = useState<number>(0);
+  const [favorites, setFavorites] = useState<Record<string, boolean>>(
+    mockProblems.reduce((acc, p) => ({ ...acc, [p.id]: p.isFavorite }), {}),
+  );
 
-  const page = Number(searchParams.page) || 0;
-  const size = 15;
+  const navigate = useNavigate();
+  // const searchParams = useSearch({ strict: false }) as { page?: string | number };
+  // const { data: problemsData, isLoading } = useProblems({ page, size: 15, sort: "createdAt,desc" });
+  // const { data: stats } = useUserSubmissionStats();
+  // const toggleFavorite = useToggleFavorite();
 
-  const { data: problemsData, isLoading } = useProblems({ page, size, sort: "createdAt,desc" });
-  const { data: stats } = useUserSubmissionStats();
-  const toggleFavorite = useToggleFavorite();
+  const isLoading: boolean = false;
+  const size: number = 10;
 
-  const problems = problemsData?.data || [];
-  const pageInfo = problemsData?.page;
-  const totalPages = pageInfo?.totalPages || 0;
-
-  const filteredProblems = problems.filter((p: ProblemBriefResponse) => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
-    const matchDifficulty = difficulty === "all" || p.difficulty === difficulty;
+  const filteredProblems: ProblemBriefResponse[] = mockProblems.filter((p) => {
+    const matchSearch: boolean = p.title.toLowerCase().includes(search.toLowerCase());
+    const matchDifficulty: boolean = difficulty === "all" || p.difficulty === difficulty;
     return matchSearch && matchDifficulty;
   });
 
-  const handleFavorite = (e: React.MouseEvent, problemId: string) => {
+  const totalPages: number = Math.ceil(filteredProblems.length / size);
+  const paginatedProblems: ProblemBriefResponse[] = filteredProblems.slice(page * size, (page + 1) * size);
+
+  const handleFavorite = (e: React.MouseEvent, problemId: string): void => {
     e.stopPropagation();
-    toggleFavorite.mutate(problemId);
+    setFavorites((prev) => ({ ...prev, [problemId]: !prev[problemId] }));
+    //  toggleFavorite.mutate(problemId);
   };
 
-  const handlePageChange = (newPage: number) => {
-    navigate({ search: `?page=${newPage}` } as any);
+  const handleProblemClick = (problemId: string): void => {
+    navigate({ to: `/problem/${problemId}` });
   };
 
-  const progressPercent = stats ? (stats.solvedProblems / stats.totalProblems) * 100 : 0;
+  const progressPercent: number = mockStats ? (mockStats.solvedProblems / mockStats.totalProblems) * 100 : 0;
 
   return (
     <div className="min-h-screen bg-linear-to-br from-background via-background to-muted/20">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
-        <div className="flex items-center gap-4">
-          <div className="p-3 rounded-2xl bg-linear-to-br from-violet-500 to-cyan-500 shadow-lg shadow-violet-500/25">
-            <Code2 className="w-7 h-7 text-white" />
-          </div>
-          <div>
-            <h1 className="text-3xl font-bold tracking-tight">Problem Set</h1>
-            <p className="text-muted-foreground">Luyện tập và nâng cao kỹ năng coding</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
-          <StatCard
-            icon={Target}
-            label="Tổng số"
-            value={stats?.totalProblems || 0}
-            gradient="bg-gradient-to-br from-violet-500 to-purple-600"
-          />
-          <StatCard
-            icon={Trophy}
-            label="Đã giải"
-            value={stats?.solvedProblems || 0}
-            gradient="bg-gradient-to-br from-emerald-500 to-green-600"
-          />
-          <StatCard
-            icon={Zap}
-            label="Submissions"
-            value={stats?.totalSubmissions || 0}
-            gradient="bg-gradient-to-br from-blue-500 to-cyan-500"
-          />
-          <StatCard
-            icon={Flame}
-            label="Accepted"
-            value={stats?.acceptedSubmissions || 0}
-            gradient="bg-gradient-to-br from-amber-400 to-orange-500"
-          />
-          <StatCard
-            icon={Sparkles}
-            label="Tỷ lệ AC"
-            value={`${(stats?.acceptanceRate || 0).toFixed(1)}%`}
-            gradient="bg-gradient-to-br from-rose-400 to-pink-500"
-          />
-        </div>
-
-        <Card>
-          <CardContent className="p-4">
-            <div className="flex items-center justify-between mb-2">
-              <span className="text-sm font-medium">Tiến độ hoàn thành</span>
-              <span className="text-sm text-muted-foreground">
-                {stats?.solvedProblems || 0}/{stats?.totalProblems || 0} bài
-              </span>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-8">
+        <div className="mb-8">
+          <div className="flex items-center gap-4 mb-2">
+            <div className="p-3 rounded-2xl bg-linear-to-br from-violet-500 to-cyan-500 shadow-lg shadow-violet-500/25">
+              <Code2 className="w-7 h-7 text-white" />
             </div>
-            <Progress value={progressPercent} className="h-2" />
-          </CardContent>
-        </Card>
+            <div>
+              <h1 className="text-3xl font-bold tracking-tight">Danh sách bài tập lập trình</h1>
+              <nav className="flex text-sm text-muted-foreground mt-1">
+                <a className="hover:text-primary" href="#">
+                  Trang chủ
+                </a>
+                <span className="mx-2">/</span>
+                <span className="text-foreground font-medium">Luyện tập</span>
+              </nav>
+            </div>
+          </div>
+        </div>
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <div className="relative flex-1">
+        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
+          <div className="md:col-span-4 relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <Input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm kiếm problem..."
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setSearch(e.target.value)}
+              placeholder="Tìm kiếm bài tập theo tên..."
               className="pl-10"
             />
           </div>
-          <select
-            value={difficulty}
-            onChange={(e) => setDifficulty(e.target.value)}
-            className="w-full sm:w-40 h-9 px-3 py-1 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            <option value="all">Tất cả</option>
-            <option value="EASY">Easy</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="HARD">Hard</option>
-          </select>
+          <div className="md:col-span-2">
+            <select
+              value={difficulty}
+              onChange={(e: React.ChangeEvent<HTMLSelectElement>) => setDifficulty(e.target.value)}
+              className="w-full h-10 px-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring"
+            >
+              <option value="all">Độ khó</option>
+              <option value={Difficulty.EASY}>Dễ</option>
+              <option value={Difficulty.MEDIUM}>Trung bình</option>
+              <option value={Difficulty.HARD}>Khó</option>
+            </select>
+          </div>
+          <div className="md:col-span-2">
+            <select className="w-full h-10 px-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+              <option value="">Trạng thái</option>
+              <option value="solved">Đã giải</option>
+              <option value="unsolved">Chưa giải</option>
+              <option value="trying">Đang thử</option>
+            </select>
+          </div>
+          <div className="md:col-span-3">
+            <select className="w-full h-10 px-3 py-2 text-sm rounded-md border border-input bg-background focus:outline-none focus:ring-2 focus:ring-ring">
+              <option value="">Gắn thẻ (Tags)</option>
+              <option value="dp">Quy hoạch động</option>
+              <option value="graph">Đồ thị</option>
+              <option value="string">Xử lý chuỗi</option>
+              <option value="math">Toán học</option>
+            </select>
+          </div>
+          <div className="md:col-span-1">
+            <Button variant="outline" className="w-full h-10">
+              <RefreshCw className="w-4 h-4" />
+            </Button>
+          </div>
         </div>
 
         <Card>
           <CardContent className="p-0">
-            {isLoading ? (
-              <div className="p-4">
-                <TableSkeleton />
-              </div>
-            ) : (
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12"></TableHead>
-                    <TableHead>Tiêu đề</TableHead>
-                    <TableHead className="w-24">Độ khó</TableHead>
-                    <TableHead className="w-24">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left border-collapse">
+                <thead>
+                  <tr className="bg-muted/50 border-b">
+                    <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider w-16">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Tên bài tập
+                    </th>
+                    <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Độ khó
+                    </th>
+                    <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       <div className="flex items-center gap-1">
                         <Clock className="w-3 h-3" />
                         Time
                       </div>
-                    </TableHead>
-                    <TableHead className="w-24">
+                    </th>
+                    <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                       <div className="flex items-center gap-1">
                         <HardDrive className="w-3 h-3" />
                         Memory
                       </div>
-                    </TableHead>
-                    <TableHead className="w-48">Tags</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {filteredProblems.map((problem: ProblemBriefResponse, index: number) => (
-                    <TableRow
+                    </th>
+                    <th className="px-6 py-4 text-xs font-semibold text-muted-foreground uppercase tracking-wider">
+                      Chủ đề
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border">
+                  {paginatedProblems.map((problem: ProblemBriefResponse, index: number) => (
+                    <tr
                       key={problem.id}
-                      className="cursor-pointer hover:bg-muted/50 transition-colors"
-                      onClick={() => navigate({ to: `/problem/${problem.id}` })}
+                      className="hover:bg-muted/50 transition-colors cursor-pointer group"
+                      onClick={() => handleProblemClick(problem.id)}
                     >
-                      <TableCell>
-                        <button onClick={(e) => handleFavorite(e, problem.id)} className="p-1 rounded hover:bg-muted">
-                          <Heart
-                            className={cn(
-                              "w-4 h-4 transition-colors",
-                              problem.isFavorite ? "fill-rose-500 text-rose-500" : "text-muted-foreground",
-                            )}
-                          />
-                        </button>
-                      </TableCell>
-                      <TableCell>
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={(e: React.MouseEvent) => handleFavorite(e, problem.id)}
+                            className="p-1 rounded hover:bg-muted transition-colors"
+                          >
+                            <Heart
+                              className={cn(
+                                "w-4 h-4 transition-colors",
+                                favorites[problem.id] ? "fill-rose-500 text-rose-500" : "text-muted-foreground",
+                              )}
+                            />
+                          </button>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
                           <span className="text-muted-foreground text-sm">{page * size + index + 1}.</span>
                           <span className="font-medium hover:text-primary transition-colors">{problem.title}</span>
                         </div>
-                      </TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-6 py-4">
                         <DifficultyBadge difficulty={problem.difficulty} />
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{problem.timeLimitMs}ms</TableCell>
-                      <TableCell className="text-sm text-muted-foreground">{problem.memoryLimitMb}MB</TableCell>
-                      <TableCell>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm text-muted-foreground">{problem.timeLimitMs}ms</span>
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className="text-sm text-muted-foreground">{problem.memoryLimitMb}MB</span>
+                      </td>
+                      <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">
-                          {problem.tags?.slice(0, 3).map((tag) => (
+                          {problem.tags?.slice(0, 3).map((tag: string) => (
                             <Badge key={tag} variant="secondary" className="text-xs">
                               <Hash className="w-2.5 h-2.5 mr-0.5" />
                               {tag}
@@ -220,41 +324,73 @@ const StudentProblemListContent: React.FC = () => {
                             </Badge>
                           )}
                         </div>
-                      </TableCell>
-                    </TableRow>
+                      </td>
+                    </tr>
                   ))}
-                </TableBody>
-              </Table>
-            )}
+                </tbody>
+              </table>
+            </div>
 
-            {!isLoading && filteredProblems.length === 0 && (
-              <div className="p-12 text-center">
-                <Code2 className="w-12 h-12 mx-auto text-muted-foreground/50 mb-4" />
-                <p className="text-muted-foreground">Không tìm thấy problem nào</p>
+            <div className="px-6 py-4 border-t flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Hiển thị <span className="font-medium text-foreground">{page * size + 1}</span> đến{" "}
+                <span className="font-medium text-foreground">
+                  {Math.min((page + 1) * size, filteredProblems.length)}
+                </span>{" "}
+                của <span className="font-medium text-foreground">{mockStats.totalProblems}</span> bài tập
+              </p>
+              <div className="flex items-center gap-2">
+                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
               </div>
-            )}
+            </div>
           </CardContent>
         </Card>
 
-        {totalPages > 1 && (
-          <div className="flex justify-center gap-2">
-            <Button variant="outline" size="sm" isDisabled={page <= 0} onClick={() => handlePageChange(page - 1)}>
-              Trước
-            </Button>
-            <span className="flex items-center px-4 text-sm text-muted-foreground">
-              Trang {page + 1} / {totalPages}
-            </span>
-            <Button
-              variant="outline"
-              size="sm"
-              isDisabled={page >= totalPages - 1}
-              onClick={() => handlePageChange(page + 1)}
-            >
-              Sau
-            </Button>
-          </div>
-        )}
-      </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <Card className="bg-linear-to-br from-blue-500 to-indigo-600 border-0">
+            <CardContent className="p-6 text-white">
+              <div className="flex items-center space-x-3 mb-4">
+                <Trophy className="w-6 h-6" />
+                <h3 className="text-lg font-bold">Thử thách mới</h3>
+              </div>
+              <p className="text-blue-100 text-sm leading-relaxed mb-4">
+                Tham gia cuộc thi lập trình hàng tuần để nhận được những phần quà hấp dẫn từ Bitlearning.
+              </p>
+              <Button className="bg-white text-blue-600 hover:bg-blue-50">Xem chi tiết</Button>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-bold mb-4">Tiến độ cá nhân</h3>
+              <div className="flex items-end justify-between mb-2">
+                <span className="text-2xl font-bold text-primary">
+                  {mockStats.solvedProblems}/{mockStats.totalProblems}
+                </span>
+                <span className="text-xs text-muted-foreground">{progressPercent.toFixed(0)}% hoàn thành</span>
+              </div>
+              <Progress value={progressPercent} className="h-2" />
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardContent className="p-6">
+              <h3 className="text-lg font-bold mb-4">Xếp hạng của bạn</h3>
+              <div className="flex items-center space-x-4">
+                <div className="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center">
+                  <Trophy className="w-6 h-6 text-amber-500" />
+                </div>
+                <div>
+                  <p className="text-xs text-muted-foreground">Vị trí hiện tại</p>
+                  <p className="text-xl font-bold">
+                    #1,204 <span className="text-xs font-normal text-green-500 ml-1">↑ 12</span>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      </main>
     </div>
   );
 };
