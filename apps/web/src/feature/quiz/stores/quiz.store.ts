@@ -11,30 +11,17 @@ import type {
 
 // ===== UNIFIED TYPES =====
 type QuizType = "attempt" | "session";
-
 type QuizData = QuizAttemptResponse | QuizSessionResponse;
-
 type QuizAnswer = QuizAttemptAnswerResponse | QuizSessionAnswerResponse;
 
 // ===== STATE TYPE =====
 export type TQuizState = {
-  // Loại quiz đang active (attempt hoặc session)
   activeType: QuizType | null;
-
-  // Current quiz đang làm
   currentQuiz: QuizData | null;
-
-  // Timer
-  timeRemaining: number | null; // seconds
+  timeRemaining: number | null;
   isTimerRunning: boolean;
-
-  // Answers map by questionId
   answersMap: Record<number, QuizAnswer>;
-
-  // Navigation
   currentQuestionIndex: number;
-
-  // UI states
   isSubmitting: boolean;
 };
 
@@ -50,8 +37,6 @@ const quizInitialState: TQuizState = {
 };
 
 // ===== HELPER FUNCTIONS =====
-
-// Build answers map từ quiz data
 const buildAnswersMap = (quiz: QuizData): Record<number, QuizAnswer> => {
   const answersMap: Record<number, QuizAnswer> = {};
   quiz.answers.forEach((answer) => {
@@ -60,17 +45,14 @@ const buildAnswersMap = (quiz: QuizData): Record<number, QuizAnswer> => {
   return answersMap;
 };
 
-// Get current index từ quiz data
 const getCurrentIndex = (quiz: QuizData, type: QuizType): number => {
   if (type === "session") {
     return (quiz as QuizSessionResponse).currentIndex || 0;
   }
-  return 0; // Attempt mặc định bắt đầu từ 0
+  return 0;
 };
 
 // ===== REDUCER FUNCTIONS =====
-
-// Set quiz attempt
 const setQuizAttempt = (state: TQuizState, action: PayloadAction<QuizAttemptResponse>) => {
   state.activeType = "attempt";
   state.currentQuiz = action.payload;
@@ -80,7 +62,6 @@ const setQuizAttempt = (state: TQuizState, action: PayloadAction<QuizAttemptResp
   state.isSubmitting = false;
 };
 
-// Set quiz session
 const setQuizSession = (state: TQuizState, action: PayloadAction<QuizSessionResponse>) => {
   state.activeType = "session";
   state.currentQuiz = action.payload;
@@ -90,16 +71,13 @@ const setQuizSession = (state: TQuizState, action: PayloadAction<QuizSessionResp
   state.isSubmitting = false;
 };
 
-// Clear quiz
 const clearQuiz = () => quizInitialState;
 
-// Update answer (works for both attempt & session)
 const updateAnswer = (state: TQuizState, action: PayloadAction<QuizAnswer>) => {
   const questionId = action.payload.question.id;
   state.answersMap[questionId] = action.payload;
 };
 
-// Update navigation state (only for attempt)
 const updateNavigationState = (
   state: TQuizState,
   action: PayloadAction<{ questionId: number; navigationState: QuestionNavigationState }>,
@@ -110,7 +88,6 @@ const updateNavigationState = (
   }
 };
 
-// Toggle mark (only for session)
 const toggleMark = (state: TQuizState, action: PayloadAction<number>) => {
   const questionId = action.payload;
   if (state.answersMap[questionId]) {
@@ -119,7 +96,6 @@ const toggleMark = (state: TQuizState, action: PayloadAction<number>) => {
   }
 };
 
-// Timer controls
 const setTimeRemaining = (state: TQuizState, action: PayloadAction<number>) => {
   state.timeRemaining = action.payload;
 };
@@ -138,7 +114,17 @@ const stopTimer = (state: TQuizState) => {
   state.isTimerRunning = false;
 };
 
-// Question navigation
+const syncTimeFromServer = (state: TQuizState, action: PayloadAction<number>) => {
+  if (state.timeRemaining !== null) {
+    const diff = Math.abs(state.timeRemaining - action.payload);
+    if (diff > 5) {
+      state.timeRemaining = action.payload;
+    }
+  } else {
+    state.timeRemaining = action.payload;
+  }
+};
+
 const setCurrentQuestionIndex = (state: TQuizState, action: PayloadAction<number>) => {
   state.currentQuestionIndex = action.payload;
 };
@@ -165,7 +151,6 @@ const goToQuestion = (state: TQuizState, action: PayloadAction<number>) => {
   }
 };
 
-// Submit state
 const setSubmitting = (state: TQuizState, action: PayloadAction<boolean>) => {
   state.isSubmitting = action.payload;
 };
@@ -185,6 +170,7 @@ export const quiz = createSlice({
     decrementTimeAction: decrementTime,
     startTimerAction: startTimer,
     stopTimerAction: stopTimer,
+    syncTimeFromServerAction: syncTimeFromServer, // THÊM MỚI
     setCurrentQuestionIndexAction: setCurrentQuestionIndex,
     nextQuestionAction: nextQuestion,
     previousQuestionAction: previousQuestion,
@@ -205,6 +191,7 @@ export const {
   decrementTimeAction,
   startTimerAction,
   stopTimerAction,
+  syncTimeFromServerAction, // THÊM MỚI
   setCurrentQuestionIndexAction,
   nextQuestionAction,
   previousQuestionAction,
@@ -213,8 +200,6 @@ export const {
 } = quiz.actions;
 
 // ===== SELECTORS =====
-
-// Basic selectors
 export const selectQuizState = (state: RootState) => state.quiz;
 export const selectActiveType = (state: RootState) => state.quiz.activeType;
 export const selectCurrentQuiz = (state: RootState) => state.quiz.currentQuiz;
@@ -224,7 +209,6 @@ export const selectIsTimerRunning = (state: RootState) => state.quiz.isTimerRunn
 export const selectCurrentQuestionIndex = (state: RootState) => state.quiz.currentQuestionIndex;
 export const selectIsSubmitting = (state: RootState) => state.quiz.isSubmitting;
 
-// Type-safe selectors
 export const selectCurrentAttempt = (state: RootState): QuizAttemptResponse | null => {
   if (state.quiz.activeType === "attempt") {
     return state.quiz.currentQuiz as QuizAttemptResponse;
@@ -239,21 +223,17 @@ export const selectCurrentSession = (state: RootState): QuizSessionResponse | nu
   return null;
 };
 
-// Get current answer
 export const selectCurrentAnswer = (state: RootState) => {
   const quiz = state.quiz.currentQuiz;
   const index = state.quiz.currentQuestionIndex;
   if (!quiz || !quiz.answers[index]) return null;
-
   const questionId = quiz.answers[index].question.id;
   return state.quiz.answersMap[questionId] || null;
 };
 
-// Get answer by questionId
 export const selectAnswerByQuestionId = (questionId: number) => (state: RootState) =>
   state.quiz.answersMap[questionId] || null;
 
-// Stats - works for both attempt & session
 export const selectQuestionStats = (state: RootState) => {
   const answers = Object.values(state.quiz.answersMap);
   const total = state.quiz.currentQuiz?.exam.totalQuestions || 0;
@@ -274,18 +254,13 @@ export const selectQuestionStats = (state: RootState) => {
   }
 };
 
-// Check helpers
 export const selectIsTimeUp = (state: RootState) => state.quiz.timeRemaining !== null && state.quiz.timeRemaining <= 0;
-
 export const selectIsFirstQuestion = (state: RootState) => state.quiz.currentQuestionIndex === 0;
-
 export const selectIsLastQuestion = (state: RootState) => {
   const quiz = state.quiz.currentQuiz;
   if (!quiz) return false;
   return state.quiz.currentQuestionIndex === quiz.exam.totalQuestions - 1;
 };
-
-// Check if is attempt or session
 export const selectIsAttempt = (state: RootState) => state.quiz.activeType === "attempt";
 export const selectIsSession = (state: RootState) => state.quiz.activeType === "session";
 

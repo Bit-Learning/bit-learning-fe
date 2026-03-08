@@ -1,6 +1,6 @@
 import React from "react";
 import PageMeta from "@/shared/components/seo/page-meta";
-import PracticeResultContent from "../components/PracticeResultPage";
+import PracticeResultContent from "../components/PracticeResultContent";
 
 const QuizSessionResultPage: React.FC = () => {
   return (

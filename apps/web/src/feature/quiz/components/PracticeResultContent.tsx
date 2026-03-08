@@ -1,8 +1,6 @@
 import React from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
-  Share2,
-  MoreHorizontal,
   Award,
   CheckCircle2,
   XCircle,
@@ -11,42 +9,31 @@ import {
   BookOpen,
   RefreshCw,
   Home,
-  Trophy,
+  Terminal,
+  Bell,
+  ChevronRight,
 } from "lucide-react";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { cn } from "@workspace/ui/lib/utils";
-// import { useQuizAttempt } from "../queries/useQuiz";
-import type {
-  QuizAttemptResponse,
-  QuizAttemptAnswerResponse,
-  QuizAttemptStatus,
-  QuestionNavigationState,
-} from "../types/quiz.type";
-import type {
-  QuestionResponse,
-  OptionResponse,
+// import { useQuizSession } from "../hooks/useQuiz";
+import type { QuizSessionResponse, QuizSessionStatus, QuizSessionType } from "../types/quiz.type";
+import {
+  ApprovalStatus,
   QuestionLevel,
   QuestionType,
-  ApprovalStatus,
+  type QuestionResponse,
 } from "@/feature/question/types/question.type";
 
-// ==================== MOCK FULL QUESTIONS (for result display) ====================
-const mockFullQuestions: QuestionResponse[] = Array.from({ length: 30 }, (_, i) => ({
+// ==================== MOCK FULL QUESTIONS ====================
+const mockFullQuestions: QuestionResponse[] = Array.from({ length: 20 }, (_, i) => ({
   id: i + 1,
-  content:
-    i === 0
-      ? "Đâu là thủ đô của Việt Nam?"
-      : i === 2
-        ? "Dãy núi cao nhất Việt Nam là dãy núi nào?"
-        : `Câu hỏi số ${i + 1}`,
+  content: i === 0 ? "Đâu là thiết bị đầu vào của máy tính?" : `Câu hỏi số ${i + 1} về Tin học 12?`,
   canonicalAnswer:
     i === 0
-      ? "Hà Nội là thủ đô của nước Cộng hòa xã hội chủ nghĩa Việt Nam, đồng thời cũng là kinh đô của hầu hết các vương triều phong kiến Việt Nam trước đây."
-      : i === 2
-        ? "Hoàng Liên Sơn là dãy núi cao nhất Việt Nam, trong đó có đỉnh Fansipan cao 3.143m được mệnh danh là 'Nóc nhà Đông Dương'. Bạn đã chọn Trường Sơn là chưa chính xác."
-        : `Giải thích chi tiết cho câu hỏi số ${i + 1}`,
+      ? "Thiết bị đầu vào (Input devices) là các thiết bị dùng để cung cấp dữ liệu cho máy tính. Chuột và bàn phím là hai thiết bị đầu vào cơ bản nhất. Màn hình, máy in và loa là các thiết bị đầu ra (Output devices)."
+      : `Giải thích chi tiết cho câu hỏi số ${i + 1}`,
   questionType: "MCQ" as QuestionType,
   questionLevel: "MEDIUM" as QuestionLevel,
   subject: { id: 1, name: "Tin học", code: "TIN" },
@@ -54,30 +41,10 @@ const mockFullQuestions: QuestionResponse[] = Array.from({ length: 30 }, (_, i) 
   lesson: { id: 1, name: "Bài 1", code: "L1" },
   tags: [],
   options: [
-    {
-      id: i * 4 + 1,
-      content: i === 0 ? "A. TP. Hồ Chí Minh" : i === 2 ? "A. Trường Sơn" : `Đáp án A`,
-      isCorrect: false,
-      orderNo: 1,
-    },
-    {
-      id: i * 4 + 2,
-      content: i === 0 ? "B. Hà Nội" : i === 2 ? "B. Hoàng Liên Sơn" : `Đáp án B`,
-      isCorrect: true,
-      orderNo: 2,
-    },
-    {
-      id: i * 4 + 3,
-      content: i === 0 ? "C. Đà Nẵng" : i === 2 ? "C. Bạch Mã" : `Đáp án C`,
-      isCorrect: false,
-      orderNo: 3,
-    },
-    {
-      id: i * 4 + 4,
-      content: i === 0 ? "D. Hải Phòng" : i === 2 ? "D. Ngũ Hành Sơn" : `Đáp án D`,
-      isCorrect: false,
-      orderNo: 4,
-    },
+    { id: i * 4 + 1, content: i === 0 ? "Chuột và Bàn phím" : `Đáp án A`, isCorrect: true, orderNo: 1 },
+    { id: i * 4 + 2, content: i === 0 ? "Màn hình và Máy in" : `Đáp án B`, isCorrect: false, orderNo: 2 },
+    { id: i * 4 + 3, content: i === 0 ? "Loa và Tai nghe" : `Đáp án C`, isCorrect: false, orderNo: 3 },
+    { id: i * 4 + 4, content: i === 0 ? "Ổ cứng và RAM" : `Đáp án D`, isCorrect: false, orderNo: 4 },
   ],
   isActive: true,
   isPublic: true,
@@ -87,7 +54,7 @@ const mockFullQuestions: QuestionResponse[] = Array.from({ length: 30 }, (_, i) 
 }));
 
 // ==================== MOCK DATA ====================
-const mockQuizResult: QuizAttemptResponse = {
+const mockPracticeResult: QuizSessionResponse = {
   id: 1,
   user: {
     id: 1,
@@ -97,107 +64,106 @@ const mockQuizResult: QuizAttemptResponse = {
   },
   exam: {
     id: 1,
-    name: "Kiểm tra Giữa kỳ 1 - Tin học 12",
+    name: "Luyện tập Tin học 12 - Hệ điều hành",
     code: "TIN12-GK1",
-    durationInMinutes: 45,
+    durationInMinutes: 60,
     totalScore: 10,
-    totalQuestions: 30,
+    totalQuestions: 20,
     isPublished: true,
     createdAt: "2023-09-15T08:00:00Z",
   },
-  status: "SUBMITTED" as QuizAttemptStatus,
-  startTime: "2023-10-15T09:00:00Z",
-  submittedAt: "2023-10-15T09:45:00Z",
-  score: 9.0,
-  timeRemaining: 0,
-  answers: Array.from({ length: 30 }, (_, i) => {
-    const isCorrect = ![2, 11, 22].includes(i);
+  status: "SUBMITTED" as QuizSessionStatus,
+  type: "PRACTICE" as QuizSessionType,
+  currentIndex: 20,
+  autoSubmitted: false,
+  startTime: "2023-10-15T10:00:00Z",
+  endTime: "2023-10-15T10:25:30Z",
+  timeRemaining: undefined,
+  answers: Array.from({ length: 20 }, (_, i) => {
+    const isCorrect = ![2, 7, 10].includes(i); // 3 câu sai
     return {
       id: i + 1,
       question: {
         id: i + 1,
-        questionText:
-          i === 0
-            ? "Đâu là thủ đô của Việt Nam?"
-            : i === 2
-              ? "Dãy núi cao nhất Việt Nam là dãy núi nào?"
-              : `Câu hỏi số ${i + 1}`,
+        questionText: i === 0 ? "Đâu là thiết bị đầu vào của máy tính?" : `Câu hỏi số ${i + 1}`,
         questionType: "MCQ" as QuestionType,
       },
-      selectedOptionIds: isCorrect ? [i * 4 + 2] : [i * 4 + 1],
-      isCorrect,
-      score: isCorrect ? 0.33 : 0,
+      selectedOptionIds: isCorrect ? [i * 4 + 1] : [i * 4 + 2],
+      isMarked: false,
       questionNo: i + 1,
-      navigationState: "ANSWERED" as QuestionNavigationState,
     };
   }),
-  createdAt: "2023-10-15T09:00:00Z",
-  updatedAt: "2023-10-15T09:45:00Z",
+  createdAt: "2023-10-15T10:00:00Z",
+  updatedAt: "2023-10-15T10:25:30Z",
 };
 
 // ==================== COMPONENT ====================
-const AttemptResultContent = () => {
-  // ===== ROUTER =====
+const PracticeResultContent = () => {
   const navigate = useNavigate();
-  // const { attemptId } = useParams({ from: "/_layout/quiz-attempts/$attemptId/result" });
+  // const { sessionId } = useParams({ from: "/_layout/quiz-sessions/$sessionId/summary" });
 
-  // ===== QUERIES (Commented - Ready for production) =====
-  // Fetch both attempt result and full exam questions
-  // const { data: result, isLoading } = useQuizAttempt(Number(attemptId));
+  // const { data: result, isLoading } = useQuizSession(Number(sessionId));
   // const { data: examData } = useExam(result?.exam.id);
   // const fullQuestions = examData?.examQuestions.map(eq => eq.question) || [];
 
-  // ===== MOCK DATA (Keep for UI testing) =====
-  const result = mockQuizResult;
+  const result = mockPracticeResult;
   const fullQuestions = mockFullQuestions;
 
-  // ===== DERIVED DATA =====
-  const correctAnswers = result.answers.filter((a) => a.isCorrect).length;
-  const wrongAnswers = result.answers.filter(
-    (a) => !a.isCorrect && a.selectedOptionIds && a.selectedOptionIds.length > 0,
-  ).length;
+  const correctAnswers = result.answers.filter((answer) => {
+    const question = fullQuestions.find((q) => q.id === answer.question.id);
+    const correctOption = question?.options?.find((opt) => opt.isCorrect);
+    return answer.selectedOptionIds?.includes(correctOption?.id || 0);
+  }).length;
+
+  const wrongAnswers = result.answers.filter((answer) => {
+    const question = fullQuestions.find((q) => q.id === answer.question.id);
+    const correctOption = question?.options?.find((opt) => opt.isCorrect);
+    return (
+      answer.selectedOptionIds &&
+      answer.selectedOptionIds.length > 0 &&
+      !answer.selectedOptionIds.includes(correctOption?.id || 0)
+    );
+  }).length;
+
   const skippedAnswers = result.answers.filter((a) => !a.selectedOptionIds || a.selectedOptionIds.length === 0).length;
 
-  // Calculate rank based on score
+  const accuracy = Math.round((correctAnswers / result.answers.length) * 100);
+  const score = ((correctAnswers / result.answers.length) * result.exam.totalScore).toFixed(1);
+
   const rank =
-    (result.score ?? 0) >= 9
+    Number(score) >= 9
       ? "Xuất sắc"
-      : (result.score ?? 0) >= 8
+      : Number(score) >= 8
         ? "Giỏi"
-        : (result.score ?? 0) >= 6.5
+        : Number(score) >= 6.5
           ? "Khá"
-          : (result.score ?? 0) >= 5
+          : Number(score) >= 5
             ? "Trung bình"
             : "Yếu";
 
-  // ===== HANDLERS =====
   const handleRetake = () => {
-    // Navigate back to exam detail to start new attempt
     navigate({
-      to: "/exams/$examId",
+      to: "/exams/$examId/mode",
       params: { examId: String(result.exam.id) },
     });
   };
 
   const handleGoHome = () => {
-    // Navigate to home or exam list
     navigate({ to: "/exams" });
   };
 
-  // ===== RENDER =====
   return (
     <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#221610] flex flex-col">
       <main className="max-w-300 mx-auto px-4 py-6 md:py-10 w-full flex-1">
         {/* Hero Score Section */}
         <div className="flex flex-col items-center justify-center text-center py-10 bg-white dark:bg-slate-900/50 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 mb-8">
-          <div className="mb-2 text-primary font-semibold uppercase tracking-widest text-sm">Điểm số của bạn</div>
+          <div className="mb-2 text-primary font-semibold uppercase tracking-widest text-sm">Kết quả luyện tập</div>
           <h1 className="text-6xl md:text-7xl font-extrabold text-slate-900 dark:text-white mb-2">
-            {result.score?.toFixed(1) || "0.0"}{" "}
-            <span className="text-2xl text-slate-400 font-medium">/ {result.exam.totalScore.toFixed(1)}</span>
+            {score} <span className="text-2xl text-slate-400 font-medium">/ {result.exam.totalScore.toFixed(1)}</span>
           </h1>
           <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-bold">
             <Award className="w-4 h-4" />
-            Xếp hạng: {rank}
+            {accuracy}% chính xác - {rank}
           </div>
         </div>
 
@@ -247,19 +213,23 @@ const AttemptResultContent = () => {
             Bảng rà soát đáp án
           </h2>
           <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-            {result.answers.map((answer, index) => (
-              <button
-                key={answer.id}
-                className={cn(
-                  "flex aspect-square items-center justify-center rounded-xl font-bold shadow-sm hover:scale-105 transition-transform cursor-pointer",
-                  answer.isCorrect
-                    ? "bg-green-500 dark:bg-green-600 text-white"
-                    : "bg-red-500 dark:bg-red-600 text-white",
-                )}
-              >
-                {index + 1}
-              </button>
-            ))}
+            {result.answers.map((answer, index) => {
+              const question = fullQuestions.find((q) => q.id === answer.question.id);
+              const correctOption = question?.options?.find((opt) => opt.isCorrect);
+              const isCorrect = answer.selectedOptionIds?.includes(correctOption?.id || 0);
+
+              return (
+                <button
+                  key={answer.id}
+                  className={cn(
+                    "flex aspect-square p-2 items-center justify-center rounded-xl font-bold shadow-sm hover:scale-105 transition-transform cursor-pointer",
+                    isCorrect ? "bg-green-500 dark:bg-green-600 text-white" : "bg-red-500 dark:bg-red-600 text-white",
+                  )}
+                >
+                  {index + 1}
+                </button>
+              );
+            })}
           </div>
         </div>
 
@@ -278,23 +248,22 @@ const AttemptResultContent = () => {
               const userSelectedOption = fullQuestion.options?.find((opt) =>
                 answer.selectedOptionIds?.includes(opt.id),
               );
+              const isCorrect = userSelectedOption?.id === correctOption?.id;
 
               return (
                 <Card key={answer.id} className="overflow-hidden">
                   <CardContent className="p-6">
                     <div className="flex items-start justify-between mb-4">
-                      <Badge
-                        className={cn("text-white text-sm font-bold", answer.isCorrect ? "bg-green-600" : "bg-red-600")}
-                      >
+                      <Badge className={cn("text-white text-sm font-bold", isCorrect ? "bg-green-600" : "bg-red-600")}>
                         Câu {answer.questionNo}
                       </Badge>
                       <span
                         className={cn(
                           "flex items-center gap-1 text-sm font-medium",
-                          answer.isCorrect ? "text-green-600" : "text-red-600",
+                          isCorrect ? "text-green-600" : "text-red-600",
                         )}
                       >
-                        {answer.isCorrect ? (
+                        {isCorrect ? (
                           <>
                             <CheckCircle2 className="w-4 h-4" /> Chính xác
                           </>
@@ -317,7 +286,7 @@ const AttemptResultContent = () => {
                           <div
                             key={option.id}
                             className={cn(
-                              "p-2 rounded-xl border flex justify-between items-center",
+                              "p-3 rounded-xl border flex justify-between items-center",
                               isUserAnswer &&
                                 !isCorrectAnswer &&
                                 "border-2 border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-900/10",
@@ -365,7 +334,7 @@ const AttemptResultContent = () => {
             onClick={handleRetake}
           >
             <RefreshCw className="w-5 h-5" />
-            Làm lại bài thi
+            Luyện tập lại
           </Button>
           <Button
             variant="outline"
@@ -381,4 +350,4 @@ const AttemptResultContent = () => {
   );
 };
 
-export default AttemptResultContent;
+export default PracticeResultContent;

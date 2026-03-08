@@ -16,8 +16,8 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
-// import { useExam } from "../hooks/useExam";
-// import { useQuizAttemptsByExam, useStartQuizAttempt } from "../hooks/useQuiz";
+// import { useExam } from "../queries/useExam";
+// import { useQuizAttemptsByExam, useStartQuizAttempt } from "../queries/useQuiz";
 import type { QuizAttemptBriefResponse, QuizAttemptStatus } from "../types/quiz.type";
 import { ExamResponse } from "@/feature/exam/types/exam.type";
 import { ApprovalStatus, QuestionLevel, QuestionType } from "@/feature/question/types/question.type";

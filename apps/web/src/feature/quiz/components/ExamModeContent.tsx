@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ChevronRight, Timer, BookOpen, CheckCircle2, Rocket, Edit3, AlertCircle } from "lucide-react";
-// import { useStartQuizAttempt, useStartQuizSession } from "../hooks/useQuiz";
+// import { useStartQuizAttempt, useStartQuizSession } from "../queries/useQuiz";
 
 interface ExamModeContentProps {
   examId: string | number;
@@ -14,7 +14,6 @@ const ExamModeContent: React.FC<ExamModeContentProps> = ({ examId }) => {
   // const startAttemptMutation = useStartQuizAttempt();
   // const startSessionMutation = useStartQuizSession();
 
-  // ===== HANDLERS =====
   const handleStartExam = async () => {
     // try {
     //   const response = await startAttemptMutation.mutateAsync({

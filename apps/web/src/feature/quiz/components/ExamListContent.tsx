@@ -17,8 +17,8 @@ import { Input } from "@workspace/ui/components/Input";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { cn } from "@workspace/ui/lib/utils";
-// import { useAllExams } from "../hooks/useExam";
-// import { useMyQuizAttempts } from "../hooks/useQuiz";
+// import { useAllExams } from "../queries/useExam";
+// import { useMyQuizAttempts } from "../queries/useQuiz";
 import type { ExamBriefResponse } from "../../exam/types/exam.type";
 import type { QuizAttemptBriefResponse, QuizAttemptStatus } from "../types/quiz.type";
 
@@ -192,10 +192,10 @@ const ExamListContent: React.FC = () => {
   const handleViewResult = (examId: number) => {
     const attempt = attempts.find((a) => a.exam.id === examId);
     if (attempt) {
-      navigate({
-        to: "/quiz-attempts/$attemptId/result",
-        params: { attemptId: String(attempt.id) },
-      });
+      // navigate({
+      //   to: "/quiz-attempts/$attemptId/result",
+      //   params: { attemptId: String(attempt.id) },
+      // });
     }
   };
 
