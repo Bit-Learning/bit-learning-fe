@@ -41,6 +41,8 @@ import { Route as AuthenticatedAppsIndexRouteImport } from './routes/_authentica
 import { Route as ClerkAuthenticatedUserManagementRouteImport } from './routes/clerk/_authenticated/user-management'
 import { Route as ClerkauthSignUpRouteImport } from './routes/clerk/(auth)/sign-up'
 import { Route as ClerkauthSignInRouteImport } from './routes/clerk/(auth)/sign-in'
+import { Route as AuthenticatedTemplatesCreateRouteImport } from './routes/_authenticated/templates/create'
+import { Route as AuthenticatedTemplatesIdRouteImport } from './routes/_authenticated/templates/$id'
 import { Route as AuthenticatedSubjectIdRouteImport } from './routes/_authenticated/subject/$id'
 import { Route as AuthenticatedSettingsNotificationsRouteImport } from './routes/_authenticated/settings/notifications'
 import { Route as AuthenticatedSettingsDisplayRouteImport } from './routes/_authenticated/settings/display'
@@ -52,6 +54,7 @@ import { Route as AuthenticatedCoursesIdRouteImport } from './routes/_authentica
 import { Route as AuthenticatedContestsCreateRouteImport } from './routes/_authenticated/contests/create'
 import { Route as AuthenticatedContestsIdRouteImport } from './routes/_authenticated/contests/$id'
 import { Route as AuthenticatedAppsGamesIndexRouteImport } from './routes/_authenticated/apps/games/index'
+import { Route as AuthenticatedTemplatesIdEditRouteImport } from './routes/_authenticated/templates/$id.edit'
 import { Route as AuthenticatedContestsIdManageProblemsRouteImport } from './routes/_authenticated/contests/$id_.manage-problems'
 import { Route as AuthenticatedContestsIdEditRouteImport } from './routes/_authenticated/contests/$id_.edit'
 
@@ -223,6 +226,18 @@ const ClerkauthSignInRoute = ClerkauthSignInRouteImport.update({
   path: '/sign-in',
   getParentRoute: () => ClerkauthRouteRoute,
 } as any)
+const AuthenticatedTemplatesCreateRoute =
+  AuthenticatedTemplatesCreateRouteImport.update({
+    id: '/templates/create',
+    path: '/templates/create',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
+const AuthenticatedTemplatesIdRoute =
+  AuthenticatedTemplatesIdRouteImport.update({
+    id: '/templates/$id',
+    path: '/templates/$id',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedSubjectIdRoute = AuthenticatedSubjectIdRouteImport.update({
   id: '/subject/$id',
   path: '/subject/$id',
@@ -285,6 +300,12 @@ const AuthenticatedAppsGamesIndexRoute =
     path: '/apps/games/',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedTemplatesIdEditRoute =
+  AuthenticatedTemplatesIdEditRouteImport.update({
+    id: '/edit',
+    path: '/edit',
+    getParentRoute: () => AuthenticatedTemplatesIdRoute,
+  } as any)
 const AuthenticatedContestsIdManageProblemsRoute =
   AuthenticatedContestsIdManageProblemsRouteImport.update({
     id: '/contests/$id_/manage-problems',
@@ -321,6 +342,8 @@ export interface FileRoutesByFullPath {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/subject/$id': typeof AuthenticatedSubjectIdRoute
+  '/templates/$id': typeof AuthenticatedTemplatesIdRouteWithChildren
+  '/templates/create': typeof AuthenticatedTemplatesCreateRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -340,6 +363,7 @@ export interface FileRoutesByFullPath {
   '/users/': typeof AuthenticatedUsersIndexRoute
   '/contests/$id/edit': typeof AuthenticatedContestsIdEditRoute
   '/contests/$id/manage-problems': typeof AuthenticatedContestsIdManageProblemsRoute
+  '/templates/$id/edit': typeof AuthenticatedTemplatesIdEditRoute
   '/apps/games/': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRoutesByTo {
@@ -364,6 +388,8 @@ export interface FileRoutesByTo {
   '/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/subject/$id': typeof AuthenticatedSubjectIdRoute
+  '/templates/$id': typeof AuthenticatedTemplatesIdRouteWithChildren
+  '/templates/create': typeof AuthenticatedTemplatesCreateRoute
   '/clerk/sign-in': typeof ClerkauthSignInRoute
   '/clerk/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -383,6 +409,7 @@ export interface FileRoutesByTo {
   '/users': typeof AuthenticatedUsersIndexRoute
   '/contests/$id/edit': typeof AuthenticatedContestsIdEditRoute
   '/contests/$id/manage-problems': typeof AuthenticatedContestsIdManageProblemsRoute
+  '/templates/$id/edit': typeof AuthenticatedTemplatesIdEditRoute
   '/apps/games': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRoutesById {
@@ -412,6 +439,8 @@ export interface FileRoutesById {
   '/_authenticated/settings/display': typeof AuthenticatedSettingsDisplayRoute
   '/_authenticated/settings/notifications': typeof AuthenticatedSettingsNotificationsRoute
   '/_authenticated/subject/$id': typeof AuthenticatedSubjectIdRoute
+  '/_authenticated/templates/$id': typeof AuthenticatedTemplatesIdRouteWithChildren
+  '/_authenticated/templates/create': typeof AuthenticatedTemplatesCreateRoute
   '/clerk/(auth)/sign-in': typeof ClerkauthSignInRoute
   '/clerk/(auth)/sign-up': typeof ClerkauthSignUpRoute
   '/clerk/_authenticated/user-management': typeof ClerkAuthenticatedUserManagementRoute
@@ -431,6 +460,7 @@ export interface FileRoutesById {
   '/_authenticated/users/': typeof AuthenticatedUsersIndexRoute
   '/_authenticated/contests/$id_/edit': typeof AuthenticatedContestsIdEditRoute
   '/_authenticated/contests/$id_/manage-problems': typeof AuthenticatedContestsIdManageProblemsRoute
+  '/_authenticated/templates/$id/edit': typeof AuthenticatedTemplatesIdEditRoute
   '/_authenticated/apps/games/': typeof AuthenticatedAppsGamesIndexRoute
 }
 export interface FileRouteTypes {
@@ -458,6 +488,8 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/subject/$id'
+    | '/templates/$id'
+    | '/templates/create'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
@@ -477,6 +509,7 @@ export interface FileRouteTypes {
     | '/users/'
     | '/contests/$id/edit'
     | '/contests/$id/manage-problems'
+    | '/templates/$id/edit'
     | '/apps/games/'
   fileRoutesByTo: FileRoutesByTo
   to:
@@ -501,6 +534,8 @@ export interface FileRouteTypes {
     | '/settings/display'
     | '/settings/notifications'
     | '/subject/$id'
+    | '/templates/$id'
+    | '/templates/create'
     | '/clerk/sign-in'
     | '/clerk/sign-up'
     | '/clerk/user-management'
@@ -520,6 +555,7 @@ export interface FileRouteTypes {
     | '/users'
     | '/contests/$id/edit'
     | '/contests/$id/manage-problems'
+    | '/templates/$id/edit'
     | '/apps/games'
   id:
     | '__root__'
@@ -548,6 +584,8 @@ export interface FileRouteTypes {
     | '/_authenticated/settings/display'
     | '/_authenticated/settings/notifications'
     | '/_authenticated/subject/$id'
+    | '/_authenticated/templates/$id'
+    | '/_authenticated/templates/create'
     | '/clerk/(auth)/sign-in'
     | '/clerk/(auth)/sign-up'
     | '/clerk/_authenticated/user-management'
@@ -567,6 +605,7 @@ export interface FileRouteTypes {
     | '/_authenticated/users/'
     | '/_authenticated/contests/$id_/edit'
     | '/_authenticated/contests/$id_/manage-problems'
+    | '/_authenticated/templates/$id/edit'
     | '/_authenticated/apps/games/'
   fileRoutesById: FileRoutesById
 }
@@ -810,6 +849,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ClerkauthSignInRouteImport
       parentRoute: typeof ClerkauthRouteRoute
     }
+    '/_authenticated/templates/create': {
+      id: '/_authenticated/templates/create'
+      path: '/templates/create'
+      fullPath: '/templates/create'
+      preLoaderRoute: typeof AuthenticatedTemplatesCreateRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/_authenticated/templates/$id': {
+      id: '/_authenticated/templates/$id'
+      path: '/templates/$id'
+      fullPath: '/templates/$id'
+      preLoaderRoute: typeof AuthenticatedTemplatesIdRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/subject/$id': {
       id: '/_authenticated/subject/$id'
       path: '/subject/$id'
@@ -887,6 +940,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAppsGamesIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/templates/$id/edit': {
+      id: '/_authenticated/templates/$id/edit'
+      path: '/edit'
+      fullPath: '/templates/$id/edit'
+      preLoaderRoute: typeof AuthenticatedTemplatesIdEditRouteImport
+      parentRoute: typeof AuthenticatedTemplatesIdRoute
+    }
     '/_authenticated/contests/$id_/manage-problems': {
       id: '/_authenticated/contests/$id_/manage-problems'
       path: '/contests/$id/manage-problems'
@@ -927,6 +987,20 @@ const AuthenticatedSettingsRouteRouteWithChildren =
     AuthenticatedSettingsRouteRouteChildren,
   )
 
+interface AuthenticatedTemplatesIdRouteChildren {
+  AuthenticatedTemplatesIdEditRoute: typeof AuthenticatedTemplatesIdEditRoute
+}
+
+const AuthenticatedTemplatesIdRouteChildren: AuthenticatedTemplatesIdRouteChildren =
+  {
+    AuthenticatedTemplatesIdEditRoute: AuthenticatedTemplatesIdEditRoute,
+  }
+
+const AuthenticatedTemplatesIdRouteWithChildren =
+  AuthenticatedTemplatesIdRoute._addFileChildren(
+    AuthenticatedTemplatesIdRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedSettingsRouteRoute: typeof AuthenticatedSettingsRouteRouteWithChildren
   AuthenticatedIndexRoute: typeof AuthenticatedIndexRoute
@@ -936,6 +1010,8 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedErrorsErrorRoute: typeof AuthenticatedErrorsErrorRoute
   AuthenticatedPostsIdRoute: typeof AuthenticatedPostsIdRoute
   AuthenticatedSubjectIdRoute: typeof AuthenticatedSubjectIdRoute
+  AuthenticatedTemplatesIdRoute: typeof AuthenticatedTemplatesIdRouteWithChildren
+  AuthenticatedTemplatesCreateRoute: typeof AuthenticatedTemplatesCreateRoute
   AuthenticatedAppsIndexRoute: typeof AuthenticatedAppsIndexRoute
   AuthenticatedChatsIndexRoute: typeof AuthenticatedChatsIndexRoute
   AuthenticatedContestsIndexRoute: typeof AuthenticatedContestsIndexRoute
@@ -963,6 +1039,8 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedErrorsErrorRoute: AuthenticatedErrorsErrorRoute,
   AuthenticatedPostsIdRoute: AuthenticatedPostsIdRoute,
   AuthenticatedSubjectIdRoute: AuthenticatedSubjectIdRoute,
+  AuthenticatedTemplatesIdRoute: AuthenticatedTemplatesIdRouteWithChildren,
+  AuthenticatedTemplatesCreateRoute: AuthenticatedTemplatesCreateRoute,
   AuthenticatedAppsIndexRoute: AuthenticatedAppsIndexRoute,
   AuthenticatedChatsIndexRoute: AuthenticatedChatsIndexRoute,
   AuthenticatedContestsIndexRoute: AuthenticatedContestsIndexRoute,
