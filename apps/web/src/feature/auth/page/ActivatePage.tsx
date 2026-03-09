@@ -6,7 +6,7 @@ const ActivatePage: React.FC = () => {
 		<>
 			<PageMeta
 				title="Kích hoạt tài khoản"
-				description="Kích hoạt tài khoản - Công ty Bithub"
+				description="Kích hoạt tài khoản - Công ty Bit Learning"
 			/>
 			<ActivateCard />
 		</>

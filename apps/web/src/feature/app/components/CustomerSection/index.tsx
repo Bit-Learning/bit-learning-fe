@@ -85,12 +85,12 @@ const CustomerSection: React.FC = () => {
 						<div className="rounded-xl bg-white p-8 shadow-lg">
 							<h3 className="mb-6 flex items-center text-2xl font-bold text-gray-900">
 								<span className="mr-3 h-8 border-l-4 border-blue-700" />
-								Tại sao chọn Bithub Learning?
+								Tại sao chọn Bit Learning?
 							</h3>
 							<p className="mb-6 text-base leading-relaxed text-gray-700">
-								Với hơn 5 năm kinh nghiệm trong lĩnh vực đào tạo lập trình,
-								Bithub Learning đã trở thành trung tâm đào tạo uy tín và đối tác
-								tin cậy của nhiều doanh nghiệp. Chúng tôi cam kết mang đến những
+								Với hơn 5 năm kinh nghiệm trong lĩnh vực đào tạo lập trình, Bit
+								Learning đã trở thành trung tâm đào tạo uy tín và đối tác tin
+								cậy của nhiều doanh nghiệp. Chúng tôi cam kết mang đến những
 								khóa học chất lượng cao nhất.
 							</p>
 

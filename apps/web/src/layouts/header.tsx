@@ -83,7 +83,7 @@ const Header: React.FC = () => {
 					<Link to="/" className="flex items-center relative z-50">
 						<img
 							src="/Logo.png"
-							alt="Bithub Learning"
+							alt="Bit Learning"
 							className={cn(
 								"object-contain transition-all duration-300",
 								isScrolled ? "h-8 w-28" : "h-10 w-36",

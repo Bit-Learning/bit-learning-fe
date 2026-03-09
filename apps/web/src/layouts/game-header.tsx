@@ -61,7 +61,7 @@ const GameHeader: React.FC = () => {
 							<Gamepad2 className="h-8 w-8 text-purple-300" />
 							<img
 								src="/Logo.png"
-								alt="Bithub Learning"
+								alt="Bit Learning"
 								className="h-10 w-36 object-contain brightness-0 invert"
 							/>
 						</div>

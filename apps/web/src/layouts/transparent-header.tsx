@@ -66,7 +66,7 @@ const TransparentHeader: React.FC = () => {
 						<div className="flex items-center space-x-2">
 							<img
 								src="/Logo.png"
-								alt="Bithub Learning"
+								alt="Bit Learning"
 								className="h-10 w-36 object-contain drop-shadow-[0_2px_12px_rgba(255,255,255,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_4px_20px_rgba(255,255,255,0.8)]"
 							/>
 						</div>
