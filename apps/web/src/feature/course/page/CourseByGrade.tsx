@@ -16,7 +16,7 @@ const CoursesByGradePage: React.FC = () => {
 		<>
 			<PageMeta
 				title={`Khóa học Tin học Lớp ${grade} - ${getGradeLevel(Number(grade))} - Bithub`}
-				description={`Khám phá các khóa học tin học chất lượng cao cho học sinh lớp ${grade} tại Bithub Learning`}
+				description={`Khám phá các khóa học tin học chất lượng cao cho học sinh lớp ${grade} tại Bit Learning`}
 			/>
 			<CoursesByGradeComponent />
 		</>

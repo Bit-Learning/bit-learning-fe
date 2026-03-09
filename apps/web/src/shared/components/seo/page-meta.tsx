@@ -13,7 +13,7 @@ interface PageMetaProps {
 }
 
 const PageMeta: React.FC<PageMetaProps> = ({
-	title = "Bithub Learning - Nơi đào tạo lập trình hàng đầu Việt Nam",
+	title = "Bit Learning - Nơi đào tạo lập trình hàng đầu Việt Nam",
 	description = "Trung tâm đào tạo lập trình hàng đầu Việt Nam, khóa học, tư duy lập trình",
 	keywords = "website, khóa học, tư duy lập trình",
 	url = "https://bithub.edu.vn",
@@ -22,7 +22,7 @@ const PageMeta: React.FC<PageMetaProps> = ({
 	jsonLd,
 	noIndex = false,
 }) => {
-	const siteTitle = "BitHub Learning";
+	const siteTitle = "Bit Learning";
 	const fullTitle = title.includes(siteTitle)
 		? title
 		: `${title} | ${siteTitle}`;

@@ -126,7 +126,7 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({
 					<div className="mx-auto mb-4 flex items-center justify-center">
 						<img
 							src="./Logo.png"
-							alt="Bithub Logo"
+							alt="Bit Learning Logo"
 							className="h-10 w-36 object-contain"
 						/>
 					</div>

@@ -157,7 +157,7 @@ const QRCodeLogin: React.FC = () => {
 							level={"H"} // QUAN TRỌNG: Mức độ sửa lỗi cao nhất (High)
 							marginSize={10}
 							imageSettings={{
-								src: "/edulogo.png", // Đường dẫn logo (để trong thư mục public)
+								src: "/Logo.png", // Đường dẫn logo (để trong thư mục public)
 								x: undefined, // Để undefined để tự căn giữa
 								y: undefined,
 								height: 50, // Chiều cao logo (px)
@@ -178,7 +178,7 @@ const QRCodeLogin: React.FC = () => {
 							level={"H"}
 							marginSize={10}
 							imageSettings={{
-								src: "/edulogo.png",
+								src: "/Logo.png",
 								x: undefined,
 								y: undefined,
 								height: 50,
@@ -251,7 +251,7 @@ const QRCodeLogin: React.FC = () => {
 									level={"H"}
 									marginSize={0}
 									imageSettings={{
-										src: "/edulogo.png",
+										src: "/Logo.png",
 										x: undefined,
 										y: undefined,
 										height: 40,

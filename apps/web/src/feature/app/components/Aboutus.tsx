@@ -92,7 +92,7 @@ const AboutUs: React.FC = () => {
 							Về chúng tôi
 						</Badge>
 						<h1 className="mb-6 text-4xl font-bold md:text-6xl">
-							BITHUB LEARNING
+							BIT LEARNING
 						</h1>
 						<p className="mx-auto mb-8 max-w-3xl text-xl opacity-90 md:text-2xl">
 							Nơi ước mơ lập trình của bạn trở thành hiện thực
@@ -147,9 +147,9 @@ const AboutUs: React.FC = () => {
 							</h2>
 							<div className="space-y-4 leading-relaxed text-gray-600">
 								<p>
-									Bithub Learning được thành lập vào năm 2019 với sứ mệnh mang
-									đến những khóa học lập trình chất lượng cao, giúp học viên có
-									thể nắm vững kiến thức và kỹ năng cần thiết để trở thành những
+									Bit Learning được thành lập vào năm 2019 với sứ mệnh mang đến
+									những khóa học lập trình chất lượng cao, giúp học viên có thể
+									nắm vững kiến thức và kỹ năng cần thiết để trở thành những
 									developer chuyên nghiệp.
 								</p>
 								<p>
@@ -168,7 +168,7 @@ const AboutUs: React.FC = () => {
 						<div className="relative">
 							<img
 								src="https://images.unsplash.com/photo-1522202176988-66273c2fd55f?ixlib=rb-4.0.3&auto=format&fit=crop&w=1000&q=80"
-								alt="BithubLearning Team"
+								alt="Bit Learning Team"
 								className="w-full rounded-xl shadow-2xl"
 							/>
 							<div className="absolute -bottom-6 -right-6 rounded-xl bg-white p-6 shadow-lg">

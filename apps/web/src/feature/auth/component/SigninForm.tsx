@@ -159,7 +159,7 @@ const SignInForm: React.FC = () => {
 						<div className="flex items-center space-x-2">
 							<img
 								src="./Logo.png"
-								alt="Bithub Logo"
+								alt="Bit Learning Logo"
 								className="h-10 w-36 object-contain"
 							/>
 						</div>
