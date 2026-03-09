@@ -11,6 +11,7 @@ import {
   FileQuestion,
   FileText,
   LayoutDashboard,
+  PresentationIcon,
   Puzzle,
 } from "lucide-react";
 
@@ -65,6 +66,12 @@ const menuItems = [
     label: "Yêu cầu duyệt câu hỏi",
     icon: FileCheck,
     path: "/mentor/question/my-requests",
+  },
+  {
+    id: "my-slides",
+    label: "Quản lí slide",
+    icon: PresentationIcon,
+    path: "/mentor/slides",
   },
 ];
 

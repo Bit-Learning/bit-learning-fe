@@ -42,6 +42,7 @@ import { Route as LayoutChatRouteImport } from './routes/_layout/chat'
 import { Route as LayoutCartRouteImport } from './routes/_layout/cart'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
 import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
+import { Route as MentorSlidesIndexRouteImport } from './routes/mentor/slides/index'
 import { Route as MentorQuestionIndexRouteImport } from './routes/mentor/question/index'
 import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
 import { Route as MentorMatrixIndexRouteImport } from './routes/mentor/matrix/index'
@@ -286,6 +287,11 @@ const HeaderOnlyAiChatbotRoute = HeaderOnlyAiChatbotRouteImport.update({
   id: '/ai-chatbot',
   path: '/ai-chatbot',
   getParentRoute: () => HeaderOnlyRoute,
+} as any)
+const MentorSlidesIndexRoute = MentorSlidesIndexRouteImport.update({
+  id: '/mentor/slides/',
+  path: '/mentor/slides/',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const MentorQuestionIndexRoute = MentorQuestionIndexRouteImport.update({
   id: '/mentor/question/',
@@ -809,6 +815,7 @@ export interface FileRoutesByFullPath {
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
   '/mentor/question/': typeof MentorQuestionIndexRoute
+  '/mentor/slides/': typeof MentorSlidesIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/forum/$id/edit': typeof LayoutForumIdEditRoute
@@ -923,6 +930,7 @@ export interface FileRoutesByTo {
   '/mentor/matrix': typeof MentorMatrixIndexRoute
   '/mentor/problem': typeof MentorProblemIndexRoute
   '/mentor/question': typeof MentorQuestionIndexRoute
+  '/mentor/slides': typeof MentorSlidesIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/forum/$id/edit': typeof LayoutForumIdEditRoute
@@ -1040,6 +1048,7 @@ export interface FileRoutesById {
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
   '/mentor/question/': typeof MentorQuestionIndexRoute
+  '/mentor/slides/': typeof MentorSlidesIndexRoute
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
   '/_layout/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/_layout/forum/$id/edit': typeof LayoutForumIdEditRoute
@@ -1156,6 +1165,7 @@ export interface FileRouteTypes {
     | '/mentor/matrix/'
     | '/mentor/problem/'
     | '/mentor/question/'
+    | '/mentor/slides/'
     | '/courses/grade/$grade'
     | '/exams/$examId/mode'
     | '/forum/$id/edit'
@@ -1270,6 +1280,7 @@ export interface FileRouteTypes {
     | '/mentor/matrix'
     | '/mentor/problem'
     | '/mentor/question'
+    | '/mentor/slides'
     | '/courses/grade/$grade'
     | '/exams/$examId/mode'
     | '/forum/$id/edit'
@@ -1386,6 +1397,7 @@ export interface FileRouteTypes {
     | '/mentor/matrix/'
     | '/mentor/problem/'
     | '/mentor/question/'
+    | '/mentor/slides/'
     | '/_layout/courses/grade/$grade'
     | '/_layout/exams/$examId/mode'
     | '/_layout/forum/$id/edit'
@@ -1452,6 +1464,7 @@ export interface RootRouteChildren {
   MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
   MentorProblemIndexRoute: typeof MentorProblemIndexRoute
   MentorQuestionIndexRoute: typeof MentorQuestionIndexRoute
+  MentorSlidesIndexRoute: typeof MentorSlidesIndexRoute
   MentorMatrixIdGenerateRoute: typeof MentorMatrixIdGenerateRoute
   MentorQuestionIdEditRoute: typeof MentorQuestionIdEditRoute
   MentorMatrixIdIndexRoute: typeof MentorMatrixIdIndexRoute
@@ -1690,6 +1703,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/ai-chatbot'
       preLoaderRoute: typeof HeaderOnlyAiChatbotRouteImport
       parentRoute: typeof HeaderOnlyRoute
+    }
+    '/mentor/slides/': {
+      id: '/mentor/slides/'
+      path: '/mentor/slides'
+      fullPath: '/mentor/slides/'
+      preLoaderRoute: typeof MentorSlidesIndexRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/mentor/question/': {
       id: '/mentor/question/'
@@ -2521,6 +2541,7 @@ const rootRouteChildren: RootRouteChildren = {
   MentorMatrixIndexRoute: MentorMatrixIndexRoute,
   MentorProblemIndexRoute: MentorProblemIndexRoute,
   MentorQuestionIndexRoute: MentorQuestionIndexRoute,
+  MentorSlidesIndexRoute: MentorSlidesIndexRoute,
   MentorMatrixIdGenerateRoute: MentorMatrixIdGenerateRoute,
   MentorQuestionIdEditRoute: MentorQuestionIdEditRoute,
   MentorMatrixIdIndexRoute: MentorMatrixIdIndexRoute,
