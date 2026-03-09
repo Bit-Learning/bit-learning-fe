@@ -11,6 +11,7 @@ import cart from "@/feature/order/stores/cart.store";
 import forum from "@/feature/forum/stores/forum.store";
 import contest from "@/feature/contest/stores/contest.store";
 import quiz from "@/feature/quiz/stores/quiz.store";
+import chat from "@/feature/chat-ai/stores/chat.store";
 
 const combineReducer = combineReducers({
   app: app,
@@ -24,6 +25,7 @@ const combineReducer = combineReducers({
   forum: forum,
   contest: contest,
   quiz: quiz,
+  chat: chat,
 });
 
 export type RootState = ReturnType<typeof combineReducer>;
