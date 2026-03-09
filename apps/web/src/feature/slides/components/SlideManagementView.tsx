@@ -1,19 +1,17 @@
 import React, { useState } from "react";
 import { CreateSlideTab } from "./CreateSlideTab";
-import { Slide, TabType } from "../types/slide.type";
 import { MySlidesTab } from "./MySlidesTab";
 import { DetailModal } from "./DetailModal";
+import type { SlideGenerationResponse } from "../types/slide.type";
 
-interface SlideManagementViewProps {
-  instructorId: number;
-}
+type TabType = "create" | "my-slides";
 
-export const SlideManagementView: React.FC<SlideManagementViewProps> = ({ instructorId }) => {
+export const SlideManagementView: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("create");
-  const [selectedSlide, setSelectedSlide] = useState<Slide | null>(null);
+  const [selectedSlide, setSelectedSlide] = useState<SlideGenerationResponse | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  const openDetailModal = (slide: Slide) => {
+  const openDetailModal = (slide: SlideGenerationResponse) => {
     setSelectedSlide(slide);
     setShowDetailModal(true);
   };
@@ -21,11 +19,6 @@ export const SlideManagementView: React.FC<SlideManagementViewProps> = ({ instru
   const closeDetailModal = () => {
     setShowDetailModal(false);
     setSelectedSlide(null);
-  };
-
-  const handleGenerateSlide = (data: any) => {
-    console.log("Generating slides for instructor:", instructorId);
-    console.log("Slide data:", data);
   };
 
   return (
@@ -60,13 +53,9 @@ export const SlideManagementView: React.FC<SlideManagementViewProps> = ({ instru
         </div>
 
         {activeTab === "create" ? (
-          <CreateSlideTab instructorId={instructorId} onGenerateSlide={handleGenerateSlide} />
+          <CreateSlideTab />
         ) : (
-          <MySlidesTab
-            instructorId={instructorId}
-            onViewDetail={openDetailModal}
-            onSwitchToCreate={() => setActiveTab("create")}
-          />
+          <MySlidesTab onViewDetail={openDetailModal} onSwitchToCreate={() => setActiveTab("create")} />
         )}
       </div>
 

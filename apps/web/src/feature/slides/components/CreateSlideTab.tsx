@@ -6,67 +6,43 @@ import {
   FileEdit,
   BookOpen,
   List,
-  Palette,
-  Library,
   X,
   ChevronLeft,
   ChevronRight,
   CheckCircle,
   Image,
   Brain,
+  Loader2,
 } from "lucide-react";
-import { GRADE_OPTIONS, Template } from "../types/slide.type";
+import { useGenerateSlide } from "../queries/useSlide";
+import { useTemplates } from "../queries/useTemplate";
+import { GRADE_OPTIONS } from "../types/slide.type";
+import type { SlideRequest } from "../types/slide.type";
+import { toast } from "@workspace/ui/components/Sonner";
 
-interface CreateSlideTabProps {
-  instructorId: number;
-  onGenerateSlide: (data: any) => void;
-}
-
-const templates: Template[] = [
-  {
-    id: "tpl1",
-    name: "Mẫu xanh dương",
-    category: "Chuyên nghiệp",
-    color: "bg-blue-600",
-    gradient: "from-blue-600 to-blue-700",
-  },
-  {
-    id: "tpl2",
-    name: "Mẫu hiện đại",
-    category: "Tối giản",
-    color: "bg-slate-900",
-    gradient: "from-slate-800 to-slate-900",
-  },
-  {
-    id: "tpl3",
-    name: "Mẫu giáo dục",
-    category: "Trường học",
-    color: "bg-emerald-500",
-    gradient: "from-emerald-500 to-emerald-600",
-    icon: <Library className="text-white/60" size={32} />,
-  },
-  {
-    id: "tpl4",
-    name: "Mẫu sáng tạo",
-    category: "Nghệ thuật",
-    color: "bg-amber-500",
-    gradient: "from-amber-500 to-amber-600",
-    icon: <Palette className="text-white/60" size={32} />,
-  },
-];
-
-export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, onGenerateSlide }) => {
-  const [selectedTemplate, setSelectedTemplate] = useState("tpl1");
+export const CreateSlideTab: React.FC = () => {
+  const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
   const [topic, setTopic] = useState("");
-  const [grade, setGrade] = useState("");
+  const [grade, setGrade] = useState(6);
   const [slideCount, setSlideCount] = useState(10);
   const [includeExamples, setIncludeExamples] = useState(true);
   const [includeExercises, setIncludeExercises] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
-  const [previewTemplateId, setPreviewTemplateId] = useState("");
+  const [previewTemplateId, setPreviewTemplateId] = useState<number | null>(null);
   const [previewCarouselIndex, setPreviewCarouselIndex] = useState(0);
 
-  const openPreviewModal = (templateId: string) => {
+  const { data: templatesData, isLoading: templatesLoading } = useTemplates();
+  const generateSlide = useGenerateSlide();
+
+  const templates = templatesData?.data || [];
+
+  React.useEffect(() => {
+    if (templates.length > 0 && !selectedTemplateId) {
+      setSelectedTemplateId(templates[0]?.id!);
+    }
+  }, [templates, selectedTemplateId]);
+
+  const openPreviewModal = (templateId: number) => {
     setPreviewTemplateId(templateId);
     setShowPreviewModal(true);
     setPreviewCarouselIndex(0);
@@ -77,15 +53,32 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
   };
 
   const handleGenerate = () => {
-    onGenerateSlide({
+    if (!topic.trim()) {
+      toast.error({
+        title: "Thiếu thông tin",
+        description: "Vui lòng nhập chủ đề bài giảng.",
+      });
+      return;
+    }
+
+    if (!selectedTemplateId) {
+      toast.error({
+        title: "Thiếu thông tin",
+        description: "Vui lòng chọn template.",
+      });
+      return;
+    }
+
+    const request: SlideRequest = {
       topic,
       grade,
-      templateId: selectedTemplate,
+      templateId: selectedTemplateId,
       slideCount,
       includeExamples,
       includeExercises,
-      instructorId,
-    });
+    };
+
+    generateSlide.mutate(request);
   };
 
   const currentTemplate = templates.find((t) => t.id === previewTemplateId);
@@ -96,14 +89,12 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
           title: "Trang Tiêu Đề",
           subtitle: "Title Slide",
           content: (
-            <div
-              className={`w-full max-w-4xl aspect-video bg-linear-to-br ${currentTemplate.gradient || currentTemplate.color} rounded-2xl shadow-2xl flex flex-col justify-center items-center text-white p-16 border-12 border-white/10 relative overflow-hidden`}
-            >
+            <div className="w-full max-w-4xl aspect-video bg-linear-to-br from-blue-600 to-blue-700 rounded-2xl shadow-2xl flex flex-col justify-center items-center text-white p-16 border-12 border-white/10 relative overflow-hidden">
               <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent"></div>
               <div className="absolute -left-10 -bottom-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
               <div className="h-1.5 w-32 bg-white/40 rounded-full mb-10"></div>
               <h3 className="text-5xl font-black text-center mb-8 leading-tight tracking-tight uppercase">
-                Tin Học Lớp {grade || "6"}
+                Tin Học Lớp {grade}
                 <br />
                 <span className="text-white/80">Lập trình cơ bản</span>
               </h3>
@@ -228,6 +219,15 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
       ]
     : [];
 
+  if (templatesLoading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        <span className="ml-3 text-slate-600">Đang tải templates...</span>
+      </div>
+    );
+  }
+
   return (
     <>
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -238,22 +238,24 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
                 <div className="md:col-span-2">
                   <label className="block text-sm font-medium text-slate-700 mb-2">Chủ đề bài giảng</label>
                   <input
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none disabled:opacity-50"
                     placeholder="Ví dụ: Lập trình Pascal, Thuật toán sắp xếp..."
                     type="text"
                     value={topic}
                     onChange={(e) => setTopic(e.target.value)}
+                    disabled={generateSlide.isPending}
                   />
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">Lớp học</label>
                   <select
-                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+                    className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none disabled:opacity-50"
                     value={grade}
-                    onChange={(e) => setGrade(e.target.value)}
+                    onChange={(e) => setGrade(Number(e.target.value))}
+                    disabled={generateSlide.isPending}
                   >
-                    {GRADE_OPTIONS.map((option: any) => (
-                      <option key={option.value} value={option.value}>
+                    {GRADE_OPTIONS.filter((opt) => opt.value).map((option: any) => (
+                      <option key={option.value} value={option.value.replace("Lớp ", "")}>
                         {option.label}
                       </option>
                     ))}
@@ -269,49 +271,62 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
                   {templates.map((tpl) => (
                     <div key={tpl.id} className="relative group">
                       <input
-                        checked={selectedTemplate === tpl.id}
+                        checked={selectedTemplateId === tpl.id}
                         className="hidden peer"
-                        id={tpl.id}
+                        id={`tpl-${tpl.id}`}
                         name="template"
                         type="radio"
-                        onChange={() => setSelectedTemplate(tpl.id)}
+                        onChange={() => setSelectedTemplateId(tpl.id)}
+                        disabled={generateSlide.isPending}
                       />
                       <label
-                        className={`block cursor-pointer h-full border-2 rounded-xl overflow-hidden transition-all ${selectedTemplate === tpl.id ? "border-primary ring-2 ring-primary shadow-lg" : "border-slate-200 hover:border-primary"}`}
-                        htmlFor={tpl.id}
+                        className={`block cursor-pointer h-full border-2 rounded-xl overflow-hidden transition-all ${selectedTemplateId === tpl.id ? "border-primary ring-2 ring-primary shadow-lg" : "border-slate-200 hover:border-primary"}`}
+                        htmlFor={`tpl-${tpl.id}`}
                       >
-                        <div
-                          className={`relative h-32 bg-linear-to-br ${tpl.gradient || tpl.color} overflow-hidden flex flex-col justify-center items-center text-white p-4`}
-                        >
-                          {tpl.icon ? (
-                            <div className="relative z-10 text-center">
-                              {tpl.icon}
-                              <div className="h-2 w-16 bg-white/80 mx-auto rounded mt-2"></div>
+                        {tpl.thumbnailUrl ? (
+                          <div className="relative h-32 overflow-hidden">
+                            <img src={tpl.thumbnailUrl} alt={tpl.name} className="w-full h-full object-cover" />
+                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                              <button
+                                className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-slate-100 transition-colors shadow-lg"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  openPreviewModal(tpl.id);
+                                }}
+                                type="button"
+                              >
+                                <Eye size={16} />
+                                Xem trước
+                              </button>
                             </div>
-                          ) : (
+                          </div>
+                        ) : (
+                          <div className="relative h-32 bg-linear-to-br from-blue-600 to-blue-700 overflow-hidden flex flex-col justify-center items-center text-white p-4">
                             <div className="relative z-10 text-center">
                               <div className="h-1 w-8 bg-white/40 mx-auto rounded mb-1"></div>
                               <div className="h-2 w-16 bg-white/80 mx-auto rounded mb-1"></div>
                               <div className="h-1 w-12 bg-white/40 mx-auto rounded"></div>
                             </div>
-                          )}
-                          <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
-                            <button
-                              className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-slate-100 transition-colors shadow-lg"
-                              onClick={(e) => {
-                                e.preventDefault();
-                                openPreviewModal(tpl.id);
-                              }}
-                              type="button"
-                            >
-                              <Eye size={16} />
-                              Xem trước
-                            </button>
+                            <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
+                              <button
+                                className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-slate-100 transition-colors shadow-lg"
+                                onClick={(e) => {
+                                  e.preventDefault();
+                                  openPreviewModal(tpl.id);
+                                }}
+                                type="button"
+                              >
+                                <Eye size={16} />
+                                Xem trước
+                              </button>
+                            </div>
                           </div>
-                        </div>
+                        )}
                         <div className="p-3 bg-white">
                           <h4 className="text-xs font-bold text-slate-900 truncate">{tpl.name}</h4>
-                          <p className="text-xs text-slate-500 mt-0.5 uppercase tracking-tight">{tpl.category}</p>
+                          {tpl.description && (
+                            <p className="text-xs text-slate-500 mt-0.5 truncate">{tpl.description}</p>
+                          )}
                         </div>
                       </label>
                     </div>
@@ -325,16 +340,17 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
                   <div className="relative flex items-center">
                     <List className="absolute left-3 text-slate-400" size={20} />
                     <input
-                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
-                      max="50"
+                      className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-10 pr-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none disabled:opacity-50"
+                      max="15"
                       min="1"
                       type="number"
                       value={slideCount}
                       onChange={(e) => setSlideCount(Number(e.target.value))}
+                      disabled={generateSlide.isPending}
                     />
                   </div>
                   <p className="text-xs text-slate-400 mt-1.5 italic">
-                    * Đề xuất: 10 - 20 slides để đạt hiệu quả tốt nhất.
+                    * Đề xuất: 5 - 15 slides để đạt hiệu quả tốt nhất.
                   </p>
                 </div>
 
@@ -350,6 +366,7 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
                         className="sr-only peer"
                         type="checkbox"
                         onChange={(e) => setIncludeExamples(e.target.checked)}
+                        disabled={generateSlide.isPending}
                       />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary rounded-full"></div>
                     </label>
@@ -365,6 +382,7 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
                         className="sr-only peer"
                         type="checkbox"
                         onChange={(e) => setIncludeExercises(e.target.checked)}
+                        disabled={generateSlide.isPending}
                       />
                       <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary rounded-full"></div>
                     </label>
@@ -373,11 +391,21 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
               </div>
 
               <button
-                className="w-full bg-primary hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] shadow-xl shadow-primary/30"
+                className="w-full bg-primary hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] shadow-xl shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 onClick={handleGenerate}
+                disabled={generateSlide.isPending || !topic.trim() || !selectedTemplateId}
               >
-                <Sparkles size={20} />
-                Tạo Slide với AI
+                {generateSlide.isPending ? (
+                  <>
+                    <Loader2 className="w-5 h-5 animate-spin" />
+                    Đang tạo slide...
+                  </>
+                ) : (
+                  <>
+                    <Sparkles size={20} />
+                    Tạo Slide với AI
+                  </>
+                )}
               </button>
             </div>
           </section>
@@ -407,7 +435,7 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
       </div>
 
       {showPreviewModal && currentTemplate && (
-        <div className="fixed inset-0 z-60 flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md">
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md">
           <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden relative border border-slate-200/20">
             <div className="px-8 py-6 border-b border-slate-200 flex items-center justify-between">
               <div>
@@ -477,7 +505,7 @@ export const CreateSlideTab: React.FC<CreateSlideTabProps> = ({ instructorId, on
               <button
                 className="px-10 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-lg hover:bg-blue-700 transition-all transform hover:scale-[1.02] flex items-center gap-2"
                 onClick={() => {
-                  setSelectedTemplate(previewTemplateId);
+                  setSelectedTemplateId(previewTemplateId);
                   closePreviewModal();
                 }}
               >

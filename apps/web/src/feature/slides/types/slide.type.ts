@@ -1,50 +1,79 @@
-import React from "react";
-
-export type TabType = "create" | "my-slides";
-
-export interface Template {
-  id: string;
-  name: string;
-  category: string;
-  color: string;
-  gradient?: string;
-  icon?: React.ReactNode;
+export enum SlideFormat {
+  POWERPOINT = "powerpoint",
+  MARKDOWN = "markdown",
+  HTML = "html",
+  TEXT = "text",
+  JSON = "json",
 }
 
-export interface Slide {
-  id: string;
-  topic: string;
-  grade: string;
-  slideCount: number;
-  createdDate: string;
-  template: string;
-  icon: React.ReactNode;
-  iconColor: string;
-  hasExamples: boolean;
-  hasExercises: boolean;
-  instructorId?: number;
+export enum SlideType {
+  TITLE_SLIDE = "title_slide",
+  CONTENT_SLIDE = "content_slide",
+  CODE_SLIDE = "code_slide",
+  IMAGE_SLIDE = "image_slide",
+  TABLE_SLIDE = "table_slide",
+  EXERCISE_SLIDE = "exercise_slide",
+  SUMMARY_SLIDE = "summary_slide",
 }
 
-export interface CreateSlideRequest {
+export interface SlideContent {
+  slideNumber: number;
+  title: string;
+  content: string;
+  notes?: string;
+  sources?: string[];
+}
+
+export interface SlideGenerationResponse {
+  id: number;
   topic: string;
-  grade: string;
-  templateId: string;
+  templateId: number;
+  templateName: string;
+  cloudinaryUrl: string;
+  filename: string;
   slideCount: number;
-  includeExamples: boolean;
-  includeExercises: boolean;
-  instructorId: number;
+  fromCache?: boolean;
+  generatedAt: string;
+  message?: string;
+}
+
+export interface SlideRequest {
+  topic: string;
+  grade: number;
+  templateId: number;
+  slideCount?: number;
+  includeExamples?: boolean;
+  includeExercises?: boolean;
 }
 
 export interface SlideResponse {
-  id: string;
   topic: string;
-  grade: string;
-  slideCount: number;
-  templateName: string;
-  createdAt: string;
-  hasExamples: boolean;
-  hasExercises: boolean;
-  downloadUrl?: string;
+  slides: SlideContent[];
+  format: SlideFormat;
+  totalSlides: number;
+  gradeLevel: string;
+  status: string;
+  processingTime?: number;
+  error?: string;
+}
+
+export interface JsonSlideMetadata {
+  totalSlides: number;
+  estimatedDuration: string;
+  sources?: Record<string, string>;
+  generatedAt: string;
+  gradeLevel: string;
+}
+
+export interface JsonSlideResponse {
+  title: string;
+  topic: string;
+  grade: number;
+  slides: any[];
+  metadata: JsonSlideMetadata;
+  status: string;
+  processingTime?: number;
+  error?: string;
 }
 
 export const GRADE_COLOR_MAP: { [key: string]: string } = {
