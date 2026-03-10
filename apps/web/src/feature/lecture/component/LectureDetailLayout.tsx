@@ -157,7 +157,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
         <div className="flex items-center gap-4">
           <button
             type="button"
-            className="text-gray-400 transition-colors hover:text-white"
+            className="cursor-pointer text-gray-400 transition-colors hover:text-white"
             onClick={() => navigate({ to: "/courses/$id", params: { id: String(courseId) } })}
           >
             <ChevronLeft className="h-6 w-6" />

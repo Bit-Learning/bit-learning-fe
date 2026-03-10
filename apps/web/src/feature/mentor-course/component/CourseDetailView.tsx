@@ -1,4 +1,4 @@
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
@@ -38,10 +38,6 @@ import { EditLectureModal } from "./EditLectureModal";
 import { EditSectionModal } from "./EditSectionModal";
 import { LectureDetailModal } from "./LectureDetailModal";
 
-interface CourseDetailViewProps {
-  courseId: number;
-}
-
 type ModalState =
   | { type: "none" }
   | { type: "create-lecture"; sectionId: number }
@@ -56,7 +52,9 @@ type DeleteModalState =
   | { type: "section"; id: number; name: string }
   | { type: "lecture"; id: number; name: string };
 
-export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
+export const CourseDetailView = () => {
+  const { id } = useParams({ from: "/mentor/course/$id" });
+  const courseId = Number(id);
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
   const [modalState, setModalState] = useState<ModalState>({ type: "none" });
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: "none" });

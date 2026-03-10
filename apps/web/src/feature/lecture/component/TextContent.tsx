@@ -106,6 +106,7 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, isOwner, onComplet
             <div className="mt-8 border-t border-gray-700 pt-6">
               <Button
                 onPress={handleMarkComplete}
+                size="xl"
                 isDisabled={!hasScrolledToBottom || isPending}
                 className="w-full bg-green-600 py-3 text-white hover:bg-green-700 disabled:opacity-50"
               >

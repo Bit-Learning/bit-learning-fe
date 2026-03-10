@@ -167,7 +167,7 @@ export const QuizForm = () => {
       }
 
       dispatch(resetMLectureStateAction());
-      navigate({ to: `/mentor/course/${context.courseId}` });
+      navigate({ to: "/mentor/course/$id", params: { id: String(context.courseId) } });
     } catch (error) {
       console.error("Failed to save quiz:", error);
     }
@@ -175,7 +175,7 @@ export const QuizForm = () => {
 
   const handleCancel = () => {
     if (context?.courseId) {
-      navigate({ to: `/mentor/course/${context.courseId}` });
+      navigate({ to: "/mentor/course/$id", params: { id: String(context.courseId) } });
     }
     dispatch(resetMLectureStateAction());
   };
@@ -209,7 +209,12 @@ export const QuizForm = () => {
   return (
     <div className="mx-auto p-8">
       <div className="mb-6">
-        <Button variant="outline" size="sm" onClick={handleCancel}>
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={handleCancel}
+        >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Quay lại
         </Button>
@@ -221,27 +226,38 @@ export const QuizForm = () => {
 
       <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
         <Card className="p-6">
-          <h3 className="mb-4 text-lg font-semibold">Thông tin bài học</h3>
-          <div className="space-y-4">
-            <div>
-              <Label htmlFor="title">Tên bài học *</Label>
+          <h3 className="mb-5 text-lg font-semibold">Thông tin bài học</h3>
+          <div className="space-y-5">
+            <div className="space-y-2">
+              <Label htmlFor="title" className="text-sm font-medium">
+                Tên bài học *
+              </Label>
               <Input
                 id="title"
                 {...register("title", { required: "Tên bài học là bắt buộc" })}
                 placeholder="VD: Bài kiểm tra chương 1"
-                className={cn(errors.title && "border-red-500")}
+                className={cn("h-11 w-full text-base", errors.title && "border-red-500")}
               />
-              {errors.title && <p className="mt-1 text-sm text-red-500">{errors.title.message}</p>}
+              {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
             </div>
 
-            <div>
-              <Label htmlFor="description">Mô tả</Label>
-              <Input id="description" {...register("description")} placeholder="Mô tả ngắn về bài kiểm tra" />
+            <div className="space-y-2">
+              <Label htmlFor="description" className="text-sm font-medium">
+                Mô tả
+              </Label>
+              <Input
+                id="description"
+                {...register("description")}
+                placeholder="Mô tả ngắn về bài kiểm tra"
+                className="h-11 w-full text-base"
+              />
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="passPercent">Điểm đạt (%) *</Label>
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <Label htmlFor="passPercent" className="text-sm font-medium">
+                  Điểm đạt (%) *
+                </Label>
                 <Input
                   id="passPercent"
                   type="number"
@@ -255,13 +271,15 @@ export const QuizForm = () => {
                     valueAsNumber: true,
                   })}
                   placeholder="0.8 (80%)"
-                  className={cn(errors.passPercent && "border-red-500")}
+                  className={cn("h-11 w-full text-base", errors.passPercent && "border-red-500")}
                 />
-                {errors.passPercent && <p className="mt-1 text-sm text-red-500">{errors.passPercent.message}</p>}
+                {errors.passPercent && <p className="text-sm text-red-500">{errors.passPercent.message}</p>}
               </div>
 
-              <div>
-                <Label htmlFor="maxAttempts">Số lần làm tối đa *</Label>
+              <div className="space-y-2">
+                <Label htmlFor="maxAttempts" className="text-sm font-medium">
+                  Số lần làm tối đa *
+                </Label>
                 <Input
                   id="maxAttempts"
                   type="number"
@@ -272,9 +290,9 @@ export const QuizForm = () => {
                     valueAsNumber: true,
                   })}
                   placeholder="3"
-                  className={cn(errors.maxAttempts && "border-red-500")}
+                  className={cn("h-11 w-full text-base", errors.maxAttempts && "border-red-500")}
                 />
-                {errors.maxAttempts && <p className="mt-1 text-sm text-red-500">{errors.maxAttempts.message}</p>}
+                {errors.maxAttempts && <p className="text-sm text-red-500">{errors.maxAttempts.message}</p>}
               </div>
             </div>
           </div>
@@ -283,7 +301,7 @@ export const QuizForm = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Câu hỏi ({questionFields.length})</h3>
-            <Button type="button" onClick={addQuestion} size="sm">
+            <Button type="button" onClick={addQuestion} size="lg">
               <Plus className="mr-2 h-4 w-4" />
               Thêm câu hỏi
             </Button>
@@ -303,10 +321,10 @@ export const QuizForm = () => {
         </div>
 
         <div className="flex justify-end gap-3 border-t pt-6">
-          <Button type="button" variant="outline" onClick={handleCancel}>
+          <Button type="button" size="lg" variant="outline" onClick={handleCancel}>
             Hủy
           </Button>
-          <Button type="submit" isDisabled={isSubmitting}>
+          <Button type="submit" size="lg" isDisabled={isSubmitting}>
             {isSubmitting
               ? isEditMode
                 ? "Đang lưu..."

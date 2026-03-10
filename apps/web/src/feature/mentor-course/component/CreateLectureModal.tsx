@@ -48,8 +48,9 @@ export const CreateLectureModal = ({
         orderIndex: getNextOrderIndex(),
       }),
     );
-    navigate({ to: "/mentor/course/quiz" });
     onClose();
+
+    navigate({ to: "/mentor/course/quiz" });
   };
 
   const form = useForm<{

@@ -19,6 +19,7 @@ export const useLectureProgress = (lectureId: number) => {
     staleTime: 0,
   });
 };
+
 export const useIsLectureCompleted = (lectureId: number) => {
   return useQuery({
     queryKey: LEARNING_KEYS.isCompleted(lectureId),
@@ -28,6 +29,7 @@ export const useIsLectureCompleted = (lectureId: number) => {
     },
     enabled: !!lectureId,
     staleTime: 5 * 60 * 1000,
+    select: (data) => (typeof data === "object" && data !== null ? (data as any).isCompleted : data) as boolean,
   });
 };
 
@@ -37,19 +39,26 @@ export const useMultipleLecturesCompleted = (lectureIds: number[]) => {
       queryKey: LEARNING_KEYS.isCompleted(id),
       queryFn: async () => {
         const response = await learningApi.isLectureCompleted(id);
-        return { id, isCompleted: response.data.data ?? false };
+        return response.data.data ?? false;
       },
       staleTime: 5 * 60 * 1000,
       enabled: !!id,
     })),
   });
 
-  const completedIds = results.filter((r) => r.data?.isCompleted).map((r) => r.data!.id);
+  const completedIds = results
+    .map((r, idx) => {
+      const data = r.data as any;
+      const isCompleted = typeof data === "object" && data !== null ? data.isCompleted : data;
+      return isCompleted ? lectureIds[idx] : null;
+    })
+    .filter((id): id is number => id !== null);
 
   const isLoading = results.some((r) => r.isLoading);
 
   return { completedIds, isLoading };
 };
+
 export const useSyncProgress = () => {
   return useMutation({
     mutationFn: (data: SyncProgressRequest) => learningApi.syncProgress(data),
@@ -62,11 +71,8 @@ export const useMarkAsCompleted = () => {
   return useMutation({
     mutationFn: (lectureId: number) => learningApi.markAsCompleted(lectureId),
     onSuccess: (_, lectureId) => {
-      queryClient.invalidateQueries({
-        queryKey: LEARNING_KEYS.progress(lectureId),
-      });
-      queryClient.invalidateQueries({ queryKey: LEARNING_KEYS.all });
-      queryClient.invalidateQueries({ queryKey: ["sections"] });
+      queryClient.setQueryData(LEARNING_KEYS.isCompleted(lectureId), true);
+      queryClient.invalidateQueries({ queryKey: LEARNING_KEYS.progress(lectureId) });
     },
   });
 };

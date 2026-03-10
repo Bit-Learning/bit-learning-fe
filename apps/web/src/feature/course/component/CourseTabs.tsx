@@ -115,7 +115,7 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
 
         {activeTab === "reviews" &&
           (hasAccess ? (
-            <div className="text-center py-8 text-slate-500">
+            <div className="py-6 text-slate-500">
               <CourseReviews courseId={course.id} />
             </div>
           ) : (
