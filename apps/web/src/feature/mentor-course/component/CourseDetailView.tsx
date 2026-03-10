@@ -1,4 +1,4 @@
-import { Link, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
@@ -48,6 +48,7 @@ type ModalState =
   | { type: "view-lecture"; lecture: LectureDetail }
   | { type: "edit-lecture"; lecture: LectureDetail }
   | { type: "edit-section"; section: SectionDetail }
+  | { type: "add-section" }
   | { type: "edit-course" };
 
 type DeleteModalState =
@@ -57,11 +58,8 @@ type DeleteModalState =
 
 export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
-  const [isAddingSection, setIsAddingSection] = useState(false);
   const [modalState, setModalState] = useState<ModalState>({ type: "none" });
-  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
-    type: "none",
-  });
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: "none" });
 
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -93,7 +91,7 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
         orderIndex: (sections?.length || 0) + 1,
       });
       sectionForm.reset();
-      setIsAddingSection(false);
+      setModalState({ type: "none" });
     } catch (error) {
       console.error("Failed to create section:", error);
     }
@@ -128,7 +126,10 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
     }
   };
 
-  const closeModal = () => setModalState({ type: "none" });
+  const closeModal = () => {
+    sectionForm.reset();
+    setModalState({ type: "none" });
+  };
 
   const handleViewLecture = (lecture: LectureDetail) => setModalState({ type: "view-lecture", lecture });
 
@@ -193,16 +194,15 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
 
   return (
     <div className="space-y-4">
-      <Link to="/mentor/course/list">
-        <Button
-          variant="outline"
-          size="lg"
-          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
-        >
-          <ArrowLeft className="h-4 w-4" />
-          <span>Quay lại danh sách</span>
-        </Button>
-      </Link>
+      <Button
+        variant="outline"
+        size="lg"
+        className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+        onClick={() => navigate({ to: "/mentor/course/list" })}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <span>Quay lại danh sách</span>
+      </Button>
 
       <div className="mt-2 flex items-center justify-between">
         <div>
@@ -212,6 +212,7 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
         <div>
           <Button
             onClick={() => setModalState({ type: "edit-course" })}
+            size="lg"
             className="bg-linear-to-r mr-3 gap-2 from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
           >
             <Settings className="h-4 w-4" />
@@ -249,64 +250,10 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
         </div>
 
         <div className="mb-4">
-          {!isAddingSection ? (
-            <Button onClick={() => setIsAddingSection(true)} variant="outline" className="w-full">
-              <Plus className="mr-2 h-4 w-4" />
-              Thêm chương mới
-            </Button>
-          ) : (
-            <Card className="border-2 border-blue-400 p-4">
-              <Form {...sectionForm}>
-                <form onSubmit={sectionForm.handleSubmit(handleCreateSection)} className="space-y-4">
-                  <FormField
-                    control={sectionForm.control}
-                    name="title"
-                    rules={{
-                      required: "Tên chương là bắt buộc",
-                      maxLength: { value: 100, message: "Tối đa 100 ký tự" },
-                    }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Tên chương *</FormLabel>
-                        <FormControl>
-                          <Input placeholder="VD: Chương 1: Giới thiệu" autoFocus {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                  <FormField
-                    control={sectionForm.control}
-                    name="description"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Mô tả</FormLabel>
-                        <FormControl>
-                          <Textarea rows={2} placeholder="Mô tả chương (tùy chọn)" {...field} />
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex gap-2">
-                    <Button type="submit" size="sm" isDisabled={createSectionMutation.isPending}>
-                      {createSectionMutation.isPending ? "Đang thêm..." : "Thêm chương"}
-                    </Button>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      onClick={() => {
-                        setIsAddingSection(false);
-                        sectionForm.reset();
-                      }}
-                    >
-                      Hủy
-                    </Button>
-                  </div>
-                </form>
-              </Form>
-            </Card>
-          )}
+          <Button onClick={() => setModalState({ type: "add-section" })} variant="outline" className="w-full">
+            <Plus className="mr-2 h-4 w-4" />
+            Thêm chương mới
+          </Button>
         </div>
 
         <div className="space-y-3">
@@ -376,12 +323,7 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
                       variant="outline"
                       size="sm"
                       className="w-full"
-                      onClick={() =>
-                        setModalState({
-                          type: "create-lecture",
-                          sectionId: section.id,
-                        })
-                      }
+                      onClick={() => setModalState({ type: "create-lecture", sectionId: section.id })}
                     >
                       <Plus className="mr-2 h-4 w-4" />
                       Thêm bài học
@@ -457,6 +399,55 @@ export const CourseDetailView = ({ courseId }: CourseDetailViewProps) => {
           )}
         </div>
       </Card>
+
+      {modalState.type === "add-section" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+          <Card className="w-full max-w-md p-6">
+            <h2 className="mb-4 text-xl font-bold">Thêm chương mới</h2>
+            <Form {...sectionForm}>
+              <form onSubmit={sectionForm.handleSubmit(handleCreateSection)} className="space-y-4">
+                <FormField
+                  control={sectionForm.control}
+                  name="title"
+                  rules={{
+                    required: "Tên chương là bắt buộc",
+                    maxLength: { value: 100, message: "Tối đa 100 ký tự" },
+                  }}
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Tên chương *</FormLabel>
+                      <FormControl>
+                        <Input placeholder="VD: Chương 1: Giới thiệu" autoFocus {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={sectionForm.control}
+                  name="description"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Mô tả</FormLabel>
+                      <FormControl>
+                        <Textarea rows={3} placeholder="Mô tả chương (tùy chọn)" {...field} />
+                      </FormControl>
+                    </FormItem>
+                  )}
+                />
+                <div className="flex justify-end gap-2">
+                  <Button type="button" variant="outline" onClick={closeModal}>
+                    Hủy
+                  </Button>
+                  <Button type="submit" isDisabled={createSectionMutation.isPending}>
+                    {createSectionMutation.isPending ? "Đang thêm..." : "Thêm chương"}
+                  </Button>
+                </div>
+              </form>
+            </Form>
+          </Card>
+        </div>
+      )}
 
       {modalState.type === "create-lecture" && (
         <CreateLectureModal

@@ -207,7 +207,7 @@ export const QuizForm = () => {
   const isSubmitting = createQuizMutation.isPending || updateLectureMutation.isPending || updateQuizMutation.isPending;
 
   return (
-    <div className="mx-auto max-w-5xl">
+    <div className="mx-auto p-8">
       <div className="mb-6">
         <Button variant="outline" size="sm" onClick={handleCancel}>
           <ArrowLeft className="mr-2 h-4 w-4" />

@@ -72,14 +72,18 @@ export const CreateCourseForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-4xl p-8">
+    <Card className="w-full  p-8">
       <div className="mb-6">
-        <Link to="/mentor/course/list">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại
-          </Button>
-        </Link>
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={() => navigate({ to: "/mentor/course/list" })}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại danh sách</span>
+        </Button>
+
         <h1 className="mt-4 text-3xl font-bold">Tạo khóa học mới</h1>
         <p className="mt-2 text-gray-600">Điền thông tin cơ bản cho khóa học của bạn</p>
       </div>

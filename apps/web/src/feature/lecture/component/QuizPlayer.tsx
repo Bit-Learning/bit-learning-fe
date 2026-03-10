@@ -7,10 +7,11 @@ import { useMarkAsCompleted } from "../queries/useLearning";
 
 interface QuizPlayerProps {
   lectureId: number;
+  isOwner?: boolean;
   onComplete?: () => void;
 }
 
-const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
+const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, isOwner, onComplete }) => {
   const { data: quizData, isLoading } = useLectureQuiz(lectureId);
   const { mutate: markAsCompleted } = useMarkAsCompleted();
 
@@ -19,7 +20,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
   const [score, setScore] = useState(0);
 
   const handleSubmit = () => {
-    if (!quizData) return;
+    if (!quizData || isOwner) return;
 
     let correctCount = 0;
     quizData.quizzes.forEach((quiz) => {
@@ -88,7 +89,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
           </div>
         </div>
 
-        {submitted && (
+        {!isOwner && submitted && (
           <div className={`mb-8 rounded-lg p-6 ${isPassed ? "bg-green-600" : "bg-red-600"}`}>
             <div className="flex items-center gap-4">
               {isPassed ? <CheckCircle className="h-8 w-8 text-white" /> : <XCircle className="h-8 w-8 text-white" />}
@@ -123,7 +124,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                   {quiz.answers.map((answer) => {
                     const isSelected = selectedAnswerId === answer.id;
                     const isCorrect = answer.isCorrect;
-                    const showResult = submitted;
+                    const showResult = !isOwner && submitted;
 
                     let bgColor = "border-gray-700";
                     if (showResult) {
@@ -136,11 +137,16 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                       bgColor = "border-blue-500 bg-blue-500/10";
                     }
 
+                    // Owner: luôn highlight đáp án đúng
+                    if (isOwner && isCorrect) {
+                      bgColor = "border-green-500 bg-green-500/10";
+                    }
+
                     return (
                       <label
                         key={answer.id}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all ${bgColor} ${
-                          submitted ? "cursor-default" : "hover:border-gray-600"
+                          submitted || isOwner ? "cursor-default" : "hover:border-gray-600"
                         }`}
                       >
                         <input
@@ -149,16 +155,17 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                           checked={isSelected}
                           onChange={() =>
                             !submitted &&
+                            !isOwner &&
                             setSelectedAnswers((prev) => ({
                               ...prev,
                               [quiz.id]: answer.id,
                             }))
                           }
-                          disabled={submitted}
+                          disabled={submitted || isOwner}
                           className="h-5 w-5 accent-blue-600"
                         />
                         <span className="flex-1 text-white">{answer.answerText}</span>
-                        {showResult && isCorrect && <CheckCircle className="h-5 w-5 text-green-500" />}
+                        {(showResult || isOwner) && isCorrect && <CheckCircle className="h-5 w-5 text-green-500" />}
                         {showResult && isSelected && !isCorrect && <XCircle className="h-5 w-5 text-red-500" />}
                       </label>
                     );
@@ -169,7 +176,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
           })}
         </div>
 
-        {!submitted && (
+        {!isOwner && !submitted && (
           <Button
             onPress={handleSubmit}
             isDisabled={Object.keys(selectedAnswers).length !== quizData.quizzes.length}

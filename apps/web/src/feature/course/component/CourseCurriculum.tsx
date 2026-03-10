@@ -115,7 +115,7 @@ const CourseCurriculum: React.FC<CourseCurriculumProps> = ({ courseId }) => {
                         </div>
 
                         <div className="flex items-center gap-3">
-                          {lecture.isPreviewable && <Badge className="bg-blue-600 text-xs text-white">PREVIEW</Badge>}
+                          {lecture.isPreviewable && <Badge className="bg-blue-600 text-xs text-white">Học thử</Badge>}
                           <span className="text-sm text-gray-600">00:00:00</span>
                         </div>
                       </div>

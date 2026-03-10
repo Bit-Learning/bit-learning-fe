@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import { Input } from "@workspace/ui/components/Input";
@@ -14,6 +14,7 @@ interface CourseListViewProps {
 }
 
 export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [size] = useState(10);
@@ -63,12 +64,10 @@ export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
           <h1 className="text-3xl font-bold">Khóa học của tôi</h1>
           <p className="mt-1 text-gray-600">Quản lý và chỉnh sửa các khóa học</p>
         </div>
-        <Link to="/mentor/course/create">
-          <Button>
-            <Plus className="mr-2 h-4 w-4" />
-            Tạo khóa học mới
-          </Button>
-        </Link>
+        <Button size="lg" onClick={() => navigate({ to: "/mentor/course/create" })}>
+          <Plus className="mr-2 h-4 w-4" />
+          Tạo khóa học mới
+        </Button>
       </div>
 
       <Card className="p-4">
@@ -95,12 +94,10 @@ export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
           <BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
           <h3 className="mb-2 text-xl font-semibold">Chưa có khóa học nào</h3>
           <p className="mb-6 text-gray-600">Hãy tạo khóa học đầu tiên của bạn</p>
-          <Link to="/mentor/course/create">
-            <Button>
-              <Plus className="mr-2 h-4 w-4" />
-              Tạo khóa học mới
-            </Button>
-          </Link>
+          <Button size="lg" onClick={() => navigate({ to: "/mentor/course/create" })}>
+            <Plus className="mr-2 h-4 w-4" />
+            Tạo khóa học mới
+          </Button>
         </Card>
       ) : (
         <>
@@ -134,18 +131,21 @@ export const CoursesListView = ({ instructorId }: CourseListViewProps) => {
                   </div>
 
                   <div className="flex items-center gap-2 border-t pt-3">
-                    <Link to="/mentor/course/$id" params={{ id: String(course.id) }} className="flex-1">
-                      <Button variant="outline" className="w-full" size="sm">
-                        <Edit className="mr-2 h-4 w-4" />
-                        Chi tiết
-                      </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" onClick={() => handleToggleHide(course.id, course.isDeleted)}>
+                    <Button
+                      variant="outline"
+                      className="flex-1"
+                      size="lg"
+                      onClick={() => navigate({ to: "/mentor/course/$id", params: { id: String(course.id) } })}
+                    >
+                      <Edit className="mr-2 h-4 w-4" />
+                      Chi tiết
+                    </Button>
+                    <Button variant="outline" size="lg" onClick={() => handleToggleHide(course.id, course.isDeleted)}>
                       {course.isDeleted ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </Button>
                     <Button
                       variant="outline"
-                      size="sm"
+                      size="lg"
                       onClick={() => openDeleteModal(course.id, course.title)}
                       isDisabled={deleteMutation.isPending}
                     >
