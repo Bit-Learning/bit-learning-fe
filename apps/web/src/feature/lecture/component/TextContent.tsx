@@ -7,10 +7,11 @@ import { useMarkAsCompleted, useIsLectureCompleted } from "../queries/useLearnin
 
 interface TextContentProps {
   lectureId: number;
+  isOwner?: boolean;
   onComplete?: () => void;
 }
 
-const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
+const TextContent: React.FC<TextContentProps> = ({ lectureId, isOwner, onComplete }) => {
   const { data, isLoading, error } = useLectureText(lectureId);
   const { data: isCompleted } = useIsLectureCompleted(lectureId);
   const { mutate: markAsCompleted, isPending } = useMarkAsCompleted();
@@ -80,7 +81,7 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
         <div className="rounded-lg bg-gray-800 p-8">
           <div className="mb-6 flex items-center justify-between">
             <h1 className="text-3xl font-bold text-white">{lecture.title}</h1>
-            {isCompleted && (
+            {!isOwner && isCompleted && (
               <span className="flex items-center gap-1 text-sm text-green-400">
                 <CheckCircle className="h-4 w-4" />
                 Đã hoàn thành
@@ -96,15 +97,16 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
                     <p key={index} className="leading-relaxed">
                       {paragraph}
                     </p>
-                  )
+                  ),
               )}
             </div>
           </div>
 
-          {!isCompleted && (
+          {!isOwner && !isCompleted && (
             <div className="mt-8 border-t border-gray-700 pt-6">
               <Button
                 onPress={handleMarkComplete}
+                size="xl"
                 isDisabled={!hasScrolledToBottom || isPending}
                 className="w-full bg-green-600 py-3 text-white hover:bg-green-700 disabled:opacity-50"
               >

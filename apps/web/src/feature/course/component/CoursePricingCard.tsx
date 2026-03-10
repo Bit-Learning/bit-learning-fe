@@ -1,23 +1,42 @@
 import { Button } from "@workspace/ui/components/Button";
-import { Award, CheckCircle, Download, Loader2, MessageCircle, ShoppingCart, Video, Zap } from "lucide-react";
+import {
+  Award,
+  CheckCircle,
+  Download,
+  Loader2,
+  MessageCircle,
+  Play,
+  Settings,
+  ShoppingCart,
+  Video,
+  Zap,
+} from "lucide-react";
 import type React from "react";
 
 interface CoursePricingCardProps {
   price: number;
   hasAccess?: boolean;
+  isOwner?: boolean;
   isPending: boolean;
+  firstLectureId?: number;
   onEnroll: () => void;
   onAddToCart: () => void;
   onBuyNow: () => void;
+  onManage?: () => void;
+  onStartLearning?: () => void;
 }
 
 export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   price,
   hasAccess,
+  isOwner,
   isPending,
+  firstLectureId,
   onEnroll,
   onAddToCart,
   onBuyNow,
+  onManage,
+  onStartLearning,
 }) => {
   return (
     <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg p-8 border border-slate-100 dark:border-slate-800">
@@ -60,10 +79,35 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
         </li>
       </ul>
 
-      {hasAccess ? (
+      {firstLectureId && (hasAccess || isOwner) && (
+        <Button
+          onClick={onStartLearning}
+          size="lg"
+          className="w-full mb-3 bg-linear-to-r from-green-500 to-emerald-500 text-white py-5 rounded-xl font-bold shadow-lg hover:from-green-600 hover:to-emerald-600 transition-all flex items-center justify-center gap-2"
+        >
+          <Play className="w-5 h-5" />
+          Vào học ngay
+        </Button>
+      )}
+
+      {isOwner ? (
+        <div className="space-y-3">
+          {onManage && (
+            <Button
+              onClick={onManage}
+              size="lg"
+              className="w-full bg-transparent border-2 border-blue-600 text-blue-600 py-5 rounded-xl font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2"
+            >
+              <Settings className="w-5 h-5" />
+              Quản lý khóa học
+            </Button>
+          )}
+        </div>
+      ) : hasAccess ? (
         <Button
           isDisabled
-          className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-4 rounded-xl font-bold flex items-center justify-center gap-2 opacity-50"
+          size="lg"
+          className="w-full bg-linear-to-r from-green-500 to-emerald-500 text-white py-5 rounded-xl font-bold flex items-center justify-center gap-2 opacity-50"
         >
           <CheckCircle className="w-5 h-5" />
           Đã đăng ký
@@ -71,8 +115,9 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
       ) : price === 0 ? (
         <Button
           onClick={onEnroll}
+          size="lg"
           isDisabled={isPending}
-          className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+          className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
         >
           {isPending ? (
             <>
@@ -90,8 +135,9 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
         <div className="space-y-3">
           <Button
             onClick={onBuyNow}
+            size="lg"
             isDisabled={isPending}
-            className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-4 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-linear-to-r from-blue-600 to-indigo-600 text-white py-5 rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-indigo-700 transition-all flex items-center justify-center gap-2 disabled:opacity-50"
           >
             {isPending ? (
               <>
@@ -107,8 +153,9 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
           </Button>
           <Button
             onClick={onAddToCart}
+            size="lg"
             isDisabled={isPending}
-            className="w-full bg-transparent border-2 border-blue-600 text-blue-600 py-4 rounded-xl font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+            className="w-full bg-transparent border-2 border-blue-600 text-blue-600 py-5 rounded-xl font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
           >
             <ShoppingCart className="w-5 h-5" />
             Thêm vào giỏ hàng

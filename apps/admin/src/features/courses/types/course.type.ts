@@ -12,6 +12,7 @@ export interface CoursePreview {
   price: number;
   isDeleted: boolean;
   isPublished?: boolean;
+  status: CourseStatus;
 }
 
 export interface CourseDetail {
@@ -37,6 +38,7 @@ export interface CourseDetail {
   price: number;
   isPublished?: boolean;
   sections: SectionDetail[];
+  status: CourseStatus;
 }
 
 export interface SectionDetail {
@@ -78,4 +80,10 @@ export enum LectureType {
   TEXT = "TEXT",
   QUIZ = "QUIZ",
   EMPTY = "EMPTY",
+}
+
+export enum CourseStatus {
+  PENDING = "PENDING",
+  PUBLISHED = "PUBLISHED",
+  REJECTED = "REJECTED",
 }

@@ -72,14 +72,18 @@ export const CreateCourseForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-4xl p-8">
+    <Card className="w-full  p-8">
       <div className="mb-6">
-        <Link to="/mentor/course/list">
-          <Button variant="outline" size="sm">
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Quay lại
-          </Button>
-        </Link>
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={() => navigate({ to: "/mentor/course/list" })}
+        >
+          <ArrowLeft className="h-4 w-4" />
+          <span>Quay lại danh sách</span>
+        </Button>
+
         <h1 className="mt-4 text-3xl font-bold">Tạo khóa học mới</h1>
         <p className="mt-2 text-gray-600">Điền thông tin cơ bản cho khóa học của bạn</p>
       </div>
@@ -200,7 +204,7 @@ export const CreateCourseForm = () => {
               {...register("grade", { required: true, valueAsNumber: true })}
               className="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-transparent focus:ring-2 focus:ring-blue-500"
             >
-              {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
+              {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((grade) => (
                 <option key={grade} value={grade}>
                   Lớp {grade}
                 </option>
@@ -281,11 +285,16 @@ export const CreateCourseForm = () => {
 
         <div className="flex justify-end gap-3 border-t pt-6">
           <Link to="/mentor/course/list">
-            <Button type="button" variant="outline">
+            <Button type="button" size="xl" variant="outline">
               Hủy
             </Button>
           </Link>
-          <Button type="submit" isDisabled={createCourseMutation.isPending || !thumbnailFile} className="min-w-30">
+          <Button
+            type="submit"
+            size="xl"
+            isDisabled={createCourseMutation.isPending || !thumbnailFile}
+            className="min-w-30"
+          >
             {createCourseMutation.isPending ? "Đang tạo..." : "Tạo khóa học"}
           </Button>
         </div>
