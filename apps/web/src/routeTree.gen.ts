@@ -40,7 +40,6 @@ import { Route as LayoutConsultationRouteImport } from './routes/_layout/consult
 import { Route as LayoutChatAiRouteImport } from './routes/_layout/chat-ai'
 import { Route as LayoutCartRouteImport } from './routes/_layout/cart'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
-import { Route as HeaderOnlyAiChatbotRouteImport } from './routes/_headerOnly/ai-chatbot'
 import { Route as MentorSlidesIndexRouteImport } from './routes/mentor/slides/index'
 import { Route as MentorQuestionIndexRouteImport } from './routes/mentor/question/index'
 import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
@@ -261,11 +260,6 @@ const LayoutAboutRoute = LayoutAboutRouteImport.update({
   id: '/about',
   path: '/about',
   getParentRoute: () => LayoutRoute,
-} as any)
-const HeaderOnlyAiChatbotRoute = HeaderOnlyAiChatbotRouteImport.update({
-  id: '/ai-chatbot',
-  path: '/ai-chatbot',
-  getParentRoute: () => HeaderOnlyRoute,
 } as any)
 const MentorSlidesIndexRoute = MentorSlidesIndexRouteImport.update({
   id: '/mentor/slides/',
@@ -627,7 +621,6 @@ export interface FileRoutesByFullPath {
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/about': typeof LayoutAboutRoute
   '/cart': typeof LayoutCartRoute
   '/chat-ai': typeof LayoutChatAiRoute
@@ -726,7 +719,6 @@ export interface FileRoutesByTo {
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/about': typeof LayoutAboutRoute
   '/cart': typeof LayoutCartRoute
   '/chat-ai': typeof LayoutChatAiRoute
@@ -827,7 +819,6 @@ export interface FileRoutesById {
   '/signin': typeof SigninRoute
   '/signin-2fa': typeof Signin2faRoute
   '/signup': typeof SignupRoute
-  '/_headerOnly/ai-chatbot': typeof HeaderOnlyAiChatbotRoute
   '/_layout/about': typeof LayoutAboutRoute
   '/_layout/cart': typeof LayoutCartRoute
   '/_layout/chat-ai': typeof LayoutChatAiRoute
@@ -929,7 +920,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/ai-chatbot'
     | '/about'
     | '/cart'
     | '/chat-ai'
@@ -1028,7 +1018,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/ai-chatbot'
     | '/about'
     | '/cart'
     | '/chat-ai'
@@ -1128,7 +1117,6 @@ export interface FileRouteTypes {
     | '/signin'
     | '/signin-2fa'
     | '/signup'
-    | '/_headerOnly/ai-chatbot'
     | '/_layout/about'
     | '/_layout/cart'
     | '/_layout/chat-ai'
@@ -1491,13 +1479,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/about'
       preLoaderRoute: typeof LayoutAboutRouteImport
       parentRoute: typeof LayoutRoute
-    }
-    '/_headerOnly/ai-chatbot': {
-      id: '/_headerOnly/ai-chatbot'
-      path: '/ai-chatbot'
-      fullPath: '/ai-chatbot'
-      preLoaderRoute: typeof HeaderOnlyAiChatbotRouteImport
-      parentRoute: typeof HeaderOnlyRoute
     }
     '/mentor/slides/': {
       id: '/mentor/slides/'
@@ -1972,7 +1953,6 @@ declare module '@tanstack/react-router' {
 }
 
 interface HeaderOnlyRouteChildren {
-  HeaderOnlyAiChatbotRoute: typeof HeaderOnlyAiChatbotRoute
   HeaderOnlyProfileHistoryRoute: typeof HeaderOnlyProfileHistoryRoute
   HeaderOnlyProfileNotificationsRoute: typeof HeaderOnlyProfileNotificationsRoute
   HeaderOnlyProfilePasswordRoute: typeof HeaderOnlyProfilePasswordRoute
@@ -1980,7 +1960,6 @@ interface HeaderOnlyRouteChildren {
 }
 
 const HeaderOnlyRouteChildren: HeaderOnlyRouteChildren = {
-  HeaderOnlyAiChatbotRoute: HeaderOnlyAiChatbotRoute,
   HeaderOnlyProfileHistoryRoute: HeaderOnlyProfileHistoryRoute,
   HeaderOnlyProfileNotificationsRoute: HeaderOnlyProfileNotificationsRoute,
   HeaderOnlyProfilePasswordRoute: HeaderOnlyProfilePasswordRoute,

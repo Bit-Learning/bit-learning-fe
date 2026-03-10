@@ -29,7 +29,6 @@ import { Route as AuthenticatedTemplatesIndexRouteImport } from './routes/_authe
 import { Route as AuthenticatedSettingsIndexRouteImport } from './routes/_authenticated/settings/index'
 import { Route as AuthenticatedQuestionsIndexRouteImport } from './routes/_authenticated/questions/index'
 import { Route as AuthenticatedPostsIndexRouteImport } from './routes/_authenticated/posts/index'
-import { Route as AuthenticatedOrdersIndexRouteImport } from './routes/_authenticated/orders/index'
 import { Route as AuthenticatedHelpCenterIndexRouteImport } from './routes/_authenticated/help-center/index'
 import { Route as AuthenticatedCurriculumIndexRouteImport } from './routes/_authenticated/curriculum/index'
 import { Route as AuthenticatedCoursesIndexRouteImport } from './routes/_authenticated/courses/index'
@@ -156,12 +155,6 @@ const AuthenticatedPostsIndexRoute = AuthenticatedPostsIndexRouteImport.update({
   path: '/posts/',
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
-const AuthenticatedOrdersIndexRoute =
-  AuthenticatedOrdersIndexRouteImport.update({
-    id: '/orders/',
-    path: '/orders/',
-    getParentRoute: () => AuthenticatedRouteRoute,
-  } as any)
 const AuthenticatedHelpCenterIndexRoute =
   AuthenticatedHelpCenterIndexRouteImport.update({
     id: '/help-center/',
@@ -333,7 +326,6 @@ export interface FileRoutesByFullPath {
   '/courses/': typeof AuthenticatedCoursesIndexRoute
   '/curriculum/': typeof AuthenticatedCurriculumIndexRoute
   '/help-center/': typeof AuthenticatedHelpCenterIndexRoute
-  '/orders/': typeof AuthenticatedOrdersIndexRoute
   '/posts/': typeof AuthenticatedPostsIndexRoute
   '/questions/': typeof AuthenticatedQuestionsIndexRoute
   '/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -376,7 +368,6 @@ export interface FileRoutesByTo {
   '/courses': typeof AuthenticatedCoursesIndexRoute
   '/curriculum': typeof AuthenticatedCurriculumIndexRoute
   '/help-center': typeof AuthenticatedHelpCenterIndexRoute
-  '/orders': typeof AuthenticatedOrdersIndexRoute
   '/posts': typeof AuthenticatedPostsIndexRoute
   '/questions': typeof AuthenticatedQuestionsIndexRoute
   '/settings': typeof AuthenticatedSettingsIndexRoute
@@ -424,7 +415,6 @@ export interface FileRoutesById {
   '/_authenticated/courses/': typeof AuthenticatedCoursesIndexRoute
   '/_authenticated/curriculum/': typeof AuthenticatedCurriculumIndexRoute
   '/_authenticated/help-center/': typeof AuthenticatedHelpCenterIndexRoute
-  '/_authenticated/orders/': typeof AuthenticatedOrdersIndexRoute
   '/_authenticated/posts/': typeof AuthenticatedPostsIndexRoute
   '/_authenticated/questions/': typeof AuthenticatedQuestionsIndexRoute
   '/_authenticated/settings/': typeof AuthenticatedSettingsIndexRoute
@@ -470,7 +460,6 @@ export interface FileRouteTypes {
     | '/courses/'
     | '/curriculum/'
     | '/help-center/'
-    | '/orders/'
     | '/posts/'
     | '/questions/'
     | '/settings/'
@@ -513,7 +502,6 @@ export interface FileRouteTypes {
     | '/courses'
     | '/curriculum'
     | '/help-center'
-    | '/orders'
     | '/posts'
     | '/questions'
     | '/settings'
@@ -560,7 +548,6 @@ export interface FileRouteTypes {
     | '/_authenticated/courses/'
     | '/_authenticated/curriculum/'
     | '/_authenticated/help-center/'
-    | '/_authenticated/orders/'
     | '/_authenticated/posts/'
     | '/_authenticated/questions/'
     | '/_authenticated/settings/'
@@ -726,13 +713,6 @@ declare module '@tanstack/react-router' {
       path: '/posts'
       fullPath: '/posts/'
       preLoaderRoute: typeof AuthenticatedPostsIndexRouteImport
-      parentRoute: typeof AuthenticatedRouteRoute
-    }
-    '/_authenticated/orders/': {
-      id: '/_authenticated/orders/'
-      path: '/orders'
-      fullPath: '/orders/'
-      preLoaderRoute: typeof AuthenticatedOrdersIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
     '/_authenticated/help-center/': {
@@ -959,7 +939,6 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedCoursesIndexRoute: typeof AuthenticatedCoursesIndexRoute
   AuthenticatedCurriculumIndexRoute: typeof AuthenticatedCurriculumIndexRoute
   AuthenticatedHelpCenterIndexRoute: typeof AuthenticatedHelpCenterIndexRoute
-  AuthenticatedOrdersIndexRoute: typeof AuthenticatedOrdersIndexRoute
   AuthenticatedPostsIndexRoute: typeof AuthenticatedPostsIndexRoute
   AuthenticatedQuestionsIndexRoute: typeof AuthenticatedQuestionsIndexRoute
   AuthenticatedTemplatesIndexRoute: typeof AuthenticatedTemplatesIndexRoute
@@ -985,7 +964,6 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedCoursesIndexRoute: AuthenticatedCoursesIndexRoute,
   AuthenticatedCurriculumIndexRoute: AuthenticatedCurriculumIndexRoute,
   AuthenticatedHelpCenterIndexRoute: AuthenticatedHelpCenterIndexRoute,
-  AuthenticatedOrdersIndexRoute: AuthenticatedOrdersIndexRoute,
   AuthenticatedPostsIndexRoute: AuthenticatedPostsIndexRoute,
   AuthenticatedQuestionsIndexRoute: AuthenticatedQuestionsIndexRoute,
   AuthenticatedTemplatesIndexRoute: AuthenticatedTemplatesIndexRoute,
