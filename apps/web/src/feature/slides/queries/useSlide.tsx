@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { slideApi } from "../apis/slide.api";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import type { SlideRequest } from "../types/slide.type";
 
 export const slideKeys = {

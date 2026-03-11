@@ -38,7 +38,7 @@ export const useContestList = (params?: ContestListParams) => {
     queryKey: contestKeys.list(params),
     queryFn: async () => {
       const response = await contestApi.listContests(params);
-      return response.data.data;
+      return response.data;
     },
   });
 };

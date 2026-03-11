@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import type {
   ExamGenerateRequest,
   ExamGenerateFromUserQuestionsRequest,

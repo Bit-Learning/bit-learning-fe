@@ -18,7 +18,7 @@ import { useGenerateSlide } from "../queries/useSlide";
 import { useTemplates } from "../queries/useTemplate";
 import { GRADE_OPTIONS } from "../types/slide.type";
 import type { SlideRequest } from "../types/slide.type";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 
 export const CreateSlideTab: React.FC = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);

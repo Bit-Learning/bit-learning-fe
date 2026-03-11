@@ -78,7 +78,7 @@ export const sidebarData: SidebarData = {
         },
         {
           title: "Quản lí template",
-          url: "/tenmplates",
+          url: "/templates",
           icon: PresentationIcon,
         },
       ],

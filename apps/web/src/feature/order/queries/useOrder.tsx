@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { orderApi } from "../apis/order.api";
 import { OrderCreateRequest } from "../types/order.type";
 

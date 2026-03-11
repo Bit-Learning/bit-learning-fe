@@ -1,6 +1,6 @@
 import * as Sentry from "@sentry/react";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
-import { Toaster } from "@workspace/ui/components/Sonner";
+import { Toaster } from "@/shared/components/Sonner";
 import "@workspace/ui/globals.css";
 import ReactDOM from "react-dom/client";
 import "./instrument";
@@ -37,7 +37,7 @@ if (!rootElement.innerHTML) {
   });
   root.render(
     <SearchProvider>
-      <Toaster richColors position="top-right" />
+      <Toaster richColors position="bottom-right" />
       <RouterProvider router={router} />
     </SearchProvider>,
   );

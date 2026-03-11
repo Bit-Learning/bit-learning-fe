@@ -1,6 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { BookOpen, ChevronLeft } from "lucide-react";
 import type React from "react";
 import { useState } from "react";

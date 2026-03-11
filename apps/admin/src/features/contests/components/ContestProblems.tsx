@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import { useContestProblems } from "../hooks/useContest";
+// import { useContestProblems } from "../queries/useContest";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus, Trash2, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-// import { useContestDetail } from "../hooks/useContest";
+// import { useContestDetail } from "../queries/useContest";
 import { ContestStatus } from "../types/contest.type";
 import { Calendar, Edit2, StopCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";

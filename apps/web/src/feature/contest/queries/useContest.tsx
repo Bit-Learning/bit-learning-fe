@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import contestApi from "../apis/contest.api";
 import { selectSelectedStatus, selectSearchQuery, selectPagination } from "../stores/contest.store";
 import type { SubmitRequest, CreateClarificationRequest, MySubmissionsParams } from "../types/contest.type";

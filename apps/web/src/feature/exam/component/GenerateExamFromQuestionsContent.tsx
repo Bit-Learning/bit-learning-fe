@@ -7,7 +7,7 @@ import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
 import { Label } from "@workspace/ui/components/label";
 import { Checkbox } from "@workspace/ui/components/Checkbox";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { useSearchQuestions, useMyQuestions } from "@/feature/question/queries/useQuestion";
 import { useGenerateExamFromQuestions, useExam, useDownloadExam } from "../queries/useExam";
 import type { QuestionLevel } from "@/feature/question/types/question.type";

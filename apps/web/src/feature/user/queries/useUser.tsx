@@ -1,5 +1,5 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { useEffect } from "react";
 import { setIsLoadingAction } from "@/feature/app/stores";
 import { setErrorAction, setIsAuthenticatedAction, setUserInfoAction } from "@/feature/auth/store";

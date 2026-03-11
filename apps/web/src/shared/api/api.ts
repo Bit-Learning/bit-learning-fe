@@ -1,4 +1,4 @@
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import axios, {
   type AxiosError,
   type AxiosInstance,

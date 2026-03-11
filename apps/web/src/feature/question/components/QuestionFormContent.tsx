@@ -6,7 +6,7 @@ import { Input } from "@workspace/ui/components/Input";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
 import { Label } from "@workspace/ui/components/label";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { useCreateQuestion, useUpdateQuestion, useQuestion } from "../queries/useQuestion";
 import type { QuestionRequest, OptionRequest, QuestionType, QuestionLevel } from "../types/question.type";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
