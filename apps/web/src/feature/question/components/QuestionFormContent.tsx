@@ -10,7 +10,7 @@ import { toast } from "@/shared/components/Sonner";
 import { useCreateQuestion, useUpdateQuestion, useQuestion } from "../queries/useQuestion";
 import type { QuestionRequest, OptionRequest, QuestionType, QuestionLevel } from "../types/question.type";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
-import { useLessons } from "@/feature/matrix/queries/useLesson";
+import { useLessonsBySubject } from "@/feature/matrix/queries/useLesson";
 
 interface Props {
   mode?: "create" | "edit";
@@ -27,7 +27,6 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     enabled: mode === "edit" && !!questionId,
   });
   const { data: subjects } = useSubjectsList();
-  const { data: lessons } = useLessons();
 
   const [formData, setFormData] = useState<QuestionRequest>({
     content: "",
@@ -35,10 +34,12 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     questionType: "MCQ" as QuestionType,
     questionLevel: "EASY" as QuestionLevel,
     subjectId: undefined,
-    lessonId: 2,
+    lessonId: undefined,
     tagIds: [],
     options: [],
   });
+
+  const { data: lessons } = useLessonsBySubject(formData.subjectId);
 
   const [options, setOptions] = useState<OptionRequest[]>([
     { label: "A", content: "", isCorrect: false, orderNo: 0 },
@@ -71,8 +72,21 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     }
   }, [mode, existingQuestion]);
 
+  useEffect(() => {
+    if (formData.subjectId && formData.lessonId) {
+      const lessonBelongsToSubject = lessons?.some((l) => l.id === formData.lessonId);
+      if (!lessonBelongsToSubject) {
+        setFormData((prev) => ({ ...prev, lessonId: undefined }));
+      }
+    }
+  }, [formData.subjectId, formData.lessonId, lessons]);
+
   const handleInputChange = (field: keyof QuestionRequest, value: any) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    if (field === "subjectId") {
+      setFormData((prev) => ({ ...prev, [field]: value, lessonId: undefined }));
+    } else {
+      setFormData((prev) => ({ ...prev, [field]: value }));
+    }
   };
 
   const addOption = () => {
@@ -256,6 +270,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                 value={formData.lessonId || ""}
                 onChange={(e) => handleInputChange("lessonId", e.target.value ? Number(e.target.value) : undefined)}
                 className="w-full mt-1.5 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
+                disabled={!formData.subjectId}
               >
                 <option value="">-- Chọn bài học --</option>
                 {lessons &&
@@ -265,6 +280,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                     </option>
                   ))}
               </select>
+              {!formData.subjectId && <p className="text-xs text-muted-foreground mt-1">Vui lòng chọn môn học trước</p>}
             </div>
 
             <div>

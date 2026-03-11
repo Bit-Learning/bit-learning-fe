@@ -317,6 +317,7 @@ const MatrixDetailContent: React.FC = () => {
         onClose={() => setVersionModal(false)}
         matrixId={matrixId}
         totalScore={matrix.totalScore}
+        subjectId={matrix.subject.id}
       />
     </main>
   );
