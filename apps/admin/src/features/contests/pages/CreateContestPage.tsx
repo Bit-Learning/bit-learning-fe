@@ -17,8 +17,8 @@ import {
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Link } from "@tanstack/react-router";
-// import { useCreateContest, useUpdateContest } from "../queries/useContest";
-// import { useNavigate } from "@tanstack/react-router";
+import { useCreateContest, useUpdateContest } from "../queries/useContest";
+import { useNavigate } from "@tanstack/react-router";
 
 interface ContestUpsertDTO {
   title: string;
@@ -33,13 +33,12 @@ interface CreateContestPageProps {
 }
 
 export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId, initialData }) => {
-  // const navigate = useNavigate();
-  // const createMutation = useCreateContest();
-  // const updateMutation = useUpdateContest();
+  const navigate = useNavigate();
+  const createMutation = useCreateContest();
+  const updateMutation = useUpdateContest();
 
   const isEditMode = !!contestId;
 
-  // Form state
   const [formData, setFormData] = useState<ContestUpsertDTO>({
     title: "",
     description: "",
@@ -123,16 +122,17 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
     if (!validate()) {
       return;
     }
+    if (createMutation.isPending || updateMutation.isPending) return;
 
     try {
       if (isEditMode && contestId) {
-        // await updateMutation.mutateAsync({ contestId, data: formData });
+        await updateMutation.mutateAsync({ contestId, data: formData });
         console.log("Update contest:", contestId, formData);
-        // navigate({ to: "/contests/$contestId", params: { contestId } });
+        navigate({ to: "/contests/$id", params: { id: contestId } });
       } else {
-        // const response = await createMutation.mutateAsync(formData);
+        await createMutation.mutateAsync(formData);
         console.log("Create contest:", formData);
-        // navigate({ to: "/contests" });
+        navigate({ to: "/contests" });
       }
     } catch (error) {
       console.error("Error:", error);

@@ -1,5 +1,5 @@
 import React from "react";
-// import { useAdminLeaderboard } from "../hooks/useContest";
+// import { useAdminLeaderboard } from "../queries/useContest";
 import { RefreshCw, Download } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";

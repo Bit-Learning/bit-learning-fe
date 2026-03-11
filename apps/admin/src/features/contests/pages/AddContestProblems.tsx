@@ -5,7 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Difficulty, ProblemBriefResponse, ProblemDetailResponse } from "../types/problem.type";
 import { ContestProblemListDTO } from "../types/contest.type";
 // import { useProblems, useProblemDetail } from "../queries/useProblem";
-// import { useAddProblem, useRemoveProblem, useContestProblems } from "../hooks/useContest";
+// import { useAddProblem, useRemoveProblem, useContestProblems } from "../queries/useContest";
 
 const MOCK_PROBLEMS: ProblemBriefResponse[] = [
   {

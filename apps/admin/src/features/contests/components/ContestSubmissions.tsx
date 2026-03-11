@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-// import { useContestSubmissions } from "../hooks/useContest";
+// import { useContestSubmissions } from "../queries/useContest";
 import { Search, Filter, RefreshCw, Code } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";

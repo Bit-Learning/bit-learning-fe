@@ -1,134 +1,125 @@
 import React, { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus, Search, Eye, Edit, Trash2, Trophy, PlayCircle, Clock, History, TrendingUp, Filter } from "lucide-react";
-// import { useContestList, useDeleteContest } from "../queries/useContest";
+import { useContestList, useDeleteContest } from "../queries/useContest";
 import { ContestStatus, type ContestListDTO } from "../types/contest.type";
 import { Button } from "@/components/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
-const contestsList: ContestListDTO[] = [
-  {
-    contestId: "1",
-    title: "Vòng chung kết Olympic Tin học 2024",
-    slug: "olympic-2024-final",
-    status: ContestStatus.RUNNING,
-    startTime: "2024-05-24T08:00:00",
-    endTime: "2024-05-24T11:30:00",
-    problemCount: 8,
-    participantCount: 1240,
-    isRegistered: true,
-  },
-  {
-    contestId: "2",
-    title: "Lập trình thi đấu tuần #12",
-    slug: "weekly-contest-12",
-    status: ContestStatus.UPCOMING,
-    startTime: "2024-05-28T20:00:00",
-    endTime: "2024-05-28T22:00:00",
-    problemCount: 5,
-    participantCount: 856,
-    isRegistered: false,
-  },
-  {
-    contestId: "3",
-    title: "Kiểm tra tư duy giải thuật C++",
-    slug: "cpp-algorithm-test",
-    status: ContestStatus.ENDED,
-    startTime: "2024-05-20T14:00:00",
-    endTime: "2024-05-20T15:30:00",
-    problemCount: 6,
-    participantCount: 3420,
-    isRegistered: true,
-  },
-  {
-    contestId: "4",
-    title: "Thách thức Python cơ bản",
-    slug: "python-basic-challenge",
-    status: ContestStatus.ENDED,
-    startTime: "2024-05-18T09:00:00",
-    endTime: "2024-05-18T10:30:00",
-    problemCount: 4,
-    participantCount: 512,
-    isRegistered: true,
-  },
-  {
-    contestId: "5",
-    title: "Code Marathon 2024",
-    slug: "code-marathon-2024",
-    status: ContestStatus.UPCOMING,
-    startTime: "2024-06-01T09:00:00",
-    endTime: "2024-06-01T17:00:00",
-    problemCount: 10,
-    participantCount: 2100,
-    isRegistered: true,
-  },
-  {
-    contestId: "6",
-    title: "Dynamic Programming Challenge",
-    slug: "dp-challenge",
-    status: ContestStatus.ENDED,
-    startTime: "2024-05-15T19:00:00",
-    endTime: "2024-05-15T21:00:00",
-    problemCount: 5,
-    participantCount: 780,
-    isRegistered: false,
-  },
-  {
-    contestId: "7",
-    title: "Hackathon Sinh viên HCMC",
-    slug: "hackathon-hcmc",
-    status: ContestStatus.RUNNING,
-    startTime: "2024-05-25T08:00:00",
-    endTime: "2024-05-25T20:00:00",
-    problemCount: 12,
-    participantCount: 450,
-    isRegistered: true,
-  },
-  {
-    contestId: "8",
-    title: "Graph Theory Basics",
-    slug: "graph-theory-basics",
-    status: ContestStatus.ENDED,
-    startTime: "2024-05-12T14:00:00",
-    endTime: "2024-05-12T16:00:00",
-    problemCount: 4,
-    participantCount: 920,
-    isRegistered: false,
-  },
-  {
-    contestId: "9",
-    title: "Cuộc thi lập trình Java Spring Boot",
-    slug: "java-spring-boot-contest",
-    status: ContestStatus.UPCOMING,
-    startTime: "2024-06-05T10:00:00",
-    endTime: "2024-06-05T14:00:00",
-    problemCount: 6,
-    participantCount: 340,
-    isRegistered: false,
-  },
-  {
-    contestId: "10",
-    title: "AI & Machine Learning Challenge",
-    slug: "ai-ml-challenge",
-    status: ContestStatus.ENDED,
-    startTime: "2024-05-10T09:00:00",
-    endTime: "2024-05-10T12:00:00",
-    problemCount: 5,
-    participantCount: 1560,
-    isRegistered: true,
-  },
-];
+// const contestsList: ContestListDTO[] = [
+//   {
+//     contestId: "1",
+//     title: "Vòng chung kết Olympic Tin học 2024",
+//     slug: "olympic-2024-final",
+//     status: ContestStatus.RUNNING,
+//     startTime: "2024-05-24T08:00:00",
+//     endTime: "2024-05-24T11:30:00",
+//     problemCount: 8,
+//     participantCount: 1240,
+//     isRegistered: true,
+//   },
+//   {
+//     contestId: "2",
+//     title: "Lập trình thi đấu tuần #12",
+//     slug: "weekly-contest-12",
+//     status: ContestStatus.UPCOMING,
+//     startTime: "2024-05-28T20:00:00",
+//     endTime: "2024-05-28T22:00:00",
+//     problemCount: 5,
+//     participantCount: 856,
+//     isRegistered: false,
+//   },
+//   {
+//     contestId: "3",
+//     title: "Kiểm tra tư duy giải thuật C++",
+//     slug: "cpp-algorithm-test",
+//     status: ContestStatus.ENDED,
+//     startTime: "2024-05-20T14:00:00",
+//     endTime: "2024-05-20T15:30:00",
+//     problemCount: 6,
+//     participantCount: 3420,
+//     isRegistered: true,
+//   },
+//   {
+//     contestId: "4",
+//     title: "Thách thức Python cơ bản",
+//     slug: "python-basic-challenge",
+//     status: ContestStatus.ENDED,
+//     startTime: "2024-05-18T09:00:00",
+//     endTime: "2024-05-18T10:30:00",
+//     problemCount: 4,
+//     participantCount: 512,
+//     isRegistered: true,
+//   },
+//   {
+//     contestId: "5",
+//     title: "Code Marathon 2024",
+//     slug: "code-marathon-2024",
+//     status: ContestStatus.UPCOMING,
+//     startTime: "2024-06-01T09:00:00",
+//     endTime: "2024-06-01T17:00:00",
+//     problemCount: 10,
+//     participantCount: 2100,
+//     isRegistered: true,
+//   },
+//   {
+//     contestId: "6",
+//     title: "Dynamic Programming Challenge",
+//     slug: "dp-challenge",
+//     status: ContestStatus.ENDED,
+//     startTime: "2024-05-15T19:00:00",
+//     endTime: "2024-05-15T21:00:00",
+//     problemCount: 5,
+//     participantCount: 780,
+//     isRegistered: false,
+//   },
+//   {
+//     contestId: "7",
+//     title: "Hackathon Sinh viên HCMC",
+//     slug: "hackathon-hcmc",
+//     status: ContestStatus.RUNNING,
+//     startTime: "2024-05-25T08:00:00",
+//     endTime: "2024-05-25T20:00:00",
+//     problemCount: 12,
+//     participantCount: 450,
+//     isRegistered: true,
+//   },
+//   {
+//     contestId: "8",
+//     title: "Graph Theory Basics",
+//     slug: "graph-theory-basics",
+//     status: ContestStatus.ENDED,
+//     startTime: "2024-05-12T14:00:00",
+//     endTime: "2024-05-12T16:00:00",
+//     problemCount: 4,
+//     participantCount: 920,
+//     isRegistered: false,
+//   },
+//   {
+//     contestId: "9",
+//     title: "Cuộc thi lập trình Java Spring Boot",
+//     slug: "java-spring-boot-contest",
+//     status: ContestStatus.UPCOMING,
+//     startTime: "2024-06-05T10:00:00",
+//     endTime: "2024-06-05T14:00:00",
+//     problemCount: 6,
+//     participantCount: 340,
+//     isRegistered: false,
+//   },
+//   {
+//     contestId: "10",
+//     title: "AI & Machine Learning Challenge",
+//     slug: "ai-ml-challenge",
+//     status: ContestStatus.ENDED,
+//     startTime: "2024-05-10T09:00:00",
+//     endTime: "2024-05-10T12:00:00",
+//     problemCount: 5,
+//     participantCount: 1560,
+//     isRegistered: true,
+//   },
+// ];
 
 const ContestListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -136,14 +127,17 @@ const ContestListPage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<ContestStatus | "all">("all");
   const [page, setPage] = useState(1);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [contestToDelete, setContestToDelete] = useState<string | null>(null);
+  const [contestToDelete, setContestToDelete] = useState<ContestListDTO | null>(null);
 
-  // const {contestsList} = useContestList()
+  const { data: contestsData } = useContestList();
+  const { mutate: deleteContest, isPending: isDeleting } = useDeleteContest();
+
+  const contestsList = contestsData?.data || [];
 
   const isLoading = false;
 
   const filteredContests = useMemo(() => {
-    return contestsList.filter((contest) => {
+    return contestsList?.filter((contest) => {
       const matchesSearch =
         !searchQuery ||
         contest.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -153,22 +147,22 @@ const ContestListPage: React.FC = () => {
 
       return matchesSearch && matchesStatus;
     });
-  }, [searchQuery, statusFilter]);
+  }, [searchQuery, statusFilter, contestsList]);
 
   const pageSize = 10;
   const contests = useMemo(() => {
     const start = (page - 1) * pageSize;
-    return filteredContests.slice(start, start + pageSize);
+    return filteredContests?.slice(start, start + pageSize);
   }, [filteredContests, page]);
 
   const stats = useMemo(() => {
     return {
-      total: contestsList.length,
-      running: contestsList.filter((c) => c.status === ContestStatus.RUNNING).length,
-      upcoming: contestsList.filter((c) => c.status === ContestStatus.UPCOMING).length,
-      ended: contestsList.filter((c) => c.status === ContestStatus.ENDED).length,
+      total: contestsList?.length,
+      running: contestsList?.filter((c) => c.status === ContestStatus.RUNNING).length,
+      upcoming: contestsList?.filter((c) => c.status === ContestStatus.UPCOMING).length,
+      ended: contestsList?.filter((c) => c.status === ContestStatus.ENDED).length,
     };
-  }, []);
+  }, [contestsList]);
 
   const getStatusBadge = (status: ContestStatus) => {
     const classes = {
@@ -204,20 +198,33 @@ const ContestListPage: React.FC = () => {
         : "hoàn thành";
   };
 
-  const handleDeleteClick = (contestId: string) => {
-    setContestToDelete(contestId);
+  const handleDeleteClick = (contest: ContestListDTO) => {
+    setContestToDelete(contest);
     setDeleteDialogOpen(true);
   };
 
   const handleDeleteConfirm = () => {
     if (contestToDelete) {
-      console.log("Deleting contest:", contestToDelete);
+      deleteContest(contestToDelete.contestId, {
+        onSuccess: () => {
+          setDeleteDialogOpen(false);
+          setContestToDelete(null);
+        },
+        onError: (error) => {
+          console.error("Error deleting contest:", error);
+        },
+      });
+    }
+  };
+
+  const handleCloseDeleteDialog = () => {
+    if (!isDeleting) {
       setDeleteDialogOpen(false);
       setContestToDelete(null);
     }
   };
 
-  const totalPages = Math.ceil(filteredContests.length / pageSize);
+  const totalPages = contestsData?.page?.totalPages || 1;
 
   return (
     <div className="p-8">
@@ -327,7 +334,7 @@ const ContestListPage: React.FC = () => {
               <Skeleton key={i} className="h-16 w-full" />
             ))}
           </div>
-        ) : contests.length === 0 ? (
+        ) : contests?.length === 0 ? (
           <div className="text-center py-12">
             <Trophy className="h-12 w-12 mx-auto text-slate-400 mb-4" />
             <h3 className="text-lg font-semibold mb-2">Không có cuộc thi nào</h3>
@@ -392,7 +399,7 @@ const ContestListPage: React.FC = () => {
                             <Edit className="w-5 h-5" />
                           </Button>
                           <Button
-                            onClick={() => handleDeleteClick(contest.contestId)}
+                            onClick={() => handleDeleteClick(contest)}
                             className="p-3 text-slate-100 hover:text-red-600 dark:hover:text-red-400 transition-colors"
                             title="Xóa"
                           >
@@ -456,26 +463,15 @@ const ContestListPage: React.FC = () => {
         )}
       </div>
 
-      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Xác nhận xóa cuộc thi</AlertDialogTitle>
-            <AlertDialogDescription>
-              Bạn có chắc chắn muốn xóa cuộc thi này? Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên
-              quan đến cuộc thi.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Hủy</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteConfirm}
-              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
-            >
-              Xóa
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <DeleteConfirmModal
+        open={deleteDialogOpen}
+        onClose={handleCloseDeleteDialog}
+        onConfirm={handleDeleteConfirm}
+        title="Xác nhận xóa cuộc thi"
+        description="Bạn có chắc chắn muốn xóa cuộc thi này? Hành động này không thể hoàn tác và sẽ xóa tất cả dữ liệu liên quan đến cuộc thi."
+        itemName={contestToDelete?.title}
+        isPending={isDeleting}
+      />
     </div>
   );
 };
