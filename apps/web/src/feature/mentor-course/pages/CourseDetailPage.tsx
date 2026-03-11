@@ -8,7 +8,7 @@ export default function CourseDetailPage() {
     <>
       <PageMeta title="Chi tiết khóa học - Mentor" description="Quản lý chương và bài học" />
       <MentorLayout>
-        <div className="p-6">
+        <div className="p-8">
           <CourseDetailView />
         </div>
       </MentorLayout>

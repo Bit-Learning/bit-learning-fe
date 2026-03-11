@@ -120,10 +120,15 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
+    <div className=" mx-auto p-8">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/mentor/exam/my" })} className="gap-2 mb-4">
-          <ArrowLeft className="h-4 w-4" />
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 mb-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={() => navigate({ to: "/mentor/exam/my" })}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
           Quay lại danh sách
         </Button>
         <h1 className="text-3xl font-bold mb-2">Tạo đề thi từ ngân hàng câu hỏi</h1>
@@ -139,6 +144,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
             <CardContent className="flex gap-4">
               <Button
                 variant={questionSource === "system" ? "default" : "outline"}
+                size="lg"
                 onClick={() => handleSourceChange("system")}
                 className="flex-1"
               >
@@ -146,6 +152,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
               </Button>
               <Button
                 variant={questionSource === "user" ? "default" : "outline"}
+                size="lg"
                 onClick={() => handleSourceChange("user")}
                 className="flex-1"
               >
@@ -354,6 +361,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
               <Button
                 onClick={handleGenerate}
                 isDisabled={generateExam.isPending || selectedQuestions.size === 0}
+                size="lg"
                 className="w-full gap-2 mt-4"
               >
                 <Sparkles className="h-4 w-4" />

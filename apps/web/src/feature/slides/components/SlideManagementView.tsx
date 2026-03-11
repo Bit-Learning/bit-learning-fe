@@ -7,7 +7,7 @@ import type { SlideGenerationResponse } from "../types/slide.type";
 type TabType = "create" | "my-slides";
 
 export const SlideManagementView: React.FC = () => {
-  const [activeTab, setActiveTab] = useState<TabType>("create");
+  const [activeTab, setActiveTab] = useState<TabType>("my-slides");
   const [selectedSlide, setSelectedSlide] = useState<SlideGenerationResponse | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
@@ -23,22 +23,12 @@ export const SlideManagementView: React.FC = () => {
 
   return (
     <div className="bg-background-light text-slate-900 min-h-screen">
-      <div className="max-w-7xl mx-auto">
+      <div className="p-8 mx-auto">
         <div className="mb-8 border-b border-slate-200">
           <div className="flex items-center justify-between mb-6">
             <h1 className="text-3xl font-bold text-slate-900">Quản lý Slide bài giảng</h1>
           </div>
           <div className="flex gap-8">
-            <button
-              className={`pb-4 border-b-2 font-semibold text-sm transition-colors ${
-                activeTab === "create"
-                  ? "border-primary text-primary"
-                  : "border-transparent text-slate-500 hover:text-slate-700"
-              }`}
-              onClick={() => setActiveTab("create")}
-            >
-              Tạo Slide mới
-            </button>
             <button
               className={`pb-4 border-b-2 font-semibold text-sm transition-colors ${
                 activeTab === "my-slides"
@@ -48,6 +38,16 @@ export const SlideManagementView: React.FC = () => {
               onClick={() => setActiveTab("my-slides")}
             >
               Slide của tôi
+            </button>
+            <button
+              className={`pb-4 border-b-2 font-semibold text-sm transition-colors ${
+                activeTab === "create"
+                  ? "border-primary text-primary"
+                  : "border-transparent text-slate-500 hover:text-slate-700"
+              }`}
+              onClick={() => setActiveTab("create")}
+            >
+              Tạo Slide mới
             </button>
           </div>
         </div>

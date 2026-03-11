@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { Copy, Edit, Trash2, Clock, HardDrive, Globe, Tag, TrendingUp, Plus } from "lucide-react";
+import { Copy, Edit, Trash2, Clock, HardDrive, Globe, Tag, TrendingUp, Plus, ArrowLeft } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent } from "@workspace/ui/components/Card";
@@ -56,20 +56,21 @@ const MentorProblemDetailContent: React.FC = () => {
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
         <div className="mx-auto px-8 h-20 flex items-center justify-between">
-          <div>
-            <nav className="flex text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
-              <span onClick={() => navigate({ to: "/mentor/problem" })} className="hover:text-blue-600 cursor-pointer">
-                Bài tập thực hành
-              </span>
-              <span className="mx-2">/</span>
-              <span className="text-slate-400 dark:text-slate-600">{problem.title}</span>
-            </nav>
-            <h1 className="text-2xl font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-              Chi tiết bài tập: {problem.title}
-              <Badge className="px-2 py-0.5 text-[10px] bg-emerald-100 text-emerald-600 dark:bg-emerald-500/10 dark:text-emerald-400 border border-emerald-200 dark:border-emerald-500/20 uppercase font-bold tracking-wider">
-                Mới
-              </Badge>
-            </h1>
+          <div className="flex items-center gap-3">
+            <Button
+              variant="outline"
+              size="lg"
+              className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+              onClick={() => navigate({ to: "/mentor/problem" })}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Quay lại
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold flex items-center gap-2 text-slate-800 dark:text-white">
+                Chi tiết bài tập: {problem.title}
+              </h1>
+            </div>
           </div>
           <div className="flex items-center gap-3">
             <Button

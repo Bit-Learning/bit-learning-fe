@@ -1,21 +1,11 @@
 import { useState } from "react";
-import { Send, Clock, Search, CheckCircle, XCircle, FileText, Eye, Edit, Trash2 } from "lucide-react";
+import { CheckCircle, XCircle, FileText, Eye } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
 import { useMyPublishRequests, usePendingApproval } from "../queries/useQuestion";
 import { QuestionLevel, QuestionType, ApprovalStatus, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
-
-const menuItems = [
-  { id: "my-requests", label: "Yêu cầu của tôi", icon: Send },
-  {
-    id: "pending",
-    label: "Chờ phê duyệt",
-    icon: Clock,
-  },
-];
 
 const levelColors: Record<QuestionLevel, string> = {
   [QuestionLevel.EASY]: "bg-green-100 text-green-700",
@@ -95,7 +85,7 @@ export default function QuestionApprovalTableView() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 container mx-auto p-6">
+    <div className="flex h-screen bg-slate-50 mx-auto p-8">
       <main className="flex-1 flex flex-col overflow-hidden">
         <div className="flex items-center justify-between">
           <div className="mb-2">
@@ -108,7 +98,7 @@ export default function QuestionApprovalTableView() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                  "cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition-colors",
                   activeTab === tab.id ? "bg-slate-100 text-slate-900" : "text-slate-600 hover:bg-slate-50",
                 )}
               >

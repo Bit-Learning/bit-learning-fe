@@ -57,7 +57,7 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
 
   return (
     <div>
-      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white p-4 rounded-xl shadow-sm border border-slate-200 mb-6">
+      <div className="flex flex-col md:flex-row gap-4 items-center justify-between bg-white rounded-xl shadow-sm border border-slate-200 mb-6">
         <div className="relative w-full md:w-96">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={20} />
           <input

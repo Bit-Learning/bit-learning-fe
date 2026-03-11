@@ -36,7 +36,6 @@ const MyExamsContent: React.FC = () => {
 
   return (
     <main className="flex-1 p-8">
-      {/* Header */}
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">Đề thi của tôi</h1>
@@ -45,7 +44,7 @@ const MyExamsContent: React.FC = () => {
           </p>
         </div>
         <Button
-          onClick={() => navigate({ to: "/mentor/matrix" })}
+          onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
           className="bg-primary hover:bg-blue-700 text-white px-6 py-5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-blue-200 dark:shadow-none transition-all"
         >
           <Plus className="h-5 w-5" />
@@ -53,7 +52,6 @@ const MyExamsContent: React.FC = () => {
         </Button>
       </header>
 
-      {/* Search */}
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <input
@@ -65,7 +63,6 @@ const MyExamsContent: React.FC = () => {
         />
       </div>
 
-      {/* Table */}
       <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-6 space-y-2">

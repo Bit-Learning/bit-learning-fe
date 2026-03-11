@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Send, Eye, Edit, Trash2, FileText, Plus } from "lucide-react";
+import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
@@ -99,7 +99,7 @@ const MyQuestionsContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-6">
+      <div className="mx-auto p-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -137,12 +137,17 @@ const MyQuestionsContent: React.FC = () => {
               <Button
                 onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
                 variant="outline"
+                size="lg"
                 className="gap-2"
               >
                 <FileText className="h-4 w-4" />
                 Tạo đề thi
               </Button>
-              <Button onClick={() => navigate({ to: "/mentor/question/create" })} className="gap-2">
+              <Button size="lg" onClick={() => navigate({ to: "/mentor/matrix/import" })} className="gap-2">
+                <Upload className="h-4 w-4" />
+                Import
+              </Button>
+              <Button size="lg" onClick={() => navigate({ to: "/mentor/question/create" })} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Tạo câu hỏi
               </Button>
@@ -272,6 +277,12 @@ const MyQuestionsContent: React.FC = () => {
                             <button
                               className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
                               title="Xem"
+                              onClick={() =>
+                                navigate({
+                                  to: "/mentor/question/$id",
+                                  params: { id: question.id.toString() },
+                                })
+                              }
                             >
                               <Eye className="h-4 w-4" />
                             </button>

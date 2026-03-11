@@ -16,6 +16,7 @@ import {
   CheckCircle2,
   Code2,
   GripVertical,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
@@ -137,7 +138,6 @@ const CreateProblemContent: React.FC = () => {
     name: "codeTemplates",
   });
 
-  // Load existing data when in edit mode
   useEffect(() => {
     if (isEditMode && existingProblem) {
       form.reset({
@@ -195,7 +195,6 @@ const CreateProblemContent: React.FC = () => {
       let finalProblemId = problemId;
 
       if (isEditMode) {
-        // Update existing problem
         await updateProblem.mutateAsync({
           problemId: problemId!,
           data: {
@@ -210,7 +209,6 @@ const CreateProblemContent: React.FC = () => {
           },
         });
       } else {
-        // Create new problem
         const res = await createProblem.mutateAsync({
           title: values.title,
           slug: values.slug,
@@ -249,29 +247,22 @@ const CreateProblemContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      {/* Header */}
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
-        <div className="max-w-5xl mx-auto px-8 h-20 flex items-center justify-between">
-          <div>
-            <nav className="flex text-xs text-slate-500 dark:text-slate-400 mb-1 font-medium">
-              <span onClick={() => navigate({ to: "/mentor/problem" })} className="hover:text-blue-600 cursor-pointer">
-                Bài tập thực hành
-              </span>
-              <span className="mx-2">/</span>
-              <span className="text-slate-400 dark:text-slate-600">
-                {isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}
-              </span>
-            </nav>
-            <h1 className="text-2xl font-bold text-slate-800 dark:text-white">
-              {isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}
-            </h1>
-          </div>
-        </div>
-      </header>
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-8">
+      <div className=" max-w-6xl mx-auto px-8">
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={() => navigate({ to: "/mentor/problem" })}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Quay lại
+        </Button>
+        <h1 className="mt-4 text-3xl font-bold">{isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}</h1>
+        <p className="mt-2 text-gray-600">{isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}</p>
+      </div>
 
-      <div className="max-w-5xl mx-auto px-8 py-10 space-y-8">
-        {/* Thông tin cơ bản */}
+      <div className="max-w-6xl mx-auto px-8 py-10 space-y-8">
         <Card className="overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
             <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
@@ -376,7 +367,6 @@ const CreateProblemContent: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Nội dung đề bài */}
         <Card className="overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
             <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
@@ -400,7 +390,6 @@ const CreateProblemContent: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Code Templates */}
         <Card className="overflow-hidden">
           <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
             <div className="flex items-center justify-between">
@@ -442,7 +431,7 @@ const CreateProblemContent: React.FC = () => {
                       <Button
                         type="button"
                         variant="ghost"
-                        size="sm"
+                        size="lg"
                         onClick={() => removeTemplate(index)}
                         className="text-red-500 hover:text-red-600"
                       >
@@ -468,9 +457,7 @@ const CreateProblemContent: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Grid 2 columns */}
         <div className="grid grid-cols-2 gap-8">
-          {/* Gắn thẻ */}
           <Card className="overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
               <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
@@ -505,7 +492,6 @@ const CreateProblemContent: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Cài đặt hiển thị */}
           <Card className="overflow-hidden">
             <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
               <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
@@ -529,12 +515,13 @@ const CreateProblemContent: React.FC = () => {
         </div>
 
         <div className="flex items-center justify-end gap-4 pt-4 pb-12">
-          <Button variant="outline" onClick={() => navigate({ to: "/mentor/problem" })} className="px-8 py-3">
+          <Button variant="outline" size="lg" onClick={() => navigate({ to: "/mentor/problem" })} className="px-8 py-5">
             Hủy
           </Button>
           <Button
             onClick={form.handleSubmit(onSubmit)}
             isDisabled={isSubmitting}
+            size="lg"
             className="px-10 py-5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/30 gap-2"
           >
             {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
