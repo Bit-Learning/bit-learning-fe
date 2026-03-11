@@ -1,7 +1,7 @@
 // features/coding/hooks/useCoding.ts
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import type { ApiResponse } from "@/shared/api/api.type";
 import { problemApi, submissionApi } from "../apis/coding.api";
 import type {

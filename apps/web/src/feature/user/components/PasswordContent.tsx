@@ -4,7 +4,7 @@ import { Card } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { useChangePassword, useUserProfile } from "../queries/useUser";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 
 export const PasswordContent: React.FC = () => {
   const { data: userProfile } = useUserProfile();

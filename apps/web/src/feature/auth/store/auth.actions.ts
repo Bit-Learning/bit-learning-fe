@@ -1,4 +1,4 @@
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import type { TAppThunk } from "@/feature/app/types/AppState";
 import type { TChangePasswordRequest } from "@/feature/user/types/user.type";
 import { clearAuthTokens, getAccessToken, setAccessToken } from "@/shared/lib/cookies";

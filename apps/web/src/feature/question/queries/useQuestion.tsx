@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import type { QuestionRequest, RequestPublishDTO, ApproveRejectDTO } from "../types/question.type";
 import type { ApiResponse } from "@/shared/api/api.type";
 import { questionApi, type QuestionSearchParams, type QuestionApprovalParams } from "../api/question.api";

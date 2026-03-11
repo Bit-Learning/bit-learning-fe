@@ -20,7 +20,7 @@ import type {
   UpdateCommentRequest,
   FilterByAuthorParams,
 } from "../types/forum.type";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 
 export const useForumPosts = (params: PaginationParams = {}) => {
   const dispatch = useDispatch();

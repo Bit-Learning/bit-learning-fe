@@ -4,7 +4,7 @@ import { ArrowLeft, Download, Upload, FileText, CheckCircle, AlertCircle, FileSp
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
 import { Progress } from "@workspace/ui/components/Progress";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { useImportQuestions } from "../queries/useQuestion";
 
 const ImportQuestionForm: React.FC = () => {
