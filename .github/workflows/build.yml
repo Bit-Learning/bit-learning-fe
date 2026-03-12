@@ -5,9 +5,15 @@ on:
     pull_request:
         branches: [main]
         paths:
-          - "apps/web/src/**"
-          - "apps/admin/src/**"
-          - ".github/workflows/build.yml"
+          - "apps/web/**"
+          - "apps/admin/**"
+          - "packages/**"
+          - "package.json"
+          - "pnpm-lock.yaml"
+          - "vite.config.*"
+          - "tailwind.config.*"
+          - "tsconfig*.json"
+          - ".github/workflows/**"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
