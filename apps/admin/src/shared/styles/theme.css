@@ -24,13 +24,13 @@
   --chart-4: oklch(0.828 0.189 84.429);
   --chart-5: oklch(0.769 0.188 70.08);
 
-  /* Bithub */
-  --bithub-secondary: oklch(64.61% 0.194 41.12);
-  --bithub-primary: oklch(42.44% 0.181 265.64);
+  /* Bit Learning */
+  --bit-learning-secondary: oklch(64.61% 0.194 41.12);
+  --bit-learning-primary: oklch(42.44% 0.181 265.64);
 
   --sidebar: var(--background);
   --sidebar-foreground: var(--foreground);
-  --sidebar-primary: var(--bithub-primary);
+  --sidebar-primary: var(--bit-learning-primary);
   --sidebar-primary-foreground: var(--primary-foreground);
   --sidebar-accent: var(--accent);
   --sidebar-accent-foreground: var(--accent-foreground);
@@ -78,7 +78,7 @@
   --color-card-foreground: var(--card-foreground);
   --color-popover: var(--popover);
   --color-popover-foreground: var(--popover-foreground);
-  --color-primary: var(--bithub-primary);
+  --color-primary: var(--bit-learning-primary);
   --color-primary-foreground: var(--primary-foreground);
   --color-secondary: var(--secondary);
   --color-secondary-foreground: var(--secondary-foreground);
@@ -105,30 +105,30 @@
   --color-sidebar-ring: var(--sidebar-ring);
 }
 
-/* Custom Bithub styles */
-.bithub-gradient {
+/* Custom Bit Learning styles */
+.bit-learning-gradient {
   background: linear-gradient(135deg, #1e40af 0%, #3b82f6 50%, #60a5fa 100%);
 }
 
-.bithub-gradient-text {
+.bit-learning-gradient-text {
   background: linear-gradient(135deg, #1e40af 0%, #ea580c 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-.bithub-card {
+.bit-learning-card {
   @apply bg-white dark:bg-gray-800 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 dark:border-gray-700;
 }
 
-.bithub-button-primary {
+.bit-learning-button-primary {
   @apply bg-gradient-to-r from-blue-700 to-blue-800 hover:from-blue-800 hover:to-blue-900 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl;
 }
 
-.bithub-button-secondary {
+.bit-learning-button-secondary {
   @apply bg-gradient-to-r from-orange-600 to-orange-700 hover:from-orange-700 hover:to-orange-800 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 shadow-lg hover:shadow-xl;
 }
 
-.bithub-button-outline {
+.bit-learning-button-outline {
   @apply border-2 border-blue-700 text-blue-700 hover:bg-blue-700 hover:text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300;
 }

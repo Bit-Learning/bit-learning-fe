@@ -56,7 +56,7 @@ export default function SlideBanner() {
 								</div>
 								<h1 className="text-3xl font-bold leading-tight text-gray-800 lg:text-6xl">
 									<span className="relative text-orange-500">
-										Bithub Game Center
+										Bit Learning Game Center
 										<svg
 											className="absolute -bottom-2 left-0 h-3 w-full"
 											viewBox="0 0 200 12"

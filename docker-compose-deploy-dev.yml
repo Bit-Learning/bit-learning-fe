@@ -1,0 +1,26 @@
+---
+services:
+  bitlearning-web-deploy-dev:
+    image: lcaohoanq/bitlearning-web:dev-latest
+    expose:
+      - "5173"
+    mem_limit: 1024m
+    cpus: 1.0
+    restart: unless-stopped
+    networks:
+      - app-network
+
+  bitlearning-admin-deploy-dev:
+    image: lcaohoanq/bitlearning-admin:dev-latest
+    expose:
+      - "8386"
+    mem_limit: 1024m
+    cpus: 1.0
+    restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+    name: bitlearning-network

@@ -6,7 +6,7 @@ const Enable2FAPage: React.FC = () => {
 	return (
 		<>
 			<PageMeta
-				title="Bật Xác Thực 2FA - Bithub"
+				title="Bật Xác Thực 2FA - Bit Learning"
 				description="Bảo vệ tài khoản của bạn với xác thực hai yếu tố"
 			/>
 			<AuthLayout>

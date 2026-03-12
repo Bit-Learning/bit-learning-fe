@@ -46,7 +46,7 @@ const CustomerSection: React.FC = () => {
 							{partners.map((partner) => (
 								<div
 									key={partner.title}
-									className="bithub-card group flex h-64 flex-col items-center justify-center p-8 text-center transition-all duration-300 hover:scale-105"
+									className="bit-learning-card group flex h-64 flex-col items-center justify-center p-8 text-center transition-all duration-300 hover:scale-105"
 								>
 									<div className="mb-6 justify-items-center">
 										<img

@@ -51,3 +51,5 @@ storybook-static
 # ignore all md files, except README.md
 *.md
 !README.md
+
+infra/.vault_pass
