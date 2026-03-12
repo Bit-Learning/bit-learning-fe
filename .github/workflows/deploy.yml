@@ -44,7 +44,7 @@ jobs:
               run: pnpm install --frozen-lockfile
 
             - name: Run Check
-              run: echo "Running lint and format checks... later "
+              run: pnpm run check
 
     # ─────────────────────────────────────────────
     # 2. Build & Push Docker images
