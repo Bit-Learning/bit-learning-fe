@@ -26,12 +26,9 @@ const ExamModeModal: React.FC<ExamModeModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      {/* Backdrop */}
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
 
-      {/* Modal */}
       <div className="relative bg-white dark:bg-slate-900 rounded-3xl shadow-2xl max-w-5xl w-full max-h-[90vh] overflow-y-auto">
-        {/* Close Button */}
         <button
           onClick={onClose}
           className="absolute top-6 right-6 w-10 h-10 rounded-full bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex items-center justify-center z-10"
@@ -39,7 +36,6 @@ const ExamModeModal: React.FC<ExamModeModalProps> = ({
           <X className="w-5 h-5" />
         </button>
 
-        {/* Header */}
         <div className="p-8 pb-6 border-b border-slate-200 dark:border-slate-800">
           <h2 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-2">Chọn chế độ làm bài</h2>
           {examName && (
@@ -52,10 +48,8 @@ const ExamModeModal: React.FC<ExamModeModalProps> = ({
           </p>
         </div>
 
-        {/* Content */}
         <div className="p-8">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Exam Mode */}
             <div className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-xl hover:border-red-300 dark:hover:border-red-800">
               <div className="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
                 <img
@@ -89,14 +83,10 @@ const ExamModeModal: React.FC<ExamModeModalProps> = ({
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
                     <span>Phù hợp để đánh giá năng lực thực tế</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                    <span>Điểm số được lưu vào hồ sơ học tập</span>
-                  </li>
                 </ul>
 
                 <Button
-                  size="lg"
+                  size="xl"
                   onClick={onSelectExamMode}
                   isDisabled={isStartingExam || isStartingPractice}
                   className="w-full gap-2 bg-linear-to-r from-red-600 to-orange-600 hover:from-red-700 hover:to-orange-700 text-white shadow-lg shadow-red-500/30"
@@ -113,7 +103,6 @@ const ExamModeModal: React.FC<ExamModeModalProps> = ({
               </div>
             </div>
 
-            {/* Practice Mode */}
             <div className="group relative flex flex-col overflow-hidden rounded-2xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sm transition-all hover:shadow-xl hover:border-blue-300 dark:hover:border-blue-800">
               <div className="aspect-video w-full overflow-hidden bg-slate-100 dark:bg-slate-800 relative">
                 <img
@@ -147,14 +136,10 @@ const ExamModeModal: React.FC<ExamModeModalProps> = ({
                     <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
                     <span>Phù hợp để nắm vững kiến thức</span>
                   </li>
-                  <li className="flex items-start gap-2">
-                    <CheckCircle2 className="w-4 h-4 text-green-500 shrink-0 mt-0.5" />
-                    <span>Không ảnh hưởng đến điểm số chính thức</span>
-                  </li>
                 </ul>
 
                 <Button
-                  size="lg"
+                  size="xl"
                   variant="outline"
                   onClick={onSelectPracticeMode}
                   isDisabled={isStartingExam || isStartingPractice}
@@ -169,20 +154,6 @@ const ExamModeModal: React.FC<ExamModeModalProps> = ({
                     </>
                   )}
                 </Button>
-              </div>
-            </div>
-          </div>
-
-          {/* Notice */}
-          <div className="mt-6 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-900/50 p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-              <div className="text-sm text-amber-900 dark:text-amber-200">
-                <p className="font-semibold mb-1">Lưu ý quan trọng:</p>
-                <p className="text-amber-800 dark:text-amber-300">
-                  Kết quả ở <span className="font-semibold">Chế độ Thi</span> sẽ được lưu vào học bạ điện tử của bạn.
-                  Chỉ chọn chế độ này khi bạn đã sẵn sàng làm bài chính thức.
-                </p>
               </div>
             </div>
           </div>

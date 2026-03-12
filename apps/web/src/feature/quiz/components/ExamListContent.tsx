@@ -108,17 +108,6 @@ const ExamListContent: React.FC = () => {
     });
   };
 
-  const handleViewResult = (examId: number, e: React.MouseEvent) => {
-    e.stopPropagation();
-    const attempt = attempts.find((a) => a.exam.id === examId && a.status === "SUBMITTED");
-    if (attempt) {
-      // Navigate to result page
-      navigate({
-        to: `/quiz-attempts/${attempt.id}/result`,
-      });
-    }
-  };
-
   return (
     <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -188,7 +177,6 @@ const ExamListContent: React.FC = () => {
                 >
                   <CardContent className="p-6">
                     <div className="flex flex-col lg:flex-row lg:items-center gap-6">
-                      {/* Icon Section */}
                       <div className="flex items-start gap-5 flex-1">
                         <div
                           className={cn(
@@ -231,7 +219,6 @@ const ExamListContent: React.FC = () => {
                             {exam.name}
                           </h3>
 
-                          {/* Metadata */}
                           <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
                             <span className="flex items-center gap-2">
                               <Timer className="w-4 h-4" />
@@ -251,30 +238,8 @@ const ExamListContent: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Action Buttons */}
                       <div className="flex items-center gap-3 lg:flex-col lg:items-stretch lg:w-40">
-                        {isCompleted ? (
-                          <>
-                            <Button
-                              variant="outline"
-                              className="flex-1 lg:flex-none gap-2 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleExamClick(exam);
-                              }}
-                            >
-                              <FileText className="w-4 h-4" />
-                              Xem đề thi
-                            </Button>
-                            <Button
-                              className="flex-1 lg:flex-none gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
-                              onClick={(e) => handleViewResult(exam.id, e)}
-                            >
-                              <Trophy className="w-4 h-4" />
-                              Xem kết quả
-                            </Button>
-                          </>
-                        ) : isUpcoming ? (
+                        {isUpcoming ? (
                           <Button
                             variant="outline"
                             isDisabled
@@ -304,7 +269,6 @@ const ExamListContent: React.FC = () => {
           </div>
         )}
 
-        {/* Pagination */}
         {pagination && pagination.totalPages > 1 && (
           <div className="mt-12 flex items-center justify-center gap-2">
             <Button
@@ -322,7 +286,6 @@ const ExamListContent: React.FC = () => {
               {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
                 let pageNum = i;
 
-                // Show current page and surrounding pages
                 if (pagination.totalPages > 5) {
                   if (currentPage < 3) {
                     pageNum = i;

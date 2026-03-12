@@ -66,7 +66,7 @@ export const quizAttemptApi = {
   getAttemptsByExam(
     examId: number,
     params?: PaginationParams,
-  ): Promise<AxiosResponse<ApiResponse<QuizAttemptBriefResponse>>> {
+  ): Promise<AxiosResponse<ApiResponse<QuizAttemptBriefResponse[]>>> {
     return api.get(`/quiz-attempts/exam/${examId}`, { params });
   },
 

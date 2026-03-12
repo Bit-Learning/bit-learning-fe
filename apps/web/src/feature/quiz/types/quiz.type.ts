@@ -1,3 +1,5 @@
+import { QuestionBriefResponse } from "@/feature/question/types/question.type";
+
 // Quiz Attempt Types
 export interface QuizAttemptRequest {
   examId: number;
@@ -28,7 +30,7 @@ export interface QuizAttemptAnswerResponse {
   question: QuestionBriefResponse;
   answerText?: string;
   selectedOptionIds?: number[];
-  isCorrect: boolean;
+  correct: boolean;
   score: number;
   questionNo: number;
   navigationState: QuestionNavigationState;
@@ -71,7 +73,6 @@ export interface QuizHeartbeatResponse {
   isInterrupted: boolean;
 }
 
-// Quiz Session Types
 export interface QuizSessionRequest {
   examId: number;
   type?: QuizSessionType;
@@ -127,7 +128,6 @@ export interface QuizSessionBriefResponse {
   startTime: string;
 }
 
-// Enums
 export enum QuizAttemptStatus {
   DOING = "DOING",
   SUBMITTED = "SUBMITTED",
@@ -149,13 +149,6 @@ export enum QuestionNavigationState {
   UNANSWERED = "UNANSWERED",
   ANSWERED = "ANSWERED",
   MARKED_FOR_REVIEW = "MARKED_FOR_REVIEW",
-}
-
-// Supporting Types
-export interface QuestionBriefResponse {
-  id: number;
-  questionText: string;
-  questionType: string;
 }
 
 export interface ExamBriefResponse {

@@ -12,7 +12,7 @@ import {
   Star,
   FileText,
   CheckCircle2,
-  Home,
+  Eye,
 } from "lucide-react";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
@@ -271,22 +271,25 @@ const ExamDetailContent: React.FC = () => {
                 {hasHistory ? (
                   <div className="space-y-3">
                     {attempts.map((attempt, index) => {
+                      const isSubmitted = attempt.status == "SUBMITTED";
+                      const isDoing = attempt.status === "DOING";
+
                       return (
                         <div
                           key={`attempt-${attempt.id}`}
                           className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
                         >
                           <div className="flex items-center justify-between gap-4 flex-wrap">
-                            <div className="flex items-center gap-4 flex-1">
-                              <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-red-200 dark:border-red-900/50">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                              <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-red-200 dark:border-red-900/50 shrink-0">
                                 <span className="text-red-600 dark:text-red-400">#{index + 1}</span>
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
                                   <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800 text-xs">
                                     Chế độ Thi
                                   </Badge>
-                                  {attempt.submittedAt ? (
+                                  {isSubmitted ? (
                                     <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-xs">
                                       <CheckCircle2 className="w-3 h-3 mr-1" />
                                       Đã nộp
@@ -308,8 +311,8 @@ const ExamDetailContent: React.FC = () => {
                               </div>
                             </div>
 
-                            {attempt.submittedAt && attempt.score !== undefined && (
-                              <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-3 shrink-0">
+                              {isSubmitted && attempt.score !== undefined && (
                                 <div className="text-right">
                                   <p className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">Điểm số</p>
                                   <p className="text-2xl font-black text-blue-600 dark:text-blue-400">
@@ -317,8 +320,42 @@ const ExamDetailContent: React.FC = () => {
                                     <span className="text-sm text-slate-400 ml-1">/{exam?.totalScore}</span>
                                   </p>
                                 </div>
-                              </div>
-                            )}
+                              )}
+
+                              {isDoing && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-attempts/$attemptId",
+                                      params: { attemptId: String(attempt.id) },
+                                    })
+                                  }
+                                >
+                                  <PlayCircle className="w-4 h-4" />
+                                  Tiếp tục
+                                </Button>
+                              )}
+
+                              {isSubmitted && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 shrink-0"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-attempts/$attemptId/result",
+                                      params: { attemptId: String(attempt.id) },
+                                    })
+                                  }
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Xem kết quả
+                                </Button>
+                              )}
+                            </div>
                           </div>
                         </div>
                       );
@@ -327,6 +364,7 @@ const ExamDetailContent: React.FC = () => {
                     {sessions.map((session, index) => {
                       const isSubmitted = session.status === "SUBMITTED";
                       const isExpired = session.status === "EXPIRED";
+                      const isDoing = session.status === "DOING";
 
                       return (
                         <div
@@ -334,12 +372,12 @@ const ExamDetailContent: React.FC = () => {
                           className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
                         >
                           <div className="flex items-center justify-between gap-4 flex-wrap">
-                            <div className="flex items-center gap-4 flex-1">
-                              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-blue-200 dark:border-blue-900/50">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-blue-200 dark:border-blue-900/50 shrink-0">
                                 <span className="text-blue-600 dark:text-blue-400">L{index + 1}</span>
                               </div>
-                              <div className="flex-1">
-                                <div className="flex items-center gap-2 mb-1">
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
                                   <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800 text-xs">
                                     Chế độ Luyện tập
                                   </Badge>
@@ -367,6 +405,42 @@ const ExamDetailContent: React.FC = () => {
                                   Câu {session.currentIndex + 1} / {exam?.examQuestions?.length || 0}
                                 </div>
                               </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {isDoing && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-sessions/$sessionId",
+                                      params: { sessionId: String(session.id) },
+                                    })
+                                  }
+                                >
+                                  <PlayCircle className="w-4 h-4" />
+                                  Tiếp tục
+                                </Button>
+                              )}
+
+                              {isSubmitted && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-sessions/$sessionId/result",
+                                      params: { sessionId: String(session.id) },
+                                    })
+                                  }
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Xem kết quả
+                                </Button>
+                              )}
                             </div>
                           </div>
                         </div>
