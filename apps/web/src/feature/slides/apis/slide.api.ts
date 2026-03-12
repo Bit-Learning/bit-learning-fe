@@ -5,7 +5,7 @@ import type { SlideGenerationResponse, SlideRequest } from "../types/slide.type"
 
 export const slideApi = {
   generateSlide: async (request: SlideRequest): Promise<AxiosResponse<ApiResponse<SlideGenerationResponse>>> => {
-    return api.post("/pptx/generate", request);
+    return api.post("/pptx/v2/generate", request);
   },
 
   getMySlides: async (
