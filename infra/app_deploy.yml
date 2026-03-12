@@ -77,7 +77,7 @@
             password: "{{ smtp_password }}"
             to: "{{ notify_email }}"
             from: "{{ smtp_user }}"
-            subject: "[Bitlearning-FE] ✅ Deploy SUCCESS – {{ env | upper }}"
+            subject: "[BLW] ✅ WEB Deploy SUCCESS – {{ env | upper }}"
             body: |
               ✅ FE Deploy completed successfully.
 
@@ -108,7 +108,7 @@
             password: "{{ smtp_password }}"
             to: "{{ notify_email }}"
             from: "{{ smtp_user }}"
-            subject: "[Bitlearning-FE] ❌ Deploy FAILED – {{ env | upper }}"
+            subject: "[BLW] ❌ WEB Deploy FAILED – {{ env | upper }}"
             body: |
               ❌ FE Deploy has FAILED. Please investigate immediately.
 
