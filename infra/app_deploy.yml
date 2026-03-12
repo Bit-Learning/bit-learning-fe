@@ -1,0 +1,135 @@
+---
+# Usage examples:
+#   ansible-playbook app_deploy.yml -e "env=prod" --tags deploy
+#   ansible-playbook app_deploy.yml -e "env=dev"  --tags deploy
+- name: Deploy Bitlearning FE Stack
+  hosts: "{{ target_host | default('fpt') }}"
+  become: true
+  vars:
+    env: prod
+    project_dir: /home/hoang/Desktop/bitlearning/fe
+    compose_file: "docker-compose-deploy-{{ env }}.yml"
+    # ── SMTP Notification ───────────────────────────────────────────────────
+    smtp_host: smtp.gmail.com
+    smtp_port: 587
+    smtp_user: "{{ vault_smtp_user }}"
+    smtp_password: "{{ vault_smtp_password }}"
+    notify_email: "{{ vault_notify_email }}"
+    prod_fe_web_url: "{{ vault_prod_fe_web_url }}"
+    prod_fe_admin_url: "{{ vault_prod_fe_admin_url }}"
+  vars_files:
+    - vault.yml
+
+  tasks:
+    - name: Include print facts
+      include_tasks:
+        file: tasks/print_facts.yml
+        apply:
+          tags:
+            - facts
+      tags: [ facts ]
+
+    - name: Ensure project directory exists
+      ansible.builtin.file:
+        path: "{{ project_dir }}"
+        state: directory
+        mode: "0755"
+      tags: [deploy]
+
+    - name: Copy Docker Compose deploy file (env-specific)
+      ansible.builtin.copy:
+        src: "../{{ compose_file }}"
+        dest: "{{ project_dir }}/{{ compose_file }}"
+        mode: "0644"
+      tags: [deploy]
+
+    - name: Tear down existing services (optional – clean slate)
+      community.docker.docker_compose_v2:
+        project_src: "{{ project_dir }}"
+        files:
+          - "{{ compose_file }}"
+        state: absent
+      tags: [restart]
+
+    # ── Capture deploy timestamp ─────────────────────────────────────────────
+    - name: Get deploy timestamp
+      ansible.builtin.set_fact:
+        deploy_time: "{{ ansible_date_time.iso8601 }}"
+      tags: [deploy]
+
+    # ── Deploy with block/rescue for error handling ──────────────────────────
+    - name: Deploy block
+      tags: [deploy]
+      block:
+        - name: Deploy FE services (web + admin)
+          community.docker.docker_compose_v2:
+            project_src: "{{ project_dir }}"
+            files:
+              - "{{ compose_file }}"
+            state: present
+            pull: always
+
+        - name: "Notify – Deploy SUCCESS"
+          community.general.mail:
+            host: "{{ smtp_host }}"
+            port: "{{ smtp_port }}"
+            username: "{{ smtp_user }}"
+            password: "{{ smtp_password }}"
+            to: "{{ notify_email }}"
+            from: "{{ smtp_user }}"
+            subject: "[Bitlearning-FE] ✅ Deploy SUCCESS – {{ env | upper }}"
+            body: |
+              ✅ FE Deploy completed successfully.
+
+              ─────────────────────────────
+              Environment   : {{ env }}
+              Host          : {{ inventory_hostname }}
+              Web image     : lcaohoanq/bitlearning-web:{{ env }}-latest
+              Admin image   : lcaohoanq/bitlearning-admin:{{ env }}-latest
+              Deploy time   : {{ deploy_time }}
+              ─────────────────────────────
+
+              More details:
+
+              Web URL       : {{ prod_fe_web_url }}
+              Admin URL     : {{ prod_fe_admin_url }}
+
+              All services are up and running.
+            secure: starttls
+          delegate_to: localhost
+          become: false
+
+      rescue:
+        - name: "Notify – Deploy FAILED"
+          community.general.mail:
+            host: "{{ smtp_host }}"
+            port: "{{ smtp_port }}"
+            username: "{{ smtp_user }}"
+            password: "{{ smtp_password }}"
+            to: "{{ notify_email }}"
+            from: "{{ smtp_user }}"
+            subject: "[Bitlearning-FE] ❌ Deploy FAILED – {{ env | upper }}"
+            body: |
+              ❌ FE Deploy has FAILED. Please investigate immediately.
+
+              ─────────────────────────────
+              Environment   : {{ env }}
+              Host          : {{ inventory_hostname }}
+              Web image     : lcaohoanq/bitlearning-web:{{ env }}-latest
+              Admin image   : lcaohoanq/bitlearning-admin:{{ env }}-latest
+              Deploy time   : {{ deploy_time }}
+              ─────────────────────────────
+
+              More details:
+
+              Web URL       : {{ prod_fe_web_url }}
+              Admin URL     : {{ prod_fe_admin_url }}
+
+              Check Ansible logs and Docker Compose output on the server for details.
+            secure: starttls
+          delegate_to: localhost
+          become: false
+
+        - name: Re-raise failure after notification
+          ansible.builtin.fail:
+            msg: "FE Deploy failed on {{ inventory_hostname }} (env={{ env }}). Notification sent."
