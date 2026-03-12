@@ -44,6 +44,10 @@ next-env.d.ts
 # apps/web
 apps/web/.env.sentry-build-plugin
 apps/web/*.xml
+apps/web/.tanstack/
+
+# apps/admin
+apps/admin/.tanstack/
 
 *storybook.log
 storybook-static
@@ -51,3 +55,5 @@ storybook-static
 # ignore all md files, except README.md
 *.md
 !README.md
+
+infra/.vault_pass

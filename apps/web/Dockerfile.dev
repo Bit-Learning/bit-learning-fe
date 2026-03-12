@@ -12,7 +12,6 @@ COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
 COPY apps/web/package.json ./apps/web/
 COPY packages/lib/package.json ./packages/lib/
 COPY packages/ui/package.json ./packages/ui/
-COPY packages/eslint-config/package.json ./packages/eslint-config/
 COPY packages/typescript-config/package.json ./packages/typescript-config/
 
 # Install ALL dependencies at root level (simplest approach for Docker builds)
@@ -22,7 +21,6 @@ RUN pnpm install --frozen-lockfile
 # Copy source code for workspace packages
 COPY packages/lib ./packages/lib
 COPY packages/ui ./packages/ui
-COPY packages/eslint-config ./packages/eslint-config
 COPY packages/typescript-config ./packages/typescript-config
 
 # Copy web app source code

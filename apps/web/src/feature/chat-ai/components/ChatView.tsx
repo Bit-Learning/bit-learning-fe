@@ -1,5 +1,5 @@
 import React, { useRef, useEffect } from "react";
-import { Bot, Copy, ThumbsUp, ThumbsDown, Clock, FileText } from "lucide-react";
+import { Bot, Copy, ThumbsUp, ThumbsDown, FileText, Paperclip } from "lucide-react";
 import type { Message } from "../types/chat.type";
 
 interface ChatViewProps {
@@ -36,50 +36,90 @@ const ChatView: React.FC<ChatViewProps> = ({ messages }) => {
 
           <div className={`flex flex-col space-y-2 max-w-[85%] ${message.role === "user" ? "items-end" : ""}`}>
             <div
-              className={`p-4 rounded-2xl shadow-sm ${
-                message.role === "user"
-                  ? "bg-blue-500 text-white rounded-tr-none"
-                  : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none"
-              }`}
+              className={`p-4 rounded-2xl shadow-sm ${message.role === "user"
+                ? "bg-blue-500 text-white rounded-tr-none"
+                : "bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200 rounded-tl-none"
+                }`}
             >
               <p className="leading-relaxed whitespace-pre-wrap">{message.content}</p>
 
+              {/* User attachments */}
+              {message.role === "user" && message.attachments && message.attachments.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {message.attachments.map((att, i) => (
+                    <span
+                      key={att.id ?? i}
+                      className="flex items-center gap-1 bg-blue-400/30 px-2 py-1 rounded-md text-[11px]"
+                    >
+                      <Paperclip size={12} />
+                      {att.fileName}
+                      {att.fileSize > 0 && (
+                        <span className="opacity-70">({(att.fileSize / 1024).toFixed(1)} KB)</span>
+                      )}
+                    </span>
+                  ))}
+                </div>
+              )}
+
+              {/* Assistant: sources */}
               {message.role === "assistant" && message.sources && message.sources.length > 0 && (
-                <div className="mt-4 pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <div className="flex flex-wrap gap-2 mb-3">
-                    {Object.entries(message.sources[0] || {}).map(([key, value]) => (
+                <div className="mt-4 pt-3 border-t border-slate-200 dark:border-slate-700">
+                  <div className="flex flex-wrap gap-2">
+                    {Object.entries(message.sources[0] || {}).map(([bookName, pageInfo]) => (
                       <span
-                        key={key}
+                        key={bookName}
                         className="flex items-center gap-1 bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 px-2 py-1 rounded-md text-[10px] text-slate-500 dark:text-slate-300"
                       >
-                        <FileText size={14} />
-                        {value}
+                        <FileText size={12} />
+                        {bookName} — {pageInfo}
                       </span>
                     ))}
                   </div>
+                </div>
+              )}
 
-                  <div className="flex items-center justify-between text-[10px] text-slate-400">
-                    <div className="flex items-center gap-4">
-                      {message.totalToken && (
-                        <span className="flex items-center gap-1">
-                          <FileText size={14} /> Tokens: {message.totalToken}
-                        </span>
-                      )}
+              {/* Assistant: attachments */}
+              {message.role === "assistant" && message.attachments && message.attachments.length > 0 && (
+                <div className="mt-2 flex flex-wrap gap-2">
+                  {message.attachments.map((att, i) => (
+                    <a
+                      key={att.id ?? i}
+                      href={att.fileUrl || undefined}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 bg-slate-200 dark:bg-slate-700 px-2 py-1 rounded-md text-[11px] hover:underline"
+                    >
+                      <Paperclip size={12} />
+                      {att.fileName}
+                    </a>
+                  ))}
+                </div>
+              )}
+
+              {/* Assistant: metadata (tokens, model) — always shown when available */}
+              {message.role === "assistant" && (message.totalToken || message.model) && (
+                <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-[10px] text-slate-400">
+                  <div className="flex items-center gap-4">
+                    {message.model && (
+                      <span>{message.model}</span>
+                    )}
+                    {message.totalToken && (
                       <span className="flex items-center gap-1">
-                        <Clock size={14} /> {formatTime(message.createdAt)}
+                        <FileText size={12} /> {message.totalToken} tokens
+                        {/* {message.promptToken ? ` (${message.promptToken}+${message.completionToken})` : ""} */}
                       </span>
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <button className="hover:text-blue-500 transition-colors">
-                        <Copy size={16} />
-                      </button>
-                      <button className="hover:text-green-500 transition-colors">
-                        <ThumbsUp size={16} />
-                      </button>
-                      <button className="hover:text-red-500 transition-colors">
-                        <ThumbsDown size={16} />
-                      </button>
-                    </div>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button className="hover:text-blue-500 transition-colors">
+                      <Copy size={14} />
+                    </button>
+                    <button className="hover:text-green-500 transition-colors">
+                      <ThumbsUp size={14} />
+                    </button>
+                    <button className="hover:text-red-500 transition-colors">
+                      <ThumbsDown size={14} />
+                    </button>
                   </div>
                 </div>
               )}

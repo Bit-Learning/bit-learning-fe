@@ -1,11 +1,11 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Send } from "lucide-react";
-import { addMessageAction, clearChatAction, selectCurrentConversation, selectMessages } from "../stores/chat.store";
-import { useCreateConversation, useSendMessage, useUserConversations } from "../queries/useChat";
+import { addMessageAction, clearChatAction, clearMessagesAction, selectCurrentConversation, selectMessages, setCurrentConversationAction } from "../stores/chat.store";
+import { useCreateConversation, useSendMessage, useUserConversations, useConversationMessages } from "../queries/useChat";
 import IntroView from "./IntroView";
 import ChatView from "./ChatView";
 import ChatSidebar from "./ChatSidebar";
-import type { Message } from "../types/chat.type";
+import type { Message, Conversation } from "../types/chat.type";
 import { useAppDispatch } from "@/shared/redux/store";
 import { useSelector } from "react-redux";
 
@@ -23,7 +23,28 @@ const ChatAIContent: React.FC = () => {
   const createConversation = useCreateConversation();
   const sendMessage = useSendMessage(currentConversation?.id || "");
 
+  // Load messages khi có conversation
+  const { isLoading: isLoadingMessages } = useConversationMessages(
+    currentConversation?.id || "",
+    20
+  );
+
   const conversations = conversationsData?.data || [];
+
+  // Effect để chuyển sang chat view khi có currentConversation và messages
+  useEffect(() => {
+    if (currentConversation && messages.length > 0) {
+      setCurrentView("chat");
+    }
+  }, [currentConversation, messages.length]);
+
+  const handleSelectConversation = (conversation: Conversation) => {
+    // Clear messages cũ trước khi chuyển sang conversation mới
+    dispatch(clearMessagesAction());
+    // Set conversation mới
+    dispatch(setCurrentConversationAction(conversation));
+    setCurrentView("chat");
+  };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim()) return;
@@ -94,7 +115,12 @@ const ChatAIContent: React.FC = () => {
 
   return (
     <div className="h-screen flex bg-slate-50 dark:bg-slate-900">
-      <ChatSidebar conversations={conversations} onNewChat={handleNewChat} />
+      <ChatSidebar
+        conversations={conversations}
+        currentConversationId={currentConversation?.id}
+        onNewChat={handleNewChat}
+        onSelectConversation={handleSelectConversation}
+      />
 
       <main className="flex-1 flex flex-col bg-white dark:bg-slate-900">
         {currentView === "intro" ? (

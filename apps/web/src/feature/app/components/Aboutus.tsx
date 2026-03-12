@@ -292,7 +292,7 @@ const AboutUs: React.FC = () => {
 						<div className="flex flex-wrap justify-center gap-4">
 							<Button
 								size="lg"
-								className="bithub-button-secondary px-8 py-4 text-lg"
+								className="bit-learning-button-secondary px-8 py-4 text-lg"
 								onClick={() => {
 									window.location.href = "/courses";
 								}}
@@ -302,7 +302,7 @@ const AboutUs: React.FC = () => {
 							</Button>
 							<Button
 								size="lg"
-								className="bithub-button-primary px-8 py-4 text-lg"
+								className="bit-learning-button-primary px-8 py-4 text-lg"
 								onClick={() => {
 									window.location.href = "/contact";
 								}}

@@ -128,7 +128,7 @@ const SignUpForm: React.FC = () => {
 								Tạo tài khoản mới
 							</h1>
 							<p className="text-sm text-gray-600">
-								Tham gia cộng đồng Bithub để học tập và phát triển
+								Tham gia cộng đồng Bit Learning để học tập và phát triển
 							</p>
 						</div>
 

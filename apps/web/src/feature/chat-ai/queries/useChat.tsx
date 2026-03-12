@@ -7,7 +7,7 @@ import {
   setCurrentConversationAction,
   setMessagesAction,
 } from "../stores/chat.store";
-import { ChatRequest, CreateConversationRequest } from "../types/chat.type";
+import type { ChatRequest, ChatResult, CreateConversationRequest, Message } from "../types/chat.type";
 
 export const chatKeys = {
   all: ["chat"] as const,
@@ -50,7 +50,20 @@ export const useConversationMessages = (conversationId: string, size = 20, befor
     queryKey: chatKeys.messages(conversationId, before),
     queryFn: async () => {
       const response = await chatApi.getConversationMessages(conversationId, size, before);
-      const messages = response.data.data?.messages || [];
+      const chatResults: ChatResult[] = response.data.data?.messages || [];
+
+      const messages: Message[] = chatResults.map((result) => ({
+        id: result.id,
+        role: result.role,
+        content: result.answer,
+        model: result.model,
+        promptToken: result.prompt_tokens,
+        completionToken: result.completion_tokens,
+        totalToken: result.total_tokens,
+        sources: result.sources ? [result.sources] : undefined,
+        attachments: result.attachments,
+        createdAt: result.created_at,
+      }));
 
       if (before) {
         dispatch(prependMessagesAction(messages));
@@ -61,6 +74,8 @@ export const useConversationMessages = (conversationId: string, size = 20, befor
       return response.data;
     },
     enabled: !!conversationId,
+    refetchOnMount: 'always',
+    staleTime: 0,
   });
 };
 
@@ -101,16 +116,17 @@ export const useSendMessage = (conversationId: string) => {
     onSuccess: (response) => {
       const result = response.data.data;
       if (result) {
-        const assistantMessage = {
-          id: Date.now(),
-          role: "assistant" as const,
+        const assistantMessage: Message = {
+          id: result.id ?? Date.now(),
+          role: result.role ?? "assistant",
           content: result.answer,
-          promptToken: result.promptTokens,
-          completionToken: result.completionTokens,
-          totalToken: result.totalTokens,
+          model: result.model,
+          promptToken: result.prompt_tokens,
+          completionToken: result.completion_tokens,
+          totalToken: result.total_tokens,
           sources: result.sources ? [result.sources] : undefined,
           attachments: result.attachments,
-          createdAt: new Date().toISOString(),
+          createdAt: result.created_at ?? new Date().toISOString(),
         };
         dispatch(addMessageAction(assistantMessage));
       }

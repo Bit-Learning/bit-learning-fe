@@ -1,0 +1,32 @@
+FROM node:20-alpine
+
+WORKDIR /app
+
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@latest --activate
+
+# Copy workspace configuration from monorepo root
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Copy all package.json files to establish workspace structure
+COPY apps/admin/package.json ./apps/admin/
+COPY packages/lib/package.json ./packages/lib/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+
+# Install ALL dependencies at root level (simplest approach for Docker builds)
+# This ensures workspace packages get their devDependencies (@tailwindcss/postcss, etc.)
+RUN pnpm install --frozen-lockfile
+
+# Copy source code for workspace packages
+COPY packages/lib ./packages/lib
+COPY packages/ui ./packages/ui
+COPY packages/typescript-config ./packages/typescript-config
+
+# Copy web app source code
+COPY apps/admin ./apps/admin
+
+WORKDIR /app/apps/admin
+
+EXPOSE 8386
+CMD ["pnpm", "run", "dev", "--host"]
