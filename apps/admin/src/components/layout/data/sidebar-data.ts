@@ -22,7 +22,7 @@ import type { SidebarData } from "../types";
 
 export const sidebarData: SidebarData = {
 	user: {
-		name: "Bithub",
+		name: "Bit Learning",
 		email: "admin@gmail.com",
 		avatar: "/avatars/shadcn.jpg",
 	},
@@ -33,12 +33,12 @@ export const sidebarData: SidebarData = {
 			plan: "Cổng Quản Trị",
 		},
 		{
-			name: "Bithub Inc",
+			name: "Bit Learning Inc",
 			logo: GalleryVerticalEnd,
 			plan: "Doanh Nghiệp",
 		},
 		{
-			name: "Bithub Corp.",
+			name: "Bit Learning Corp.",
 			logo: AudioWaveform,
 			plan: "Khởi Nghiệp",
 		},

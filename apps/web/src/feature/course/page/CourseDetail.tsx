@@ -17,7 +17,7 @@ const CourseDetailPage: React.FC = () => {
 		<>
 			<PageMeta
 				title="Chi Tiết Khóa Học - Bit Learning"
-				description="Thông tin chi tiết về khóa học tin học tại Bithub"
+				description="Thông tin chi tiết về khóa học tin học tại Bit Learning"
 			/>
 			<CourseDetailContent />
 		</>
