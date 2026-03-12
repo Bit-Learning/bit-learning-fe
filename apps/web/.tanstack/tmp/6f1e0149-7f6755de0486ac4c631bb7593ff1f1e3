@@ -1,9 +1,0 @@
-import { createFileRoute } from '@tanstack/react-router'
-
-export const Route = createFileRoute('/matching/game')({
-  component: RouteComponent,
-})
-
-function RouteComponent() {
-  return <div>Hello "/matching/game"!</div>
-}

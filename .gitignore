@@ -44,6 +44,10 @@ next-env.d.ts
 # apps/web
 apps/web/.env.sentry-build-plugin
 apps/web/*.xml
+apps/web/.tanstack/
+
+# apps/admin
+apps/admin/.tanstack/
 
 *storybook.log
 storybook-static
