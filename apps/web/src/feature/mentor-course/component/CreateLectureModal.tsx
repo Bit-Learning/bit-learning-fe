@@ -1,12 +1,14 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/Form";
 import { Input } from "@workspace/ui/components/Input";
+import { Label } from "@workspace/ui/components/label";
 import { Textarea } from "@workspace/ui/components/Textarea";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { FileText, HelpCircle, Upload, Video, X } from "lucide-react";
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
 import { useAppDispatch } from "@/shared/redux/store";
 import { useCreateLectureText, useCreateLectureVideo } from "../queries/useLecture";
 import { setCreateQuizContextAction } from "../stores/mlecture.store";
@@ -19,6 +21,20 @@ interface CreateLectureModalProps {
 }
 
 type LectureType = "VIDEO" | "TEXT" | "QUIZ";
+
+const videoLectureSchema = z.object({
+  title: z.string().min(1, "Tên bài học là bắt buộc"),
+  description: z.string().optional(),
+});
+
+const textLectureSchema = z.object({
+  title: z.string().min(1, "Tên bài học là bắt buộc"),
+  description: z.string().optional(),
+  textContent: z.string().min(1, "Nội dung là bắt buộc"),
+});
+
+type VideoLectureFormValues = z.infer<typeof videoLectureSchema>;
+type TextLectureFormValues = z.infer<typeof textLectureSchema>;
 
 export const CreateLectureModal = ({
   sectionId,
@@ -36,63 +52,66 @@ export const CreateLectureModal = ({
 
   const getNextOrderIndex = () => {
     if (existingLectures.length === 0) return 1;
-    const maxOrder = Math.max(...existingLectures.map((l) => l.orderIndex));
-    return maxOrder + 1;
+    return Math.max(...existingLectures.map((l) => l.orderIndex)) + 1;
   };
 
-  const handleQuizClick = () => {
-    dispatch(
-      setCreateQuizContextAction({
-        sectionId,
-        courseId,
-        orderIndex: getNextOrderIndex(),
-      }),
-    );
-    onClose();
+  const videoForm = useForm<VideoLectureFormValues>({
+    resolver: zodResolver(videoLectureSchema) as Resolver<VideoLectureFormValues>,
+    defaultValues: { title: "", description: "" },
+  });
 
-    navigate({ to: "/mentor/course/quiz" });
-  };
-
-  const form = useForm<{
-    title: string;
-    description: string;
-    textContent?: string;
-  }>({
+  const textForm = useForm<TextLectureFormValues>({
+    resolver: zodResolver(textLectureSchema) as Resolver<TextLectureFormValues>,
     defaultValues: { title: "", description: "", textContent: "" },
   });
 
-  const handleSubmit = async (data: any) => {
-    try {
-      const nextOrderIndex = getNextOrderIndex();
+  const handleQuizClick = () => {
+    dispatch(setCreateQuizContextAction({ sectionId, courseId, orderIndex: getNextOrderIndex() }));
+    onClose();
+    navigate({ to: "/mentor/course/quiz" });
+  };
 
-      if (lectureType === "VIDEO" && videoFile) {
-        await createVideoMutation.mutateAsync({
-          request: {
-            sectionId,
-            title: data.title,
-            description: data.description,
-            isPreviewable: false,
-            orderIndex: nextOrderIndex,
-          },
-          video: videoFile,
-        });
-      } else if (lectureType === "TEXT") {
-        await createTextMutation.mutateAsync({
-          lecture: {
-            sectionId,
-            title: data.title,
-            description: data.description,
-            isPreviewable: false,
-            orderIndex: nextOrderIndex,
-          },
-          content: data.textContent || "",
-        });
-      }
+  const handleBack = () => {
+    setLectureType(null);
+    setVideoFile(null);
+    videoForm.reset();
+    textForm.reset();
+  };
+
+  const onSubmitVideo = async (data: VideoLectureFormValues) => {
+    if (!videoFile) return;
+    try {
+      const base = {
+        sectionId,
+        title: data.title,
+        description: data.description,
+        isPreviewable: false,
+        orderIndex: getNextOrderIndex(),
+      };
+      await createVideoMutation.mutateAsync({ request: base, video: videoFile });
       onClose();
     } catch (error) {
-      console.error("Failed to create lecture:", error);
+      console.error("Failed to create video lecture:", error);
     }
   };
+
+  const onSubmitText = async (data: TextLectureFormValues) => {
+    try {
+      const base = {
+        sectionId,
+        title: data.title,
+        description: data.description,
+        isPreviewable: false,
+        orderIndex: getNextOrderIndex(),
+      };
+      await createTextMutation.mutateAsync({ lecture: base, content: data.textContent });
+      onClose();
+    } catch (error) {
+      console.error("Failed to create text lecture:", error);
+    }
+  };
+
+  const isPending = createVideoMutation.isPending || createTextMutation.isPending;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
@@ -132,88 +151,81 @@ export const CreateLectureModal = ({
                 <p className="text-sm text-gray-600">Tạo bài kiểm tra</p>
               </Card>
             </div>
+          ) : lectureType === "VIDEO" ? (
+            <form id="create-lecture-form" onSubmit={videoForm.handleSubmit(onSubmitVideo)} className="space-y-4">
+              <div className="space-y-1">
+                <Label>Tên bài học *</Label>
+                <Input
+                  {...videoForm.register("title")}
+                  placeholder="VD: Bài 1: Giới thiệu"
+                  className={videoForm.formState.errors.title ? "border-red-500" : ""}
+                />
+                {videoForm.formState.errors.title && (
+                  <p className="text-sm text-red-500">{videoForm.formState.errors.title.message}</p>
+                )}
+              </div>
+
+              <div className="space-y-1">
+                <Label>Mô tả</Label>
+                <Textarea {...videoForm.register("description")} rows={3} placeholder="Mô tả ngắn về bài học" />
+              </div>
+
+              <div className="space-y-1">
+                <Label>Upload video *</Label>
+                <div className="mt-2 rounded-lg border-2 border-dashed p-6 text-center">
+                  <Upload className="mx-auto mb-2 h-10 w-10 text-gray-400" />
+                  <p className="mb-2 text-sm text-gray-600">{videoFile ? videoFile.name : "Chọn file video"}</p>
+                  <Input type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
+                </div>
+                {!videoFile && <p className="text-sm text-red-500">Vui lòng chọn file video</p>}
+              </div>
+            </form>
           ) : (
-            <Form {...form}>
-              <form id="create-lecture-form" onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="title"
-                  rules={{ required: "Tên bài học là bắt buộc" }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tên bài học *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="VD: Bài 1: Giới thiệu" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+            <form id="create-lecture-form" onSubmit={textForm.handleSubmit(onSubmitText)} className="space-y-4">
+              <div className="space-y-1">
+                <Label>Tên bài học *</Label>
+                <Input
+                  {...textForm.register("title")}
+                  placeholder="VD: Bài 1: Giới thiệu"
+                  className={textForm.formState.errors.title ? "border-red-500" : ""}
                 />
+                {textForm.formState.errors.title && (
+                  <p className="text-sm text-red-500">{textForm.formState.errors.title.message}</p>
+                )}
+              </div>
 
-                <FormField
-                  control={form.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mô tả</FormLabel>
-                      <FormControl>
-                        <Textarea rows={3} placeholder="Mô tả ngắn về bài học" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
+              <div className="space-y-1">
+                <Label>Mô tả</Label>
+                <Textarea {...textForm.register("description")} rows={3} placeholder="Mô tả ngắn về bài học" />
+              </div>
+
+              <div className="space-y-1">
+                <Label>Nội dung *</Label>
+                <Textarea
+                  {...textForm.register("textContent")}
+                  rows={10}
+                  placeholder="Nhập nội dung bài học..."
+                  className={textForm.formState.errors.textContent ? "border-red-500" : ""}
                 />
-
-                {lectureType === "VIDEO" && (
-                  <div>
-                    <FormLabel>Upload video *</FormLabel>
-                    <div className="mt-2 rounded-lg border-2 border-dashed p-6 text-center">
-                      <Upload className="mx-auto mb-2 h-10 w-10 text-gray-400" />
-                      <p className="mb-2 text-sm text-gray-600">{videoFile ? videoFile.name : "Chọn file video"}</p>
-                      <Input type="file" accept="video/*" onChange={(e) => setVideoFile(e.target.files?.[0] || null)} />
-                    </div>
-                  </div>
+                {textForm.formState.errors.textContent && (
+                  <p className="text-sm text-red-500">{textForm.formState.errors.textContent.message}</p>
                 )}
-
-                {lectureType === "TEXT" && (
-                  <FormField
-                    control={form.control}
-                    name="textContent"
-                    rules={{ required: "Nội dung là bắt buộc" }}
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Nội dung *</FormLabel>
-                        <FormControl>
-                          <Textarea rows={10} placeholder="Nhập nội dung bài học..." {...field} />
-                        </FormControl>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-                )}
-              </form>
-            </Form>
+              </div>
+            </form>
           )}
         </div>
 
         {lectureType && (
           <div className="flex justify-end gap-3 border-t px-6 py-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => {
-                setLectureType(null);
-                form.reset();
-                setVideoFile(null);
-              }}
-            >
+            <Button type="button" variant="outline" onClick={handleBack}>
               Quay lại
             </Button>
             <Button
               type="submit"
               form="create-lecture-form"
-              isDisabled={createVideoMutation.isPending || createTextMutation.isPending}
+              isDisabled={isPending || (lectureType === "VIDEO" && !videoFile)}
             >
-              {createVideoMutation.isPending || createTextMutation.isPending ? "Đang thêm..." : "Thêm bài học"}
+              {isPending ? "Đang thêm..." : "Thêm bài học"}
             </Button>
           </div>
         )}

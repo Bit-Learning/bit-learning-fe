@@ -3,10 +3,12 @@ import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import { Input } from "@workspace/ui/components/Input";
 import { Label } from "@workspace/ui/components/label";
-import { cn } from "@workspace/ui/lib/utils";
+import { zodResolver } from "@hookform/resolvers/zod";
 import { ArrowLeft, Plus } from "lucide-react";
 import { useEffect } from "react";
-import { useFieldArray, useForm } from "react-hook-form";
+import { useFieldArray, useForm, type Resolver } from "react-hook-form";
+import { z } from "zod";
+import { cn } from "@workspace/ui/lib/utils";
 import { useSelector } from "react-redux";
 import { useLectureQuiz } from "@/feature/lecture/queries/useLecture";
 import { useAppDispatch } from "@/shared/redux/store";
@@ -15,23 +17,29 @@ import { resetMLectureStateAction, selectCreateQuizContext, selectEditQuizContex
 import type { CreateLectureQuizRequest, QuizUpdateRequest } from "../types/mlecture.api";
 import { QuestionCard } from "./QuestionCard";
 
-interface QuizFormData {
-  title: string;
-  description: string;
-  passPercent: number;
-  maxAttempts: number;
-  questions: Array<{
-    id?: number;
-    questionText: string;
-    orderIndex: number;
-    answers: Array<{
-      id?: number;
-      answerText: string;
-      isCorrect: boolean;
-      orderIndex: number;
-    }>;
-  }>;
-}
+const answerSchema = z.object({
+  id: z.coerce.number().optional(),
+  answerText: z.string().min(1, "Vui lòng nhập nội dung đáp án"),
+  isCorrect: z.boolean(),
+  orderIndex: z.coerce.number(),
+});
+
+const questionSchema = z.object({
+  id: z.coerce.number().optional(),
+  questionText: z.string().min(1, "Vui lòng nhập nội dung câu hỏi"),
+  orderIndex: z.coerce.number(),
+  answers: z.array(answerSchema).min(2, "Cần ít nhất 2 đáp án"),
+});
+
+const quizSchema = z.object({
+  title: z.string().min(1, "Tên bài học là bắt buộc"),
+  description: z.string().optional(),
+  passPercent: z.coerce.number().min(0, "Tối thiểu 0").max(1, "Tối đa 1"),
+  maxAttempts: z.coerce.number().min(1, "Tối thiểu 1 lần"),
+  questions: z.array(questionSchema).min(1, "Cần ít nhất 1 câu hỏi"),
+});
+
+type QuizFormValues = z.infer<typeof quizSchema>;
 
 export const QuizForm = () => {
   const navigate = useNavigate();
@@ -39,7 +47,6 @@ export const QuizForm = () => {
 
   const createContext = useSelector(selectCreateQuizContext);
   const editContext = useSelector(selectEditQuizContext);
-
   const isEditMode = !!editContext?.lectureId;
   const context = isEditMode ? editContext : createContext;
 
@@ -55,7 +62,8 @@ export const QuizForm = () => {
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<QuizFormData>({
+  } = useForm<QuizFormValues>({
+    resolver: zodResolver(quizSchema) as Resolver<QuizFormValues>,
     defaultValues: {
       title: "",
       description: "",
@@ -78,10 +86,7 @@ export const QuizForm = () => {
     fields: questionFields,
     append: appendQuestion,
     remove: removeQuestion,
-  } = useFieldArray({
-    control,
-    name: "questions",
-  });
+  } = useFieldArray({ control, name: "questions" });
 
   useEffect(() => {
     if (isEditMode && quizData) {
@@ -108,14 +113,16 @@ export const QuizForm = () => {
   }, [isEditMode, quizData, reset]);
 
   useEffect(() => {
-    if (!context?.sectionId) {
-      navigate({ to: "/mentor/course/list" });
-    }
+    if (!context?.sectionId) navigate({ to: "/mentor/course/list" });
   }, [context, navigate]);
 
-  const handleFormSubmit = async (data: QuizFormData) => {
-    if (!context?.sectionId) return;
+  const handleCancel = () => {
+    if (context?.courseId) navigate({ to: "/mentor/course/$id", params: { id: String(context.courseId) } });
+    dispatch(resetMLectureStateAction());
+  };
 
+  const onSubmit = async (data: QuizFormValues) => {
+    if (!context?.sectionId) return;
     try {
       if (isEditMode && editContext?.lectureId) {
         await updateLectureMutation.mutateAsync({
@@ -128,7 +135,6 @@ export const QuizForm = () => {
             orderIndex: editContext.orderIndex || 1,
           },
         });
-
         const quizzes: QuizUpdateRequest[] = data.questions.map((q) => ({
           id: q.id,
           questionText: q.questionText,
@@ -140,13 +146,9 @@ export const QuizForm = () => {
             orderIndex: a.orderIndex,
           })),
         }));
-
-        await updateQuizMutation.mutateAsync({
-          id: editContext.lectureId,
-          quizzes,
-        });
+        await updateQuizMutation.mutateAsync({ id: editContext.lectureId, quizzes });
       } else {
-        const quizData: CreateLectureQuizRequest = {
+        const payload: CreateLectureQuizRequest = {
           lecture: {
             sectionId: context.sectionId,
             title: data.title,
@@ -162,10 +164,8 @@ export const QuizForm = () => {
           passPercent: data.passPercent,
           maxAttempts: data.maxAttempts,
         };
-
-        await createQuizMutation.mutateAsync(quizData);
+        await createQuizMutation.mutateAsync(payload);
       }
-
       dispatch(resetMLectureStateAction());
       navigate({ to: "/mentor/course/$id", params: { id: String(context.courseId) } });
     } catch (error) {
@@ -173,27 +173,7 @@ export const QuizForm = () => {
     }
   };
 
-  const handleCancel = () => {
-    if (context?.courseId) {
-      navigate({ to: "/mentor/course/$id", params: { id: String(context.courseId) } });
-    }
-    dispatch(resetMLectureStateAction());
-  };
-
-  const addQuestion = () => {
-    appendQuestion({
-      questionText: "",
-      orderIndex: questionFields.length + 1,
-      answers: [
-        { answerText: "", isCorrect: true, orderIndex: 1 },
-        { answerText: "", isCorrect: false, orderIndex: 2 },
-      ],
-    });
-  };
-
-  if (!context?.sectionId) {
-    return null;
-  }
+  if (!context?.sectionId) return null;
 
   if (isEditMode && quizLoading) {
     return (
@@ -212,7 +192,7 @@ export const QuizForm = () => {
         <Button
           variant="outline"
           size="lg"
-          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600"
           onClick={handleCancel}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -220,31 +200,27 @@ export const QuizForm = () => {
         </Button>
         <h1 className="mt-4 text-3xl font-bold">{isEditMode ? "Chỉnh sửa bài kiểm tra" : "Tạo bài kiểm tra mới"}</h1>
         <p className="mt-2 text-gray-600">
-          {isEditMode ? "Chỉnh sửa câu hỏi và đáp án của bài kiểm tra" : "Tạo bài kiểm tra với nhiều câu hỏi và đáp án"}
+          {isEditMode ? "Chỉnh sửa câu hỏi và đáp án" : "Tạo bài kiểm tra với nhiều câu hỏi và đáp án"}
         </p>
       </div>
 
-      <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
         <Card className="p-6">
           <h3 className="mb-5 text-lg font-semibold">Thông tin bài học</h3>
           <div className="space-y-5">
-            <div className="space-y-2">
-              <Label htmlFor="title" className="text-sm font-medium">
-                Tên bài học *
-              </Label>
+            <div className="space-y-1">
+              <Label htmlFor="title">Tên bài học *</Label>
               <Input
                 id="title"
-                {...register("title", { required: "Tên bài học là bắt buộc" })}
+                {...register("title")}
                 placeholder="VD: Bài kiểm tra chương 1"
                 className={cn("h-11 w-full text-base", errors.title && "border-red-500")}
               />
               {errors.title && <p className="text-sm text-red-500">{errors.title.message}</p>}
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="description" className="text-sm font-medium">
-                Mô tả
-              </Label>
+            <div className="space-y-1">
+              <Label htmlFor="description">Mô tả</Label>
               <Input
                 id="description"
                 {...register("description")}
@@ -254,41 +230,27 @@ export const QuizForm = () => {
             </div>
 
             <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label htmlFor="passPercent" className="text-sm font-medium">
-                  Điểm đạt (%) *
-                </Label>
+              <div className="space-y-1">
+                <Label htmlFor="passPercent">Điểm đạt (%) *</Label>
                 <Input
                   id="passPercent"
                   type="number"
                   step="0.01"
                   min="0"
                   max="1"
-                  {...register("passPercent", {
-                    required: "Điểm đạt là bắt buộc",
-                    min: { value: 0, message: "Tối thiểu 0" },
-                    max: { value: 1, message: "Tối đa 1" },
-                    valueAsNumber: true,
-                  })}
+                  {...register("passPercent")}
                   placeholder="0.8 (80%)"
                   className={cn("h-11 w-full text-base", errors.passPercent && "border-red-500")}
                 />
                 {errors.passPercent && <p className="text-sm text-red-500">{errors.passPercent.message}</p>}
               </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="maxAttempts" className="text-sm font-medium">
-                  Số lần làm tối đa *
-                </Label>
+              <div className="space-y-1">
+                <Label htmlFor="maxAttempts">Số lần làm tối đa *</Label>
                 <Input
                   id="maxAttempts"
                   type="number"
                   min="1"
-                  {...register("maxAttempts", {
-                    required: "Số lần làm là bắt buộc",
-                    min: { value: 1, message: "Tối thiểu 1 lần" },
-                    valueAsNumber: true,
-                  })}
+                  {...register("maxAttempts")}
                   placeholder="3"
                   className={cn("h-11 w-full text-base", errors.maxAttempts && "border-red-500")}
                 />
@@ -301,7 +263,20 @@ export const QuizForm = () => {
         <div className="space-y-4">
           <div className="flex items-center justify-between">
             <h3 className="text-lg font-semibold">Câu hỏi ({questionFields.length})</h3>
-            <Button type="button" onClick={addQuestion} size="lg">
+            <Button
+              type="button"
+              onClick={() =>
+                appendQuestion({
+                  questionText: "",
+                  orderIndex: questionFields.length + 1,
+                  answers: [
+                    { answerText: "", isCorrect: true, orderIndex: 1 },
+                    { answerText: "", isCorrect: false, orderIndex: 2 },
+                  ],
+                })
+              }
+              size="lg"
+            >
               <Plus className="mr-2 h-4 w-4" />
               Thêm câu hỏi
             </Button>

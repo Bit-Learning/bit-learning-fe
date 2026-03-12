@@ -42,8 +42,7 @@ const emptyDetail: TMatrixDetailRequest = {
 
 const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalScore, subjectId }) => {
   const [matrixDetails, setMatrixDetails] = useState<TMatrixDetailRequest[]>([]);
-  const { data: lessons } = useLessonsBySubject(subjectId);
-
+  const { data: lessons } = useLessonsBySubject(subjectId, { size: 50 });
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: { name: "", notes: "" },
@@ -112,7 +111,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
-      <div className="w-full max-w-6xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8">
+      <div className="w-full max-w-7xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <span className="text-2xl">✨</span>
@@ -167,7 +166,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                   <table className="w-full min-w-300">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-slate-800/50">
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300 w-50">
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300 w-60">
                           Chương / Bài học
                         </th>
                         <th className="px-2 py-3 text-center" colSpan={3}>
@@ -210,19 +209,22 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                     <tbody className="divide-y divide-slate-200 dark:divide-slate-700">
                       {matrixDetails.map((detail, index) => (
                         <tr key={index} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                          <td className="px-4 py-3">
-                            <select
-                              value={detail.lessonId}
-                              onChange={(e) => updateDetail(index, "lessonId", Number(e.target.value))}
-                              className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
-                            >
-                              <option value={0}>-- Chọn chương/bài học --</option>
-                              {lessons?.map((lesson: TLessonBriefResponse) => (
-                                <option key={lesson.id} value={lesson.id}>
-                                  {lesson.name}
-                                </option>
-                              ))}
-                            </select>
+                          <td className="px-2 py-3">
+                            <td className="px-2 py-3">
+                              <select
+                                value={detail.lessonId}
+                                onChange={(e) => updateDetail(index, "lessonId", Number(e.target.value))}
+                                className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                              >
+                                <option value={0}>-- Chọn chương/bài học --</option>
+
+                                {lessons?.map((lesson: TLessonBriefResponse) => (
+                                  <option key={lesson.id} value={lesson.id}>
+                                    {lesson.name}
+                                  </option>
+                                ))}
+                              </select>
+                            </td>
                           </td>
 
                           <td className="px-2 py-3">

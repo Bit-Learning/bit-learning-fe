@@ -332,6 +332,12 @@ const MyQuestionsContent: React.FC = () => {
                             <button
                               className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
                               title="Chỉnh sửa"
+                              onClick={() =>
+                                navigate({
+                                  to: "/mentor/question/$id/edit",
+                                  params: { id: question.id.toString() },
+                                })
+                              }
                             >
                               <Edit className="h-4 w-4" />
                             </button>

@@ -1,214 +1,180 @@
-import React, { useState } from "react";
-import { Search, Plus, Edit, Trash2, Eye, AlertCircle } from "lucide-react";
-import { Button } from "@workspace/ui/components/Button";
-import { Card, CardContent } from "@workspace/ui/components/Card";
-import { Badge } from "@workspace/ui/components/Badge";
-import { Input } from "@workspace/ui/components/Input";
+import React, { useState, useMemo } from "react";
+import { Search, Plus, Edit, Trash2, Eye, AlertCircle, FileText, CheckCircle, Lock } from "lucide-react";
 import { useSelector } from "react-redux";
 import { useForumPostsByAuthor, useDeleteForumPost } from "../queries/useForum";
-import { selectForumPosts, selectForumPagination } from "../stores/forum.store";
+import { selectForumMyPosts } from "../stores/forum.store";
 import type { Post } from "../types/forum.type";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { useNavigate } from "@tanstack/react-router";
 import { Pagination } from "@/shared/components/Pagination";
+import { PostRow } from "./PostRow";
+import { Button } from "@workspace/ui/components/Button";
+
+type TabType = "all" | "published" | "locked";
 
 const MyPostContent: React.FC = () => {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"all" | "published" | "draft" | "locked">("all");
+  const [activeTab, setActiveTab] = useState<TabType>("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
 
   const { userInfo } = useSelector(selectAuthStateInfo);
   const authorId = userInfo?.id || 1;
-  const posts = useSelector(selectForumPosts);
-  const pagination = useSelector(selectForumPagination);
 
-  useForumPostsByAuthor({ authorId: authorId, page, size: 10 });
-
+  const posts = useSelector(selectForumMyPosts);
+  const { data } = useForumPostsByAuthor({ authorId, page, size: 10 });
   const deletePostMutation = useDeleteForumPost();
 
-  const getStatusBadge = (post: Post) => {
-    if (post.isBanned) {
-      return <Badge className="bg-red-50 text-red-600 uppercase tracking-wide text-[11px] font-bold">Bị khóa</Badge>;
+  const pagination = data?.page;
+
+  const filteredPosts = useMemo(() => {
+    let result = posts;
+    if (activeTab === "published") result = result.filter((p) => !p.isBanned);
+    if (activeTab === "locked") result = result.filter((p) => p.isBanned);
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase();
+      result = result.filter((p) => p.title.toLowerCase().includes(q) || p.content.toLowerCase().includes(q));
     }
-    return <Badge className="bg-green-50 text-green-600 uppercase tracking-wide text-[11px] font-bold">Đã đăng</Badge>;
-  };
+    return result;
+  }, [posts, activeTab, searchQuery]);
+
+  const counts = useMemo(
+    () => ({
+      all: posts.length,
+      published: posts.filter((p) => !p.isBanned).length,
+      locked: posts.filter((p) => p.isBanned).length,
+    }),
+    [posts],
+  );
 
   const formatDate = (date: string) => {
     const now = new Date();
     const postDate = new Date(date);
     const diffInHours = Math.floor((now.getTime() - postDate.getTime()) / (1000 * 60 * 60));
-
     if (diffInHours < 1) return "Vừa xong";
     if (diffInHours < 24) return `${diffInHours} giờ trước`;
-    return `${Math.floor(diffInHours / 24)} ngày trước`;
+    const days = Math.floor(diffInHours / 24);
+    if (days < 30) return `${days} ngày trước`;
+    return postDate.toLocaleDateString("vi-VN");
   };
 
+  const tabs: { key: TabType; label: string; icon: React.ReactNode }[] = [
+    { key: "all", label: "Tất cả", icon: <FileText className="w-3.5 h-3.5" /> },
+    { key: "published", label: "Đã đăng", icon: <CheckCircle className="w-3.5 h-3.5" /> },
+    { key: "locked", label: "Bị khóa", icon: <Lock className="w-3.5 h-3.5" /> },
+  ];
+
   return (
-    <main className="pt-12 pb-20">
-      <div className="fixed top-20 left-0 right-0 h-14 bg-white border-b border-gray-200 z-40">
-        <div className="max-w-5xl mx-auto h-full px-6 flex items-center justify-between">
-          <div className="flex items-center gap-8 h-full">
-            <Button
-              variant="ghost"
-              className="text-gray-500 font-medium hover:text-blue-600 h-full px-1 rounded-none hover:bg-transparent"
+    <div className="min-h-screen bg-[#f7f8fc]">
+      <div className="fixed top-20 left-0 right-0 h-12 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-40 shadow-sm">
+        <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
+          <div className="flex items-center gap-1 h-full">
+            <button
+              className="cursor-pointer h-full px-4 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
               onClick={() => navigate({ to: "/forum" })}
             >
               Tất cả bài viết
-            </Button>
-            <Button
-              variant="ghost"
-              className="text-blue-600 font-bold border-b-2 border-blue-600 h-full px-1 rounded-none hover:bg-transparent"
-            >
+            </button>
+            <button className="cursor-pointer relative h-full px-4 text-sm font-semibold text-blue-600">
               Bài viết của tôi
-            </Button>
+              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full" />
+            </button>
           </div>
-          <Button
-            className="flex items-center gap-2 bg-blue-600 text-white px-5 py-1.5 rounded-lg font-semibold text-sm hover:bg-blue-700 shadow-sm"
+          <button
+            className="cursor-pointer flex items-center gap-1.5 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
             onClick={() => navigate({ to: "/forum/create" })}
           >
-            <Plus className="w-4 h-4" />
+            <Plus className="w-3.5 h-3.5" />
             Tạo bài viết
-          </Button>
+          </button>
         </div>
       </div>
-      <div className="max-w-5xl mx-auto px-6 py-10">
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-10">
+
+      <div className="max-w-7xl mx-auto px-6 pt-15 pb-20">
+        <div className="flex flex-col sm:flex-row sm:items-end justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 tracking-tight">Bài viết của tôi</h1>
-            <p className="text-gray-500 text-sm mt-1">Quản lý và theo dõi các nội dung bạn đã chia sẻ trên diễn đàn</p>
-          </div>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                className="pl-10 pr-4 py-2 bg-gray-50 border-gray-200 rounded-lg text-sm w-64"
-                placeholder="Tìm trong bài viết..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
+            <div className="flex items-center gap-2 mb-1">
+              <span className="text-2xl">✍️</span>
+              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Bài viết của tôi</h1>
             </div>
+            <p className="text-gray-500 text-sm">Quản lý và theo dõi nội dung bạn đã chia sẻ</p>
+          </div>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-3.5 h-3.5" />
+            <input
+              className="pl-9 pr-4 py-2 bg-white border border-gray-200 rounded-lg text-sm w-56 focus:outline-none focus:border-blue-400 focus:ring-2 focus:ring-blue-100 transition-all placeholder:text-gray-400"
+              placeholder="Tìm kiếm bài viết..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
         </div>
 
-        <div className="flex items-center gap-6 mb-8 border-b border-gray-100">
-          {(["all", "published", "draft", "locked"] as const).map((tab) => (
-            <Button
-              key={tab}
-              variant="ghost"
-              className={`pb-4 text-sm font-bold border-b-2 px-2 rounded-none ${
-                activeTab === tab
-                  ? "border-blue-700 text-blue-700"
-                  : "border-transparent text-gray-400 hover:text-gray-600"
+        <div className="flex items-center gap-1 mb-6 bg-white border border-gray-200 rounded-xl p-1 shadow-sm w-fit">
+          {tabs.map(({ key, label, icon }) => (
+            <button
+              key={key}
+              className={`flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-all ${
+                activeTab === key
+                  ? "bg-blue-600 text-white shadow-sm"
+                  : "text-gray-500 hover:text-gray-800 hover:bg-gray-50"
               }`}
-              onClick={() => setActiveTab(tab)}
+              onClick={() => setActiveTab(key)}
             >
-              {tab === "all" && "Tất cả"}
-              {tab === "published" && "Đã đăng"}
-              {tab === "draft" && "Bản nháp"}
-              {tab === "locked" && "Bị khóa"}
-            </Button>
+              {icon}
+              {label}
+              <span
+                className={`ml-0.5 text-xs px-1.5 py-0.5 rounded-full font-bold ${
+                  activeTab === key ? "bg-blue-500 text-white" : "bg-gray-100 text-gray-500"
+                }`}
+              >
+                {counts[key]}
+              </span>
+            </button>
           ))}
         </div>
 
-        <div className="grid gap-6">
-          {posts.map((post) => (
-            <Card
-              key={post.id}
-              className={`border-gray-200 transition-all ${post.isBanned ? "opacity-80 bg-gray-50/50" : "hover:border-blue-200"} group`}
-            >
-              <CardContent className="p-5">
-                <div className="flex flex-col md:flex-row gap-6">
-                  {post.attachments.length > 0 && post.attachments[0] && post.attachments[0].type === "IMAGE" ? (
-                    <div
-                      className="w-full md:w-56 h-36 shrink-0 rounded-lg bg-cover bg-center overflow-hidden"
-                      style={{ backgroundImage: `url(${post.attachments[0].url})` }}
-                    />
-                  ) : (
-                    <div className="w-full md:w-56 h-36 shrink-0 rounded-lg bg-gray-50 flex items-center justify-center border border-gray-100">
-                      <span className="text-gray-300 text-4xl">📄</span>
-                    </div>
-                  )}
-
-                  <div className="flex-1 flex flex-col justify-between">
-                    <div>
-                      <div className="flex items-center justify-between mb-2">
-                        {getStatusBadge(post)}
-                        {!post.isBanned && (
-                          <div className="flex items-center gap-1">
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-gray-400 hover:bg-gray-50 hover:text-blue-600"
-                              aria-label="Chỉnh sửa"
-                              onClick={() => navigate({ to: "/forum/$id/edit", params: { id: String(post.id) } })}
-                            >
-                              <Edit className="w-5 h-5" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="text-gray-400 hover:bg-red-50 hover:text-red-500"
-                              aria-label="Xóa"
-                              onClick={() => deletePostMutation.mutate(post.id)}
-                            >
-                              <Trash2 className="w-5 h-5" />
-                            </Button>
-                          </div>
-                        )}
-                      </div>
-                      <h3
-                        className={`text-xl font-bold mb-2 transition-colors cursor-pointer leading-tight ${
-                          post.isBanned ? "text-gray-400 line-through" : "text-gray-800 group-hover:text-blue-700"
-                        }`}
-                        onClick={() =>
-                          !post.isBanned && navigate({ to: "/forum/post/$id", params: { id: String(post.id) } })
-                        }
-                      >
-                        {post.title}
-                      </h3>
-                      <p className={`text-sm line-clamp-2 ${post.isBanned ? "text-gray-400" : "text-gray-500"}`}>
-                        {post.content}
-                      </p>
-                    </div>
-                    <div className="flex items-center justify-between pt-4 mt-2">
-                      <div className="flex items-center gap-6 text-gray-400">
-                        <div className="flex items-center gap-1.5">
-                          <Eye className="w-4 h-4" />
-                          <span className="text-xs font-medium">{post.likes + post.dislikes}</span>
-                        </div>
-                        {!post.isBanned && (
-                          <>
-                            <div className="flex items-center gap-1.5">
-                              <span className="text-xs font-medium">👍 {post.likes}</span>
-                            </div>
-                          </>
-                        )}
-                      </div>
-                      <span className="text-xs text-gray-400">
-                        {post.isBanned
-                          ? `Bị khóa ${formatDate(post.updatedAt)}`
-                          : `Đã đăng ${formatDate(post.createdAt)}`}
-                      </span>
-                    </div>
-                    {post.isBanned && (
-                      <div className="flex items-center gap-2 text-red-500 pt-4 border-t border-gray-100 mt-2">
-                        <AlertCircle className="w-4 h-4" />
-                        <span className="text-[10px] font-bold uppercase">Vi phạm tiêu chuẩn cộng đồng</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-
-          {pagination && pagination.totalPages > 1 && (
-            <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
+        <div className="space-y-4">
+          {filteredPosts.length === 0 ? (
+            <div className="text-center py-20 bg-white rounded-2xl border border-gray-200">
+              <div className="text-4xl mb-3">{activeTab === "locked" ? "🔒" : searchQuery ? "🔍" : "📝"}</div>
+              <p className="font-semibold text-gray-500">
+                {activeTab === "locked"
+                  ? "Không có bài viết bị khóa"
+                  : searchQuery
+                    ? `Không tìm thấy "${searchQuery}"`
+                    : "Bạn chưa có bài viết nào"}
+              </p>
+              {!searchQuery && activeTab === "all" && (
+                <button
+                  className="mt-4 text-sm text-blue-600 font-semibold hover:underline"
+                  onClick={() => navigate({ to: "/forum/create" })}
+                >
+                  Tạo bài viết đầu tiên →
+                </button>
+              )}
+            </div>
+          ) : (
+            filteredPosts.map((post) => (
+              <PostRow
+                key={post.id}
+                post={post}
+                formatDate={formatDate}
+                onEdit={() => navigate({ to: "/forum/$id/edit", params: { id: String(post.id) } })}
+                onDelete={() => deletePostMutation.mutate(post.id)}
+                onView={() => navigate({ to: "/forum/post/$id", params: { id: String(post.id) } })}
+              />
+            ))
           )}
         </div>
+
+        {pagination && pagination.totalPages > 1 && (
+          <div className="mt-8">
+            <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
+          </div>
+        )}
       </div>
-    </main>
+    </div>
   );
 };
 

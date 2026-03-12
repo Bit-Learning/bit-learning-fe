@@ -5,46 +5,28 @@ import type { Post, Comment, Hashtag } from "../types/forum.type";
 
 export type TForumState = {
   posts: Post[];
+  myPosts: Post[];
   selectedPost: Post | null;
   comments: Comment[];
   hashtags: Hashtag[];
-  selectedTags: string[];
-  isLoading: boolean;
-  error: string | null;
-  pagination: {
-    page: number;
-    size: number;
-    totalPages: number;
-    totalElements: number;
-  };
 };
 
 const forumInitialState: TForumState = {
   posts: [],
+  myPosts: [],
   selectedPost: null,
   comments: [],
   hashtags: [],
-  selectedTags: [],
-  isLoading: false,
-  error: null,
-  pagination: {
-    page: 0,
-    size: 10,
-    totalPages: 0,
-    totalElements: 0,
-  },
 };
 
-const setLoading = (state: TForumState, action: PayloadAction<boolean>) => {
-  state.isLoading = action.payload;
-};
-
-const setError = (state: TForumState, action: PayloadAction<string | null>) => {
-  state.error = action.payload;
-};
+// ─── Reducers ─────────────────────────────────────────────────────────────────
 
 const setPosts = (state: TForumState, action: PayloadAction<Post[]>) => {
   state.posts = action.payload;
+};
+
+const setMyPosts = (state: TForumState, action: PayloadAction<Post[]>) => {
+  state.myPosts = action.payload;
 };
 
 const setSelectedPost = (state: TForumState, action: PayloadAction<Post | null>) => {
@@ -52,20 +34,17 @@ const setSelectedPost = (state: TForumState, action: PayloadAction<Post | null>)
 };
 
 const updatePost = (state: TForumState, action: PayloadAction<Post>) => {
-  const index = state.posts.findIndex((p) => p.id === action.payload.id);
-  if (index !== -1) {
-    state.posts[index] = action.payload;
-  }
-  if (state.selectedPost?.id === action.payload.id) {
-    state.selectedPost = action.payload;
-  }
+  const idx = state.posts.findIndex((p) => p.id === action.payload.id);
+  if (idx !== -1) state.posts[idx] = action.payload;
+  const myIdx = state.myPosts.findIndex((p) => p.id === action.payload.id);
+  if (myIdx !== -1) state.myPosts[myIdx] = action.payload;
+  if (state.selectedPost?.id === action.payload.id) state.selectedPost = action.payload;
 };
 
 const removePost = (state: TForumState, action: PayloadAction<number>) => {
   state.posts = state.posts.filter((p) => p.id !== action.payload);
-  if (state.selectedPost?.id === action.payload) {
-    state.selectedPost = null;
-  }
+  state.myPosts = state.myPosts.filter((p) => p.id !== action.payload);
+  if (state.selectedPost?.id === action.payload) state.selectedPost = null;
 };
 
 const setComments = (state: TForumState, action: PayloadAction<Comment[]>) => {
@@ -77,10 +56,8 @@ const addComment = (state: TForumState, action: PayloadAction<Comment>) => {
 };
 
 const updateComment = (state: TForumState, action: PayloadAction<Comment>) => {
-  const index = state.comments.findIndex((c) => c.id === action.payload.id);
-  if (index !== -1) {
-    state.comments[index] = action.payload;
-  }
+  const idx = state.comments.findIndex((c) => c.id === action.payload.id);
+  if (idx !== -1) state.comments[idx] = action.payload;
 };
 
 const removeComment = (state: TForumState, action: PayloadAction<number>) => {
@@ -91,52 +68,16 @@ const setHashtags = (state: TForumState, action: PayloadAction<Hashtag[]>) => {
   state.hashtags = action.payload;
 };
 
-const toggleTag = (state: TForumState, action: PayloadAction<string>) => {
-  const index = state.selectedTags.indexOf(action.payload);
-  if (index > -1) {
-    state.selectedTags.splice(index, 1);
-  } else {
-    state.selectedTags.push(action.payload);
-  }
-};
+const resetForumState = () => forumInitialState;
 
-const clearSelectedTags = (state: TForumState) => {
-  state.selectedTags = [];
-};
-
-const setPage = (state: TForumState, action: PayloadAction<number>) => {
-  state.pagination.page = action.payload;
-};
-
-const setPageSize = (state: TForumState, action: PayloadAction<number>) => {
-  state.pagination.size = action.payload;
-  state.pagination.page = 0;
-};
-
-const setPagination = (
-  state: TForumState,
-  action: PayloadAction<{
-    totalPages: number;
-    page: number;
-    totalElements: number;
-  }>,
-) => {
-  state.pagination.totalPages = action.payload.totalPages;
-  state.pagination.page = action.payload.page;
-  state.pagination.totalElements = action.payload.totalElements;
-};
-
-const resetForumState = () => {
-  return forumInitialState;
-};
+// ─── Slice ────────────────────────────────────────────────────────────────────
 
 export const forum = createSlice({
   name: "forum",
   initialState: forumInitialState,
   reducers: {
-    setLoadingAction: setLoading,
-    setErrorAction: setError,
     setPostsAction: setPosts,
+    setMyPostsAction: setMyPosts,
     setSelectedPostAction: setSelectedPost,
     updatePostAction: updatePost,
     removePostAction: removePost,
@@ -145,19 +86,13 @@ export const forum = createSlice({
     updateCommentAction: updateComment,
     removeCommentAction: removeComment,
     setHashtagsAction: setHashtags,
-    toggleTagAction: toggleTag,
-    clearSelectedTagsAction: clearSelectedTags,
-    setPageAction: setPage,
-    setPageSizeAction: setPageSize,
-    setPaginationAction: setPagination,
     resetForumStateAction: resetForumState,
   },
 });
 
 export const {
-  setLoadingAction,
-  setErrorAction,
   setPostsAction,
+  setMyPostsAction,
   setSelectedPostAction,
   updatePostAction,
   removePostAction,
@@ -166,22 +101,15 @@ export const {
   updateCommentAction,
   removeCommentAction,
   setHashtagsAction,
-  toggleTagAction,
-  clearSelectedTagsAction,
-  setPageAction,
-  setPageSizeAction,
-  setPaginationAction,
   resetForumStateAction,
 } = forum.actions;
 
-export const selectForumState = (state: RootState) => state.forum;
+// ─── Selectors ────────────────────────────────────────────────────────────────
+
 export const selectForumPosts = (state: RootState) => state.forum.posts;
+export const selectForumMyPosts = (state: RootState) => state.forum.myPosts;
 export const selectForumSelectedPost = (state: RootState) => state.forum.selectedPost;
 export const selectForumComments = (state: RootState) => state.forum.comments;
 export const selectForumHashtags = (state: RootState) => state.forum.hashtags;
-export const selectForumSelectedTags = (state: RootState) => state.forum.selectedTags;
-export const selectForumLoading = (state: RootState) => state.forum.isLoading;
-export const selectForumError = (state: RootState) => state.forum.error;
-export const selectForumPagination = (state: RootState) => state.forum.pagination;
 
 export default forum.reducer;
