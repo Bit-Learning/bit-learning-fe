@@ -11,9 +11,7 @@ export interface Message {
   createdAt: string;
 }
 
-export interface SourceInfo {
-  [key: string]: string;
-}
+export type SourceInfo = Record<string, string>;
 
 export interface Attachment {
   id?: number;
@@ -32,18 +30,23 @@ export interface Conversation {
 }
 
 export interface MessageHistoryResponse {
-  messages: Message[];
-  hasMore: boolean;
-  nextCursor: number | null;
+  conversation_id: string;
+  messages: ChatResult[];
+  has_more: boolean;
+  next_cursor: number | null;
 }
 
 export interface ChatResult {
+  id: number;
+  role: "user" | "assistant";
   answer: string;
+  model?: string;
   sources?: Record<string, string>;
-  promptTokens?: number;
-  completionTokens?: number;
-  totalTokens?: number;
+  prompt_tokens?: number;
+  completion_tokens?: number;
+  total_tokens?: number;
   attachments?: Attachment[];
+  created_at: string;
 }
 
 export interface CreateConversationRequest {
