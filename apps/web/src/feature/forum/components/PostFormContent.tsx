@@ -1,210 +1,311 @@
-import React, { useEffect, useState } from "react";
-import { ArrowLeft, X, Paperclip, CheckCircle2, ChevronDown } from "lucide-react";
-import { Button } from "@workspace/ui/components/Button";
-import { Card, CardContent } from "@workspace/ui/components/Card";
-import { Badge } from "@workspace/ui/components/Badge";
-import { Label } from "@workspace/ui/components/label";
-import { Input } from "@workspace/ui/components/Input";
-import { Textarea } from "@workspace/ui/components/Textarea";
+import React, { useEffect, useRef } from "react";
+import { ArrowLeft, X, Paperclip, ChevronRight, ImageIcon, FileText, Trash2 } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useCreateForumPost, useForumHashtags, useForumPostById, useUpdateForumPost } from "../queries/useForum";
 import { useSelector } from "react-redux";
-import { selectForumHashtags, selectForumSelectedPost } from "../stores/forum.store";
+import { selectForumSelectedPost } from "../stores/forum.store";
 import type { CreatePostRequest, UpdatePostRequest } from "../types/forum.type";
 import { useNavigate, useParams } from "@tanstack/react-router";
+import { Button } from "@workspace/ui/components/Button";
+
+const postSchema = z.object({
+  title: z.string().min(1, "Vui lòng nhập tiêu đề").max(200, "Tiêu đề tối đa 200 ký tự"),
+  content: z.string().min(1, "Vui lòng nhập nội dung"),
+  tags: z.array(z.string()).max(10, "Tối đa 10 thẻ"),
+  attachments: z.array(z.instanceof(File)).max(5, "Tối đa 5 tệp đính kèm"),
+});
+
+type PostFormValues = z.infer<typeof postSchema>;
 
 const PostFormContent: React.FC = () => {
   const navigate = useNavigate();
   const params = useParams({ strict: false });
   const postId = params.id ? Number(params.id) : null;
   const isEditMode = !!postId;
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const tagInputRef = useRef<HTMLInputElement>(null);
 
-  const [title, setTitle] = useState("");
-  const [content, setContent] = useState("");
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [newTag, setNewTag] = useState("");
-  const [attachments, setAttachments] = useState<File[]>([]);
-
-  const hashtags = useSelector(selectForumHashtags);
   const selectedPost = useSelector(selectForumSelectedPost);
 
   useForumHashtags();
-
-  if (isEditMode && postId) {
-    useForumPostById(postId);
-  }
+  useForumPostById(postId!);
 
   const createPostMutation = useCreateForumPost();
   const updatePostMutation = useUpdateForumPost();
 
+  const {
+    register,
+    handleSubmit,
+    watch,
+    setValue,
+    formState: { errors, isSubmitting },
+  } = useForm<PostFormValues>({
+    resolver: zodResolver(postSchema),
+    defaultValues: { title: "", content: "", tags: [], attachments: [] },
+  });
+
+  const tags = watch("tags");
+  const attachments = watch("attachments");
+
   useEffect(() => {
     if (isEditMode && selectedPost) {
-      setTitle(selectedPost.title);
-      setContent(selectedPost.content);
-      setSelectedTags(selectedPost.hashtags.map((h) => h.name));
+      setValue("title", selectedPost.title);
+      setValue("content", selectedPost.content);
+      setValue(
+        "tags",
+        selectedPost.hashtags.map((h) => h.name),
+      );
     }
-  }, [isEditMode, selectedPost]);
+  }, [isEditMode, selectedPost, setValue]);
 
-  const removeTag = (tagToRemove: string) => {
-    setSelectedTags(selectedTags.filter((tag) => tag !== tagToRemove));
+  const addTag = (value: string) => {
+    const trimmed = value.trim().replace(/^#/, "");
+    if (!trimmed || tags.includes(trimmed) || tags.length >= 10) return;
+    setValue("tags", [...tags, trimmed]);
+    if (tagInputRef.current) tagInputRef.current.value = "";
   };
 
-  const addTag = () => {
-    if (newTag.trim() && !selectedTags.includes(newTag.trim())) {
-      setSelectedTags([...selectedTags, newTag.trim()]);
-      setNewTag("");
-    }
+  const removeTag = (tag: string) =>
+    setValue(
+      "tags",
+      tags.filter((t) => t !== tag),
+    );
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(e.target.files ?? []);
+    const existing = new Set(attachments.map((f) => f.name));
+    const merged = [...attachments, ...files.filter((f) => !existing.has(f.name))].slice(0, 5);
+    setValue("attachments", merged);
+    e.target.value = "";
   };
 
-  const handleSubmit = () => {
+  const removeAttachment = (name: string) =>
+    setValue(
+      "attachments",
+      attachments.filter((f) => f.name !== name),
+    );
+
+  const getFileIcon = (file: File) =>
+    file.type.startsWith("image/") ? (
+      <ImageIcon className="w-4 h-4 text-blue-500" />
+    ) : (
+      <FileText className="w-4 h-4 text-gray-600" />
+    );
+
+  const formatFileSize = (bytes: number) => {
+    if (bytes < 1024) return `${bytes} B`;
+    if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+    return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+  };
+
+  const onSubmit = (values: PostFormValues) => {
     if (isEditMode && postId) {
-      const postData: UpdatePostRequest = {
-        title,
-        content,
-        tags: selectedTags,
-      };
+      const postData: UpdatePostRequest = { title: values.title, content: values.content, tags: values.tags };
       updatePostMutation.mutate(
-        { id: postId, data: postData, attachments },
-        {
-          onSuccess: () => navigate({ to: "/forum/my" }),
-        },
+        { id: postId, data: postData, attachments: values.attachments },
+        { onSuccess: () => navigate({ to: "/forum/my" }) },
       );
     } else {
-      const postData: CreatePostRequest = {
-        title,
-        content,
-        tags: selectedTags,
-      };
+      const postData: CreatePostRequest = { title: values.title, content: values.content, tags: values.tags };
       createPostMutation.mutate(
-        { data: postData, attachments },
-        {
-          onSuccess: () => navigate({ to: "/forum" }),
-        },
+        { data: postData, attachments: values.attachments },
+        { onSuccess: () => navigate({ to: "/forum" }) },
       );
     }
   };
 
   return (
-    <main className="flex-1 flex flex-col items-center bg-white">
-      <div className="w-full max-w-4xl px-6 py-12">
-        <div className="flex flex-col gap-2 mb-10">
-          <div className="flex items-center gap-2 text-gray-400 text-sm">
-            <Button
-              variant="ghost"
-              className="hover:text-blue-600 transition-colors flex items-center gap-1 p-0 h-auto"
-              onClick={() => navigate({ to: "/forum" })}
-            >
-              <ArrowLeft className="w-4 h-4" />
-              Quay lại Diễn đàn
-            </Button>
-          </div>
-          <h1 className="text-3xl font-bold tracking-tight mt-4 text-gray-900">
+    <main className="flex-1 flex flex-col items-center bg-white min-h-screen">
+      <div className="w-full max-w-6xl px-6 py-8">
+        <div className="mb-10">
+          <Button
+            variant="outline"
+            size="lg"
+            className="gap-2 mb-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+            onClick={() => navigate({ to: "/forum" })}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Quay lại diễn đàn
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight text-gray-900">
             {isEditMode ? "Chỉnh sửa bài viết" : "Tạo bài viết mới"}
           </h1>
-          <p className="text-gray-500 text-lg">
-            Phác thảo ý tưởng của bạn và chia sẻ với cộng đồng học thuật bit learning.
-          </p>
+          <p className="text-gray-500 mt-1">Phác thảo ý tưởng và chia sẻ với cộng đồng bit learning.</p>
         </div>
 
-        <div className="space-y-8">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-8">
           <div className="space-y-2">
-            <Label htmlFor="post-title" className="text-xs font-bold uppercase tracking-widest text-gray-400">
-              Tiêu đề bài viết
-            </Label>
-            <Input
-              id="post-title"
-              className="w-full h-14 bg-white border-gray-200 rounded-lg px-2 text-2xl font-semibold focus:ring-0 border-x-0 border-t-0 border-b-2 focus:border-blue-600"
+            <label className="text-md font-bold uppercase tracking-widest text-gray-600">Tiêu đề bài viết</label>
+            <input
+              {...register("title")}
+              className={`w-full h-14 bg-white border-x-0 border-t-0 border-b-2 px-0 text-2xl font-semibold outline-none transition-colors placeholder:text-gray-300 ${
+                errors.title ? "border-red-400" : "border-gray-300 focus:border-blue-600"
+              }`}
               placeholder="Nhập tiêu đề mô tả rõ ràng..."
-              value={title}
-              onChange={(e) => setTitle(e.target.value)}
             />
+            {errors.title && <p className="text-xs text-red-500 mt-1">{errors.title.message}</p>}
           </div>
 
           <div className="space-y-2">
-            <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">Nội dung</Label>
-            <div className="rounded-xl border border-gray-200 overflow-hidden bg-white shadow-sm">
-              <Textarea
-                className="w-full min-h-100 bg-transparent border-none focus:ring-0 p-6 text-lg leading-relaxed text-gray-700 resize-none placeholder:text-gray-200"
+            <label className="text-md font-bold uppercase tracking-widest text-gray-600">Nội dung</label>
+            <div
+              className={`rounded-xl border overflow-hidden bg-white shadow-sm transition-colors ${
+                errors.content ? "border-red-400" : "border-gray-300 focus-within:border-blue-400"
+              }`}
+            >
+              <textarea
+                {...register("content")}
+                className="w-full min-h-64 bg-transparent outline-none p-6 text-base leading-relaxed text-gray-700 resize-none placeholder:text-gray-300"
                 placeholder="Bắt đầu viết bài thảo luận của bạn tại đây..."
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
               />
             </div>
+            {errors.content && <p className="text-xs text-red-500 mt-1">{errors.content.message}</p>}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="space-y-3">
-              <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">Thẻ liên quan</Label>
-              <div className="flex flex-wrap gap-2 min-h-12 p-3 bg-white border border-gray-200 rounded-lg items-center focus-within:border-blue-600">
-                {selectedTags.map((tag, index) => (
-                  <Badge
-                    key={index}
-                    className="flex items-center gap-1 px-3 py-1 bg-gray-100 text-gray-600 rounded-full text-sm font-medium border border-gray-200"
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-600">
+                Thẻ liên quan
+                <span className="ml-2 normal-case font-normal text-gray-300">{tags.length}/10</span>
+              </label>
+              <div
+                className={`flex flex-wrap gap-2 min-h-12 p-3 bg-white border rounded-lg items-center transition-colors focus-within:border-blue-400 ${
+                  errors.tags ? "border-red-400" : "border-gray-200"
+                }`}
+              >
+                {tags.map((tag) => (
+                  <span
+                    key={tag}
+                    className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-600 border border-blue-100 rounded-full text-sm font-medium"
                   >
-                    {tag}
-                    <button onClick={() => removeTag(tag)} className="hover:text-red-500">
+                    #{tag}
+                    <button
+                      type="button"
+                      onClick={() => removeTag(tag)}
+                      className="hover:text-red-500 transition-colors"
+                    >
                       <X className="w-3 h-3" />
                     </button>
-                  </Badge>
+                  </span>
                 ))}
-                <Input
-                  className="bg-transparent border-none focus:ring-0 text-sm flex-1 min-w-30 p-2 h-auto"
-                  placeholder="Thêm thẻ..."
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                />
+                {tags.length < 10 && (
+                  <input
+                    ref={tagInputRef}
+                    className="bg-transparent outline-none text-sm flex-1 min-w-24 placeholder:text-gray-300"
+                    placeholder="Thêm thẻ, nhấn Enter..."
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        addTag(e.currentTarget.value);
+                      }
+                    }}
+                    onBlur={(e) => addTag(e.currentTarget.value)}
+                  />
+                )}
               </div>
+              {errors.tags && <p className="text-xs text-red-500">{errors.tags.message}</p>}
             </div>
 
-            <div className="space-y-3">
-              <Label className="text-xs font-bold uppercase tracking-widest text-gray-400">Tài liệu tham khảo</Label>
-              <div className="border-2 border-dashed border-gray-200 rounded-lg p-3 h-12 flex items-center justify-center bg-gray-50 hover:bg-white hover:border-blue-600 hover:text-blue-600 cursor-pointer transition-all group">
-                <div className="flex items-center gap-2 text-gray-400 text-sm group-hover:text-blue-600">
-                  <Paperclip className="w-5 h-5" />
-                  <span className="font-medium">Đính kèm tệp hoặc hình ảnh</span>
+            <div className="space-y-2">
+              <label className="text-xs font-bold uppercase tracking-widest text-gray-600">
+                Đính kèm
+                <span className="ml-2 normal-case font-normal text-gray-300">{attachments.length}/5</span>
+              </label>
+              <input
+                ref={fileInputRef}
+                type="file"
+                multiple
+                accept="image/*,.pdf,.doc,.docx"
+                className="cursor-pointer hidden"
+                onChange={handleFileChange}
+              />
+
+              {attachments.length > 0 ? (
+                <div className="space-y-2">
+                  {attachments.map((file) => (
+                    <div
+                      key={file.name}
+                      className="flex items-center gap-3 px-3 py-2 bg-gray-50 border border-gray-300 rounded-lg group"
+                    >
+                      {file.type.startsWith("image/") ? (
+                        <img
+                          src={URL.createObjectURL(file)}
+                          alt={file.name}
+                          className="w-8 h-8 rounded object-cover shrink-0"
+                        />
+                      ) : (
+                        <div className="w-8 h-8 rounded bg-gray-100 flex items-center justify-center shrink-0">
+                          <FileText className="w-4 h-4 text-gray-600" />
+                        </div>
+                      )}
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-700 truncate">{file.name}</p>
+                        <p className="text-xs text-gray-600">{formatFileSize(file.size)}</p>
+                      </div>
+                      <button
+                        type="button"
+                        className="opacity-0 group-hover:opacity-100 text-gray-600 hover:text-red-500 transition-all"
+                        onClick={() => removeAttachment(file.name)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  ))}
+                  {attachments.length < 5 && (
+                    <button
+                      type="button"
+                      className="cursor-pointer w-full py-2 text-sm text-blue-600 border border-dashed border-blue-200 rounded-lg hover:bg-blue-50 transition-colors font-medium"
+                      onClick={() => fileInputRef.current?.click()}
+                    >
+                      + Thêm tệp
+                    </button>
+                  )}
                 </div>
-              </div>
+              ) : (
+                <button
+                  type="button"
+                  className="w-full border-2 border-dashed border-gray-300 rounded-lg p-4 flex items-center justify-center gap-2 text-gray-600 text-sm hover:border-blue-400 hover:text-blue-600 hover:bg-blue-50/50 transition-all"
+                  onClick={() => fileInputRef.current?.click()}
+                >
+                  <Paperclip className="w-4 h-4" />
+                  <span className="font-medium">Đính kèm tệp hoặc hình ảnh</span>
+                </button>
+              )}
+              {errors.attachments && <p className="text-xs text-red-500">{errors.attachments.message}</p>}
             </div>
           </div>
 
-          <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-8 border-t border-gray-100">
-            <div className="flex items-center gap-2 text-gray-400 text-sm italic">
-              <CheckCircle2 className="w-4 h-4" />
-            </div>
-            <div className="flex items-center gap-4 w-full sm:w-auto">
-              <Button
-                variant="ghost"
-                className="flex-1 sm:flex-none px-8 py-3 font-semibold text-gray-500 hover:text-gray-800 hover:bg-gray-50"
-                onClick={() => navigate({ to: "/forum" })}
-              >
-                Hủy
-              </Button>
-              <Button
-                className="flex-1 sm:flex-none px-10 py-3 bg-blue-600 hover:bg-blue-700 text-white font-bold shadow-md shadow-blue-600/10 gap-2"
-                onClick={handleSubmit}
-                isDisabled={!title.trim() || !content.trim()}
-              >
-                {isEditMode ? "Cập nhật" : "Đăng bài"}
-                <ChevronDown className="w-5 h-5 -rotate-90" />
-              </Button>
-            </div>
+          <div className="flex items-center justify-end gap-3 pt-8 border-t border-gray-300">
+            <button
+              type="button"
+              className="cursor-pointer border px-6 py-3 text-sm font-semibold text-gray-500 hover:text-gray-800 hover:bg-gray-50 rounded-lg transition-colors"
+              onClick={() => navigate({ to: "/forum" })}
+            >
+              Hủy
+            </button>
+            <button
+              type="submit"
+              disabled={isSubmitting || createPostMutation.isPending || updatePostMutation.isPending}
+              className="cursor-pointer flex items-center gap-2 px-8 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white text-sm font-bold rounded-lg shadow-sm shadow-blue-600/20 transition-all"
+            >
+              {isEditMode ? "Cập nhật" : "Đăng bài"}
+              <ChevronRight className="w-4 h-4" />
+            </button>
+          </div>
+        </form>
+
+        {/* Tip */}
+        <div className="mt-12 flex items-start gap-4 p-5 bg-gray-50 border border-gray-100 rounded-xl">
+          <span className="text-2xl shrink-0">✨</span>
+          <div>
+            <h4 className="font-bold text-gray-800 text-sm">Mẹo chất lượng học thuật</h4>
+            <p className="text-sm text-gray-500 mt-1 leading-relaxed">
+              Trích dẫn nguồn và sử dụng thẻ mô tả giúp bạn bè dễ dàng tìm kiếm và tương tác với nghiên cứu của bạn.
+            </p>
           </div>
         </div>
-
-        <Card className="mt-12 bg-gray-50 border-gray-100">
-          <CardContent className="p-5 flex items-start gap-4">
-            <div className="text-blue-600 mt-0.5">
-              <span className="text-2xl">✨</span>
-            </div>
-            <div>
-              <h4 className="font-bold text-gray-800 text-sm">Mẹo chất lượng học thuật</h4>
-              <p className="text-sm text-gray-500 mt-1 leading-relaxed">
-                Trích dẫn nguồn và sử dụng thẻ mô tả giúp bạn bè dễ dàng tìm kiếm và tương tác với nghiên cứu của bạn
-                hiệu quả hơn tại bit learning.
-              </p>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </main>
   );

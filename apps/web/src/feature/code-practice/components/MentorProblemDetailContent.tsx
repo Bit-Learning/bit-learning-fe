@@ -33,7 +33,14 @@ const MentorProblemDetailContent: React.FC = () => {
   };
 
   if (isLoading || !problem) {
-    return <div className="p-8">Đang tải...</div>;
+    return (
+      <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#221610] flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Đang tải...</p>
+        </div>
+      </div>
+    );
   }
 
   const getDifficultyBadge = (difficulty: Difficulty) => {

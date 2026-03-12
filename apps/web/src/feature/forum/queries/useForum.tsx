@@ -5,12 +5,10 @@ import { commentApi } from "../apis/comment.api";
 import { hashtagApi } from "../apis/hashtag.api";
 import {
   setPostsAction,
+  setMyPostsAction,
+  setSelectedPostAction,
   setCommentsAction,
   setHashtagsAction,
-  setPaginationAction,
-  setLoadingAction,
-  setErrorAction,
-  setSelectedPostAction,
 } from "../stores/forum.store";
 import type {
   PaginationParams,
@@ -28,28 +26,9 @@ export const useForumPosts = (params: PaginationParams = {}) => {
   return useQuery({
     queryKey: ["forum-posts", params],
     queryFn: async () => {
-      dispatch(setLoadingAction(true));
-      try {
-        const response = await postApi.getAllPosts(params);
-        if (response.data) {
-          dispatch(setPostsAction(response.data));
-        }
-        if (response.page) {
-          dispatch(
-            setPaginationAction({
-              totalPages: response.page.totalPages,
-              page: response.page.page,
-              totalElements: response.page.totalElements,
-            }),
-          );
-        }
-        return response;
-      } catch (error: any) {
-        dispatch(setErrorAction(error.message));
-        throw error;
-      } finally {
-        dispatch(setLoadingAction(false));
-      }
+      const response = await postApi.getAllPosts(params);
+      if (response.data) dispatch(setPostsAction(response.data));
+      return response;
     },
   });
 };
@@ -61,9 +40,7 @@ export const useForumPostById = (id: number) => {
     queryKey: ["forum-post", id],
     queryFn: async () => {
       const response = await postApi.getPostById(id);
-      if (response.data) {
-        dispatch(setSelectedPostAction(response.data));
-      }
+      if (response.data) dispatch(setSelectedPostAction(response.data));
       return response;
     },
     enabled: !!id,
@@ -76,28 +53,9 @@ export const useForumPostsByAuthor = (params: FilterByAuthorParams) => {
   return useQuery({
     queryKey: ["forum-posts-by-author", params],
     queryFn: async () => {
-      dispatch(setLoadingAction(true));
-      try {
-        const response = await postApi.getPostsByAuthor(params);
-        if (response.data) {
-          dispatch(setPostsAction(response.data));
-        }
-        if (response.page) {
-          dispatch(
-            setPaginationAction({
-              totalPages: response.page.totalPages,
-              page: response.page.page,
-              totalElements: response.page.totalElements,
-            }),
-          );
-        }
-        return response;
-      } catch (error: any) {
-        dispatch(setErrorAction(error.message));
-        throw error;
-      } finally {
-        dispatch(setLoadingAction(false));
-      }
+      const response = await postApi.getPostsByAuthor(params);
+      if (response.data) dispatch(setMyPostsAction(response.data));
+      return response;
     },
     enabled: !!params.authorId,
   });
@@ -111,6 +69,7 @@ export const useCreateForumPost = () => {
       postApi.createPost(data, attachments),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
+      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
       toast.success({ title: "Tạo bài viết thành công!" });
     },
     onError: (error: any) => {
@@ -157,10 +116,7 @@ export const useLikeForumPost = () => {
 
   return useMutation({
     mutationFn: (id: number) => postApi.likePost(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["forum-posts"] }),
   });
 };
 
@@ -169,10 +125,7 @@ export const useDislikeForumPost = () => {
 
   return useMutation({
     mutationFn: (id: number) => postApi.dislikePost(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["forum-posts"] }),
   });
 };
 
@@ -181,10 +134,7 @@ export const useUnlikeOrUndislikeForumPost = () => {
 
   return useMutation({
     mutationFn: (id: number) => postApi.unlikeOrUndislikePost(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forum-posts"] });
-      queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["forum-posts"] }),
   });
 };
 
@@ -195,9 +145,7 @@ export const useForumComments = (postId: number, params: PaginationParams = {}) 
     queryKey: ["forum-comments", postId, params],
     queryFn: async () => {
       const response = await commentApi.getAllComments(postId, params);
-      if (response.data) {
-        dispatch(setCommentsAction(response.data));
-      }
+      if (response.data) dispatch(setCommentsAction(response.data));
       return response;
     },
     enabled: !!postId,
@@ -269,9 +217,7 @@ export const useLikeForumComment = () => {
 
   return useMutation({
     mutationFn: (id: number) => commentApi.likeComment(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
-    },
+    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["forum-comments"] }),
   });
 };
 
@@ -282,9 +228,7 @@ export const useForumHashtags = () => {
     queryKey: ["forum-hashtags"],
     queryFn: async () => {
       const response = await hashtagApi.getAllTags();
-      if (response.data) {
-        dispatch(setHashtagsAction(response.data));
-      }
+      if (response.data) dispatch(setHashtagsAction(response.data));
       return response;
     },
   });

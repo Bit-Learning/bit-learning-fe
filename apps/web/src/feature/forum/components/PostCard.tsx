@@ -39,7 +39,7 @@ export const PostCard: React.FC<PostCardProps> = ({
 
   return (
     <Card className="border-gray-200 hover:border-blue-600/40 transition-all group">
-      <CardContent className="p-8">
+      <CardContent className="px-6 py-4">
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <AuthorAvatar author={post.author} size="md" />
