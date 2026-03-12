@@ -19,10 +19,12 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
   const slides = data?.data || [];
   const pageInfo = data?.page;
 
-  const filteredSlides = slides.filter((slide: SlideGenerationResponse) => {
-    const matchesSearch = slide.topic.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesSearch;
-  });
+  const filteredSlides = Array.isArray(slides)
+    ? slides.filter((slide: SlideGenerationResponse) => {
+        const matchesSearch = slide.topic.toLowerCase().includes(searchQuery.toLowerCase());
+        return matchesSearch;
+      })
+    : [];
 
   const handleDelete = (id: number, topic: string) => {
     if (confirm(`Bạn có chắc muốn xóa slide "${topic}"?`)) {

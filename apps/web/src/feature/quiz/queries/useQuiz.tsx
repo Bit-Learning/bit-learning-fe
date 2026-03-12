@@ -18,9 +18,7 @@ import type {
 } from "../types/quiz.type";
 import { useAppDispatch } from "@/shared/redux/store";
 
-// ===== QUERY KEYS =====
 export const quizKeys = {
-  // Attempts
   attempts: {
     all: ["quiz-attempts"] as const,
     detail: (id: number) => [...quizKeys.attempts.all, "detail", id] as const,
@@ -28,7 +26,6 @@ export const quizKeys = {
     examAttempts: (examId: number, params?: PaginationParams) =>
       [...quizKeys.attempts.all, "exam", examId, params] as const,
   },
-  // Sessions
   sessions: {
     all: ["quiz-sessions"] as const,
     detail: (id: number) => [...quizKeys.sessions.all, "detail", id] as const,
@@ -38,14 +35,6 @@ export const quizKeys = {
   },
 };
 
-// ==========================================
-// QUIZ ATTEMPT HOOKS
-// ==========================================
-
-/**
- * Fetch quiz attempt & sync to Redux
- * Dùng cho: ExamTakingPage, ExamResultPage
- */
 export const useQuizAttempt = (attemptId: number, enabled = true) => {
   const dispatch = useAppDispatch();
 
@@ -55,7 +44,6 @@ export const useQuizAttempt = (attemptId: number, enabled = true) => {
       const response = await quizAttemptApi.getAttemptById(attemptId);
       const data = response.data.data!;
 
-      // Sync to Redux
       dispatch(setQuizAttemptAction(data));
 
       return data;
@@ -65,9 +53,6 @@ export const useQuizAttempt = (attemptId: number, enabled = true) => {
   });
 };
 
-/**
- * Fetch user's attempts
- */
 export const useMyQuizAttempts = (params?: PaginationParams) => {
   return useQuery({
     queryKey: quizKeys.attempts.myAttempts(params),

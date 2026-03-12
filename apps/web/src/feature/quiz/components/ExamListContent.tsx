@@ -8,75 +8,22 @@ import {
   Lock,
   Timer,
   HelpCircle,
-  Filter,
   ChevronLeft,
   ChevronRight,
+  FileText,
+  Trophy,
+  ArrowRight,
 } from "lucide-react";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Input } from "@workspace/ui/components/Input";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
+import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
-// import { useAllExams } from "../queries/useExam";
-// import { useMyQuizAttempts } from "../queries/useQuiz";
+import { useMyQuizAttempts } from "../queries/useQuiz";
 import type { ExamBriefResponse } from "../../exam/types/exam.type";
-import type { QuizAttemptBriefResponse, QuizAttemptStatus } from "../types/quiz.type";
+import { useAllExams } from "@/feature/exam/queries/useExam";
 
-const mockExams: ExamBriefResponse[] = [
-  {
-    id: 1,
-    name: "Kiểm tra Giữa kỳ 1 - Tin học 12",
-    code: "TIN12-GK1",
-    durationInMinutes: 45,
-    totalScore: 10,
-    totalQuestions: 30,
-    isPublished: true,
-    createdAt: "2023-10-15T08:00:00Z",
-  },
-  {
-    id: 2,
-    name: "Luyện tập Scratch - Lớp 5 (Cơ bản)",
-    code: "SCR-L5",
-    durationInMinutes: 30,
-    totalScore: 10,
-    totalQuestions: 20,
-    isPublished: true,
-    createdAt: "2023-10-10T08:00:00Z",
-  },
-  {
-    id: 3,
-    name: "Kiểm tra 15 phút - Hệ quản trị CSDL",
-    code: "TIN10-15P",
-    durationInMinutes: 15,
-    totalScore: 10,
-    totalQuestions: 10,
-    isPublished: true,
-    createdAt: "2023-10-05T08:00:00Z",
-  },
-  {
-    id: 4,
-    name: "Kiểm tra Học kỳ 1 - Tin học 12",
-    code: "TIN12-HK1",
-    durationInMinutes: 90,
-    totalScore: 10,
-    totalQuestions: 50,
-    isPublished: false,
-    createdAt: "2023-12-20T08:00:00Z",
-  },
-];
-
-const mockAttempts: QuizAttemptBriefResponse[] = [
-  {
-    id: 1,
-    exam: mockExams[2]!,
-    status: "SUBMITTED" as QuizAttemptStatus,
-    startTime: "2023-10-15T09:00:00Z",
-    submittedAt: "2023-10-15T09:12:00Z",
-    score: 9.5,
-  },
-];
-
-// ==================== TYPES ====================
 type ExamStatusEnum = "OPEN" | "UPCOMING" | "COMPLETED";
 
 interface ExamWithStatus extends ExamBriefResponse {
@@ -89,15 +36,15 @@ interface ExamWithStatus extends ExamBriefResponse {
 const ExamListContent: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState<string>("");
-  const [selectedTypes, setSelectedTypes] = useState<Set<string>>(new Set(["all"]));
+  const [currentPage, setCurrentPage] = useState(0);
+  const pageSize = 10;
 
-  // const { data: examsData, isLoading } = useAllExams({ page: 0, size: 20 });
-  // const { data: attemptsData } = useMyQuizAttempts({ page: 0, size: 100 });
-  // const exams = examsData?.data?.content || [];
-  // const attempts = attemptsData?.content || [];
+  const { data: examsData, isLoading } = useAllExams({ page: currentPage, size: pageSize });
+  const { data: attemptsData } = useMyQuizAttempts({ page: 0, size: 100 });
 
-  const exams = mockExams;
-  const attempts = mockAttempts;
+  const exams = examsData?.data || [];
+  const pagination = examsData?.page;
+  const attempts = attemptsData || [];
 
   const examsWithStatus: ExamWithStatus[] = exams.map((exam) => {
     const attempt = attempts.find((a) => a.exam.id === exam.id && a.status === "SUBMITTED");
@@ -109,7 +56,7 @@ const ExamListContent: React.FC = () => {
       status = "COMPLETED";
     }
 
-    let icon = <Terminal className="w-8 h-8" />;
+    let icon = <FileText className="w-8 h-8" />;
     let iconBg = "bg-blue-50 dark:bg-blue-900/30";
 
     if (status === "COMPLETED") {
@@ -118,9 +65,9 @@ const ExamListContent: React.FC = () => {
     } else if (status === "UPCOMING") {
       icon = <Lock className="w-8 h-8" />;
       iconBg = "bg-slate-100 dark:bg-slate-800";
-    } else if (exam.code.includes("SCR")) {
+    } else if (exam.code.includes("SCR") || exam.code.includes("CODE")) {
       icon = <Code className="w-8 h-8" />;
-      iconBg = "bg-orange-50 dark:bg-orange-900/30";
+      iconBg = "bg-purple-50 dark:bg-purple-900/30";
     }
 
     return {
@@ -135,52 +82,24 @@ const ExamListContent: React.FC = () => {
   const statusConfig = {
     OPEN: {
       label: "Đang mở",
-      color: "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300",
+      color: "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
     },
     UPCOMING: {
       label: "Sắp diễn ra",
-      color: "bg-yellow-100 dark:bg-yellow-900/50 text-yellow-700 dark:text-yellow-300",
+      color:
+        "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
     },
     COMPLETED: {
       label: "Đã hoàn thành",
-      color: "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400",
+      color: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700",
     },
   };
 
   const filteredExams = examsWithStatus.filter((exam) => {
     const matchSearch =
       exam.name.toLowerCase().includes(search.toLowerCase()) || exam.code.toLowerCase().includes(search.toLowerCase());
-
-    let matchType = selectedTypes.has("all");
-    if (!matchType) {
-      if (selectedTypes.has("official")) {
-        matchType = exam.code.includes("TIN") || exam.code.includes("GK") || exam.code.includes("HK");
-      }
-      if (selectedTypes.has("practice")) {
-        matchType = matchType || exam.code.includes("SCR") || exam.code.includes("LT");
-      }
-    }
-
-    return matchSearch && matchType;
+    return matchSearch;
   });
-
-  const handleTypeChange = (type: string): void => {
-    const newTypes = new Set(selectedTypes);
-    if (type === "all") {
-      setSelectedTypes(new Set(["all"]));
-    } else {
-      newTypes.delete("all");
-      if (newTypes.has(type)) {
-        newTypes.delete(type);
-      } else {
-        newTypes.add(type);
-      }
-      if (newTypes.size === 0) {
-        newTypes.add("all");
-      }
-      setSelectedTypes(newTypes);
-    }
-  };
 
   const handleExamClick = (exam: ExamWithStatus) => {
     navigate({
@@ -189,198 +108,257 @@ const ExamListContent: React.FC = () => {
     });
   };
 
-  const handleViewResult = (examId: number) => {
-    const attempt = attempts.find((a) => a.exam.id === examId);
+  const handleViewResult = (examId: number, e: React.MouseEvent) => {
+    e.stopPropagation();
+    const attempt = attempts.find((a) => a.exam.id === examId && a.status === "SUBMITTED");
     if (attempt) {
-      // navigate({
-      //   to: "/quiz-attempts/$attemptId/result",
-      //   params: { attemptId: String(attempt.id) },
-      // });
+      // Navigate to result page
+      navigate({
+        to: `/quiz-attempts/${attempt.id}/result`,
+      });
     }
   };
 
   return (
-    <div className="bg-white">
-      {" "}
-      <main className="max-w-360 mx-auto px-6 py-8">
-        <div className="flex flex-col md:flex-row gap-8">
-          <aside className="w-full md:w-64 shrink-0">
-            <div className="sticky top-28 space-y-6">
-              <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                <Filter className="w-5 h-5 text-primary" />
-                Bộ lọc
-              </h2>
-
-              <Card>
-                <CardContent className="p-5">
-                  <h3 className="font-bold text-sm uppercase tracking-wider text-slate-400 mb-4">Loại bài thi</h3>
-                  <div className="space-y-3">
-                    {[
-                      { id: "all", label: "Tất cả" },
-                      { id: "official", label: "Chính thức" },
-                      { id: "practice", label: "Luyện tập" },
-                    ].map((type) => (
-                      <label key={type.id} className="flex items-center gap-3 cursor-pointer group">
-                        <input
-                          type="checkbox"
-                          checked={selectedTypes.has(type.id)}
-                          onChange={() => handleTypeChange(type.id)}
-                          className="rounded border-slate-300 text-primary focus:ring-primary w-5 h-5"
-                        />
-                        <span className="group-hover:text-primary transition-colors">{type.label}</span>
-                      </label>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="mb-10">
+          <div className="flex flex-col gap-6">
+            <div>
+              <h1 className="text-4xl font-black bg-linear-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent mb-3">
+                Danh sách đề thi
+              </h1>
+              <p className="text-lg text-slate-600 dark:text-slate-400">
+                Chọn một đề thi để bắt đầu thử thách kiến thức của bạn
+              </p>
             </div>
-          </aside>
 
-          <div className="flex-1">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
-              <div>
-                <h1 className="text-3xl font-black mb-1">Informatics Exam Selection</h1>
+            <div className="relative max-w-xl">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Tìm kiếm theo tên đề thi hoặc mã đề..."
+                className="pl-12 h-12 text-base shadow-sm border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary/20"
+              />
+            </div>
+          </div>
+        </div>
+
+        {isLoading ? (
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-40 w-full rounded-2xl" />
+            ))}
+          </div>
+        ) : filteredExams.length === 0 ? (
+          <Card className="border-2 border-dashed border-slate-200 dark:border-slate-800">
+            <CardContent className="py-20">
+              <div className="text-center">
+                <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                  <FileText className="w-10 h-10 text-slate-400" />
+                </div>
+                <h3 className="text-xl font-bold text-slate-900 dark:text-slate-100 mb-2">
+                  {search ? "Không tìm thấy đề thi" : "Chưa có đề thi nào"}
+                </h3>
                 <p className="text-slate-500 dark:text-slate-400">
-                  Chào Binh, hãy chọn một bài thi để bắt đầu thử thách kiến thức nhé!
+                  {search ? "Thử tìm kiếm với từ khóa khác" : "Hiện tại chưa có đề thi nào được xuất bản"}
                 </p>
               </div>
-              <div className="relative w-full sm:w-80">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  placeholder="Tìm kiếm đề thi..."
-                  className="pl-10"
-                />
-              </div>
-            </div>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-4">
+            {filteredExams.map((exam) => {
+              const isCompleted = exam.status === "COMPLETED";
+              const isUpcoming = exam.status === "UPCOMING";
+              const isOpen = exam.status === "OPEN";
 
-            <div className="space-y-4">
-              {filteredExams.map((exam) => {
-                const isCompleted = exam.status === "COMPLETED";
-                const isUpcoming = exam.status === "UPCOMING";
-
-                return (
-                  <Card
-                    key={exam.id}
-                    className={cn(
-                      "group hover:shadow-md transition-all cursor-pointer border-2",
-                      isCompleted && "bg-slate-50 dark:bg-slate-900/50 opacity-90",
-                    )}
-                    onClick={() => !isCompleted && handleExamClick(exam)}
-                  >
-                    <CardContent className="p-6">
-                      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-6">
-                        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
+              return (
+                <Card
+                  key={exam.id}
+                  className={cn(
+                    "group transition-all duration-300 border-2 overflow-hidden",
+                    isCompleted && "bg-slate-50/50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800",
+                    isUpcoming && "border-amber-200 dark:border-amber-900/50",
+                    isOpen &&
+                      "border-blue-200 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-800 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer",
+                  )}
+                  onClick={() => isOpen && handleExamClick(exam)}
+                >
+                  <CardContent className="p-6">
+                    <div className="flex flex-col lg:flex-row lg:items-center gap-6">
+                      {/* Icon Section */}
+                      <div className="flex items-start gap-5 flex-1">
+                        <div
+                          className={cn(
+                            "w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 transition-transform",
+                            exam.iconBg,
+                            isOpen && "group-hover:scale-110",
+                          )}
+                        >
                           <div
                             className={cn(
-                              "w-16 h-16 rounded-2xl flex items-center justify-center shrink-0",
-                              exam.iconBg,
+                              isCompleted
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : isUpcoming
+                                  ? "text-slate-400"
+                                  : "text-blue-600 dark:text-blue-400",
                             )}
                           >
-                            <div
-                              className={cn(
-                                isCompleted ? "text-emerald-500" : isUpcoming ? "text-slate-400" : "text-primary",
-                              )}
-                            >
-                              {exam.icon}
-                            </div>
-                          </div>
-                          <div className="space-y-1">
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <Badge
-                                className={cn(
-                                  "text-[10px] font-bold uppercase tracking-wide",
-                                  statusConfig[exam.status].color,
-                                )}
-                              >
-                                {statusConfig[exam.status].label}
-                              </Badge>
-                              <Badge variant="secondary" className="text-[10px] font-bold uppercase tracking-wide">
-                                {exam.code}
-                              </Badge>
-                            </div>
-                            <h3
-                              className={cn(
-                                "text-xl font-bold",
-                                !isCompleted && "group-hover:text-primary transition-colors",
-                              )}
-                            >
-                              {exam.name}
-                            </h3>
-                            <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-500 dark:text-slate-400 pt-1">
-                              <span className="flex items-center gap-1.5">
-                                <Timer className="w-4 h-4" />
-                                {exam.durationInMinutes} phút
-                              </span>
-                              <span className="flex items-center gap-1.5">
-                                <HelpCircle className="w-4 h-4" />
-                                {exam.totalQuestions} câu hỏi
-                              </span>
-                              {isCompleted && exam.lastAttemptScore && (
-                                <span className="flex items-center gap-1.5 text-emerald-500 font-medium">
-                                  Kết quả: {exam.lastAttemptScore}/10
-                                </span>
-                              )}
-                            </div>
+                            {exam.icon}
                           </div>
                         </div>
-                        <div className="flex items-center gap-3">
-                          {isCompleted ? (
-                            <Button
-                              variant="outline"
-                              className="flex-1 lg:flex-none whitespace-nowrap"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleViewResult(exam.id);
-                              }}
+
+                        <div className="flex-1 min-w-0 space-y-3">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            <Badge
+                              className={cn("text-xs font-semibold px-3 py-1 border", statusConfig[exam.status].color)}
                             >
-                              Xem kết quả
-                            </Button>
-                          ) : isUpcoming ? (
-                            <Button
-                              variant="outline"
-                              isDisabled
-                              className="flex-1 lg:flex-none whitespace-nowrap cursor-not-allowed"
-                            >
-                              Chưa mở
-                            </Button>
-                          ) : (
-                            <Button className="flex-1 lg:flex-none whitespace-nowrap shadow-lg shadow-primary/20">
-                              Bắt đầu làm bài
-                            </Button>
-                          )}
+                              {statusConfig[exam.status].label}
+                            </Badge>
+                            <Badge variant="outline" className="text-xs font-mono font-semibold px-3 py-1">
+                              {exam.code}
+                            </Badge>
+                          </div>
+
+                          <h3
+                            className={cn(
+                              "text-2xl font-bold text-slate-900 dark:text-slate-100",
+                              isOpen && "group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors",
+                            )}
+                          >
+                            {exam.name}
+                          </h3>
+
+                          {/* Metadata */}
+                          <div className="flex flex-wrap items-center gap-x-6 gap-y-2 text-sm text-slate-600 dark:text-slate-400">
+                            <span className="flex items-center gap-2">
+                              <Timer className="w-4 h-4" />
+                              <span className="font-medium">{exam.durationInMinutes} phút</span>
+                            </span>
+                            <span className="flex items-center gap-2">
+                              <HelpCircle className="w-4 h-4" />
+                              <span className="font-medium">{exam.totalQuestions} câu hỏi</span>
+                            </span>
+                            {isCompleted && exam.lastAttemptScore !== undefined && (
+                              <span className="flex items-center gap-2 text-emerald-600 dark:text-emerald-400 font-semibold">
+                                <Trophy className="w-4 h-4" />
+                                Điểm: {exam.lastAttemptScore}/{exam.totalScore}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       </div>
-                    </CardContent>
-                  </Card>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-3 lg:flex-col lg:items-stretch lg:w-40">
+                        {isCompleted ? (
+                          <>
+                            <Button
+                              variant="outline"
+                              className="flex-1 lg:flex-none gap-2 border-slate-300 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleExamClick(exam);
+                              }}
+                            >
+                              <FileText className="w-4 h-4" />
+                              Xem đề thi
+                            </Button>
+                            <Button
+                              className="flex-1 lg:flex-none gap-2 bg-emerald-600 hover:bg-emerald-700 text-white"
+                              onClick={(e) => handleViewResult(exam.id, e)}
+                            >
+                              <Trophy className="w-4 h-4" />
+                              Xem kết quả
+                            </Button>
+                          </>
+                        ) : isUpcoming ? (
+                          <Button
+                            variant="outline"
+                            isDisabled
+                            className="flex-1 lg:flex-none gap-2 cursor-not-allowed opacity-60"
+                          >
+                            <Lock className="w-4 h-4" />
+                            Chưa mở
+                          </Button>
+                        ) : (
+                          <Button
+                            className="flex-1 lg:flex-none gap-2 bg-linear-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-900/50 group/btn"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleExamClick(exam);
+                            }}
+                          >
+                            Xem chi tiết
+                            <ArrowRight className="w-4 h-4 transition-transform group-hover/btn:translate-x-1" />
+                          </Button>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })}
+          </div>
+        )}
+
+        {/* Pagination */}
+        {pagination && pagination.totalPages > 1 && (
+          <div className="mt-12 flex items-center justify-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
+              isDisabled={currentPage === 0}
+              className="gap-2"
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Trước
+            </Button>
+
+            <div className="flex items-center gap-1">
+              {Array.from({ length: Math.min(pagination.totalPages, 5) }, (_, i) => {
+                let pageNum = i;
+
+                // Show current page and surrounding pages
+                if (pagination.totalPages > 5) {
+                  if (currentPage < 3) {
+                    pageNum = i;
+                  } else if (currentPage > pagination.totalPages - 4) {
+                    pageNum = pagination.totalPages - 5 + i;
+                  } else {
+                    pageNum = currentPage - 2 + i;
+                  }
+                }
+
+                return (
+                  <Button
+                    key={pageNum}
+                    variant={currentPage === pageNum ? "default" : "outline"}
+                    size="sm"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className="w-10"
+                  >
+                    {pageNum + 1}
+                  </Button>
                 );
               })}
             </div>
 
-            <div className="mt-12 flex items-center justify-center gap-2">
-              <Button variant="outline" size="sm">
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button size="sm" className="w-10">
-                1
-              </Button>
-              <Button variant="outline" size="sm" className="w-10">
-                2
-              </Button>
-              <Button variant="outline" size="sm" className="w-10">
-                3
-              </Button>
-              <span className="px-2 text-slate-400">...</span>
-              <Button variant="outline" size="sm" className="w-10">
-                10
-              </Button>
-              <Button variant="outline" size="sm">
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((p) => p + 1)}
+              isDisabled={currentPage >= pagination.totalPages - 1}
+              className="gap-2"
+            >
+              Sau
+              <ChevronRight className="w-4 h-4" />
+            </Button>
           </div>
-        </div>
+        )}
       </main>
     </div>
   );

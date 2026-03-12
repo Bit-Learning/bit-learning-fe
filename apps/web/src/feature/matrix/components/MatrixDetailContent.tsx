@@ -40,7 +40,7 @@ const MatrixDetailContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <main className="ml-64 flex-1 p-8">
+      <main className=" flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <Skeleton className="h-8 w-32 mb-4" />
           <Skeleton className="h-48 w-full mb-8" />
@@ -52,7 +52,7 @@ const MatrixDetailContent: React.FC = () => {
 
   if (!matrix) {
     return (
-      <main className="ml-64 flex-1 p-8">
+      <main className=" flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">

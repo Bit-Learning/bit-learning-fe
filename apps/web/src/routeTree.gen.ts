@@ -105,7 +105,6 @@ import { Route as LayoutQuizSessionsSessionIdResultRouteImport } from './routes/
 import { Route as LayoutQuizAttemptsAttemptIdResultRouteImport } from './routes/_layout/quiz-attempts/$attemptId.result'
 import { Route as LayoutForumPostIdRouteImport } from './routes/_layout/forum/post.$id'
 import { Route as LayoutForumIdEditRouteImport } from './routes/_layout/forum/$id.edit'
-import { Route as LayoutExamsExamIdModeRouteImport } from './routes/_layout/exams/$examId.mode'
 import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
 
 const SignupRoute = SignupRouteImport.update({
@@ -601,11 +600,6 @@ const LayoutForumIdEditRoute = LayoutForumIdEditRouteImport.update({
   path: '/forum/$id/edit',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutExamsExamIdModeRoute = LayoutExamsExamIdModeRouteImport.update({
-  id: '/mode',
-  path: '/mode',
-  getParentRoute: () => LayoutExamsExamIdRoute,
-} as any)
 const LayoutCoursesGradeGradeRoute = LayoutCoursesGradeGradeRouteImport.update({
   id: '/courses/grade/$grade',
   path: '/courses/grade/$grade',
@@ -651,7 +645,7 @@ export interface FileRoutesByFullPath {
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/exams/$examId': typeof LayoutExamsExamIdRouteWithChildren
+  '/exams/$examId': typeof LayoutExamsExamIdRoute
   '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
@@ -698,7 +692,6 @@ export interface FileRoutesByFullPath {
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/mentor/slides/': typeof MentorSlidesIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
-  '/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/quiz-attempts/$attemptId/result': typeof LayoutQuizAttemptsAttemptIdResultRoute
@@ -749,7 +742,7 @@ export interface FileRoutesByTo {
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/exams/$examId': typeof LayoutExamsExamIdRouteWithChildren
+  '/exams/$examId': typeof LayoutExamsExamIdRoute
   '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
@@ -796,7 +789,6 @@ export interface FileRoutesByTo {
   '/mentor/question': typeof MentorQuestionIndexRoute
   '/mentor/slides': typeof MentorSlidesIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
-  '/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/quiz-attempts/$attemptId/result': typeof LayoutQuizAttemptsAttemptIdResultRoute
@@ -850,7 +842,7 @@ export interface FileRoutesById {
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/_layout/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/_layout/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/_layout/exams/$examId': typeof LayoutExamsExamIdRouteWithChildren
+  '/_layout/exams/$examId': typeof LayoutExamsExamIdRoute
   '/_layout/forum/create': typeof LayoutForumCreateRoute
   '/_layout/forum/my': typeof LayoutForumMyRoute
   '/_layout/internal/test-loader': typeof LayoutInternalTestLoaderRoute
@@ -897,7 +889,6 @@ export interface FileRoutesById {
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/mentor/slides/': typeof MentorSlidesIndexRoute
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
-  '/_layout/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/_layout/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/_layout/forum/post/$id': typeof LayoutForumPostIdRoute
   '/_layout/quiz-attempts/$attemptId/result': typeof LayoutQuizAttemptsAttemptIdResultRoute
@@ -997,7 +988,6 @@ export interface FileRouteTypes {
     | '/mentor/question/'
     | '/mentor/slides/'
     | '/courses/grade/$grade'
-    | '/exams/$examId/mode'
     | '/forum/$id/edit'
     | '/forum/post/$id'
     | '/quiz-attempts/$attemptId/result'
@@ -1095,7 +1085,6 @@ export interface FileRouteTypes {
     | '/mentor/question'
     | '/mentor/slides'
     | '/courses/grade/$grade'
-    | '/exams/$examId/mode'
     | '/forum/$id/edit'
     | '/forum/post/$id'
     | '/quiz-attempts/$attemptId/result'
@@ -1195,7 +1184,6 @@ export interface FileRouteTypes {
     | '/mentor/question/'
     | '/mentor/slides/'
     | '/_layout/courses/grade/$grade'
-    | '/_layout/exams/$examId/mode'
     | '/_layout/forum/$id/edit'
     | '/_layout/forum/post/$id'
     | '/_layout/quiz-attempts/$attemptId/result'
@@ -1935,13 +1923,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutForumIdEditRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/exams/$examId/mode': {
-      id: '/_layout/exams/$examId/mode'
-      path: '/mode'
-      fullPath: '/exams/$examId/mode'
-      preLoaderRoute: typeof LayoutExamsExamIdModeRouteImport
-      parentRoute: typeof LayoutExamsExamIdRoute
-    }
     '/_layout/courses/grade/$grade': {
       id: '/_layout/courses/grade/$grade'
       path: '/courses/grade/$grade'
@@ -1969,17 +1950,6 @@ const HeaderOnlyRouteChildren: HeaderOnlyRouteChildren = {
 const HeaderOnlyRouteWithChildren = HeaderOnlyRoute._addFileChildren(
   HeaderOnlyRouteChildren,
 )
-
-interface LayoutExamsExamIdRouteChildren {
-  LayoutExamsExamIdModeRoute: typeof LayoutExamsExamIdModeRoute
-}
-
-const LayoutExamsExamIdRouteChildren: LayoutExamsExamIdRouteChildren = {
-  LayoutExamsExamIdModeRoute: LayoutExamsExamIdModeRoute,
-}
-
-const LayoutExamsExamIdRouteWithChildren =
-  LayoutExamsExamIdRoute._addFileChildren(LayoutExamsExamIdRouteChildren)
 
 interface LayoutQuizAttemptsAttemptIdRouteChildren {
   LayoutQuizAttemptsAttemptIdResultRoute: typeof LayoutQuizAttemptsAttemptIdResultRoute
@@ -2032,7 +2002,7 @@ interface LayoutRouteChildren {
   LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
   LayoutCoursesMobileDevelopmentRoute: typeof LayoutCoursesMobileDevelopmentRoute
   LayoutCoursesWebDevelopmentRoute: typeof LayoutCoursesWebDevelopmentRoute
-  LayoutExamsExamIdRoute: typeof LayoutExamsExamIdRouteWithChildren
+  LayoutExamsExamIdRoute: typeof LayoutExamsExamIdRoute
   LayoutForumCreateRoute: typeof LayoutForumCreateRoute
   LayoutForumMyRoute: typeof LayoutForumMyRoute
   LayoutInternalTestLoaderRoute: typeof LayoutInternalTestLoaderRoute
@@ -2073,7 +2043,7 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
   LayoutCoursesMobileDevelopmentRoute: LayoutCoursesMobileDevelopmentRoute,
   LayoutCoursesWebDevelopmentRoute: LayoutCoursesWebDevelopmentRoute,
-  LayoutExamsExamIdRoute: LayoutExamsExamIdRouteWithChildren,
+  LayoutExamsExamIdRoute: LayoutExamsExamIdRoute,
   LayoutForumCreateRoute: LayoutForumCreateRoute,
   LayoutForumMyRoute: LayoutForumMyRoute,
   LayoutInternalTestLoaderRoute: LayoutInternalTestLoaderRoute,
