@@ -1,10 +1,13 @@
 name: Build and Check
 
 on:
-    push:
-        branches: [feature/biome-ci]
+    workflow_dispatch:
     pull_request:
-        branches: [develop]
+        branches: [main]
+        paths:
+          - "apps/web/src/**"
+          - "apps/admin/src/**"
+          - ".github/workflows/build.yml"
 
 concurrency:
     group: ${{ github.workflow }}-${{ github.ref }}
