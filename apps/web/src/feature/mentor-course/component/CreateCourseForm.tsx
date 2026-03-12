@@ -72,7 +72,7 @@ export const CreateCourseForm = () => {
   };
 
   return (
-    <Card className="w-full  p-8">
+    <Card className="w-full p-8">
       <div className="mb-6">
         <Button
           variant="outline"

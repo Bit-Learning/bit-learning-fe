@@ -1,384 +1,360 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import {
-  Share2,
-  MoreHorizontal,
-  Award,
-  CheckCircle2,
-  XCircle,
-  EyeOff,
-  LayoutGrid,
-  BookOpen,
-  RefreshCw,
-  Home,
-  Trophy,
-} from "lucide-react";
+import { CheckCircle2, XCircle, Clock, Trophy, FileText, ChevronDown, ChevronUp, Home, RotateCcw } from "lucide-react";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { cn } from "@workspace/ui/lib/utils";
-// import { useQuizAttempt } from "../queries/useQuiz";
-import type {
-  QuizAttemptResponse,
-  QuizAttemptAnswerResponse,
-  QuizAttemptStatus,
-  QuestionNavigationState,
-} from "../types/quiz.type";
-import type {
-  QuestionResponse,
-  OptionResponse,
-  QuestionLevel,
-  QuestionType,
-  ApprovalStatus,
-} from "@/feature/question/types/question.type";
+import { useQuizAttempt } from "../queries/useQuiz";
+import { useExam } from "@/feature/exam/queries/useExam";
 
-// ==================== MOCK FULL QUESTIONS (for result display) ====================
-const mockFullQuestions: QuestionResponse[] = Array.from({ length: 30 }, (_, i) => ({
-  id: i + 1,
-  content:
-    i === 0
-      ? "Đâu là thủ đô của Việt Nam?"
-      : i === 2
-        ? "Dãy núi cao nhất Việt Nam là dãy núi nào?"
-        : `Câu hỏi số ${i + 1}`,
-  canonicalAnswer:
-    i === 0
-      ? "Hà Nội là thủ đô của nước Cộng hòa xã hội chủ nghĩa Việt Nam, đồng thời cũng là kinh đô của hầu hết các vương triều phong kiến Việt Nam trước đây."
-      : i === 2
-        ? "Hoàng Liên Sơn là dãy núi cao nhất Việt Nam, trong đó có đỉnh Fansipan cao 3.143m được mệnh danh là 'Nóc nhà Đông Dương'. Bạn đã chọn Trường Sơn là chưa chính xác."
-        : `Giải thích chi tiết cho câu hỏi số ${i + 1}`,
-  questionType: "MCQ" as QuestionType,
-  questionLevel: "MEDIUM" as QuestionLevel,
-  subject: { id: 1, name: "Tin học", code: "TIN" },
-  chapter: undefined,
-  lesson: { id: 1, name: "Bài 1", code: "L1" },
-  tags: [],
-  options: [
-    {
-      id: i * 4 + 1,
-      content: i === 0 ? "A. TP. Hồ Chí Minh" : i === 2 ? "A. Trường Sơn" : `Đáp án A`,
-      isCorrect: false,
-      orderNo: 1,
-    },
-    {
-      id: i * 4 + 2,
-      content: i === 0 ? "B. Hà Nội" : i === 2 ? "B. Hoàng Liên Sơn" : `Đáp án B`,
-      isCorrect: true,
-      orderNo: 2,
-    },
-    {
-      id: i * 4 + 3,
-      content: i === 0 ? "C. Đà Nẵng" : i === 2 ? "C. Bạch Mã" : `Đáp án C`,
-      isCorrect: false,
-      orderNo: 3,
-    },
-    {
-      id: i * 4 + 4,
-      content: i === 0 ? "D. Hải Phòng" : i === 2 ? "D. Ngũ Hành Sơn" : `Đáp án D`,
-      isCorrect: false,
-      orderNo: 4,
-    },
-  ],
-  isActive: true,
-  isPublic: true,
-  approvalStatus: "APPROVED" as ApprovalStatus,
-  createdAt: "2023-09-15T08:00:00Z",
-  updatedAt: "2023-09-15T08:00:00Z",
-}));
-
-// ==================== MOCK DATA ====================
-const mockQuizResult: QuizAttemptResponse = {
-  id: 1,
-  user: {
-    id: 1,
-    username: "student01",
-    email: "student01@example.com",
-    fullName: "Nguyễn Văn A",
-  },
-  exam: {
-    id: 1,
-    name: "Kiểm tra Giữa kỳ 1 - Tin học 12",
-    code: "TIN12-GK1",
-    durationInMinutes: 45,
-    totalScore: 10,
-    totalQuestions: 30,
-    isPublished: true,
-    createdAt: "2023-09-15T08:00:00Z",
-  },
-  status: "SUBMITTED" as QuizAttemptStatus,
-  startTime: "2023-10-15T09:00:00Z",
-  submittedAt: "2023-10-15T09:45:00Z",
-  score: 9.0,
-  timeRemaining: 0,
-  answers: Array.from({ length: 30 }, (_, i) => {
-    const isCorrect = ![2, 11, 22].includes(i);
-    return {
-      id: i + 1,
-      question: {
-        id: i + 1,
-        questionText:
-          i === 0
-            ? "Đâu là thủ đô của Việt Nam?"
-            : i === 2
-              ? "Dãy núi cao nhất Việt Nam là dãy núi nào?"
-              : `Câu hỏi số ${i + 1}`,
-        questionType: "MCQ" as QuestionType,
-      },
-      selectedOptionIds: isCorrect ? [i * 4 + 2] : [i * 4 + 1],
-      isCorrect,
-      score: isCorrect ? 0.33 : 0,
-      questionNo: i + 1,
-      navigationState: "ANSWERED" as QuestionNavigationState,
-    };
-  }),
-  createdAt: "2023-10-15T09:00:00Z",
-  updatedAt: "2023-10-15T09:45:00Z",
-};
-
-// ==================== COMPONENT ====================
-const AttemptResultContent = () => {
-  // ===== ROUTER =====
+const QuizAttemptResultContent: React.FC = () => {
   const navigate = useNavigate();
-  // const { attemptId } = useParams({ from: "/_layout/quiz-attempts/$attemptId/result" });
+  const { attemptId } = useParams({ from: "/_layout/quiz-attempts/$attemptId/result" });
 
-  // ===== QUERIES (Commented - Ready for production) =====
-  // Fetch both attempt result and full exam questions
-  // const { data: result, isLoading } = useQuizAttempt(Number(attemptId));
-  // const { data: examData } = useExam(result?.exam.id);
-  // const fullQuestions = examData?.examQuestions.map(eq => eq.question) || [];
+  const [expandedQuestions, setExpandedQuestions] = useState<Set<number>>(new Set());
 
-  // ===== MOCK DATA (Keep for UI testing) =====
-  const result = mockQuizResult;
-  const fullQuestions = mockFullQuestions;
+  const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(Number(attemptId));
+  const { data: examData, isLoading: examLoading } = useExam(attemptData?.exam?.id || 0, {
+    enabled: !!attemptData?.exam?.id,
+  });
 
-  // ===== DERIVED DATA =====
-  const correctAnswers = result.answers.filter((a) => a.isCorrect).length;
-  const wrongAnswers = result.answers.filter(
-    (a) => !a.isCorrect && a.selectedOptionIds && a.selectedOptionIds.length > 0,
-  ).length;
-  const skippedAnswers = result.answers.filter((a) => !a.selectedOptionIds || a.selectedOptionIds.length === 0).length;
-
-  // Calculate rank based on score
-  const rank =
-    (result.score ?? 0) >= 9
-      ? "Xuất sắc"
-      : (result.score ?? 0) >= 8
-        ? "Giỏi"
-        : (result.score ?? 0) >= 6.5
-          ? "Khá"
-          : (result.score ?? 0) >= 5
-            ? "Trung bình"
-            : "Yếu";
-
-  // ===== HANDLERS =====
-  const handleRetake = () => {
-    // Navigate back to exam detail to start new attempt
-    navigate({
-      to: "/exams/$examId",
-      params: { examId: String(result.exam.id) },
+  const toggleQuestion = (questionId: number) => {
+    setExpandedQuestions((prev) => {
+      const next = new Set(prev);
+      next.has(questionId) ? next.delete(questionId) : next.add(questionId);
+      return next;
     });
   };
 
-  const handleGoHome = () => {
-    // Navigate to home or exam list
-    navigate({ to: "/exams" });
+  const getOptionLabel = (index: number) => String.fromCharCode(65 + index);
+  const isEssay = (type: string) => type?.toUpperCase() === "ESSAY";
+  const isMCQ = (type: string) => type?.toUpperCase() === "MCQ";
+
+  if (attemptLoading || examLoading) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-slate-600 dark:text-slate-400 font-medium">Đang tải kết quả...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (!attemptData || !examData) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
+        <Card className="max-w-md shadow-xl">
+          <CardContent className="p-12 text-center">
+            <FileText className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2">Không tìm thấy kết quả</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">Kết quả bài thi không tồn tại.</p>
+            <Button onClick={() => navigate({ to: "/exams" })}>Quay lại danh sách</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const examQuestionsMap = new Map((examData.examQuestions || []).map((eq) => [eq.question.id, eq.question]));
+
+  const hasAnswered = (answer: (typeof attemptData.answers)[number]): boolean => {
+    if (isEssay(answer.question.questionType)) return !!answer.answerText?.trim();
+    return (answer.selectedOptionIds?.length ?? 0) > 0;
   };
 
-  // ===== RENDER =====
+  const totalQuestions = attemptData.answers.length;
+  let correctCount = 0;
+  let incorrectCount = 0;
+  let unansweredCount = 0;
+
+  for (const answer of attemptData.answers) {
+    if (!hasAnswered(answer)) {
+      unansweredCount++;
+    } else if (answer.correct) {
+      correctCount++;
+    } else {
+      incorrectCount++;
+    }
+  }
+
+  const score = attemptData.score ?? 0;
+  const totalScore = examData.totalScore;
+  const percentage = totalScore > 0 ? Math.round((score / totalScore) * 100) : 0;
+  const isPassed = percentage >= 50;
+
+  const sortedAnswers = [...attemptData.answers].sort((a, b) => (a.questionNo ?? 9999) - (b.questionNo ?? 9999));
+
   return (
-    <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#221610] flex flex-col">
-      <main className="max-w-300 mx-auto px-4 py-6 md:py-10 w-full flex-1">
-        {/* Hero Score Section */}
-        <div className="flex flex-col items-center justify-center text-center py-10 bg-white dark:bg-slate-900/50 rounded-3xl shadow-sm border border-slate-100 dark:border-slate-800 mb-8">
-          <div className="mb-2 text-primary font-semibold uppercase tracking-widest text-sm">Điểm số của bạn</div>
-          <h1 className="text-6xl md:text-7xl font-extrabold text-slate-900 dark:text-white mb-2">
-            {result.score?.toFixed(1) || "0.0"}{" "}
-            <span className="text-2xl text-slate-400 font-medium">/ {result.exam.totalScore.toFixed(1)}</span>
-          </h1>
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400 font-bold">
-            <Award className="w-4 h-4" />
-            Xếp hạng: {rank}
-          </div>
-        </div>
-
-        {/* Statistics Grid */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-10">
-          <Card className="shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 text-green-600 dark:text-green-500 mb-1">
-                <CheckCircle2 className="w-5 h-5" />
-                <p className="text-sm font-semibold uppercase">Đúng</p>
-              </div>
-              <p className="text-3xl font-bold">
-                {correctAnswers} <span className="text-base font-normal text-slate-500">câu</span>
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 text-red-600 dark:text-red-500 mb-1">
-                <XCircle className="w-5 h-5" />
-                <p className="text-sm font-semibold uppercase">Sai</p>
-              </div>
-              <p className="text-3xl font-bold">
-                {wrongAnswers} <span className="text-base font-normal text-slate-500">câu</span>
-              </p>
-            </CardContent>
-          </Card>
-
-          <Card className="shadow-sm">
-            <CardContent className="p-6">
-              <div className="flex items-center gap-2 text-slate-400 mb-1">
-                <EyeOff className="w-5 h-5" />
-                <p className="text-sm font-semibold uppercase">Bỏ qua</p>
-              </div>
-              <p className="text-3xl font-bold">
-                {skippedAnswers} <span className="text-base font-normal text-slate-500">câu</span>
-              </p>
-            </CardContent>
-          </Card>
-        </div>
-
-        {/* Answer Review Grid */}
-        <div className="mb-10">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <LayoutGrid className="w-5 h-5 text-primary" />
-            Bảng rà soát đáp án
-          </h2>
-          <div className="grid grid-cols-5 sm:grid-cols-10 gap-3">
-            {result.answers.map((answer, index) => (
-              <button
-                key={answer.id}
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <main className="max-w-5xl mx-auto p-4 md:p-8">
+        <Card
+          className={cn(
+            "mb-6 border-2 shadow-2xl",
+            isPassed
+              ? "border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20"
+              : "border-red-200 dark:border-red-800 bg-linear-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20",
+          )}
+        >
+          <CardContent className="p-8">
+            <div className="text-center mb-6">
+              <div
                 className={cn(
-                  "flex aspect-square items-center justify-center rounded-xl font-bold shadow-sm hover:scale-105 transition-transform cursor-pointer",
-                  answer.isCorrect
-                    ? "bg-green-500 dark:bg-green-600 text-white"
-                    : "bg-red-500 dark:bg-red-600 text-white",
+                  "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg",
+                  isPassed ? "bg-emerald-500" : "bg-red-500",
                 )}
               >
-                {index + 1}
-              </button>
-            ))}
-          </div>
-        </div>
+                {isPassed ? <Trophy className="w-10 h-10 text-white" /> : <XCircle className="w-10 h-10 text-white" />}
+              </div>
+              <h1 className="text-3xl font-black mb-2 text-slate-900 dark:text-slate-100">
+                {isPassed ? "🎉 Chúc mừng! Bạn đã đạt" : "Chưa đạt yêu cầu"}
+              </h1>
+              <p className="text-slate-600 dark:text-slate-400 text-lg">{examData.name}</p>
+            </div>
 
-        {/* Detailed Explanation Section */}
-        <div className="mb-10">
-          <h2 className="text-xl font-bold mb-6 flex items-center gap-2">
-            <BookOpen className="w-5 h-5 text-primary" />
-            Chi tiết giải thích
-          </h2>
-          <div className="space-y-6">
-            {result.answers.slice(0, 3).map((answer) => {
-              const fullQuestion = fullQuestions.find((q) => q.id === answer.question.id);
-              if (!fullQuestion) return null;
+            <div className="flex items-center justify-center mb-6">
+              <div className="text-center">
+                <div
+                  className={cn(
+                    "text-6xl font-black mb-2",
+                    isPassed ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                  )}
+                >
+                  {percentage}%
+                </div>
+                <p className="text-sm text-slate-500 dark:text-slate-400">
+                  {score.toFixed(1)} / {totalScore} điểm
+                </p>
+              </div>
+            </div>
 
-              const correctOption = fullQuestion.options?.find((opt) => opt.isCorrect);
-              const userSelectedOption = fullQuestion.options?.find((opt) =>
-                answer.selectedOptionIds?.includes(opt.id),
-              );
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="bg-white/50 dark:bg-slate-900/50 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-800">
+                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{totalQuestions}</div>
+                <div className="text-xs text-slate-500 dark:text-slate-400">Tổng số câu</div>
+              </div>
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center border border-emerald-200 dark:border-emerald-800">
+                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{correctCount}</div>
+                <div className="text-xs text-emerald-700 dark:text-emerald-400">Trả lời đúng</div>
+              </div>
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-center border border-red-200 dark:border-red-800">
+                <div className="text-2xl font-bold text-red-600 dark:text-red-400">{incorrectCount}</div>
+                <div className="text-xs text-red-700 dark:text-red-400">Trả lời sai</div>
+              </div>
+              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-center border border-amber-200 dark:border-amber-800">
+                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{unansweredCount}</div>
+                <div className="text-xs text-amber-700 dark:text-amber-400">Chưa trả lời</div>
+              </div>
+            </div>
 
-              return (
-                <Card key={answer.id} className="overflow-hidden">
-                  <CardContent className="p-6">
-                    <div className="flex items-start justify-between mb-4">
-                      <Badge
-                        className={cn("text-white text-sm font-bold", answer.isCorrect ? "bg-green-600" : "bg-red-600")}
-                      >
-                        Câu {answer.questionNo}
-                      </Badge>
-                      <span
-                        className={cn(
-                          "flex items-center gap-1 text-sm font-medium",
-                          answer.isCorrect ? "text-green-600" : "text-red-600",
-                        )}
-                      >
-                        {answer.isCorrect ? (
-                          <>
-                            <CheckCircle2 className="w-4 h-4" /> Chính xác
-                          </>
-                        ) : (
-                          <>
-                            <XCircle className="w-4 h-4" /> Sai rồi
-                          </>
-                        )}
-                      </span>
-                    </div>
+            {attemptData.createdAt && attemptData.submittedAt && (
+              <div className="flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
+                <Clock className="w-4 h-4" />
+                <span>
+                  Thời gian làm bài:{" "}
+                  {Math.floor(
+                    (new Date(attemptData.submittedAt).getTime() - new Date(attemptData.createdAt).getTime()) / 60000,
+                  )}{" "}
+                  phút
+                </span>
+              </div>
+            )}
 
-                    <p className="text-lg font-semibold mb-4 leading-relaxed">{fullQuestion.content}</p>
+            <div className="flex flex-col sm:flex-row gap-3 mt-6">
+              <Button size="lg" className="flex-1 gap-2" onClick={() => navigate({ to: "/exams" })}>
+                <Home className="w-5 h-5" />
+                Về trang chủ
+              </Button>
+              <Button
+                variant="outline"
+                size="lg"
+                className="flex-1 gap-2"
+                onClick={() => navigate({ to: "/exams/$examId", params: { examId: String(attemptData.exam.id) } })}
+              >
+                <RotateCcw className="w-5 h-5" />
+                Làm lại
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
 
-                    <div className="space-y-2 mb-6">
-                      {fullQuestion.options?.map((option) => {
-                        const isUserAnswer = userSelectedOption?.id === option.id;
-                        const isCorrectAnswer = correctOption?.id === option.id;
+        <Card className="shadow-lg">
+          <CardContent className="p-6">
+            <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Chi tiết câu trả lời</h2>
 
-                        return (
-                          <div
-                            key={option.id}
-                            className={cn(
-                              "p-2 rounded-xl border flex justify-between items-center",
-                              isUserAnswer &&
-                                !isCorrectAnswer &&
-                                "border-2 border-red-500 dark:border-red-600 bg-red-50 dark:bg-red-900/10",
-                              isCorrectAnswer &&
-                                "border-2 border-green-500 dark:border-green-600 bg-green-50 dark:bg-green-900/10",
-                              !isUserAnswer &&
-                                !isCorrectAnswer &&
-                                "border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50",
-                            )}
-                          >
-                            <span className={cn("font-medium", (isUserAnswer || isCorrectAnswer) && "font-bold")}>
-                              {option.content}
-                            </span>
-                            {isCorrectAnswer && (
-                              <span className="text-xs font-bold text-green-600 dark:text-green-400 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded">
-                                Đáp án đúng
-                              </span>
-                            )}
-                            {isUserAnswer && !isCorrectAnswer && <XCircle className="w-4 h-4 text-red-600" />}
-                            {isCorrectAnswer && isUserAnswer && <CheckCircle2 className="w-4 h-4 text-green-600" />}
+            <div className="space-y-3">
+              {sortedAnswers.map((answer, index) => {
+                const fullQuestion = examQuestionsMap.get(answer.question.id);
+                const isExpanded = expandedQuestions.has(answer.question.id);
+                const answered = hasAnswered(answer);
+                const isCorrect = answered && answer.correct;
+
+                return (
+                  <div
+                    key={answer.question.id}
+                    className={cn(
+                      "border-2 rounded-xl transition-all",
+                      !answered && "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10",
+                      answered &&
+                        isCorrect &&
+                        "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/10",
+                      answered && !isCorrect && "border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10",
+                    )}
+                  >
+                    <button
+                      onClick={() => toggleQuestion(answer.question.id)}
+                      className="w-full p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors rounded-t-xl"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <div
+                          className={cn(
+                            "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0",
+                            !answered && "bg-amber-500 text-white",
+                            answered && isCorrect && "bg-emerald-500 text-white",
+                            answered && !isCorrect && "bg-red-500 text-white",
+                          )}
+                        >
+                          {answer.questionNo ?? index + 1}
+                        </div>
+
+                        <span className="text-sm font-medium text-slate-700 dark:text-slate-300 text-left truncate">
+                          {answer.question.content}
+                        </span>
+
+                        <div className="shrink-0">
+                          {!answered && (
+                            <Badge
+                              variant="outline"
+                              className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700"
+                            >
+                              Chưa trả lời
+                            </Badge>
+                          )}
+                          {answered && isCorrect && (
+                            <Badge
+                              variant="outline"
+                              className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700"
+                            >
+                              Đúng (+{answer.score} điểm)
+                            </Badge>
+                          )}
+                          {answered && !isCorrect && (
+                            <Badge
+                              variant="outline"
+                              className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700"
+                            >
+                              Sai (0 điểm)
+                            </Badge>
+                          )}
+                        </div>
+                      </div>
+
+                      {isExpanded ? (
+                        <ChevronUp className="w-5 h-5 text-slate-400 shrink-0 ml-2" />
+                      ) : (
+                        <ChevronDown className="w-5 h-5 text-slate-400 shrink-0 ml-2" />
+                      )}
+                    </button>
+
+                    {isExpanded && (
+                      <div className="p-4 pt-0 border-t border-slate-200 dark:border-slate-800">
+                        <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4 whitespace-pre-wrap">
+                          {answer.question.content}
+                        </h3>
+
+                        {isMCQ(answer.question.questionType) && fullQuestion?.options && (
+                          <div className="space-y-2">
+                            {fullQuestion.options.map((option, optIndex) => {
+                              const isSelected = answer.selectedOptionIds?.includes(option.id);
+                              const isCorrectOption = option.isCorrect;
+
+                              return (
+                                <div
+                                  key={option.id}
+                                  className={cn(
+                                    "flex items-center gap-3 p-3 rounded-lg border-2",
+                                    isCorrectOption &&
+                                      "border-emerald-300 dark:border-emerald-700 bg-emerald-50 dark:bg-emerald-900/20",
+                                    !isCorrectOption &&
+                                      isSelected &&
+                                      "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20",
+                                    !isCorrectOption &&
+                                      !isSelected &&
+                                      "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900",
+                                  )}
+                                >
+                                  <div
+                                    className={cn(
+                                      "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0",
+                                      isCorrectOption && "bg-emerald-500 text-white",
+                                      !isCorrectOption && isSelected && "bg-red-500 text-white",
+                                      !isCorrectOption &&
+                                        !isSelected &&
+                                        "bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-400",
+                                    )}
+                                  >
+                                    {getOptionLabel(optIndex)}
+                                  </div>
+                                  <span
+                                    className={cn(
+                                      "flex-1",
+                                      isCorrectOption && "font-semibold text-emerald-900 dark:text-emerald-300",
+                                      !isCorrectOption && isSelected && "text-red-900 dark:text-red-300",
+                                      !isCorrectOption && !isSelected && "text-slate-600 dark:text-slate-400",
+                                    )}
+                                  >
+                                    {option.content}
+                                  </span>
+                                  {isCorrectOption && (
+                                    <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400 shrink-0" />
+                                  )}
+                                  {!isCorrectOption && isSelected && (
+                                    <XCircle className="w-5 h-5 text-red-600 dark:text-red-400 shrink-0" />
+                                  )}
+                                </div>
+                              );
+                            })}
                           </div>
-                        );
-                      })}
-                    </div>
+                        )}
 
-                    {fullQuestion.canonicalAnswer && (
-                      <div className="p-4 rounded-xl bg-primary/5 border-l-4 border-primary">
-                        <p className="text-primary font-bold text-sm uppercase mb-2">Lời giải chi tiết</p>
-                        <p className="text-sm leading-relaxed text-slate-600 dark:text-slate-400">
-                          {fullQuestion.canonicalAnswer}
-                        </p>
+                        {isEssay(answer.question.questionType) && (
+                          <div className="space-y-3">
+                            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
+                              <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                                Câu trả lời của bạn:
+                              </p>
+                              {answer.answerText?.trim() ? (
+                                <p className="text-slate-900 dark:text-slate-100 whitespace-pre-wrap">
+                                  {answer.answerText}
+                                </p>
+                              ) : (
+                                <p className="text-slate-400 italic">Chưa trả lời</p>
+                              )}
+                            </div>
+                            {fullQuestion?.canonicalAnswer && (
+                              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-lg p-4 border border-emerald-200 dark:border-emerald-800">
+                                <p className="text-sm font-semibold text-emerald-700 dark:text-emerald-300 mb-2">
+                                  Đáp án tham khảo:
+                                </p>
+                                <p className="text-emerald-900 dark:text-emerald-100 whitespace-pre-wrap">
+                                  {fullQuestion.canonicalAnswer}
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        )}
                       </div>
                     )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </div>
-        </div>
-
-        {/* Footer Actions */}
-        <div className="flex flex-col sm:flex-row gap-4 pb-10">
-          <Button
-            className="flex-1 flex items-center justify-center gap-2 h-14 shadow-lg shadow-primary/25"
-            onClick={handleRetake}
-          >
-            <RefreshCw className="w-5 h-5" />
-            Làm lại bài thi
-          </Button>
-          <Button
-            variant="outline"
-            className="flex-1 flex items-center justify-center gap-2 h-14"
-            onClick={handleGoHome}
-          >
-            <Home className="w-5 h-5" />
-            Về trang chủ
-          </Button>
-        </div>
+                  </div>
+                );
+              })}
+            </div>
+          </CardContent>
+        </Card>
       </main>
     </div>
   );
 };
 
-export default AttemptResultContent;
+export default QuizAttemptResultContent;

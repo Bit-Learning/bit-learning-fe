@@ -43,18 +43,13 @@ export const navItems = [
     items: [
       {
         title: "Trợ lý AI",
-        to: "/ai-chatbot",
+        to: "/chat-ai",
         description: "Trợ lý AI hỗ trợ học tập và soạn tài liệu.",
       },
       {
         title: "Trò chơi học tập",
         to: "/games",
         description: "Học lập trình qua các trò chơi tương tác.",
-      },
-      {
-        title: "Bài giảng & Tài liệu",
-        to: "/presentations",
-        description: "Kho tài liệu và bài giảng miễn phí.",
       },
     ],
   },

@@ -40,7 +40,7 @@ const MatrixDetailContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <main className="ml-64 flex-1 p-8">
+      <main className=" flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <Skeleton className="h-8 w-32 mb-4" />
           <Skeleton className="h-48 w-full mb-8" />
@@ -52,7 +52,7 @@ const MatrixDetailContent: React.FC = () => {
 
   if (!matrix) {
     return (
-      <main className="ml-64 flex-1 p-8">
+      <main className=" flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
@@ -73,17 +73,18 @@ const MatrixDetailContent: React.FC = () => {
 
   return (
     <main className="flex-1 p-8">
-      <div className="max-w-7xl mx-auto">
+      <div className="mx-auto">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>
-            <nav className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400 mb-2">
-              <Link className="hover:text-blue-800 transition-colors cursor-pointer" to={"/mentor/matrix/my"}>
-                <div className="flex gap-2">
-                  {" "}
-                  <ArrowLeft /> Ma trận đề thi
-                </div>
-              </Link>
-            </nav>
+            <Button
+              variant="outline"
+              size="lg"
+              className="gap-2 mb-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+              onClick={() => navigate({ to: "/mentor/matrix/my" })}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Quay lại
+            </Button>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{matrix.name}</h1>
           </div>
           <div className="flex items-center gap-3">
@@ -316,6 +317,7 @@ const MatrixDetailContent: React.FC = () => {
         onClose={() => setVersionModal(false)}
         matrixId={matrixId}
         totalScore={matrix.totalScore}
+        subjectId={matrix.subject.id}
       />
     </main>
   );

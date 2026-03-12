@@ -4,10 +4,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, X, Plus, Trash2, BarChart3, DollarSign, CheckCircle } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { useCreateVersion } from "../queries/useMatrix";
 import type { TMatrixDetailRequest } from "../types/matrix.type";
-import { useLessons } from "../queries/useLesson";
+import { useLessonsBySubject } from "../queries/useLesson";
 import { TLessonBriefResponse } from "../types/lesson.type";
 
 const formSchema = z.object({
@@ -22,6 +21,7 @@ interface Props {
   onClose: () => void;
   matrixId: number;
   totalScore: number;
+  subjectId: number;
 }
 
 const emptyDetail: TMatrixDetailRequest = {
@@ -40,9 +40,9 @@ const emptyDetail: TMatrixDetailRequest = {
   hardEssayScore: 1.0,
 };
 
-const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalScore }) => {
+const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalScore, subjectId }) => {
   const [matrixDetails, setMatrixDetails] = useState<TMatrixDetailRequest[]>([]);
-  const { data: lessons } = useLessons();
+  const { data: lessons } = useLessonsBySubject(subjectId);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -112,19 +112,18 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4 overflow-y-auto">
-      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8">
+      <div className="w-full max-w-6xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800">
           <div className="flex items-center gap-2">
             <span className="text-2xl">✨</span>
             <h2 className="text-xl font-bold text-slate-900 dark:text-white">Tạo phiên bản ma trận mới</h2>
           </div>
-          <Button onClick={onClose} className="text-white  dark:hover:text-slate-200 transition-colors">
+          <Button onClick={onClose} className="text-white dark:hover:text-slate-200 transition-colors">
             <X className="h-6 w-6" />
           </Button>
         </div>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="p-6 space-y-6">
-          {/* Form Fields */}
           <div className="grid grid-cols-2 gap-4">
             <div>
               <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-2">Tên phiên bản</label>
@@ -147,11 +146,8 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
             </div>
           </div>
 
-          {/* Matrix Configuration */}
           <div>
-            <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">
-              Cấu hình chi tiết ma trận (Tin học 12)
-            </h3>
+            <h3 className="text-base font-semibold text-slate-900 dark:text-white mb-4">Cấu hình chi tiết ma trận</h3>
 
             {matrixDetails.length === 0 ? (
               <div className="text-center py-12 bg-slate-50 dark:bg-slate-800/50 rounded-xl border-2 border-dashed border-slate-200 dark:border-slate-700">
@@ -167,21 +163,21 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
               </div>
             ) : (
               <>
-                {/* Table */}
-                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
-                  <table className="w-full">
+                <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden overflow-x-auto">
+                  <table className="w-full min-w-300">
                     <thead>
                       <tr className="bg-slate-50 dark:bg-slate-800/50">
-                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300">
+                        <th className="px-4 py-3 text-left text-sm font-semibold text-slate-700 dark:text-slate-300 w-50">
                           Chương / Bài học
                         </th>
                         <th className="px-2 py-3 text-center" colSpan={3}>
-                          <div className="text-sm font-bold text-blue-600 dark:text-blue-400">MCQ (Số câu x Điểm)</div>
+                          <div className="text-sm font-bold text-blue-600 dark:text-blue-400">MCQ - Trắc nghiệm</div>
                         </th>
                         <th className="px-2 py-3 text-center" colSpan={3}>
-                          <div className="text-sm font-bold text-orange-600 dark:text-orange-400">
-                            Essay (Số câu x Điểm)
-                          </div>
+                          <div className="text-sm font-bold text-orange-600 dark:text-orange-400">Essay - Tự luận</div>
+                        </th>
+                        <th className="px-2 py-3 text-center text-sm font-semibold text-slate-700 dark:text-slate-300">
+                          Tổng
                         </th>
                         <th className="w-12"></th>
                       </tr>
@@ -205,6 +201,9 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                         <th className="px-2 py-2 text-center text-xs font-medium text-slate-600 dark:text-slate-400">
                           Khó
                         </th>
+                        <th className="px-2 py-2 text-center text-xs font-medium text-slate-600 dark:text-slate-400">
+                          Điểm
+                        </th>
                         <th></th>
                       </tr>
                     </thead>
@@ -226,7 +225,6 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                             </select>
                           </td>
 
-                          {/* MCQ Inputs */}
                           <td className="px-2 py-3">
                             <div className="flex flex-col items-center gap-1">
                               <input
@@ -234,9 +232,21 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                                 min={0}
                                 value={detail.easyMCQ}
                                 onChange={(e) => updateDetail(index, "easyMCQ", Number(e.target.value) || 0)}
-                                className="w-20 px-2 py-1.5 text-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-16 px-2 py-1.5 text-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="0"
                               />
-                              <span className="text-[10px] text-slate-400">x {detail.easyMCQScore}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[10px] text-slate-400">×</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={detail.easyMCQScore}
+                                  onChange={(e) => updateDetail(index, "easyMCQScore", Number(e.target.value) || 0)}
+                                  className="w-12 px-1 py-0.5 text-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-[10px] focus:ring-1 focus:ring-blue-500 outline-none"
+                                  placeholder="0.0"
+                                />
+                              </div>
                             </div>
                           </td>
                           <td className="px-2 py-3">
@@ -246,9 +256,21 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                                 min={0}
                                 value={detail.mediumMCQ}
                                 onChange={(e) => updateDetail(index, "mediumMCQ", Number(e.target.value) || 0)}
-                                className="w-20 px-2 py-1.5 text-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-16 px-2 py-1.5 text-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="0"
                               />
-                              <span className="text-[10px] text-slate-400">x {detail.mediumMCQScore}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[10px] text-slate-400">×</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={detail.mediumMCQScore}
+                                  onChange={(e) => updateDetail(index, "mediumMCQScore", Number(e.target.value) || 0)}
+                                  className="w-12 px-1 py-0.5 text-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-[10px] focus:ring-1 focus:ring-blue-500 outline-none"
+                                  placeholder="0.0"
+                                />
+                              </div>
                             </div>
                           </td>
                           <td className="px-2 py-3">
@@ -258,13 +280,24 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                                 min={0}
                                 value={detail.hardMCQ}
                                 onChange={(e) => updateDetail(index, "hardMCQ", Number(e.target.value) || 0)}
-                                className="w-20 px-2 py-1.5 text-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                className="w-16 px-2 py-1.5 text-center bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded text-sm focus:ring-2 focus:ring-blue-500 outline-none"
+                                placeholder="0"
                               />
-                              <span className="text-[10px] text-slate-400">x {detail.hardMCQScore}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[10px] text-slate-400">×</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={detail.hardMCQScore}
+                                  onChange={(e) => updateDetail(index, "hardMCQScore", Number(e.target.value) || 0)}
+                                  className="w-12 px-1 py-0.5 text-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-[10px] focus:ring-1 focus:ring-blue-500 outline-none"
+                                  placeholder="0.0"
+                                />
+                              </div>
                             </div>
                           </td>
 
-                          {/* Essay Inputs */}
                           <td className="px-2 py-3">
                             <div className="flex flex-col items-center gap-1">
                               <input
@@ -272,9 +305,21 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                                 min={0}
                                 value={detail.easyEssay}
                                 onChange={(e) => updateDetail(index, "easyEssay", Number(e.target.value) || 0)}
-                                className="w-20 px-2 py-1.5 text-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                                className="w-16 px-2 py-1.5 text-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                                placeholder="0"
                               />
-                              <span className="text-[10px] text-slate-400">x {detail.easyEssayScore}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[10px] text-slate-400">×</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={detail.easyEssayScore}
+                                  onChange={(e) => updateDetail(index, "easyEssayScore", Number(e.target.value) || 0)}
+                                  className="w-12 px-1 py-0.5 text-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-[10px] focus:ring-1 focus:ring-orange-500 outline-none"
+                                  placeholder="0.0"
+                                />
+                              </div>
                             </div>
                           </td>
                           <td className="px-2 py-3">
@@ -284,9 +329,21 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                                 min={0}
                                 value={detail.mediumEssay}
                                 onChange={(e) => updateDetail(index, "mediumEssay", Number(e.target.value) || 0)}
-                                className="w-20 px-2 py-1.5 text-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                                className="w-16 px-2 py-1.5 text-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                                placeholder="0"
                               />
-                              <span className="text-[10px] text-slate-400">x {detail.mediumEssayScore}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[10px] text-slate-400">×</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={detail.mediumEssayScore}
+                                  onChange={(e) => updateDetail(index, "mediumEssayScore", Number(e.target.value) || 0)}
+                                  className="w-12 px-1 py-0.5 text-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-[10px] focus:ring-1 focus:ring-orange-500 outline-none"
+                                  placeholder="0.0"
+                                />
+                              </div>
                             </div>
                           </td>
                           <td className="px-2 py-3">
@@ -296,10 +353,28 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                                 min={0}
                                 value={detail.hardEssay}
                                 onChange={(e) => updateDetail(index, "hardEssay", Number(e.target.value) || 0)}
-                                className="w-20 px-2 py-1.5 text-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                                className="w-16 px-2 py-1.5 text-center bg-orange-50 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800 rounded text-sm focus:ring-2 focus:ring-orange-500 outline-none"
+                                placeholder="0"
                               />
-                              <span className="text-[10px] text-slate-400">x {detail.hardEssayScore}</span>
+                              <div className="flex items-center gap-1">
+                                <span className="text-[10px] text-slate-400">×</span>
+                                <input
+                                  type="number"
+                                  min={0}
+                                  step={0.1}
+                                  value={detail.hardEssayScore}
+                                  onChange={(e) => updateDetail(index, "hardEssayScore", Number(e.target.value) || 0)}
+                                  className="w-12 px-1 py-0.5 text-center bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-600 rounded text-[10px] focus:ring-1 focus:ring-orange-500 outline-none"
+                                  placeholder="0.0"
+                                />
+                              </div>
                             </div>
+                          </td>
+
+                          <td className="px-2 py-3 text-center">
+                            <span className="text-sm font-semibold text-slate-900 dark:text-white">
+                              {calculateRowScore(detail).toFixed(1)}
+                            </span>
                           </td>
 
                           <td className="px-2 py-3 text-center">
@@ -316,17 +391,18 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                     </tbody>
                     <tfoot className="bg-slate-50 dark:bg-slate-800/50 border-t-2 border-slate-300 dark:border-slate-600">
                       <tr>
-                        <td className="px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300">
-                          Tổng hợp nội dung
+                        <td className="px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300">Tổng hợp</td>
+                        <td colSpan={3} className="px-2 py-3 text-center">
+                          <div className="text-base font-bold text-blue-600 dark:text-blue-400">{totalMCQ} câu MCQ</div>
                         </td>
                         <td colSpan={3} className="px-2 py-3 text-center">
-                          <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
-                            {totalMCQ} Câu Trắc Nghiệm (MCQ)
+                          <div className="text-base font-bold text-orange-600 dark:text-orange-400">
+                            {totalEssay} câu Essay
                           </div>
                         </td>
-                        <td colSpan={3} className="px-2 py-3 text-center">
-                          <div className="text-lg font-bold text-orange-600 dark:text-orange-400">
-                            {totalEssay} Bài Tự Luận (Essay)
+                        <td className="px-2 py-3 text-center">
+                          <div className="text-base font-bold text-slate-900 dark:text-white">
+                            {calculatedScore.toFixed(1)}
                           </div>
                         </td>
                         <td></td>
@@ -347,7 +423,6 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
             )}
           </div>
 
-          {/* Summary */}
           {matrixDetails.length > 0 && (
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-6">
               <div className="grid grid-cols-3 gap-6">
@@ -400,7 +475,6 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
             </div>
           )}
 
-          {/* Actions */}
           <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
             <Button
               type="button"

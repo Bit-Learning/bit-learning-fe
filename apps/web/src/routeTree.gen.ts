@@ -78,8 +78,6 @@ import { Route as ContestsIdLeaderboardRouteImport } from './routes/contests/$id
 import { Route as AuthGoogleCallbackRouteImport } from './routes/auth/google/callback'
 import { Route as AuthGithubCallbackRouteImport } from './routes/auth/github/callback'
 import { Route as ApiAuthActivateRouteImport } from './routes/api/auth/activate'
-import { Route as LayoutQuizSessionsSessionIdRouteImport } from './routes/_layout/quiz-sessions/$sessionId'
-import { Route as LayoutQuizAttemptsAttemptIdRouteImport } from './routes/_layout/quiz-attempts/$attemptId'
 import { Route as LayoutProblemIdRouteImport } from './routes/_layout/problem/$id'
 import { Route as LayoutLecturesIdRouteImport } from './routes/_layout/lectures/$id'
 import { Route as LayoutInternalTestLoaderRouteImport } from './routes/_layout/internal/test-loader'
@@ -97,15 +95,16 @@ import { Route as HeaderOnlyProfileNotificationsRouteImport } from './routes/_he
 import { Route as HeaderOnlyProfileHistoryRouteImport } from './routes/_headerOnly/profile/history'
 import { Route as MentorQuestionIdIndexRouteImport } from './routes/mentor/question/$id/index'
 import { Route as MentorMatrixIdIndexRouteImport } from './routes/mentor/matrix/$id/index'
+import { Route as LayoutQuizSessionsSessionIdIndexRouteImport } from './routes/_layout/quiz-sessions/$sessionId/index'
+import { Route as LayoutQuizAttemptsAttemptIdIndexRouteImport } from './routes/_layout/quiz-attempts/$attemptId/index'
 import { Route as MentorQuestionIdEditRouteImport } from './routes/mentor/question/$id/edit'
 import { Route as MentorProblemIdEditRouteImport } from './routes/mentor/problem/$id.edit'
 import { Route as MentorMatrixIdGenerateRouteImport } from './routes/mentor/matrix/$id/generate'
 import { Route as ContestsIdProblemsProblemIdRouteImport } from './routes/contests/$id/problems.$problemId'
-import { Route as LayoutQuizSessionsSessionIdResultRouteImport } from './routes/_layout/quiz-sessions/$sessionId.result'
-import { Route as LayoutQuizAttemptsAttemptIdResultRouteImport } from './routes/_layout/quiz-attempts/$attemptId.result'
+import { Route as LayoutQuizSessionsSessionIdResultRouteImport } from './routes/_layout/quiz-sessions/$sessionId/result'
+import { Route as LayoutQuizAttemptsAttemptIdResultRouteImport } from './routes/_layout/quiz-attempts/$attemptId/result'
 import { Route as LayoutForumPostIdRouteImport } from './routes/_layout/forum/post.$id'
 import { Route as LayoutForumIdEditRouteImport } from './routes/_layout/forum/$id.edit'
-import { Route as LayoutExamsExamIdModeRouteImport } from './routes/_layout/exams/$examId.mode'
 import { Route as LayoutCoursesGradeGradeRouteImport } from './routes/_layout/courses/grade/$grade'
 
 const SignupRoute = SignupRouteImport.update({
@@ -453,18 +452,6 @@ const ApiAuthActivateRoute = ApiAuthActivateRouteImport.update({
   path: '/api/auth/activate',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutQuizSessionsSessionIdRoute =
-  LayoutQuizSessionsSessionIdRouteImport.update({
-    id: '/quiz-sessions/$sessionId',
-    path: '/quiz-sessions/$sessionId',
-    getParentRoute: () => LayoutRoute,
-  } as any)
-const LayoutQuizAttemptsAttemptIdRoute =
-  LayoutQuizAttemptsAttemptIdRouteImport.update({
-    id: '/quiz-attempts/$attemptId',
-    path: '/quiz-attempts/$attemptId',
-    getParentRoute: () => LayoutRoute,
-  } as any)
 const LayoutProblemIdRoute = LayoutProblemIdRouteImport.update({
   id: '/problem/$id',
   path: '/problem/$id',
@@ -558,6 +545,18 @@ const MentorMatrixIdIndexRoute = MentorMatrixIdIndexRouteImport.update({
   path: '/mentor/matrix/$id/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const LayoutQuizSessionsSessionIdIndexRoute =
+  LayoutQuizSessionsSessionIdIndexRouteImport.update({
+    id: '/quiz-sessions/$sessionId/',
+    path: '/quiz-sessions/$sessionId/',
+    getParentRoute: () => LayoutRoute,
+  } as any)
+const LayoutQuizAttemptsAttemptIdIndexRoute =
+  LayoutQuizAttemptsAttemptIdIndexRouteImport.update({
+    id: '/quiz-attempts/$attemptId/',
+    path: '/quiz-attempts/$attemptId/',
+    getParentRoute: () => LayoutRoute,
+  } as any)
 const MentorQuestionIdEditRoute = MentorQuestionIdEditRouteImport.update({
   id: '/mentor/question/$id/edit',
   path: '/mentor/question/$id/edit',
@@ -581,15 +580,15 @@ const ContestsIdProblemsProblemIdRoute =
   } as any)
 const LayoutQuizSessionsSessionIdResultRoute =
   LayoutQuizSessionsSessionIdResultRouteImport.update({
-    id: '/result',
-    path: '/result',
-    getParentRoute: () => LayoutQuizSessionsSessionIdRoute,
+    id: '/quiz-sessions/$sessionId/result',
+    path: '/quiz-sessions/$sessionId/result',
+    getParentRoute: () => LayoutRoute,
   } as any)
 const LayoutQuizAttemptsAttemptIdResultRoute =
   LayoutQuizAttemptsAttemptIdResultRouteImport.update({
-    id: '/result',
-    path: '/result',
-    getParentRoute: () => LayoutQuizAttemptsAttemptIdRoute,
+    id: '/quiz-attempts/$attemptId/result',
+    path: '/quiz-attempts/$attemptId/result',
+    getParentRoute: () => LayoutRoute,
   } as any)
 const LayoutForumPostIdRoute = LayoutForumPostIdRouteImport.update({
   id: '/forum/post/$id',
@@ -600,11 +599,6 @@ const LayoutForumIdEditRoute = LayoutForumIdEditRouteImport.update({
   id: '/forum/$id/edit',
   path: '/forum/$id/edit',
   getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutExamsExamIdModeRoute = LayoutExamsExamIdModeRouteImport.update({
-  id: '/mode',
-  path: '/mode',
-  getParentRoute: () => LayoutExamsExamIdRoute,
 } as any)
 const LayoutCoursesGradeGradeRoute = LayoutCoursesGradeGradeRouteImport.update({
   id: '/courses/grade/$grade',
@@ -651,14 +645,12 @@ export interface FileRoutesByFullPath {
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/exams/$examId': typeof LayoutExamsExamIdRouteWithChildren
+  '/exams/$examId': typeof LayoutExamsExamIdRoute
   '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
   '/problem/$id': typeof LayoutProblemIdRoute
-  '/quiz-attempts/$attemptId': typeof LayoutQuizAttemptsAttemptIdRouteWithChildren
-  '/quiz-sessions/$sessionId': typeof LayoutQuizSessionsSessionIdRouteWithChildren
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
@@ -698,7 +690,6 @@ export interface FileRoutesByFullPath {
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/mentor/slides/': typeof MentorSlidesIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
-  '/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/quiz-attempts/$attemptId/result': typeof LayoutQuizAttemptsAttemptIdResultRoute
@@ -707,6 +698,8 @@ export interface FileRoutesByFullPath {
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
+  '/quiz-attempts/$attemptId/': typeof LayoutQuizAttemptsAttemptIdIndexRoute
+  '/quiz-sessions/$sessionId/': typeof LayoutQuizSessionsSessionIdIndexRoute
   '/mentor/matrix/$id/': typeof MentorMatrixIdIndexRoute
   '/mentor/question/$id/': typeof MentorQuestionIdIndexRoute
 }
@@ -749,14 +742,12 @@ export interface FileRoutesByTo {
   '/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/exams/$examId': typeof LayoutExamsExamIdRouteWithChildren
+  '/exams/$examId': typeof LayoutExamsExamIdRoute
   '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
   '/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/lectures/$id': typeof LayoutLecturesIdRoute
   '/problem/$id': typeof LayoutProblemIdRoute
-  '/quiz-attempts/$attemptId': typeof LayoutQuizAttemptsAttemptIdRouteWithChildren
-  '/quiz-sessions/$sessionId': typeof LayoutQuizSessionsSessionIdRouteWithChildren
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
@@ -796,7 +787,6 @@ export interface FileRoutesByTo {
   '/mentor/question': typeof MentorQuestionIndexRoute
   '/mentor/slides': typeof MentorSlidesIndexRoute
   '/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
-  '/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/forum/post/$id': typeof LayoutForumPostIdRoute
   '/quiz-attempts/$attemptId/result': typeof LayoutQuizAttemptsAttemptIdResultRoute
@@ -805,6 +795,8 @@ export interface FileRoutesByTo {
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
+  '/quiz-attempts/$attemptId': typeof LayoutQuizAttemptsAttemptIdIndexRoute
+  '/quiz-sessions/$sessionId': typeof LayoutQuizSessionsSessionIdIndexRoute
   '/mentor/matrix/$id': typeof MentorMatrixIdIndexRoute
   '/mentor/question/$id': typeof MentorQuestionIdIndexRoute
 }
@@ -850,14 +842,12 @@ export interface FileRoutesById {
   '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
   '/_layout/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
   '/_layout/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
-  '/_layout/exams/$examId': typeof LayoutExamsExamIdRouteWithChildren
+  '/_layout/exams/$examId': typeof LayoutExamsExamIdRoute
   '/_layout/forum/create': typeof LayoutForumCreateRoute
   '/_layout/forum/my': typeof LayoutForumMyRoute
   '/_layout/internal/test-loader': typeof LayoutInternalTestLoaderRoute
   '/_layout/lectures/$id': typeof LayoutLecturesIdRoute
   '/_layout/problem/$id': typeof LayoutProblemIdRoute
-  '/_layout/quiz-attempts/$attemptId': typeof LayoutQuizAttemptsAttemptIdRouteWithChildren
-  '/_layout/quiz-sessions/$sessionId': typeof LayoutQuizSessionsSessionIdRouteWithChildren
   '/api/auth/activate': typeof ApiAuthActivateRoute
   '/auth/github/callback': typeof AuthGithubCallbackRoute
   '/auth/google/callback': typeof AuthGoogleCallbackRoute
@@ -897,7 +887,6 @@ export interface FileRoutesById {
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/mentor/slides/': typeof MentorSlidesIndexRoute
   '/_layout/courses/grade/$grade': typeof LayoutCoursesGradeGradeRoute
-  '/_layout/exams/$examId/mode': typeof LayoutExamsExamIdModeRoute
   '/_layout/forum/$id/edit': typeof LayoutForumIdEditRoute
   '/_layout/forum/post/$id': typeof LayoutForumPostIdRoute
   '/_layout/quiz-attempts/$attemptId/result': typeof LayoutQuizAttemptsAttemptIdResultRoute
@@ -906,6 +895,8 @@ export interface FileRoutesById {
   '/mentor/matrix/$id/generate': typeof MentorMatrixIdGenerateRoute
   '/mentor/problem/$id/edit': typeof MentorProblemIdEditRoute
   '/mentor/question/$id/edit': typeof MentorQuestionIdEditRoute
+  '/_layout/quiz-attempts/$attemptId/': typeof LayoutQuizAttemptsAttemptIdIndexRoute
+  '/_layout/quiz-sessions/$sessionId/': typeof LayoutQuizSessionsSessionIdIndexRoute
   '/mentor/matrix/$id/': typeof MentorMatrixIdIndexRoute
   '/mentor/question/$id/': typeof MentorQuestionIdIndexRoute
 }
@@ -956,8 +947,6 @@ export interface FileRouteTypes {
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/problem/$id'
-    | '/quiz-attempts/$attemptId'
-    | '/quiz-sessions/$sessionId'
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
@@ -997,7 +986,6 @@ export interface FileRouteTypes {
     | '/mentor/question/'
     | '/mentor/slides/'
     | '/courses/grade/$grade'
-    | '/exams/$examId/mode'
     | '/forum/$id/edit'
     | '/forum/post/$id'
     | '/quiz-attempts/$attemptId/result'
@@ -1006,6 +994,8 @@ export interface FileRouteTypes {
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
+    | '/quiz-attempts/$attemptId/'
+    | '/quiz-sessions/$sessionId/'
     | '/mentor/matrix/$id/'
     | '/mentor/question/$id/'
   fileRoutesByTo: FileRoutesByTo
@@ -1054,8 +1044,6 @@ export interface FileRouteTypes {
     | '/internal/test-loader'
     | '/lectures/$id'
     | '/problem/$id'
-    | '/quiz-attempts/$attemptId'
-    | '/quiz-sessions/$sessionId'
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
@@ -1095,7 +1083,6 @@ export interface FileRouteTypes {
     | '/mentor/question'
     | '/mentor/slides'
     | '/courses/grade/$grade'
-    | '/exams/$examId/mode'
     | '/forum/$id/edit'
     | '/forum/post/$id'
     | '/quiz-attempts/$attemptId/result'
@@ -1104,6 +1091,8 @@ export interface FileRouteTypes {
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
+    | '/quiz-attempts/$attemptId'
+    | '/quiz-sessions/$sessionId'
     | '/mentor/matrix/$id'
     | '/mentor/question/$id'
   id:
@@ -1154,8 +1143,6 @@ export interface FileRouteTypes {
     | '/_layout/internal/test-loader'
     | '/_layout/lectures/$id'
     | '/_layout/problem/$id'
-    | '/_layout/quiz-attempts/$attemptId'
-    | '/_layout/quiz-sessions/$sessionId'
     | '/api/auth/activate'
     | '/auth/github/callback'
     | '/auth/google/callback'
@@ -1195,7 +1182,6 @@ export interface FileRouteTypes {
     | '/mentor/question/'
     | '/mentor/slides/'
     | '/_layout/courses/grade/$grade'
-    | '/_layout/exams/$examId/mode'
     | '/_layout/forum/$id/edit'
     | '/_layout/forum/post/$id'
     | '/_layout/quiz-attempts/$attemptId/result'
@@ -1204,6 +1190,8 @@ export interface FileRouteTypes {
     | '/mentor/matrix/$id/generate'
     | '/mentor/problem/$id/edit'
     | '/mentor/question/$id/edit'
+    | '/_layout/quiz-attempts/$attemptId/'
+    | '/_layout/quiz-sessions/$sessionId/'
     | '/mentor/matrix/$id/'
     | '/mentor/question/$id/'
   fileRoutesById: FileRoutesById
@@ -1746,20 +1734,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ApiAuthActivateRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/quiz-sessions/$sessionId': {
-      id: '/_layout/quiz-sessions/$sessionId'
-      path: '/quiz-sessions/$sessionId'
-      fullPath: '/quiz-sessions/$sessionId'
-      preLoaderRoute: typeof LayoutQuizSessionsSessionIdRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/quiz-attempts/$attemptId': {
-      id: '/_layout/quiz-attempts/$attemptId'
-      path: '/quiz-attempts/$attemptId'
-      fullPath: '/quiz-attempts/$attemptId'
-      preLoaderRoute: typeof LayoutQuizAttemptsAttemptIdRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/problem/$id': {
       id: '/_layout/problem/$id'
       path: '/problem/$id'
@@ -1879,6 +1853,20 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof MentorMatrixIdIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_layout/quiz-sessions/$sessionId/': {
+      id: '/_layout/quiz-sessions/$sessionId/'
+      path: '/quiz-sessions/$sessionId'
+      fullPath: '/quiz-sessions/$sessionId/'
+      preLoaderRoute: typeof LayoutQuizSessionsSessionIdIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
+    '/_layout/quiz-attempts/$attemptId/': {
+      id: '/_layout/quiz-attempts/$attemptId/'
+      path: '/quiz-attempts/$attemptId'
+      fullPath: '/quiz-attempts/$attemptId/'
+      preLoaderRoute: typeof LayoutQuizAttemptsAttemptIdIndexRouteImport
+      parentRoute: typeof LayoutRoute
+    }
     '/mentor/question/$id/edit': {
       id: '/mentor/question/$id/edit'
       path: '/mentor/question/$id/edit'
@@ -1909,17 +1897,17 @@ declare module '@tanstack/react-router' {
     }
     '/_layout/quiz-sessions/$sessionId/result': {
       id: '/_layout/quiz-sessions/$sessionId/result'
-      path: '/result'
+      path: '/quiz-sessions/$sessionId/result'
       fullPath: '/quiz-sessions/$sessionId/result'
       preLoaderRoute: typeof LayoutQuizSessionsSessionIdResultRouteImport
-      parentRoute: typeof LayoutQuizSessionsSessionIdRoute
+      parentRoute: typeof LayoutRoute
     }
     '/_layout/quiz-attempts/$attemptId/result': {
       id: '/_layout/quiz-attempts/$attemptId/result'
-      path: '/result'
+      path: '/quiz-attempts/$attemptId/result'
       fullPath: '/quiz-attempts/$attemptId/result'
       preLoaderRoute: typeof LayoutQuizAttemptsAttemptIdResultRouteImport
-      parentRoute: typeof LayoutQuizAttemptsAttemptIdRoute
+      parentRoute: typeof LayoutRoute
     }
     '/_layout/forum/post/$id': {
       id: '/_layout/forum/post/$id'
@@ -1934,13 +1922,6 @@ declare module '@tanstack/react-router' {
       fullPath: '/forum/$id/edit'
       preLoaderRoute: typeof LayoutForumIdEditRouteImport
       parentRoute: typeof LayoutRoute
-    }
-    '/_layout/exams/$examId/mode': {
-      id: '/_layout/exams/$examId/mode'
-      path: '/mode'
-      fullPath: '/exams/$examId/mode'
-      preLoaderRoute: typeof LayoutExamsExamIdModeRouteImport
-      parentRoute: typeof LayoutExamsExamIdRoute
     }
     '/_layout/courses/grade/$grade': {
       id: '/_layout/courses/grade/$grade'
@@ -1970,47 +1951,6 @@ const HeaderOnlyRouteWithChildren = HeaderOnlyRoute._addFileChildren(
   HeaderOnlyRouteChildren,
 )
 
-interface LayoutExamsExamIdRouteChildren {
-  LayoutExamsExamIdModeRoute: typeof LayoutExamsExamIdModeRoute
-}
-
-const LayoutExamsExamIdRouteChildren: LayoutExamsExamIdRouteChildren = {
-  LayoutExamsExamIdModeRoute: LayoutExamsExamIdModeRoute,
-}
-
-const LayoutExamsExamIdRouteWithChildren =
-  LayoutExamsExamIdRoute._addFileChildren(LayoutExamsExamIdRouteChildren)
-
-interface LayoutQuizAttemptsAttemptIdRouteChildren {
-  LayoutQuizAttemptsAttemptIdResultRoute: typeof LayoutQuizAttemptsAttemptIdResultRoute
-}
-
-const LayoutQuizAttemptsAttemptIdRouteChildren: LayoutQuizAttemptsAttemptIdRouteChildren =
-  {
-    LayoutQuizAttemptsAttemptIdResultRoute:
-      LayoutQuizAttemptsAttemptIdResultRoute,
-  }
-
-const LayoutQuizAttemptsAttemptIdRouteWithChildren =
-  LayoutQuizAttemptsAttemptIdRoute._addFileChildren(
-    LayoutQuizAttemptsAttemptIdRouteChildren,
-  )
-
-interface LayoutQuizSessionsSessionIdRouteChildren {
-  LayoutQuizSessionsSessionIdResultRoute: typeof LayoutQuizSessionsSessionIdResultRoute
-}
-
-const LayoutQuizSessionsSessionIdRouteChildren: LayoutQuizSessionsSessionIdRouteChildren =
-  {
-    LayoutQuizSessionsSessionIdResultRoute:
-      LayoutQuizSessionsSessionIdResultRoute,
-  }
-
-const LayoutQuizSessionsSessionIdRouteWithChildren =
-  LayoutQuizSessionsSessionIdRoute._addFileChildren(
-    LayoutQuizSessionsSessionIdRouteChildren,
-  )
-
 interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
   LayoutCartRoute: typeof LayoutCartRoute
@@ -2032,14 +1972,12 @@ interface LayoutRouteChildren {
   LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
   LayoutCoursesMobileDevelopmentRoute: typeof LayoutCoursesMobileDevelopmentRoute
   LayoutCoursesWebDevelopmentRoute: typeof LayoutCoursesWebDevelopmentRoute
-  LayoutExamsExamIdRoute: typeof LayoutExamsExamIdRouteWithChildren
+  LayoutExamsExamIdRoute: typeof LayoutExamsExamIdRoute
   LayoutForumCreateRoute: typeof LayoutForumCreateRoute
   LayoutForumMyRoute: typeof LayoutForumMyRoute
   LayoutInternalTestLoaderRoute: typeof LayoutInternalTestLoaderRoute
   LayoutLecturesIdRoute: typeof LayoutLecturesIdRoute
   LayoutProblemIdRoute: typeof LayoutProblemIdRoute
-  LayoutQuizAttemptsAttemptIdRoute: typeof LayoutQuizAttemptsAttemptIdRouteWithChildren
-  LayoutQuizSessionsSessionIdRoute: typeof LayoutQuizSessionsSessionIdRouteWithChildren
   LayoutCheckoutIndexRoute: typeof LayoutCheckoutIndexRoute
   LayoutContestsIndexRoute: typeof LayoutContestsIndexRoute
   LayoutCoursesIndexRoute: typeof LayoutCoursesIndexRoute
@@ -2050,6 +1988,10 @@ interface LayoutRouteChildren {
   LayoutCoursesGradeGradeRoute: typeof LayoutCoursesGradeGradeRoute
   LayoutForumIdEditRoute: typeof LayoutForumIdEditRoute
   LayoutForumPostIdRoute: typeof LayoutForumPostIdRoute
+  LayoutQuizAttemptsAttemptIdResultRoute: typeof LayoutQuizAttemptsAttemptIdResultRoute
+  LayoutQuizSessionsSessionIdResultRoute: typeof LayoutQuizSessionsSessionIdResultRoute
+  LayoutQuizAttemptsAttemptIdIndexRoute: typeof LayoutQuizAttemptsAttemptIdIndexRoute
+  LayoutQuizSessionsSessionIdIndexRoute: typeof LayoutQuizSessionsSessionIdIndexRoute
 }
 
 const LayoutRouteChildren: LayoutRouteChildren = {
@@ -2073,16 +2015,12 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
   LayoutCoursesMobileDevelopmentRoute: LayoutCoursesMobileDevelopmentRoute,
   LayoutCoursesWebDevelopmentRoute: LayoutCoursesWebDevelopmentRoute,
-  LayoutExamsExamIdRoute: LayoutExamsExamIdRouteWithChildren,
+  LayoutExamsExamIdRoute: LayoutExamsExamIdRoute,
   LayoutForumCreateRoute: LayoutForumCreateRoute,
   LayoutForumMyRoute: LayoutForumMyRoute,
   LayoutInternalTestLoaderRoute: LayoutInternalTestLoaderRoute,
   LayoutLecturesIdRoute: LayoutLecturesIdRoute,
   LayoutProblemIdRoute: LayoutProblemIdRoute,
-  LayoutQuizAttemptsAttemptIdRoute:
-    LayoutQuizAttemptsAttemptIdRouteWithChildren,
-  LayoutQuizSessionsSessionIdRoute:
-    LayoutQuizSessionsSessionIdRouteWithChildren,
   LayoutCheckoutIndexRoute: LayoutCheckoutIndexRoute,
   LayoutContestsIndexRoute: LayoutContestsIndexRoute,
   LayoutCoursesIndexRoute: LayoutCoursesIndexRoute,
@@ -2093,6 +2031,12 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutCoursesGradeGradeRoute: LayoutCoursesGradeGradeRoute,
   LayoutForumIdEditRoute: LayoutForumIdEditRoute,
   LayoutForumPostIdRoute: LayoutForumPostIdRoute,
+  LayoutQuizAttemptsAttemptIdResultRoute:
+    LayoutQuizAttemptsAttemptIdResultRoute,
+  LayoutQuizSessionsSessionIdResultRoute:
+    LayoutQuizSessionsSessionIdResultRoute,
+  LayoutQuizAttemptsAttemptIdIndexRoute: LayoutQuizAttemptsAttemptIdIndexRoute,
+  LayoutQuizSessionsSessionIdIndexRoute: LayoutQuizSessionsSessionIdIndexRoute,
 }
 
 const LayoutRouteWithChildren =

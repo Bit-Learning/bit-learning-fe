@@ -7,7 +7,7 @@ const searchSchema = z.object({
 	redirect: z.string().optional(),
 });
 
-export const Route = createFileRoute("/(auth)/signin")({
+export const Route = createFileRoute("/(auth)/sign-in")({
 	beforeLoad: async () => {
 		const accessToken = getAccessToken();
 
@@ -15,7 +15,7 @@ export const Route = createFileRoute("/(auth)/signin")({
 		if (accessToken) {
 			throw redirect({
 				to: "/",
-			});
+			})
 		}
 	},
 	component: SignIn,

@@ -59,14 +59,14 @@ export const quizAttemptApi = {
     return api.post(`/quiz-attempts/${attemptId}/submit`, data);
   },
 
-  getMyAttempts(params?: PaginationParams): Promise<AxiosResponse<ApiResponse<QuizAttemptBriefResponse>>> {
+  getMyAttempts(params?: PaginationParams): Promise<AxiosResponse<ApiResponse<QuizAttemptBriefResponse[]>>> {
     return api.get("/quiz-attempts/my-attempts", { params });
   },
 
   getAttemptsByExam(
     examId: number,
     params?: PaginationParams,
-  ): Promise<AxiosResponse<ApiResponse<QuizAttemptBriefResponse>>> {
+  ): Promise<AxiosResponse<ApiResponse<QuizAttemptBriefResponse[]>>> {
     return api.get(`/quiz-attempts/exam/${examId}`, { params });
   },
 

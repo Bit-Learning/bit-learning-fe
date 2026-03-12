@@ -79,11 +79,16 @@ const QuestionDetailContent: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
+    <div className=" mx-auto p-6 max-w-5xl">
       <div className="mb-6">
-        <Button variant="ghost" onClick={() => navigate({ to: "/mentor/question/my" })} className="gap-2 mb-4">
-          <ArrowLeft className="h-4 w-4" />
-          Quay lại danh sách
+        <Button
+          variant="outline"
+          size="lg"
+          className="gap-2 mb-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={() => navigate({ to: "/mentor/question/my" })}
+        >
+          <ArrowLeft className="mr-2 h-4 w-4" />
+          Quay lại
         </Button>
         <div className="flex items-center justify-between">
           <h1 className="text-3xl font-bold">Chi tiết câu hỏi</h1>

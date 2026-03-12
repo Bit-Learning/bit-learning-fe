@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Search, Send, Eye, Edit, Trash2, FileText, Plus } from "lucide-react";
+import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
@@ -15,7 +15,7 @@ import {
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
 import { useMyQuestions, useDeleteQuestion, useRequestPublish } from "../queries/useQuestion";
-import { QuestionLevel, QuestionType, type QuestionResponse } from "../types/question.type";
+import { ApprovalStatus, QuestionLevel, QuestionType, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
 import { useNavigate } from "@tanstack/react-router";
@@ -29,6 +29,7 @@ const MyQuestionsContent: React.FC = () => {
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState("all");
 
   const { data: response, isLoading } = useMyQuestions({
     keyword: search,
@@ -45,18 +46,29 @@ const MyQuestionsContent: React.FC = () => {
   const filteredQuestions = questions.filter((q) => {
     const matchDifficulty = difficultyFilter === "all" || q.questionLevel === difficultyFilter;
     const matchType = typeFilter === "all" || q.questionType === typeFilter;
-    return matchDifficulty && matchType;
+    const matchStatus = statusFilter === "all" || q.approvalStatus === statusFilter;
+    return matchDifficulty && matchType && matchStatus;
   });
 
   const handleSelectQuestion = (id: number) => {
-    setSelectedQuestions((prev) => (prev.includes(id) ? prev.filter((qId) => qId !== id) : [...prev, id]));
+    const question = questions.find((q) => q.id === id);
+    if (
+      question &&
+      (question.approvalStatus === ApprovalStatus.NONE || question.approvalStatus === ApprovalStatus.REJECTED)
+    ) {
+      setSelectedQuestions((prev) => (prev.includes(id) ? prev.filter((qId) => qId !== id) : [...prev, id]));
+    }
   };
 
   const handleSelectAll = () => {
-    if (selectedQuestions.length === filteredQuestions.length) {
+    const selectableQuestions = filteredQuestions.filter(
+      (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
+    );
+
+    if (selectedQuestions.length === selectableQuestions.length) {
       setSelectedQuestions([]);
     } else {
-      setSelectedQuestions(filteredQuestions.map((q) => q.id));
+      setSelectedQuestions(selectableQuestions.map((q) => q.id));
     }
   };
 
@@ -89,6 +101,17 @@ const MyQuestionsContent: React.FC = () => {
     return <span className={`px-2 py-1 rounded text-xs font-medium ${config.className}`}>{config.label}</span>;
   };
 
+  const getStatusBadge = (status: ApprovalStatus) => {
+    const variants: Record<ApprovalStatus, { className: string; label: string }> = {
+      [ApprovalStatus.NONE]: { className: "bg-gray-100 text-gray-700", label: "Chưa gửi" },
+      [ApprovalStatus.PENDING]: { className: "bg-blue-100 text-blue-700", label: "Chờ duyệt" },
+      [ApprovalStatus.APPROVED]: { className: "bg-green-100 text-green-700", label: "Đã duyệt" },
+      [ApprovalStatus.REJECTED]: { className: "bg-red-100 text-red-700", label: "Từ chối" },
+    };
+    const config = variants[status];
+    return <span className={`px-2 py-1 rounded text-xs font-medium ${config.className}`}>{config.label}</span>;
+  };
+
   const getTypeBadge = (type: QuestionType) => {
     const labels: Record<QuestionType, string> = {
       [QuestionType.MCQ]: "Trắc nghiệm",
@@ -99,7 +122,7 @@ const MyQuestionsContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <div className="container mx-auto p-6">
+      <div className="mx-auto p-8">
         <div className="mb-8">
           <div className="flex items-center justify-between mb-2">
             <div>
@@ -137,12 +160,17 @@ const MyQuestionsContent: React.FC = () => {
               <Button
                 onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
                 variant="outline"
+                size="lg"
                 className="gap-2"
               >
                 <FileText className="h-4 w-4" />
                 Tạo đề thi
               </Button>
-              <Button onClick={() => navigate({ to: "/mentor/question/create" })} className="gap-2">
+              <Button size="lg" onClick={() => navigate({ to: "/mentor/matrix/import" })} className="gap-2">
+                <Upload className="h-4 w-4" />
+                Import
+              </Button>
+              <Button size="lg" onClick={() => navigate({ to: "/mentor/question/create" })} className="gap-2">
                 <Plus className="h-4 w-4" />
                 Tạo câu hỏi
               </Button>
@@ -180,6 +208,17 @@ const MyQuestionsContent: React.FC = () => {
                 <option value="all">Loại: Tất cả</option>
                 <option value="MCQ">Trắc nghiệm</option>
                 <option value="ESSAY">Tự luận</option>
+              </select>
+              <select
+                value={statusFilter}
+                onChange={(e) => setStatusFilter(e.target.value)}
+                className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+              >
+                <option value="all">Trạng thái: Tất cả</option>
+                <option value="NONE">Chưa gửi</option>
+                <option value="PENDING">Chờ duyệt</option>
+                <option value="APPROVED">Đã duyệt</option>
+                <option value="REJECTED">Từ chối</option>
               </select>
             </div>
           </div>
@@ -228,6 +267,9 @@ const MyQuestionsContent: React.FC = () => {
                       <th className="text-left p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
                         MÔN HỌC
                       </th>
+                      <th className="text-left p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                        TRẠNG THÁI
+                      </th>
                       <th className="text-center p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
                         HÀNH ĐỘNG
                       </th>
@@ -247,7 +289,11 @@ const MyQuestionsContent: React.FC = () => {
                             type="checkbox"
                             checked={selectedQuestions.includes(question.id)}
                             onChange={() => handleSelectQuestion(question.id)}
-                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                            disabled={
+                              question.approvalStatus === ApprovalStatus.PENDING ||
+                              question.approvalStatus === ApprovalStatus.APPROVED
+                            }
+                            className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                           />
                         </td>
                         <td className="p-4">
@@ -266,12 +312,20 @@ const MyQuestionsContent: React.FC = () => {
                         </td>
                         <td className="p-4">{getDifficultyBadge(question.questionLevel)}</td>
                         <td className="p-4 text-sm text-gray-700">{getTypeBadge(question.questionType)}</td>
-                        <td className="p-4 text-sm text-gray-700">{question.subject?.name || "Tin học 10"}</td>
+                        <td className="p-4 text-sm text-gray-700">{question.subject?.name}</td>
+                        <td className="p-4">{getStatusBadge(question.approvalStatus)}</td>
+
                         <td className="p-4">
                           <div className="flex items-center justify-center gap-1">
                             <button
                               className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
                               title="Xem"
+                              onClick={() =>
+                                navigate({
+                                  to: "/mentor/question/$id",
+                                  params: { id: question.id.toString() },
+                                })
+                              }
                             >
                               <Eye className="h-4 w-4" />
                             </button>

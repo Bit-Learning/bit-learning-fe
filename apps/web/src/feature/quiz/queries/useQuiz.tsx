@@ -18,9 +18,7 @@ import type {
 } from "../types/quiz.type";
 import { useAppDispatch } from "@/shared/redux/store";
 
-// ===== QUERY KEYS =====
 export const quizKeys = {
-  // Attempts
   attempts: {
     all: ["quiz-attempts"] as const,
     detail: (id: number) => [...quizKeys.attempts.all, "detail", id] as const,
@@ -28,7 +26,6 @@ export const quizKeys = {
     examAttempts: (examId: number, params?: PaginationParams) =>
       [...quizKeys.attempts.all, "exam", examId, params] as const,
   },
-  // Sessions
   sessions: {
     all: ["quiz-sessions"] as const,
     detail: (id: number) => [...quizKeys.sessions.all, "detail", id] as const,
@@ -38,36 +35,21 @@ export const quizKeys = {
   },
 };
 
-// ==========================================
-// QUIZ ATTEMPT HOOKS
-// ==========================================
-
-/**
- * Fetch quiz attempt & sync to Redux
- * Dùng cho: ExamTakingPage, ExamResultPage
- */
 export const useQuizAttempt = (attemptId: number, enabled = true) => {
-  const dispatch = useAppDispatch();
-
   return useQuery({
     queryKey: quizKeys.attempts.detail(attemptId),
     queryFn: async () => {
       const response = await quizAttemptApi.getAttemptById(attemptId);
-      const data = response.data.data!;
-
-      // Sync to Redux
-      dispatch(setQuizAttemptAction(data));
-
-      return data;
+      return response.data.data!;
     },
     enabled: !!attemptId && enabled,
-    staleTime: 0,
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };
 
-/**
- * Fetch user's attempts
- */
 export const useMyQuizAttempts = (params?: PaginationParams) => {
   return useQuery({
     queryKey: quizKeys.attempts.myAttempts(params),
@@ -79,9 +61,6 @@ export const useMyQuizAttempts = (params?: PaginationParams) => {
   });
 };
 
-/**
- * Fetch attempts by exam
- */
 export const useQuizAttemptsByExam = (examId: number, params?: PaginationParams) => {
   return useQuery({
     queryKey: quizKeys.attempts.examAttempts(examId, params),
@@ -94,9 +73,6 @@ export const useQuizAttemptsByExam = (examId: number, params?: PaginationParams)
   });
 };
 
-/**
- * Start new quiz attempt
- */
 export const useStartQuizAttempt = () => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
@@ -122,9 +98,6 @@ export const useStartQuizAttempt = () => {
   });
 };
 
-/**
- * Save/update answer for attempt
- */
 export const useSaveQuizAnswer = () => {
   const dispatch = useAppDispatch();
 
@@ -135,17 +108,11 @@ export const useSaveQuizAnswer = () => {
       dispatch(updateAnswerAction(response.data.data!));
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể lưu câu trả lời",
-      });
+      console.error("Failed to save answer:", error);
     },
   });
 };
 
-/**
- * Update navigation state (mark for review)
- */
 export const useUpdateNavigationState = () => {
   const dispatch = useAppDispatch();
 
@@ -165,9 +132,6 @@ export const useUpdateNavigationState = () => {
   });
 };
 
-/**
- * Submit quiz attempt
- */
 export const useSubmitQuizAttempt = () => {
   const queryClient = useQueryClient();
 
@@ -196,9 +160,6 @@ export const useSubmitQuizAttempt = () => {
   });
 };
 
-/**
- * Send heartbeat
- */
 export const useSendHeartbeat = () => {
   return useMutation({
     mutationFn: ({ attemptId, data }: { attemptId: number; data: QuizHeartbeatRequest }) =>
@@ -208,35 +169,21 @@ export const useSendHeartbeat = () => {
   });
 };
 
-// ==========================================
-// QUIZ SESSION HOOKS
-// ==========================================
-
-/**
- * Fetch quiz session & sync to Redux
- */
 export const useQuizSession = (sessionId: number, enabled = true) => {
-  const dispatch = useAppDispatch();
-
   return useQuery({
     queryKey: quizKeys.sessions.detail(sessionId),
     queryFn: async () => {
       const response = await quizSessionApi.getSessionById(sessionId);
-      const data = response.data.data;
-
-      // Sync to Redux
-      dispatch(setQuizSessionAction(data!));
-
-      return data;
+      return response.data.data;
     },
     enabled: !!sessionId && enabled,
-    staleTime: 0,
+    staleTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
   });
 };
 
-/**
- * Fetch user's sessions
- */
 export const useMyQuizSessions = (params?: PaginationParams) => {
   return useQuery({
     queryKey: quizKeys.sessions.mySessions(params),
@@ -248,9 +195,6 @@ export const useMyQuizSessions = (params?: PaginationParams) => {
   });
 };
 
-/**
- * Fetch sessions by exam
- */
 export const useQuizSessionsByExam = (examId: number, params?: PaginationParams) => {
   return useQuery({
     queryKey: quizKeys.sessions.examSessions(examId, params),
@@ -263,9 +207,6 @@ export const useQuizSessionsByExam = (examId: number, params?: PaginationParams)
   });
 };
 
-/**
- * Start new quiz session
- */
 export const useStartQuizSession = () => {
   const queryClient = useQueryClient();
   const dispatch = useAppDispatch();
@@ -291,9 +232,6 @@ export const useStartQuizSession = () => {
   });
 };
 
-/**
- * Save/update answer for session
- */
 export const useSaveSessionAnswer = () => {
   const dispatch = useAppDispatch();
 
@@ -304,17 +242,11 @@ export const useSaveSessionAnswer = () => {
       dispatch(updateAnswerAction(response.data.data!));
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể lưu câu trả lời",
-      });
+      console.error("Failed to save answer:", error);
     },
   });
 };
 
-/**
- * Toggle mark answer for session
- */
 export const useToggleMarkAnswer = () => {
   const dispatch = useAppDispatch();
 
@@ -328,22 +260,16 @@ export const useToggleMarkAnswer = () => {
       questionId: number;
       data: QuizSessionAnswerRequest;
     }) => {
-      // Optimistic update
       dispatch(toggleMarkAction(questionId));
 
-      // Call API
       return quizSessionAnswerApi.saveOrUpdateAnswer(sessionId, data);
     },
     onSuccess: (response) => {
-      // Update with server response
       dispatch(updateAnswerAction(response.data.data!));
     },
   });
 };
 
-/**
- * Update current index
- */
 export const useUpdateCurrentIndex = () => {
   return useMutation({
     mutationFn: ({ sessionId, data }: { sessionId: number; data: UpdateCurrentIndexRequest }) =>
@@ -351,9 +277,6 @@ export const useUpdateCurrentIndex = () => {
   });
 };
 
-/**
- * Submit quiz session
- */
 export const useSubmitQuizSession = () => {
   const queryClient = useQueryClient();
 

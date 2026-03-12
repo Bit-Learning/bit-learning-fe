@@ -61,7 +61,7 @@ const ExamDetailContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <main className="ml-64 flex-1 p-8">
+      <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <Skeleton className="h-8 w-32 mb-4" />
           <Skeleton className="h-10 w-64 mb-8" />
@@ -76,7 +76,7 @@ const ExamDetailContent: React.FC = () => {
 
   if (!exam) {
     return (
-      <main className="ml-64 flex-1 p-8">
+      <main className="flex-1 p-8">
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
@@ -95,13 +95,16 @@ const ExamDetailContent: React.FC = () => {
     <main className="flex-1 dark:bg-slate-950">
       <div className="mb-4 bg-white px-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <button
+          <div className="flex items-center gap-4 py-4">
+            <Button
+              variant="outline"
+              size="lg"
+              className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
               onClick={() => navigate({ to: "/mentor/exam/my" })}
-              className="flex items-center gap-2 pt-4 text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white mb-4 transition-colors"
             >
-              <ArrowLeft className="h-8 w-8" />
-            </button>
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Quay lại
+            </Button>
             <div>
               <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{exam.name}</h1>
             </div>
@@ -149,12 +152,11 @@ const ExamDetailContent: React.FC = () => {
               </div>
             )}
 
-            {/* Download Buttons */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-2">
               <button
                 onClick={() => handleDownload("pdf")}
                 disabled={downloadExam.isPending}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-left disabled:opacity-50"
+                className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-left disabled:opacity-50"
               >
                 {downloadExam.isPending ? (
                   <Loader2 className="h-5 w-5 text-slate-600 dark:text-slate-400 animate-spin" />
@@ -166,7 +168,7 @@ const ExamDetailContent: React.FC = () => {
               <button
                 onClick={() => handleDownload("docx")}
                 disabled={downloadExam.isPending}
-                className="w-full flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-left disabled:opacity-50"
+                className=" cursor-pointer w-full flex items-center gap-3 px-4 py-3 bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors text-left disabled:opacity-50"
               >
                 {downloadExam.isPending ? (
                   <Loader2 className="h-5 w-5 text-slate-600 dark:text-slate-400 animate-spin" />
@@ -177,12 +179,11 @@ const ExamDetailContent: React.FC = () => {
               </button>
             </div>
 
-            {/* Publish/Unpublish Button */}
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
               <button
                 onClick={handleTogglePublish}
                 disabled={isPublishing}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left font-medium ${
+                className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left font-medium ${
                   exam.isPublished
                     ? "bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
                     : "bg-green-50 dark:bg-green-900/10 hover:bg-green-100 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400"

@@ -1,21 +1,11 @@
 import { useState } from "react";
-import { Send, Clock, Search, CheckCircle, XCircle, FileText, Eye, Edit, Trash2 } from "lucide-react";
+import { CheckCircle, XCircle, FileText, Eye } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
 import { useMyPublishRequests, usePendingApproval } from "../queries/useQuestion";
 import { QuestionLevel, QuestionType, ApprovalStatus, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
-
-const menuItems = [
-  { id: "my-requests", label: "Yêu cầu của tôi", icon: Send },
-  {
-    id: "pending",
-    label: "Chờ phê duyệt",
-    icon: Clock,
-  },
-];
 
 const levelColors: Record<QuestionLevel, string> = {
   [QuestionLevel.EASY]: "bg-green-100 text-green-700",
@@ -95,8 +85,8 @@ export default function QuestionApprovalTableView() {
   };
 
   return (
-    <div className="flex h-screen bg-slate-50 container mx-auto p-6">
-      <main className="flex-1 flex flex-col overflow-hidden">
+    <div className="flex bg-slate-50 mx-auto p-8">
+      <main className="flex-1 flex flex-col">
         <div className="flex items-center justify-between">
           <div className="mb-2">
             <h1 className="text-3xl font-bold">Yêu cầu phê duyệt của tôi</h1>
@@ -108,7 +98,7 @@ export default function QuestionApprovalTableView() {
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "px-4 py-2 text-sm font-medium rounded-lg transition-colors",
+                  "cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition-colors",
                   activeTab === tab.id ? "bg-slate-100 text-slate-900" : "text-slate-600 hover:bg-slate-50",
                 )}
               >
@@ -118,7 +108,7 @@ export default function QuestionApprovalTableView() {
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto">
+        <div className="flex-1">
           {isLoading ? (
             <div className="flex items-center justify-center h-64">
               <div className="text-slate-500">Đang tải...</div>
@@ -132,7 +122,7 @@ export default function QuestionApprovalTableView() {
               </p>
             </div>
           ) : (
-            <div className="bg-white mx-8 my-6 rounded-lg border border-slate-200 overflow-hidden">
+            <div className="bg-white my-6 rounded-lg border border-slate-200 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-200">
                   <tr>
@@ -148,18 +138,16 @@ export default function QuestionApprovalTableView() {
                     <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-40">
                       Trạng thái
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider w-32">
+                    <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider w-50">
                       Thao tác
                     </th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-slate-200">
                   {questions.map((question: QuestionResponse, index: number) => (
-                    <tr key={question.id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={index} className="hover:bg-slate-50 transition-colors">
                       <td className="px-6 py-4">
-                        <div className="text-sm font-medium text-slate-900">
-                          #REQ-{String(index + 1).padStart(3, "0")}
-                        </div>
+                        <div className="text-sm font-medium text-slate-900">{question.id}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="max-w-xl">
@@ -207,8 +195,8 @@ export default function QuestionApprovalTableView() {
                           </Badge>
                         </div>
                       </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-center gap-1">
+                      <td className="px-2 py-4">
+                        <div className="flex items-center justify-center gap-3">
                           {question.approvalStatus === ApprovalStatus.REJECTED && (
                             <Button
                               variant="ghost"
@@ -239,7 +227,11 @@ export default function QuestionApprovalTableView() {
                               <Eye className="w-4 h-4" />
                             </Button>
                           )}
-                          <Button variant="ghost" size="icon" className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            className="h-8 w-8 ml-4 hover:bg-blue-50 hover:text-blue-600"
+                          >
                             <span className="text-sm">Sửa & Gửi lại</span>
                           </Button>
                         </div>

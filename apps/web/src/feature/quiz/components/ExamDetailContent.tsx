@@ -3,116 +3,50 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import {
   ChevronRight,
   Timer,
-  RefreshCw,
-  Award,
   Lock,
   PlayCircle,
   HelpCircle,
   BarChart3,
   Clock,
   BookOpen,
-  AlertCircle,
   Star,
+  FileText,
+  CheckCircle2,
+  Eye,
 } from "lucide-react";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
-// import { useExam } from "../queries/useExam";
-// import { useQuizAttemptsByExam, useStartQuizAttempt } from "../queries/useQuiz";
-import type { QuizAttemptBriefResponse, QuizAttemptStatus } from "../types/quiz.type";
-import { ExamResponse } from "@/feature/exam/types/exam.type";
-import { ApprovalStatus, QuestionLevel, QuestionType } from "@/feature/question/types/question.type";
-
-const mockExam: ExamResponse = {
-  id: 1,
-  name: "Kiểm tra Giữa kỳ 1 - Tin học 12",
-  code: "TIN12-GK1",
-  durationInMinutes: 45,
-  totalScore: 10,
-  publishedAt: "2023-10-01T08:00:00Z",
-  isPublished: true,
-  matrixVersion: {
-    id: 1,
-    versionNo: 1,
-    name: "Chương trình Tin học 12 - Học kỳ 1",
-  },
-  subject: {
-    id: 1,
-    name: "Tin học",
-    code: "TIN",
-  },
-  examQuestions: Array.from({ length: 40 }, (_, i) => ({
-    id: i + 1,
-    questionNo: i + 1,
-    score: 0.25,
-    optionsShuffled: false,
-    question: {
-      id: i + 1,
-      content: `Câu hỏi ${i + 1}`,
-      canonicalAnswer: undefined,
-      questionType: "MCQ" as QuestionType,
-      questionLevel: "MEDIUM" as QuestionLevel,
-      subject: { id: 1, name: "Tin học", code: "TIN" },
-      chapter: { id: 1, name: "Tin học", code: "TIN" },
-      lesson: { id: 1, name: "Bài 1", code: "L1" },
-      tags: [],
-      options: [
-        { id: i * 4 + 1, content: "Đáp án A", isCorrect: false, orderNo: 1 },
-        { id: i * 4 + 2, content: "Đáp án B", isCorrect: true, orderNo: 2 },
-        { id: i * 4 + 3, content: "Đáp án C", isCorrect: false, orderNo: 3 },
-        { id: i * 4 + 4, content: "Đáp án D", isCorrect: false, orderNo: 4 },
-      ],
-      isActive: true,
-      isPublic: true,
-      approvalStatus: "APPROVED" as ApprovalStatus,
-      createdAt: "2023-09-15T08:00:00Z",
-      updatedAt: "2023-09-15T08:00:00Z",
-    },
-  })),
-  createdAt: "2023-09-15T08:00:00Z",
-  updatedAt: "2023-09-20T10:30:00Z",
-};
-
-const mockAttempts: QuizAttemptBriefResponse[] = [
-  {
-    id: 1,
-    exam: {
-      id: 1,
-      name: "Kiểm tra Giữa kỳ 1 - Tin học 12",
-      code: "TIN12-GK1",
-      durationInMinutes: 45,
-      totalScore: 10,
-      totalQuestions: 40,
-      isPublished: true,
-      createdAt: "2023-09-15T08:00:00Z",
-    },
-    status: "SUBMITTED" as QuizAttemptStatus,
-    startTime: "2023-10-12T14:00:00Z",
-    submittedAt: "2023-10-12T14:45:12Z",
-    score: 8.5,
-  },
-];
+import { Skeleton } from "@workspace/ui/components/Skeleton";
+import { Badge } from "@workspace/ui/components/Badge";
+import { useMyQuizAttempts, useMyQuizSessions, useStartQuizAttempt, useStartQuizSession } from "../queries/useQuiz";
+import { useExam } from "@/feature/exam/queries/useExam";
+import { toast } from "@/shared/components/Sonner";
+import ExamModeModal from "./ExamModeModal";
+import { QuizSessionType } from "../types/quiz.type";
 
 const ExamDetailContent: React.FC = () => {
   const navigate = useNavigate();
   const { examId } = useParams({ from: "/_layout/exams/$examId" });
+  const [showModeModal, setShowModeModal] = useState(false);
 
-  const [showStartConfirm, setShowStartConfirm] = useState(false);
+  const { data: exam, isLoading: examLoading } = useExam(Number(examId), { enabled: !!examId });
 
-  // const { data: exam, isLoading } = useExam(Number(examId), { enabled: !!examId });
-  // const { data: attemptsData } = useQuizAttemptsByExam(Number(examId), {
-  //   page: 0,
-  //   size: 100,
-  // });
-  // const startMutation = useStartQuizAttempt();
-  // const attempts = attemptsData?.content?.filter(a => a.exam.id === Number(examId)) || [];
+  const { data: allAttemptsResponse } = useMyQuizAttempts({ page: 0, size: 100 });
+  const { data: allSessionsResponse } = useMyQuizSessions({ page: 0, size: 100 });
 
-  const exam = mockExam;
-  const attempts = mockAttempts;
+  const startAttemptMutation = useStartQuizAttempt();
+  const startSessionMutation = useStartQuizSession();
 
-  const maxAttempts = 3;
-  const remainingAttempts = maxAttempts - attempts.length;
-  const bestScore = attempts.length > 0 ? Math.max(...attempts.map((a) => a.score || 0)) : null;
-  const canStartExam = exam.isPublished && remainingAttempts > 0;
+  const attempts = Array.isArray(allAttemptsResponse)
+    ? allAttemptsResponse.filter((a) => a.exam.id === Number(examId))
+    : [];
+
+  const sessions = Array.isArray(allSessionsResponse)
+    ? allSessionsResponse.filter((s) => s.exam.id === Number(examId))
+    : [];
+
+  const canStartExam = exam?.isPublished;
+  const hasHistory = attempts.length > 0 || sessions.length > 0;
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -125,208 +59,504 @@ const ExamDetailContent: React.FC = () => {
     });
   };
 
-  const formatDuration = (start: string, end: string) => {
+  const formatDuration = (start: string, end?: string) => {
+    if (!end) return "Đang làm";
     const startTime = new Date(start).getTime();
     const endTime = new Date(end).getTime();
     const diffMs = endTime - startTime;
     const minutes = Math.floor(diffMs / 60000);
     const seconds = Math.floor((diffMs % 60000) / 1000);
-    return `${minutes}:${seconds.toString().padStart(2, "0")}`;
+    return `${minutes} phút ${seconds} giây`;
   };
 
   const handleStartExam = async () => {
-    // try {
-    //   const response = await startMutation.mutateAsync({
-    //     examId: exam.id,
-    //   });
-    //
-    //   navigate({
-    //     to: "/quiz-attempts/$attemptId",
-    //     params: { attemptId: String(response.data.data.id) },
-    //   });
-    // } catch (error) {
-    //   console.error("Failed to start attempt:", error);
-    // }
+    if (!canStartExam) return;
 
-    navigate({
-      to: "/exams/$examId/mode",
-      params: { examId: String(exam.id) },
-    });
+    try {
+      const response = await startAttemptMutation.mutateAsync({
+        examId: Number(examId),
+      });
+
+      setShowModeModal(false);
+
+      toast.success({
+        title: "Bắt đầu làm bài thi",
+        description: "Chúc bạn làm bài tốt!",
+      });
+
+      navigate({
+        to: "/quiz-attempts/$attemptId",
+        params: { attemptId: String(response.data.data!.id) },
+      });
+    } catch (error) {
+      toast.error({
+        title: "Lỗi",
+        description: "Không thể bắt đầu bài thi. Vui lòng thử lại.",
+      });
+      console.error("Failed to start attempt:", error);
+    }
   };
 
-  return (
-    <div className="max-w-300 mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <nav className="flex items-center gap-2 mb-8 text-sm font-medium text-slate-500 dark:text-slate-400">
-        <a className="hover:text-primary cursor-pointer">Trang chủ</a>
-        <ChevronRight className="w-4 h-4" />
-        <a className="hover:text-primary cursor-pointer">Khóa học</a>
-        <ChevronRight className="w-4 h-4" />
-        <span className="text-slate-900 dark:text-slate-100">Chi tiết đề thi</span>
-      </nav>
+  const handleStartPractice = async () => {
+    if (!exam) return;
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-8">
-          <header className="space-y-4">
-            <h1 className="text-4xl font-black tracking-tight leading-tight text-slate-900 dark:text-slate-100">
-              {exam.name}
-            </h1>
-            <p className="text-lg text-slate-600 dark:text-slate-400">
-              Phạm vi kiến thức: {exam.matrixVersion?.name}. Đề thi bao gồm các câu hỏi trắc nghiệm khách quan và bài
-              tập tình huống thực tế về Mạng máy tính, Internet và Hệ điều hành.
-            </p>
-          </header>
+    try {
+      const response = await startSessionMutation.mutateAsync({
+        examId: Number(examId),
+        type: "PRACTICE" as QuizSessionType,
+      });
 
-          <section className="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-slate-200 dark:border-slate-700">
-            <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-              <BookOpen className="w-5 h-5 text-primary" />
-              Hướng dẫn và Quy định
-            </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-[#f8f6f6] dark:bg-slate-700/50">
-                <Timer className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="font-bold text-sm">Thời gian làm bài</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">{exam.durationInMinutes} phút không nghỉ</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-[#f8f6f6] dark:bg-slate-700/50">
-                <RefreshCw className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="font-bold text-sm">Số lần làm lại</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Tối đa {maxAttempts} lần</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-[#f8f6f6] dark:bg-slate-700/50">
-                <Star className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="font-bold text-sm">Cách tính điểm</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Lấy điểm cao nhất</p>
-                </div>
-              </div>
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-[#f8f6f6] dark:bg-slate-700/50">
-                <Lock className="w-5 h-5 text-primary" />
-                <div>
-                  <p className="font-bold text-sm">Bảo mật</p>
-                  <p className="text-sm text-slate-600 dark:text-slate-400">Không quay phim, chụp ảnh đề</p>
-                </div>
-              </div>
+      setShowModeModal(false);
+
+      toast.success({
+        title: "Bắt đầu luyện tập",
+        description: "Bạn có thể học tập thoải mái!",
+      });
+
+      navigate({
+        to: "/quiz-sessions/$sessionId",
+        params: { sessionId: String(response.data.data!.id) },
+      });
+    } catch (error) {
+      toast.error({
+        title: "Lỗi",
+        description: "Không thể bắt đầu phiên luyện tập. Vui lòng thử lại.",
+      });
+      console.error("Failed to start practice session:", error);
+    }
+  };
+
+  if (examLoading) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <Skeleton className="h-8 w-64 mb-8" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+            <div className="lg:col-span-2 space-y-6">
+              <Skeleton className="h-32 w-full" />
+              <Skeleton className="h-64 w-full" />
+              <Skeleton className="h-48 w-full" />
             </div>
-          </section>
-
-          <section>
-            <h2 className="text-xl font-bold mb-4">Lịch sử làm bài</h2>
-            {attempts.length > 0 ? (
-              <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse bg-white dark:bg-slate-800/50 rounded-lg overflow-hidden">
-                  <thead>
-                    <tr className="border-b border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                      <th className="py-3 px-4 text-sm font-semibold">Lần thi</th>
-                      <th className="py-3 px-4 text-sm font-semibold">Ngày hoàn thành</th>
-                      <th className="py-3 px-4 text-sm font-semibold text-center">Thời gian</th>
-                      <th className="py-3 px-4 text-sm font-semibold text-right">Điểm số</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                    {attempts.map((attempt, index) => (
-                      <tr key={attempt.id} className="hover:bg-slate-50 dark:hover:bg-slate-800/30">
-                        <td className="py-4 px-4 text-sm font-medium">Lần {index + 1}</td>
-                        <td className="py-4 px-4 text-sm text-slate-600 dark:text-slate-400">
-                          {formatDate(attempt.submittedAt || attempt.startTime)}
-                        </td>
-                        <td className="py-4 px-4 text-sm text-center text-slate-600 dark:text-slate-400">
-                          {attempt.submittedAt && formatDuration(attempt.startTime, attempt.submittedAt)}
-                        </td>
-                        <td className="py-4 px-4 text-sm text-right font-bold text-green-600">{attempt.score} / 10</td>
-                      </tr>
-                    ))}
-                    {remainingAttempts > 0 && (
-                      <tr>
-                        <td className="py-4 px-4 text-sm text-slate-400 italic" colSpan={4}>
-                          Bạn vẫn còn {remainingAttempts} lần làm bài nữa.
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-            ) : (
-              <Card>
-                <CardContent className="p-8 text-center">
-                  <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                    <Clock className="w-8 h-8 text-slate-400" />
-                  </div>
-                  <p className="text-slate-500 dark:text-slate-400">
-                    Bạn chưa có lần thi nào. Hãy bắt đầu làm bài ngay!
-                  </p>
-                </CardContent>
-              </Card>
-            )}
-          </section>
-        </div>
-
-        <div className="lg:col-span-1">
-          <div className="sticky top-6 space-y-4">
-            <div className="bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden">
-              <div className="p-6 bg-primary/10 dark:bg-primary/20 border-b border-primary/20">
-                <h3 className="font-bold text-primary flex items-center gap-2">
-                  <BarChart3 className="w-5 h-5" />
-                  Tóm tắt đề thi
-                </h3>
-              </div>
-              <div className="p-6 space-y-6">
-                <div className="space-y-4">
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-600 dark:text-slate-400">Số lượng câu hỏi</span>
-                    <span className="font-bold">{exam.examQuestions.length} câu</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-600 dark:text-slate-400">Tổng điểm</span>
-                    <span className="font-bold">{exam.totalScore.toFixed(1)}</span>
-                  </div>
-                  <div className="flex justify-between items-center">
-                    <span className="text-slate-600 dark:text-slate-400">Điểm tối thiểu đạt</span>
-                    <span className="font-bold">5.0</span>
-                  </div>
-                </div>
-                <hr className="border-slate-100 dark:border-slate-700" />
-                <div className="space-y-3">
-                  {canStartExam ? (
-                    <>
-                      <button
-                        className="w-full rounded-xl bg-blue-600 px-6 py-3 text-lg font-bold text-white transition-opacity hover:opacity-90 flex items-center justify-center gap-2 shadow-lg shadow-blue-600/20"
-                        onClick={handleStartExam}
-                      >
-                        <PlayCircle className="w-5 h-5" />
-                        Bắt đầu làm bài ngay
-                      </button>
-                      <p className="text-xs text-center text-slate-500">
-                        Bằng việc bấm bắt đầu, đồng hồ sẽ tính giờ ngay lập tức.
-                      </p>
-                    </>
-                  ) : !exam.isPublished ? (
-                    <Button className="w-full" isDisabled>
-                      <Lock className="w-5 h-5 mr-2" />
-                      Đề thi chưa mở
-                    </Button>
-                  ) : (
-                    <div className="text-center space-y-2">
-                      <AlertCircle className="w-12 h-12 text-amber-500 mx-auto" />
-                      <p className="text-sm font-medium text-slate-600 dark:text-slate-400">
-                        Bạn đã hết lượt thi ({maxAttempts}/{maxAttempts})
-                      </p>
-                    </div>
-                  )}
-                </div>
-              </div>
+            <div>
+              <Skeleton className="h-96 w-full" />
             </div>
-
-            <button className="w-full p-4 flex items-center justify-center gap-2 text-slate-500 hover:text-primary cursor-pointer transition-colors text-sm font-medium rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800">
-              <HelpCircle className="w-5 h-5" />
-              Bạn cần trợ giúp?
-            </button>
           </div>
         </div>
       </div>
+    );
+  }
+
+  if (!exam) {
+    return (
+      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
+        <Card className="max-w-md">
+          <CardContent className="p-12 text-center">
+            <FileText className="w-16 h-16 text-slate-400 mx-auto mb-4" />
+            <h3 className="text-xl font-bold mb-2">Không tìm thấy đề thi</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6">Đề thi này không tồn tại hoặc đã bị xóa.</p>
+            <Button onClick={() => navigate({ to: "/exams" })}>Quay lại danh sách</Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  return (
+    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <nav className="flex items-center gap-2 mb-8 text-sm font-medium text-slate-500 dark:text-slate-400">
+          <button onClick={() => navigate({ to: "/exams" })} className="hover:text-primary transition-colors">
+            Danh sách đề thi
+          </button>
+          <ChevronRight className="w-4 h-4" />
+          <span className="text-slate-900 dark:text-slate-100 font-semibold">Chi tiết đề thi</span>
+        </nav>
+
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+          <div className="lg:col-span-2 space-y-6">
+            <Card className="border-2 border-blue-100 dark:border-blue-900/50 shadow-md">
+              <CardContent className="p-8">
+                <div className="flex items-start gap-4 mb-4">
+                  <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
+                    <FileText className="w-8 h-8 text-white" />
+                  </div>
+                  <div className="flex-1">
+                    <Badge className="mb-3 text-xs font-mono">{exam.code}</Badge>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-3 leading-tight">
+                      {exam.name}
+                    </h1>
+                    {exam.matrixVersion && (
+                      <p className="text-slate-600 dark:text-slate-400">
+                        Phạm vi kiến thức: <span className="font-semibold">{exam.matrixVersion.name}</span>
+                      </p>
+                    )}
+                  </div>
+                </div>
+
+                <div className="flex flex-wrap gap-3 mt-6">
+                  {exam.isPublished ? (
+                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
+                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                      Đang mở
+                    </Badge>
+                  ) : (
+                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                      <Lock className="w-3 h-3 mr-1" />
+                      Chưa mở
+                    </Badge>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <BookOpen className="w-5 h-5 text-primary" />
+                  Hướng dẫn và Quy định
+                </h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
+                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center shrink-0">
+                      <Timer className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm mb-1">Thời gian làm bài</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">
+                        {exam.durationInMinutes} phút không nghỉ
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50">
+                    <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center shrink-0">
+                      <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm mb-1">Chế độ làm bài</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Thi chính thức hoặc Luyện tập</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50">
+                    <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-lg flex items-center justify-center shrink-0">
+                      <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm mb-1">Tự động lưu</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Câu trả lời được lưu liên tục</p>
+                    </div>
+                  </div>
+
+                  <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50">
+                    <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center shrink-0">
+                      <Lock className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    </div>
+                    <div>
+                      <p className="font-bold text-sm mb-1">Bảo mật</p>
+                      <p className="text-sm text-slate-600 dark:text-slate-400">Không quay phim, chụp ảnh đề</p>
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            <Card>
+              <CardContent className="p-6">
+                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
+                  <Clock className="w-5 h-5 text-primary" />
+                  Lịch sử làm bài
+                </h2>
+
+                {hasHistory ? (
+                  <div className="space-y-3">
+                    {attempts.map((attempt, index) => {
+                      const isSubmitted = attempt.status == "SUBMITTED";
+                      const isDoing = attempt.status === "DOING";
+
+                      return (
+                        <div
+                          key={`attempt-${attempt.id}`}
+                          className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                        >
+                          <div className="flex items-center justify-between gap-4 flex-wrap">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                              <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-red-200 dark:border-red-900/50 shrink-0">
+                                <span className="text-red-600 dark:text-red-400">#{index + 1}</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800 text-xs">
+                                    Chế độ Thi
+                                  </Badge>
+                                  {isSubmitted ? (
+                                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-xs">
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      Đã nộp
+                                    </Badge>
+                                  ) : (
+                                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 text-xs">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      Đang làm
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                                  {formatDate(attempt.submittedAt || attempt.startTime)}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 mt-1">
+                                  <Timer className="w-3 h-3" />
+                                  {formatDuration(attempt.startTime, attempt.submittedAt)}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-3 shrink-0">
+                              {isSubmitted && attempt.score !== undefined && (
+                                <div className="text-right">
+                                  <p className="text-xs text-slate-500 dark:text-slate-400 mb-0.5">Điểm số</p>
+                                  <p className="text-2xl font-black text-blue-600 dark:text-blue-400">
+                                    {attempt.score.toFixed(1)}
+                                    <span className="text-sm text-slate-400 ml-1">/{exam?.totalScore}</span>
+                                  </p>
+                                </div>
+                              )}
+
+                              {isDoing && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-attempts/$attemptId",
+                                      params: { attemptId: String(attempt.id) },
+                                    })
+                                  }
+                                >
+                                  <PlayCircle className="w-4 h-4" />
+                                  Tiếp tục
+                                </Button>
+                              )}
+
+                              {isSubmitted && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5 shrink-0"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-attempts/$attemptId/result",
+                                      params: { attemptId: String(attempt.id) },
+                                    })
+                                  }
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Xem kết quả
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+
+                    {sessions.map((session, index) => {
+                      const isSubmitted = session.status === "SUBMITTED";
+                      const isExpired = session.status === "EXPIRED";
+                      const isDoing = session.status === "DOING";
+
+                      return (
+                        <div
+                          key={`session-${session.id}`}
+                          className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                        >
+                          <div className="flex items-center justify-between gap-4 flex-wrap">
+                            <div className="flex items-center gap-4 flex-1 min-w-0">
+                              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-blue-200 dark:border-blue-900/50 shrink-0">
+                                <span className="text-blue-600 dark:text-blue-400">L{index + 1}</span>
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <div className="flex items-center gap-2 mb-1 flex-wrap">
+                                  <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800 text-xs">
+                                    Chế độ Luyện tập
+                                  </Badge>
+                                  {isSubmitted ? (
+                                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-xs">
+                                      <CheckCircle2 className="w-3 h-3 mr-1" />
+                                      Hoàn thành
+                                    </Badge>
+                                  ) : isExpired ? (
+                                    <Badge className="bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400 border-slate-200 dark:border-slate-700 text-xs">
+                                      Hết hạn
+                                    </Badge>
+                                  ) : (
+                                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800 text-xs">
+                                      <Clock className="w-3 h-3 mr-1" />
+                                      Đang làm
+                                    </Badge>
+                                  )}
+                                </div>
+                                <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
+                                  {formatDate(session.startTime)}
+                                </p>
+                                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 mt-1">
+                                  <BookOpen className="w-3 h-3" />
+                                  Câu {session.currentIndex + 1} / {exam?.examQuestions?.length || 0}
+                                </div>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 shrink-0">
+                              {isDoing && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-sessions/$sessionId",
+                                      params: { sessionId: String(session.id) },
+                                    })
+                                  }
+                                >
+                                  <PlayCircle className="w-4 h-4" />
+                                  Tiếp tục
+                                </Button>
+                              )}
+
+                              {isSubmitted && (
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  className="gap-1.5"
+                                  onClick={() =>
+                                    navigate({
+                                      to: "/quiz-sessions/$sessionId/result",
+                                      params: { sessionId: String(session.id) },
+                                    })
+                                  }
+                                >
+                                  <Eye className="w-4 h-4" />
+                                  Xem kết quả
+                                </Button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div className="py-12 text-center">
+                    <div className="w-16 h-16 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
+                      <Clock className="w-8 h-8 text-slate-400" />
+                    </div>
+                    <p className="text-slate-500 dark:text-slate-400 font-medium">Bạn chưa có lịch sử làm bài</p>
+                    <p className="text-sm text-slate-400 dark:text-slate-500 mt-1">
+                      Hãy bắt đầu làm bài ngay để kiểm tra kiến thức!
+                    </p>
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          </div>
+
+          <div className="lg:col-span-1">
+            <div className="sticky top-6 space-y-4">
+              <Card className="border-2 border-primary/20 shadow-xl overflow-hidden">
+                <div className="bg-linear-to-r from-blue-600 to-purple-600 p-6 text-white">
+                  <h3 className="font-bold text-lg flex items-center gap-2">
+                    <BarChart3 className="w-5 h-5" />
+                    Tóm tắt đề thi
+                  </h3>
+                </div>
+
+                <CardContent className="p-6 space-y-6">
+                  <div className="space-y-4">
+                    <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                        <HelpCircle className="w-4 h-4" />
+                        Số câu hỏi
+                      </span>
+                      <span className="font-bold text-lg">{exam.examQuestions?.length || 0}</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                      <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                        <Timer className="w-4 h-4" />
+                        Thời gian
+                      </span>
+                      <span className="font-bold text-lg">{exam.durationInMinutes} phút</span>
+                    </div>
+
+                    <div className="flex justify-between items-center py-3">
+                      <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                        <Clock className="w-4 h-4" />
+                        Lịch sử
+                      </span>
+                      <span className="font-bold text-lg text-blue-600 dark:text-blue-400">
+                        {attempts.length + sessions.length} lần
+                      </span>
+                    </div>
+                  </div>
+
+                  <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                    {canStartExam ? (
+                      <div className="space-y-3">
+                        <Button
+                          size="lg"
+                          className="w-full gap-2 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-900/50 font-bold text-base h-12"
+                          onClick={() => setShowModeModal(true)}
+                        >
+                          <PlayCircle className="w-5 h-5" />
+                          Bắt đầu làm bài
+                        </Button>
+                        <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+                          Chọn chế độ Thi hoặc Luyện tập phù hợp với bạn
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="text-center space-y-3">
+                        <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto">
+                          <Lock className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <div>
+                          <p className="font-semibold text-slate-900 dark:text-slate-100 mb-1">Đề thi chưa mở</p>
+                          <p className="text-sm text-slate-500 dark:text-slate-400">Vui lòng chờ giáo viên mở đề thi</p>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+
+              <button
+                className="w-full p-4 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary cursor-pointer transition-colors text-sm font-medium rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                onClick={() => {
+                  toast.info({
+                    title: "Trợ giúp",
+                    description: "Liên hệ giáo viên nếu bạn cần hỗ trợ",
+                  });
+                }}
+              >
+                <HelpCircle className="w-5 h-5" />
+                Bạn cần trợ giúp?
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <ExamModeModal
+        isOpen={showModeModal}
+        onClose={() => setShowModeModal(false)}
+        onSelectExamMode={handleStartExam}
+        onSelectPracticeMode={handleStartPractice}
+        isStartingExam={startAttemptMutation.isPending}
+        isStartingPractice={startSessionMutation.isPending}
+        examName={exam?.name}
+      />
     </div>
   );
 };
