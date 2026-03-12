@@ -10,10 +10,10 @@ export const Route = createFileRoute("/_authenticated/apps/games/")({
 
 function GamesRoute() {
 	return (
-		<div className="space-y-6">
-			<div>
+		<div className="p-8">
+			<div className="mb-6">
 				<h1 className="text-2xl font-bold tracking-tight">Quản lý game</h1>
-				<p className="text-sm text-muted-foreground">
+				<p className="text-sm text-muted-foreground mt-1">
 					Xem danh sách, tạo/cập nhật và lưu trữ game trực tiếp trong hệ thống.
 				</p>
 			</div>
