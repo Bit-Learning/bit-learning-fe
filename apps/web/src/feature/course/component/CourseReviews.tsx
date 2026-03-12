@@ -10,6 +10,8 @@ interface CourseReviewsProps {
   courseId: number;
 }
 
+const STAR_LABELS = ["", "Tệ", "Không tốt", "Bình thường", "Tốt", "Xuất sắc"];
+
 const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
@@ -20,139 +22,166 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
   const { mutate: postReview, isPending: isPosting } = usePostReview();
 
   const handleSubmitReview = () => {
-    if (rating === 0) {
-      return;
-    }
-
+    if (rating === 0) return;
     postReview(
-      {
-        courseId,
-        rating,
-        comment: comment.trim() || undefined,
-      },
+      { courseId, rating, comment: comment.trim() || undefined },
       {
         onSuccess: () => {
           setRating(0);
           setComment("");
         },
-      }
+      },
     );
   };
 
   const pageInfo = data?.page;
   const reviews = data?.content || [];
+  const activeRating = hoverRating || rating;
 
   return (
-    <div className="space-y-6">
-      <div className="rounded-lg border border-gray-200 bg-white p-6 shadow-sm">
-        <h4 className="mb-4 font-semibold text-gray-900">Đánh giá khóa học</h4>
+    <div className="space-y-4">
+      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+        <div className="text-center border-b border-gray-100 bg-linear-to-r from-blue-50 to-indigo-50 px-6 py-4">
+          <h4 className="text-lg font-bold text-gray-900">Viết đánh giá của bạn</h4>
+          <p className="mt-0.5 text-sm text-gray-500">
+            Chia sẻ trải nghiệm giúp học viên khác đưa ra quyết định đúng đắn
+          </p>
+        </div>
 
-        <div className="mb-4">
-          <label htmlFor="rating" className="mb-2 block text-sm font-medium text-gray-700">
-            Đánh giá của bạn
-          </label>
-          <input id="rating" type="hidden" value={rating} readOnly />
+        <div className="p-6 space-y-5">
           <div className="flex items-center gap-2">
-            {Array.from({ length: 5 }).map((_, index) => {
-              const starValue = index + 1;
-              return (
-                <button
-                  key={index}
-                  type="button"
-                  onClick={() => setRating(starValue)}
-                  onMouseEnter={() => setHoverRating(starValue)}
-                  onMouseLeave={() => setHoverRating(0)}
-                  className="transition-transform hover:scale-110"
-                >
-                  <Star
-                    className={`h-8 w-8 ${
-                      starValue <= (hoverRating || rating) ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                    }`}
-                  />
-                </button>
-              );
-            })}
-            {rating > 0 && <span className="ml-2 text-sm font-medium text-gray-700">{rating}/5 sao</span>}
-          </div>
-        </div>
-
-        <div className="mb-4">
-          <label htmlFor="comment" className="mb-2 block text-sm font-medium text-gray-700">
-            Nhận xét (không bắt buộc)
-          </label>
-          <Textarea
-            id="comment"
-            value={comment}
-            onChange={(e) => setComment(e.target.value)}
-            placeholder="Chia sẻ trải nghiệm của bạn về khóa học này..."
-            className="min-h-25 resize-none"
-          />
-        </div>
-
-        <div className="flex justify-end">
-          <Button
-            onClick={handleSubmitReview}
-            isDisabled={rating === 0 || isPosting}
-            className="bg-blue-700 text-white hover:bg-blue-800"
-          >
-            {isPosting ? (
-              <>
-                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                Đang gửi
-              </>
-            ) : (
-              <>
-                <Send className="mr-2 h-4 w-4" />
-                Gửi đánh giá
-              </>
-            )}
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <h4 className="text-lg font-semibold text-gray-900">{pageInfo?.totalElements || 0} đánh giá</h4>
-      </div>
-
-      {isLoading ? (
-        <div className="flex items-center justify-center py-12">
-          <Loader2 className="h-8 w-8 animate-spin text-blue-700" />
-        </div>
-      ) : reviews.length === 0 ? (
-        <div className="rounded-lg border border-gray-200 bg-gray-50 p-12 text-center">
-          <MessageSquare className="mx-auto mb-3 h-12 w-12 text-gray-400" />
-          <p className="text-gray-600">Chưa có đánh giá nào. Hãy là người đầu tiên đánh giá khóa học này!</p>
-        </div>
-      ) : (
-        <>
-          <div className="space-y-6 rounded-lg border border-gray-200 bg-white p-6">
-            {reviews.map((review) => (
-              <ReviewItem key={review.id} review={review} />
-            ))}
-          </div>
-
-          {pageInfo && pageInfo.totalPages > 1 && (
-            <div className="flex items-center justify-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setPage((p) => Math.max(0, p - 1))}
-                isDisabled={pageInfo.first}
-              >
-                Trang trước
-              </Button>
-              <div className="flex items-center gap-1">
-                <span className="px-3 py-1 text-sm text-gray-600">
-                  Trang {pageInfo.page + 1} / {pageInfo.totalPages}
+            <p className="ml-2 text-lg font-medium text-gray-700">Đánh giá của bạn:</p>
+            <div className="flex items-center gap-1">
+              {Array.from({ length: 5 }).map((_, i) => {
+                const val = i + 1;
+                return (
+                  <button
+                    key={i}
+                    type="button"
+                    onClick={() => setRating(val)}
+                    onMouseEnter={() => setHoverRating(val)}
+                    onMouseLeave={() => setHoverRating(0)}
+                    className="rounded-md p-1 transition-transform hover:scale-110 focus:outline-none"
+                  >
+                    <Star
+                      className={`h-9 w-9 transition-colors ${
+                        val <= activeRating ? "fill-yellow-400 text-yellow-400 drop-shadow-sm" : "text-gray-200"
+                      }`}
+                    />
+                  </button>
+                );
+              })}
+              {activeRating > 0 && (
+                <span className="ml-2 rounded-full bg-yellow-50 px-3 py-1 text-sm font-semibold text-yellow-700">
+                  {STAR_LABELS[activeRating]}
                 </span>
-              </div>
-              <Button variant="outline" size="sm" onClick={() => setPage((p) => p + 1)} isDisabled={pageInfo.last}>
-                Trang sau
-              </Button>
+              )}
             </div>
-          )}
-        </>
-      )}
+          </div>
+
+          <div>
+            <label htmlFor="comment" className="px-2 mb-2 block text-md font-medium text-gray-700">
+              Nhận xét <span className="text-gray-400">(không bắt buộc)</span>
+            </label>
+            <Textarea
+              id="comment"
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              placeholder="Khóa học này có điểm gì nổi bật? Bạn học được gì? Có điều gì cần cải thiện không?"
+              className="min-h-28 resize-none rounded-xl border-gray-200 text-sm focus:border-blue-400 focus:ring-blue-400"
+            />
+            <p className="mt-1 text-right text-xs text-gray-400">{comment.length} ký tự</p>
+          </div>
+
+          <div className="flex items-center justify-between border-t border-gray-100 pt-4">
+            <p className="text-xs text-gray-400">* Đánh giá sao là bắt buộc</p>
+            <Button
+              onClick={handleSubmitReview}
+              size="lg"
+              isDisabled={rating === 0 || isPosting}
+              className="gap-2 bg-linear-to-r from-blue-600 to-indigo-600 px-6 text-white shadow-md hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+            >
+              {isPosting ? (
+                <>
+                  <Loader2 className="h-4 w-4 animate-spin" />
+                  Đang gửi...
+                </>
+              ) : (
+                <>
+                  <Send className="h-4 w-4" />
+                  Gửi đánh giá
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div className="mb-4 flex items-center justify-between">
+          <h4 className="text-lg font-bold text-gray-900">
+            Đánh giá từ học viên
+            {pageInfo?.totalElements ? (
+              <span className="ml-2 rounded-full bg-blue-100 px-2.5 py-0.5 text-sm font-semibold text-blue-700">
+                {pageInfo.totalElements}
+              </span>
+            ) : null}
+          </h4>
+        </div>
+
+        {isLoading ? (
+          <div className="flex items-center justify-center py-16">
+            <div className="text-center">
+              <Loader2 className="mx-auto h-8 w-8 animate-spin text-blue-600" />
+              <p className="mt-3 text-sm text-gray-500">Đang tải đánh giá...</p>
+            </div>
+          </div>
+        ) : reviews.length === 0 ? (
+          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 py-16 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+              <MessageSquare className="h-8 w-8 text-gray-400" />
+            </div>
+            <p className="font-medium text-gray-700">Chưa có đánh giá nào</p>
+            <p className="mt-1 text-sm text-gray-500">Hãy là người đầu tiên đánh giá khóa học này!</p>
+          </div>
+        ) : (
+          <>
+            <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+              {reviews.map((review) => (
+                <div key={review.id} className="px-6 py-5 transition-colors hover:bg-gray-50">
+                  <ReviewItem review={review} />
+                </div>
+              ))}
+            </div>
+
+            {pageInfo && pageInfo.totalPages > 1 && (
+              <div className="mt-6 flex items-center justify-center gap-3">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => Math.max(0, p - 1))}
+                  isDisabled={pageInfo.first}
+                  className="rounded-lg px-4"
+                >
+                  ← Trang trước
+                </Button>
+                <span className="rounded-lg bg-gray-100 px-4 py-2 text-sm font-medium text-gray-700">
+                  {pageInfo.page + 1} / {pageInfo.totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPage((p) => p + 1)}
+                  isDisabled={pageInfo.last}
+                  className="rounded-lg px-4"
+                >
+                  Trang sau →
+                </Button>
+              </div>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 };

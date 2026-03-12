@@ -1,5 +1,5 @@
-import { toast } from "@workspace/ui/components/Sonner";
-import type { TAppThunk } from "@/feature/app/type/AppState";
+import { toast } from "@/shared/components/Sonner";
+import type { TAppThunk } from "@/feature/app/types/AppState";
 import type { TChangePasswordRequest } from "@/feature/user/types/user.type";
 import {
 	clearAuthTokens,
@@ -282,7 +282,7 @@ export const requestGoogleLogin = (code: string): TAppThunk => {
 				if (payload.isNewUser) {
 					toast.success({
 						title: "Đăng nhập thành công!",
-						description: `Chào mừng ${payload.user.username || "bạn"} đến với Bithub! ${payload.message || "Vui lòng kiểm tra email để lấy mật khẩu tạm thời."}`,
+						description: `Chào mừng ${payload.user.username || "bạn"} đến với Bit Learning! ${payload.message || "Vui lòng kiểm tra email để lấy mật khẩu tạm thời."}`,
 					});
 				} else {
 					toast.success({

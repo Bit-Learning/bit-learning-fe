@@ -66,7 +66,7 @@ const TransparentHeader: React.FC = () => {
 						<div className="flex items-center space-x-2">
 							<img
 								src="/Logo.png"
-								alt="Bithub Learning"
+								alt="Bit Learning"
 								className="h-10 w-36 object-contain drop-shadow-[0_2px_12px_rgba(255,255,255,0.5)] transition-all duration-300 group-hover:drop-shadow-[0_4px_20px_rgba(255,255,255,0.8)]"
 							/>
 						</div>
@@ -145,9 +145,7 @@ const TransparentHeader: React.FC = () => {
 								</Button>
 								<MenuPopover placement="bottom end">
 									<DropdownMenu className="border border-white/20 bg-white/10 shadow-[0_8px_32px_0_rgba(0,0,0,0.2)] backdrop-blur-2xl backdrop-saturate-150 dark:bg-gray-900/90">
-										<MenuItem
-											onAction={() => navigate({ to: "/user-profile" })}
-										>
+										<MenuItem onAction={() => navigate({ to: "/profile" })}>
 											<User className="mr-2 h-4 w-4" />
 											<span>Hồ sơ cá nhân</span>
 										</MenuItem>

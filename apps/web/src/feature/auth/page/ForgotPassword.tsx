@@ -6,8 +6,8 @@ const ForgotPasswordPage: React.FC = () => {
 	return (
 		<>
 			<PageMeta
-				title="Quên Mật Khẩu - Công ty Bithub"
-				description="Quên Mật Khẩu - Công ty Bithub"
+				title="Quên Mật Khẩu - Công ty Bit Learning"
+				description="Quên Mật Khẩu - Công ty Bit Learning"
 			/>
 			<AuthLayout>
 				<ForgotPasswordForm />

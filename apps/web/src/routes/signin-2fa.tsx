@@ -11,8 +11,8 @@ function SignIn2FAPage() {
 	return (
 		<>
 			<PageMeta
-				title="Đăng Nhập 2FA - Bithub"
-				description="Đăng nhập với xác thực hai yếu tố vào tài khoản Bithub"
+				title="Đăng Nhập 2FA - Bit Learning"
+				description="Đăng nhập với xác thực hai yếu tố vào tài khoản Bit Learning"
 			/>
 			<AuthLayout>
 				<LoginWith2FAForm />

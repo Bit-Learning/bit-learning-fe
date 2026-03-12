@@ -1,0 +1,30 @@
+---
+services:
+  bitlearning-web-local-prod:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile.prod
+    ports:
+      - "5173:5173"
+    # mem_limit: 1024m
+    # cpus: 1.0
+    # restart: unless-stopped
+    networks:
+      - app-network
+
+  bitlearning-admin-local-prod:
+    build:
+      context: .
+      dockerfile: apps/admin/Dockerfile.prod
+    ports:
+      - "8386:8386"
+    # mem_limit: 1024m
+    # cpus: 1.0
+    # restart: unless-stopped
+    networks:
+      - app-network
+
+networks:
+  app-network:
+    external: true
+    name: bitlearning-network

@@ -1,5 +1,5 @@
 import { useNavigate } from "@tanstack/react-router";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { QRCodeSVG } from "qrcode.react";
 import React, { useCallback, useRef } from "react";
 import { useDispatch } from "react-redux";
@@ -157,7 +157,7 @@ const QRCodeLogin: React.FC = () => {
 							level={"H"} // QUAN TRỌNG: Mức độ sửa lỗi cao nhất (High)
 							marginSize={10}
 							imageSettings={{
-								src: "/edulogo.png", // Đường dẫn logo (để trong thư mục public)
+								src: "/Logo.png", // Đường dẫn logo (để trong thư mục public)
 								x: undefined, // Để undefined để tự căn giữa
 								y: undefined,
 								height: 50, // Chiều cao logo (px)
@@ -178,7 +178,7 @@ const QRCodeLogin: React.FC = () => {
 							level={"H"}
 							marginSize={10}
 							imageSettings={{
-								src: "/edulogo.png",
+								src: "/Logo.png",
 								x: undefined,
 								y: undefined,
 								height: 50,
@@ -251,7 +251,7 @@ const QRCodeLogin: React.FC = () => {
 									level={"H"}
 									marginSize={0}
 									imageSettings={{
-										src: "/edulogo.png",
+										src: "/Logo.png",
 										x: undefined,
 										y: undefined,
 										height: 40,
@@ -328,7 +328,7 @@ const QRCodeLogin: React.FC = () => {
 					Đăng nhập bằng mã QR
 				</h2>
 				<p className="text-sm text-gray-600">
-					Quét mã từ Bithub Mobile để đăng nhập nhanh chóng
+					Quét mã từ Bit Learning Mobile để đăng nhập nhanh chóng
 				</p>
 			</div>
 		</div>

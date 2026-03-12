@@ -19,7 +19,7 @@ const Footer: React.FC = () => {
 						<div className="flex items-center space-x-2">
 							<img
 								src="/Logo.png"
-								alt="BithubLearning"
+								alt="Bit Learning"
 								className="h-10 w-36 object-contain"
 							/>
 						</div>
@@ -92,14 +92,14 @@ const Footer: React.FC = () => {
 									Data Science & AI
 								</Link>
 							</li>
-							<li>
+							{/* <li>
 								<Link
 									to="/offline-course"
 									className="text-gray-300 transition-colors hover:text-blue-400"
 								>
 									Khóa học Offline
 								</Link>
-							</li>
+							</li> */}
 						</ul>
 					</div>
 
@@ -167,7 +167,7 @@ const Footer: React.FC = () => {
 				<div className="mt-12 border-t border-gray-700 pt-8">
 					<div className="flex flex-col items-center justify-between md:flex-row">
 						<p className="text-sm text-gray-400">
-							{new Date().getFullYear()} ©Bithub Learning. Tất cả quyền được bảo
+							{new Date().getFullYear()} ©Bit Learning. Tất cả quyền được bảo
 							lưu
 						</p>
 						<div className="mt-4 flex space-x-6 md:mt-0">

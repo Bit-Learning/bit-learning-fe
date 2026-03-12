@@ -8,12 +8,15 @@ import ViteImagemin from "vite-plugin-imagemin";
 
 // https://vitejs.dev/config/
 export default defineConfig({
+	define: {
+		global: "globalThis",
+	},
 	plugins: [
 		tanstackRouter({ target: "react", autoCodeSplitting: true }),
 		react(),
 		sentryVitePlugin({
-			org: "bithub-learning",
-			project: "bithub-web",
+			org: "bit-learning",
+			project: "bit-learning-web",
 		}),
 		codecovVitePlugin({
 			enableBundleAnalysis: process.env.CODECOV_TOKEN !== undefined,

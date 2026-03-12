@@ -1,0 +1,55 @@
+.section {
+  padding: 0 1rem;
+}
+
+@media (min-width: 768px) {
+  .section { padding: 0 2rem; }
+}
+
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1rem;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  text-transform: uppercase;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0;
+}
+
+@media (min-width: 768px) {
+  .title { font-size: 1.5rem; }
+}
+
+.accent {
+  display: inline-block;
+  width: 4px;
+  height: 24px;
+  background: #ec1337;
+  border-radius: 4px;
+  flex-shrink: 0;
+}
+
+.viewAll {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #ec1337;
+  text-decoration: none;
+}
+
+.viewAll:hover { text-decoration: underline; }
+
+.row {
+  display: flex;
+  gap: 1rem;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  padding-bottom: 1rem;
+}

@@ -39,7 +39,7 @@ interface EditCourseModalProps {
 }
 
 const LEVELS = [
-	{ value: CourseLevel.BEGINNER, label: "Cơ bản" },
+	{ value: CourseLevel.BEGINNING, label: "Cơ bản" },
 	{ value: CourseLevel.INTERMEDIATE, label: "Trung cấp" },
 	{ value: CourseLevel.ADVANCED, label: "Nâng cao" },
 ];

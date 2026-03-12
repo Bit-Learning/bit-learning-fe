@@ -54,25 +54,25 @@ const GameHeader: React.FC = () => {
 
 	return (
 		<SearchProvider>
-			<header className="sticky top-0 z-50 border-b border-purple-900/20 bg-gradient-to-r from-purple-900 via-purple-800 to-indigo-900 shadow-xl">
-				<div className="container mx-auto flex items-center justify-between py-4 max-[776px]:px-4 md:px-10">
+			<header className="sticky top-0 z-50 border-b border-purple-900/20 bg-linear-to-r from-purple-900 via-purple-800 to-indigo-900 shadow-xl">
+				<div className="container mx-auto flex items-center justify-between gap-4 py-4 max-[776px]:px-4 md:px-10">
 					<Link to="/" className="flex items-center space-x-3">
 						<div className="flex items-center space-x-2">
 							<Gamepad2 className="h-8 w-8 text-purple-300" />
 							<img
 								src="/Logo.png"
-								alt="Bithub Learning"
+								alt="Bit Learning"
 								className="h-10 w-36 object-contain brightness-0 invert"
 							/>
 						</div>
 					</Link>
 
-					<div className="hidden items-center space-x-4 md:flex">
+					<div className="hidden flex-1 items-center justify-end gap-4 md:flex">
 						{isAuthenticated && userInfo ? (
 							<MenuTrigger>
 								<Button
 									variant="ghost"
-									className="flex items-center gap-2 px-2 text-white hover:bg-purple-800"
+									className="flex items-center gap-3 px-3 text-white hover:bg-purple-800"
 								>
 									<Avatar className="h-8 w-8">
 										<AvatarImage
@@ -91,9 +91,7 @@ const GameHeader: React.FC = () => {
 								</Button>
 								<MenuPopover placement="bottom end">
 									<DropdownMenu className="">
-										<MenuItem
-											onAction={() => navigate({ to: "/user-profile" })}
-										>
+										<MenuItem onAction={() => navigate({ to: "/profile" })}>
 											<User className="mr-2 h-4 w-4" />
 											<span>Hồ sơ cá nhân</span>
 										</MenuItem>
@@ -145,7 +143,7 @@ const GameHeader: React.FC = () => {
 							</SheetTrigger>
 							<SheetContent
 								side="right"
-								className="w-[320px] bg-gradient-to-b from-purple-900 to-purple-950 p-0 sm:w-[400px]"
+								className="w-[320px] bg-linear-to-b from-purple-900 to-purple-950 p-0 sm:w-[400px]"
 							>
 								<MobileSheetMenu
 									onNavigate={handleNavigate}

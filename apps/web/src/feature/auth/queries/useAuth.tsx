@@ -1,5 +1,5 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { toast } from "@workspace/ui/components/Sonner";
+import { toast } from "@/shared/components/Sonner";
 import { clearAuthTokens, setAuthTokens } from "@/shared/lib/cookies";
 import { useAppDispatch } from "@/shared/redux/store";
 import {
@@ -323,7 +323,7 @@ export function useGoogleLogin() {
 			if (data.isNewUser) {
 				toast.success({
 					title: "Đăng nhập thành công!",
-					description: `Chào mừng ${data.user.username || "bạn"} đến với Bithub! ${data.message || "Vui lòng kiểm tra email để lấy mật khẩu tạm thời."}`,
+					description: `Chào mừng ${data.user.username || "bạn"} đến với Bit Learning! ${data.message || "Vui lòng kiểm tra email để lấy mật khẩu tạm thời."}`,
 				});
 			} else {
 				toast.success({
@@ -370,7 +370,7 @@ export function useGitHubLogin() {
 			if (data.isNewUser) {
 				toast.success({
 					title: "Đăng nhập thành công!",
-					description: `Chào mừng ${data.user.username || "bạn"} đến với Bithub! ${data.message || "Vui lòng kiểm tra email để lấy mật khẩu tạm thời."}`,
+					description: `Chào mừng ${data.user.username || "bạn"} đến với Bit Learning! ${data.message || "Vui lòng kiểm tra email để lấy mật khẩu tạm thời."}`,
 				});
 			} else {
 				toast.success({

@@ -103,7 +103,7 @@ export function redirectIfAuthenticated() {
 	const loggedIn = isLoggedIn();
 	console.log("redirectIfAuthenticated: isLoggedIn =", loggedIn);
 	if (loggedIn) {
-		console.log("redirectIfAuthenticated: Throwing redirect to /user-profile");
-		throw redirect({ to: "/user-profile" });
+		console.log("redirectIfAuthenticated: Throwing redirect to /profile");
+		throw redirect({ to: "/profile" });
 	}
 }

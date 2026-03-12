@@ -3,15 +3,17 @@ import { CheckCircle, XCircle } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useLectureQuiz } from "../queries/useLecture";
-import { useMarkAsCompleted } from "../queries/useLearning";
+import { useIsLectureCompleted, useMarkAsCompleted } from "../queries/useLearning";
 
 interface QuizPlayerProps {
   lectureId: number;
+  isOwner?: boolean;
   onComplete?: () => void;
 }
 
-const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
+const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, isOwner, onComplete }) => {
   const { data: quizData, isLoading } = useLectureQuiz(lectureId);
+  const { data: isCompleted } = useIsLectureCompleted(lectureId);
   const { mutate: markAsCompleted } = useMarkAsCompleted();
 
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
@@ -19,7 +21,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
   const [score, setScore] = useState(0);
 
   const handleSubmit = () => {
-    if (!quizData) return;
+    if (!quizData || isOwner) return;
 
     let correctCount = 0;
     quizData.quizzes.forEach((quiz) => {
@@ -34,7 +36,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
     setScore(percentage);
     setSubmitted(true);
 
-    const isPassed = percentage >= quizData.passPercent;
+    const isPassed = percentage >= quizData.passPercent * 100;
     if (isPassed) {
       markAsCompleted(lectureId, {
         onSuccess: () => {
@@ -69,17 +71,25 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
     );
   }
 
-  const isPassed = score >= quizData.passPercent;
+  const isPassed = score >= quizData.passPercent * 100;
 
   return (
     <div className="h-full overflow-y-auto bg-gray-900 p-8">
       <div className="mx-auto max-w-3xl">
         <div className="mb-8 rounded-lg bg-gray-800 p-6">
-          <h2 className="mb-4 text-2xl font-bold text-white">{quizData.lecture.title}</h2>
+          <div className="flex items-center justify-between">
+            <h2 className="mb-4 text-2xl font-bold text-white">{quizData.lecture.title}</h2>
+            {!isOwner && isCompleted && (
+              <span className="flex items-center gap-1 text-sm text-green-400">
+                <CheckCircle className="h-4 w-4" />
+                Đã hoàn thành
+              </span>
+            )}
+          </div>
           <div className="flex gap-6 text-sm text-gray-400">
             <div className="flex items-center gap-2">
               <span>Điểm đạt:</span>
-              <span className="font-semibold text-green-400">{quizData.passPercent}%</span>
+              <span className="font-semibold text-green-400">{quizData.passPercent * 100}%</span>
             </div>
             <div className="flex items-center gap-2">
               <span>Số lần thử:</span>
@@ -88,7 +98,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
           </div>
         </div>
 
-        {submitted && (
+        {!isOwner && submitted && (
           <div className={`mb-8 rounded-lg p-6 ${isPassed ? "bg-green-600" : "bg-red-600"}`}>
             <div className="flex items-center gap-4">
               {isPassed ? <CheckCircle className="h-8 w-8 text-white" /> : <XCircle className="h-8 w-8 text-white" />}
@@ -97,7 +107,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                   {isPassed ? "Chúc mừng! Bạn đã vượt qua bài quiz" : "Chưa đạt yêu cầu"}
                 </h3>
                 <p className="text-sm opacity-90">
-                  Điểm của bạn: {score.toFixed(1)}% / {quizData.passPercent}%
+                  Điểm của bạn: {score.toFixed(1)}% / {quizData.passPercent * 100}%
                 </p>
               </div>
               {!isPassed && (
@@ -123,7 +133,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                   {quiz.answers.map((answer) => {
                     const isSelected = selectedAnswerId === answer.id;
                     const isCorrect = answer.isCorrect;
-                    const showResult = submitted;
+                    const showResult = !isOwner && submitted;
 
                     let bgColor = "border-gray-700";
                     if (showResult) {
@@ -136,11 +146,16 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                       bgColor = "border-blue-500 bg-blue-500/10";
                     }
 
+                    // Owner: luôn highlight đáp án đúng
+                    if (isOwner && isCorrect) {
+                      bgColor = "border-green-500 bg-green-500/10";
+                    }
+
                     return (
                       <label
                         key={answer.id}
                         className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all ${bgColor} ${
-                          submitted ? "cursor-default" : "hover:border-gray-600"
+                          submitted || isOwner ? "cursor-default" : "hover:border-gray-600"
                         }`}
                       >
                         <input
@@ -149,16 +164,17 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                           checked={isSelected}
                           onChange={() =>
                             !submitted &&
+                            !isOwner &&
                             setSelectedAnswers((prev) => ({
                               ...prev,
                               [quiz.id]: answer.id,
                             }))
                           }
-                          disabled={submitted}
+                          disabled={submitted || isOwner}
                           className="h-5 w-5 accent-blue-600"
                         />
                         <span className="flex-1 text-white">{answer.answerText}</span>
-                        {showResult && isCorrect && <CheckCircle className="h-5 w-5 text-green-500" />}
+                        {(showResult || isOwner) && isCorrect && <CheckCircle className="h-5 w-5 text-green-500" />}
                         {showResult && isSelected && !isCorrect && <XCircle className="h-5 w-5 text-red-500" />}
                       </label>
                     );
@@ -169,7 +185,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
           })}
         </div>
 
-        {!submitted && (
+        {!isOwner && !submitted && (
           <Button
             onPress={handleSubmit}
             isDisabled={Object.keys(selectedAnswers).length !== quizData.quizzes.length}

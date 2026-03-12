@@ -6,8 +6,8 @@ const SignInPage: React.FC = () => {
 	return (
 		<>
 			<PageMeta
-				title="Đăng Nhập - Bithub"
-				description="Đăng nhập vào tài khoản Bithub để truy cập các khóa học và dịch vụ công nghệ"
+				title="Đăng Nhập - Bit Learning"
+				description="Đăng nhập vào tài khoản Bit Learning để truy cập các khóa học và dịch vụ công nghệ"
 			/>
 			<AuthLayout>
 				<SignInForm />

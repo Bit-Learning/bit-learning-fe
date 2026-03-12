@@ -1,0 +1,64 @@
+import type { AxiosResponse } from "axios";
+import api from "@/shared/api/api";
+import type { ApiResponse } from "@/shared/api/api.type";
+import { PostDetail, PostPreview, CommentDetail } from "../types/post.type";
+
+export const postApi = {
+  getAllPosts(page: number = 0, size: number = 10): Promise<AxiosResponse<ApiResponse<PostPreview[]>>> {
+    return api.get("/posts", {
+      params: { page, size },
+    });
+  },
+
+  getPostById(id: number): Promise<AxiosResponse<ApiResponse<PostDetail>>> {
+    return api.get(`/posts/${id}`);
+  },
+
+  getPostsByAuthor(
+    authorId: number,
+    page: number = 0,
+    size: number = 10,
+  ): Promise<AxiosResponse<ApiResponse<PostPreview[]>>> {
+    return api.get("/posts/author", {
+      params: { authorId, page, size },
+    });
+  },
+
+  getPostsByTags(
+    tagNames: string[],
+    matchAll: boolean,
+    page: number = 0,
+    size: number = 10,
+  ): Promise<AxiosResponse<ApiResponse<PostPreview[]>>> {
+    const endpoint = matchAll ? "/posts/tags/max" : "/posts/tags/min";
+    return api.post(endpoint, tagNames, {
+      params: { page, size },
+    });
+  },
+
+  banPost(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.post(`/posts/${id}/ban`);
+  },
+
+  unbanPost(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.post(`/posts/${id}/unban`);
+  },
+
+  getCommentsOfPost(
+    postId: number,
+    page: number = 0,
+    size: number = 10,
+  ): Promise<AxiosResponse<ApiResponse<CommentDetail[]>>> {
+    return api.get("/comments", {
+      params: { postId, page, size },
+    });
+  },
+
+  banComment(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.post(`/comments/${id}/ban`);
+  },
+
+  unbanComment(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.post(`/comments/${id}/unban`);
+  },
+};

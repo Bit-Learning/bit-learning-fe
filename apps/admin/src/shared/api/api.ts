@@ -8,7 +8,7 @@ import axios, {
 import { clearAuthTokens, getAccessToken, getRefreshToken, setAuthTokens } from "@/shared/lib/cookies";
 
 const api: AxiosInstance = axios.create({
-  baseURL: "http://localhost:8080/api/",
+  baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/",
   headers: {
     "Content-Type": "application/json",
     "Accept-Language": localStorage.getItem("i18nextLng") || "vi",
@@ -49,7 +49,7 @@ function handleRefreshToken(refreshToken: string | undefined): Promise<string> {
         },
         // Skip auth interceptor for refresh token request
         _retry: true,
-      } as any
+      } as any,
     )
     .then((response: AxiosResponse) => {
       console.log("[Token Refresh] Refresh successful");

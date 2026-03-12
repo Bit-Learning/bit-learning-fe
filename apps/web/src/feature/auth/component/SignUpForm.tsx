@@ -117,7 +117,7 @@ const SignUpForm: React.FC = () => {
 					<div className="mb-8 flex items-center justify-center">
 						<img
 							src="./Logo.png"
-							alt="Bithub Logo"
+							alt="Bit Learning Logo"
 							className="h-10 w-36 object-contain"
 						/>
 					</div>
@@ -128,7 +128,7 @@ const SignUpForm: React.FC = () => {
 								Tạo tài khoản mới
 							</h1>
 							<p className="text-sm text-gray-600">
-								Tham gia cộng đồng Bithub để học tập và phát triển
+								Tham gia cộng đồng Bit Learning để học tập và phát triển
 							</p>
 						</div>
 
