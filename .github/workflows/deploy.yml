@@ -2,9 +2,7 @@ name: Build, Push & Deploy – PROD
 
 on:
     push:
-        branches: [main, develop]
-    pull_request:
-        branches: [develop]
+        branches: [main]
     workflow_dispatch:
 
 concurrency:
