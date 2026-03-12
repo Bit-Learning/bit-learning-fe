@@ -46,7 +46,7 @@ jobs:
     build:
         strategy:
             matrix:
-                node: [20]
+                node: [24]
         runs-on: ubuntu-latest
         name: Build for Node.js ${{ matrix.node }} # Corrected job name
         steps:
