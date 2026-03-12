@@ -5,10 +5,12 @@ import type { Conversation } from "../types/chat.type";
 
 interface ChatSidebarProps {
   conversations: Conversation[];
+  currentConversationId?: string;
   onNewChat: () => void;
+  onSelectConversation: (conversation: Conversation) => void;
 }
 
-const ChatSidebar: React.FC<ChatSidebarProps> = ({ conversations, onNewChat }) => {
+const ChatSidebar: React.FC<ChatSidebarProps> = ({ conversations, currentConversationId, onNewChat, onSelectConversation }) => {
   const today = new Date().toDateString();
   const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toDateString();
 
@@ -38,7 +40,11 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ conversations, onNewChat }) =
               {todayConversations.map((conv) => (
                 <div
                   key={conv.id}
-                  className="group flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors text-slate-300 hover:text-white"
+                  onClick={() => onSelectConversation(conv)}
+                  className={`group flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors ${currentConversationId === conv.id
+                      ? "bg-slate-700 text-white"
+                      : "text-slate-300 hover:text-white"
+                    }`}
                 >
                   <MessageSquare size={18} className="text-slate-400" />
                   <span className="truncate text-sm font-medium">{conv.title}</span>
@@ -57,7 +63,11 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({ conversations, onNewChat }) =
               {lastWeekConversations.map((conv) => (
                 <div
                   key={conv.id}
-                  className="group flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors text-slate-300 hover:text-white"
+                  onClick={() => onSelectConversation(conv)}
+                  className={`group flex items-center gap-3 px-4 py-2.5 rounded-lg hover:bg-slate-700/50 cursor-pointer transition-colors ${currentConversationId === conv.id
+                      ? "bg-slate-700 text-white"
+                      : "text-slate-300 hover:text-white"
+                    }`}
                 >
                   <MessageSquare size={18} className="text-slate-400" />
                   <span className="truncate text-sm font-medium">{conv.title}</span>
