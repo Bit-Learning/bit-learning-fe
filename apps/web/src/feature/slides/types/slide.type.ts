@@ -30,6 +30,7 @@ export interface SlideGenerationResponse {
   templateId: number;
   templateName: string;
   cloudinaryUrl: string;
+  pdfCloudinaryUrl: string;
   filename: string;
   slideCount: number;
   fromCache?: boolean;
