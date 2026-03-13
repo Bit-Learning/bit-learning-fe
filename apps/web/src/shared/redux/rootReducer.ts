@@ -4,7 +4,6 @@ import course from "@/feature/course/store/course.store";
 import learning from "@/feature/lecture/store/learning.store";
 import lecture from "@/feature/lecture/store/lecture.store";
 import section from "@/feature/lecture/store/section.store";
-import mlecture from "@/feature/mentor-course/stores/mlecture.store";
 import app from "../../feature/app/stores";
 import auth from "../../feature/auth/store";
 import cart from "@/feature/order/stores/cart.store";
@@ -19,7 +18,6 @@ const combineReducer = combineReducers({
   course: course,
   section: section,
   lecture: lecture,
-  mlecture: mlecture,
   learning: learning,
   cart: cart,
   forum: forum,

@@ -1,8 +1,9 @@
-import { Button } from "@workspace/ui/components/Button";
-import { Card } from "@workspace/ui/components/Card";
-import { Input } from "@workspace/ui/components/Input";
-import { Label } from "@workspace/ui/components/label";
-import { cn } from "@workspace/ui/lib/utils";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { cn } from "@/shared/lib/utils";
 import { Plus, Trash2 } from "lucide-react";
 import { useFieldArray } from "react-hook-form";
 import { AnswerRow } from "./AnswerRow";
@@ -16,7 +17,14 @@ interface QuestionCardProps {
   canRemove: boolean;
 }
 
-export const QuestionCard = ({ questionIndex, control, register, errors, onRemove, canRemove }: QuestionCardProps) => {
+export const QuestionCard: React.FC<QuestionCardProps> = ({
+  questionIndex,
+  control,
+  register,
+  errors,
+  onRemove,
+  canRemove,
+}) => {
   const {
     fields: answerFields,
     append: appendAnswer,
@@ -38,7 +46,7 @@ export const QuestionCard = ({ questionIndex, control, register, errors, onRemov
 
   return (
     <Card className="p-6">
-      <div className="mb-2 flex items-start justify-between">
+      <div className="mb-4 flex items-start justify-between">
         <h4 className="text-lg font-semibold">Câu hỏi {questionIndex + 1}</h4>
         {canRemove && (
           <Button type="button" variant="outline" size="sm" onClick={onRemove}>
@@ -47,7 +55,7 @@ export const QuestionCard = ({ questionIndex, control, register, errors, onRemov
         )}
       </div>
 
-      <div className="mb-2 space-y-2">
+      <div className="mb-4 space-y-2">
         <Label htmlFor={`question-${questionIndex}`} className="text-sm font-medium">
           Nội dung câu hỏi *
         </Label>
@@ -65,13 +73,13 @@ export const QuestionCard = ({ questionIndex, control, register, errors, onRemov
       <div className="space-y-3">
         <div className="flex items-center justify-between">
           <Label className="text-sm font-medium">Đáp án ({answerFields.length})</Label>
-          <Button type="button" onClick={addAnswer} size="lg" variant="outline">
+          <Button type="button" onClick={addAnswer} size="sm" variant="outline">
             <Plus className="mr-1 h-3 w-3" />
             Thêm đáp án
           </Button>
         </div>
 
-        <div className="space-y-3 pt-1">
+        <div className="space-y-3">
           {answerFields.map((answer, answerIndex) => (
             <AnswerRow
               key={answer.id}

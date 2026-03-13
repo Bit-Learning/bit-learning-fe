@@ -1,9 +1,10 @@
-import { Badge } from "@workspace/ui/components/Badge";
-import { Button } from "@workspace/ui/components/Button";
-import { Card } from "@workspace/ui/components/Card";
-import { CheckCircle, FileText, HelpCircle, Video, X, XCircle } from "lucide-react";
-import { useLectureQuiz, useLectureText, useVideoUrls } from "@/feature/lecture/queries/useLecture";
-import type { LectureDetail } from "@/feature/lecture/types/lecture.type";
+import React from "react";
+import { CheckCircle, FileText, HelpCircle, Video, XCircle, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useLectureQuiz, useLectureText, useVideoUrls } from "../queries/useLecture";
+import { LectureDetail } from "../types/course.type";
 
 interface LectureDetailModalProps {
   lecture: LectureDetail;
@@ -11,7 +12,7 @@ interface LectureDetailModalProps {
   onEdit: () => void;
 }
 
-export const LectureDetailModal = ({ lecture, onClose, onEdit }: LectureDetailModalProps) => {
+export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture, onClose, onEdit }) => {
   const { data: textData, isLoading: textLoading } = useLectureText(lecture.type === "TEXT" ? lecture.id : 0);
   const { data: quizData, isLoading: quizLoading } = useLectureQuiz(lecture.type === "QUIZ" ? lecture.id : 0);
   const { m3u8Url } = useVideoUrls(lecture.type === "VIDEO" ? lecture.id : 0);
@@ -26,7 +27,7 @@ export const LectureDetailModal = ({ lecture, onClose, onEdit }: LectureDetailMo
               <span className="font-medium">Bài học Video</span>
             </div>
             <div className="aspect-video overflow-hidden rounded-lg bg-black">
-              <video src={m3u8Url} controls className="h-full w-full" poster="/video-placeholder.jpg">
+              <video src={m3u8Url} controls className="h-full w-full">
                 <track kind="captions" srcLang="vi" label="Tiếng Việt" />
                 Trình duyệt không hỗ trợ video
               </video>
@@ -44,7 +45,7 @@ export const LectureDetailModal = ({ lecture, onClose, onEdit }: LectureDetailMo
               <FileText className="h-5 w-5" />
               <span className="font-medium">Bài học Văn bản</span>
             </div>
-            <div className="prose max-w-none rounded-lg border bg-gray-50 p-4">
+            <div className="max-w-none rounded-lg border bg-gray-50 p-4">
               <div className="whitespace-pre-wrap text-black">{textData?.content || "Không có nội dung"}</div>
             </div>
           </div>
@@ -110,9 +111,10 @@ export const LectureDetailModal = ({ lecture, onClose, onEdit }: LectureDetailMo
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="max-h-[90vh] w-full max-w-4xl overflow-hidden">
+      <Card className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden">
+        {/* Header */}
         <div className="flex items-center justify-between border-b p-4">
-          <div>
+          <div className="flex-1">
             <h2 className="text-xl font-bold">{lecture.title}</h2>
             {lecture.description && <p className="mt-1 text-sm text-gray-600">{lecture.description}</p>}
           </div>
@@ -126,9 +128,11 @@ export const LectureDetailModal = ({ lecture, onClose, onEdit }: LectureDetailMo
           </div>
         </div>
 
-        <div className="max-h-[calc(90vh-140px)] overflow-y-auto p-6">{renderContent()}</div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6">{renderContent()}</div>
 
-        <div className="flex justify-end gap-3 border-t p-4">
+        {/* Footer */}
+        <div className="flex justify-end gap-2 border-t bg-gray-50 p-4">
           <Button variant="outline" onClick={onClose}>
             Đóng
           </Button>
@@ -138,3 +142,5 @@ export const LectureDetailModal = ({ lecture, onClose, onEdit }: LectureDetailMo
     </div>
   );
 };
+
+export default LectureDetailModal;

@@ -1,6 +1,7 @@
-import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
-import { cn } from "@workspace/ui/lib/utils";
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { cn } from "@/shared/lib/utils";
 import { X } from "lucide-react";
 
 interface AnswerRowProps {
@@ -12,7 +13,14 @@ interface AnswerRowProps {
   canRemove: boolean;
 }
 
-export const AnswerRow = ({ questionIndex, answerIndex, register, errors, onRemove, canRemove }: AnswerRowProps) => {
+export const AnswerRow: React.FC<AnswerRowProps> = ({
+  questionIndex,
+  answerIndex,
+  register,
+  errors,
+  onRemove,
+  canRemove,
+}) => {
   const answerError = errors?.questions?.[questionIndex]?.answers?.[answerIndex];
 
   return (
@@ -22,7 +30,7 @@ export const AnswerRow = ({ questionIndex, answerIndex, register, errors, onRemo
           type="radio"
           {...register(`questions.${questionIndex}.correctAnswer`)}
           value={answerIndex}
-          className="h-4 w-4 cursor-pointer accent-green-400"
+          className="h-4 w-4 cursor-pointer accent-green-500"
         />
         <input type="hidden" {...register(`questions.${questionIndex}.answers.${answerIndex}.isCorrect`)} />
       </div>

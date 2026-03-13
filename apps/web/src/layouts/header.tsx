@@ -13,6 +13,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { Book, ChevronDown, LogOut, Menu, Settings, User, User2Icon, ShoppingCart } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
+import { useCart } from "@/feature/order/queries/useCart";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -22,6 +23,8 @@ const Header: React.FC = () => {
   const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
   const cartItemCount = useSelector(selectCartItemCount);
   const logout = useLogout();
+
+  useCart();
 
   const handleNavigate = (path: string) => {
     navigate({ to: path });
@@ -124,7 +127,7 @@ const Header: React.FC = () => {
           </nav>
 
           <div className="flex items-center gap-2">
-            {isAuthenticated && (
+            {isAuthenticated && userInfo?.role == "STUDENT" && (
               <button
                 onClick={handleCartClick}
                 className="relative rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer"
@@ -164,17 +167,15 @@ const Header: React.FC = () => {
                       <User className="mr-3 h-4 w-4" />
                       <span>Hồ sơ cá nhân</span>
                     </MenuItem>
-                    <MenuItem onAction={() => navigate({ to: "/mentor/dashboard" })} className="cursor-pointer">
-                      <User2Icon className="mr-3 h-4 w-4" />
-                      <span>Mentor</span>
-                    </MenuItem>
+                    {userInfo.role == "MENTOR" && (
+                      <MenuItem onAction={() => navigate({ to: "/mentor/dashboard" })} className="cursor-pointer">
+                        <User2Icon className="mr-3 h-4 w-4" />
+                        <span>Mentor</span>
+                      </MenuItem>
+                    )}
                     <MenuItem onAction={() => navigate({ to: "/dashboard" })} className="cursor-pointer">
                       <Book className="mr-3 h-4 w-4" />
                       <span>Báo cáo học tập</span>
-                    </MenuItem>
-                    <MenuItem onAction={() => navigate({ to: "/cart" })} className="cursor-pointer">
-                      <ShoppingCart className="mr-3 h-4 w-4" />
-                      <span>Giỏ hàng {cartItemCount > 0 && `(${cartItemCount})`}</span>
                     </MenuItem>
                     <MenuItem isDisabled className="cursor-pointer">
                       <Settings className="mr-3 h-4 w-4" />
