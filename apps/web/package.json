@@ -15,6 +15,8 @@
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.2.2",
+		"@react-pdf-viewer/core": "^3.12.0",
+		"@react-pdf-viewer/default-layout": "^3.12.0",
 		"@reduxjs/toolkit": "^2.9.1",
 		"@sentry/react": "^10.27.0",
 		"@sentry/vite-plugin": "^4.6.1",
@@ -46,6 +48,7 @@
 		"js-cookie": "^3.0.5",
 		"lucide-react": "^0.562.0",
 		"motion": "^12.23.6",
+		"pdfjs-dist": "3.11.174",
 		"prismjs": "^1.30.0",
 		"qrcode": "^1.5.4",
 		"qrcode.react": "^4.2.0",

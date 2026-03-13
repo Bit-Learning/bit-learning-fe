@@ -11,11 +11,17 @@ import {
   Loader2,
   ExternalLink,
 } from "lucide-react";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { useGenerateSlide } from "../queries/useSlide";
 import { useTemplates } from "../queries/useTemplate";
 import { GRADE_OPTIONS } from "../types/slide.type";
 import type { SlideRequest } from "../types/slide.type";
 import { toast } from "@/shared/components/Sonner";
+
+const PDFJS_WORKER_URL = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
 export const CreateSlideTab: React.FC = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
@@ -26,10 +32,10 @@ export const CreateSlideTab: React.FC = () => {
   const [includeExercises, setIncludeExercises] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewTemplateId, setPreviewTemplateId] = useState<number | null>(null);
-  const [isIframeLoading, setIsIframeLoading] = useState(false);
 
   const { data: templatesData, isLoading: templatesLoading } = useTemplates();
   const generateSlide = useGenerateSlide();
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   const templates = templatesData?.data || [];
 
@@ -41,7 +47,6 @@ export const CreateSlideTab: React.FC = () => {
 
   const openPreviewModal = (templateId: number) => {
     setPreviewTemplateId(templateId);
-    setIsIframeLoading(true);
     setShowPreviewModal(true);
   };
 
@@ -323,21 +328,39 @@ export const CreateSlideTab: React.FC = () => {
             </div>
 
             {/* PDF viewer */}
-            <div className="flex-1 relative overflow-hidden bg-slate-100">
-              {isIframeLoading && (
-                <div className="absolute inset-0 flex flex-col items-center justify-center bg-slate-50 z-10 gap-3">
-                  <Loader2 className="w-8 h-8 animate-spin text-primary" />
-                  <p className="text-sm text-slate-500">Đang tải xem trước...</p>
-                </div>
-              )}
+            <div className="flex-1 overflow-hidden">
               {currentTemplate.previewPdfUrl ? (
-                <iframe
-                  key={currentTemplate.id}
-                  src={currentTemplate.previewPdfUrl}
-                  className="w-full h-full border-0"
-                  title={`Preview: ${currentTemplate.name}`}
-                  onLoad={() => setIsIframeLoading(false)}
-                />
+                <Worker workerUrl={PDFJS_WORKER_URL}>
+                  <div style={{ height: "100%" }}>
+                    <Viewer
+                      fileUrl={currentTemplate.previewPdfUrl}
+                      plugins={[defaultLayoutPluginInstance]}
+                      renderLoader={(percentages) => (
+                        <div className="flex flex-col items-center justify-center h-full gap-3">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                          <p className="text-sm text-slate-500">
+                            Đang tải... {Math.round(percentages)}%
+                          </p>
+                        </div>
+                      )}
+                      renderError={() => (
+                        <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+                          <BookOpen size={40} className="opacity-30" />
+                          <p className="text-sm">Không thể tải file xem trước.</p>
+                          <a
+                            href={currentTemplate.previewPdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline flex items-center gap-1"
+                          >
+                            <ExternalLink size={14} />
+                            Mở trực tiếp
+                          </a>
+                        </div>
+                      )}
+                    />
+                  </div>
+                </Worker>
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-3">
                   <BookOpen size={40} className="opacity-30" />
