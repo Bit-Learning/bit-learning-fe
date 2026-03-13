@@ -187,6 +187,10 @@ function applyInlineEdgeStyle(edge: Edge, strokeColor: string): Edge {
             stroke: strokeColor,
             strokeWidth: 2,
             strokeLinecap: "round",
+            // Inline strokeDasharray so html-to-image captures it.
+            // React Flow's animated class uses CSS from an external stylesheet
+            // which is NOT included when html-to-image clones the viewport element.
+            ...(edge.animated ? { strokeDasharray: "5" } : {}),
         },
     };
 }
