@@ -40,8 +40,8 @@ export interface SlideGenerationResponse {
 export interface SlideRequest {
   topic: string;
   grade: number;
-  templateId: number;
-  slideCount?: number;
+  template_id: number;
+  slide_count?: number;
   includeExamples?: boolean;
   includeExercises?: boolean;
 }
