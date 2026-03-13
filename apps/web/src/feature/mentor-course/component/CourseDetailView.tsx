@@ -1,10 +1,5 @@
+import React, { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { Badge } from "@workspace/ui/components/Badge";
-import { Button } from "@workspace/ui/components/Button";
-import { Card } from "@workspace/ui/components/Card";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@workspace/ui/components/Form";
-import { Input } from "@workspace/ui/components/Input";
-import { Textarea } from "@workspace/ui/components/Textarea";
 import {
   ArrowLeft,
   BookOpen,
@@ -15,28 +10,31 @@ import {
   FileText,
   GripVertical,
   HelpCircle,
+  MessageCircle,
   Plus,
   Settings,
   Trash2,
   Video,
 } from "lucide-react";
-import { useState } from "react";
 import { useForm } from "react-hook-form";
-import { useCourseDetail } from "@/feature/course/queries/useCourse";
-import { useSectionsByCourse } from "@/feature/lecture/queries/useSection";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
 import type { LectureDetail } from "@/feature/lecture/types/lecture.type";
-import { useAppDispatch } from "@/shared/redux/store";
-import { useValidateCourse } from "../queries/useCourse";
+import { useCourseDetail } from "../queries/useCourse";
 import { useDeleteLecture } from "../queries/useLecture";
-import { useCreateSection, useDeleteSection } from "../queries/useSection";
-import { setEditQuizContextAction } from "../stores/mlecture.store";
+import { useSectionsByCourse, useCreateSection, useDeleteSection } from "../queries/useSection";
 import type { SectionDetail } from "../types/msection.api";
-import { CreateLectureModal } from "./CreateLectureModal";
-import { DeleteConfirmModal, type DeleteItemType } from "./DeleteConfirmModal";
-import { EditCourseModal } from "./EditCourseModal";
-import { EditLectureModal } from "./EditLectureModal";
-import { EditSectionModal } from "./EditSectionModal";
-import { LectureDetailModal } from "./LectureDetailModal";
+import { CreateLectureModal } from "../modals/CreateLectureModal";
+import { DeleteConfirmModal, type DeleteItemType } from "../modals/DeleteConfirmModal";
+import { EditCourseModal } from "../modals/EditCourseModal";
+import { EditLectureModal } from "../modals/EditLectureModal";
+import { EditSectionModal } from "../modals/EditSectionModal";
+import { LectureDetailModal } from "../modals/LectureDetailModal";
 
 type ModalState =
   | { type: "none" }
@@ -52,7 +50,7 @@ type DeleteModalState =
   | { type: "section"; id: number; name: string }
   | { type: "lecture"; id: number; name: string };
 
-export const CourseDetailView = () => {
+export const CourseDetailPage: React.FC = () => {
   const { id } = useParams({ from: "/mentor/course/$id" });
   const courseId = Number(id);
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
@@ -60,7 +58,6 @@ export const CourseDetailView = () => {
   const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: "none" });
 
   const navigate = useNavigate();
-  const dispatch = useAppDispatch();
 
   const { data: course, isLoading: courseLoading, refetch: refetchCourse } = useCourseDetail(courseId);
   const { data: sections, isLoading: sectionsLoading, refetch: refetchSections } = useSectionsByCourse(courseId);
@@ -133,15 +130,17 @@ export const CourseDetailView = () => {
 
   const handleEditLecture = (lecture: LectureDetail) => {
     if (lecture.type === "QUIZ") {
-      dispatch(
-        setEditQuizContextAction({
+      // Navigate to quiz page with URL params (NO REDUX)
+      navigate({
+        to: "/mentor/course/quiz",
+        search: {
+          mode: "edit",
           sectionId: lecture.sectionId,
           courseId,
           lectureId: lecture.id,
           orderIndex: lecture.orderIndex,
-        }),
-      );
-      navigate({ to: "/mentor/course/quiz" });
+        },
+      });
     } else {
       setModalState({ type: "edit-lecture", lecture });
     }
@@ -153,15 +152,16 @@ export const CourseDetailView = () => {
     if (modalState.type === "view-lecture") {
       const lecture = modalState.lecture;
       if (lecture.type === "QUIZ") {
-        dispatch(
-          setEditQuizContextAction({
+        navigate({
+          to: "/mentor/course/quiz",
+          search: {
+            mode: "edit",
             sectionId: lecture.sectionId,
             courseId,
             lectureId: lecture.id,
             orderIndex: lecture.orderIndex,
-          }),
-        );
-        navigate({ to: "/mentor/course/quiz" });
+          },
+        });
         closeModal();
       } else {
         setModalState({ type: "edit-lecture", lecture });
@@ -175,23 +175,27 @@ export const CourseDetailView = () => {
 
   if (courseLoading) {
     return (
-      <div className="py-12 text-center">
-        <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
-        <p className="mt-4 text-gray-600">Đang tải...</p>
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+          <p className="mt-4 text-gray-600">Đang tải...</p>
+        </div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <Card className="p-12 text-center">
-        <h3 className="text-xl font-semibold">Không tìm thấy khóa học</h3>
-      </Card>
+      <div className="flex min-h-screen items-center justify-center p-8">
+        <Card className="p-12 text-center">
+          <h3 className="text-xl font-semibold">Không tìm thấy khóa học</h3>
+        </Card>
+      </div>
     );
   }
 
   return (
-    <div className="space-y-4">
+    <div className="min-h-screen space-y-4 p-8">
       <Button
         variant="outline"
         size="lg"
@@ -207,16 +211,14 @@ export const CourseDetailView = () => {
           <h1 className="text-3xl font-bold">{course.title}</h1>
           <p className="mt-1 text-gray-600">{course.subtitle}</p>
         </div>
-        <div>
-          <Button
-            onClick={() => setModalState({ type: "edit-course" })}
-            size="lg"
-            className="bg-linear-to-r mr-3 gap-2 from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-          >
-            <Settings className="h-4 w-4" />
-            Chỉnh sửa khóa học
-          </Button>
-        </div>
+        <Button
+          onClick={() => setModalState({ type: "edit-course" })}
+          size="lg"
+          className="mr-3 gap-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+        >
+          <Settings className="h-4 w-4" />
+          Chỉnh sửa khóa học
+        </Button>
       </div>
 
       <Card className="p-6">
@@ -303,7 +305,7 @@ export const CourseDetailView = () => {
                         e.stopPropagation();
                         openDeleteSectionModal(section.id, section.title);
                       }}
-                      isDisabled={deleteSectionMutation.isPending}
+                      disabled={deleteSectionMutation.isPending}
                     >
                       <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
@@ -365,10 +367,24 @@ export const CourseDetailView = () => {
                               <Button
                                 variant="outline"
                                 size="sm"
+                                onClick={() =>
+                                  navigate({
+                                    to: "/mentor/lecture/$lectureId/qa",
+                                    params: { lectureId: String(lecture.id) },
+                                  })
+                                }
+                                className="gap-1 hover:border-purple-400 hover:bg-purple-50 hover:text-purple-600"
+                              >
+                                <MessageCircle className="h-4 w-4" />
+                                <span className="hidden sm:inline">Q&A</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
                                 onClick={() => handleViewLecture(lecture as LectureDetail)}
                               >
                                 <Eye className="mr-1 h-4 w-4" />
-                                Xem
+                                <span className="hidden sm:inline">Xem</span>
                               </Button>
                               <Button
                                 variant="outline"
@@ -381,7 +397,7 @@ export const CourseDetailView = () => {
                                 variant="outline"
                                 size="sm"
                                 onClick={() => openDeleteLectureModal(lecture.id, lecture.title)}
-                                isDisabled={deleteLectureMutation.isPending}
+                                disabled={deleteLectureMutation.isPending}
                               >
                                 <Trash2 className="h-4 w-4 text-red-500" />
                               </Button>
@@ -398,55 +414,52 @@ export const CourseDetailView = () => {
         </div>
       </Card>
 
+      {/* Add Section Modal */}
       {modalState.type === "add-section" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-          <Card className="w-full max-w-md p-6">
-            <h2 className="mb-4 text-xl font-bold">Thêm chương mới</h2>
-            <Form {...sectionForm}>
-              <form onSubmit={sectionForm.handleSubmit(handleCreateSection)} className="space-y-4">
-                <FormField
-                  control={sectionForm.control}
-                  name="title"
-                  rules={{
+        <Dialog open onOpenChange={closeModal}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Thêm chương mới</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={sectionForm.handleSubmit(handleCreateSection)} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="title">Tên chương *</Label>
+                <Input
+                  id="title"
+                  {...sectionForm.register("title", {
                     required: "Tên chương là bắt buộc",
                     maxLength: { value: 100, message: "Tối đa 100 ký tự" },
-                  }}
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Tên chương *</FormLabel>
-                      <FormControl>
-                        <Input placeholder="VD: Chương 1: Giới thiệu" autoFocus {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
+                  })}
+                  placeholder="VD: Chương 1: Giới thiệu"
+                  autoFocus
                 />
-                <FormField
-                  control={sectionForm.control}
-                  name="description"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Mô tả</FormLabel>
-                      <FormControl>
-                        <Textarea rows={3} placeholder="Mô tả chương (tùy chọn)" {...field} />
-                      </FormControl>
-                    </FormItem>
-                  )}
+                {sectionForm.formState.errors.title && (
+                  <p className="text-sm text-red-500">{sectionForm.formState.errors.title.message}</p>
+                )}
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="description">Mô tả</Label>
+                <Textarea
+                  id="description"
+                  {...sectionForm.register("description")}
+                  rows={3}
+                  placeholder="Mô tả chương (tùy chọn)"
                 />
-                <div className="flex justify-end gap-2">
-                  <Button type="button" variant="outline" onClick={closeModal}>
-                    Hủy
-                  </Button>
-                  <Button type="submit" isDisabled={createSectionMutation.isPending}>
-                    {createSectionMutation.isPending ? "Đang thêm..." : "Thêm chương"}
-                  </Button>
-                </div>
-              </form>
-            </Form>
-          </Card>
-        </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={closeModal}>
+                  Hủy
+                </Button>
+                <Button type="submit" disabled={createSectionMutation.isPending}>
+                  {createSectionMutation.isPending ? "Đang thêm..." : "Thêm chương"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
       )}
 
+      {/* Other Modals */}
       {modalState.type === "create-lecture" && (
         <CreateLectureModal
           courseId={courseId}

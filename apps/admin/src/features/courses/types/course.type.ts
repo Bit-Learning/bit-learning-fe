@@ -1,3 +1,28 @@
+export interface CreateCourseRequest {
+  title: string;
+  subtitle: string;
+  description: string;
+  price: number;
+  language: Language;
+  outcome: string;
+  requirement: string;
+  audience: string;
+  level: CourseLevel;
+  grade: number;
+}
+
+export interface UpdateCourseRequest {
+  title: string;
+  subtitle: string;
+  description: string;
+  price: number;
+  language: Language;
+  outcome: string;
+  requirement: string;
+  audience: string;
+  level: CourseLevel;
+  grade: number;
+}
 export interface CoursePreview {
   id: number;
   code: string;
