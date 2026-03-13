@@ -27,7 +27,8 @@
 			"nodes": "{{count}} nodes",
 			"edges": "{{count}} edges",
 			"depth": "Depth: {{depth}}",
-			"sources": "{{count}} sources"
+			"sources": "{{count}} sources",
+			"sourcesTitle": "Reference Sources"
 		},
 		"empty": {
 			"title": "Enter a topic to start",

@@ -157,6 +157,7 @@ export default function MindMapView() {
     };
 
     const hasResult = nodes.length > 0;
+    const sourceEntries = metadata?.sources ? Object.entries(metadata.sources) : [];
 
     return (
         <div className="flex h-[calc(100vh-2rem)] flex-col gap-4 p-6">
@@ -178,13 +179,35 @@ export default function MindMapView() {
                         <span>{t("mindmap.metadata.edges", { count: metadata.total_edges })}</span>
                         <span>•</span>
                         <span>{t("mindmap.metadata.depth", { depth: metadata.max_depth })}</span>
-                        {metadata.sources && Object.keys(metadata.sources).length > 0 && (
+                        {sourceEntries.length > 0 && (
                             <>
                                 <span>•</span>
-                                <span className="flex items-center gap-1">
-                                    <BookOpen className="h-3 w-3" />
-                                    {t("mindmap.metadata.sources", { count: Object.keys(metadata.sources).length })}
-                                </span>
+                                <details className="group relative">
+                                    <summary className="flex cursor-pointer list-none items-center gap-1 rounded-md px-2 py-1 text-slate-600 transition-colors hover:bg-slate-100 hover:text-slate-900 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white [&::-webkit-details-marker]:hidden">
+                                        <BookOpen className="h-3 w-3" />
+                                        {t("mindmap.metadata.sources", { count: sourceEntries.length })}
+                                    </summary>
+                                    <div className="absolute right-0 top-full z-30 mt-2 w-96 rounded-lg border border-slate-200 bg-white p-3 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                                        <p className="mb-2 text-sm font-semibold text-slate-900 dark:text-slate-100">
+                                            {t("mindmap.metadata.sourcesTitle")}
+                                        </p>
+                                        <div className="max-h-56 space-y-2 overflow-auto pr-1">
+                                            {sourceEntries.map(([sourceName, sourceDetail]) => (
+                                                <div
+                                                    key={sourceName}
+                                                    className="rounded-md border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-800/60"
+                                                >
+                                                    <p className="text-xs font-medium text-slate-800 dark:text-slate-200">
+                                                        {sourceName}
+                                                    </p>
+                                                    <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">
+                                                        {sourceDetail}
+                                                    </p>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </details>
                             </>
                         )}
                     </div>

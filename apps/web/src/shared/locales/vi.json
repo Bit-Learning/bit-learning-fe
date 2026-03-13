@@ -27,7 +27,8 @@
 			"nodes": "{{count}} nodes",
 			"edges": "{{count}} edges",
 			"depth": "Depth: {{depth}}",
-			"sources": "{{count}} nguồn"
+			"sources": "{{count}} nguồn",
+			"sourcesTitle": "Nguồn tham khảo"
 		},
 		"empty": {
 			"title": "Nhập chủ đề để bắt đầu",
