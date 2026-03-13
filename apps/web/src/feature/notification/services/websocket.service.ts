@@ -1,6 +1,5 @@
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
-import { toast } from "@/shared/components/Sonner";
 import { getAccessToken } from "@/shared/lib/cookies";
 
 type MessageHandler = (message: any) => void;
@@ -32,10 +31,6 @@ class WebSocketService {
       if (!accessToken) {
         const error = "No access token found. Please log in.";
         console.error("[WebSocket]", error);
-        toast.error({
-          title: "Kết nối thất bại",
-          description: error,
-        });
         reject(new Error(error));
         return;
       }
@@ -62,19 +57,11 @@ class WebSocketService {
           console.log("[WebSocket] Connected successfully");
           this.reconnectAttempts = 0;
           this.isManualDisconnect = false;
-          toast.success({
-            title: "Kết nối thành công",
-            description: "Đã kết nối tới hệ thống thông báo thời gian thực.",
-          });
           resolve();
         },
 
         onStompError: (frame) => {
           console.error("[WebSocket] STOMP Error:", frame);
-          toast.error({
-            title: "Kết nối thất bại",
-            description: frame.headers.message || "Lỗi kết nối WebSocket",
-          });
           reject(new Error(frame.headers.message || "Connection failed"));
         },
 
@@ -89,10 +76,6 @@ class WebSocketService {
 
         onWebSocketError: (error) => {
           console.error("[WebSocket] Error:", error);
-          toast.error({
-            title: "Kết nối thất bại",
-            description: "Lỗi kết nối WebSocket",
-          });
         },
       });
 
@@ -106,10 +89,6 @@ class WebSocketService {
   private handleReconnect(): void {
     if (this.reconnectAttempts >= this.maxReconnectAttempts) {
       console.error("[WebSocket] Max reconnection attempts reached. Please refresh the page.");
-      toast.error({
-        title: "Kết nối thất bại",
-        description: "Không thể kết nối lại sau nhiều lần thử. Vui lòng làm mới trang.",
-      });
       return;
     }
 

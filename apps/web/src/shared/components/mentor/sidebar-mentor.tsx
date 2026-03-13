@@ -9,6 +9,7 @@ import {
   Award,
   Bell,
   BookOpen,
+  BrainCircuit,
   ChevronLeft,
   Code,
   FileCheck,
@@ -79,6 +80,12 @@ const menuItems = [
     label: "Quản lí slide",
     icon: PresentationIcon,
     path: "/mentor/slides",
+  },
+  {
+    id: "mindmap",
+    label: "Tạo Mind Map",
+    icon: BrainCircuit,
+    path: "/mentor/mindmap",
   },
 ];
 

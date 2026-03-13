@@ -2,5 +2,51 @@
 	"home": {
 		"welcome": "Chào mừng đến với ứng dụng của chúng tôi!",
 		"description": "Đây là nơi tốt nhất để học hỏi và phát triển."
+	},
+	"mindmap": {
+		"pageTitle": "Tạo Mind Map - Mentor",
+		"pageDescription": "Tạo sơ đồ tư duy bằng AI",
+		"title": "Tạo Mind Map",
+		"subtitle": "Nhập chủ đề để AI tự động tạo sơ đồ tư duy",
+		"topicPlaceholder": "Ví dụ: Tìm hiểu về HTML và CSS, Thuật toán sắp xếp...",
+		"layout": {
+			"radial": "Tỏa tròn",
+			"symmetricHorizontal": "Ngang đối xứng",
+			"horizontal": "Ngang"
+		},
+		"theme": {
+			"random": "Màu ngẫu nhiên",
+			"indigo": "Tím chàm",
+			"rose": "Hồng đỏ",
+			"teal": "Xanh ngọc",
+			"orange": "Cam ấm"
+		},
+		"button": {
+			"generate": "Tạo Mind Map",
+			"generating": "Đang tạo...",
+			"export": "Export PNG"
+		},
+		"export": {
+			"successTitle": "Xuất ảnh thành công",
+			"successDescription": "Mind map đã được tải xuống dạng PNG.",
+			"errorTitle": "Xuất ảnh thất bại",
+			"errorDescription": "Không thể xuất ảnh mind map. Vui lòng thử lại."
+		},
+		"settings": {
+			"grade": "Lớp",
+			"maxDepth": "Độ sâu",
+			"maxBranches": "Nhánh tối đa"
+		},
+		"metadata": {
+			"nodes": "{{count}} nodes",
+			"edges": "{{count}} edges",
+			"depth": "Depth: {{depth}}",
+			"sources": "{{count}} nguồn",
+			"sourcesTitle": "Nguồn tham khảo"
+		},
+		"empty": {
+			"title": "Nhập chủ đề để bắt đầu",
+			"description": "Mind map sẽ được hiển thị tại đây"
+		}
 	}
 }

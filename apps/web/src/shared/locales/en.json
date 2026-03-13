@@ -2,5 +2,51 @@
 	"home": {
 		"welcome": "Welcome to our application!",
 		"description": "This is the best place to learn and grow."
+	},
+	"mindmap": {
+		"pageTitle": "Generate Mind Map - Mentor",
+		"pageDescription": "Generate AI-powered mind maps",
+		"title": "Generate Mind Map",
+		"subtitle": "Enter a topic and let AI generate the mind map",
+		"topicPlaceholder": "Example: Learn HTML and CSS, Sorting algorithms...",
+		"layout": {
+			"radial": "Radial",
+			"symmetricHorizontal": "Symmetric Horizontal",
+			"horizontal": "Horizontal"
+		},
+		"theme": {
+			"random": "Random Theme",
+			"indigo": "Indigo",
+			"rose": "Rose",
+			"teal": "Teal",
+			"orange": "Orange"
+		},
+		"button": {
+			"generate": "Generate Mind Map",
+			"generating": "Generating...",
+			"export": "Export PNG"
+		},
+		"export": {
+			"successTitle": "Export successful",
+			"successDescription": "Mind map has been downloaded as PNG.",
+			"errorTitle": "Export failed",
+			"errorDescription": "Unable to export mind map image. Please try again."
+		},
+		"settings": {
+			"grade": "Grade",
+			"maxDepth": "Max Depth",
+			"maxBranches": "Max Branches"
+		},
+		"metadata": {
+			"nodes": "{{count}} nodes",
+			"edges": "{{count}} edges",
+			"depth": "Depth: {{depth}}",
+			"sources": "{{count}} sources",
+			"sourcesTitle": "Reference Sources"
+		},
+		"empty": {
+			"title": "Enter a topic to start",
+			"description": "Your mind map will appear here"
+		}
 	}
 }

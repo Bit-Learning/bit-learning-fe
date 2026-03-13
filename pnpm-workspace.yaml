@@ -1,4 +1,9 @@
 packages:
-    - 'apps/*'
-    - 'packages/*'
-    - 'tooling/*'
+  - apps/*
+  - packages/*
+  - tooling/*
+
+onlyBuiltDependencies:
+  - '@clerk/shared'
+  - '@swc/core'
+  - core-js-pure
