@@ -284,8 +284,8 @@ const GenerateExamFlow: React.FC = () => {
         </button>
         <button
           onClick={() => {
-            setExamName(`Đề thi Giữa kỳ 1 - ${matrix?.subject?.name} - ${new Date().toLocaleDateString("vi-VN")}`);
-            setExamCode(`${matrix?.code}-GK1-A`);
+            setExamName(`Đề thi - ${matrix?.subject?.name} - ${new Date().toLocaleDateString("vi-VN")}`);
+            setExamCode(`${matrix?.code}-A`);
             setCurrentStep("setup");
           }}
           disabled={!allValid}
