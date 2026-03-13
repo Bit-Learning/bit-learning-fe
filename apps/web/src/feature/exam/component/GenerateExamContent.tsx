@@ -25,8 +25,8 @@ interface LessonRequirement {
   lessonId: number;
   lessonName: string;
   requirements: {
-    type: "MCQ" | "Essay";
-    difficulty: "easy" | "medium" | "hard";
+    type: "MCQ" | "ESSAY";
+    difficulty: "EASY" | "MEDIUM" | "HARD";
     required: number;
     available: number;
   }[];
@@ -41,7 +41,6 @@ const GenerateExamFlow: React.FC = () => {
   const [currentStep, setCurrentStep] = useState<Step>("check");
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
 
-  // Form state for step 2
   const [examName, setExamName] = useState("");
   const [examCode, setExamCode] = useState("");
   const [shuffleAnswers, setShuffleAnswers] = useState(true);
@@ -51,13 +50,18 @@ const GenerateExamFlow: React.FC = () => {
   const { data: versions } = useMatrixVersions(matrixId);
   const { mutate: generateExam, isPending: isGenerating } = useGenerateExam();
 
-  // Get all questions to check availability
-  const { data: questionsData } = useSearchQuestions({ page: 0, size: 1000 }, { enabled: currentStep === "check" });
+  const { data: questionsData } = useSearchQuestions(
+    {
+      keyword: "",
+      page: 0,
+      size: 1000,
+    },
+    { enabled: currentStep === "check" },
+  );
 
   const allQuestions = questionsData?.data || [];
   const selectedVersion = versions?.find((v) => v.id === selectedVersionId) || versions?.[0];
 
-  // Check requirements
   const checkRequirements = (): LessonRequirement[] => {
     if (!selectedVersion?.matrixDetails) return [];
 
@@ -65,10 +69,9 @@ const GenerateExamFlow: React.FC = () => {
       const lessonQuestions = allQuestions.filter((q) => q.lesson?.id === detail.lesson.id);
 
       const requirements = [
-        // MCQ
         {
           type: "MCQ" as const,
-          difficulty: "easy" as const,
+          difficulty: "EASY" as const,
           required: detail.easyMCQ,
           available: lessonQuestions.filter(
             (q) => q.questionType === QuestionType.MCQ && q.questionLevel === QuestionLevel.EASY,
@@ -76,7 +79,7 @@ const GenerateExamFlow: React.FC = () => {
         },
         {
           type: "MCQ" as const,
-          difficulty: "medium" as const,
+          difficulty: "MEDIUM" as const,
           required: detail.mediumMCQ,
           available: lessonQuestions.filter(
             (q) => q.questionType === QuestionType.MCQ && q.questionLevel === QuestionLevel.MEDIUM,
@@ -84,32 +87,31 @@ const GenerateExamFlow: React.FC = () => {
         },
         {
           type: "MCQ" as const,
-          difficulty: "hard" as const,
+          difficulty: "HARD" as const,
           required: detail.hardMCQ,
           available: lessonQuestions.filter(
             (q) => q.questionType === QuestionType.MCQ && q.questionLevel === QuestionLevel.HARD,
           ).length,
         },
-        // Essay
         {
-          type: "Essay" as const,
-          difficulty: "easy" as const,
+          type: "ESSAY" as const,
+          difficulty: "EASY" as const,
           required: detail.easyEssay,
           available: lessonQuestions.filter(
             (q) => q.questionType === QuestionType.ESSAY && q.questionLevel === QuestionLevel.EASY,
           ).length,
         },
         {
-          type: "Essay" as const,
-          difficulty: "medium" as const,
+          type: "ESSAY" as const,
+          difficulty: "MEDIUM" as const,
           required: detail.mediumEssay,
           available: lessonQuestions.filter(
             (q) => q.questionType === QuestionType.ESSAY && q.questionLevel === QuestionLevel.MEDIUM,
           ).length,
         },
         {
-          type: "Essay" as const,
-          difficulty: "hard" as const,
+          type: "ESSAY" as const,
+          difficulty: "HARD" as const,
           required: detail.hardEssay,
           available: lessonQuestions.filter(
             (q) => q.questionType === QuestionType.ESSAY && q.questionLevel === QuestionLevel.HARD,
@@ -133,7 +135,6 @@ const GenerateExamFlow: React.FC = () => {
 
   const renderStepIndicator = () => (
     <div className="flex items-center gap-4 mb-8">
-      {/* Step 1 */}
       <div className="flex items-center gap-2">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -156,7 +157,6 @@ const GenerateExamFlow: React.FC = () => {
       </div>
       <div className={`h-px w-12 ${currentStep === "check" ? "bg-slate-200 dark:bg-slate-800" : "bg-green-200"}`} />
 
-      {/* Step 2 */}
       <div className="flex items-center gap-2">
         <div
           className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
@@ -183,7 +183,6 @@ const GenerateExamFlow: React.FC = () => {
       </div>
       <div className={`h-px w-12 ${currentStep === "complete" ? "bg-green-200" : "bg-slate-200 dark:bg-slate-800"}`} />
 
-      {/* Step 3 */}
       <div className={`flex items-center gap-2 ${currentStep === "complete" ? "" : "opacity-50"}`}>
         <div className="w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 flex items-center justify-center text-sm font-bold">
           3
@@ -241,7 +240,7 @@ const GenerateExamFlow: React.FC = () => {
                   <div className="space-y-1">
                     {req.requirements.map((r, idx) => (
                       <p key={idx} className="text-sm text-slate-600 dark:text-slate-400">
-                        {r.type} {r.difficulty === "easy" ? "Dễ" : r.difficulty === "medium" ? "TB" : "Khó"}: Cần{" "}
+                        {r.type} {r.difficulty === "EASY" ? "Dễ" : r.difficulty === "MEDIUM" ? "TB" : "Khó"}: Cần{" "}
                         <span className="font-bold">{r.required}</span>, có{" "}
                         <span
                           className={`font-bold ${r.available >= r.required ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
