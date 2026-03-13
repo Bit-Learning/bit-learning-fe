@@ -1,15 +1,21 @@
+// ==========================================
+// IMPROVED: Add `enabled` flag to useCart
+// ==========================================
+
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
-import { useDispatch } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { cartApi } from "../apis/cart.api";
 import {
   setCartItemCountAction,
   incrementCartItemCountAction,
   decrementCartItemCountAction,
 } from "../stores/cart.store";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 
 export const useCart = () => {
   const dispatch = useDispatch();
+  const { isAuthenticated } = useSelector(selectAuthStateInfo);
 
   return useQuery({
     queryKey: ["cart"],
@@ -21,6 +27,9 @@ export const useCart = () => {
 
       return data;
     },
+    enabled: isAuthenticated,
+    staleTime: 5 * 60 * 1000,
+    refetchOnWindowFocus: true,
   });
 };
 
