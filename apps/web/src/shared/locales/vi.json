@@ -14,6 +14,13 @@
 			"symmetricHorizontal": "Ngang đối xứng",
 			"horizontal": "Ngang"
 		},
+		"theme": {
+			"random": "Màu ngẫu nhiên",
+			"indigo": "Tím chàm",
+			"rose": "Hồng đỏ",
+			"teal": "Xanh ngọc",
+			"orange": "Cam ấm"
+		},
 		"button": {
 			"generate": "Tạo Mind Map",
 			"generating": "Đang tạo...",

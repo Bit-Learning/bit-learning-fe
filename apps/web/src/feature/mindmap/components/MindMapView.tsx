@@ -23,11 +23,157 @@ import {
     useGenerateRadialMindMap,
     useGenerateSymmetricHorizontalMindMap,
 } from "../queries/use-mindmap-queries";
-import { mindMapNodeTypes, mindMapRadialNodeTypes, mindMapSymmetricNodeTypes } from "../components/MindMapNodes";
+import {
+    mindMapNodeTypes,
+    mindMapRadialNodeTypes,
+    mindMapSymmetricNodeTypes,
+    type MindMapNodeTheme,
+} from "../components/MindMapNodes";
 import type { MindMapResponse } from "../types/mindmap.type";
 
 type MindMapLayoutType = "radial" | "symmetric-horizontal" | "horizontal";
 type HandleDirection = "top" | "right" | "bottom" | "left";
+type MindMapPaletteSelection = "random" | "indigo" | "rose" | "teal" | "orange";
+
+type MindMapPalette = {
+    id: Exclude<MindMapPaletteSelection, "random">;
+    nameKey: string;
+    edge: string;
+    root: MindMapNodeTheme;
+    branch: MindMapNodeTheme;
+    leaf: MindMapNodeTheme;
+};
+
+const MINDMAP_PALETTES: MindMapPalette[] = [
+    {
+        id: "indigo",
+        nameKey: "mindmap.theme.indigo",
+        edge: "#6366f1",
+        root: {
+            from: "#6366f1",
+            to: "#7c3aed",
+            border: "#818cf8",
+            text: "#ffffff",
+            description: "#e0e7ff",
+            handle: "#a5b4fc",
+            shadow: "rgba(99,102,241,0.35)",
+        },
+        branch: {
+            from: "#eff6ff",
+            to: "#e0f2fe",
+            border: "#93c5fd",
+            text: "#1e3a8a",
+            description: "#1d4ed8",
+            handle: "#60a5fa",
+            shadow: "rgba(59,130,246,0.2)",
+        },
+        leaf: {
+            from: "#ecfdf5",
+            to: "#f0fdfa",
+            border: "#a7f3d0",
+            text: "#065f46",
+            description: "#0f766e",
+            handle: "#34d399",
+            shadow: "rgba(16,185,129,0.2)",
+        },
+    },
+    {
+        id: "rose",
+        nameKey: "mindmap.theme.rose",
+        edge: "#db2777",
+        root: {
+            from: "#db2777",
+            to: "#e11d48",
+            border: "#f472b6",
+            text: "#ffffff",
+            description: "#ffe4f1",
+            handle: "#f9a8d4",
+            shadow: "rgba(225,29,114,0.35)",
+        },
+        branch: {
+            from: "#fff1f2",
+            to: "#ffe4e6",
+            border: "#fda4af",
+            text: "#9f1239",
+            description: "#be123c",
+            handle: "#fb7185",
+            shadow: "rgba(244,63,94,0.2)",
+        },
+        leaf: {
+            from: "#fff7ed",
+            to: "#ffedd5",
+            border: "#fdba74",
+            text: "#9a3412",
+            description: "#c2410c",
+            handle: "#fb923c",
+            shadow: "rgba(249,115,22,0.2)",
+        },
+    },
+    {
+        id: "teal",
+        nameKey: "mindmap.theme.teal",
+        edge: "#0d9488",
+        root: {
+            from: "#0d9488",
+            to: "#0f766e",
+            border: "#2dd4bf",
+            text: "#ffffff",
+            description: "#ccfbf1",
+            handle: "#5eead4",
+            shadow: "rgba(13,148,136,0.35)",
+        },
+        branch: {
+            from: "#ecfeff",
+            to: "#ccfbf1",
+            border: "#5eead4",
+            text: "#134e4a",
+            description: "#115e59",
+            handle: "#2dd4bf",
+            shadow: "rgba(20,184,166,0.2)",
+        },
+        leaf: {
+            from: "#f0fdf4",
+            to: "#dcfce7",
+            border: "#86efac",
+            text: "#14532d",
+            description: "#166534",
+            handle: "#4ade80",
+            shadow: "rgba(34,197,94,0.2)",
+        },
+    },
+    {
+        id: "orange",
+        nameKey: "mindmap.theme.orange",
+        edge: "#ea580c",
+        root: {
+            from: "#ea580c",
+            to: "#c2410c",
+            border: "#fb923c",
+            text: "#ffffff",
+            description: "#ffedd5",
+            handle: "#fdba74",
+            shadow: "rgba(234,88,12,0.35)",
+        },
+        branch: {
+            from: "#fff7ed",
+            to: "#ffedd5",
+            border: "#fdba74",
+            text: "#9a3412",
+            description: "#c2410c",
+            handle: "#fb923c",
+            shadow: "rgba(251,146,60,0.2)",
+        },
+        leaf: {
+            from: "#fefce8",
+            to: "#fef9c3",
+            border: "#fde047",
+            text: "#854d0e",
+            description: "#a16207",
+            handle: "#facc15",
+            shadow: "rgba(250,204,21,0.2)",
+        },
+    },
+];
 
 function applyInlineEdgeStyle(edge: Edge, strokeColor: string): Edge {
     return {
@@ -35,10 +181,10 @@ function applyInlineEdgeStyle(edge: Edge, strokeColor: string): Edge {
         type: edge.type ?? "smoothstep",
         animated: edge.animated ?? false,
         style: {
+            ...edge.style,
             stroke: strokeColor,
             strokeWidth: 2,
             strokeLinecap: "round",
-            ...edge.style,
         },
     };
 }
@@ -61,14 +207,14 @@ function getOppositeDirection(direction: HandleDirection): HandleDirection {
     return "left";
 }
 
-function mapEdgesForRadialLayout(rawNodes: Node[], rawEdges: Edge[]): Edge[] {
+function mapEdgesForRadialLayout(rawNodes: Node[], rawEdges: Edge[], strokeColor: string): Edge[] {
     const nodeMap = new Map(rawNodes.map((node) => [node.id, node]));
 
     return rawEdges.map((edge) => {
         const sourceNode = nodeMap.get(edge.source);
         const targetNode = nodeMap.get(edge.target);
 
-        const styledEdge = applyInlineEdgeStyle(edge, "#4b5563");
+        const styledEdge = applyInlineEdgeStyle(edge, strokeColor);
 
         if (!sourceNode || !targetNode) {
             return styledEdge;
@@ -85,14 +231,14 @@ function mapEdgesForRadialLayout(rawNodes: Node[], rawEdges: Edge[]): Edge[] {
     });
 }
 
-function mapEdgesForSymmetricHorizontalLayout(rawNodes: Node[], rawEdges: Edge[]): Edge[] {
+function mapEdgesForSymmetricHorizontalLayout(rawNodes: Node[], rawEdges: Edge[], strokeColor: string): Edge[] {
     const nodeMap = new Map(rawNodes.map((node) => [node.id, node]));
 
     return rawEdges.map((edge) => {
         const sourceNode = nodeMap.get(edge.source);
         const targetNode = nodeMap.get(edge.target);
 
-        const styledEdge = applyInlineEdgeStyle(edge, "#3b82f6");
+        const styledEdge = applyInlineEdgeStyle(edge, strokeColor);
 
         if (!sourceNode || !targetNode) {
             return styledEdge;
@@ -108,14 +254,47 @@ function mapEdgesForSymmetricHorizontalLayout(rawNodes: Node[], rawEdges: Edge[]
     });
 }
 
-function mapEdgesForHorizontalLayout(rawEdges: Edge[]): Edge[] {
-    return rawEdges.map((edge) => applyInlineEdgeStyle(edge, "#64748b"));
+function mapEdgesForHorizontalLayout(rawEdges: Edge[], strokeColor: string): Edge[] {
+    return rawEdges.map((edge) => applyInlineEdgeStyle(edge, strokeColor));
+}
+
+function pickRandomPalette(): MindMapPalette {
+    const randomIndex = Math.floor(Math.random() * MINDMAP_PALETTES.length);
+    return MINDMAP_PALETTES[randomIndex] ?? MINDMAP_PALETTES[0]!;
+}
+
+function getPaletteBySelection(selection: MindMapPaletteSelection): MindMapPalette {
+    if (selection === "random") {
+        return pickRandomPalette();
+    }
+
+    return MINDMAP_PALETTES.find((palette) => palette.id === selection) ?? pickRandomPalette();
+}
+
+function mapNodesWithPalette(rawNodes: Node[], palette: MindMapPalette): Node[] {
+    return rawNodes.map((node) => {
+        const theme =
+            node.type === "mindMapRoot"
+                ? palette.root
+                : node.type === "mindMapBranch"
+                    ? palette.branch
+                    : palette.leaf;
+
+        return {
+            ...node,
+            data: {
+                ...(node.data as Record<string, unknown>),
+                theme,
+            },
+        };
+    });
 }
 
 export default function MindMapView() {
     const { t } = useTranslation();
     const [topic, setTopic] = useState("");
     const [layoutType, setLayoutType] = useState<MindMapLayoutType>("radial");
+    const [paletteSelection, setPaletteSelection] = useState<MindMapPaletteSelection>("random");
     const [grade, setGrade] = useState(10);
     const [maxDepth, setMaxDepth] = useState(3);
     const [maxBranches, setMaxBranches] = useState(5);
@@ -139,21 +318,39 @@ export default function MindMapView() {
                 ? mindMapSymmetricNodeTypes
                 : mindMapNodeTypes;
 
+    const applyPaletteToGraph = (palette: MindMapPalette, currentNodes: Node[], currentEdges: Edge[]) => {
+        const themedNodes = mapNodesWithPalette(currentNodes, palette);
+        setNodes(themedNodes);
+
+        if (layoutType === "radial") {
+            setEdges(mapEdgesForRadialLayout(themedNodes, currentEdges, palette.edge));
+        } else if (layoutType === "symmetric-horizontal") {
+            setEdges(mapEdgesForSymmetricHorizontalLayout(themedNodes, currentEdges, palette.edge));
+        } else {
+            setEdges(mapEdgesForHorizontalLayout(currentEdges, palette.edge));
+        }
+    };
+
+    const handlePaletteSelectionChange = (selection: MindMapPaletteSelection) => {
+        setPaletteSelection(selection);
+
+        if (nodes.length === 0) {
+            return;
+        }
+
+        const palette = getPaletteBySelection(selection);
+        applyPaletteToGraph(palette, nodes, edges);
+    };
+
     const handleGenerateSuccess = (response: any) => {
         const data = response.data.data;
         if (!data) return;
 
+        const palette = getPaletteBySelection(paletteSelection);
         const nextNodes = data.nodes as unknown as Node[];
         const nextEdges = data.edges as Edge[];
 
-        setNodes(nextNodes);
-        if (layoutType === "radial") {
-            setEdges(mapEdgesForRadialLayout(nextNodes, nextEdges));
-        } else if (layoutType === "symmetric-horizontal") {
-            setEdges(mapEdgesForSymmetricHorizontalLayout(nextNodes, nextEdges));
-        } else {
-            setEdges(mapEdgesForHorizontalLayout(nextEdges));
-        }
+        applyPaletteToGraph(palette, nextNodes, nextEdges);
         setMetadata(data.metadata);
     };
 
@@ -323,6 +520,19 @@ export default function MindMapView() {
                         <option value="radial">{t("mindmap.layout.radial")}</option>
                         <option value="symmetric-horizontal">{t("mindmap.layout.symmetricHorizontal")}</option>
                         <option value="horizontal">{t("mindmap.layout.horizontal")}</option>
+                    </select>
+                    <select
+                        value={paletteSelection}
+                        onChange={(e) => handlePaletteSelectionChange(e.target.value as MindMapPaletteSelection)}
+                        disabled={isPending}
+                        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                    >
+                        <option value="random">{t("mindmap.theme.random")}</option>
+                        {MINDMAP_PALETTES.map((palette) => (
+                            <option key={palette.id} value={palette.id}>
+                                {t(palette.nameKey)}
+                            </option>
+                        ))}
                     </select>
                     <Button
                         variant="outline"
