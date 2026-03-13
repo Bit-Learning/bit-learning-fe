@@ -27,16 +27,9 @@ import { Route as MatchingGameRouteImport } from './routes/matching/game'
 import { Route as MatchingDashboardRouteImport } from './routes/matching/dashboard'
 import { Route as GamesLeaderboardRouteImport } from './routes/games/leaderboard'
 import { Route as GamesIdRouteImport } from './routes/games/$id'
-import { Route as LayoutWebDesignRouteImport } from './routes/_layout/web-design'
-import { Route as LayoutUploadRouteImport } from './routes/_layout/upload'
 import { Route as LayoutTermsRouteImport } from './routes/_layout/terms'
 import { Route as LayoutPrivacyRouteImport } from './routes/_layout/privacy'
 import { Route as LayoutPaymentResultRouteImport } from './routes/_layout/payment-result'
-import { Route as LayoutMentorshipRouteImport } from './routes/_layout/mentorship'
-import { Route as LayoutDemoRouteImport } from './routes/_layout/demo'
-import { Route as LayoutCorporateTrainingRouteImport } from './routes/_layout/corporate-training'
-import { Route as LayoutContactRouteImport } from './routes/_layout/contact'
-import { Route as LayoutConsultationRouteImport } from './routes/_layout/consultation'
 import { Route as LayoutChatAiRouteImport } from './routes/_layout/chat-ai'
 import { Route as LayoutCartRouteImport } from './routes/_layout/cart'
 import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
@@ -84,10 +77,6 @@ import { Route as LayoutInternalTestLoaderRouteImport } from './routes/_layout/i
 import { Route as LayoutForumMyRouteImport } from './routes/_layout/forum/my'
 import { Route as LayoutForumCreateRouteImport } from './routes/_layout/forum/create'
 import { Route as LayoutExamsExamIdRouteImport } from './routes/_layout/exams/$examId'
-import { Route as LayoutCoursesWebDevelopmentRouteImport } from './routes/_layout/courses/web-development'
-import { Route as LayoutCoursesMobileDevelopmentRouteImport } from './routes/_layout/courses/mobile-development'
-import { Route as LayoutCoursesDataScienceRouteImport } from './routes/_layout/courses/data-science'
-import { Route as LayoutCoursesBackendDevelopmentRouteImport } from './routes/_layout/courses/backend-development'
 import { Route as LayoutCoursesIdRouteImport } from './routes/_layout/courses/$id'
 import { Route as LayoutContestsMyRouteImport } from './routes/_layout/contests/my'
 import { Route as HeaderOnlyProfilePasswordRouteImport } from './routes/_headerOnly/profile/password'
@@ -195,16 +184,6 @@ const GamesIdRoute = GamesIdRouteImport.update({
   path: '/games/$id',
   getParentRoute: () => rootRouteImport,
 } as any)
-const LayoutWebDesignRoute = LayoutWebDesignRouteImport.update({
-  id: '/web-design',
-  path: '/web-design',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutUploadRoute = LayoutUploadRouteImport.update({
-  id: '/upload',
-  path: '/upload',
-  getParentRoute: () => LayoutRoute,
-} as any)
 const LayoutTermsRoute = LayoutTermsRouteImport.update({
   id: '/terms',
   path: '/terms',
@@ -218,31 +197,6 @@ const LayoutPrivacyRoute = LayoutPrivacyRouteImport.update({
 const LayoutPaymentResultRoute = LayoutPaymentResultRouteImport.update({
   id: '/payment-result',
   path: '/payment-result',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutMentorshipRoute = LayoutMentorshipRouteImport.update({
-  id: '/mentorship',
-  path: '/mentorship',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutDemoRoute = LayoutDemoRouteImport.update({
-  id: '/demo',
-  path: '/demo',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutCorporateTrainingRoute = LayoutCorporateTrainingRouteImport.update({
-  id: '/corporate-training',
-  path: '/corporate-training',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutContactRoute = LayoutContactRouteImport.update({
-  id: '/contact',
-  path: '/contact',
-  getParentRoute: () => LayoutRoute,
-} as any)
-const LayoutConsultationRoute = LayoutConsultationRouteImport.update({
-  id: '/consultation',
-  path: '/consultation',
   getParentRoute: () => LayoutRoute,
 } as any)
 const LayoutChatAiRoute = LayoutChatAiRouteImport.update({
@@ -483,30 +437,6 @@ const LayoutExamsExamIdRoute = LayoutExamsExamIdRouteImport.update({
   path: '/exams/$examId',
   getParentRoute: () => LayoutRoute,
 } as any)
-const LayoutCoursesWebDevelopmentRoute =
-  LayoutCoursesWebDevelopmentRouteImport.update({
-    id: '/courses/web-development',
-    path: '/courses/web-development',
-    getParentRoute: () => LayoutRoute,
-  } as any)
-const LayoutCoursesMobileDevelopmentRoute =
-  LayoutCoursesMobileDevelopmentRouteImport.update({
-    id: '/courses/mobile-development',
-    path: '/courses/mobile-development',
-    getParentRoute: () => LayoutRoute,
-  } as any)
-const LayoutCoursesDataScienceRoute =
-  LayoutCoursesDataScienceRouteImport.update({
-    id: '/courses/data-science',
-    path: '/courses/data-science',
-    getParentRoute: () => LayoutRoute,
-  } as any)
-const LayoutCoursesBackendDevelopmentRoute =
-  LayoutCoursesBackendDevelopmentRouteImport.update({
-    id: '/courses/backend-development',
-    path: '/courses/backend-development',
-    getParentRoute: () => LayoutRoute,
-  } as any)
 const LayoutCoursesIdRoute = LayoutCoursesIdRouteImport.update({
   id: '/courses/$id',
   path: '/courses/$id',
@@ -618,16 +548,9 @@ export interface FileRoutesByFullPath {
   '/about': typeof LayoutAboutRoute
   '/cart': typeof LayoutCartRoute
   '/chat-ai': typeof LayoutChatAiRoute
-  '/consultation': typeof LayoutConsultationRoute
-  '/contact': typeof LayoutContactRoute
-  '/corporate-training': typeof LayoutCorporateTrainingRoute
-  '/demo': typeof LayoutDemoRoute
-  '/mentorship': typeof LayoutMentorshipRoute
   '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
-  '/upload': typeof LayoutUploadRoute
-  '/web-design': typeof LayoutWebDesignRoute
   '/games/$id': typeof GamesIdRouteWithChildren
   '/games/leaderboard': typeof GamesLeaderboardRoute
   '/matching/dashboard': typeof MatchingDashboardRoute
@@ -641,10 +564,6 @@ export interface FileRoutesByFullPath {
   '/profile/password': typeof HeaderOnlyProfilePasswordRoute
   '/contests/my': typeof LayoutContestsMyRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
-  '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof LayoutCoursesDataScienceRoute
-  '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
   '/exams/$examId': typeof LayoutExamsExamIdRoute
   '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
@@ -715,16 +634,9 @@ export interface FileRoutesByTo {
   '/about': typeof LayoutAboutRoute
   '/cart': typeof LayoutCartRoute
   '/chat-ai': typeof LayoutChatAiRoute
-  '/consultation': typeof LayoutConsultationRoute
-  '/contact': typeof LayoutContactRoute
-  '/corporate-training': typeof LayoutCorporateTrainingRoute
-  '/demo': typeof LayoutDemoRoute
-  '/mentorship': typeof LayoutMentorshipRoute
   '/payment-result': typeof LayoutPaymentResultRoute
   '/privacy': typeof LayoutPrivacyRoute
   '/terms': typeof LayoutTermsRoute
-  '/upload': typeof LayoutUploadRoute
-  '/web-design': typeof LayoutWebDesignRoute
   '/games/$id': typeof GamesIdRouteWithChildren
   '/games/leaderboard': typeof GamesLeaderboardRoute
   '/matching/dashboard': typeof MatchingDashboardRoute
@@ -738,10 +650,6 @@ export interface FileRoutesByTo {
   '/profile/password': typeof HeaderOnlyProfilePasswordRoute
   '/contests/my': typeof LayoutContestsMyRoute
   '/courses/$id': typeof LayoutCoursesIdRoute
-  '/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
-  '/courses/data-science': typeof LayoutCoursesDataScienceRoute
-  '/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
-  '/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
   '/exams/$examId': typeof LayoutExamsExamIdRoute
   '/forum/create': typeof LayoutForumCreateRoute
   '/forum/my': typeof LayoutForumMyRoute
@@ -814,16 +722,9 @@ export interface FileRoutesById {
   '/_layout/about': typeof LayoutAboutRoute
   '/_layout/cart': typeof LayoutCartRoute
   '/_layout/chat-ai': typeof LayoutChatAiRoute
-  '/_layout/consultation': typeof LayoutConsultationRoute
-  '/_layout/contact': typeof LayoutContactRoute
-  '/_layout/corporate-training': typeof LayoutCorporateTrainingRoute
-  '/_layout/demo': typeof LayoutDemoRoute
-  '/_layout/mentorship': typeof LayoutMentorshipRoute
   '/_layout/payment-result': typeof LayoutPaymentResultRoute
   '/_layout/privacy': typeof LayoutPrivacyRoute
   '/_layout/terms': typeof LayoutTermsRoute
-  '/_layout/upload': typeof LayoutUploadRoute
-  '/_layout/web-design': typeof LayoutWebDesignRoute
   '/games/$id': typeof GamesIdRouteWithChildren
   '/games/leaderboard': typeof GamesLeaderboardRoute
   '/matching/dashboard': typeof MatchingDashboardRoute
@@ -838,10 +739,6 @@ export interface FileRoutesById {
   '/_headerOnly/profile/password': typeof HeaderOnlyProfilePasswordRoute
   '/_layout/contests/my': typeof LayoutContestsMyRoute
   '/_layout/courses/$id': typeof LayoutCoursesIdRoute
-  '/_layout/courses/backend-development': typeof LayoutCoursesBackendDevelopmentRoute
-  '/_layout/courses/data-science': typeof LayoutCoursesDataScienceRoute
-  '/_layout/courses/mobile-development': typeof LayoutCoursesMobileDevelopmentRoute
-  '/_layout/courses/web-development': typeof LayoutCoursesWebDevelopmentRoute
   '/_layout/exams/$examId': typeof LayoutExamsExamIdRoute
   '/_layout/forum/create': typeof LayoutForumCreateRoute
   '/_layout/forum/my': typeof LayoutForumMyRoute
@@ -914,16 +811,9 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/chat-ai'
-    | '/consultation'
-    | '/contact'
-    | '/corporate-training'
-    | '/demo'
-    | '/mentorship'
     | '/payment-result'
     | '/privacy'
     | '/terms'
-    | '/upload'
-    | '/web-design'
     | '/games/$id'
     | '/games/leaderboard'
     | '/matching/dashboard'
@@ -937,10 +827,6 @@ export interface FileRouteTypes {
     | '/profile/password'
     | '/contests/my'
     | '/courses/$id'
-    | '/courses/backend-development'
-    | '/courses/data-science'
-    | '/courses/mobile-development'
-    | '/courses/web-development'
     | '/exams/$examId'
     | '/forum/create'
     | '/forum/my'
@@ -1011,16 +897,9 @@ export interface FileRouteTypes {
     | '/about'
     | '/cart'
     | '/chat-ai'
-    | '/consultation'
-    | '/contact'
-    | '/corporate-training'
-    | '/demo'
-    | '/mentorship'
     | '/payment-result'
     | '/privacy'
     | '/terms'
-    | '/upload'
-    | '/web-design'
     | '/games/$id'
     | '/games/leaderboard'
     | '/matching/dashboard'
@@ -1034,10 +913,6 @@ export interface FileRouteTypes {
     | '/profile/password'
     | '/contests/my'
     | '/courses/$id'
-    | '/courses/backend-development'
-    | '/courses/data-science'
-    | '/courses/mobile-development'
-    | '/courses/web-development'
     | '/exams/$examId'
     | '/forum/create'
     | '/forum/my'
@@ -1109,16 +984,9 @@ export interface FileRouteTypes {
     | '/_layout/about'
     | '/_layout/cart'
     | '/_layout/chat-ai'
-    | '/_layout/consultation'
-    | '/_layout/contact'
-    | '/_layout/corporate-training'
-    | '/_layout/demo'
-    | '/_layout/mentorship'
     | '/_layout/payment-result'
     | '/_layout/privacy'
     | '/_layout/terms'
-    | '/_layout/upload'
-    | '/_layout/web-design'
     | '/games/$id'
     | '/games/leaderboard'
     | '/matching/dashboard'
@@ -1133,10 +1001,6 @@ export interface FileRouteTypes {
     | '/_headerOnly/profile/password'
     | '/_layout/contests/my'
     | '/_layout/courses/$id'
-    | '/_layout/courses/backend-development'
-    | '/_layout/courses/data-science'
-    | '/_layout/courses/mobile-development'
-    | '/_layout/courses/web-development'
     | '/_layout/exams/$examId'
     | '/_layout/forum/create'
     | '/_layout/forum/my'
@@ -1377,20 +1241,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof GamesIdRouteImport
       parentRoute: typeof rootRouteImport
     }
-    '/_layout/web-design': {
-      id: '/_layout/web-design'
-      path: '/web-design'
-      fullPath: '/web-design'
-      preLoaderRoute: typeof LayoutWebDesignRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/upload': {
-      id: '/_layout/upload'
-      path: '/upload'
-      fullPath: '/upload'
-      preLoaderRoute: typeof LayoutUploadRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/terms': {
       id: '/_layout/terms'
       path: '/terms'
@@ -1410,41 +1260,6 @@ declare module '@tanstack/react-router' {
       path: '/payment-result'
       fullPath: '/payment-result'
       preLoaderRoute: typeof LayoutPaymentResultRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/mentorship': {
-      id: '/_layout/mentorship'
-      path: '/mentorship'
-      fullPath: '/mentorship'
-      preLoaderRoute: typeof LayoutMentorshipRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/demo': {
-      id: '/_layout/demo'
-      path: '/demo'
-      fullPath: '/demo'
-      preLoaderRoute: typeof LayoutDemoRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/corporate-training': {
-      id: '/_layout/corporate-training'
-      path: '/corporate-training'
-      fullPath: '/corporate-training'
-      preLoaderRoute: typeof LayoutCorporateTrainingRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/contact': {
-      id: '/_layout/contact'
-      path: '/contact'
-      fullPath: '/contact'
-      preLoaderRoute: typeof LayoutContactRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/consultation': {
-      id: '/_layout/consultation'
-      path: '/consultation'
-      fullPath: '/consultation'
-      preLoaderRoute: typeof LayoutConsultationRouteImport
       parentRoute: typeof LayoutRoute
     }
     '/_layout/chat-ai': {
@@ -1776,34 +1591,6 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof LayoutExamsExamIdRouteImport
       parentRoute: typeof LayoutRoute
     }
-    '/_layout/courses/web-development': {
-      id: '/_layout/courses/web-development'
-      path: '/courses/web-development'
-      fullPath: '/courses/web-development'
-      preLoaderRoute: typeof LayoutCoursesWebDevelopmentRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/courses/mobile-development': {
-      id: '/_layout/courses/mobile-development'
-      path: '/courses/mobile-development'
-      fullPath: '/courses/mobile-development'
-      preLoaderRoute: typeof LayoutCoursesMobileDevelopmentRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/courses/data-science': {
-      id: '/_layout/courses/data-science'
-      path: '/courses/data-science'
-      fullPath: '/courses/data-science'
-      preLoaderRoute: typeof LayoutCoursesDataScienceRouteImport
-      parentRoute: typeof LayoutRoute
-    }
-    '/_layout/courses/backend-development': {
-      id: '/_layout/courses/backend-development'
-      path: '/courses/backend-development'
-      fullPath: '/courses/backend-development'
-      preLoaderRoute: typeof LayoutCoursesBackendDevelopmentRouteImport
-      parentRoute: typeof LayoutRoute
-    }
     '/_layout/courses/$id': {
       id: '/_layout/courses/$id'
       path: '/courses/$id'
@@ -1955,23 +1742,12 @@ interface LayoutRouteChildren {
   LayoutAboutRoute: typeof LayoutAboutRoute
   LayoutCartRoute: typeof LayoutCartRoute
   LayoutChatAiRoute: typeof LayoutChatAiRoute
-  LayoutConsultationRoute: typeof LayoutConsultationRoute
-  LayoutContactRoute: typeof LayoutContactRoute
-  LayoutCorporateTrainingRoute: typeof LayoutCorporateTrainingRoute
-  LayoutDemoRoute: typeof LayoutDemoRoute
-  LayoutMentorshipRoute: typeof LayoutMentorshipRoute
   LayoutPaymentResultRoute: typeof LayoutPaymentResultRoute
   LayoutPrivacyRoute: typeof LayoutPrivacyRoute
   LayoutTermsRoute: typeof LayoutTermsRoute
-  LayoutUploadRoute: typeof LayoutUploadRoute
-  LayoutWebDesignRoute: typeof LayoutWebDesignRoute
   LayoutIndexRoute: typeof LayoutIndexRoute
   LayoutContestsMyRoute: typeof LayoutContestsMyRoute
   LayoutCoursesIdRoute: typeof LayoutCoursesIdRoute
-  LayoutCoursesBackendDevelopmentRoute: typeof LayoutCoursesBackendDevelopmentRoute
-  LayoutCoursesDataScienceRoute: typeof LayoutCoursesDataScienceRoute
-  LayoutCoursesMobileDevelopmentRoute: typeof LayoutCoursesMobileDevelopmentRoute
-  LayoutCoursesWebDevelopmentRoute: typeof LayoutCoursesWebDevelopmentRoute
   LayoutExamsExamIdRoute: typeof LayoutExamsExamIdRoute
   LayoutForumCreateRoute: typeof LayoutForumCreateRoute
   LayoutForumMyRoute: typeof LayoutForumMyRoute
@@ -1998,23 +1774,12 @@ const LayoutRouteChildren: LayoutRouteChildren = {
   LayoutAboutRoute: LayoutAboutRoute,
   LayoutCartRoute: LayoutCartRoute,
   LayoutChatAiRoute: LayoutChatAiRoute,
-  LayoutConsultationRoute: LayoutConsultationRoute,
-  LayoutContactRoute: LayoutContactRoute,
-  LayoutCorporateTrainingRoute: LayoutCorporateTrainingRoute,
-  LayoutDemoRoute: LayoutDemoRoute,
-  LayoutMentorshipRoute: LayoutMentorshipRoute,
   LayoutPaymentResultRoute: LayoutPaymentResultRoute,
   LayoutPrivacyRoute: LayoutPrivacyRoute,
   LayoutTermsRoute: LayoutTermsRoute,
-  LayoutUploadRoute: LayoutUploadRoute,
-  LayoutWebDesignRoute: LayoutWebDesignRoute,
   LayoutIndexRoute: LayoutIndexRoute,
   LayoutContestsMyRoute: LayoutContestsMyRoute,
   LayoutCoursesIdRoute: LayoutCoursesIdRoute,
-  LayoutCoursesBackendDevelopmentRoute: LayoutCoursesBackendDevelopmentRoute,
-  LayoutCoursesDataScienceRoute: LayoutCoursesDataScienceRoute,
-  LayoutCoursesMobileDevelopmentRoute: LayoutCoursesMobileDevelopmentRoute,
-  LayoutCoursesWebDevelopmentRoute: LayoutCoursesWebDevelopmentRoute,
   LayoutExamsExamIdRoute: LayoutExamsExamIdRoute,
   LayoutForumCreateRoute: LayoutForumCreateRoute,
   LayoutForumMyRoute: LayoutForumMyRoute,
