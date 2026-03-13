@@ -26,6 +26,11 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
               <Video className="h-5 w-5" />
               <span className="font-medium">Bài học Video</span>
             </div>
+            {lecture.description && (
+              <div className="rounded-lg border bg-gray-50 p-4">
+                <div dangerouslySetInnerHTML={{ __html: lecture.description }} className="prose prose-sm max-w-none" />
+              </div>
+            )}
             <div className="aspect-video overflow-hidden rounded-lg bg-black">
               <video src={m3u8Url} controls className="h-full w-full">
                 <track kind="captions" srcLang="vi" label="Tiếng Việt" />
@@ -45,8 +50,11 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
               <FileText className="h-5 w-5" />
               <span className="font-medium">Bài học Văn bản</span>
             </div>
-            <div className="max-w-none rounded-lg border bg-gray-50 p-4">
-              <div className="whitespace-pre-wrap text-black">{textData?.content || "Không có nội dung"}</div>
+            <div className="prose prose-sm max-w-none rounded-lg border bg-white p-6">
+              <div
+                dangerouslySetInnerHTML={{ __html: textData?.content || "<p>Không có nội dung</p>" }}
+                className="lecture-content"
+              />
             </div>
           </div>
         );
@@ -112,11 +120,12 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
       <Card className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden">
-        {/* Header */}
         <div className="flex items-center justify-between border-b p-4">
           <div className="flex-1">
             <h2 className="text-xl font-bold">{lecture.title}</h2>
-            {lecture.description && <p className="mt-1 text-sm text-gray-600">{lecture.description}</p>}
+            {lecture.description && lecture.type === "TEXT" && (
+              <div className="mt-2 text-sm text-gray-600">{lecture.description}</div>
+            )}
           </div>
           <div className="flex items-center gap-2">
             <Badge variant={lecture.isPreviewable ? "secondary" : "outline"}>
@@ -128,10 +137,8 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
           </div>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">{renderContent()}</div>
 
-        {/* Footer */}
         <div className="flex justify-end gap-2 border-t bg-gray-50 p-4">
           <Button variant="outline" onClick={onClose}>
             Đóng
