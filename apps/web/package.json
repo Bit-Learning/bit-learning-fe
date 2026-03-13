@@ -48,7 +48,7 @@
 		"js-cookie": "^3.0.5",
 		"lucide-react": "^0.562.0",
 		"motion": "^12.23.6",
-		"pdfjs-dist": "3.11.174",
+		"pdfjs-dist": "5.5.207",
 		"prismjs": "^1.30.0",
 		"qrcode": "^1.5.4",
 		"qrcode.react": "^4.2.0",

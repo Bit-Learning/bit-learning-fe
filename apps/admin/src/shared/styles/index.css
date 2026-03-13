@@ -60,8 +60,23 @@
   /* Firefox */
 }
 
-@utility faded-bottom {
-  @apply after:pointer-events-none after:absolute after:start-0 after:bottom-0 after:hidden after:h-32 after:w-full after:rounded-b-2xl after:bg-[linear-gradient(180deg, _transparent_10%, _var(--background)_70%)] md:after:block;
+.faded-bottom::after {
+  content: "";
+  pointer-events: none;
+  position: absolute;
+  inset-inline-start: 0;
+  bottom: 0;
+  width: 100%;
+  height: 8rem;
+  border-bottom-left-radius: 1rem;
+  border-bottom-right-radius: 1rem;
+  background: linear-gradient(180deg, transparent 10%, var(--background) 70%);
+}
+
+@media (min-width: 768px) {
+  .faded-bottom::after {
+    display: block;
+  }
 }
 
 /* styles.css */
