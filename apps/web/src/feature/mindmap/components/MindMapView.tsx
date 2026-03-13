@@ -12,12 +12,12 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { toPng } from "html-to-image";
-import { useRef, useState } from "react";
+import React, { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { toast } from "@/shared/components/Sonner";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
-import { Loader2, Sparkles, BookOpen, Settings2, ImageDown, BookMarked, Save } from "lucide-react";
+import { Loader2, Sparkles, BookOpen, Settings2, ImageDown, BookMarked, Save, Pencil } from "lucide-react";
 import {
     useGenerateHorizontalMindMap,
     useGenerateRadialMindMap,
@@ -316,6 +316,7 @@ export default function MindMapView() {
     const [saveName, setSaveName] = useState("");
     const [currentTitle, setCurrentTitle] = useState("");
     const [activePalette, setActivePalette] = useState<MindMapPalette | null>(null);
+    const [editingNode, setEditingNode] = useState<{ id: string; label: string; description: string } | null>(null);
     const flowContainerRef = useRef<HTMLDivElement | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -424,6 +425,23 @@ export default function MindMapView() {
         setMetadata(detail.metadata);
         setCurrentTitle(detail.title);
         setActiveTab("generate");
+    };
+
+    const handleNodeDoubleClick = (_event: React.MouseEvent, node: Node) => {
+        const data = node.data as { label: string; description: string };
+        setEditingNode({ id: node.id, label: data.label ?? "", description: data.description ?? "" });
+    };
+
+    const handleSaveNodeEdit = () => {
+        if (!editingNode) return;
+        setNodes((prev) =>
+            prev.map((n) =>
+                n.id === editingNode.id
+                    ? { ...n, data: { ...n.data, label: editingNode.label, description: editingNode.description } }
+                    : n,
+            ),
+        );
+        setEditingNode(null);
     };
 
     const handleGenerate = () => {
@@ -734,6 +752,7 @@ export default function MindMapView() {
                                 onNodesChange={onNodesChange}
                                 onEdgesChange={onEdgesChange}
                                 nodeTypes={activeNodeTypes}
+                                onNodeDoubleClick={handleNodeDoubleClick}
                                 fitView
                                 fitViewOptions={{ padding: 0.3 }}
                                 minZoom={0.2}
@@ -757,12 +776,78 @@ export default function MindMapView() {
                             </div>
                         )}
                     </div>
+
+                    {hasResult && (
+                        <p className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
+                            <Pencil className="h-3 w-3" />
+                            Double-click vào node bất kỳ để chỉnh sửa nội dung
+                        </p>
+                    )}
                 </>
             )}
 
             {/* Saved Tab */}
             {activeTab === "saved" && (
                 <SavedMindMapsPanel onLoad={handleLoadSavedMindMap} />
+            )}
+
+            {/* Edit Node Dialog */}
+            {editingNode && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                        <h2 className="flex items-center gap-2 text-lg font-semibold text-slate-900 dark:text-white">
+                            <Pencil className="h-4 w-4" />
+                            Chỉnh sửa node
+                        </h2>
+                        <div className="mt-4 flex flex-col gap-3">
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    Tiêu đề
+                                </label>
+                                <Input
+                                    value={editingNode.label}
+                                    onChange={(e) => setEditingNode({ ...editingNode, label: e.target.value })}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Escape") setEditingNode(null);
+                                    }}
+                                    autoFocus
+                                />
+                            </div>
+                            <div>
+                                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">
+                                    Mô tả
+                                </label>
+                                <textarea
+                                    value={editingNode.description}
+                                    onChange={(e) => setEditingNode({ ...editingNode, description: e.target.value })}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "Escape") setEditingNode(null);
+                                        if (e.key === "Enter" && (e.ctrlKey || e.metaKey)) handleSaveNodeEdit();
+                                    }}
+                                    rows={3}
+                                    className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                                />
+                                <p className="mt-1 text-xs text-slate-400">Ctrl+Enter để lưu</p>
+                            </div>
+                        </div>
+                        <div className="mt-5 flex justify-end gap-2">
+                            <Button
+                                variant="outline"
+                                onPress={() => setEditingNode(null)}
+                            >
+                                Hủy
+                            </Button>
+                            <Button
+                                onPress={handleSaveNodeEdit}
+                                isDisabled={!editingNode.label.trim()}
+                                className="gap-2"
+                            >
+                                <Pencil className="h-4 w-4" />
+                                Lưu thay đổi
+                            </Button>
+                        </div>
+                    </div>
+                </div>
             )}
 
             {/* Save Dialog */}
