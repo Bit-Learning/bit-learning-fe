@@ -51,3 +51,36 @@ export interface GenerateMindMapRequest {
     /** Số nhánh con tối đa từ mỗi node (2-8, default: 5) */
     max_branches?: number;
 }
+
+export interface SaveMindMapRequest {
+    /** Tên do user tự đặt */
+    name: string;
+    /** Title lấy từ AI response */
+    title: string;
+    topic: string;
+    layoutType: string;
+    nodes: MindMapNode[];
+    edges: MindMapEdge[];
+    metadata: MindMapMetadata;
+}
+
+export interface SavedMindMapDto {
+    id: number;
+    name: string;
+    title: string;
+    topic: string;
+    layoutType: string;
+    createdAt: string;
+}
+
+export interface SavedMindMapDetailDto {
+    id: number;
+    name: string;
+    title: string;
+    topic: string;
+    layoutType: string;
+    nodes: MindMapNode[];
+    edges: MindMapEdge[];
+    metadata: MindMapMetadata;
+    createdAt: string;
+}

@@ -17,11 +17,12 @@ import { useTranslation } from "react-i18next";
 import { toast } from "@/shared/components/Sonner";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
-import { Loader2, Sparkles, BookOpen, Settings2, ImageDown } from "lucide-react";
+import { Loader2, Sparkles, BookOpen, Settings2, ImageDown, BookMarked, Save } from "lucide-react";
 import {
     useGenerateHorizontalMindMap,
     useGenerateRadialMindMap,
     useGenerateSymmetricHorizontalMindMap,
+    useSaveMindMap,
 } from "../queries/use-mindmap-queries";
 import {
     mindMapNodeTypes,
@@ -29,7 +30,8 @@ import {
     mindMapSymmetricNodeTypes,
     type MindMapNodeTheme,
 } from "../components/MindMapNodes";
-import type { MindMapResponse } from "../types/mindmap.type";
+import type { MindMapResponse, SavedMindMapDetailDto } from "../types/mindmap.type";
+import SavedMindMapsPanel from "./SavedMindMapsPanel";
 
 type MindMapLayoutType = "radial" | "symmetric-horizontal" | "horizontal";
 type HandleDirection = "top" | "right" | "bottom" | "left";
@@ -255,7 +257,11 @@ function mapEdgesForSymmetricHorizontalLayout(rawNodes: Node[], rawEdges: Edge[]
 }
 
 function mapEdgesForHorizontalLayout(rawEdges: Edge[], strokeColor: string): Edge[] {
-    return rawEdges.map((edge) => applyInlineEdgeStyle(edge, strokeColor));
+    return rawEdges.map((edge) => {
+        const styled = applyInlineEdgeStyle(edge, strokeColor);
+        // Clear directional handles so the horizontal node components use their default handles
+        return { ...styled, sourceHandle: undefined, targetHandle: undefined };
+    });
 }
 
 function pickRandomPalette(): MindMapPalette {
@@ -290,8 +296,11 @@ function mapNodesWithPalette(rawNodes: Node[], palette: MindMapPalette): Node[] 
     });
 }
 
+type ActiveTab = "generate" | "saved";
+
 export default function MindMapView() {
     const { t } = useTranslation();
+    const [activeTab, setActiveTab] = useState<ActiveTab>("generate");
     const [topic, setTopic] = useState("");
     const [layoutType, setLayoutType] = useState<MindMapLayoutType>("radial");
     const [paletteSelection, setPaletteSelection] = useState<MindMapPaletteSelection>("random");
@@ -299,6 +308,10 @@ export default function MindMapView() {
     const [maxDepth, setMaxDepth] = useState(3);
     const [maxBranches, setMaxBranches] = useState(5);
     const [showSettings, setShowSettings] = useState(false);
+    const [showSaveDialog, setShowSaveDialog] = useState(false);
+    const [saveName, setSaveName] = useState("");
+    const [currentTitle, setCurrentTitle] = useState("");
+    const [activePalette, setActivePalette] = useState<MindMapPalette | null>(null);
     const flowContainerRef = useRef<HTMLDivElement | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -308,6 +321,7 @@ export default function MindMapView() {
     const { mutate: generateSymmetricHorizontal, isPending: isSymmetricHorizontalPending } =
         useGenerateSymmetricHorizontalMindMap();
     const { mutate: generateHorizontal, isPending: isHorizontalPending } = useGenerateHorizontalMindMap();
+    const { mutate: saveMindMap, isPending: isSaving } = useSaveMindMap();
 
     const isPending = isRadialPending || isSymmetricHorizontalPending || isHorizontalPending;
 
@@ -319,6 +333,7 @@ export default function MindMapView() {
                 : mindMapNodeTypes;
 
     const applyPaletteToGraph = (palette: MindMapPalette, currentNodes: Node[], currentEdges: Edge[]) => {
+        setActivePalette(palette);
         const themedNodes = mapNodesWithPalette(currentNodes, palette);
         setNodes(themedNodes);
 
@@ -342,6 +357,21 @@ export default function MindMapView() {
         applyPaletteToGraph(palette, nodes, edges);
     };
 
+    const handleLayoutTypeChange = (newLayoutType: MindMapLayoutType) => {
+        setLayoutType(newLayoutType);
+
+        if (nodes.length === 0 || !activePalette) return;
+
+        // Remap edges to match the new layout's handle configuration
+        if (newLayoutType === "radial") {
+            setEdges(mapEdgesForRadialLayout(nodes, edges, activePalette.edge));
+        } else if (newLayoutType === "symmetric-horizontal") {
+            setEdges(mapEdgesForSymmetricHorizontalLayout(nodes, edges, activePalette.edge));
+        } else {
+            setEdges(mapEdgesForHorizontalLayout(edges, activePalette.edge));
+        }
+    };
+
     const handleGenerateSuccess = (response: any) => {
         const data = response.data.data;
         if (!data) return;
@@ -352,6 +382,44 @@ export default function MindMapView() {
 
         applyPaletteToGraph(palette, nextNodes, nextEdges);
         setMetadata(data.metadata);
+        setCurrentTitle(data.title ?? "");
+    };
+
+    const handleSave = () => {
+        const trimmedName = saveName.trim();
+        if (!trimmedName || !metadata) return;
+
+        saveMindMap(
+            {
+                name: trimmedName,
+                title: currentTitle,
+                topic,
+                layoutType,
+                nodes: nodes as any,
+                edges: edges as any,
+                metadata,
+            },
+            {
+                onSuccess: () => {
+                    setShowSaveDialog(false);
+                    setSaveName("");
+                    toast.success({ title: "Đã lưu mindmap thành công" });
+                },
+                onError: () => {
+                    toast.error({ title: "Lỗi khi lưu mindmap" });
+                },
+            },
+        );
+    };
+
+    const handleLoadSavedMindMap = (detail: SavedMindMapDetailDto) => {
+        setTopic(detail.topic);
+        setLayoutType(detail.layoutType as MindMapLayoutType);
+        setNodes(detail.nodes as unknown as Node[]);
+        setEdges(detail.edges as unknown as Edge[]);
+        setMetadata(detail.metadata);
+        setCurrentTitle(detail.title);
+        setActiveTab("generate");
     };
 
     const handleGenerate = () => {
@@ -456,7 +524,7 @@ export default function MindMapView() {
                     </p>
                 </div>
 
-                {metadata && (
+                {activeTab === "generate" && metadata && (
                     <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
                         <span>{t("mindmap.metadata.nodes", { count: metadata.total_nodes })}</span>
                         <span>•</span>
@@ -498,152 +566,246 @@ export default function MindMapView() {
                 )}
             </div>
 
-            {/* Input */}
-            <div className="flex flex-col gap-3">
-                <div className="flex gap-3">
-                    <Input
-                        className="flex-1"
-                        placeholder={t("mindmap.topicPlaceholder")}
-                        value={topic}
-                        onChange={(e) => setTopic(e.target.value)}
-                        onKeyDown={(e) => {
-                            if (e.key === "Enter" && !isPending) handleGenerate();
-                        }}
-                        disabled={isPending}
-                    />
-                    <select
-                        value={layoutType}
-                        onChange={(e) => setLayoutType(e.target.value as MindMapLayoutType)}
-                        disabled={isPending}
-                        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-                    >
-                        <option value="radial">{t("mindmap.layout.radial")}</option>
-                        <option value="symmetric-horizontal">{t("mindmap.layout.symmetricHorizontal")}</option>
-                        <option value="horizontal">{t("mindmap.layout.horizontal")}</option>
-                    </select>
-                    <select
-                        value={paletteSelection}
-                        onChange={(e) => handlePaletteSelectionChange(e.target.value as MindMapPaletteSelection)}
-                        disabled={isPending}
-                        className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-                    >
-                        <option value="random">{t("mindmap.theme.random")}</option>
-                        {MINDMAP_PALETTES.map((palette) => (
-                            <option key={palette.id} value={palette.id}>
-                                {t(palette.nameKey)}
-                            </option>
-                        ))}
-                    </select>
-                    <Button
-                        variant="outline"
-                        onPress={() => setShowSettings(!showSettings)}
-                        className="shrink-0"
-                    >
-                        <Settings2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                        variant="outline"
-                        onPress={handleExportImage}
-                        isDisabled={!hasResult || isPending}
-                        className="gap-2 shrink-0"
-                    >
-                        <ImageDown className="h-4 w-4" />
-                        {t("mindmap.button.export")}
-                    </Button>
-                    <Button
-                        onPress={handleGenerate}
-                        isDisabled={isPending || !topic.trim()}
-                        className="gap-2 shrink-0"
-                    >
-                        {isPending ? (
-                            <Loader2 className="h-4 w-4 animate-spin" />
-                        ) : (
-                            <Sparkles className="h-4 w-4" />
+            {/* Tabs */}
+            <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">
+                <button
+                    onClick={() => setActiveTab("generate")}
+                    className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+                        activeTab === "generate"
+                            ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                            : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    }`}
+                >
+                    <Sparkles className="h-4 w-4" />
+                    Tạo mindmap
+                </button>
+                <button
+                    onClick={() => setActiveTab("saved")}
+                    className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+                        activeTab === "saved"
+                            ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                            : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                    }`}
+                >
+                    <BookMarked className="h-4 w-4" />
+                    Đã lưu
+                </button>
+            </div>
+
+            {/* Generate Tab */}
+            {activeTab === "generate" && (
+                <>
+                    {/* Input */}
+                    <div className="flex flex-col gap-3">
+                        <div className="flex gap-3">
+                            <Input
+                                className="flex-1"
+                                placeholder={t("mindmap.topicPlaceholder")}
+                                value={topic}
+                                onChange={(e) => setTopic(e.target.value)}
+                                onKeyDown={(e) => {
+                                    if (e.key === "Enter" && !isPending) handleGenerate();
+                                }}
+                                disabled={isPending}
+                            />
+                            <select
+                                value={layoutType}
+                                onChange={(e) => handleLayoutTypeChange(e.target.value as MindMapLayoutType)}
+                                disabled={isPending}
+                                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                            >
+                                <option value="radial">{t("mindmap.layout.radial")}</option>
+                                <option value="symmetric-horizontal">{t("mindmap.layout.symmetricHorizontal")}</option>
+                                <option value="horizontal">{t("mindmap.layout.horizontal")}</option>
+                            </select>
+                            <select
+                                value={paletteSelection}
+                                onChange={(e) => handlePaletteSelectionChange(e.target.value as MindMapPaletteSelection)}
+                                disabled={isPending}
+                                className="rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                            >
+                                <option value="random">{t("mindmap.theme.random")}</option>
+                                {MINDMAP_PALETTES.map((palette) => (
+                                    <option key={palette.id} value={palette.id}>
+                                        {t(palette.nameKey)}
+                                    </option>
+                                ))}
+                            </select>
+                            <Button
+                                variant="outline"
+                                onPress={() => setShowSettings(!showSettings)}
+                                className="shrink-0"
+                            >
+                                <Settings2 className="h-4 w-4" />
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onPress={handleExportImage}
+                                isDisabled={!hasResult || isPending}
+                                className="gap-2 shrink-0"
+                            >
+                                <ImageDown className="h-4 w-4" />
+                                {t("mindmap.button.export")}
+                            </Button>
+                            <Button
+                                variant="outline"
+                                onPress={() => {
+                                    setSaveName("");
+                                    setShowSaveDialog(true);
+                                }}
+                                isDisabled={!hasResult || isPending}
+                                className="gap-2 shrink-0"
+                            >
+                                <Save className="h-4 w-4" />
+                                Lưu
+                            </Button>
+                            <Button
+                                onPress={handleGenerate}
+                                isDisabled={isPending || !topic.trim()}
+                                className="gap-2 shrink-0"
+                            >
+                                {isPending ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Sparkles className="h-4 w-4" />
+                                )}
+                                {isPending ? t("mindmap.button.generating") : t("mindmap.button.generate")}
+                            </Button>
+                        </div>
+
+                        {showSettings && (
+                            <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("mindmap.settings.grade")}</label>
+                                    <select
+                                        value={grade}
+                                        onChange={(e) => setGrade(Number(e.target.value))}
+                                        disabled={isPending}
+                                        className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                                    >
+                                        {Array.from({ length: 10 }, (_, i) => i + 3).map((g) => (
+                                            <option key={g} value={g}>{`${t("mindmap.settings.grade")} ${g}`}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("mindmap.settings.maxDepth")}</label>
+                                    <select
+                                        value={maxDepth}
+                                        onChange={(e) => setMaxDepth(Number(e.target.value))}
+                                        disabled={isPending}
+                                        className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                                    >
+                                        {[2, 3, 4].map((d) => (
+                                            <option key={d} value={d}>{d}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                    <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("mindmap.settings.maxBranches")}</label>
+                                    <select
+                                        value={maxBranches}
+                                        onChange={(e) => setMaxBranches(Number(e.target.value))}
+                                        disabled={isPending}
+                                        className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+                                    >
+                                        {Array.from({ length: 7 }, (_, i) => i + 2).map((b) => (
+                                            <option key={b} value={b}>{b}</option>
+                                        ))}
+                                    </select>
+                                </div>
+                            </div>
                         )}
-                        {isPending ? t("mindmap.button.generating") : t("mindmap.button.generate")}
-                    </Button>
-                </div>
-
-                {showSettings && (
-                    <div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
-                        <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("mindmap.settings.grade")}</label>
-                            <select
-                                value={grade}
-                                onChange={(e) => setGrade(Number(e.target.value))}
-                                disabled={isPending}
-                                className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-                            >
-                                {Array.from({ length: 10 }, (_, i) => i + 3).map((g) => (
-                                    <option key={g} value={g}>{`${t("mindmap.settings.grade")} ${g}`}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("mindmap.settings.maxDepth")}</label>
-                            <select
-                                value={maxDepth}
-                                onChange={(e) => setMaxDepth(Number(e.target.value))}
-                                disabled={isPending}
-                                className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-                            >
-                                {[2, 3, 4].map((d) => (
-                                    <option key={d} value={d}>{d}</option>
-                                ))}
-                            </select>
-                        </div>
-                        <div className="flex items-center gap-2">
-                            <label className="text-sm font-medium text-slate-700 dark:text-slate-300">{t("mindmap.settings.maxBranches")}</label>
-                            <select
-                                value={maxBranches}
-                                onChange={(e) => setMaxBranches(Number(e.target.value))}
-                                disabled={isPending}
-                                className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-                            >
-                                {Array.from({ length: 7 }, (_, i) => i + 2).map((b) => (
-                                    <option key={b} value={b}>{b}</option>
-                                ))}
-                            </select>
-                        </div>
                     </div>
-                )}
-            </div>
 
-            {/* React Flow Canvas */}
-            <div
-                ref={flowContainerRef}
-                className="flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
-            >
-                {hasResult ? (
-                    <ReactFlow
-                        nodes={nodes}
-                        edges={edges}
-                        onNodesChange={onNodesChange}
-                        onEdgesChange={onEdgesChange}
-                        nodeTypes={activeNodeTypes}
-                        fitView
-                        fitViewOptions={{ padding: 0.3 }}
-                        minZoom={0.2}
-                        maxZoom={2}
-                        proOptions={{ hideAttribution: true }}
+                    {/* React Flow Canvas */}
+                    <div
+                        ref={flowContainerRef}
+                        className="flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
                     >
-                        <Background gap={20} size={1} />
-                        <Controls position="bottom-right" />
-                        <MiniMap
-                            position="bottom-left"
-                            pannable
-                            zoomable
-                            className="bg-slate-100! dark:bg-slate-800!"
-                        />
-                    </ReactFlow>
-                ) : (
-                    <div className="flex h-full flex-col items-center justify-center text-slate-400 dark:text-slate-500">
-                        <Sparkles className="mb-3 h-12 w-12 opacity-30" />
-                        <p className="text-lg font-medium">{t("mindmap.empty.title")}</p>
-                        <p className="mt-1 text-sm">{t("mindmap.empty.description")}</p>
+                        {hasResult ? (
+                            <ReactFlow
+                                nodes={nodes}
+                                edges={edges}
+                                onNodesChange={onNodesChange}
+                                onEdgesChange={onEdgesChange}
+                                nodeTypes={activeNodeTypes}
+                                fitView
+                                fitViewOptions={{ padding: 0.3 }}
+                                minZoom={0.2}
+                                maxZoom={2}
+                                proOptions={{ hideAttribution: true }}
+                            >
+                                <Background gap={20} size={1} />
+                                <Controls position="bottom-right" />
+                                <MiniMap
+                                    position="bottom-left"
+                                    pannable
+                                    zoomable
+                                    className="bg-slate-100! dark:bg-slate-800!"
+                                />
+                            </ReactFlow>
+                        ) : (
+                            <div className="flex h-full flex-col items-center justify-center text-slate-400 dark:text-slate-500">
+                                <Sparkles className="mb-3 h-12 w-12 opacity-30" />
+                                <p className="text-lg font-medium">{t("mindmap.empty.title")}</p>
+                                <p className="mt-1 text-sm">{t("mindmap.empty.description")}</p>
+                            </div>
+                        )}
                     </div>
-                )}
-            </div>
+                </>
+            )}
+
+            {/* Saved Tab */}
+            {activeTab === "saved" && (
+                <SavedMindMapsPanel onLoad={handleLoadSavedMindMap} />
+            )}
+
+            {/* Save Dialog */}
+            {showSaveDialog && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-sm">
+                    <div className="w-full max-w-md rounded-xl border border-slate-200 bg-white p-6 shadow-2xl dark:border-slate-700 dark:bg-slate-900">
+                        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
+                            Lưu mindmap
+                        </h2>
+                        <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+                            Đặt tên để dễ tìm lại sau này.
+                        </p>
+                        <Input
+                            className="mt-4"
+                            placeholder="Ví dụ: Ôn tập chương 3 - Hóa học"
+                            value={saveName}
+                            onChange={(e) => setSaveName(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === "Enter" && saveName.trim()) handleSave();
+                                if (e.key === "Escape") setShowSaveDialog(false);
+                            }}
+                            autoFocus
+                        />
+                        <div className="mt-4 flex justify-end gap-2">
+                            <Button
+                                variant="outline"
+                                onPress={() => setShowSaveDialog(false)}
+                                isDisabled={isSaving}
+                            >
+                                Hủy
+                            </Button>
+                            <Button
+                                onPress={handleSave}
+                                isDisabled={!saveName.trim() || isSaving}
+                                className="gap-2"
+                            >
+                                {isSaving ? (
+                                    <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                    <Save className="h-4 w-4" />
+                                )}
+                                Lưu
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            )}
         </div>
     );
 }
