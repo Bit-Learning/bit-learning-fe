@@ -1,19 +1,16 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { BookOpen, Edit, Eye, EyeOff, Plus, Search, Trash2 } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useCoursesByInstructor, useDeleteCourse, useHideOrShowCourse } from "../queries/useCourse";
+import { useDeleteCourse, useGetCourses, useHideOrShowCourse } from "../queries/useCourse";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { CoursePreview } from "../types/course.type";
 import { Pagination } from "@/components/Pagination";
 
-interface CourseListPageProps {
-  instructorId: number;
-}
-
-export const CourseListPage: React.FC<CourseListPageProps> = ({ instructorId }) => {
+export const CourseListPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
@@ -28,12 +25,12 @@ export const CourseListPage: React.FC<CourseListPageProps> = ({ instructorId }) 
     name: "",
   });
 
-  const { data: coursesData, isLoading } = useCoursesByInstructor(instructorId, page, size);
+  const { data: coursesData, isLoading } = useGetCourses(page, size);
   const deleteMutation = useDeleteCourse();
   const hideMutation = useHideOrShowCourse();
 
   const courses = Array.isArray(coursesData?.data) ? coursesData.data : [];
-  const totalPages = coursesData?.data?.totalPages || 0;
+  const totalPages = coursesData?.page?.totalPages || 0;
 
   const openDeleteModal = (id: number, name: string) => {
     setDeleteModal({ isOpen: true, id, name });
@@ -103,8 +100,8 @@ export const CourseListPage: React.FC<CourseListPageProps> = ({ instructorId }) 
         <>
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
             {filteredCourses.map((course: CoursePreview) => (
-              <Card key={course.id} className="overflow-hidden transition-shadow hover:shadow-lg">
-                <div className="flex aspect-video items-center justify-center bg-linear-to-br from-blue-500 to-indigo-600">
+              <Card key={course.id} className="overflow-hidden p-0 transition-shadow hover:shadow-lg">
+                <div className="relative flex aspect-video items-center justify-center bg-linear-to-br from-blue-500 to-indigo-600">
                   {course.thumbnailUrl ? (
                     <img src={course.thumbnailUrl} alt={course.title} className="h-full w-full object-cover" />
                   ) : (
@@ -113,10 +110,15 @@ export const CourseListPage: React.FC<CourseListPageProps> = ({ instructorId }) 
                 </div>
 
                 <div className="space-y-3 p-4">
-                  <div className="flex items-start justify-between">
+                  <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
                       <h3 className="line-clamp-2 text-lg font-semibold">{course.title}</h3>
                     </div>
+                    {course.status && (
+                      <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"} className="shrink-0">
+                        {course.status === "PUBLISHED" ? "Đã xuất bản" : "Chưa xuất bản"}
+                      </Badge>
+                    )}
                   </div>
 
                   <div className="flex items-center gap-4 text-sm text-gray-600">

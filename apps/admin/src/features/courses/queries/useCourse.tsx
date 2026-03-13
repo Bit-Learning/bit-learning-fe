@@ -17,10 +17,7 @@ export const useGetCourses = (page: number = 0, size: number = 10) => {
     queryKey: courseKeys.list(page, size),
     queryFn: async () => {
       const response = await courseApi.getAllCourses(page, size);
-      return {
-        content: response.data.data || [],
-        page: response.data.page,
-      };
+      return response.data;
     },
   });
 };

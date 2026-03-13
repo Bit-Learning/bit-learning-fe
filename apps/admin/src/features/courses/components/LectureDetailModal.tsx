@@ -1,9 +1,8 @@
 import React from "react";
-import { CheckCircle, FileText, HelpCircle, Video, XCircle } from "lucide-react";
+import { CheckCircle, FileText, HelpCircle, Video, XCircle, X } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { useLectureQuiz, useLectureText, useVideoUrls } from "../queries/useLecture";
 import { LectureDetail } from "../types/course.type";
 
@@ -111,29 +110,37 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
   };
 
   return (
-    <Dialog open onOpenChange={onClose}>
-      <DialogContent className="max-h-[90vh] max-w-4xl overflow-hidden">
-        <DialogHeader>
-          <div className="flex items-center justify-between">
-            <div>
-              <DialogTitle>{lecture.title}</DialogTitle>
-              {lecture.description && <p className="mt-1 text-sm text-gray-600">{lecture.description}</p>}
-            </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <Card className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden">
+        {/* Header */}
+        <div className="flex items-center justify-between border-b p-4">
+          <div className="flex-1">
+            <h2 className="text-xl font-bold">{lecture.title}</h2>
+            {lecture.description && <p className="mt-1 text-sm text-gray-600">{lecture.description}</p>}
+          </div>
+          <div className="flex items-center gap-2">
             <Badge variant={lecture.isPreviewable ? "secondary" : "outline"}>
               {lecture.isPreviewable ? "Cho xem trước" : "Không xem trước"}
             </Badge>
+            <Button variant="outline" size="sm" onClick={onClose}>
+              <X className="h-4 w-4" />
+            </Button>
           </div>
-        </DialogHeader>
+        </div>
 
-        <div className="max-h-[calc(90vh-200px)] overflow-y-auto">{renderContent()}</div>
+        {/* Content */}
+        <div className="flex-1 overflow-y-auto p-6">{renderContent()}</div>
 
-        <DialogFooter>
+        {/* Footer */}
+        <div className="flex justify-end gap-2 border-t bg-gray-50 p-4">
           <Button variant="outline" onClick={onClose}>
             Đóng
           </Button>
           <Button onClick={onEdit}>Chỉnh sửa</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
+        </div>
+      </Card>
+    </div>
   );
 };
+
+export default LectureDetailModal;
