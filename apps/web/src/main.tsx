@@ -1,6 +1,7 @@
 import * as Sentry from "@sentry/react";
 import { createRouter, RouterProvider } from "@tanstack/react-router";
 import { Toaster } from "@/shared/components/Sonner";
+import "@/shared/i18n/i18n";
 import "@workspace/ui/globals.css";
 import ReactDOM from "react-dom/client";
 import "./instrument";
