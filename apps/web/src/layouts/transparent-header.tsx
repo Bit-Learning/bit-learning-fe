@@ -171,7 +171,7 @@ const TransparentHeader: React.FC = () => {
 						) : (
 							<CodeButton
 								label="Đăng nhập"
-								onClick={() => navigate({ to: "/signin" })}
+								onClick={() => navigate({ to: "/signin/role" })}
 								className="rounded-full border border-white/30 bg-white/20 px-6 py-2.5 font-semibold text-white shadow-lg backdrop-blur-xl transition-all duration-200 hover:bg-white/30 hover:shadow-xl"
 							/>
 						)}
