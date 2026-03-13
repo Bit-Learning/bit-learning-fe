@@ -1,6 +1,12 @@
 import React from "react";
-import { X, Info, Download, CheckCircle, Code, FileText, Calendar } from "lucide-react";
+import { X, Download, CheckCircle, FileText, Calendar, ExternalLink, Layers } from "lucide-react";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import type { SlideGenerationResponse } from "../types/slide.type";
+
+const PDFJS_WORKER_URL = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
 interface DetailModalProps {
   slide: SlideGenerationResponse;
@@ -8,83 +14,101 @@ interface DetailModalProps {
 }
 
 export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
+
   const handleDownload = () => {
     if (slide.cloudinaryUrl) {
       window.open(slide.cloudinaryUrl, "_blank");
-    } else {
-      alert(`File không khả dụng`);
     }
   };
 
   return (
     <div className="fixed inset-0 z-100 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm p-4">
-      <div className="bg-white w-full max-w-4xl max-h-[90vh] overflow-hidden rounded-2xl shadow-2xl border border-slate-200 flex flex-col">
-        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between">
-          <h2 className="text-xl font-bold text-slate-900">Chi tiết Slide bài giảng</h2>
+      <div
+        className="bg-white w-full max-w-6xl rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
+        style={{ height: "90vh" }}
+      >
+        {/* Header */}
+        <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
+              <Layers className="text-primary" size={18} />
+            </div>
+            <div>
+              <h2 className="text-base font-bold text-slate-900 line-clamp-1">{slide.topic}</h2>
+              <p className="text-xs text-slate-500">{slide.templateName} · {slide.slideCount} slides</p>
+            </div>
+          </div>
           <button
-            className="p-2 text-slate-400 hover:text-slate-600 transition-colors rounded-full hover:bg-slate-100"
+            className="w-9 h-9 flex items-center justify-center hover:bg-slate-100 rounded-full text-slate-400 transition-all group"
             onClick={onClose}
           >
-            <X size={24} />
+            <X className="group-hover:rotate-90 transition-transform" size={18} />
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-6 flex flex-col md:flex-row gap-8">
-          <div className="md:w-1/2">
-            <div className="aspect-video bg-linear-to-br from-blue-500 to-blue-700 rounded-xl overflow-hidden border border-slate-200 shadow-lg group relative flex items-center justify-center text-white">
-              <div className="text-center p-6">
-                <div className="w-16 h-16 bg-white/20 rounded-xl flex items-center justify-center mx-auto mb-4">
-                  <Code size={32} />
+        {/* Body */}
+        <div className="flex-1 flex overflow-hidden">
+          {/* PDF Viewer */}
+          <div className="flex-1 overflow-hidden border-r border-slate-100">
+            {slide.pdfCloudinaryUrl ? (
+              <Worker workerUrl={PDFJS_WORKER_URL}>
+                <div style={{ height: "100%" }}>
+                  <Viewer
+                    fileUrl={slide.pdfCloudinaryUrl}
+                    plugins={[defaultLayoutPluginInstance]}
+                    renderError={() => (
+                      <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+                        <p className="text-sm">Không thể tải file xem trước.</p>
+                        <a
+                          href={slide.pdfCloudinaryUrl}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="text-sm text-primary hover:underline flex items-center gap-1"
+                        >
+                          <ExternalLink size={14} />
+                          Mở trực tiếp
+                        </a>
+                      </div>
+                    )}
+                  />
                 </div>
-                <h3 className="text-2xl font-bold mb-2">{slide.topic}</h3>
-                <p className="text-blue-100 text-sm">{slide.slideCount} slides</p>
+              </Worker>
+            ) : (
+              <div className="flex items-center justify-center h-full text-slate-400">
+                <p className="text-sm">Không có file xem trước.</p>
               </div>
-            </div>
-            <div className="mt-4 grid grid-cols-4 gap-2">
-              {[...Array(Math.min(4, slide.slideCount))].map((_, idx) => (
-                <div
-                  key={idx}
-                  className={`aspect-video bg-slate-200 rounded-md overflow-hidden ${idx === 0 ? "border-2 border-primary" : "opacity-50"}`}
-                >
-                  <div className="w-full h-full bg-linear-to-br from-blue-400 to-blue-600 flex items-center justify-center text-white text-xs font-bold">
-                    {idx + 1}
-                  </div>
-                </div>
-              ))}
-            </div>
+            )}
           </div>
 
-          <div className="md:w-1/2 space-y-6">
+          {/* Info Panel */}
+          <div className="w-72 shrink-0 flex flex-col overflow-y-auto p-5 gap-5">
             <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4 flex items-center gap-2">
-                <Info className="text-primary" size={20} />
-                Thông tin chi tiết
+              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
+                Thông tin
               </h3>
               <ul className="space-y-3">
-                <li className="flex items-start justify-between text-sm py-2 border-b border-slate-100 gap-4">
-                  <span className="text-slate-500 flex items-center gap-2 shrink-0">
-                    <FileText size={16} />
+                <li className="flex flex-col gap-0.5">
+                  <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                    <FileText size={12} />
                     Chủ đề
                   </span>
-                  <span className="font-medium text-slate-900 text-right">{slide.topic}</span>
+                  <span className="text-sm font-medium text-slate-900">{slide.topic}</span>
                 </li>
-                <li className="flex items-center justify-between text-sm py-2 border-b border-slate-100">
-                  <span className="text-slate-500">Số lượng slide</span>
-                  <span className="font-medium text-slate-900">{slide.slideCount} slide</span>
+                <li className="flex flex-col gap-0.5">
+                  <span className="text-xs text-slate-400">Số lượng slide</span>
+                  <span className="text-sm font-medium text-slate-900">{slide.slideCount} slides</span>
                 </li>
-                <li className="flex items-start justify-between text-sm py-2 border-b border-slate-100 gap-4">
-                  <span className="text-slate-500 shrink-0">Template</span>
-                  <span className="font-medium text-primary flex items-center gap-1">
-                    <span className="w-3 h-3 rounded-full bg-blue-500 shrink-0"></span>
-                    <span className="text-right">{slide.templateName}</span>
-                  </span>
+                <li className="flex flex-col gap-0.5">
+                  <span className="text-xs text-slate-400">Template</span>
+                  <span className="text-sm font-medium text-primary">{slide.templateName}</span>
                 </li>
-                <li className="flex items-center justify-between text-sm py-2 border-b border-slate-100">
-                  <span className="text-slate-500 flex items-center gap-2">
-                    <Calendar size={16} />
+                <li className="flex flex-col gap-0.5">
+                  <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                    <Calendar size={12} />
                     Ngày tạo
                   </span>
-                  <span className="font-medium text-slate-900">
+                  <span className="text-sm font-medium text-slate-900">
                     {new Date(slide.generatedAt).toLocaleDateString("vi-VN", {
                       year: "numeric",
                       month: "long",
@@ -94,49 +118,45 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
                     })}
                   </span>
                 </li>
-                <li className="flex items-start justify-between text-sm py-2 border-b border-slate-100 gap-4">
-                  <span className="text-slate-500 shrink-0">Tên file</span>
-                  <span className="font-medium text-slate-600 text-xs text-right break-all">{slide.filename}</span>
+                <li className="flex flex-col gap-0.5">
+                  <span className="text-xs text-slate-400">Tên file</span>
+                  <span className="text-xs text-slate-600 break-all">{slide.filename}</span>
                 </li>
               </ul>
             </div>
 
-            <div className="space-y-3">
-              {slide.fromCache && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
-                  <CheckCircle className="text-amber-500 shrink-0" size={16} />
-                  <div>
-                    <span className="text-sm font-medium text-amber-700 block">Tạo từ cache</span>
-                    <span className="text-xs text-amber-600">Thời gian xử lý nhanh hơn</span>
-                  </div>
+            {slide.fromCache && (
+              <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
+                <CheckCircle className="text-amber-500 shrink-0" size={14} />
+                <div>
+                  <span className="text-xs font-medium text-amber-700 block">Tạo từ cache</span>
+                  <span className="text-xs text-amber-600">Thời gian xử lý nhanh hơn</span>
                 </div>
-              )}
+              </div>
+            )}
 
-              {slide.cloudinaryUrl && (
-                <div className="flex items-center gap-2 px-3 py-2 bg-green-50 border border-green-100 rounded-lg">
-                  <CheckCircle className="text-green-500 shrink-0" size={16} />
-                  <span className="text-sm text-green-700">File đã sẵn sàng tải xuống</span>
-                </div>
+            <div className="mt-auto flex flex-col gap-2 pt-4 border-t border-slate-100">
+              {slide.pdfCloudinaryUrl && (
+                <a
+                  href={slide.pdfCloudinaryUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
+                >
+                  <ExternalLink size={15} />
+                  Mở PDF trong tab mới
+                </a>
               )}
+              <button
+                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleDownload}
+                disabled={!slide.cloudinaryUrl}
+              >
+                <Download size={15} />
+                Tải xuống (.pptx)
+              </button>
             </div>
           </div>
-        </div>
-
-        <div className="px-6 py-4 bg-slate-50 border-t border-slate-200 flex items-center justify-end gap-3">
-          <button
-            className="px-5 py-2 text-sm font-medium text-slate-600 hover:text-slate-900 transition-colors"
-            onClick={onClose}
-          >
-            Đóng
-          </button>
-          <button
-            className="flex items-center gap-2 px-6 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-lg shadow-blue-500/30 disabled:opacity-50 disabled:cursor-not-allowed"
-            onClick={handleDownload}
-            disabled={!slide.cloudinaryUrl}
-          >
-            <Download size={16} />
-            Tải xuống (.pptx)
-          </button>
         </div>
       </div>
     </div>
