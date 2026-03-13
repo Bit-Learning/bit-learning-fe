@@ -43,6 +43,7 @@ import { Route as LayoutAboutRouteImport } from './routes/_layout/about'
 import { Route as MentorSlidesIndexRouteImport } from './routes/mentor/slides/index'
 import { Route as MentorQuestionIndexRouteImport } from './routes/mentor/question/index'
 import { Route as MentorProblemIndexRouteImport } from './routes/mentor/problem/index'
+import { Route as MentorMindmapIndexRouteImport } from './routes/mentor/mindmap/index'
 import { Route as MentorMatrixIndexRouteImport } from './routes/mentor/matrix/index'
 import { Route as MentorDashboardIndexRouteImport } from './routes/mentor/dashboard/index'
 import { Route as ContestsIdIndexRouteImport } from './routes/contests/$id/index'
@@ -273,6 +274,11 @@ const MentorQuestionIndexRoute = MentorQuestionIndexRouteImport.update({
 const MentorProblemIndexRoute = MentorProblemIndexRouteImport.update({
   id: '/mentor/problem/',
   path: '/mentor/problem/',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MentorMindmapIndexRoute = MentorMindmapIndexRouteImport.update({
+  id: '/mentor/mindmap/',
+  path: '/mentor/mindmap/',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MentorMatrixIndexRoute = MentorMatrixIndexRouteImport.update({
@@ -686,6 +692,7 @@ export interface FileRoutesByFullPath {
   '/contests/$id/': typeof ContestsIdIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
+  '/mentor/mindmap/': typeof MentorMindmapIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/mentor/slides/': typeof MentorSlidesIndexRoute
@@ -783,6 +790,7 @@ export interface FileRoutesByTo {
   '/contests/$id': typeof ContestsIdIndexRoute
   '/mentor/dashboard': typeof MentorDashboardIndexRoute
   '/mentor/matrix': typeof MentorMatrixIndexRoute
+  '/mentor/mindmap': typeof MentorMindmapIndexRoute
   '/mentor/problem': typeof MentorProblemIndexRoute
   '/mentor/question': typeof MentorQuestionIndexRoute
   '/mentor/slides': typeof MentorSlidesIndexRoute
@@ -883,6 +891,7 @@ export interface FileRoutesById {
   '/contests/$id/': typeof ContestsIdIndexRoute
   '/mentor/dashboard/': typeof MentorDashboardIndexRoute
   '/mentor/matrix/': typeof MentorMatrixIndexRoute
+  '/mentor/mindmap/': typeof MentorMindmapIndexRoute
   '/mentor/problem/': typeof MentorProblemIndexRoute
   '/mentor/question/': typeof MentorQuestionIndexRoute
   '/mentor/slides/': typeof MentorSlidesIndexRoute
@@ -982,6 +991,7 @@ export interface FileRouteTypes {
     | '/contests/$id/'
     | '/mentor/dashboard/'
     | '/mentor/matrix/'
+    | '/mentor/mindmap/'
     | '/mentor/problem/'
     | '/mentor/question/'
     | '/mentor/slides/'
@@ -1079,6 +1089,7 @@ export interface FileRouteTypes {
     | '/contests/$id'
     | '/mentor/dashboard'
     | '/mentor/matrix'
+    | '/mentor/mindmap'
     | '/mentor/problem'
     | '/mentor/question'
     | '/mentor/slides'
@@ -1178,6 +1189,7 @@ export interface FileRouteTypes {
     | '/contests/$id/'
     | '/mentor/dashboard/'
     | '/mentor/matrix/'
+    | '/mentor/mindmap/'
     | '/mentor/problem/'
     | '/mentor/question/'
     | '/mentor/slides/'
@@ -1240,6 +1252,7 @@ export interface RootRouteChildren {
   ContestsIdIndexRoute: typeof ContestsIdIndexRoute
   MentorDashboardIndexRoute: typeof MentorDashboardIndexRoute
   MentorMatrixIndexRoute: typeof MentorMatrixIndexRoute
+  MentorMindmapIndexRoute: typeof MentorMindmapIndexRoute
   MentorProblemIndexRoute: typeof MentorProblemIndexRoute
   MentorQuestionIndexRoute: typeof MentorQuestionIndexRoute
   MentorSlidesIndexRoute: typeof MentorSlidesIndexRoute
@@ -1487,6 +1500,13 @@ declare module '@tanstack/react-router' {
       path: '/mentor/problem'
       fullPath: '/mentor/problem/'
       preLoaderRoute: typeof MentorProblemIndexRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/mentor/mindmap/': {
+      id: '/mentor/mindmap/'
+      path: '/mentor/mindmap'
+      fullPath: '/mentor/mindmap/'
+      preLoaderRoute: typeof MentorMindmapIndexRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/mentor/matrix/': {
@@ -2121,6 +2141,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContestsIdIndexRoute: ContestsIdIndexRoute,
   MentorDashboardIndexRoute: MentorDashboardIndexRoute,
   MentorMatrixIndexRoute: MentorMatrixIndexRoute,
+  MentorMindmapIndexRoute: MentorMindmapIndexRoute,
   MentorProblemIndexRoute: MentorProblemIndexRoute,
   MentorQuestionIndexRoute: MentorQuestionIndexRoute,
   MentorSlidesIndexRoute: MentorSlidesIndexRoute,

@@ -2,5 +2,36 @@
 	"home": {
 		"welcome": "Welcome to our application!",
 		"description": "This is the best place to learn and grow."
+	},
+	"mindmap": {
+		"pageTitle": "Generate Mind Map - Mentor",
+		"pageDescription": "Generate AI-powered mind maps",
+		"title": "Generate Mind Map",
+		"subtitle": "Enter a topic and let AI generate the mind map",
+		"topicPlaceholder": "Example: Learn HTML and CSS, Sorting algorithms...",
+		"layout": {
+			"radial": "Radial",
+			"symmetricHorizontal": "Symmetric Horizontal",
+			"horizontal": "Horizontal"
+		},
+		"button": {
+			"generate": "Generate Mind Map",
+			"generating": "Generating..."
+		},
+		"settings": {
+			"grade": "Grade",
+			"maxDepth": "Max Depth",
+			"maxBranches": "Max Branches"
+		},
+		"metadata": {
+			"nodes": "{{count}} nodes",
+			"edges": "{{count}} edges",
+			"depth": "Depth: {{depth}}",
+			"sources": "{{count}} sources"
+		},
+		"empty": {
+			"title": "Enter a topic to start",
+			"description": "Your mind map will appear here"
+		}
 	}
 }

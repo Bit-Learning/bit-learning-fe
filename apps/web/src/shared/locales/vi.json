@@ -2,5 +2,36 @@
 	"home": {
 		"welcome": "Chào mừng đến với ứng dụng của chúng tôi!",
 		"description": "Đây là nơi tốt nhất để học hỏi và phát triển."
+	},
+	"mindmap": {
+		"pageTitle": "Tạo Mind Map - Mentor",
+		"pageDescription": "Tạo sơ đồ tư duy bằng AI",
+		"title": "Tạo Mind Map",
+		"subtitle": "Nhập chủ đề để AI tự động tạo sơ đồ tư duy",
+		"topicPlaceholder": "Ví dụ: Tìm hiểu về HTML và CSS, Thuật toán sắp xếp...",
+		"layout": {
+			"radial": "Tỏa tròn",
+			"symmetricHorizontal": "Ngang đối xứng",
+			"horizontal": "Ngang"
+		},
+		"button": {
+			"generate": "Tạo Mind Map",
+			"generating": "Đang tạo..."
+		},
+		"settings": {
+			"grade": "Lớp",
+			"maxDepth": "Độ sâu",
+			"maxBranches": "Nhánh tối đa"
+		},
+		"metadata": {
+			"nodes": "{{count}} nodes",
+			"edges": "{{count}} edges",
+			"depth": "Depth: {{depth}}",
+			"sources": "{{count}} nguồn"
+		},
+		"empty": {
+			"title": "Nhập chủ đề để bắt đầu",
+			"description": "Mind map sẽ được hiển thị tại đây"
+		}
 	}
 }
