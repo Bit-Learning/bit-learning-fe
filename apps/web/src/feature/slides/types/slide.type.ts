@@ -42,8 +42,8 @@ export interface SlideRequest {
   grade: number;
   template_id: number;
   slide_count?: number;
-  includeExamples?: boolean;
-  includeExercises?: boolean;
+  include_examples?: boolean;
+  include_exercises?: boolean;
 }
 
 export interface SlideResponse {

@@ -72,10 +72,10 @@ export const CreateSlideTab: React.FC = () => {
     const request: SlideRequest = {
       topic,
       grade,
-      templateId: selectedTemplateId,
-      slideCount,
-      includeExamples,
-      includeExercises,
+      template_id: selectedTemplateId,
+      slide_count: slideCount,
+      include_examples: includeExamples,
+      include_exercises: includeExercises,
     };
 
     generateSlide.mutate(request);
