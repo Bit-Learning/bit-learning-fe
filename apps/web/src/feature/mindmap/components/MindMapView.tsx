@@ -3,17 +3,21 @@ import {
     Background,
     Controls,
     MiniMap,
+    getNodesBounds,
+    getViewportForBounds,
     useNodesState,
     useEdgesState,
     type Node,
     type Edge,
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
-import { useState } from "react";
+import { toPng } from "html-to-image";
+import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { toast } from "@/shared/components/Sonner";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
-import { Loader2, Sparkles, BookOpen, Settings2 } from "lucide-react";
+import { Loader2, Sparkles, BookOpen, Settings2, ImageDown } from "lucide-react";
 import {
     useGenerateHorizontalMindMap,
     useGenerateRadialMindMap,
@@ -24,6 +28,20 @@ import type { MindMapResponse } from "../types/mindmap.type";
 
 type MindMapLayoutType = "radial" | "symmetric-horizontal" | "horizontal";
 type HandleDirection = "top" | "right" | "bottom" | "left";
+
+function applyInlineEdgeStyle(edge: Edge, strokeColor: string): Edge {
+    return {
+        ...edge,
+        type: edge.type ?? "smoothstep",
+        animated: edge.animated ?? false,
+        style: {
+            stroke: strokeColor,
+            strokeWidth: 2,
+            strokeLinecap: "round",
+            ...edge.style,
+        },
+    };
+}
 
 function getDirectionFromPositions(source: Node, target: Node): HandleDirection {
     const deltaX = target.position.x - source.position.x;
@@ -50,15 +68,17 @@ function mapEdgesForRadialLayout(rawNodes: Node[], rawEdges: Edge[]): Edge[] {
         const sourceNode = nodeMap.get(edge.source);
         const targetNode = nodeMap.get(edge.target);
 
+        const styledEdge = applyInlineEdgeStyle(edge, "#4b5563");
+
         if (!sourceNode || !targetNode) {
-            return edge;
+            return styledEdge;
         }
 
         const sourceDirection = getDirectionFromPositions(sourceNode, targetNode);
         const targetDirection = getOppositeDirection(sourceDirection);
 
         return {
-            ...edge,
+            ...styledEdge,
             sourceHandle: `source-${sourceDirection}`,
             targetHandle: `target-${targetDirection}`,
         };
@@ -72,18 +92,24 @@ function mapEdgesForSymmetricHorizontalLayout(rawNodes: Node[], rawEdges: Edge[]
         const sourceNode = nodeMap.get(edge.source);
         const targetNode = nodeMap.get(edge.target);
 
+        const styledEdge = applyInlineEdgeStyle(edge, "#3b82f6");
+
         if (!sourceNode || !targetNode) {
-            return edge;
+            return styledEdge;
         }
 
         const goRight = targetNode.position.x >= sourceNode.position.x;
 
         return {
-            ...edge,
+            ...styledEdge,
             sourceHandle: goRight ? "source-right" : "source-left",
             targetHandle: goRight ? "target-left" : "target-right",
         };
     });
+}
+
+function mapEdgesForHorizontalLayout(rawEdges: Edge[]): Edge[] {
+    return rawEdges.map((edge) => applyInlineEdgeStyle(edge, "#64748b"));
 }
 
 export default function MindMapView() {
@@ -94,6 +120,7 @@ export default function MindMapView() {
     const [maxDepth, setMaxDepth] = useState(3);
     const [maxBranches, setMaxBranches] = useState(5);
     const [showSettings, setShowSettings] = useState(false);
+    const flowContainerRef = useRef<HTMLDivElement | null>(null);
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
     const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
     const [metadata, setMetadata] = useState<MindMapResponse["metadata"] | null>(null);
@@ -125,7 +152,7 @@ export default function MindMapView() {
         } else if (layoutType === "symmetric-horizontal") {
             setEdges(mapEdgesForSymmetricHorizontalLayout(nextNodes, nextEdges));
         } else {
-            setEdges(nextEdges);
+            setEdges(mapEdgesForHorizontalLayout(nextEdges));
         }
         setMetadata(data.metadata);
     };
@@ -154,6 +181,66 @@ export default function MindMapView() {
         }
 
         generateHorizontal(payload, options);
+    };
+
+    const handleExportImage = async () => {
+        if (!flowContainerRef.current || !hasResult) return;
+
+        try {
+            const viewportElement = flowContainerRef.current.querySelector(
+                ".react-flow__viewport",
+            ) as HTMLElement | null;
+
+            if (!viewportElement) {
+                throw new Error("React Flow viewport not found");
+            }
+
+            const imageWidth = 1920;
+            const imageHeight = 1080;
+            const nodesBounds = getNodesBounds(nodes);
+            const viewport = getViewportForBounds(
+                nodesBounds,
+                imageWidth,
+                imageHeight,
+                0.2,
+                2,
+                0.15,
+            );
+
+            const dataUrl = await toPng(viewportElement, {
+                cacheBust: true,
+                pixelRatio: 2,
+                backgroundColor: "#ffffff",
+                width: imageWidth,
+                height: imageHeight,
+                style: {
+                    width: `${imageWidth}px`,
+                    height: `${imageHeight}px`,
+                    transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+                },
+            });
+
+            const anchor = document.createElement("a");
+            const safeTopic = (topic.trim() || "mindmap")
+                .toLowerCase()
+                .replace(/[^a-z0-9\s-]/g, "")
+                .replace(/\s+/g, "-");
+
+            anchor.href = dataUrl;
+            anchor.download = `${safeTopic}-${layoutType}.png`;
+            anchor.click();
+
+            toast.success({
+                title: t("mindmap.export.successTitle"),
+                description: t("mindmap.export.successDescription"),
+            });
+        } catch (error) {
+            console.error("[MindMap] Export image failed:", error);
+            toast.error({
+                title: t("mindmap.export.errorTitle"),
+                description: t("mindmap.export.errorDescription"),
+            });
+        }
     };
 
     const hasResult = nodes.length > 0;
@@ -245,6 +332,15 @@ export default function MindMapView() {
                         <Settings2 className="h-4 w-4" />
                     </Button>
                     <Button
+                        variant="outline"
+                        onPress={handleExportImage}
+                        isDisabled={!hasResult || isPending}
+                        className="gap-2 shrink-0"
+                    >
+                        <ImageDown className="h-4 w-4" />
+                        {t("mindmap.button.export")}
+                    </Button>
+                    <Button
                         onPress={handleGenerate}
                         isDisabled={isPending || !topic.trim()}
                         className="gap-2 shrink-0"
@@ -304,7 +400,10 @@ export default function MindMapView() {
             </div>
 
             {/* React Flow Canvas */}
-            <div className="flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900">
+            <div
+                ref={flowContainerRef}
+                className="flex-1 overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-700 dark:bg-slate-900"
+            >
                 {hasResult ? (
                     <ReactFlow
                         nodes={nodes}

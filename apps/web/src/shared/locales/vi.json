@@ -16,7 +16,14 @@
 		},
 		"button": {
 			"generate": "Tạo Mind Map",
-			"generating": "Đang tạo..."
+			"generating": "Đang tạo...",
+			"export": "Export PNG"
+		},
+		"export": {
+			"successTitle": "Xuất ảnh thành công",
+			"successDescription": "Mind map đã được tải xuống dạng PNG.",
+			"errorTitle": "Xuất ảnh thất bại",
+			"errorDescription": "Không thể xuất ảnh mind map. Vui lòng thử lại."
 		},
 		"settings": {
 			"grade": "Lớp",

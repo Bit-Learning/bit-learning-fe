@@ -16,7 +16,14 @@
 		},
 		"button": {
 			"generate": "Generate Mind Map",
-			"generating": "Generating..."
+			"generating": "Generating...",
+			"export": "Export PNG"
+		},
+		"export": {
+			"successTitle": "Export successful",
+			"successDescription": "Mind map has been downloaded as PNG.",
+			"errorTitle": "Export failed",
+			"errorDescription": "Unable to export mind map image. Please try again."
 		},
 		"settings": {
 			"grade": "Grade",
