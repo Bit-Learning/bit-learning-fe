@@ -16,8 +16,9 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
   const { data, isLoading, isError } = useMySlides(page, pageSize);
   const deleteSlide = useDeleteSlide();
 
-  const slides = data?.data || [];
-  const pageInfo = data?.page;
+  const springPage = data?.data as any;
+  const slides: SlideGenerationResponse[] = springPage?.content || [];
+  const pageInfo = springPage;
 
   const filteredSlides = Array.isArray(slides)
     ? slides.filter((slide: SlideGenerationResponse) => {

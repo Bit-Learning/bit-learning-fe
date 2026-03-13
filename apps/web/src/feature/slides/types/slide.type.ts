@@ -30,6 +30,7 @@ export interface SlideGenerationResponse {
   templateId: number;
   templateName: string;
   cloudinaryUrl: string;
+  pdfCloudinaryUrl: string;
   filename: string;
   slideCount: number;
   fromCache?: boolean;
@@ -40,10 +41,10 @@ export interface SlideGenerationResponse {
 export interface SlideRequest {
   topic: string;
   grade: number;
-  templateId: number;
-  slideCount?: number;
-  includeExamples?: boolean;
-  includeExercises?: boolean;
+  template_id: number;
+  slide_count?: number;
+  include_examples?: boolean;
+  include_exercises?: boolean;
 }
 
 export interface SlideResponse {

@@ -7,18 +7,21 @@ import {
   BookOpen,
   List,
   X,
-  ChevronLeft,
-  ChevronRight,
   CheckCircle,
-  Image,
-  Brain,
   Loader2,
+  ExternalLink,
 } from "lucide-react";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { useGenerateSlide } from "../queries/useSlide";
 import { useTemplates } from "../queries/useTemplate";
 import { GRADE_OPTIONS } from "../types/slide.type";
 import type { SlideRequest } from "../types/slide.type";
 import { toast } from "@/shared/components/Sonner";
+
+const PDFJS_WORKER_URL = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
 export const CreateSlideTab: React.FC = () => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(null);
@@ -29,10 +32,10 @@ export const CreateSlideTab: React.FC = () => {
   const [includeExercises, setIncludeExercises] = useState(false);
   const [showPreviewModal, setShowPreviewModal] = useState(false);
   const [previewTemplateId, setPreviewTemplateId] = useState<number | null>(null);
-  const [previewCarouselIndex, setPreviewCarouselIndex] = useState(0);
 
   const { data: templatesData, isLoading: templatesLoading } = useTemplates();
   const generateSlide = useGenerateSlide();
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
   const templates = templatesData?.data || [];
 
@@ -45,7 +48,6 @@ export const CreateSlideTab: React.FC = () => {
   const openPreviewModal = (templateId: number) => {
     setPreviewTemplateId(templateId);
     setShowPreviewModal(true);
-    setPreviewCarouselIndex(0);
   };
 
   const closePreviewModal = () => {
@@ -72,152 +74,16 @@ export const CreateSlideTab: React.FC = () => {
     const request: SlideRequest = {
       topic,
       grade,
-      templateId: selectedTemplateId,
-      slideCount,
-      includeExamples,
-      includeExercises,
+      template_id: selectedTemplateId,
+      slide_count: slideCount,
+      include_examples: includeExamples,
+      include_exercises: includeExercises,
     };
 
     generateSlide.mutate(request);
   };
 
   const currentTemplate = templates.find((t) => t.id === previewTemplateId);
-
-  const slideExamples = currentTemplate
-    ? [
-        {
-          title: "Trang Tiêu Đề",
-          subtitle: "Title Slide",
-          content: (
-            <div className="w-full max-w-4xl aspect-video bg-linear-to-br from-blue-600 to-blue-700 rounded-2xl shadow-2xl flex flex-col justify-center items-center text-white p-16 border-12 border-white/10 relative overflow-hidden">
-              <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,var(--tw-gradient-stops))] from-white/20 via-transparent to-transparent"></div>
-              <div className="absolute -left-10 -bottom-10 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
-              <div className="h-1.5 w-32 bg-white/40 rounded-full mb-10"></div>
-              <h3 className="text-5xl font-black text-center mb-8 leading-tight tracking-tight uppercase">
-                Tin Học Lớp {grade}
-                <br />
-                <span className="text-white/80">Lập trình cơ bản</span>
-              </h3>
-              <div className="flex items-center gap-4">
-                <div className="h-0.5 w-16 bg-white/30"></div>
-                <p className="text-xl font-medium text-white/80">MentorHub Academy</p>
-                <div className="h-0.5 w-16 bg-white/30"></div>
-              </div>
-            </div>
-          ),
-        },
-        {
-          title: "Trang Nội Dung",
-          subtitle: "Content Slide",
-          content: (
-            <div className="w-full max-w-4xl aspect-video bg-white rounded-2xl shadow-2xl p-12 border-12 border-slate-100 flex flex-col">
-              <div className="flex items-center justify-between mb-10">
-                <h3 className="text-3xl font-bold text-blue-600 border-l-8 border-blue-600 pl-6">
-                  Các khái niệm cơ bản
-                </h3>
-                <div className="text-slate-300 text-5xl font-black opacity-40">01</div>
-              </div>
-              <div className="space-y-6">
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 mt-1">
-                    <CheckCircle size={20} />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-slate-800">Biến và kiểu dữ liệu</h4>
-                    <p className="text-slate-500 mt-1 leading-relaxed">
-                      Hiểu về cách khai báo biến và các kiểu dữ liệu cơ bản trong lập trình.
-                    </p>
-                  </div>
-                </div>
-                <div className="flex items-start gap-4">
-                  <div className="w-8 h-8 rounded-full bg-blue-100 flex items-center justify-center text-blue-600 shrink-0 mt-1">
-                    <CheckCircle size={20} />
-                  </div>
-                  <div>
-                    <h4 className="text-lg font-bold text-slate-800">Cấu trúc điều kiện</h4>
-                    <p className="text-slate-500 mt-1 leading-relaxed">
-                      Sử dụng if-else để kiểm soát luồng chương trình.
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          ),
-        },
-        {
-          title: "Trang Hình Ảnh & Chữ",
-          subtitle: "Image & Text",
-          content: (
-            <div className="w-full max-w-4xl aspect-video bg-white rounded-2xl shadow-2xl p-10 border-12 border-slate-100 grid grid-cols-5 gap-10">
-              <div className="col-span-3 flex flex-col justify-center">
-                <span className="inline-block px-3 py-1 bg-blue-100 text-blue-600 text-xs font-bold rounded-full w-fit mb-4">
-                  VÍ DỤ CODE
-                </span>
-                <h3 className="text-3xl font-bold text-slate-900 mb-6 leading-tight">
-                  Chương trình
-                  <br />
-                  Hello World
-                </h3>
-                <p className="text-slate-600 leading-relaxed italic border-l-4 border-slate-200 pl-4">
-                  "Chương trình đầu tiên của mọi lập trình viên"
-                </p>
-              </div>
-              <div className="col-span-2 relative">
-                <div className="w-full h-full bg-slate-100 rounded-2xl flex items-center justify-center overflow-hidden border border-slate-200">
-                  <Image className="text-slate-300" size={80} />
-                </div>
-              </div>
-            </div>
-          ),
-        },
-        {
-          title: "Trang Câu Hỏi/Bài Tập",
-          subtitle: "Quiz Slide",
-          content: (
-            <div className="w-full max-w-4xl aspect-video bg-white rounded-2xl shadow-2xl p-12 border-12 border-slate-100">
-              <div className="bg-blue-600 text-white px-8 py-6 rounded-2xl shadow-lg shadow-blue-600/20 mb-10 flex items-center gap-6">
-                <div className="w-14 h-14 bg-white/20 rounded-xl flex items-center justify-center shrink-0">
-                  <Brain size={32} />
-                </div>
-                <div>
-                  <h3 className="text-xl font-bold">Kiểm tra kiến thức</h3>
-                  <p className="text-blue-100 text-sm opacity-80 mt-0.5">Lựa chọn đáp án đúng nhất</p>
-                </div>
-              </div>
-              <div className="grid grid-cols-2 gap-6">
-                <div className="p-6 border-2 border-slate-100 rounded-2xl flex items-center gap-5 bg-slate-50/50">
-                  <div className="w-10 h-10 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center font-bold text-slate-400">
-                    A
-                  </div>
-                  <div className="h-3 w-40 bg-slate-200 rounded-full"></div>
-                </div>
-                <div className="p-6 border-2 border-slate-100 rounded-2xl flex items-center gap-5 bg-slate-50/50">
-                  <div className="w-10 h-10 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center font-bold text-slate-400">
-                    B
-                  </div>
-                  <div className="h-3 w-32 bg-slate-200 rounded-full"></div>
-                </div>
-                <div className="p-6 border-2 border-blue-600/30 bg-blue-50/50 rounded-2xl flex items-center gap-5 relative">
-                  <div className="w-10 h-10 rounded-full bg-blue-600 flex items-center justify-center font-bold text-white shadow-lg shadow-blue-600/30">
-                    C
-                  </div>
-                  <div className="h-3 w-48 bg-blue-600/30 rounded-full"></div>
-                  <div className="absolute right-6 text-blue-600">
-                    <CheckCircle size={20} />
-                  </div>
-                </div>
-                <div className="p-6 border-2 border-slate-100 rounded-2xl flex items-center gap-5 bg-slate-50/50">
-                  <div className="w-10 h-10 rounded-full bg-white border-2 border-slate-200 flex items-center justify-center font-bold text-slate-400">
-                    D
-                  </div>
-                  <div className="h-3 w-36 bg-slate-200 rounded-full"></div>
-                </div>
-              </div>
-            </div>
-          ),
-        },
-      ]
-    : [];
 
   if (templatesLoading) {
     return (
@@ -436,82 +302,102 @@ export const CreateSlideTab: React.FC = () => {
 
       {showPreviewModal && currentTemplate && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 md:p-6 bg-slate-950/80 backdrop-blur-md">
-          <div className="bg-white w-full max-w-6xl rounded-3xl shadow-2xl flex flex-col max-h-[95vh] overflow-hidden relative border border-slate-200/20">
-            <div className="px-8 py-6 border-b border-slate-200 flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-slate-900 flex items-center gap-3">
-                  <span className="p-2 bg-primary/10 rounded-lg">
-                    <Eye className="text-primary" size={24} />
-                  </span>
-                  Xem trước Mẫu: <span className="text-primary">{currentTemplate.name}</span>
-                </h2>
-                <p className="text-sm text-slate-500 mt-1">Khám phá các bố cục slide có sẵn</p>
-              </div>
-              <button
-                className="w-12 h-12 flex items-center justify-center hover:bg-slate-100 rounded-full text-slate-500 transition-all group"
-                onClick={closePreviewModal}
-              >
-                <X className="group-hover:rotate-90 transition-transform" size={24} />
-              </button>
-            </div>
-
-            <div className="flex-1 relative flex items-center bg-slate-50 p-12 overflow-hidden">
-              <button
-                className="absolute left-6 z-20 w-14 h-14 rounded-full bg-white shadow-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-primary hover:text-white transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => setPreviewCarouselIndex((prev) => Math.max(0, prev - 1))}
-                disabled={previewCarouselIndex === 0}
-              >
-                <ChevronLeft size={24} />
-              </button>
-              <button
-                className="absolute right-6 z-20 w-14 h-14 rounded-full bg-white shadow-xl border border-slate-200 flex items-center justify-center text-slate-700 hover:bg-primary hover:text-white transition-all transform hover:scale-110 disabled:opacity-50 disabled:cursor-not-allowed"
-                onClick={() => setPreviewCarouselIndex((prev) => Math.min(slideExamples.length - 1, prev + 1))}
-                disabled={previewCarouselIndex === slideExamples.length - 1}
-              >
-                <ChevronRight size={24} />
-              </button>
-
-              <div className="w-full h-full flex items-center justify-center">
-                <div className="flex flex-col items-center">
-                  {slideExamples[previewCarouselIndex]?.content}
-                  <p className="mt-6 text-sm font-semibold text-slate-500 uppercase tracking-widest">
-                    {slideExamples[previewCarouselIndex]?.title} ({slideExamples[previewCarouselIndex]?.subtitle})
-                  </p>
+          <div
+            className="bg-white w-full max-w-5xl rounded-2xl shadow-2xl flex flex-col overflow-hidden border border-slate-200/20"
+            style={{ height: "90vh" }}
+          >
+            {/* Header */}
+            <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between shrink-0">
+              <div className="flex items-center gap-3">
+                <span className="p-2 bg-primary/10 rounded-lg">
+                  <Eye className="text-primary" size={20} />
+                </span>
+                <div>
+                  <h2 className="text-base font-bold text-slate-900">{currentTemplate.name}</h2>
+                  {currentTemplate.description && (
+                    <p className="text-xs text-slate-500 mt-0.5">{currentTemplate.description}</p>
+                  )}
                 </div>
               </div>
-
-              <div className="absolute bottom-6 left-1/2 -translate-x-1/2 flex gap-3 z-10">
-                {slideExamples.map((_, idx) => (
-                  <button
-                    key={idx}
-                    className={`w-2.5 h-2.5 rounded-full transition-all ${
-                      idx === previewCarouselIndex
-                        ? "bg-primary ring-4 ring-primary/20"
-                        : "bg-slate-300 hover:bg-slate-400"
-                    }`}
-                    onClick={() => setPreviewCarouselIndex(idx)}
-                  />
-                ))}
-              </div>
-            </div>
-
-            <div className="px-8 py-6 border-t border-slate-200 flex items-center justify-end gap-4">
               <button
-                className="px-8 py-3 rounded-xl border-2 border-slate-200 text-slate-600 font-bold text-sm hover:bg-slate-50 transition-all"
+                className="w-9 h-9 flex items-center justify-center hover:bg-slate-100 rounded-full text-slate-400 transition-all group"
                 onClick={closePreviewModal}
               >
-                Đóng
+                <X className="group-hover:rotate-90 transition-transform" size={18} />
               </button>
-              <button
-                className="px-10 py-3 rounded-xl bg-primary text-white font-bold text-sm shadow-lg hover:bg-blue-700 transition-all transform hover:scale-[1.02] flex items-center gap-2"
-                onClick={() => {
-                  setSelectedTemplateId(previewTemplateId);
-                  closePreviewModal();
-                }}
+            </div>
+
+            {/* PDF viewer */}
+            <div className="flex-1 overflow-hidden">
+              {currentTemplate.previewPdfUrl ? (
+                <Worker workerUrl={PDFJS_WORKER_URL}>
+                  <div style={{ height: "100%" }}>
+                    <Viewer
+                      fileUrl={currentTemplate.previewPdfUrl}
+                      plugins={[defaultLayoutPluginInstance]}
+                      renderLoader={(percentages) => (
+                        <div className="flex flex-col items-center justify-center h-full gap-3">
+                          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+                          <p className="text-sm text-slate-500">
+                            Đang tải... {Math.round(percentages)}%
+                          </p>
+                        </div>
+                      )}
+                      renderError={() => (
+                        <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+                          <BookOpen size={40} className="opacity-30" />
+                          <p className="text-sm">Không thể tải file xem trước.</p>
+                          <a
+                            href={currentTemplate.previewPdfUrl}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-sm text-primary hover:underline flex items-center gap-1"
+                          >
+                            <ExternalLink size={14} />
+                            Mở trực tiếp
+                          </a>
+                        </div>
+                      )}
+                    />
+                  </div>
+                </Worker>
+              ) : (
+                <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-3">
+                  <BookOpen size={40} className="opacity-30" />
+                  <p className="text-sm">Không có file xem trước cho template này.</p>
+                </div>
+              )}
+            </div>
+
+            {/* Footer */}
+            <div className="px-6 py-4 border-t border-slate-100 flex items-center justify-between shrink-0">
+              <a
+                href={currentTemplate.previewPdfUrl || currentTemplate.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-primary transition-colors"
               >
-                <CheckCircle size={20} />
-                Sử dụng mẫu này
-              </button>
+                <ExternalLink size={15} />
+                Mở trong tab mới
+              </a>
+              <div className="flex gap-3">
+                <button
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all"
+                  onClick={closePreviewModal}
+                >
+                  Đóng
+                </button>
+                <button
+                  className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
+                  onClick={() => {
+                    setSelectedTemplateId(previewTemplateId);
+                    closePreviewModal();
+                  }}
+                >
+                  <CheckCircle size={18} />
+                  Sử dụng mẫu này
+                </button>
+              </div>
             </div>
           </div>
         </div>

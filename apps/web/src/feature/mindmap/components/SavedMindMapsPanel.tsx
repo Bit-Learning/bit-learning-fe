@@ -11,7 +11,7 @@ interface SavedMindMapsPanelProps {
 }
 
 const LAYOUT_LABEL: Record<string, string> = {
-    "radial": "Radial",
+    "radial": "Tỏa tròn",
     "symmetric-horizontal": "Đối xứng",
     "horizontal": "Ngang",
 };
