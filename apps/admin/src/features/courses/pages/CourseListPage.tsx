@@ -112,7 +112,7 @@ export const CourseListPage: React.FC = () => {
                 <div className="space-y-3 p-4">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <h3 className="line-clamp-2 text-lg font-semibold">{course.title}</h3>
+                      <h3 className="line-clamp-2 h-14 text-lg font-semibold">{course.title}</h3>
                     </div>
                     {course.status && (
                       <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"} className="shrink-0">

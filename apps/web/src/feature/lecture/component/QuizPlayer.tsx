@@ -1,5 +1,5 @@
 import { Button } from "@workspace/ui/components/Button";
-import { CheckCircle, XCircle } from "lucide-react";
+import { CheckCircle, ChevronLeft, ChevronRight, XCircle } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useLectureQuiz } from "../queries/useLecture";
@@ -7,21 +7,21 @@ import { useIsLectureCompleted, useMarkAsCompleted } from "../queries/useLearnin
 
 interface QuizPlayerProps {
   lectureId: number;
-  isOwner?: boolean;
   onComplete?: () => void;
 }
 
-const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, isOwner, onComplete }) => {
+const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
   const { data: quizData, isLoading } = useLectureQuiz(lectureId);
   const { data: isCompleted } = useIsLectureCompleted(lectureId);
   const { mutate: markAsCompleted } = useMarkAsCompleted();
 
+  const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0);
   const [selectedAnswers, setSelectedAnswers] = useState<Record<number, number>>({});
   const [submitted, setSubmitted] = useState(false);
   const [score, setScore] = useState(0);
 
   const handleSubmit = () => {
-    if (!quizData || isOwner) return;
+    if (!quizData) return;
 
     let correctCount = 0;
     quizData.quizzes.forEach((quiz) => {
@@ -50,13 +50,26 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, isOwner, onComplete 
     setSelectedAnswers({});
     setSubmitted(false);
     setScore(0);
+    setCurrentQuestionIndex(0);
+  };
+
+  const handleNext = () => {
+    if (quizData && currentQuestionIndex < quizData.quizzes.length - 1) {
+      setCurrentQuestionIndex(currentQuestionIndex + 1);
+    }
+  };
+
+  const handlePrev = () => {
+    if (currentQuestionIndex > 0) {
+      setCurrentQuestionIndex(currentQuestionIndex - 1);
+    }
   };
 
   if (isLoading) {
     return (
-      <div className="flex h-full items-center justify-center bg-gray-900">
+      <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900">
         <div className="text-center">
-          <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
           <p className="mt-4 text-gray-400">Đang tải quiz...</p>
         </div>
       </div>
@@ -65,135 +78,206 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, isOwner, onComplete 
 
   if (!quizData) {
     return (
-      <div className="flex h-full items-center justify-center bg-gray-900">
+      <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900">
         <p className="text-gray-400">Không tìm thấy quiz</p>
       </div>
     );
   }
 
+  const currentQuiz = quizData.quizzes[currentQuestionIndex];
+  if (!currentQuiz) {
+    return (
+      <div className="flex h-full items-center justify-center bg-linear-to-br from-slate-900 via-slate-800 to-slate-900">
+        <p className="text-gray-400">Câu hỏi không tồn tại</p>
+      </div>
+    );
+  }
+
+  const selectedAnswerId = selectedAnswers[currentQuiz.id];
   const isPassed = score >= quizData.passPercent * 100;
+  const allAnswered = Object.keys(selectedAnswers).length === quizData.quizzes.length;
 
   return (
-    <div className="h-full overflow-y-auto bg-gray-900 p-8">
-      <div className="mx-auto max-w-3xl">
-        <div className="mb-8 rounded-lg bg-gray-800 p-6">
-          <div className="flex items-center justify-between">
-            <h2 className="mb-4 text-2xl font-bold text-white">{quizData.lecture.title}</h2>
-            {!isOwner && isCompleted && (
-              <span className="flex items-center gap-1 text-sm text-green-400">
-                <CheckCircle className="h-4 w-4" />
-                Đã hoàn thành
-              </span>
-            )}
-          </div>
-          <div className="flex gap-6 text-sm text-gray-400">
-            <div className="flex items-center gap-2">
-              <span>Điểm đạt:</span>
-              <span className="font-semibold text-green-400">{quizData.passPercent * 100}%</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <span>Số lần thử:</span>
-              <span className="font-semibold text-blue-400">{quizData.maxAttempts}</span>
-            </div>
-          </div>
-        </div>
-
-        {!isOwner && submitted && (
-          <div className={`mb-8 rounded-lg p-6 ${isPassed ? "bg-green-600" : "bg-red-600"}`}>
-            <div className="flex items-center gap-4">
-              {isPassed ? <CheckCircle className="h-8 w-8 text-white" /> : <XCircle className="h-8 w-8 text-white" />}
-              <div className="flex-1 text-white">
-                <h3 className="text-xl font-bold">
-                  {isPassed ? "Chúc mừng! Bạn đã vượt qua bài quiz" : "Chưa đạt yêu cầu"}
-                </h3>
-                <p className="text-sm opacity-90">
-                  Điểm của bạn: {score.toFixed(1)}% / {quizData.passPercent * 100}%
-                </p>
+    <div className="flex h-full flex-col bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
+      <div className="mx-auto w-full max-w-4xl flex-1">
+        <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-2xl">
+          <div className="border-b border-gray-200 bg-linear-to-r from-purple-50 to-pink-50 p-6">
+            <div className="flex items-center justify-between">
+              <div>
+                <h2 className="text-2xl font-bold text-gray-900">{quizData.lecture.title}</h2>
+                {quizData.lecture.description && (
+                  <p className="mt-1 text-sm text-gray-600">{quizData.lecture.description}</p>
+                )}
               </div>
-              {!isPassed && (
-                <Button onPress={handleRetry} className="bg-white text-red-600 hover:bg-gray-100">
-                  Thử lại
+              {isCompleted && (
+                <span className="flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-medium text-green-700">
+                  <CheckCircle className="h-5 w-5" />
+                  Đã hoàn thành
+                </span>
+              )}
+            </div>
+            <div className="mt-4 flex gap-6 text-sm">
+              <div className="flex items-center gap-2 text-gray-600">
+                <span>Điểm đạt:</span>
+                <span className="font-semibold text-green-600">{quizData.passPercent * 100}%</span>
+              </div>
+            </div>
+          </div>
+
+          {submitted && (
+            <div className={`border-b p-6 ${isPassed ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+              <div className="flex items-center gap-4">
+                {isPassed ? (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
+                    <CheckCircle className="h-8 w-8 text-green-600" />
+                  </div>
+                ) : (
+                  <div className="flex h-12 w-12 items-center justify-center rounded-full bg-red-100">
+                    <XCircle className="h-8 w-8 text-red-600" />
+                  </div>
+                )}
+                <div className="flex-1">
+                  <h3 className={`text-xl font-bold ${isPassed ? "text-green-900" : "text-red-900"}`}>
+                    {isPassed ? "🎉 Chúc mừng! Bạn đã vượt qua bài quiz" : "😔 Chưa đạt yêu cầu"}
+                  </h3>
+                  <p className={`text-sm ${isPassed ? "text-green-700" : "text-red-700"}`}>
+                    Điểm của bạn: <strong>{score.toFixed(1)}%</strong> / {quizData.passPercent * 100}%
+                  </p>
+                </div>
+                {!isPassed && (
+                  <Button onPress={handleRetry} className="bg-red-600 text-white hover:bg-red-700">
+                    🔄 Thử lại
+                  </Button>
+                )}
+              </div>
+            </div>
+          )}
+
+          <div className="bg-gray-50 px-6 py-4">
+            <div className="flex items-center justify-between">
+              <span className="text-sm font-medium text-gray-600">
+                Câu hỏi {currentQuestionIndex + 1} / {quizData.quizzes.length}
+              </span>
+              <div className="flex gap-1">
+                {quizData.quizzes.map((quiz, idx) => (
+                  <button
+                    key={idx}
+                    type="button"
+                    onClick={() => setCurrentQuestionIndex(idx)}
+                    className={`h-2 w-8 rounded-full transition-all ${
+                      idx === currentQuestionIndex
+                        ? "bg-blue-600"
+                        : selectedAnswers[quiz.id]
+                          ? "bg-green-500"
+                          : "bg-gray-300"
+                    }`}
+                  />
+                ))}
+              </div>
+            </div>
+          </div>
+
+          <div className="p-8">
+            <h3 className="mb-6 text-xl font-semibold text-gray-900">{currentQuiz.questionText}</h3>
+
+            <div className="space-y-3">
+              {currentQuiz.answers.map((answer, idx) => {
+                const isSelected = selectedAnswerId === answer.id;
+                const isCorrect = answer.isCorrect;
+                const showResult = submitted;
+
+                let borderColor = "border-gray-300";
+                let bgColor = "bg-white";
+                let textColor = "text-gray-900";
+
+                if (showResult) {
+                  if (isCorrect) {
+                    borderColor = "border-green-500";
+                    bgColor = "bg-green-50";
+                    textColor = "text-green-900";
+                  } else if (isSelected && !isCorrect) {
+                    borderColor = "border-red-500";
+                    bgColor = "bg-red-50";
+                    textColor = "text-red-900";
+                  }
+                } else if (isSelected) {
+                  borderColor = "border-blue-500";
+                  bgColor = "bg-blue-50";
+                  textColor = "text-blue-900";
+                }
+
+                return (
+                  <label
+                    key={answer.id}
+                    className={`flex cursor-pointer items-center gap-4 rounded-xl border-2 p-4 transition-all ${borderColor} ${bgColor} ${
+                      submitted ? "cursor-default" : "hover:border-blue-400 hover:shadow-md"
+                    }`}
+                  >
+                    <div className="flex h-8 w-8 items-center justify-center">
+                      <input
+                        type="radio"
+                        name={`quiz-${currentQuiz.id}`}
+                        checked={isSelected}
+                        onChange={() =>
+                          !submitted &&
+                          setSelectedAnswers((prev) => ({
+                            ...prev,
+                            [currentQuiz.id]: answer.id,
+                          }))
+                        }
+                        disabled={submitted}
+                        className="h-5 w-5 cursor-pointer accent-blue-600"
+                      />
+                    </div>
+                    <span className={`flex-1 font-medium ${textColor}`}>
+                      <span className="mr-2 text-gray-500">{String.fromCharCode(65 + idx)}.</span>
+                      {answer.answerText}
+                    </span>
+                    {showResult && isCorrect && <CheckCircle className="h-6 w-6 text-green-600" />}
+                    {showResult && isSelected && !isCorrect && <XCircle className="h-6 w-6 text-red-600" />}
+                  </label>
+                );
+              })}
+            </div>
+          </div>
+
+          <div className="border-t border-gray-200 bg-gray-50 p-6">
+            <div className="flex items-center justify-between">
+              <Button
+                onPress={handlePrev}
+                isDisabled={currentQuestionIndex === 0}
+                className="flex items-center gap-2 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-40"
+              >
+                <ChevronLeft className="h-5 w-5" />
+                Câu trước
+              </Button>
+
+              {!submitted && currentQuestionIndex === quizData.quizzes.length - 1 && allAnswered ? (
+                <Button
+                  onPress={handleSubmit}
+                  className="bg-linear-to-r from-green-600 to-emerald-600 px-8 text-white hover:from-green-700 hover:to-emerald-700"
+                >
+                  ✅ Nộp bài
+                </Button>
+              ) : (
+                <Button
+                  onPress={handleNext}
+                  isDisabled={currentQuestionIndex === quizData.quizzes.length - 1}
+                  className="flex items-center gap-2 bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-40"
+                >
+                  Câu tiếp
+                  <ChevronRight className="h-5 w-5" />
                 </Button>
               )}
             </div>
-          </div>
-        )}
 
-        <div className="space-y-6">
-          {quizData.quizzes.map((quiz, index) => {
-            const selectedAnswerId = selectedAnswers[quiz.id];
-
-            return (
-              <div key={quiz.id} className="rounded-lg bg-gray-800 p-6">
-                <h3 className="mb-4 text-lg font-semibold text-white">
-                  Câu {index + 1}: {quiz.questionText}
-                </h3>
-
-                <div className="space-y-3">
-                  {quiz.answers.map((answer) => {
-                    const isSelected = selectedAnswerId === answer.id;
-                    const isCorrect = answer.isCorrect;
-                    const showResult = !isOwner && submitted;
-
-                    let bgColor = "border-gray-700";
-                    if (showResult) {
-                      if (isCorrect) {
-                        bgColor = "border-green-500 bg-green-500/10";
-                      } else if (isSelected && !isCorrect) {
-                        bgColor = "border-red-500 bg-red-500/10";
-                      }
-                    } else if (isSelected) {
-                      bgColor = "border-blue-500 bg-blue-500/10";
-                    }
-
-                    // Owner: luôn highlight đáp án đúng
-                    if (isOwner && isCorrect) {
-                      bgColor = "border-green-500 bg-green-500/10";
-                    }
-
-                    return (
-                      <label
-                        key={answer.id}
-                        className={`flex cursor-pointer items-center gap-3 rounded-lg border p-4 transition-all ${bgColor} ${
-                          submitted || isOwner ? "cursor-default" : "hover:border-gray-600"
-                        }`}
-                      >
-                        <input
-                          type="radio"
-                          name={`quiz-${quiz.id}`}
-                          checked={isSelected}
-                          onChange={() =>
-                            !submitted &&
-                            !isOwner &&
-                            setSelectedAnswers((prev) => ({
-                              ...prev,
-                              [quiz.id]: answer.id,
-                            }))
-                          }
-                          disabled={submitted || isOwner}
-                          className="h-5 w-5 accent-blue-600"
-                        />
-                        <span className="flex-1 text-white">{answer.answerText}</span>
-                        {(showResult || isOwner) && isCorrect && <CheckCircle className="h-5 w-5 text-green-500" />}
-                        {showResult && isSelected && !isCorrect && <XCircle className="h-5 w-5 text-red-500" />}
-                      </label>
-                    );
-                  })}
-                </div>
+            {!submitted && (
+              <div className="mt-4 text-center text-sm text-gray-600">
+                Đã trả lời: <strong>{Object.keys(selectedAnswers).length}</strong> / {quizData.quizzes.length} câu
               </div>
-            );
-          })}
+            )}
+          </div>
         </div>
-
-        {!isOwner && !submitted && (
-          <Button
-            onPress={handleSubmit}
-            isDisabled={Object.keys(selectedAnswers).length !== quizData.quizzes.length}
-            className="mt-8 w-full bg-blue-600 py-3 text-white hover:bg-blue-700 disabled:opacity-50"
-          >
-            Nộp bài ({Object.keys(selectedAnswers).length}/{quizData.quizzes.length})
-          </Button>
-        )}
       </div>
     </div>
   );

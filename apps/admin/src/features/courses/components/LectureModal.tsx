@@ -1,8 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import ReactQuill from "react-quill-new";
+import "react-quill-new/dist/quill.snow.css";
 import { FileText, HelpCircle, Loader2, Trash2, Upload, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -21,6 +23,7 @@ import {
 } from "../queries/useLecture";
 import { LectureDetail } from "../types/course.type";
 import { UpdateLectureRequest, UpdateLectureTextRequest } from "../types/lecture.type";
+import { HtmlPasteButton } from "@/components/HtmlPasteButton";
 
 interface LectureModalProps {
   mode: "create" | "edit";
@@ -70,6 +73,8 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const navigate = useNavigate();
 
+  const textContentRef = useRef<any>(null);
+
   const { data: textData, isLoading: textLoading } = useLectureText(
     mode === "edit" && lecture && lecture.type === "TEXT" ? lecture.id : 0,
   );
@@ -103,6 +108,44 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const videoIsPreviewable = videoForm.watch("isPreviewable");
   const textIsPreviewable = textForm.watch("isPreviewable");
 
+  const quillModules = useMemo(
+    () => ({
+      toolbar: [
+        ["bold", "italic", "underline", "strike"],
+        ["code", "blockquote", "code-block"],
+        [{ header: [1, 2, 3, false] }],
+        [{ list: "ordered" }, { list: "bullet" }],
+        [{ indent: "-1" }, { indent: "+1" }],
+        [{ color: [] }, { background: [] }],
+        ["link", "image", "video"],
+        ["clean"],
+      ],
+      clipboard: {
+        matchVisual: false,
+      },
+    }),
+    [],
+  );
+
+  const quillFormats = [
+    "header",
+    "bold",
+    "italic",
+    "underline",
+    "strike",
+    "code",
+    "blockquote",
+    "code-block",
+    "list",
+    "bullet",
+    "indent",
+    "color",
+    "background",
+    "link",
+    "image",
+    "video",
+  ];
+
   useEffect(() => {
     if (textData?.content) {
       textForm.setValue("content", textData.content);
@@ -112,6 +155,20 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const getNextOrderIndex = () => {
     if (existingLectures.length === 0) return 1;
     return Math.max(...existingLectures.map((l) => l.orderIndex)) + 1;
+  };
+
+  const handleInsertHtml = (ref: any, setValue: any, fieldName: string) => (html: string) => {
+    if (ref.current) {
+      const editor = ref.current.getEditor();
+      const range = editor.getSelection();
+      if (range) {
+        editor.clipboard.dangerouslyPasteHTML(range.index, html);
+      } else {
+        const length = editor.getLength();
+        editor.clipboard.dangerouslyPasteHTML(length, html);
+      }
+      setValue(fieldName, editor.root.innerHTML);
+    }
   };
 
   const handleQuizClick = () => {
@@ -221,7 +278,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="flex max-h-[90vh] w-full max-w-2xl flex-col overflow-hidden">
+      <Card className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden">
         <div className="flex items-center justify-between border-b p-4">
           <h2 className="text-xl font-bold">{mode === "create" ? "Thêm bài học mới" : "Chỉnh sửa bài học"}</h2>
           <Button variant="outline" size="sm" onClick={onClose}>
@@ -286,7 +343,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
                 <Textarea
                   id="description"
                   {...videoForm.register("description")}
-                  rows={2}
+                  rows={3}
                   placeholder="Mô tả ngắn về bài học"
                 />
               </div>
@@ -383,20 +440,28 @@ const LectureModal: React.FC<LectureModalProps> = ({
                   <Textarea
                     id="description"
                     {...textForm.register("description")}
-                    rows={2}
+                    rows={3}
                     placeholder="Mô tả ngắn về bài học"
                   />
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="content">Nội dung *</Label>
-                  <Textarea
-                    id="content"
-                    {...textForm.register("content")}
-                    rows={10}
-                    placeholder="Nhập nội dung bài học..."
-                    className={textForm.formState.errors.content ? "border-red-500" : ""}
-                  />
+                  <div className="flex items-center justify-between">
+                    <Label>Nội dung *</Label>
+                    <HtmlPasteButton onInsert={handleInsertHtml(textContentRef, textForm.setValue, "content")} />
+                  </div>
+                  <div className={textForm.formState.errors.content ? "rounded-lg border-2 border-red-500" : ""}>
+                    <ReactQuill
+                      ref={textContentRef}
+                      theme="snow"
+                      value={textForm.watch("content") || ""}
+                      onChange={(value) => textForm.setValue("content", value)}
+                      modules={quillModules}
+                      formats={quillFormats}
+                      placeholder="Nhập nội dung bài học"
+                      style={{ height: "400px", marginBottom: "50px" }}
+                    />
+                  </div>
                   {textForm.formState.errors.content && (
                     <p className="text-sm text-red-500">{textForm.formState.errors.content.message}</p>
                   )}
