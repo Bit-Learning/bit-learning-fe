@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "@/shared/components/Sonner";
 import { QRCodeSVG } from "qrcode.react";
-import React, { useCallback, useRef } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { useDispatch } from "react-redux";
 import { GenerateQRToken } from "../api/auth.api";
 import { setErrorAction, setIsAuthenticatedAction } from "../store";
@@ -21,6 +21,11 @@ const QRCodeLogin: React.FC = () => {
 	const dispatch = useDispatch();
 	const navigate = useNavigate();
 	const eventSourceRef = useRef<EventSource | null>(null);
+	const statusRef = useRef<QRStatus>(QRStatus.LOADING);
+
+	useEffect(() => {
+		statusRef.current = status;
+	}, [status]);
 
 	const generateQR = useCallback(async () => {
 		try {
@@ -90,7 +95,10 @@ const QRCodeLogin: React.FC = () => {
 			es.onerror = (error) => {
 				console.error("[QRCodeLogin] SSE Error:", error);
 				// Check if already in a terminal state
-				if (status !== QRStatus.EXPIRED && status !== QRStatus.CONFIRMED) {
+				if (
+					statusRef.current !== QRStatus.EXPIRED &&
+					statusRef.current !== QRStatus.CONFIRMED
+				) {
 					setStatus(QRStatus.ERROR);
 					es.close();
 					// Only show error toast for actual connection errors, not timeout
@@ -116,7 +124,7 @@ const QRCodeLogin: React.FC = () => {
 				description: errorMessage,
 			});
 		}
-	}, [dispatch, navigate, status]);
+	}, [dispatch, navigate]);
 
 	React.useEffect(() => {
 		generateQR();
