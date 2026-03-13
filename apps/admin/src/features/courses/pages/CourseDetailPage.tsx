@@ -1,310 +1,488 @@
 import React, { useState } from "react";
-import { useParams } from "@tanstack/react-router";
-import { useNavigate } from "@tanstack/react-router";
-import { useGetCourseDetail, useGetSections, useValidateCourse } from "../queries/useCourse";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import {
   ArrowLeft,
-  CheckCircle,
-  XCircle,
-  Star,
-  Users,
   BookOpen,
-  Globe,
-  Target,
-  GraduationCap,
-  AlertTriangle,
+  CheckCircle,
+  ChevronDown,
+  ChevronUp,
+  Edit,
+  Eye,
+  FileText,
+  GripVertical,
+  HelpCircle,
+  Plus,
+  Settings,
+  Trash2,
+  Video,
 } from "lucide-react";
-import { SectionItem } from "../components/SectionItem";
-import { Skeleton } from "@/components/ui/skeleton";
+import { useForm } from "react-hook-form";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
+import { useCourseDetail, useValidateCourse } from "../queries/useCourse";
+import { useDeleteLecture } from "../queries/useLecture";
+import { useSectionsByCourse, useDeleteSection } from "../queries/useSection";
+import { LectureDetail, SectionDetail } from "../types/course.type";
+import { LectureDetailModal } from "../components/LectureDetailModal";
+
+import { EditCourseModal } from "../components/EditCourseModal";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import LectureModal from "../components/LectureModal";
+import SectionModal from "../components/SectionModal";
+
+type ModalState =
+  | { type: "none" }
+  | { type: "create-lecture"; sectionId: number }
+  | { type: "view-lecture"; lecture: LectureDetail }
+  | { type: "edit-lecture"; lecture: LectureDetail }
+  | { type: "edit-section"; section: SectionDetail }
+  | { type: "add-section" }
+  | { type: "edit-course" };
+
+type DeleteModalState =
+  | { type: "none" }
+  | { type: "section"; id: number; name: string }
+  | { type: "lecture"; id: number; name: string };
 
 export const CourseDetailPage: React.FC = () => {
-  const { id } = useParams({ strict: false });
+  const { id } = useParams({ from: "/_authenticated/courses/$id" });
+  const courseId = Number(id);
+  const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
+  const [modalState, setModalState] = useState<ModalState>({ type: "none" });
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: "none" });
+
   const navigate = useNavigate();
-  const courseId = parseInt(id || "0");
 
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    action: "publish" | "unpublish" | null;
-  }>({ open: false, action: null });
+  const { data: course, isLoading: courseLoading, refetch: refetchCourse } = useCourseDetail(courseId);
+  const { data: sections, isLoading: sectionsLoading, refetch: refetchSections } = useSectionsByCourse(courseId);
+  const deleteSectionMutation = useDeleteSection();
+  const deleteLectureMutation = useDeleteLecture();
+  const validateCourseMutation = useValidateCourse();
 
-  const { data: course, isLoading: courseLoading } = useGetCourseDetail(courseId);
-  const { data: sections, isLoading: sectionsLoading } = useGetSections(courseId);
-  const { mutate: validateCourse, isPending } = useValidateCourse();
+  const sectionForm = useForm<{ title: string; description: string }>({
+    defaultValues: { title: "", description: "" },
+  });
 
-  const handleOpenConfirm = (action: "publish" | "unpublish") => {
-    setConfirmDialog({ open: true, action });
+  const toggleSection = (sectionId: number) => {
+    const newExpanded = new Set(expandedSections);
+    if (newExpanded.has(sectionId)) newExpanded.delete(sectionId);
+    else newExpanded.add(sectionId);
+    setExpandedSections(newExpanded);
   };
 
-  const handleConfirm = () => {
-    if (confirmDialog.action === "publish") {
-      validateCourse({ id: courseId, isAccepted: true });
-    } else if (confirmDialog.action === "unpublish") {
-      validateCourse({ id: courseId, isAccepted: false });
+  const openDeleteSectionModal = (sectionId: number, sectionName: string) => {
+    setDeleteModal({ type: "section", id: sectionId, name: sectionName });
+  };
+
+  const openDeleteLectureModal = (lectureId: number, lectureName: string) => {
+    setDeleteModal({ type: "lecture", id: lectureId, name: lectureName });
+  };
+
+  const closeDeleteModal = () => setDeleteModal({ type: "none" });
+
+  const handleConfirmDelete = async () => {
+    if (deleteModal.type === "section") {
+      try {
+        await deleteSectionMutation.mutateAsync(deleteModal.id);
+        closeDeleteModal();
+      } catch (error) {
+        console.error("Failed to delete section:", error);
+      }
+    } else if (deleteModal.type === "lecture") {
+      try {
+        await deleteLectureMutation.mutateAsync(deleteModal.id);
+        refetchSections();
+        closeDeleteModal();
+      } catch (error) {
+        console.error("Failed to delete lecture:", error);
+      }
     }
-    setConfirmDialog({ open: false, action: null });
   };
 
-  const handleCancel = () => {
-    setConfirmDialog({ open: false, action: null });
+  const closeModal = () => {
+    sectionForm.reset();
+    setModalState({ type: "none" });
   };
 
-  const formatDuration = (seconds: number) => {
-    const hours = Math.floor(seconds / 3600);
-    const minutes = Math.floor((seconds % 3600) / 60);
-    return `${hours}h ${minutes}m`;
+  const handleViewLecture = (lecture: LectureDetail) => setModalState({ type: "view-lecture", lecture });
+
+  const handleEditLecture = (lecture: LectureDetail) => {
+    if (lecture.type === "QUIZ") {
+      navigate({
+        to: "/courses/quiz",
+        search: {
+          mode: "edit",
+          sectionId: lecture.sectionId,
+          courseId,
+          lectureId: lecture.id,
+          orderIndex: lecture.orderIndex,
+        },
+      });
+    } else {
+      setModalState({ type: "edit-lecture", lecture });
+    }
   };
 
-  if (courseLoading || sectionsLoading) {
+  const handleEditSection = (section: SectionDetail) => setModalState({ type: "edit-section", section });
+
+  const handleEditFromView = () => {
+    if (modalState.type === "view-lecture") {
+      const lecture = modalState.lecture;
+      if (lecture.type === "QUIZ") {
+        navigate({
+          to: "/courses/quiz",
+          search: {
+            mode: "edit",
+            sectionId: lecture.sectionId,
+            courseId,
+            lectureId: lecture.id,
+            orderIndex: lecture.orderIndex,
+          },
+        });
+        closeModal();
+      } else {
+        setModalState({ type: "edit-lecture", lecture });
+      }
+    }
+  };
+
+  const handleTogglePublish = async () => {
+    if (!course) return;
+
+    const isAccepted = course.status !== "PUBLISHED";
+
+    try {
+      await validateCourseMutation.mutateAsync({ id: courseId, isAccepted });
+      refetchCourse();
+    } catch (error) {
+      console.error("Failed to toggle publish status:", error);
+    }
+  };
+
+  const handleSectionUpdated = () => refetchSections();
+  const handleLectureUpdated = () => refetchSections();
+  const handleCourseUpdated = () => refetchCourse();
+
+  if (courseLoading) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-8 w-48 mb-6" />
-        <Skeleton className="h-96 w-full" />
+      <div className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto h-12 w-12 animate-spin rounded-full border-b-2 border-blue-600" />
+          <p className="mt-4 text-gray-600">Đang tải...</p>
+        </div>
       </div>
     );
   }
 
   if (!course) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-destructive">Không tìm thấy khóa học</p>
+      <div className="flex min-h-screen items-center justify-center p-8">
+        <Card className="p-12 text-center">
+          <h3 className="text-xl font-semibold">Không tìm thấy khóa học</h3>
+        </Card>
       </div>
     );
   }
 
+  const getDeleteModalProps = () => {
+    if (deleteModal.type === "section") {
+      return {
+        title: "Xóa chương",
+        description: "Tất cả bài học trong chương này cũng sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác!",
+      };
+    } else if (deleteModal.type === "lecture") {
+      return {
+        title: "Xóa bài học",
+        description: "Bài học này sẽ bị xóa vĩnh viễn khỏi khóa học. Hành động này không thể hoàn tác!",
+      };
+    }
+    return { title: "Xóa", description: "" };
+  };
+
+  const deleteModalProps = getDeleteModalProps();
+
+  const isPublished = course.status === "PUBLISHED";
+  const canTogglePublish = ["PUBLISHED", "PENDING"].includes(course.status || "");
+
   return (
-    <div className="container mx-auto px-4 py-8">
-      <Button variant="ghost" className="mb-6" onClick={() => navigate({ to: "/courses" })}>
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Quay lại danh sách
+    <div className="min-h-screen space-y-4 p-8">
+      <Button
+        variant="outline"
+        size="lg"
+        className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+        onClick={() => navigate({ to: "/courses" })}
+      >
+        <ArrowLeft className="h-4 w-4" />
+        <span>Quay lại danh sách</span>
       </Button>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div>
-                  <p className="text-sm text-muted-foreground font-mono mb-2">{course.code}</p>
-                  <CardTitle className="text-3xl mb-2">{course.title}</CardTitle>
-                  <p className="text-lg text-muted-foreground">{course.subtitle}</p>
-                </div>
-                <Badge variant={course.isPublished ? "default" : "secondary"} className="text-sm">
-                  {course.isPublished ? "Đã xuất bản" : "Chờ duyệt"}
-                </Badge>
-              </div>
-            </CardHeader>
-
-            <CardContent className="space-y-4">
-              <img src={course.thumbnailUrl} alt={course.title} className="w-full h-64 object-cover rounded-lg" />
-
-              <div className="flex flex-wrap gap-4 text-sm">
-                <div className="flex items-center gap-2">
-                  <Star className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-                  <span className="font-semibold">{course.ratingStar}</span>
-                  <span className="text-muted-foreground">({course.ratingCount} đánh giá)</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <BookOpen className="w-4 h-4" />
-                  <span>{course.instructorName}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <Globe className="w-4 h-4" />
-                  <span>{course.language === "VIETNAMESE" ? "Tiếng Việt" : "English"}</span>
-                </div>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="font-semibold text-lg mb-2">Mô tả khóa học</h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{course.description}</p>
-              </div>
-
-              <Separator />
-
-              <div>
-                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                  <Target className="w-5 h-5" />
-                  Bạn sẽ học được gì
-                </h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{course.outcome}</p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                  <GraduationCap className="w-5 h-5" />
-                  Yêu cầu
-                </h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{course.requirement}</p>
-              </div>
-
-              <div>
-                <h3 className="font-semibold text-lg mb-2 flex items-center gap-2">
-                  <Users className="w-5 h-5" />
-                  Đối tượng học viên
-                </h3>
-                <p className="text-muted-foreground whitespace-pre-wrap">{course.audience}</p>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Nội dung khóa học</CardTitle>
-              <p className="text-sm text-muted-foreground">
-                {course.totalSections} chương • {course.totalLectures} bài học • {formatDuration(course.totalDuration)}
-              </p>
-            </CardHeader>
-            <CardContent>
-              {sections && sections.length > 0 ? (
-                <div className="space-y-4">
-                  {sections.map((section, index) => (
-                    <SectionItem key={section.id} section={section} index={index} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">Chưa có nội dung nào</p>
-              )}
-            </CardContent>
-          </Card>
+      <div className="mt-2 flex items-center justify-between">
+        <div className="flex items-center gap-3">
+          <div>
+            <h1 className="text-3xl font-bold">{course.title}</h1>
+            <p className="mt-1 text-gray-600">{course.subtitle}</p>
+          </div>
+          {course.status && (
+            <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"} className="h-fit">
+              {course.status === "PUBLISHED" ? "Đã xuất bản" : "Chưa xuất bản"}
+            </Badge>
+          )}
         </div>
-
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Giá</span>
-                <span className="font-bold text-lg text-primary">{course.price.toLocaleString("vi-VN")}đ</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Cấp độ</span>
-                <Badge>
-                  {course.level === "BEGINNER" ? "Cơ bản" : course.level === "INTERMEDIATE" ? "Trung cấp" : "Nâng cao"}
-                </Badge>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Khối</span>
-                <span className="font-semibold">Khối {course.grade}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Số chương</span>
-                <span className="font-semibold">{course.totalSections}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Số bài học</span>
-                <span className="font-semibold">{course.totalLectures}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Thời lượng</span>
-                <span className="font-semibold">{formatDuration(course.totalDuration)}</span>
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Hành động</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {!course.isPublished ? (
-                <Button className="w-full" onClick={() => handleOpenConfirm("publish")} disabled={isPending}>
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Phê duyệt & Xuất bản
-                </Button>
+        <div className="flex gap-2">
+          {canTogglePublish && (
+            <Button
+              onClick={handleTogglePublish}
+              size="lg"
+              disabled={validateCourseMutation.isPending}
+              variant={isPublished ? "outline" : "default"}
+              className={
+                isPublished
+                  ? "border-none"
+                  : "gap-2 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
+              }
+            >
+              {validateCourseMutation.isPending ? (
+                <>
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                  Đang xử lý...
+                </>
+              ) : isPublished ? (
+                <></>
               ) : (
-                <Button
-                  variant="destructive"
-                  className="w-full"
-                  onClick={() => handleOpenConfirm("unpublish")}
-                  disabled={isPending}
-                >
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Hủy xuất bản
-                </Button>
+                <>
+                  <CheckCircle className="h-4 w-4" />
+                  Xuất bản
+                </>
               )}
-            </CardContent>
-          </Card>
+            </Button>
+          )}
+          <Button
+            onClick={() => setModalState({ type: "edit-course" })}
+            size="lg"
+            className="gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+          >
+            <Settings className="h-4 w-4" />
+            Chỉnh sửa khóa học
+          </Button>
         </div>
       </div>
 
-      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => !open && handleCancel()}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2">
-              {confirmDialog.action === "publish" ? (
-                <>
-                  <CheckCircle className="w-5 h-5 text-green-600" />
-                  Xác nhận phê duyệt & xuất bản
-                </>
-              ) : (
-                <>
-                  <AlertTriangle className="w-5 h-5 text-amber-600" />
-                  Xác nhận hủy xuất bản
-                </>
-              )}
-            </AlertDialogTitle>
-            <AlertDialogDescription className="space-y-3 pt-2">
-              {confirmDialog.action === "publish" ? (
-                <>
-                  <p>
-                    Bạn có chắc chắn muốn <strong className="text-green-600">phê duyệt và xuất bản</strong> khóa học
-                    này?
-                  </p>
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-3 text-sm text-green-800">
-                    <p className="font-medium mb-1">Sau khi xuất bản:</p>
-                    <ul className="list-disc list-inside space-y-1 text-xs">
-                      <li>Khóa học sẽ hiển thị công khai trên hệ thống</li>
-                      <li>Học viên có thể đăng ký và học khóa học</li>
-                      <li>Giảng viên sẽ nhận được thông báo</li>
-                    </ul>
+      <Card className="p-6">
+        <div className="grid grid-cols-1 gap-4 md:grid-cols-4">
+          <div>
+            <p className="text-sm text-gray-600">Giá</p>
+            <p className="text-xl font-bold text-blue-600">
+              {course.price === 0 ? "Miễn phí" : `${course.price.toLocaleString("vi-VN")} ₫`}
+            </p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Cấp độ</p>
+            <p className="font-semibold">{course.level}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Khối lớp</p>
+            <p className="font-semibold">Lớp {course.grade}</p>
+          </div>
+          <div>
+            <p className="text-sm text-gray-600">Ngôn ngữ</p>
+            <p className="font-semibold">{course.language}</p>
+          </div>
+        </div>
+      </Card>
+
+      <Card className="p-6">
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="text-2xl font-bold">Nội dung khóa học</h2>
+        </div>
+
+        <div className="mb-4">
+          <Button onClick={() => setModalState({ type: "add-section" })} variant="outline" className="w-full">
+            <Plus className="mr-2 h-4 w-4" />
+            Thêm chương mới
+          </Button>
+        </div>
+
+        <div className="space-y-3">
+          {sectionsLoading ? (
+            <p className="py-8 text-center text-gray-600">Đang tải chương...</p>
+          ) : !sections || sections.length === 0 ? (
+            <div className="py-8 text-center text-gray-600">
+              <BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+              <p className="mb-2 text-lg font-medium">Chưa có chương nào</p>
+              <p className="text-sm">Hãy thêm chương đầu tiên để bắt đầu!</p>
+            </div>
+          ) : (
+            sections.map((section, index) => (
+              <Card key={section.id} className="overflow-hidden border-l-4 border-l-blue-500">
+                <div
+                  className="flex cursor-pointer items-center justify-between bg-gray-50 p-4 transition-colors hover:bg-gray-100"
+                  onClick={() => toggleSection(section.id)}
+                >
+                  <div className="flex flex-1 items-center gap-3">
+                    <GripVertical className="h-5 w-5 cursor-move text-gray-400" />
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2">
+                        <h3 className="text-lg font-semibold">
+                          Chương {index + 1}: {section.title}
+                        </h3>
+                        <Badge variant={section.isPublished ? "secondary" : "default"}>
+                          {section.isPublished ? "Công khai" : "Riêng tư"}
+                        </Badge>
+                      </div>
+                      {section.description && <p className="mt-1 text-sm text-gray-600">{section.description}</p>}
+                      <p className="mt-2 text-xs text-gray-500">{section.lectures?.length || 0} bài học</p>
+                    </div>
                   </div>
-                </>
-              ) : (
-                <>
-                  <p>
-                    Bạn có chắc chắn muốn <strong className="text-amber-600">hủy xuất bản</strong> khóa học này?
-                  </p>
-                  <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 text-sm text-amber-800">
-                    <p className="font-medium mb-1">Sau khi hủy xuất bản:</p>
-                    <ul className="list-disc list-inside space-y-1 text-xs">
-                      <li>Khóa học sẽ không còn hiển thị công khai</li>
-                      <li>Học viên mới không thể đăng ký</li>
-                      <li>Học viên hiện tại vẫn có thể tiếp tục học</li>
-                      <li>Giảng viên sẽ nhận được thông báo</li>
-                    </ul>
+                  <div className="flex items-center gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditSection(section as SectionDetail);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteSectionModal(section.id, section.title);
+                      }}
+                      disabled={deleteSectionMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                    {expandedSections.has(section.id) ? (
+                      <ChevronUp className="h-5 w-5 text-gray-600" />
+                    ) : (
+                      <ChevronDown className="h-5 w-5 text-gray-600" />
+                    )}
                   </div>
-                </>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancel}>Hủy bỏ</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirm}
-              className={confirmDialog.action === "publish" ? "bg-green-600 hover:bg-green-700" : ""}
-            >
-              {confirmDialog.action === "publish" ? "Phê duyệt & Xuất bản" : "Hủy xuất bản"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+                </div>
+
+                {expandedSections.has(section.id) && (
+                  <div className="space-y-3 border-t bg-white p-4">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="w-full"
+                      onClick={() => setModalState({ type: "create-lecture", sectionId: section.id })}
+                    >
+                      <Plus className="mr-2 h-4 w-4" />
+                      Thêm bài học
+                    </Button>
+
+                    {!section.lectures || section.lectures.length === 0 ? (
+                      <p className="py-6 text-center text-sm text-gray-500">
+                        Chưa có bài học nào. Click "Thêm bài học" để bắt đầu.
+                      </p>
+                    ) : (
+                      <div className="space-y-2">
+                        {section.lectures.map((lecture, lIdx) => (
+                          <div
+                            key={lecture.id}
+                            className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-gray-100"
+                          >
+                            <div className="flex items-center gap-3">
+                              {lecture.type === "VIDEO" ? (
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-100">
+                                  <Video className="h-5 w-5 text-blue-600" />
+                                </div>
+                              ) : lecture.type === "TEXT" ? (
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-green-100">
+                                  <FileText className="h-5 w-5 text-green-600" />
+                                </div>
+                              ) : (
+                                <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-100">
+                                  <HelpCircle className="h-5 w-5 text-purple-600" />
+                                </div>
+                              )}
+                              <div className="flex-1">
+                                <p className="font-medium">
+                                  Bài {lIdx + 1}: {lecture.title}
+                                </p>
+                                {lecture.description && (
+                                  <p className="mt-0.5 text-sm text-gray-600">{lecture.description}</p>
+                                )}
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleViewLecture(lecture as LectureDetail)}
+                              >
+                                <Eye className="mr-1 h-4 w-4" />
+                                <span className="hidden sm:inline">Xem</span>
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => handleEditLecture(lecture as LectureDetail)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => openDeleteLectureModal(lecture.id, lecture.title)}
+                                disabled={deleteLectureMutation.isPending}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-500" />
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </Card>
+            ))
+          )}
+        </div>
+      </Card>
+
+      {modalState.type === "add-section" && (
+        <SectionModal mode="create" courseId={courseId} onClose={closeModal} onSuccess={handleSectionUpdated} />
+      )}
+
+      {modalState.type === "create-lecture" && (
+        <LectureModal
+          mode="create"
+          courseId={courseId}
+          sectionId={modalState.sectionId}
+          existingLectures={sections?.find((s) => s.id === modalState.sectionId)?.lectures || []}
+          onClose={closeModal}
+          onSuccess={handleLectureUpdated}
+        />
+      )}
+      {modalState.type === "view-lecture" && (
+        <LectureDetailModal lecture={modalState.lecture} onClose={closeModal} onEdit={handleEditFromView} />
+      )}
+      {modalState.type === "edit-lecture" && (
+        <LectureModal mode="edit" lecture={modalState.lecture} onClose={closeModal} onSuccess={handleLectureUpdated} />
+      )}
+      {modalState.type === "edit-section" && (
+        <SectionModal mode="edit" section={modalState.section} onClose={closeModal} onSuccess={handleSectionUpdated} />
+      )}
+      {modalState.type === "edit-course" && (
+        <EditCourseModal course={course as any} onClose={closeModal} onSuccess={handleCourseUpdated} />
+      )}
+
+      <DeleteConfirmModal
+        open={deleteModal.type !== "none"}
+        onClose={closeDeleteModal}
+        onConfirm={handleConfirmDelete}
+        title={deleteModalProps.title}
+        description={deleteModalProps.description}
+        itemName={deleteModal.type !== "none" ? deleteModal.name : undefined}
+        isPending={deleteSectionMutation.isPending || deleteLectureMutation.isPending}
+      />
     </div>
   );
 };

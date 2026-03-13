@@ -8,6 +8,7 @@ import styles from "./HomePage.module.css";
 import { Link } from "@tanstack/react-router";
 import { featuredGame } from "../data/games";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import useDebounce from "@/shared/hooks/use-debounce";
 interface GameListNetflixProps {
 	username: string | null;
 }
@@ -19,6 +20,8 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 	const [categories, setCategories] = useState<GameCategory[]>([]);
 	const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 	const [detailGame, setDetailGame] = useState<Game | null>(null);
+	const [searchTerm, setSearchTerm] = useState("");
+	const debouncedSearchTerm = useDebounce(searchTerm, 300);
 
 	// State for Fullscreen
 	const [isFullscreen, setIsFullscreen] = useState(false);
@@ -441,6 +444,38 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 	}
 
 	// --- VIEW: Netflix-style Home ---
+	const normalizedSearch = debouncedSearchTerm.trim().toLowerCase();
+	const filteredCategoriesWithGames = normalizedSearch
+		? categoriesWithGames
+				.map((category) => {
+					const games = (category.games || []).filter((game) => {
+						const title = game.title?.toLowerCase() || "";
+						const description = game.description?.toLowerCase() || "";
+						return (
+							title.includes(normalizedSearch) ||
+							description.includes(normalizedSearch)
+						);
+					});
+					return { ...category, games } as GameCategory;
+				})
+				.filter(
+					(category) =>
+						(category.games && category.games.length > 0) ||
+						category.name.toLowerCase().includes(normalizedSearch),
+				)
+		: categoriesWithGames;
+
+	const handleSelectGameFromSearch = (gameId: number) => {
+		const category = categoriesWithGames.find((c) =>
+			(c.games || []).some((g) => g.id === gameId),
+		);
+		const game = category?.games?.find((g) => g.id === gameId) || null;
+		if (game) {
+			setDetailGame(game);
+			setSearchTerm("");
+		}
+	};
+
 	return (
 		<div className="min-h-screen bg-[#12080a] text-white">
 			<title>Bit Learning Game Center</title>
@@ -510,8 +545,8 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 
 			<main className={styles.main}>
 				{/* Categories with Games - Netflix Style */}
-				{categoriesWithGames.length > 0 ? (
-					categoriesWithGames.map((category) => (
+				{filteredCategoriesWithGames.length > 0 ? (
+					filteredCategoriesWithGames.map((category) => (
 						<CategoryRow
 							key={category.id}
 							categoryName={category.name}
@@ -537,7 +572,8 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 								</span>
 							</span>
 							<span className={styles.footerLogoText}>
-								Edu<span className={styles.footerLogoAccent}>Play</span>
+								Bit Learring
+								<span className={styles.footerLogoAccent}>Play</span>
 							</span>
 						</div>
 						<p className={styles.footerTagline}>

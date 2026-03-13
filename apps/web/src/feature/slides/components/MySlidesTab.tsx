@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Search, Plus, Download, Eye, Trash2, ChevronLeft, ChevronRight, Loader2, Code } from "lucide-react";
+import { Search, Plus, Download, Eye, Trash2, ChevronLeft, ChevronRight, Loader2, Code, AlertTriangle, X } from "lucide-react";
 import { useMySlides, useDeleteSlide } from "../queries/useSlide";
 import type { SlideGenerationResponse } from "../types/slide.type";
 
@@ -11,13 +11,15 @@ interface MySlidesTabProps {
 export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitchToCreate }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
+  const [deleteTarget, setDeleteTarget] = useState<{ id: number; topic: string } | null>(null);
   const pageSize = 10;
 
   const { data, isLoading, isError } = useMySlides(page, pageSize);
   const deleteSlide = useDeleteSlide();
 
-  const slides = data?.data || [];
-  const pageInfo = data?.page;
+  const springPage = data?.data as any;
+  const slides: SlideGenerationResponse[] = springPage?.content || [];
+  const pageInfo = springPage;
 
   const filteredSlides = Array.isArray(slides)
     ? slides.filter((slide: SlideGenerationResponse) => {
@@ -27,8 +29,14 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
     : [];
 
   const handleDelete = (id: number, topic: string) => {
-    if (confirm(`Bạn có chắc muốn xóa slide "${topic}"?`)) {
-      deleteSlide.mutate(id);
+    setDeleteTarget({ id, topic });
+  };
+
+  const handleConfirmDelete = () => {
+    if (deleteTarget) {
+      deleteSlide.mutate(deleteTarget.id, {
+        onSettled: () => setDeleteTarget(null),
+      });
     }
   };
 
@@ -221,6 +229,49 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
           >
             <ChevronRight size={20} />
           </button>
+        </div>
+      )}
+
+      {deleteTarget && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
+          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4">
+            <div className="flex items-start justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
+                  <AlertTriangle className="text-red-500" size={20} />
+                </div>
+                <h3 className="text-base font-bold text-slate-900">Xóa slide</h3>
+              </div>
+              <button
+                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
+                onClick={() => setDeleteTarget(null)}
+              >
+                <X size={16} />
+              </button>
+            </div>
+            <p className="text-sm text-slate-600 leading-relaxed">
+              Bạn có chắc muốn xóa slide{" "}
+              <span className="font-semibold text-slate-900">"{deleteTarget.topic}"</span>?{" "}
+              Hành động này không thể hoàn tác.
+            </p>
+            <div className="flex gap-3 justify-end pt-1">
+              <button
+                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
+                onClick={() => setDeleteTarget(null)}
+                disabled={deleteSlide.isPending}
+              >
+                Hủy
+              </button>
+              <button
+                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+                onClick={handleConfirmDelete}
+                disabled={deleteSlide.isPending}
+              >
+                {deleteSlide.isPending ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
+                Xóa
+              </button>
+            </div>
+          </div>
         </div>
       )}
     </div>

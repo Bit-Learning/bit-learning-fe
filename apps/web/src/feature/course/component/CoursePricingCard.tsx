@@ -16,26 +16,22 @@ import type React from "react";
 interface CoursePricingCardProps {
   price: number;
   hasAccess?: boolean;
-  isOwner?: boolean;
   isPending: boolean;
   firstLectureId?: number;
   onEnroll: () => void;
   onAddToCart: () => void;
   onBuyNow: () => void;
-  onManage?: () => void;
   onStartLearning?: () => void;
 }
 
 export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   price,
   hasAccess,
-  isOwner,
   isPending,
   firstLectureId,
   onEnroll,
   onAddToCart,
   onBuyNow,
-  onManage,
   onStartLearning,
 }) => {
   return (
@@ -79,7 +75,7 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
         </li>
       </ul>
 
-      {firstLectureId && (hasAccess || isOwner) && (
+      {firstLectureId && hasAccess && (
         <Button
           onClick={onStartLearning}
           size="lg"
@@ -90,20 +86,7 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
         </Button>
       )}
 
-      {isOwner ? (
-        <div className="space-y-3">
-          {onManage && (
-            <Button
-              onClick={onManage}
-              size="lg"
-              className="w-full bg-transparent border-2 border-blue-600 text-blue-600 py-5 rounded-xl font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2"
-            >
-              <Settings className="w-5 h-5" />
-              Quản lý khóa học
-            </Button>
-          )}
-        </div>
-      ) : hasAccess ? (
+      {hasAccess ? (
         <Button
           isDisabled
           size="lg"

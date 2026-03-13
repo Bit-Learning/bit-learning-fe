@@ -1,7 +1,6 @@
-import { Link } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
-import { ArrowUpRight, BookOpen, Eye, Users } from "lucide-react";
+import { BookOpen, Eye, Users } from "lucide-react";
 import type { CoursePerformance } from "../types/dashboard.type";
 
 interface TopCoursesTableProps {
@@ -13,11 +12,11 @@ export const TopCoursesTable = ({ courses }: TopCoursesTableProps) => {
 		<Card className="p-6">
 			<div className="mb-4 flex items-center justify-between">
 				<h2 className="text-lg font-semibold text-gray-900">Top khóa học</h2>
-				<Link to="/mentor/course/list">
+				{/* <Link to="/mentor/course/list">
 					<Button variant="ghost" size="sm" className="gap-1 text-blue-600">
 						Xem tất cả <ArrowUpRight className="h-4 w-4" />
 					</Button>
-				</Link>
+				</Link> */}
 			</div>
 			<div className="overflow-x-auto">
 				<table className="w-full">

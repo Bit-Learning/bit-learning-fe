@@ -10,20 +10,16 @@ import { useAddToCart } from "@/feature/order/queries/useCart";
 import { CourseHero } from "./CourseHero";
 import { CourseTabs } from "./CourseTabs";
 import { CoursePricingCard } from "./CoursePricingCard";
-import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
-import { useSelector } from "react-redux";
 
 const CourseDetailContent: React.FC = () => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
   const [activeTab, setActiveTab] = useState("overview");
-  const { userInfo } = useSelector(selectAuthStateInfo);
 
   const { data: course, isLoading, error } = useCourseDetail();
 
-  const isOwner = !!userInfo && !!course && course.instructorId === userInfo.id;
   const { data: enrollAccess } = useCourseAccess(course?.id || 0);
-  const hasAccess = isOwner || enrollAccess;
+  const hasAccess = enrollAccess;
 
   const { data: progress } = useCourseProgress(course?.id || 0, hasAccess === true);
   const { mutate: enroll, isPending: enrollPending } = useEnrollCourse();
@@ -139,12 +135,10 @@ const CourseDetailContent: React.FC = () => {
             <CoursePricingCard
               price={course.price}
               hasAccess={hasAccess}
-              isOwner={isOwner}
               isPending={cartPending || enrollPending}
               onEnroll={handleEnroll}
               onAddToCart={handleAddToCart}
               onBuyNow={handleBuyNow}
-              onManage={() => navigate({ to: "/mentor/course/$id", params: { id: String(course.id) } })}
               firstLectureId={course.sections?.[0]?.lectures?.[0]?.id}
               onStartLearning={() => {
                 const firstId = course.sections?.[0]?.lectures?.[0]?.id;

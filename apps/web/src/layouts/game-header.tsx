@@ -116,7 +116,7 @@ const GameHeader: React.FC = () => {
 							</MenuTrigger>
 						) : (
 							<Button
-								onClick={() => navigate({ to: "/signin" })}
+								onClick={() => navigate({ to: "/signin-role" })}
 								className="bg-purple-600 font-semibold text-white hover:bg-purple-700"
 							>
 								Đăng nhập

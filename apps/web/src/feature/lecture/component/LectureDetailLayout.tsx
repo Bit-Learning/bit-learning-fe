@@ -3,7 +3,6 @@ import { Button } from "@workspace/ui/components/Button";
 import { CheckCircle, ChevronLeft, ChevronRight, Lock, Menu, X } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useState, useRef } from "react";
-import { useSelector } from "react-redux";
 import { useSectionsByCourse } from "../queries/useSection";
 import { useMultipleLecturesCompleted, LEARNING_KEYS } from "../queries/useLearning";
 import { useQueryClient } from "@tanstack/react-query";
@@ -14,8 +13,6 @@ import TextContent from "./TextContent";
 import VideoPlayerWithNotes from "./VideoPlayerWithNotes";
 import LectureQA from "./LectureQA";
 import { useCourseAccess } from "@/feature/course/queries/useEnroll";
-import { useCourseDetail } from "@/feature/course/queries/useCourse";
-import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 
 interface LectureDetailLayoutProps {
   courseId: number;
@@ -30,12 +27,8 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   const navigate = useNavigate();
   const queryClient = useQueryClient();
 
-  const { userInfo } = useSelector(selectAuthStateInfo);
-  const { data: course } = useCourseDetail(courseId);
-  const isOwner = !!userInfo && !!course && course.instructorId === userInfo.id;
-
   const { data: enrollAccess = false } = useCourseAccess(courseId);
-  const hasAccess = isOwner || enrollAccess;
+  const hasAccess = enrollAccess;
 
   const { data: sections, isLoading } = useSectionsByCourse(courseId);
 
@@ -45,16 +38,15 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   }, [lectureId]);
 
   const allLectureIds = useMemo(() => {
-    if (!sections || isOwner) return [];
+    if (!sections) return [];
     return sections.flatMap((s) => s.lectures?.map((l) => l.id) || []);
-  }, [sections, isOwner]);
+  }, [sections]);
 
   const { completedIds: serverCompletedIds } = useMultipleLecturesCompleted(allLectureIds);
 
   const completedLectures = useMemo(() => {
-    if (isOwner) return [];
     return [...new Set([...serverCompletedIds, ...localCompletedLectures])];
-  }, [isOwner, serverCompletedIds, localCompletedLectures]);
+  }, [serverCompletedIds, localCompletedLectures]);
 
   const currentLecture = useMemo(() => {
     if (!sections) return null;
@@ -81,9 +73,8 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
 
   const isCurrentLectureAccessible = useMemo(() => {
     if (!currentLecture) return false;
-    if (isOwner) return true;
     return hasAccess || currentLecture.isPreviewable;
-  }, [isOwner, hasAccess, currentLecture]);
+  }, [hasAccess, currentLecture]);
 
   const goToLecture = useCallback(
     (newLectureId: number) => {
@@ -93,26 +84,21 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   );
 
   const handleVideoComplete = useCallback(() => {
-    if (isOwner) return;
     const currentLectureId = lectureIdRef.current;
     setLocalCompletedLectures((prev) => {
       if (prev.includes(currentLectureId)) return prev;
       return [...prev, currentLectureId];
     });
     queryClient.setQueryData(LEARNING_KEYS.isCompleted(currentLectureId), true);
-  }, [isOwner, queryClient]);
+  }, [queryClient]);
 
-  const handleProgressUpdate = useCallback(
-    (percent: number) => {
-      if (isOwner) return;
-      const currentLectureId = lectureIdRef.current;
-      setLectureProgress((prev) => {
-        if (Math.abs((prev[currentLectureId] || 0) - percent) < 1) return prev;
-        return { ...prev, [currentLectureId]: percent };
-      });
-    },
-    [isOwner],
-  );
+  const handleProgressUpdate = useCallback((percent: number) => {
+    const currentLectureId = lectureIdRef.current;
+    setLectureProgress((prev) => {
+      if (Math.abs((prev[currentLectureId] || 0) - percent) < 1) return prev;
+      return { ...prev, [currentLectureId]: percent };
+    });
+  }, []);
 
   useEffect(() => {
     const handleKeydown = (e: KeyboardEvent) => {
@@ -120,13 +106,13 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
       switch (e.key) {
         case "ArrowLeft":
           if (e.shiftKey && previousLecture) {
-            const canAccessPrev = isOwner || hasAccess || previousLecture.isPreviewable;
+            const canAccessPrev = hasAccess || previousLecture.isPreviewable;
             if (canAccessPrev) goToLecture(previousLecture.id);
           }
           break;
         case "ArrowRight":
           if (e.shiftKey && nextLecture) {
-            const canAccessNext = isOwner || hasAccess || nextLecture.isPreviewable;
+            const canAccessNext = hasAccess || nextLecture.isPreviewable;
             if (canAccessNext) goToLecture(nextLecture.id);
           }
           break;
@@ -134,7 +120,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
     };
     window.addEventListener("keydown", handleKeydown);
     return () => window.removeEventListener("keydown", handleKeydown);
-  }, [previousLecture, nextLecture, goToLecture, hasAccess, isOwner]);
+  }, [previousLecture, nextLecture, goToLecture, hasAccess]);
 
   if (isLoading) {
     return (
@@ -147,9 +133,9 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
     );
   }
 
-  const isCompleted = !isOwner && completedLectures.includes(lectureId);
-  const canAccessPrevious = previousLecture && (isOwner || hasAccess || previousLecture.isPreviewable);
-  const canAccessNext = nextLecture && (isOwner || hasAccess || nextLecture.isPreviewable);
+  const isCompleted = completedLectures.includes(lectureId);
+  const canAccessPrevious = previousLecture && (hasAccess || previousLecture.isPreviewable);
+  const canAccessNext = nextLecture && (hasAccess || nextLecture.isPreviewable);
 
   return (
     <div className="flex h-screen flex-col bg-gray-900">
@@ -169,9 +155,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
         </div>
 
         <div className="flex items-center gap-2">
-          {isOwner && (
-            <span className="rounded-md font-bold bg-blue-900/50 px-3 py-1 text-lg text-blue-400">Giảng viên</span>
-          )}
           {!hasAccess && currentLecture?.isPreviewable && (
             <span className="text-lg font-bold text-yellow-400">Học thử</span>
           )}
@@ -218,9 +201,9 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                 />
               </div>
             ) : currentLecture?.type === LectureType.QUIZ ? (
-              <QuizPlayer lectureId={lectureId} isOwner={isOwner} onComplete={handleVideoComplete} />
+              <QuizPlayer lectureId={lectureId} onComplete={handleVideoComplete} />
             ) : currentLecture?.type === LectureType.TEXT ? (
-              <TextContent lectureId={lectureId} isOwner={isOwner} onComplete={handleVideoComplete} />
+              <TextContent lectureId={lectureId} onComplete={handleVideoComplete} />
             ) : (
               <div className="flex h-96 items-center justify-center text-gray-400">
                 <p>Nội dung đang được cập nhật</p>

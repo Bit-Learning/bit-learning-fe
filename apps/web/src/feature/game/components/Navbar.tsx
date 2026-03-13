@@ -1,7 +1,14 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
+import { useSelector } from "react-redux";
+import { navItems } from "@/layouts/data/nav-items";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import type { GameCategory } from "../services/gameService";
 import styles from "./Navbar.module.css";
 
 export function Navbar() {
+	const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
+	const navigate = useNavigate();
+
 	return (
 		<nav className={styles.nav}>
 			<div className={styles.inner}>
@@ -21,24 +28,36 @@ export function Navbar() {
 								className={styles.link}
 								activeProps={{ className: styles.linkActive }}
 							>
-								Home
+								Trang chủ
 							</Link>
 						</li>
-						<li>
-							<a className={styles.link} href="#">
-								Categories
-							</a>
-						</li>
-						<li>
-							<a className={styles.link} href="#">
-								My Favorites
-							</a>
-						</li>
-						<li>
-							<a className={styles.link} href="#">
-								New &amp; Popular
-							</a>
-						</li>
+						{navItems.map((item) => (
+							<li key={item.title}>
+								{item.to ? (
+									<Link
+										to={item.to}
+										className={styles.link}
+										activeProps={{ className: styles.linkActive }}
+									>
+										{item.title}
+									</Link>
+								) : (
+									<button
+										type="button"
+										className={styles.link}
+										onClick={() => {
+											// For grouped items, navigate to the first child route
+											const firstChild = item.items?.[0];
+											if (firstChild?.to) {
+												navigate({ to: firstChild.to });
+											}
+										}}
+									>
+										{item.title}
+									</button>
+								)}
+							</li>
+						))}
 					</ul>
 				</div>
 				<div className={styles.right}>
@@ -66,12 +85,19 @@ export function Navbar() {
 						<span className="material-icons">notifications</span>
 						<span className={styles.notifDot} />
 					</button>
-					<div className={styles.avatar}>
-						<img
-							src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ8oIbJJT6eVKJ5Vrd-3rmK55Ai4hYdYyXjdUbJvtpHbkZhcY1EP92gwMiB6JZcPgGGJP7i-RIOz0Ekz_Ub-5ylt07qy7-zytog0FbvKq5cdPDQjjy4YUbda-E45BI_tVPgyk6CDwi_jXBMDyZBjfwBBUV-Huu-wwV4OobJobyFKrnT3ZXKkQLNeJSErhHnXBwosXDm9h1L074Oi85sNqYe6jChdrpkQ4FR-1px9-SE-9LLN_hkn8cjNyZcufAdTTKKKWvt36PgB_I"
-							alt="User"
-						/>
-					</div>
+					{isAuthenticated && userInfo ? (
+						<div className={styles.avatar}>
+							<img src={userInfo.avatar} alt={userInfo.username} />
+						</div>
+					) : (
+						<button
+							type="button"
+							className={"cursor-pointer"}
+							onClick={() => navigate({ to: "/signin-role" })}
+						>
+							<span className="material-icons">login</span>
+						</button>
+					)}
 				</div>
 			</div>
 		</nav>

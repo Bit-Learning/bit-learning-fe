@@ -40,12 +40,6 @@ const menuItems = [
     path: "/mentor/dashboard",
   },
   {
-    id: "courses",
-    label: "Khóa học",
-    icon: BookOpen,
-    path: "/mentor/course/list",
-  },
-  {
     id: "problems",
     label: "Bài tập thực hành",
     icon: Code,
