@@ -27,7 +27,7 @@ const FeaturesSection: React.FC = () => {
 			title: "Ma trận đề thi",
 			description:
 				"Kho đề thi đa dạng theo sát chương trình giáo dục phổ thông mới.",
-			link: "/",
+			link: "/exams",
 			linkText: "Luyện tập",
 		},
 		{
@@ -36,7 +36,7 @@ const FeaturesSection: React.FC = () => {
 			title: "Trợ lý AI",
 			description:
 				"Bit Learning Bot - Người bạn đồng hành thông minh, giải đáp thắc mắc 24/7.",
-			link: "#",
+			link: "/chat-ai",
 			linkText: "Hỏi AI",
 		},
 		{
@@ -54,7 +54,7 @@ const FeaturesSection: React.FC = () => {
 			title: "Game Logic",
 			description:
 				"Rèn luyện tư duy lập trình qua hàng trăm trò chơi trí tuệ hấp dẫn.",
-			link: "#",
+			link: "/games",
 			linkText: "Chơi ngay",
 		},
 		{
