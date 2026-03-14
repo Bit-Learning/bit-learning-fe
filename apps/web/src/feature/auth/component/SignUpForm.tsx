@@ -45,6 +45,7 @@ const formSchema = z
 			.min(1, { message: "Vui lòng xác nhận mật khẩu" }),
 		firstName: z.string().min(1, { message: "Họ không được để trống" }),
 		lastName: z.string().min(1, { message: "Tên không được để trống" }),
+		role: z.enum(["STUDENT"], { message: "Vai trò không hợp lệ" }),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: "Mật khẩu và xác nhận mật khẩu không khớp",
@@ -70,6 +71,7 @@ const SignUpForm: React.FC = () => {
 			confirmPassword: "",
 			firstName: "",
 			lastName: "",
+			role: "STUDENT",
 		},
 	});
 
@@ -88,6 +90,7 @@ const SignUpForm: React.FC = () => {
 			password: values.password,
 			firstName: values.firstName,
 			lastName: values.lastName,
+			role: values.role,
 		});
 	}
 
