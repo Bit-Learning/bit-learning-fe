@@ -591,9 +591,7 @@ const ImportQuestionForm: React.FC = () => {
                 ) : (
                   <>
                     <div className="prose prose-sm dark:prose-invert max-w-none">
-                      <p className="text-sm whitespace-pre-wrap mb-3">
-                        {question.editedContent || question.originalContent}
-                      </p>
+                      <p className="text-md text-black mb-3">{question.editedContent || question.originalContent}</p>
                     </div>
 
                     {question.questionType === "MCQ" && question.options && question.options.length > 0 && (
