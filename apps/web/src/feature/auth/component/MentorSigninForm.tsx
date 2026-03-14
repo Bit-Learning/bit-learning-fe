@@ -13,6 +13,7 @@ import { Input } from "@workspace/ui/components/Input";
 import { Checkbox } from "@workspace/ui/components/Checkbox";
 import { Label } from "@workspace/ui/components/label";
 import { toast } from "@/shared/components/Sonner";
+import { useAppDispatch } from "@/shared/redux/store";
 import {
 	EyeClosedIcon,
 	EyeIcon,
@@ -26,6 +27,7 @@ import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { z } from "zod";
 import { selectAuthStateInfo } from "../store/auth.selectors";
+import { setErrorAction } from "../store";
 import { useLogin, useRegister } from "../queries/useAuth";
 import TwoFactorVerificationForm from "./TwoFactorVerificationForm";
 
@@ -300,6 +302,7 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
 const MentorSigninForm: React.FC = () => {
 	const { isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo);
+	const dispatch = useAppDispatch();
 	const [showPassword, setShowPassword] = React.useState(false);
 	const [hasRedirected, setHasRedirected] = React.useState(false);
 	const [show2FAForm, setShow2FAForm] = React.useState(false);
@@ -326,6 +329,11 @@ const MentorSigninForm: React.FC = () => {
 			password: "",
 		},
 	} as const);
+
+	// Clear any previous auth error when opening mentor auth page
+	React.useEffect(() => {
+		dispatch(setErrorAction(null));
+	}, [dispatch]);
 
 	React.useEffect(() => {
 		if (isAuthenticated && !hasRedirected && !show2FAForm) {
