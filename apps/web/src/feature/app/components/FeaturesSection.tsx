@@ -1,14 +1,14 @@
-import React from "react";
 import {
-	Video,
-	FileText,
 	Bot,
-	MessageCircle,
+	FileText,
 	Gamepad2,
+	MessageCircle,
 	Terminal,
+	Video,
 } from "lucide-react";
-import FeatureCard from "./FeatureCard";
+import React from "react";
 import { FeatureCardProps } from "../types";
+import FeatureCard from "./FeatureCard";
 
 const FeaturesSection: React.FC = () => {
 	const features: FeatureCardProps[] = [
@@ -18,6 +18,8 @@ const FeaturesSection: React.FC = () => {
 			title: "Khóa học Online",
 			description:
 				"Video bài giảng sinh động, dễ hiểu từ chuyên gia đầu ngành informatics.",
+			thumbnail:
+				"https://images.unsplash.com/photo-1523580846011-d3a5bc25702b?auto=format&fit=crop&w=900&q=80",
 			link: "/courses",
 			linkText: "Học ngay",
 		},
@@ -27,7 +29,9 @@ const FeaturesSection: React.FC = () => {
 			title: "Ma trận đề thi",
 			description:
 				"Kho đề thi đa dạng theo sát chương trình giáo dục phổ thông mới.",
-			link: "/",
+			thumbnail:
+				"https://images.unsplash.com/photo-1524995997946-a1c2e315a42f?auto=format&fit=crop&w=900&q=80",
+			link: "/exams",
 			linkText: "Luyện tập",
 		},
 		{
@@ -36,7 +40,9 @@ const FeaturesSection: React.FC = () => {
 			title: "Trợ lý AI",
 			description:
 				"Bit Learning Bot - Người bạn đồng hành thông minh, giải đáp thắc mắc 24/7.",
-			link: "#",
+			thumbnail:
+				"https://images.unsplash.com/photo-1659018966820-de07c94e0d01?auto=format&fit=crop&w=900&q=80",
+			link: "/chat-ai",
 			linkText: "Hỏi AI",
 		},
 		{
@@ -45,6 +51,8 @@ const FeaturesSection: React.FC = () => {
 			title: "Diễn đàn học tập",
 			description:
 				"Kết nối cùng bạn bè, chia sẻ kinh nghiệm và cùng nhau tiến bộ.",
+			thumbnail:
+				"https://images.unsplash.com/photo-1519074002996-a69e7ac46a42?auto=format&fit=crop&w=900&q=80",
 			link: "/forum",
 			linkText: "Tham gia",
 		},
@@ -54,7 +62,9 @@ const FeaturesSection: React.FC = () => {
 			title: "Game Logic",
 			description:
 				"Rèn luyện tư duy lập trình qua hàng trăm trò chơi trí tuệ hấp dẫn.",
-			link: "#",
+			thumbnail:
+				"https://images.unsplash.com/photo-1542751371-adc38448a05e?auto=format&fit=crop&w=900&q=80",
+			link: "/games",
 			linkText: "Chơi ngay",
 		},
 		{
@@ -63,6 +73,8 @@ const FeaturesSection: React.FC = () => {
 			title: "Luyện Code",
 			description:
 				"Thử thách lập trình thực tế với trình soạn thảo code hiện đại.",
+			thumbnail:
+				"https://images.unsplash.com/photo-1515879218367-8466d910aaa4?auto=format&fit=crop&w=900&q=80",
 			link: "/problem",
 			linkText: "Thử thách",
 		},

@@ -534,23 +534,10 @@ const MentorSigninForm: React.FC = () => {
 											type="submit"
 											isDisabled={isLoading}
 										>
-											{isLoading ? "Đang đăng nhập..." : "Đăng nhập Mentor"}
+											{isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
 										</Button>
 									</form>
 								</Form>
-
-								<div className="mt-6 text-center text-xs text-gray-500">
-									<p>
-										Bạn là học viên?{" "}
-										<button
-											type="button"
-											onClick={() => navigate({ to: "/signin" })}
-											className="font-semibold text-blue-700 underline-offset-2 hover:underline"
-										>
-											Đăng nhập học viên
-										</button>
-									</p>
-								</div>
 							</>
 						)}
 					</div>
