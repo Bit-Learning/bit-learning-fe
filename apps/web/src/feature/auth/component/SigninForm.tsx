@@ -18,6 +18,7 @@ import {
 	ChevronLeftIcon,
 	EyeClosedIcon,
 	EyeIcon,
+	Loader2,
 	Mail,
 	QrCode,
 } from "lucide-react";
@@ -46,6 +47,7 @@ const formSchema = z.object({
 
 import QRCodeLogin from "./QRCodeLogin";
 import TwoFactorVerificationForm from "./TwoFactorVerificationForm";
+import AuthCallbackPageContent from "./AuthCallbackPageContent";
 
 const SignInForm: React.FC = () => {
 	const { isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo);
@@ -143,12 +145,11 @@ const SignInForm: React.FC = () => {
 	return (
 		<div className="flex h-full w-full flex-col lg:w-1/2">
 			{isLoading && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-					<div className="rounded-lg bg-white p-6 text-center">
-						<div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-						<p className="text-gray-600">Đang đăng nhập...</p>
-					</div>
-				</div>
+				<AuthCallbackPageContent
+					hasError={false}
+					localError={null}
+					error={null}
+				/>
 			)}
 
 			<div className="shrink-0 p-6">
