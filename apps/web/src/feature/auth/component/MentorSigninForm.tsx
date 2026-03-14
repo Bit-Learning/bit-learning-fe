@@ -13,19 +13,22 @@ import { Input } from "@workspace/ui/components/Input";
 import { Checkbox } from "@workspace/ui/components/Checkbox";
 import { Label } from "@workspace/ui/components/label";
 import { toast } from "@/shared/components/Sonner";
+import { useAppDispatch } from "@/shared/redux/store";
 import {
 	EyeClosedIcon,
 	EyeIcon,
 	ChevronLeftIcon,
 	User2Icon,
 	Mail,
+	User,
 } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
 import { useSelector } from "react-redux";
 import { z } from "zod";
 import { selectAuthStateInfo } from "../store/auth.selectors";
-import { useLogin } from "../queries/useAuth";
+import { setErrorAction } from "../store";
+import { useLogin, useRegister } from "../queries/useAuth";
 import TwoFactorVerificationForm from "./TwoFactorVerificationForm";
 
 const formSchema = z.object({
@@ -39,11 +42,271 @@ const formSchema = z.object({
 		.max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" }),
 });
 
+const mentorRegisterSchema = z
+	.object({
+		email: z
+			.string()
+			.max(50, { message: "Email không được vượt quá 50 ký tự" })
+			.email({ message: "Email không hợp lệ" }),
+		password: z
+			.string()
+			.min(3, { message: "Mật khẩu phải có ít nhất 3 ký tự" })
+			.max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" })
+			.regex(/(?=.*[a-z])/, {
+				message: "Mật khẩu phải chứa ít nhất 1 chữ thường",
+			})
+			.regex(/(?=.*[A-Z])/, {
+				message: "Mật khẩu phải chứa ít nhất 1 chữ hoa",
+			})
+			.regex(/(?=.*[0-9])/, {
+				message: "Mật khẩu phải chứa ít nhất 1 chữ số",
+			})
+			.regex(/(?=.*[!@#$%^&*()_+\-=[\]{};':"\\|,.<>/?])/, {
+				message: "Mật khẩu phải chứa ít nhất 1 ký tự đặc biệt",
+			}),
+		confirmPassword: z
+			.string()
+			.min(1, { message: "Vui lòng xác nhận mật khẩu" }),
+		firstName: z.string().min(1, { message: "Họ không được để trống" }),
+		lastName: z.string().min(1, { message: "Tên không được để trống" }),
+		role: z.enum(["MENTOR"], { message: "Vai trò không hợp lệ" }),
+	})
+	.refine((data) => data.password === data.confirmPassword, {
+		message: "Mật khẩu và xác nhận mật khẩu không khớp",
+		path: ["confirmPassword"],
+	});
+
+type TMentorRegisterFormValues = z.infer<typeof mentorRegisterSchema>;
+
+const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+	const [showPassword, setShowPassword] = React.useState(false);
+	const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+
+	const {
+		mutate: register,
+		isPending: isRegistering,
+		isSuccess,
+	} = useRegister();
+
+	const form = useForm<TMentorRegisterFormValues>({
+		resolver: zodResolver(mentorRegisterSchema),
+		defaultValues: {
+			email: "",
+			password: "",
+			confirmPassword: "",
+			firstName: "",
+			lastName: "",
+			role: "MENTOR",
+		},
+	});
+
+	React.useEffect(() => {
+		if (isSuccess) {
+			const timer = setTimeout(() => {
+				onBack();
+			}, 2000);
+			return () => clearTimeout(timer);
+		}
+	}, [isSuccess, onBack]);
+
+	function onSubmit(values: TMentorRegisterFormValues) {
+		register({
+			email: values.email,
+			password: values.password,
+			firstName: values.firstName,
+			lastName: values.lastName,
+			role: values.role,
+		});
+	}
+
+	return (
+		<>
+			<div className="mb-6 text-center">
+				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
+					<User2Icon className="h-6 w-6" />
+				</div>
+				<h1 className="mb-2 text-xl font-bold text-gray-900">Đăng ký Mentor</h1>
+				<p className="text-sm text-gray-600">
+					Tạo tài khoản Mentor để bắt đầu dạy học trên Bit Learning
+				</p>
+			</div>
+
+			<Form {...form}>
+				<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+					<div className="grid grid-cols-2 gap-4">
+						<FormField
+							control={form.control}
+							name="firstName"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="text-sm font-semibold text-gray-700">
+										Họ <span className="text-red-500">*</span>
+									</FormLabel>
+									<FormControl>
+										<div className="relative">
+											<User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+											<Input
+												placeholder="Họ"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</div>
+									</FormControl>
+									<FormMessage className="text-xs" />
+								</FormItem>
+							)}
+						/>
+						<FormField
+							control={form.control}
+							name="lastName"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="text-sm font-semibold text-gray-700">
+										Tên <span className="text-red-500">*</span>
+									</FormLabel>
+									<FormControl>
+										<div className="relative">
+											<User className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+											<Input
+												placeholder="Tên"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</div>
+									</FormControl>
+									<FormMessage className="text-xs" />
+								</FormItem>
+							)}
+						/>
+					</div>
+
+					<FormField
+						control={form.control}
+						name="email"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="text-sm font-semibold text-gray-700">
+									Email <span className="text-red-500">*</span>
+								</FormLabel>
+								<FormControl>
+									<div className="relative">
+										<Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+										<Input
+											placeholder="Nhập email Mentor của bạn"
+											{...field}
+											className="h-11 rounded-xl border-2 border-gray-200 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+										/>
+									</div>
+								</FormControl>
+								<FormMessage className="text-xs" />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="password"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="text-sm font-semibold text-gray-700">
+									Mật khẩu <span className="text-red-500">*</span>
+								</FormLabel>
+								<FormControl>
+									<div className="relative">
+										<div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-gray-400">
+											<div className="h-2 w-2 rounded-full bg-white" />
+										</div>
+										<Input
+											type={showPassword ? "text" : "password"}
+											placeholder="Tạo mật khẩu mạnh"
+											{...field}
+											className="h-11 rounded-xl border-2 border-gray-200 pl-10 pr-12 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+										/>
+										<button
+											type="button"
+											onClick={() => setShowPassword(!showPassword)}
+											className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
+										>
+											{showPassword ? (
+												<EyeIcon className="h-5 w-5" />
+											) : (
+												<EyeClosedIcon className="h-5 w-5" />
+											)}
+										</button>
+									</div>
+								</FormControl>
+								<FormMessage className="text-xs" />
+							</FormItem>
+						)}
+					/>
+
+					<FormField
+						control={form.control}
+						name="confirmPassword"
+						render={({ field }) => (
+							<FormItem>
+								<FormLabel className="text-sm font-semibold text-gray-700">
+									Xác nhận mật khẩu <span className="text-red-500">*</span>
+								</FormLabel>
+								<FormControl>
+									<div className="relative">
+										<div className="absolute left-3 top-1/2 flex h-5 w-5 -translate-y-1/2 items-center justify-center rounded-full bg-gray-400">
+											<div className="h-2 w-2 rounded-full bg-white" />
+										</div>
+										<Input
+											type={showConfirmPassword ? "text" : "password"}
+											placeholder="Nhập lại mật khẩu"
+											{...field}
+											className="h-11 rounded-xl border-2 border-gray-200 pl-10 pr-12 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+										/>
+										<button
+											type="button"
+											onClick={() =>
+												setShowConfirmPassword(!showConfirmPassword)
+											}
+											className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 transition-colors hover:text-gray-600"
+										>
+											{showConfirmPassword ? (
+												<EyeIcon className="h-5 w-5" />
+											) : (
+												<EyeClosedIcon className="h-5 w-5" />
+											)}
+										</button>
+									</div>
+								</FormControl>
+								<FormMessage className="text-xs" />
+							</FormItem>
+						)}
+					/>
+
+					<Button
+						className="bg-linear-to-r h-11 w-full rounded-xl from-blue-700 to-blue-800 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
+						type="submit"
+						isDisabled={isRegistering}
+					>
+						{isRegistering ? "Đang đăng ký..." : "Tạo tài khoản Mentor"}
+					</Button>
+
+					<button
+						type="button"
+						onClick={onBack}
+						className="mt-3 w-full text-center text-xs font-medium text-blue-700 underline-offset-2 hover:underline"
+					>
+						Quay lại đăng nhập Mentor
+					</button>
+				</form>
+			</Form>
+		</>
+	);
+};
+
 const MentorSigninForm: React.FC = () => {
 	const { isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo);
+	const dispatch = useAppDispatch();
 	const [showPassword, setShowPassword] = React.useState(false);
 	const [hasRedirected, setHasRedirected] = React.useState(false);
 	const [show2FAForm, setShow2FAForm] = React.useState(false);
+	const [isRegisterMode, setIsRegisterMode] = React.useState(false);
 	const [userEmail, setUserEmail] = React.useState("");
 	const navigate = useNavigate();
 
@@ -66,6 +329,11 @@ const MentorSigninForm: React.FC = () => {
 			password: "",
 		},
 	} as const);
+
+	// Clear any previous auth error when opening mentor auth page
+	React.useEffect(() => {
+		dispatch(setErrorAction(null));
+	}, [dispatch]);
 
 	React.useEffect(() => {
 		if (isAuthenticated && !hasRedirected && !show2FAForm) {
@@ -123,6 +391,8 @@ const MentorSigninForm: React.FC = () => {
 									setUserEmail("");
 								}}
 							/>
+						) : isRegisterMode ? (
+							<MentorRegisterForm onBack={() => setIsRegisterMode(false)} />
 						) : (
 							<>
 								<div className="mb-6 text-center">
@@ -222,22 +492,41 @@ const MentorSigninForm: React.FC = () => {
 											)}
 										/>
 
-										<div className="flex items-center justify-between">
-											<div className="flex items-center gap-2">
-												<Checkbox id="remember-me" className="cursor-pointer" />
-												<Label
-													htmlFor="remember-me"
-													className="cursor-pointer text-sm text-gray-600"
+										<div className="flex flex-col gap-3">
+											<div className="flex items-center justify-between">
+												<div className="flex items-center gap-2">
+													<Checkbox
+														id="remember-me"
+														className="cursor-pointer"
+													/>
+													<Label
+														htmlFor="remember-me"
+														className="cursor-pointer text-sm text-gray-600"
+													>
+														Ghi nhớ đăng nhập
+													</Label>
+												</div>
+												<Link
+													to="/forgot-password"
+													className="text-sm font-medium text-blue-700 transition-colors hover:text-blue-800"
 												>
-													Ghi nhớ đăng nhập
+													Quên mật khẩu?
+												</Link>
+											</div>
+
+											<div className="flex items-center justify-start gap-2 text-xs text-gray-500">
+												<Checkbox
+													id="mentor-register-toggle"
+													isSelected={isRegisterMode}
+													onChange={(checked) => setIsRegisterMode(checked)}
+												></Checkbox>
+												<Label
+													htmlFor="mentor-register-toggle"
+													className="cursor-pointer text-xs text-gray-600"
+												>
+													Tôi chưa có tài khoản, đăng ký Mentor mới
 												</Label>
 											</div>
-											<Link
-												to="/forgot-password"
-												className="text-sm font-medium text-blue-700 transition-colors hover:text-blue-800"
-											>
-												Quên mật khẩu?
-											</Link>
 										</div>
 
 										<Button
@@ -245,23 +534,10 @@ const MentorSigninForm: React.FC = () => {
 											type="submit"
 											isDisabled={isLoading}
 										>
-											{isLoading ? "Đang đăng nhập..." : "Đăng nhập Mentor"}
+											{isLoading ? "Đang đăng nhập..." : "Đăng nhập"}
 										</Button>
 									</form>
 								</Form>
-
-								<div className="mt-6 text-center text-xs text-gray-500">
-									<p>
-										Bạn là học viên?{" "}
-										<button
-											type="button"
-											onClick={() => navigate({ to: "/signin" })}
-											className="font-semibold text-blue-700 underline-offset-2 hover:underline"
-										>
-											Đăng nhập học viên
-										</button>
-									</p>
-								</div>
 							</>
 						)}
 					</div>

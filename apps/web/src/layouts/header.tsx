@@ -173,7 +173,7 @@ const Header: React.FC = () => {
 							<MenuTrigger>
 								<Button
 									variant="ghost"
-									className="flex items-center gap-3 px-4 py-6 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200 border-2 border-gray-300 dark:border-gray-600 hover:border-blue-400 dark:hover:border-blue-500"
+									className="flex items-center gap-3 px-4 py-6 hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200 hover:border-blue-400 dark:hover:border-blue-500"
 								>
 									<Avatar className="h-9 w-9 ring-2 ring-blue-500/20">
 										<AvatarImage

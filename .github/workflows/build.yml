@@ -50,48 +50,59 @@ jobs:
             - name: Run Build
               run: pnpm run build
 
-            - name: Comment PR if build fails
-              if: failure() && github.event_name == 'pull_request'
+    notify-build-status:
+        name: Comment PR with build status
+        needs: build
+        runs-on: ubuntu-latest
+        if: github.event_name == 'pull_request'
+        steps:
+            - name: Comment PR if build failed
+              if: ${{ needs.build.result == 'failure' }}
               uses: actions/github-script@v7
               with:
                   script: |
-                    github.rest.issues.createComment({
-                      issue_number: context.issue.number,
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      body: `
-                      ❌ **Frontend build failed**
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: `
+                        ❌ **Frontend build failed**
 
-                      The frontend build failed for this pull request.
+                        The CI build for this pull request did not complete successfully.
 
-                      | | |
-                      |---|---|
-                      | 🔀 **Branch** | \`${{ github.head_ref || github.ref_name }}\` |
-                      | 📝 **Commit** | \`${{ github.sha }}\` |
-                      | 🕐 **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+                        ### Next steps
+                        1. Open the **Actions** tab and inspect the *Test Build Pre Deployment* workflow.
+                        2. Check the logs for the **Build for Node.js** job.
+                        3. Fix the failing build (dependencies, type errors, lint, etc.).
+                        4. Push new commits; CI will run again automatically.
 
-                      Please check the workflow logs for details and fix the issues before merging.
-                      `
-                    })
+                        | | |
+                        |---|---|
+                        | 🔀 **Branch** | \`${{ github.head_ref || github.ref_name }}\` |
+                        | 🕐 **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+                        `,
+                      });
 
-            - name: Comment PR if build passes
-              if: success() && github.event_name == 'pull_request'
+            - name: Comment PR if build passed
+              if: ${{ needs.build.result == 'success' }}
               uses: actions/github-script@v7
               with:
                   script: |
-                    github.rest.issues.createComment({
-                      issue_number: context.issue.number,
-                      owner: context.repo.owner,
-                      repo: context.repo.repo,
-                      body: `
-                      ✅ **Frontend build passed**
+                      github.rest.issues.createComment({
+                        issue_number: context.issue.number,
+                        owner: context.repo.owner,
+                        repo: context.repo.repo,
+                        body: `
+                        ✅ **Frontend build passed**
 
-                      The frontend build passed successfully for this pull request.
+                        All build checks for this pull request have completed successfully.
 
-                      | | |
-                      |---|---|
-                      | 🔀 **Branch** | \`${{ github.head_ref || github.ref_name }}\` |
-                      | 📝 **Commit** | \`${{ github.sha }}\` |
-                      | 🕐 **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
-                      `
-                    })
+                        This PR is now **green from CI** and can be merged once required reviews are approved.
+
+                        | | |
+                        |---|---|
+                        | 🔀 **Branch** | \`${{ github.head_ref || github.ref_name }}\` |
+                        | 📝 **Commit** | \`${{ github.sha }}\` |
+                        | 🕐 **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
+                        `,
+                      });
