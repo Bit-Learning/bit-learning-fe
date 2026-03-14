@@ -14,6 +14,7 @@ export type TRegisterRequest = {
 	password: string;
 	firstName: string;
 	lastName: string;
+	role: string;
 };
 export type TForgotPasswordRequest = {
 	email: string;
