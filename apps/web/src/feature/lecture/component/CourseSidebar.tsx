@@ -46,14 +46,6 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
     }
   }, [lectureId, sections]);
 
-  const getSectionProgress = (section: SectionDetail) => {
-    if (!section.lectures?.length) return 0;
-    const completed = section.lectures.filter(
-      (l) => completedLectures.includes(l.id) || (lectureProgress[l.id] ?? 0) >= COMPLETION_THRESHOLD,
-    ).length;
-    return Math.round((completed / section.lectures.length) * 100);
-  };
-
   const isLectureCompleted = (id: number) => {
     return completedLectures.includes(id) || (lectureProgress[id] ?? 0) >= COMPLETION_THRESHOLD;
   };
@@ -100,7 +92,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
 
         <div className="flex-1 overflow-y-auto">
           {sections?.map((section, sectionIndex) => {
-            const progress = getSectionProgress(section);
+            const progress = Math.round(section.progressPercentage || 0);
             const isExpanded = expandedSections.includes(section.id);
 
             return (
@@ -140,7 +132,7 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
                       const isActive = lecture.id === lectureId;
                       const isLocked = !hasAccess && !lecture.isPreviewable;
                       const isCompleted = isLectureCompleted(lecture.id);
-                      const progress = getLectureProgress(lecture.id);
+                      const lectureProgressValue = getLectureProgress(lecture.id);
 
                       return (
                         <button
@@ -155,10 +147,10 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
                                 : "text-gray-700 hover:bg-gray-100"
                           }`}
                         >
-                          {isActive && progress > 0 && progress < COMPLETION_THRESHOLD && (
+                          {isActive && lectureProgressValue > 0 && lectureProgressValue < COMPLETION_THRESHOLD && (
                             <div
                               className="absolute inset-y-0 left-0 bg-blue-100 transition-all"
-                              style={{ width: `${progress}%` }}
+                              style={{ width: `${lectureProgressValue}%` }}
                             />
                           )}
 

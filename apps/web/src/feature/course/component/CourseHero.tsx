@@ -1,23 +1,11 @@
 import { Badge } from "@workspace/ui/components/Badge";
 import { BookOpen, CheckCircle, Clock, Heart, Play, Share2, Star, Users, Video } from "lucide-react";
 import type React from "react";
+import { CourseDetail } from "../types/course.type";
 
 interface CourseHeroProps {
-  course: {
-    thumbnailUrl: string;
-    grade: number;
-    level: string;
-    title: string;
-    subtitle: string;
-    instructorName: string;
-    totalDuration: number;
-    ratingStar: number;
-    ratingCount: number;
-    totalSections: number;
-    totalLectures: number;
-  };
+  course: CourseDetail;
   hasAccess?: boolean;
-  progress?: number;
   isLiked: boolean;
   onLike: () => void;
   onShare: () => void;
@@ -32,9 +20,9 @@ const getLevelLabel = (level: string): string => {
   return labels[level] || level;
 };
 
-export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, progress, isLiked, onLike, onShare }) => {
+export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, isLiked, onLike, onShare }) => {
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg overflow-hidden border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl overflow-hidden border-2 border-blue-200 dark:border-slate-800">
       <div className="relative group aspect-video overflow-hidden">
         <img
           src={course.thumbnailUrl}
@@ -62,9 +50,9 @@ export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, progr
               Đã đăng ký
             </Badge>
           )}
-          {hasAccess && progress !== undefined && (
+          {hasAccess && (
             <Badge className="bg-emerald-500 text-white text-xs font-bold px-3 py-1">
-              {Math.round(progress)}% hoàn thành
+              {Math.round(course.progressPercentage)}% hoàn thành
             </Badge>
           )}
         </div>
@@ -87,45 +75,24 @@ export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, progr
         </div>
       </div>
 
-      <div className="p-8">
+      <div className="px-8 py-6">
         <h1 className="font-display text-3xl font-bold mb-3 text-slate-900 dark:text-white">{course.title}</h1>
-        <p className="text-slate-500 dark:text-slate-400 text-lg mb-6">{course.subtitle}</p>
 
-        <div className="flex items-center gap-4 mb-8">
-          <div className="w-12 h-12 rounded-full overflow-hidden bg-blue-500/10">
-            <div className="w-full h-full bg-linear-to-br from-blue-500 to-indigo-500 flex items-center justify-center">
-              <Users className="w-6 h-6 text-white" />
-            </div>
-          </div>
-          <div>
-            <p className="text-xs text-slate-400 uppercase tracking-widest font-bold">Giảng viên</p>
-            <p className="font-bold text-slate-900 dark:text-white">{course.instructorName}</p>
-          </div>
-        </div>
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl">
+        <div className="grid grid-cols-3 md:grid-cols-3 gap-4 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border">
           <div className="text-center">
-            <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center mx-auto mb-2">
-              <Clock className="w-5 h-5" />
-            </div>
-            <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">
-              Thời lượng
-            </p>
-            <p className="font-bold text-slate-900 dark:text-white">{course.totalDuration} phút</p>
-          </div>
-          <div className="text-center">
-            <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/30 text-amber-500 dark:text-amber-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <div className="w-10 h-10  text-amber-600 dark:text-amber-400 rounded-lg flex items-center justify-center mx-auto mb-2">
               <Star className="w-5 h-5" />
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">
               Đánh giá
             </p>
             <p className="font-bold text-slate-900 dark:text-white">
-              {course.ratingStar}/5.0 ({course.ratingCount})
+              {(course.ratingStar ?? 5).toFixed(1)}/5.0
+              {course.ratingCount ? ` (${course.ratingCount})` : ""}
             </p>
           </div>
           <div className="text-center border-x border-slate-200 dark:border-slate-700">
-            <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <div className="w-10 h-10 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center mx-auto mb-2">
               <BookOpen className="w-5 h-5" />
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">
@@ -134,7 +101,7 @@ export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess, progr
             <p className="font-bold text-slate-900 dark:text-white">{course.totalSections}</p>
           </div>
           <div className="text-center">
-            <div className="w-10 h-10 bg-pink-100 dark:bg-pink-900/30 text-pink-600 dark:text-pink-400 rounded-lg flex items-center justify-center mx-auto mb-2">
+            <div className="w-10 h-10 text-blue-600 dark:text-blue-400 rounded-lg flex items-center justify-center mx-auto mb-2">
               <Video className="w-5 h-5" />
             </div>
             <p className="text-[10px] text-slate-500 dark:text-slate-400 uppercase font-bold tracking-tighter">

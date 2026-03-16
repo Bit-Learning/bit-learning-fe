@@ -226,7 +226,7 @@ const AllCoursesContent: React.FC = () => {
               {courses.map((course: CoursePreview) => (
                 <Card
                   key={course.id}
-                  className="group cursor-pointer overflow-hidden gap-2 p-0 transition-all duration-300 hover:shadow-xl border border-slate-200 dark:border-slate-700"
+                  className="group cursor-pointer overflow-hidden p-4 transition-all duration-300 hover:shadow-xl border-2 border-blue-200 dark:border-slate-700"
                   onMouseEnter={() => handleMouseEnter(course.id)}
                   onClick={() =>
                     navigate({
@@ -235,13 +235,12 @@ const AllCoursesContent: React.FC = () => {
                     })
                   }
                 >
-                  <div className="relative h-48 overflow-hidden">
+                  <div className="relative h-40 overflow-hidden rounded-xl">
                     <img
                       src={course.thumbnailUrl}
                       alt={course.title}
                       className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
                     />
-                    <div className="bg-linear-to-t absolute inset-0 from-black/60 to-transparent" />
 
                     <div className="absolute left-3 top-3">
                       <Badge className="bg-blue-700 text-xs text-white">Lớp {course.grade}</Badge>
@@ -258,19 +257,27 @@ const AllCoursesContent: React.FC = () => {
                     </div>
                   </div>
 
-                  <CardContent className="p-4">
+                  <CardContent className="p-0">
                     <div className="space-y-3">
                       <h3 className="text-md line-clamp-2 h-12 font-bold text-slate-900 dark:text-white transition-colors group-hover:text-blue-700">
                         {course.title}
                       </h3>
 
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Giảng viên: {course.instructorName}</p>
-
                       <div className="flex items-center justify-between gap-2 text-sm">
-                        <div className="flex items-center gap-1">
-                          <Star className="h-4 w-4 fill-current text-yellow-500" />
-                          <span className="font-semibold">{course.ratingStar ?? 5}</span>
-                          <span className="text-slate-500 dark:text-slate-400">({course.ratingCount ?? 1000})</span>
+                        <div className="flex items-center gap-2">
+                          <div className="flex">
+                            {[...Array(5)].map((_, i) => (
+                              <Star
+                                key={i}
+                                className={`h-4 w-4 ${
+                                  i < Math.floor(course.ratingStar || 5)
+                                    ? "fill-yellow-400 text-yellow-400"
+                                    : "fill-gray-200 text-gray-200"
+                                }`}
+                              />
+                            ))}
+                          </div>
+                          <span className="text-sm text-gray-600 dark:text-gray-400">({course.ratingCount || 0})</span>
                         </div>
 
                         <div className="flex items-center">
