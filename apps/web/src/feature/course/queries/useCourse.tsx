@@ -17,6 +17,7 @@ import type { CourseLevel } from "../types/course.type";
 export const courseKeys = {
   all: ["courses"] as const,
   allPaginated: (page: number, size: number) => ["courses", "all", page, size] as const,
+  myPaginated: (page: number, size: number) => ["courses", "my", page, size] as const,
   byGrade: (grade: number, page: number, size: number) => ["courses", "grade", grade, page, size] as const,
   detail: (id: number) => ["courses", "detail", id] as const,
 };
@@ -28,6 +29,20 @@ export const useAllCourses = () => {
     queryKey: courseKeys.allPaginated(pagination.page, pagination.size),
     queryFn: async () => {
       const response = await courseApi.getAllCourses(pagination.page, pagination.size);
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
+export const useMyCourses = () => {
+  const { pagination } = useSelector(selectCourseState);
+
+  return useQuery({
+    queryKey: courseKeys.myPaginated(pagination.page, pagination.size),
+    queryFn: async () => {
+      const response = await courseApi.getMyCourses(pagination.page, pagination.size);
       return response.data;
     },
     staleTime: 5 * 60 * 1000,
