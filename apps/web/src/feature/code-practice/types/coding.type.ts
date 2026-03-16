@@ -13,7 +13,7 @@ export enum Language {
 
 export enum SubmissionStatus {
   PENDING = "PENDING",
-  JUDGING = "JUDGING",
+  RUNNING = "RUNNING",
   ACCEPTED = "ACCEPTED",
   WRONG_ANSWER = "WRONG_ANSWER",
   TIME_LIMIT_EXCEEDED = "TIME_LIMIT_EXCEEDED",
@@ -21,6 +21,22 @@ export enum SubmissionStatus {
   COMPILE_ERROR = "COMPILE_ERROR",
 }
 
+export enum ParamType {
+  INT = "INT",
+  LONG = "LONG",
+  DOUBLE = "DOUBLE",
+  STRING = "STRING",
+  BOOLEAN = "BOOLEAN",
+  CHAR = "CHAR",
+  INT_ARRAY = "INT_ARRAY",
+  LONG_ARRAY = "LONG_ARRAY",
+  DOUBLE_ARRAY = "DOUBLE_ARRAY",
+  STRING_ARRAY = "STRING_ARRAY",
+  BOOLEAN_ARRAY = "BOOLEAN_ARRAY",
+  CHAR_ARRAY = "CHAR_ARRAY",
+  INT_2D_ARRAY = "INT_2D_ARRAY",
+  STRING_2D_ARRAY = "STRING_2D_ARRAY",
+}
 export interface CreateProblemRequest {
   title: string;
   slug: string;
@@ -75,6 +91,7 @@ export interface TestCaseResponse {
 export interface CreateCodeTemplateRequest {
   language: Language;
   templateCode: string;
+  driverCode?: string;
 }
 
 export interface CreateCodeTemplateResponse {
@@ -85,6 +102,7 @@ export interface CodeTemplateResponse {
   id: string;
   language: Language;
   templateCode: string;
+  driverCode?: string;
   createdAt: string;
   updatedAt: string;
 }

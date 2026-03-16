@@ -100,7 +100,7 @@ export const problemApi = {
     return api.post(`/problems/${problemId}/favorite`);
   },
 
-  getFavoriteProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse>>> {
+  getFavoriteProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
     return api.get("/problems/favorites", { params: filters });
   },
 };
@@ -114,7 +114,7 @@ export const submissionApi = {
     return api.get(`/submissions/${submissionId}`);
   },
 
-  getUserSubmissions(filters?: SubmissionFilters): Promise<AxiosResponse<ApiResponse<SubmissionBriefResponse>>> {
+  getUserSubmissions(filters?: SubmissionFilters): Promise<AxiosResponse<ApiResponse<SubmissionBriefResponse[]>>> {
     return api.get("/submissions", { params: filters });
   },
 
