@@ -3,100 +3,141 @@ import { useSelector } from "react-redux";
 import { useAppDispatch } from "@/shared/redux/store";
 import { courseApi } from "../api/course.api";
 import {
-	selectCourseState,
-	setPageAction,
-	setSelectedCourseIdAction,
-	setSelectedGradeAction,
+  selectCourseState,
+  setPageAction,
+  setSelectedCourseIdAction,
+  setSelectedGradeAction,
+  setSelectedLevelAction,
+  setSortByAction,
+  resetCourseFiltersAction,
+  type SortType,
 } from "../store/course.store";
+import type { CourseLevel } from "../types/course.type";
 
 export const courseKeys = {
-	all: ["courses"] as const,
-	byGrade: (grade: number, page: number, size: number) =>
-		["courses", "grade", grade, page, size] as const,
-	detail: (id: number) => ["courses", "detail", id] as const,
+  all: ["courses"] as const,
+  allPaginated: (page: number, size: number) => ["courses", "all", page, size] as const,
+  myPaginated: (page: number, size: number) => ["courses", "my", page, size] as const,
+  byGrade: (grade: number, page: number, size: number) => ["courses", "grade", grade, page, size] as const,
+  detail: (id: number) => ["courses", "detail", id] as const,
+};
+
+export const useAllCourses = () => {
+  const { pagination } = useSelector(selectCourseState);
+
+  return useQuery({
+    queryKey: courseKeys.allPaginated(pagination.page, pagination.size),
+    queryFn: async () => {
+      const response = await courseApi.getAllCourses(pagination.page, pagination.size);
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
+export const useMyCourses = () => {
+  const { pagination } = useSelector(selectCourseState);
+
+  return useQuery({
+    queryKey: courseKeys.myPaginated(pagination.page, pagination.size),
+    queryFn: async () => {
+      const response = await courseApi.getMyCourses(pagination.page, pagination.size);
+      return response.data;
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 };
 
 export const useCoursesByGrade = (grade?: number) => {
-	const { selectedGrade, pagination } = useSelector(selectCourseState);
-	const targetGrade = grade ?? selectedGrade;
+  const { selectedGrade, pagination } = useSelector(selectCourseState);
+  const targetGrade = grade ?? selectedGrade;
 
-	return useQuery({
-		queryKey: courseKeys.byGrade(
-			targetGrade ?? 1,
-			pagination.page,
-			pagination.size,
-		),
-		queryFn: async () => {
-			if (!targetGrade) return null;
-			const response = await courseApi.getCoursesByGrade(
-				targetGrade,
-				pagination.page,
-				pagination.size,
-			);
-			return response.data;
-		},
-		enabled: !!targetGrade,
-		staleTime: 5 * 60 * 1000,
-		gcTime: 10 * 60 * 1000,
-	});
+  return useQuery({
+    queryKey: courseKeys.byGrade(targetGrade ?? 1, pagination.page, pagination.size),
+    queryFn: async () => {
+      if (!targetGrade) return null;
+      const response = await courseApi.getCoursesByGrade(targetGrade, pagination.page, pagination.size);
+      return response.data;
+    },
+    enabled: !!targetGrade,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 };
 
 export const useCourseDetail = (id?: number) => {
-	const { selectedCourseId } = useSelector(selectCourseState);
-	const targetId = id ?? selectedCourseId;
+  const { selectedCourseId } = useSelector(selectCourseState);
+  const targetId = id ?? selectedCourseId;
 
-	return useQuery({
-		queryKey: courseKeys.detail(targetId ?? 0),
-		queryFn: async () => {
-			if (!targetId) return null;
-			const response = await courseApi.getCourseById(targetId);
-			return response.data.data;
-		},
-		enabled: !!targetId,
-		staleTime: 5 * 60 * 1000,
-		gcTime: 10 * 60 * 1000,
-	});
+  return useQuery({
+    queryKey: courseKeys.detail(targetId ?? 0),
+    queryFn: async () => {
+      if (!targetId) return null;
+      const response = await courseApi.getCourseById(targetId);
+      return response.data.data;
+    },
+    enabled: !!targetId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
 };
 
 export const useCourseActions = () => {
-	const dispatch = useAppDispatch();
+  const dispatch = useAppDispatch();
 
-	const selectCourse = (id: number) => {
-		dispatch(setSelectedCourseIdAction(id));
-	};
+  const selectCourse = (id: number) => {
+    dispatch(setSelectedCourseIdAction(id));
+  };
 
-	const selectGrade = (grade: number) => {
-		dispatch(setSelectedGradeAction(grade));
-	};
+  const selectGrade = (grade: number | null) => {
+    dispatch(setSelectedGradeAction(grade));
+  };
 
-	const changePage = (page: number) => {
-		dispatch(setPageAction(page));
-	};
+  const selectLevel = (level: CourseLevel | null) => {
+    dispatch(setSelectedLevelAction(level));
+  };
 
-	return {
-		selectCourse,
-		selectGrade,
-		changePage,
-	};
+  const setSortBy = (sort: SortType) => {
+    dispatch(setSortByAction(sort));
+  };
+
+  const changePage = (page: number) => {
+    dispatch(setPageAction(page));
+  };
+
+  const resetFilters = () => {
+    dispatch(resetCourseFiltersAction());
+  };
+
+  return {
+    selectCourse,
+    selectGrade,
+    selectLevel,
+    setSortBy,
+    changePage,
+    resetFilters,
+  };
 };
 
 export const usePrefetchCourse = () => {
-	const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
-	const prefetchCourseDetail = (id: number) => {
-		queryClient.prefetchQuery({
-			queryKey: courseKeys.detail(id),
-			queryFn: async () => {
-				const response = await courseApi.getCourseById(id);
-				return response.data.data;
-			},
-			staleTime: 5 * 60 * 1000,
-		});
-	};
+  const prefetchCourseDetail = (id: number) => {
+    queryClient.prefetchQuery({
+      queryKey: courseKeys.detail(id),
+      queryFn: async () => {
+        const response = await courseApi.getCourseById(id);
+        return response.data.data;
+      },
+      staleTime: 5 * 60 * 1000,
+    });
+  };
 
-	return { prefetchCourseDetail };
+  return { prefetchCourseDetail };
 };
 
 export const useCourseState = () => {
-	return useSelector(selectCourseState);
+  return useSelector(selectCourseState);
 };

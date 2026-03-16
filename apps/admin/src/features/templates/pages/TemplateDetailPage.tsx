@@ -23,7 +23,7 @@ import { formatDate } from "../components/TemplateCard";
 
 export const TemplateDetailPage: React.FC = () => {
   const navigate = useNavigate();
-  const { id } = useParams({ from: "/_authenticated/templates/$id" });
+  const { id } = useParams({ from: "/_authenticated/templates/$id/" });
   const templateId = parseInt(id);
 
   const [selectedSlide, setSelectedSlide] = useState(0);

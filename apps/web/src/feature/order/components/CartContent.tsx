@@ -1,18 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
-import {
-  ShoppingCart,
-  Trash2,
-  ArrowRight,
-  Star,
-  Lock,
-  CheckCircle,
-  Sparkles,
-  AlertCircle,
-  Loader2,
-  BookOpen,
-} from "lucide-react";
+import { ShoppingCart, Trash2, ArrowRight, Star, Lock, CheckCircle, AlertCircle, Loader2 } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useCart, useRemoveFromCart } from "../queries/useCart";
@@ -55,7 +44,7 @@ const CartContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8">
+      <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
           <div className="flex min-h-125 items-center justify-center">
             <div className="text-center">
@@ -70,15 +59,15 @@ const CartContent: React.FC = () => {
 
   if (!courses || courses.length === 0) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8">
+      <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
-          <div className="flex min-h-125 flex-col items-center justify-center rounded-3xl bg-white p-12 shadow-xl">
+          <div className="flex min-h-125 flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-lg">
             <ShoppingCart className="mb-6 h-32 w-32 text-gray-300" />
             <h2 className="mb-3 text-3xl font-bold text-gray-900">Giỏ hàng trống</h2>
             <p className="mb-8 text-center text-lg text-gray-600">Hãy thêm khóa học vào giỏ hàng để bắt đầu học tập!</p>
             <Button
               onClick={() => navigate({ to: "/courses" })}
-              className="rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-3 font-semibold text-white transition-all hover:scale-105 hover:shadow-lg"
+              className="rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-700 transition-colors"
             >
               Khám phá khóa học
             </Button>
@@ -89,19 +78,17 @@ const CartContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="mx-auto max-w-7xl">
         <div className="mb-8 text-center">
-          <h1 className="mb-3 bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-4xl font-black text-transparent md:text-5xl">
-            Giỏ hàng của bạn
-          </h1>
+          <h1 className="mb-3 text-4xl font-black text-gray-900 md:text-5xl">Giỏ hàng của bạn</h1>
           <p className="text-lg text-gray-600">{courses.length} khóa học đang chờ bạn</p>
         </div>
 
         <div className="grid gap-8 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <Card className="overflow-hidden shadow-xl">
-              <CardHeader className="bg-linear-to-r from-gray-800 to-gray-900 p-6">
+            <Card className="overflow-hidden p-0 shadow-lg">
+              <CardHeader className="bg-blue-600 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <ShoppingCart className="h-7 w-7" />
                   <span className="text-2xl">Khóa học ({courses.length})</span>
@@ -111,7 +98,7 @@ const CartContent: React.FC = () => {
                 {courses.map((course, index) => (
                   <div
                     key={course.id}
-                    className="group overflow-hidden rounded-2xl border-2 border-gray-100 bg-linear-to-br from-white to-gray-50 p-5 transition-all hover:border-blue-200 hover:shadow-lg"
+                    className="group overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 transition-all hover:border-blue-300 hover:shadow-md"
                     style={{
                       animation: "fadeIn 0.5s ease-out",
                       animationDelay: `${index * 100}ms`,
@@ -137,7 +124,7 @@ const CartContent: React.FC = () => {
                           <span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
                             Lớp {course.grade}
                           </span>
-                          <span className="rounded-full bg-purple-100 px-3 py-1 text-xs font-semibold text-purple-700">
+                          <span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">
                             {course.level}
                           </span>
                         </div>
@@ -151,7 +138,7 @@ const CartContent: React.FC = () => {
                         <Button
                           onClick={() => handleRemoveItem(course.id)}
                           isDisabled={removingIds.has(course.id)}
-                          className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 transition-all hover:bg-red-100 disabled:opacity-50"
+                          className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:opacity-50 transition-colors"
                         >
                           {removingIds.has(course.id) ? (
                             <>
@@ -174,16 +161,16 @@ const CartContent: React.FC = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-8 overflow-hidden rounded-2xl bg-white shadow-2xl">
-              <div className="bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 p-6">
+            <div className="sticky top-8 overflow-hidden rounded-2xl bg-white shadow-xl">
+              <div className="bg-orange-500 p-6">
                 <h2 className="flex items-center gap-3 text-2xl font-bold text-white">
-                  <Sparkles className="h-6 w-6" />
+                  <ShoppingCart className="h-6 w-6" />
                   Tổng quan đơn hàng
                 </h2>
               </div>
 
               <div className="space-y-6 p-6">
-                <div className="space-y-4 rounded-xl bg-linear-to-br from-gray-50 to-blue-50 p-5">
+                <div className="space-y-4 rounded-xl bg-slate-50 p-5">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Số lượng khóa học</span>
                     <span className="font-semibold text-gray-900">{summary.itemCount}</span>
@@ -191,21 +178,19 @@ const CartContent: React.FC = () => {
 
                   <div className="flex justify-between border-t-2 border-gray-200 pt-4">
                     <span className="text-xl font-bold text-gray-900">Tổng cộng</span>
-                    <span className="bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-3xl font-black text-transparent">
-                      {summary.total.toLocaleString()}đ
-                    </span>
+                    <span className="text-3xl font-black text-blue-600">{summary.total.toLocaleString()}đ</span>
                   </div>
                 </div>
 
                 <Button
                   onClick={handleCheckout}
-                  className="group flex w-full items-center justify-center gap-3 rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 py-6 text-lg font-bold text-white shadow-lg transition-all hover:scale-105 hover:shadow-xl"
+                  className="group flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 py-6 text-lg font-bold text-white hover:bg-blue-700 shadow-lg transition-all"
                 >
                   Tiến hành thanh toán
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
                 </Button>
 
-                <div className="space-y-3 rounded-xl border-2 border-blue-100 bg-blue-50 p-4">
+                <div className="space-y-3 rounded-xl border-2 border-blue-200 bg-blue-50 p-4">
                   <div className="flex items-center gap-2 text-blue-900">
                     <Lock className="h-5 w-5" />
                     <span className="font-semibold">Thanh toán an toàn</span>

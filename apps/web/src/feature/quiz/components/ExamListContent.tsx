@@ -91,7 +91,8 @@ const ExamListContent: React.FC = () => {
     },
     COMPLETED: {
       label: "Đã hoàn thành",
-      color: "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 border-slate-200 dark:border-slate-700",
+      color:
+        "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
     },
   };
 
@@ -109,14 +110,12 @@ const ExamListContent: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="mb-10">
           <div className="flex flex-col gap-6">
             <div>
-              <h1 className="text-4xl font-black bg-linear-to-r from-blue-600 to-orange-600 bg-clip-text text-transparent mb-3">
-                Danh sách đề thi
-              </h1>
+              <h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 mb-3">Danh sách đề thi</h1>
               <p className="text-lg text-slate-600 dark:text-slate-400">
                 Chọn một đề thi để bắt đầu thử thách kiến thức của bạn
               </p>
@@ -128,7 +127,7 @@ const ExamListContent: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm kiếm theo tên đề thi hoặc mã đề..."
-                className="pl-12 h-12 text-base shadow-sm border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-primary/20"
+                className="pl-12 h-12 text-base shadow-sm border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
           </div>
@@ -141,7 +140,7 @@ const ExamListContent: React.FC = () => {
             ))}
           </div>
         ) : filteredExams.length === 0 ? (
-          <Card className="border-2 border-dashed border-slate-200 dark:border-slate-800">
+          <Card className="border-2 border-dashed border-slate-200 dark:border-slate-700">
             <CardContent className="py-20">
               <div className="text-center">
                 <div className="w-20 h-20 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4">
@@ -168,10 +167,10 @@ const ExamListContent: React.FC = () => {
                   key={exam.id}
                   className={cn(
                     "group transition-all duration-300 border-2 overflow-hidden",
-                    isCompleted && "bg-slate-50/50 dark:bg-slate-900/30 border-slate-200 dark:border-slate-800",
-                    isUpcoming && "border-amber-200 dark:border-amber-900/50",
+                    isCompleted && "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800",
+                    isUpcoming && "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800",
                     isOpen &&
-                      "border-blue-200 dark:border-blue-900/50 hover:border-blue-300 dark:hover:border-blue-800 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer",
+                      "border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer bg-white dark:bg-slate-800",
                   )}
                   onClick={() => isOpen && handleExamClick(exam)}
                 >
@@ -190,7 +189,7 @@ const ExamListContent: React.FC = () => {
                               isCompleted
                                 ? "text-emerald-600 dark:text-emerald-400"
                                 : isUpcoming
-                                  ? "text-slate-400"
+                                  ? "text-amber-600 dark:text-amber-400"
                                   : "text-blue-600 dark:text-blue-400",
                             )}
                           >
@@ -205,7 +204,10 @@ const ExamListContent: React.FC = () => {
                             >
                               {statusConfig[exam.status].label}
                             </Badge>
-                            <Badge variant="outline" className="text-xs font-mono font-semibold px-3 py-1">
+                            <Badge
+                              variant="outline"
+                              className="text-xs font-mono font-semibold px-3 py-1 border-slate-200 dark:border-slate-700"
+                            >
                               {exam.code}
                             </Badge>
                           </div>
@@ -243,14 +245,19 @@ const ExamListContent: React.FC = () => {
                           <Button
                             variant="outline"
                             isDisabled
-                            className="flex-1 lg:flex-none gap-2 cursor-not-allowed opacity-60"
+                            className="flex-1 lg:flex-none gap-2 cursor-not-allowed opacity-60 border-amber-200 dark:border-amber-800"
                           >
                             <Lock className="w-4 h-4" />
                             Chưa mở
                           </Button>
                         ) : (
                           <Button
-                            className="flex-1 lg:flex-none gap-2 bg-linear-to-r from-blue-600 to-orange-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-900/50 group/btn"
+                            className={cn(
+                              "flex-1 lg:flex-none gap-2 text-white shadow-lg group/btn",
+                              isCompleted
+                                ? "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 shadow-emerald-500/30"
+                                : "bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/30",
+                            )}
                             onClick={(e) => {
                               e.stopPropagation();
                               handleExamClick(exam);

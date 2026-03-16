@@ -40,10 +40,10 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
-        <div className="text-center border-b border-gray-100 bg-linear-to-r from-blue-50 to-indigo-50 px-6 py-4">
+      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+        <div className="text-center border-b border-gray-200 bg-blue-50 px-6 py-4">
           <h4 className="text-lg font-bold text-gray-900">Viết đánh giá của bạn</h4>
-          <p className="mt-0.5 text-sm text-gray-500">
+          <p className="mt-0.5 text-sm text-gray-600">
             Chia sẻ trải nghiệm giúp học viên khác đưa ra quyết định đúng đắn
           </p>
         </div>
@@ -65,14 +65,14 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
                   >
                     <Star
                       className={`h-9 w-9 transition-colors ${
-                        val <= activeRating ? "fill-yellow-400 text-yellow-400 drop-shadow-sm" : "text-gray-200"
+                        val <= activeRating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
                       }`}
                     />
                   </button>
                 );
               })}
               {activeRating > 0 && (
-                <span className="ml-2 rounded-full bg-yellow-50 px-3 py-1 text-sm font-semibold text-yellow-700">
+                <span className="ml-2 rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700">
                   {STAR_LABELS[activeRating]}
                 </span>
               )}
@@ -88,18 +88,18 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
               value={comment}
               onChange={(e) => setComment(e.target.value)}
               placeholder="Khóa học này có điểm gì nổi bật? Bạn học được gì? Có điều gì cần cải thiện không?"
-              className="min-h-28 resize-none rounded-xl border-gray-200 text-sm focus:border-blue-400 focus:ring-blue-400"
+              className="min-h-28 resize-none rounded-xl border-gray-200 text-sm focus:border-blue-500 focus:ring-blue-500"
             />
             <p className="mt-1 text-right text-xs text-gray-400">{comment.length} ký tự</p>
           </div>
 
-          <div className="flex items-center justify-between border-t border-gray-100 pt-4">
-            <p className="text-xs text-gray-400">* Đánh giá sao là bắt buộc</p>
+          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+            <p className="text-xs text-gray-500">* Đánh giá sao là bắt buộc</p>
             <Button
               onClick={handleSubmitReview}
               size="lg"
               isDisabled={rating === 0 || isPosting}
-              className="gap-2 bg-linear-to-r from-blue-600 to-indigo-600 px-6 text-white shadow-md hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50"
+              className="gap-2 bg-blue-600 px-6 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {isPosting ? (
                 <>
@@ -137,8 +137,8 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
             </div>
           </div>
         ) : reviews.length === 0 ? (
-          <div className="rounded-2xl border border-dashed border-gray-200 bg-gray-50 py-16 text-center">
-            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-100">
+          <div className="rounded-2xl border border-dashed border-gray-300 bg-gray-50 py-16 text-center">
+            <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gray-200">
               <MessageSquare className="h-8 w-8 text-gray-400" />
             </div>
             <p className="font-medium text-gray-700">Chưa có đánh giá nào</p>
@@ -146,7 +146,7 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
           </div>
         ) : (
           <>
-            <div className="divide-y divide-gray-100 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+            <div className="divide-y divide-gray-200 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
               {reviews.map((review) => (
                 <div key={review.id} className="px-6 py-5 transition-colors hover:bg-gray-50">
                   <ReviewItem review={review} />

@@ -33,11 +33,10 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
     { id: "overview", label: "Tổng quan" },
     { id: "curriculum", label: "Nội dung" },
     { id: "reviews", label: "Đánh giá", icon: Star },
-    { id: "instructor", label: "Giảng viên" },
   ];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl shadow-lg border border-slate-100 dark:border-slate-800">
+    <div className="bg-white dark:bg-slate-900 rounded-xl  border-2 border-blue-200 dark:border-slate-800">
       <div className="flex border-b border-slate-100 dark:border-slate-800 px-4">
         {tabs.map((tab) => (
           <button
@@ -66,17 +65,14 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
             </section>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-emerald-50 dark:bg-emerald-900/10 rounded-2xl border border-emerald-100 dark:border-emerald-900/20">
-                <h3 className="flex items-center gap-2 text-emerald-800 dark:text-emerald-300 font-bold mb-4">
-                  <CheckCircle className="w-5 h-5 text-emerald-600" />
+              <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
+                <h3 className="flex items-center gap-2 text-blue-800 dark:text-blue-300 font-bold mb-4">
+                  <CheckCircle className="w-5 h-5 text-blue-600" />
                   Bạn sẽ học được gì?
                 </h3>
                 <ul className="space-y-3">
                   {course.outcome.split("\n").map((item, index) => (
-                    <li
-                      key={index}
-                      className="flex items-start gap-3 text-sm text-emerald-700 dark:text-emerald-400/80"
-                    >
+                    <li key={index} className="flex items-start gap-3 text-sm text-blue-700 dark:text-blue-400/80">
                       <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
                       <span>{item}</span>
                     </li>
@@ -100,9 +96,9 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
               </div>
             </div>
 
-            <div className="p-6 bg-rose-50 dark:bg-rose-900/10 rounded-2xl border border-rose-100 dark:border-rose-900/20">
-              <h3 className="text-rose-800 dark:text-rose-300 font-bold mb-2">Khóa học này dành cho ai?</h3>
-              <p className="text-sm text-rose-700 dark:text-rose-400/80">{course.audience}</p>
+            <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
+              <h3 className="text-blue-800 dark:text-blue-300 font-bold mb-2">Khóa học này dành cho ai?</h3>
+              <p className="text-sm text-blue-700 dark:text-blue-400/80">{course.audience}</p>
             </div>
           </>
         )}
@@ -132,24 +128,6 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({
               </Button>
             </div>
           ))}
-
-        {activeTab === "instructor" && (
-          <div className="rounded-2xl bg-linear-to-br from-blue-50 to-indigo-50 dark:from-blue-900/10 dark:to-indigo-900/10 p-8">
-            <h3 className="mb-6 text-2xl font-bold text-gray-900 dark:text-white">Giảng viên</h3>
-            <div className="flex items-start gap-6">
-              <div className="flex h-24 w-24 items-center justify-center rounded-full bg-linear-to-br from-blue-500 to-indigo-500 shadow-xl shrink-0">
-                <Users className="h-12 w-12 text-white" />
-              </div>
-              <div className="flex-1">
-                <h4 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">{course.instructorName}</h4>
-                <p className="mb-4 text-sm font-medium text-blue-600">ID: {course.instructorId}</p>
-                <p className="leading-relaxed text-gray-700 dark:text-gray-300">
-                  Giảng viên giàu kinh nghiệm trong lĩnh vực tin học, đã có nhiều năm giảng dạy và đào tạo học sinh.
-                </p>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
