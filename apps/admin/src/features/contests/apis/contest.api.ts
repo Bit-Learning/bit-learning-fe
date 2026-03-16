@@ -140,5 +140,3 @@ export const adminContestApi = {
     return api.put(`${ADMIN_BASE}/${contestId}/clarifications/${clarificationId}`, request);
   },
 };
-
-export default contestApi;
