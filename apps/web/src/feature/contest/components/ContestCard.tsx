@@ -196,12 +196,20 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
         )}
 
         {isUpcoming && contest.isRegistered && (
-          <Button
-            className="w-full bg-white text-blue-800 font-bold py-5 rounded-lg border border-blue-400 cursor-default"
-            isDisabled
-          >
-            Đã sẵn sàng tham gia
-          </Button>
+          <div className="flex items-center gap-3">
+            <Button
+              className="w-full bg-white text-blue-800 font-bold py-5 rounded-lg border border-blue-400 cursor-default"
+              isDisabled
+            >
+              Đã sẵn sàng tham gia
+            </Button>
+            <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
+              <Button className="w-full bg-blue-600 text-white font-semibold py-5 rounded-lg hover:bg-blue-700">
+                <span>Xem chi tiết</span>
+                <LogIn className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
         )}
 
         {isUpcoming && !contest.isRegistered && (

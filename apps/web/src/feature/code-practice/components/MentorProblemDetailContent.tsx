@@ -179,11 +179,7 @@ const MentorProblemDetailContent: React.FC = () => {
           <div className="col-span-9 space-y-8">
             {activeTab === "description" && (
               <div className="prose prose-slate dark:prose-invert max-w-none">
-                <div
-                  className="text-slate-600 dark:text-slate-300 leading-relaxed"
-                  dangerouslySetInnerHTML={{ __html: problem.description }}
-                />
-
+                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{problem.description}</div>
                 {problem.sampleTestcases && problem.sampleTestcases.length > 0 && (
                   <div className="mt-8">
                     <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800 dark:text-white">

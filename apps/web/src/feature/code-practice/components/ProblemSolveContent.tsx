@@ -170,10 +170,7 @@ const ProblemSolveContent: React.FC = () => {
                   </div>
                 )}
 
-                <div
-                  className="prose prose-sm max-w-none text-gray-900"
-                  dangerouslySetInnerHTML={{ __html: problem.description }}
-                />
+                <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{problem.description}</div>
 
                 {problem.sampleTestcases?.length > 0 && (
                   <div className="space-y-3 mt-4 pt-4 border-t border-gray-200">

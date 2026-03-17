@@ -6,7 +6,6 @@ import { ContestStatus } from "../types/contest.type";
 import { useContestList } from "../queries/useContest";
 
 export const ContestListPage: React.FC = () => {
-  const [selectedGrade, setSelectedGrade] = useState<number>(9);
   const [currentPage, setCurrentPage] = useState<number>(0);
   const pageSize = 6;
 
@@ -100,10 +99,6 @@ export const ContestListPage: React.FC = () => {
       <PageMeta title="Kỳ thi Tin học - Bitlearning" description="Danh sách các kỳ thi lập trình" />
       <ContestListContent
         contests={contests}
-        totalContests={totalElements}
-        viewMode="list"
-        selectedGrade={selectedGrade}
-        setSelectedGrade={setSelectedGrade}
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}

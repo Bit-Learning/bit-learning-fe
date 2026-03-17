@@ -24,6 +24,7 @@ export const contestKeys = {
     [...contestKeys.detail(contestId), "leaderboard", page, size] as const,
   clarifications: (contestId: string, page?: number, size?: number) =>
     [...contestKeys.detail(contestId), "clarifications", page, size] as const,
+  myContests: (page?: number, size?: number) => [...contestKeys.all, "my-contests", page, size] as const,
 };
 
 export const useContestList = () => {
@@ -40,6 +41,16 @@ export const useContestList = () => {
         page,
         size,
       });
+      return response.data;
+    },
+  });
+};
+
+export const useMyContests = (page = 0, size = 6) => {
+  return useQuery({
+    queryKey: contestKeys.myContests(page, size),
+    queryFn: async () => {
+      const response = await contestApi.getMyContests(page, size);
       return response.data;
     },
   });

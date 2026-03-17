@@ -1,8 +1,9 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { CheckCircle, XCircle, Minus, Code, Clock, Copy, Send, FileText, AlertCircle } from "lucide-react";
+import { CheckCircle, XCircle, Minus, Code, Clock, Copy, Send, FileText, AlertCircle, Lock } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
-import { useContestProblems } from "../queries/useContest";
+import { useContestProblems, useContestDetail } from "../queries/useContest";
+import { useProblemDetail } from "@/feature/code-practice/queries/useCoding";
 import { ContestProblemListDTO } from "../types/contest.type";
 import { ProblemSubmitTab } from "./ProblemSubmitTab";
 
@@ -11,86 +12,30 @@ type TabType = "description" | "submit";
 const ContestProblemsContent: React.FC = () => {
   const { id, problemId } = useParams({ strict: false });
   const navigate = useNavigate();
-  // const { data: problems, isLoading } = useContestProblems(id || "");
+  const { data: problemsData, isLoading } = useContestProblems(id || "");
+  const { data: contestData } = useContestDetail(id || "");
 
-  const mockProblems: ContestProblemListDTO[] = [
-    {
-      contestProblemId: "cp-1",
-      label: "A",
-      orderIndex: 0,
-      problemId: "p-1",
-      title: "Two Sum",
-      difficulty: "Easy",
-      timeLimitMs: 1000,
-      memoryLimitMb: 256,
-      myStatus: "AC",
-      myAttempts: 1,
-      totalAccepted: 234,
-      totalSubmissions: 312,
-    },
-    {
-      contestProblemId: "cp-2",
-      label: "B",
-      orderIndex: 1,
-      problemId: "p-2",
-      title: "Longest Substring",
-      difficulty: "Medium",
-      timeLimitMs: 2000,
-      memoryLimitMb: 512,
-      myStatus: "WA",
-      myAttempts: 3,
-      totalAccepted: 156,
-      totalSubmissions: 289,
-    },
-    {
-      contestProblemId: "cp-3",
-      label: "C",
-      orderIndex: 2,
-      problemId: "p-3",
-      title: "Median of Arrays",
-      difficulty: "Hard",
-      timeLimitMs: 3000,
-      memoryLimitMb: 512,
-      myStatus: null,
-      myAttempts: 0,
-      totalAccepted: 89,
-      totalSubmissions: 245,
-    },
-    {
-      contestProblemId: "cp-4",
-      label: "D",
-      orderIndex: 3,
-      problemId: "p-4",
-      title: "Graph Traversal",
-      difficulty: "Medium",
-      timeLimitMs: 2000,
-      memoryLimitMb: 256,
-      myStatus: "TLE",
-      myAttempts: 2,
-      totalAccepted: 123,
-      totalSubmissions: 198,
-    },
-    {
-      contestProblemId: "cp-5",
-      label: "E",
-      orderIndex: 4,
-      problemId: "p-5",
-      title: "Dynamic Programming",
-      difficulty: "Hard",
-      timeLimitMs: 3000,
-      memoryLimitMb: 1024,
-      myStatus: null,
-      myAttempts: 0,
-      totalAccepted: 67,
-      totalSubmissions: 178,
-    },
-  ];
-
-  const problems = mockProblems;
-  const isLoading = false;
+  const problems = problemsData?.data;
+  const contest = contestData?.data;
 
   const [activeTab, setActiveTab] = useState<TabType>("description");
   const [selectedProblem, setSelectedProblem] = useState<ContestProblemListDTO | null>(null);
+
+  // Load problem detail for description and test cases
+  const { data: problemDetail, isLoading: isProblemDetailLoading } = useProblemDetail(
+    selectedProblem?.problemId || "",
+    undefined,
+    {
+      enabled: !!selectedProblem?.problemId,
+    },
+  );
+
+  const isUpcoming = contest?.status === "UPCOMING";
+  const isEnded = contest?.status === "ENDED";
+  const canViewProblems = !isUpcoming;
+  const canSubmit = !isUpcoming && !isEnded;
+
+  const sampleTestCases = problemDetail?.sampleTestcases || [];
 
   React.useEffect(() => {
     if (!problems?.length) return;
@@ -148,8 +93,11 @@ const ContestProblemsContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <div className="text-slate-500">Đang tải danh sách bài tập...</div>
+      <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-sm text-slate-600">Đang tải danh sách bài tập...</p>
+        </div>
       </div>
     );
   }
@@ -157,7 +105,31 @@ const ContestProblemsContent: React.FC = () => {
   if (!problems || problems.length === 0) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-slate-500">Không có bài tập nào</div>
+        <div className="text-center max-w-md space-y-4">
+          <div className="w-20 h-20 mx-auto rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <Lock className="w-10 h-10 text-orange-600 dark:text-orange-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Cuộc thi chưa bắt đầu</h3>
+          <p className="text-slate-600 dark:text-slate-400">
+            Bạn chưa thể xem đề bài và nộp bài. Vui lòng quay lại khi cuộc thi bắt đầu.
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  if (isUpcoming) {
+    return (
+      <div className="flex items-center justify-center h-full">
+        <div className="text-center max-w-md space-y-4">
+          <div className="w-20 h-20 mx-auto rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
+            <Lock className="w-10 h-10 text-orange-600 dark:text-orange-400" />
+          </div>
+          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Cuộc thi chưa bắt đầu</h3>
+          <p className="text-slate-600 dark:text-slate-400">
+            Bạn chưa thể xem đề bài và nộp bài. Vui lòng quay lại khi cuộc thi bắt đầu.
+          </p>
+        </div>
       </div>
     );
   }
@@ -235,119 +207,140 @@ const ContestProblemsContent: React.FC = () => {
               Đề bài
             </button>
             <button
-              onClick={() => setActiveTab("submit")}
-              className={`py-4 text-sm cursor-pointer font-bold flex items-center gap-2 transition-colors ${
-                activeTab === "submit"
-                  ? "border-primary text-primary border-b-2"
-                  : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
+              onClick={() => canSubmit && setActiveTab("submit")}
+              disabled={!canSubmit}
+              className={`py-4 text-sm font-bold flex items-center gap-2 transition-colors ${
+                !canSubmit
+                  ? "border-transparent text-slate-400 cursor-not-allowed opacity-50"
+                  : activeTab === "submit"
+                    ? "border-primary text-primary border-b-2 cursor-pointer"
+                    : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 cursor-pointer"
               }`}
             >
               <Send className="w-5 h-5" />
               Nộp bài
+              {isEnded && <Lock className="w-4 h-4 ml-1" />}
             </button>
           </div>
         </div>
 
-        {activeTab === "description" && selectedProblem && (
-          <div className="flex-1 overflow-y-auto">
+        <div className={`flex-1 overflow-y-auto ${activeTab !== "description" ? "hidden" : ""}`}>
+          {selectedProblem && (
             <section className="max-w-4xl mx-auto p-8 space-y-8">
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 text-slate-500">
-                  <span className="text-sm font-bold uppercase tracking-widest">Problem {selectedProblem.label}</span>
-                  <div className="h-1 w-1 rounded-full bg-slate-300" />
-                  <span className="text-sm font-medium">
-                    {selectedProblem.timeLimitMs / 1000}s, {selectedProblem.memoryLimitMb}MB
-                  </span>
+              {isProblemDetailLoading ? (
+                <div className="flex items-center justify-center py-12">
+                  <div className="text-center">
+                    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+                    <p className="mt-4 text-sm text-slate-600">Đang tải đề bài...</p>
+                  </div>
                 </div>
+              ) : (
+                <>
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-3 text-slate-500">
+                      <span className="text-sm font-bold uppercase tracking-widest">
+                        Problem {selectedProblem.label}
+                      </span>
+                      <div className="h-1 w-1 rounded-full bg-slate-300" />
+                      <span className="text-sm font-medium">
+                        {selectedProblem.timeLimitMs / 1000}s, {selectedProblem.memoryLimitMb}MB
+                      </span>
+                    </div>
 
-                <h2 className="text-4xl font-bold">{selectedProblem.title}</h2>
+                    <h2 className="text-4xl font-bold">{selectedProblem.title}</h2>
 
-                <div className="flex gap-2 flex-wrap">
-                  <Badge
-                    className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${getDifficultyBadge(selectedProblem.difficulty)}`}
-                  >
-                    {getDifficultyLabel(selectedProblem.difficulty)}
-                  </Badge>
-                  {selectedProblem.myStatus && (
-                    <Badge
-                      className={`px-2 py-0.5 rounded text-xs font-bold ${
-                        selectedProblem.myStatus === "AC"
-                          ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
-                          : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
-                      }`}
-                    >
-                      {selectedProblem.myStatus}
-                    </Badge>
-                  )}
-                  {selectedProblem.myAttempts > 0 && (
-                    <Badge className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                      {selectedProblem.myAttempts} lần thử
-                    </Badge>
-                  )}
-                </div>
-              </div>
-
-              <div className="prose dark:prose-invert max-w-none space-y-6">
-                <div className="space-y-3">
-                  <p className="text-lg leading-relaxed text-slate-700 dark:text-slate-300">
-                    Cho một mảng các số nguyên <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">nums</code>{" "}
-                    và một số nguyên <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">target</code>. Hãy
-                    tìm chỉ số của hai số trong mảng sao cho tổng của chúng bằng{" "}
-                    <code className="bg-slate-100 dark:bg-slate-800 px-1 rounded">target</code>.
-                  </p>
-                </div>
-
-                <div className="space-y-4 pt-6 border-t border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xl text-black font-bold flex items-center gap-2">
-                    <Code className="w-5 h-5 text-primary" />
-                    Định dạng Input
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Dòng đầu tiên chứa số nguyên N (2 ≤ N ≤ 10⁴) và target.
-                    <br />
-                    Dòng thứ hai chứa N số nguyên, các số cách nhau bởi dấu cách.
-                  </p>
-                </div>
-
-                <div className="space-y-4 pt-6 border-t border-slate-100 dark:border-slate-800">
-                  <h3 className="text-xl text-black font-bold flex items-center gap-2">
-                    <Code className="w-5 h-5 text-primary" />
-                    Định dạng Output
-                  </h3>
-                  <p className="text-slate-600 dark:text-slate-400 leading-relaxed">
-                    Hai số nguyên là chỉ số của hai phần tử có tổng bằng target. Chỉ số bắt đầu từ 0.
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-2 gap-6 pt-6">
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Sample Input</h4>
-                    <div className="relative group">
-                      <pre className="bg-slate-100 text-black dark:bg-slate-800 p-4 rounded-lg font-mono text-sm border border-slate-200 dark:border-slate-700">
-                        {`4 9
-2 7 11 15`}
-                      </pre>
-                      <button className="absolute top-2 right-2 p-1.5 bg-white dark:bg-slate-700 rounded border border-slate-200 dark:border-slate-600 opacity-0 group-hover:opacity-100 transition-opacity">
-                        <Copy className="w-4 h-4" />
-                      </button>
+                    <div className="flex gap-2 flex-wrap">
+                      <Badge
+                        className={`px-2 py-0.5 rounded text-xs font-bold uppercase ${getDifficultyBadge(selectedProblem.difficulty)}`}
+                      >
+                        {getDifficultyLabel(selectedProblem.difficulty)}
+                      </Badge>
+                      {selectedProblem.myStatus && (
+                        <Badge
+                          className={`px-2 py-0.5 rounded text-xs font-bold ${
+                            selectedProblem.myStatus === "AC"
+                              ? "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400"
+                              : "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400"
+                          }`}
+                        >
+                          {selectedProblem.myStatus}
+                        </Badge>
+                      )}
+                      {selectedProblem.myAttempts > 0 && (
+                        <Badge className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
+                          {selectedProblem.myAttempts} lần thử
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
-                  <div className="space-y-3">
-                    <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">Sample Output</h4>
-                    <pre className="bg-slate-100 text-black dark:bg-slate-800 p-4 rounded-lg font-mono text-sm border border-slate-200 dark:border-slate-700">
-                      0 1
-                    </pre>
+                  <div className="prose dark:prose-invert max-w-none space-y-6">
+                    <div className="space-y-3">
+                      <div className="prose prose-sm max-w-none text-lg text-gray-700 whitespace-pre-wrap">
+                        {problemDetail?.description}
+                      </div>
+                    </div>
+
+                    {sampleTestCases.length > 0 && (
+                      <div className="space-y-6 pt-2">
+                        <h3 className="text-xl text-black font-bold flex items-center gap-2">
+                          <Code className="w-5 h-5 text-primary" />
+                          Ví dụ
+                        </h3>
+                        {sampleTestCases.map((testCase, index) => (
+                          <div key={index} className="grid grid-cols-2 gap-6">
+                            <div className="space-y-3">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                Input {index + 1}
+                              </h4>
+                              <pre className="bg-slate-100 text-black dark:bg-slate-800 p-4 rounded-lg font-mono text-sm border border-slate-200 dark:border-slate-700 whitespace-pre-wrap wrap-break-word">
+                                {testCase.input}
+                              </pre>
+                            </div>
+
+                            <div className="space-y-3">
+                              <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
+                                Output {index + 1}
+                              </h4>
+                              <pre className="bg-slate-100 text-black dark:bg-slate-800 p-4 rounded-lg font-mono text-sm border border-slate-200 dark:border-slate-700 whitespace-pre-wrap wrap-break-word">
+                                {testCase.expectedOutput}
+                              </pre>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </>
+              )}
+            </section>
+          )}
+        </div>
+
+        <div className={`flex-1 ${activeTab !== "submit" ? "hidden" : "flex flex-col"}`}>
+          {selectedProblem && (
+            <>
+              {isEnded && (
+                <div className="bg-orange-50 dark:bg-orange-900/20 border-b border-orange-200 dark:border-orange-800 px-6 py-4 shrink-0">
+                  <div className="flex items-center gap-3 max-w-4xl mx-auto">
+                    <Lock className="w-5 h-5 text-orange-600 dark:text-orange-400 shrink-0" />
+                    <div>
+                      <p className="text-sm font-bold text-orange-900 dark:text-orange-200">Cuộc thi đã kết thúc</p>
+                      <p className="text-xs text-orange-700 dark:text-orange-300 mt-0.5">
+                        Bạn không thể nộp bài sau khi cuộc thi kết thúc
+                      </p>
+                    </div>
                   </div>
                 </div>
-              </div>
-            </section>
-          </div>
-        )}
-
-        {activeTab === "submit" && selectedProblem && (
-          <ProblemSubmitTab contestProblemId={selectedProblem.contestProblemId} />
-        )}
+              )}
+              <ProblemSubmitTab
+                contestProblemId={selectedProblem.contestProblemId}
+                problemId={selectedProblem.problemId}
+                disabled={!canSubmit}
+              />
+            </>
+          )}
+        </div>
       </div>
     </div>
   );
