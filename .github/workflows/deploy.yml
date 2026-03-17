@@ -40,7 +40,7 @@ jobs:
               uses: docker/build-push-action@v5
               with:
                   context: .
-                  file: apps/web/Dockerfile.prod
+                  file: apps/web/Dockerfile.prodV2
                   push: true
                   tags: |
                       ${{ env.WEB_IMAGE }}:prod-latest
@@ -67,7 +67,7 @@ jobs:
               uses: docker/build-push-action@v5
               with:
                   context: .
-                  file: apps/admin/Dockerfile.prod
+                  file: apps/admin/Dockerfile.prodV2
                   push: true
                   tags: |
                       ${{ env.ADMIN_IMAGE }}:prod-latest
