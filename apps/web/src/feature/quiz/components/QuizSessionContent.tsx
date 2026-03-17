@@ -1,6 +1,18 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Info, Smile, BookOpen, Save } from "lucide-react";
+import {
+  CheckCircle2,
+  XCircle,
+  ArrowRight,
+  ArrowLeft,
+  Info,
+  Smile,
+  BookOpen,
+  Save,
+  Flag,
+  Clock,
+  Target,
+} from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -35,6 +47,8 @@ const QuizSessionContent: React.FC = () => {
   const [answeredResults, setAnsweredResults] = useState<Record<number, boolean>>({});
   const [essayDraft, setEssayDraft] = useState<Record<number, string>>({});
   const [essaySaved, setEssaySaved] = useState<Record<number, boolean>>({});
+  const [markedQuestions, setMarkedQuestions] = useState<Set<number>>(new Set());
+  const [filterMode, setFilterMode] = useState<"all" | "marked" | "unanswered">("all");
 
   useEffect(() => {
     if (sessionData && !isStoreInitialized) {
@@ -43,14 +57,21 @@ const QuizSessionContent: React.FC = () => {
 
       const draft: Record<number, string> = {};
       const saved: Record<number, boolean> = {};
+      const marked = new Set<number>();
+
       sessionData.answers.forEach((a) => {
         if (a.answerText?.trim()) {
           draft[a.question.id] = a.answerText;
           saved[a.question.id] = true;
         }
+        if (a.isMarked) {
+          marked.add(a.question.id);
+        }
       });
+
       setEssayDraft(draft);
       setEssaySaved(saved);
+      setMarkedQuestions(marked);
     }
   }, [sessionData, isStoreInitialized, dispatch]);
 
@@ -67,10 +88,12 @@ const QuizSessionContent: React.FC = () => {
 
   const isEssay = (type: string) => type?.toUpperCase() === "ESSAY";
   const isMCQ = (type: string) => type?.toUpperCase() === "MCQ";
+  const getOptionLabel = (index: number) => String.fromCharCode(65 + index);
 
   const currentAnswer = currentQuestion ? answersMap[currentQuestion.id] : undefined;
   const currentDraft = currentQuestion ? (essayDraft[currentQuestion.id] ?? currentAnswer?.answerText ?? "") : "";
   const isDraftDirty = currentQuestion ? currentDraft !== (currentAnswer?.answerText ?? "") : false;
+  const isCurrentMarked = currentQuestion ? markedQuestions.has(currentQuestion.id) : false;
 
   const hasAnsweredCurrent = isMCQ(currentQuestion?.questionType ?? "")
     ? (currentAnswer?.selectedOptionIds?.length ?? 0) > 0
@@ -84,8 +107,40 @@ const QuizSessionContent: React.FC = () => {
   const correctCount = Object.values(answeredResults).filter(Boolean).length;
   const totalAnswered = Object.keys(answeredResults).length;
   const accuracy = totalAnswered > 0 ? Math.round((correctCount / totalAnswered) * 100) : 0;
+  const markedCount = markedQuestions.size;
+  const unansweredCount =
+    questions.length -
+    Object.keys(answersMap).filter((key) => {
+      const ans = answersMap[Number(key)];
+      return (ans?.selectedOptionIds?.length ?? 0) > 0 || !!ans?.answerText?.trim();
+    }).length;
 
-  const getOptionLabel = (index: number) => String.fromCharCode(65 + index);
+  const handleToggleMark = useCallback(() => {
+    if (!currentQuestion) return;
+
+    setMarkedQuestions((prev) => {
+      const newSet = new Set(prev);
+      if (newSet.has(currentQuestion.id)) {
+        newSet.delete(currentQuestion.id);
+      } else {
+        newSet.add(currentQuestion.id);
+      }
+      return newSet;
+    });
+
+    const newMarkStatus = !markedQuestions.has(currentQuestion.id);
+
+    saveMutation.mutate({
+      sessionId: Number(sessionId),
+      data: {
+        questionId: currentQuestion.id,
+        answerText: currentAnswer?.answerText || "",
+        selectedOptionIds: currentAnswer?.selectedOptionIds || [],
+        isMarked: newMarkStatus,
+        questionNo: currentIndex + 1,
+      },
+    });
+  }, [currentQuestion, currentAnswer, currentIndex, markedQuestions, saveMutation, sessionId]);
 
   const saveEssay = useCallback(
     (questionId: number, text: string) => {
@@ -105,7 +160,7 @@ const QuizSessionContent: React.FC = () => {
           },
           answerText: text,
           selectedOptionIds: [],
-          isMarked: false,
+          isMarked: markedQuestions.has(questionId),
           questionNo: questions.indexOf(question) + 1,
         }),
       );
@@ -122,6 +177,7 @@ const QuizSessionContent: React.FC = () => {
           data: {
             questionId,
             answerText: text,
+            isMarked: markedQuestions.has(questionId),
             questionNo: questions.indexOf(question) + 1,
           },
         },
@@ -135,7 +191,7 @@ const QuizSessionContent: React.FC = () => {
         },
       );
     },
-    [dispatch, questions, saveMutation, sessionId],
+    [dispatch, questions, saveMutation, sessionId, markedQuestions],
   );
 
   const handleSelectAnswer = (optionId: number) => {
@@ -151,8 +207,8 @@ const QuizSessionContent: React.FC = () => {
           questionLevel: currentQuestion.questionLevel,
         },
         selectedOptionIds: [optionId],
-        answerText: undefined,
-        isMarked: false,
+        answerText: "",
+        isMarked: markedQuestions.has(currentQuestion.id),
         questionNo: currentIndex + 1,
       }),
     );
@@ -164,7 +220,9 @@ const QuizSessionContent: React.FC = () => {
       sessionId: Number(sessionId),
       data: {
         questionId: currentQuestion.id,
+        answerText: "",
         selectedOptionIds: [optionId],
+        isMarked: markedQuestions.has(currentQuestion.id),
         questionNo: currentIndex + 1,
       },
     });
@@ -226,6 +284,7 @@ const QuizSessionContent: React.FC = () => {
             questionId: a.question.id,
             selectedOptionIds: a.selectedOptionIds,
             answerText: a.answerText ?? undefined,
+            isMarked: markedQuestions.has(a.question.id),
             questionNo: a.questionNo,
           })),
         },
@@ -239,9 +298,23 @@ const QuizSessionContent: React.FC = () => {
     }
   };
 
+  const getFilteredQuestions = () => {
+    if (filterMode === "all") return questions;
+    if (filterMode === "marked") {
+      return questions.filter((q) => markedQuestions.has(q.id));
+    }
+    if (filterMode === "unanswered") {
+      return questions.filter((q) => {
+        const ans = answersMap[q.id];
+        return !ans || ((ans.selectedOptionIds?.length ?? 0) === 0 && !ans.answerText?.trim());
+      });
+    }
+    return questions;
+  };
+
   if (sessionLoading || examLoading) {
     return (
-      <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#221610] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400 font-medium">Đang tải đề luyện tập...</p>
@@ -252,7 +325,7 @@ const QuizSessionContent: React.FC = () => {
 
   if (!questions.length) {
     return (
-      <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#221610] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <p className="text-slate-500">Không có câu hỏi nào.</p>
       </div>
     );
@@ -262,26 +335,57 @@ const QuizSessionContent: React.FC = () => {
   const currentEssaySaved = currentQuestion ? essaySaved[currentQuestion.id] : false;
 
   return (
-    <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#221610] flex flex-col">
-      <main className="max-w-360 mx-auto px-4 py-6 md:py-10 w-full">
-        <div className="flex items-center gap-3 mb-8">
-          <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
-            <BookOpen className="w-6 h-6 text-primary" />
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
+      <main className="max-w-350 mx-auto px-4 py-6 md:py-10">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-12 h-12 bg-primary/10 rounded-xl flex items-center justify-center">
+              <BookOpen className="w-6 h-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Chế độ Luyện tập</h1>
+              <p className="text-sm text-slate-500 dark:text-slate-400">{sessionData?.exam.name}</p>
+            </div>
           </div>
-          <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Chế độ Luyện tập</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">{sessionData?.exam.name}</p>
+
+          <div className="hidden md:flex items-center gap-4">
+            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+              <Target className="w-4 h-4 text-primary" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">{accuracy}% chính xác</span>
+            </div>
+            <div className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-slate-700">
+              <Clock className="w-4 h-4 text-slate-500" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                {currentIndex + 1}/{questions.length}
+              </span>
+            </div>
           </div>
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           <div className="lg:col-span-8 space-y-6">
-            <div className="bg-white dark:bg-slate-800/50 p-8 rounded-xl border border-primary/10 shadow-sm">
+            <div className="bg-white dark:bg-slate-800 p-8 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm">
               <div className="mb-8">
-                <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full mb-4">
-                  CÂU HỎI {currentIndex + 1} / {questions.length}
-                </span>
-                <h2 className="text-2xl font-bold leading-snug">{currentQuestion?.content}</h2>
+                <div className="flex items-center justify-between mb-4">
+                  <span className="inline-block px-3 py-1 bg-primary/10 text-primary text-xs font-bold rounded-full">
+                    CÂU HỎI {currentIndex + 1} / {questions.length}
+                  </span>
+                  <button
+                    onClick={handleToggleMark}
+                    className={cn(
+                      "flex items-center gap-2 px-3 py-1.5 rounded-lg text-sm font-semibold transition-all shadow-sm",
+                      isCurrentMarked
+                        ? "bg-amber-500 text-white hover:bg-amber-600"
+                        : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600",
+                    )}
+                  >
+                    <Flag className={cn("w-4 h-4", isCurrentMarked && "fill-current")} />
+                    {isCurrentMarked ? "Đã đánh dấu" : "Đánh dấu"}
+                  </button>
+                </div>
+                <h2 className="text-2xl font-bold leading-snug text-slate-900 dark:text-slate-100">
+                  {currentQuestion?.content}
+                </h2>
               </div>
 
               {currentQuestion && isMCQ(currentQuestion.questionType) && currentQuestion.options && (
@@ -296,27 +400,29 @@ const QuizSessionContent: React.FC = () => {
                       <button
                         key={option.id}
                         onClick={() => !showFeedback && handleSelectAnswer(option.id)}
+                        disabled={showFeedback}
                         className={cn(
                           "w-full flex items-center p-4 rounded-xl border-2 text-left group transition-all",
-                          showCorrect && "border-green-500 bg-green-50 dark:bg-green-900/10",
-                          showWrong && "border-red-500 bg-red-50 dark:bg-red-900/10",
+                          showCorrect && "border-green-500 bg-green-50 dark:bg-green-900/20",
+                          showWrong && "border-red-500 bg-red-50 dark:bg-red-900/20",
                           !showFeedback && isSelected && "border-primary bg-primary/5",
                           !showFeedback &&
                             !isSelected &&
-                            "border-primary/10 bg-[#f8f6f6] dark:bg-slate-800/50 hover:border-primary/40",
+                            "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 hover:border-primary/40 cursor-pointer",
                           showFeedback &&
                             !showCorrect &&
                             !showWrong &&
-                            "border-primary/10 bg-[#f8f6f6] dark:bg-slate-800/50",
+                            "border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800",
+                          showFeedback && "cursor-not-allowed",
                         )}
                       >
                         <div
                           className={cn(
-                            "w-10 h-10 rounded-lg flex items-center justify-center font-bold mr-4 shrink-0",
+                            "w-10 h-10 rounded-lg flex items-center justify-center font-bold mr-4 shrink-0 transition-all",
                             showCorrect && "bg-green-500 text-white",
                             showWrong && "bg-red-500 text-white",
                             !showFeedback && isSelected && "bg-primary text-white",
-                            !showFeedback && !isSelected && "bg-primary/10 text-primary",
+                            !showFeedback && !isSelected && "bg-primary/10 text-primary group-hover:bg-primary/20",
                             showFeedback && !showCorrect && !showWrong && "bg-primary/10 text-primary",
                           )}
                         >
@@ -327,7 +433,7 @@ const QuizSessionContent: React.FC = () => {
                             "flex-1 font-medium",
                             showCorrect && "text-green-900 dark:text-green-200 font-semibold",
                             showWrong && "text-red-900 dark:text-red-200",
-                            !showFeedback && !isSelected && "text-slate-600 dark:text-slate-300",
+                            !showFeedback && "text-slate-700 dark:text-slate-300",
                           )}
                         >
                           {option.content}
@@ -347,7 +453,7 @@ const QuizSessionContent: React.FC = () => {
                     onChange={(e) => handleEssayChange(e.target.value)}
                     onBlur={handleEssayBlur}
                     placeholder="Nhập câu trả lời của bạn..."
-                    className="w-full min-h-40 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-y transition-colors font-sans"
+                    className="w-full min-h-40 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/20 outline-none resize-y transition-colors"
                   />
 
                   <div className="flex items-center justify-between">
@@ -382,7 +488,7 @@ const QuizSessionContent: React.FC = () => {
               )}
 
               {showFeedback && (
-                <div className="mt-8 pt-8 border-t border-primary/10">
+                <div className="mt-8 pt-8 border-t border-slate-200 dark:border-slate-700">
                   <div
                     className={cn(
                       "flex items-center gap-3 mb-4",
@@ -419,7 +525,7 @@ const QuizSessionContent: React.FC = () => {
               <button
                 onClick={handlePrevQuestion}
                 disabled={currentIndex === 0}
-                className="cursor-pointer w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-primary/20 font-bold hover:bg-primary/5 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                className="w-full sm:w-auto flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-slate-200 dark:border-slate-700 font-bold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 <ArrowLeft className="w-5 h-5" />
                 Câu trước
@@ -428,13 +534,13 @@ const QuizSessionContent: React.FC = () => {
                 <button
                   onClick={handleSubmit}
                   disabled={submitMutation.isPending}
-                  className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-red-500/20 text-red-500 font-bold hover:bg-red-500/5 transition-all disabled:opacity-50"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-6 py-3 rounded-xl border-2 border-red-200 dark:border-red-900 text-red-600 dark:text-red-400 font-bold hover:bg-red-50 dark:hover:bg-red-900/20 transition-all disabled:opacity-50"
                 >
                   Kết thúc luyện tập
                 </button>
                 <button
                   onClick={handleNextQuestion}
-                  className="cursor-pointer flex-1 sm:flex-none flex items-center justify-center gap-2 px-10 py-3 rounded-xl bg-primary text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
+                  className="flex-1 sm:flex-none flex items-center justify-center gap-2 px-10 py-3 rounded-xl bg-primary text-white font-bold hover:opacity-90 transition-all shadow-lg shadow-primary/20"
                 >
                   {currentIndex === questions.length - 1 ? "Hoàn thành" : "Câu tiếp theo"}
                   <ArrowRight className="w-5 h-5" />
@@ -444,70 +550,141 @@ const QuizSessionContent: React.FC = () => {
           </div>
 
           <div className="lg:col-span-4 space-y-6">
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-xl border border-primary/10 shadow-sm sticky top-28">
-              <h3 className="font-bold mb-6 flex items-center gap-2">
-                <span className="text-xl">📋</span>
-                Danh sách câu hỏi
-              </h3>
-              <div className="grid grid-cols-5 gap-3">
-                {questions.map((q, index) => {
-                  const isCurrent = index === currentIndex;
-                  const result = answeredResults[q.id];
-                  const isAnswered = result !== undefined;
-                  const isCorrectQ = isAnswered && result;
-                  const isWrongQ = isAnswered && !result;
-
-                  const essayHasDraft =
-                    isEssay(q.questionType) && !!(essayDraft[q.id]?.trim() || answersMap[q.id]?.answerText?.trim());
-
-                  return (
-                    <button
-                      key={q.id}
-                      onClick={() => handleJumpToQuestion(index)}
-                      className={cn(
-                        "aspect-square flex items-center justify-center rounded-lg font-bold text-sm shadow-sm hover:scale-105 transition-transform",
-                        isCurrent && "ring-2 ring-primary ring-offset-1",
-                        isCorrectQ && "bg-green-500 text-white",
-                        isWrongQ && "bg-red-500 text-white",
-                        !isAnswered && essayHasDraft && "bg-blue-400 text-white",
-                        !isAnswered && !essayHasDraft && "bg-primary/5 border border-primary/20 text-slate-400",
-                      )}
-                    >
-                      {index + 1}
-                    </button>
-                  );
-                })}
+            <div className="bg-white dark:bg-slate-800 p-6 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm sticky top-6">
+              <div className="flex gap-2 mb-6">
+                <button
+                  onClick={() => setFilterMode("all")}
+                  className={cn(
+                    "cursor-pointer flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all",
+                    filterMode === "all"
+                      ? "bg-primary text-white"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600",
+                  )}
+                >
+                  Tất cả ({questions.length})
+                </button>
+                <button
+                  onClick={() => setFilterMode("marked")}
+                  className={cn(
+                    "cursor-pointer flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all",
+                    filterMode === "marked"
+                      ? "bg-amber-500 text-white"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600",
+                  )}
+                >
+                  Đã đánh dấu ({markedCount})
+                </button>
+                <button
+                  onClick={() => setFilterMode("unanswered")}
+                  className={cn(
+                    "cursor-pointer flex-1 px-3 py-2 rounded-lg text-xs font-bold transition-all",
+                    filterMode === "unanswered"
+                      ? "bg-slate-500 text-white"
+                      : "bg-slate-100 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-600",
+                  )}
+                >
+                  Chưa trả lời ({unansweredCount})
+                </button>
               </div>
 
-              <div className="mt-6 space-y-2">
+              <div className="mb-6">
+                <h3 className="font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                  <span className="text-xl">📋</span>
+                  Danh sách câu hỏi
+                </h3>
+                <div className="grid grid-cols-5 gap-3">
+                  {getFilteredQuestions().map((q) => {
+                    const index = questions.indexOf(q);
+                    const isCurrent = index === currentIndex;
+                    const result = answeredResults[q.id];
+                    const isAnswered = result !== undefined;
+                    const isCorrectQ = isAnswered && result;
+                    const isWrongQ = isAnswered && !result;
+                    const isMarkedQ = markedQuestions.has(q.id);
+
+                    const essayHasDraft =
+                      isEssay(q.questionType) && !!(essayDraft[q.id]?.trim() || answersMap[q.id]?.answerText?.trim());
+
+                    return (
+                      <button
+                        key={q.id}
+                        onClick={() => handleJumpToQuestion(index)}
+                        className={cn(
+                          "aspect-square flex items-center justify-center rounded-lg font-bold text-sm shadow-sm hover:scale-105 transition-transform relative",
+                          isCurrent && "ring-2 ring-primary ring-offset-2 dark:ring-offset-slate-800",
+                          isCorrectQ && "bg-green-500 text-white",
+                          isWrongQ && "bg-red-500 text-white",
+                          !isAnswered && essayHasDraft && "bg-blue-400 text-white",
+                          !isAnswered &&
+                            !essayHasDraft &&
+                            "bg-slate-100 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 text-slate-500 dark:text-slate-400",
+                        )}
+                      >
+                        {index + 1}
+                        {isMarkedQ && (
+                          <Flag className="absolute -top-1.5 -right-1.5 w-4 h-4 text-amber-500 fill-amber-500 drop-shadow-lg" />
+                        )}
+                      </button>
+                    );
+                  })}
+                </div>
+
+                {filterMode !== "all" && getFilteredQuestions().length === 0 && (
+                  <div className="text-center py-8 text-slate-400 text-sm">
+                    {filterMode === "marked" && "Chưa có câu hỏi nào được đánh dấu"}
+                    {filterMode === "unanswered" && "Đã trả lời tất cả các câu hỏi"}
+                  </div>
+                )}
+              </div>
+
+              <div className="space-y-2 mb-6">
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-4 h-4 rounded bg-green-500" />
-                  <span className="dark:text-slate-300">Trả lời đúng</span>
+                  <span className="text-slate-600 dark:text-slate-300">Trả lời đúng</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-4 h-4 rounded bg-red-500" />
-                  <span className="dark:text-slate-300">Trả lời sai</span>
+                  <span className="text-slate-600 dark:text-slate-300">Trả lời sai</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
                   <div className="w-4 h-4 rounded bg-blue-400" />
-                  <span className="dark:text-slate-300">Tự luận (đã nhập)</span>
+                  <span className="text-slate-600 dark:text-slate-300">Tự luận (đã nhập)</span>
                 </div>
                 <div className="flex items-center gap-2 text-sm">
-                  <div className="w-4 h-4 rounded border border-primary/30" />
-                  <span className="dark:text-slate-300">Chưa trả lời</span>
+                  <div className="w-4 h-4 rounded border-2 border-slate-300 dark:border-slate-600 bg-slate-100 dark:bg-slate-700" />
+                  <span className="text-slate-600 dark:text-slate-300">Chưa trả lời</span>
+                </div>
+                <div className="flex items-center gap-2 text-sm">
+                  <Flag className="w-4 h-4 text-amber-500 fill-amber-500" />
+                  <span className="text-slate-600 dark:text-slate-300">Đã đánh dấu</span>
                 </div>
               </div>
 
-              <div className="mt-6 pt-6 border-t border-primary/10">
-                <div className="bg-primary/10 rounded-xl p-4 flex justify-between items-center">
-                  <div>
-                    <p className="text-xs font-semibold text-primary uppercase tracking-wider">Tỉ lệ chính xác</p>
-                    <p className="text-2xl font-black text-primary">{accuracy}%</p>
-                    <p className="text-xs text-slate-500 mt-0.5">
-                      {correctCount}/{totalAnswered} câu
-                    </p>
+              <div className="pt-6 border-t border-slate-200 dark:border-slate-700">
+                <div className="bg-primary/10 rounded-xl p-5 space-y-4">
+                  <div className="flex justify-between items-center">
+                    <div>
+                      <p className="text-xs font-semibold text-primary uppercase tracking-wider">Tỉ lệ chính xác</p>
+                      <p className="text-3xl font-black text-primary mt-1">{accuracy}%</p>
+                      <p className="text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        {correctCount}/{totalAnswered} câu
+                      </p>
+                    </div>
+                    <span className="text-5xl opacity-50">📊</span>
                   </div>
-                  <span className="text-4xl opacity-50">📊</span>
+
+                  <div className="grid grid-cols-2 gap-3 pt-4 border-t border-primary/20">
+                    <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Đã trả lời</p>
+                      <p className="text-xl font-bold text-slate-900 dark:text-slate-100">{totalAnswered}</p>
+                    </div>
+                    <div className="bg-white dark:bg-slate-800 rounded-lg p-3">
+                      <p className="text-xs text-slate-500 dark:text-slate-400">Còn lại</p>
+                      <p className="text-xl font-bold text-slate-900 dark:text-slate-100">
+                        {questions.length - totalAnswered}
+                      </p>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>

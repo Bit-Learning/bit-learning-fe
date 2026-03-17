@@ -30,7 +30,7 @@ const formSchema = z
 			.email({ message: "Email không hợp lệ" }),
 		password: z
 			.string()
-			.min(3, { message: "Mật khẩu phải có ít nhất 3 ký tự" })
+			.min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự" })
 			.max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" })
 			.regex(/(?=.*[a-z])/, {
 				message: "Mật khẩu phải chứa ít nhất 1 chữ thường",
@@ -42,7 +42,7 @@ const formSchema = z
 			}),
 		confirmPassword: z
 			.string()
-			.min(1, { message: "Vui lòng xác nhận mật khẩu" }),
+			.min(6, { message: "Vui lòng xác nhận mật khẩu" }),
 		firstName: z.string().min(1, { message: "Họ không được để trống" }),
 		lastName: z.string().min(1, { message: "Tên không được để trống" }),
 		role: z.enum(["STUDENT"], { message: "Vai trò không hợp lệ" }),

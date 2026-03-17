@@ -5,7 +5,7 @@ import { BookOpen, ChevronLeft } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useCourseDetail } from "../queries/useCourse";
-import { useCourseAccess, useCourseProgress, useEnrollCourse } from "../queries/useEnroll";
+import { useCourseAccess, useEnrollCourse } from "../queries/useEnroll";
 import { useAddToCart } from "@/feature/order/queries/useCart";
 import { CourseHero } from "./CourseHero";
 import { CourseTabs } from "./CourseTabs";
@@ -21,7 +21,6 @@ const CourseDetailContent: React.FC = () => {
   const { data: enrollAccess } = useCourseAccess(course?.id || 0);
   const hasAccess = enrollAccess;
 
-  const { data: progress } = useCourseProgress(course?.id || 0, hasAccess === true);
   const { mutate: enroll, isPending: enrollPending } = useEnrollCourse();
   const { mutate: addToCart, isPending: cartPending } = useAddToCart();
 
@@ -103,11 +102,11 @@ const CourseDetailContent: React.FC = () => {
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <button
           type="button"
-          className="mb-6 inline-flex items-center text-gray-600 transition-all hover:text-blue-700"
-          onClick={() => navigate({ to: "/courses/grade/$grade", params: { grade: String(course.grade) } })}
+          className="cursor-pointer mb-6 inline-flex items-center text-gray-600 transition-all hover:text-blue-700"
+          onClick={() => navigate({ to: "/courses" })}
         >
           <ChevronLeft className="mr-1 h-5 w-5" />
-          <span className="font-medium">Lớp {course.grade}</span>
+          <span className="font-medium">Danh sách khóa học</span>
         </button>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -115,7 +114,6 @@ const CourseDetailContent: React.FC = () => {
             <CourseHero
               course={course}
               hasAccess={hasAccess}
-              progress={progress}
               isLiked={isLiked}
               onLike={handleLike}
               onShare={handleShare}

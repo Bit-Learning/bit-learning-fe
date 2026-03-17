@@ -3,7 +3,7 @@ services:
   bitlearning-web-local-prod:
     build:
       context: .
-      dockerfile: apps/web/Dockerfile.prod
+      dockerfile: apps/web/Dockerfile.prodV2
     ports:
       - "5173:5173"
     # mem_limit: 1024m
@@ -15,7 +15,7 @@ services:
   bitlearning-admin-local-prod:
     build:
       context: .
-      dockerfile: apps/admin/Dockerfile.prod
+      dockerfile: apps/admin/Dockerfile.prodV2
     ports:
       - "8386:8386"
     # mem_limit: 1024m

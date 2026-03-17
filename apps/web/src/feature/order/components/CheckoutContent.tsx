@@ -2,7 +2,7 @@ import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
 import { Input } from "@workspace/ui/components/Input";
-import { CreditCard, Loader2, ShoppingBag, Sparkles, Star, Wallet, Zap, ArrowLeft, Package } from "lucide-react";
+import { CreditCard, Loader2, ShoppingBag, Star, Wallet, Zap, ArrowLeft, Package } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useCreateOrder } from "@/feature/order/queries/useOrder";
@@ -71,7 +71,7 @@ const CheckoutContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex min-h-150 items-center justify-center bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
+      <div className="flex min-h-150 items-center justify-center bg-slate-50">
         <div className="text-center">
           <Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-blue-600" />
           <p className="text-lg font-medium text-gray-700">Đang tải thông tin...</p>
@@ -82,9 +82,9 @@ const CheckoutContent: React.FC = () => {
 
   if (!courses || courses.length === 0) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8">
+      <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="mx-auto max-w-4xl">
-          <div className="flex min-h-125 flex-col items-center justify-center rounded-3xl bg-white p-12 shadow-xl">
+          <div className="flex min-h-125 flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-lg">
             <ShoppingBag className="mb-6 h-32 w-32 text-gray-300" />
             <h3 className="mb-3 text-3xl font-bold text-gray-900">
               {isDirectCheckout ? "Không tìm thấy khóa học" : "Giỏ hàng trống"}
@@ -98,14 +98,14 @@ const CheckoutContent: React.FC = () => {
               {!isDirectCheckout && (
                 <Button
                   onClick={() => navigate({ to: "/cart" })}
-                  className="rounded-xl bg-gray-200 px-6 py-3 font-semibold text-gray-700 transition-all hover:bg-gray-300"
+                  className="rounded-xl bg-gray-200 px-6 py-3 font-semibold text-gray-700 hover:bg-gray-300 transition-colors"
                 >
                   Quay lại giỏ hàng
                 </Button>
               )}
               <Button
                 onClick={() => navigate({ to: "/courses" })}
-                className="rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 px-6 py-3 font-semibold text-white transition-all hover:scale-105 hover:shadow-lg"
+                className="rounded-xl bg-blue-600 px-6 py-3 font-semibold text-white hover:bg-blue-700 transition-colors"
               >
                 Khám phá khóa học
               </Button>
@@ -117,27 +117,25 @@ const CheckoutContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50 p-4 md:p-8">
+    <div className="min-h-screen bg-slate-50 p-4 md:p-8">
       <div className="container mx-auto max-w-7xl">
         <button
           onClick={handleBack}
-          className="mb-6 cursor-pointer flex items-center gap-2 text-gray-600 transition-colors hover:text-blue-600"
+          className="mb-6 cursor-pointer flex items-center gap-2 text-gray-600 hover:text-blue-600 transition-colors"
         >
           <ArrowLeft className="h-5 w-5" />
           <span className="font-semibold">{isDirectCheckout ? "Quay lại khóa học" : "Quay lại giỏ hàng"}</span>
         </button>
 
         <div className="mb-8 text-center">
-          <h1 className="mb-3 bg-linear-to-r from-gray-900 to-gray-700 bg-clip-text text-4xl font-black text-transparent md:text-5xl">
-            Thanh toán
-          </h1>
+          <h1 className="mb-3 text-4xl font-black text-gray-900 md:text-5xl">Thanh toán</h1>
           <p className="text-lg text-gray-600">Chỉ còn một bước nữa để bắt đầu học tập!</p>
         </div>
 
         <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <Card className="overflow-hidden shadow-xl">
-              <CardHeader className="bg-linear-to-r from-gray-800 to-gray-900 p-6">
+            <Card className="overflow-hidden p-0 shadow-lg">
+              <CardHeader className="bg-blue-600 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <Package className="h-7 w-7" />
                   <span className="text-2xl">
@@ -149,7 +147,7 @@ const CheckoutContent: React.FC = () => {
                 {courses.map((course, index) => (
                   <div
                     key={course.id}
-                    className="overflow-hidden rounded-2xl border-2 border-gray-100 bg-linear-to-br from-white to-gray-50 p-5 transition-all hover:border-blue-200 hover:shadow-md"
+                    className="overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 hover:border-blue-300 hover:shadow-md transition-all"
                     style={{
                       animation: "slideIn 0.5s ease-out",
                       animationDelay: `${index * 100}ms`,
@@ -197,8 +195,8 @@ const CheckoutContent: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden shadow-xl">
-              <CardHeader className="bg-linear-to-r from-blue-600 to-indigo-600 p-6">
+            <Card className="overflow-hidden p-0 shadow-lg">
+              <CardHeader className="bg-orange-500 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <CreditCard className="h-7 w-7" />
                   <span className="text-2xl">Phương thức thanh toán</span>
@@ -212,10 +210,7 @@ const CheckoutContent: React.FC = () => {
                     icon={<CreditCard className="h-10 w-10 text-white" />}
                     title="VNPay"
                     description="Thanh toán qua VNPay - An toàn & nhanh chóng"
-                    borderColor="border-blue-600"
-                    bgGradient="bg-linear-to-br from-blue-50 to-indigo-50"
-                    iconBg="bg-linear-to-br from-blue-500 to-blue-600"
-                    checkColor="text-blue-600"
+                    color="blue"
                   />
 
                   <PaymentMethodCard
@@ -224,10 +219,7 @@ const CheckoutContent: React.FC = () => {
                     icon={<CreditCard className="h-10 w-10 text-white" />}
                     title="PayOS"
                     description="Thanh toán qua PayOS - Đơn giản & tiện lợi"
-                    borderColor="border-green-600"
-                    bgGradient="bg-linear-to-br from-green-50 to-emerald-50"
-                    iconBg="bg-linear-to-br from-green-500 to-emerald-600"
-                    checkColor="text-green-600"
+                    color="blue"
                   />
 
                   <PaymentMethodCard
@@ -236,10 +228,7 @@ const CheckoutContent: React.FC = () => {
                     icon={<Wallet className="h-10 w-10 text-white" />}
                     title="Ví BitHub"
                     description="Thanh toán bằng số dư ví - Tức thì"
-                    borderColor="border-purple-600"
-                    bgGradient="bg-linear-to-br from-purple-50 to-pink-50"
-                    iconBg="bg-linear-to-br from-purple-500 to-pink-600"
-                    checkColor="text-purple-600"
+                    color="orange"
                   />
                 </div>
               </CardContent>
@@ -247,10 +236,10 @@ const CheckoutContent: React.FC = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-8 overflow-hidden rounded-2xl bg-white shadow-2xl">
-              <div className="bg-linear-to-br from-blue-600 via-indigo-600 to-purple-600 p-6">
+            <div className="sticky top-8 overflow-hidden rounded-2xl bg-white shadow-xl">
+              <div className="bg-orange-500 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
-                  <Sparkles className="h-7 w-7" />
+                  <ShoppingBag className="h-7 w-7" />
                   <span className="text-2xl">Tổng quan thanh toán</span>
                 </CardTitle>
               </div>
@@ -266,7 +255,7 @@ const CheckoutContent: React.FC = () => {
                   </div>
                 )}
 
-                <div className="space-y-4 rounded-2xl bg-linear-to-br from-gray-50 to-blue-50 p-5">
+                <div className="space-y-4 rounded-xl bg-slate-50 p-5">
                   <div className="flex justify-between">
                     <span className="font-medium text-gray-600">Số lượng</span>
                     <span className="font-bold text-gray-900">{cartSummary.totalItems} khóa học</span>
@@ -274,7 +263,7 @@ const CheckoutContent: React.FC = () => {
 
                   <div className="flex justify-between border-t-2 border-gray-300 pt-4">
                     <span className="text-xl font-bold text-gray-900">Tổng thanh toán</span>
-                    <span className="bg-linear-to-r from-blue-600 to-indigo-600 bg-clip-text text-3xl font-black text-transparent">
+                    <span className="text-3xl font-black text-blue-600">
                       {cartSummary.totalAmount.toLocaleString()}đ
                     </span>
                   </div>
@@ -283,7 +272,7 @@ const CheckoutContent: React.FC = () => {
                 <Button
                   onClick={handleCheckout}
                   isDisabled={isPending}
-                  className="group w-full rounded-xl bg-linear-to-r from-blue-600 to-indigo-600 py-5 text-lg font-bold text-white shadow-2xl transition-all hover:scale-105 hover:from-blue-700 hover:to-indigo-700 disabled:cursor-not-allowed disabled:opacity-70 disabled:hover:scale-100"
+                  className="group w-full rounded-xl bg-blue-600 py-5 text-lg font-bold text-white hover:bg-blue-700 shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isPending ? (
                     <>

@@ -61,6 +61,7 @@ export interface CourseDetail {
   price: number;
   sections: SectionDetail[];
   status: CourseStatus;
+  progressPercentage: number;
 }
 
 export interface CreateCourseRequest {
@@ -77,3 +78,21 @@ export interface CreateCourseRequest {
 }
 
 export interface UpdateCourseRequest extends CreateCourseRequest {}
+
+export interface MyCourse {
+  id: number;
+  code: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  instructorId: number;
+  instructorName: string;
+  ratingStar: number;
+  ratingCount: number;
+  level: CourseLevel;
+  grade: number;
+  price: number;
+  isDeleted: boolean;
+  status: CourseStatus;
+  progressPercentage: number;
+}

@@ -33,9 +33,9 @@ const QuizAttemptResultContent: React.FC = () => {
 
   if (attemptLoading || examLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4" />
           <p className="text-slate-600 dark:text-slate-400 font-medium">Đang tải kết quả...</p>
         </div>
       </div>
@@ -44,7 +44,7 @@ const QuizAttemptResultContent: React.FC = () => {
 
   if (!attemptData || !examData) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <Card className="max-w-md shadow-xl">
           <CardContent className="p-12 text-center">
             <FileText className="w-16 h-16 text-slate-400 mx-auto mb-4" />
@@ -87,89 +87,76 @@ const QuizAttemptResultContent: React.FC = () => {
   const sortedAnswers = [...attemptData.answers].sort((a, b) => (a.questionNo ?? 9999) - (b.questionNo ?? 9999));
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <main className="max-w-5xl mx-auto p-4 md:p-8">
         <Card
           className={cn(
             "mb-6 border-2 shadow-2xl",
             isPassed
-              ? "border-emerald-200 dark:border-emerald-800 bg-linear-to-br from-emerald-50 to-green-50 dark:from-emerald-900/20 dark:to-green-900/20"
-              : "border-red-200 dark:border-red-800 bg-linear-to-br from-red-50 to-orange-50 dark:from-red-900/20 dark:to-orange-900/20",
+              ? "border-emerald-400 dark:border-emerald-800  dark:bg-emerald-900/20"
+              : "border-red-600 dark:border-amber-800  dark:bg-amber-900/20",
           )}
         >
-          <CardContent className="p-8">
+          <CardContent className="px-8">
             <div className="text-center mb-6">
               <div
                 className={cn(
-                  "w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg",
-                  isPassed ? "bg-emerald-500" : "bg-red-500",
+                  "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg",
+                  isPassed ? "bg-emerald-500" : "bg-red-600",
                 )}
               >
-                {isPassed ? <Trophy className="w-10 h-10 text-white" /> : <XCircle className="w-10 h-10 text-white" />}
+                {isPassed ? <Trophy className="w-6 h-7 text-white" /> : <XCircle className="w-10 h-10 text-white" />}
               </div>
-              <h1 className="text-3xl font-black mb-2 text-slate-900 dark:text-slate-100">
+              <h1 className="text-2xl font-black mb-2 text-slate-900 dark:text-slate-100">
                 {isPassed ? "🎉 Chúc mừng! Bạn đã đạt" : "Chưa đạt yêu cầu"}
               </h1>
-              <p className="text-slate-600 dark:text-slate-400 text-lg">{examData.name}</p>
             </div>
 
             <div className="flex items-center justify-center mb-6">
               <div className="text-center">
                 <div
                   className={cn(
-                    "text-6xl font-black mb-2",
-                    isPassed ? "text-emerald-600 dark:text-emerald-400" : "text-red-600 dark:text-red-400",
+                    "text-4xl font-black mb-2",
+                    isPassed ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400",
                   )}
                 >
-                  {percentage}%
-                </div>
-                <p className="text-sm text-slate-500 dark:text-slate-400">
                   {score.toFixed(1)} / {totalScore} điểm
-                </p>
+                </div>
               </div>
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white/50 dark:bg-slate-900/50 rounded-xl p-4 text-center border border-slate-200 dark:border-slate-800">
+              <div className="bg-white dark:bg-slate-800 rounded-xl p-4 text-center border-2 border-slate-200 dark:border-slate-700">
                 <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{totalQuestions}</div>
                 <div className="text-xs text-slate-500 dark:text-slate-400">Tổng số câu</div>
               </div>
-              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center border border-emerald-200 dark:border-emerald-800">
+              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-xl p-4 text-center border-2 border-emerald-200 dark:border-emerald-800">
                 <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{correctCount}</div>
                 <div className="text-xs text-emerald-700 dark:text-emerald-400">Trả lời đúng</div>
               </div>
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-center border border-red-200 dark:border-red-800">
+              <div className="bg-red-50 dark:bg-red-900/20 rounded-xl p-4 text-center border-2 border-red-200 dark:border-red-800">
                 <div className="text-2xl font-bold text-red-600 dark:text-red-400">{incorrectCount}</div>
                 <div className="text-xs text-red-700 dark:text-red-400">Trả lời sai</div>
               </div>
-              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-center border border-amber-200 dark:border-amber-800">
+              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-xl p-4 text-center border-2 border-amber-200 dark:border-amber-800">
                 <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{unansweredCount}</div>
                 <div className="text-xs text-amber-700 dark:text-amber-400">Chưa trả lời</div>
               </div>
             </div>
 
-            {attemptData.createdAt && attemptData.submittedAt && (
-              <div className="flex items-center justify-center gap-2 text-sm text-slate-600 dark:text-slate-400">
-                <Clock className="w-4 h-4" />
-                <span>
-                  Thời gian làm bài:{" "}
-                  {Math.floor(
-                    (new Date(attemptData.submittedAt).getTime() - new Date(attemptData.createdAt).getTime()) / 60000,
-                  )}{" "}
-                  phút
-                </span>
-              </div>
-            )}
-
             <div className="flex flex-col sm:flex-row gap-3 mt-6">
-              <Button size="lg" className="flex-1 gap-2" onClick={() => navigate({ to: "/exams" })}>
+              <Button
+                size="lg"
+                className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
+                onClick={() => navigate({ to: "/exams" })}
+              >
                 <Home className="w-5 h-5" />
                 Về trang chủ
               </Button>
               <Button
                 variant="outline"
                 size="lg"
-                className="flex-1 gap-2"
+                className="flex-1 gap-2 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20"
                 onClick={() => navigate({ to: "/exams/$examId", params: { examId: String(attemptData.exam.id) } })}
               >
                 <RotateCcw className="w-5 h-5" />
@@ -179,7 +166,7 @@ const QuizAttemptResultContent: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card className="shadow-lg">
+        <Card className="shadow-lg border-2 border-slate-200 dark:border-slate-700">
           <CardContent className="p-6">
             <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Chi tiết câu trả lời</h2>
 
@@ -195,18 +182,18 @@ const QuizAttemptResultContent: React.FC = () => {
                     key={answer.question.id}
                     className={cn(
                       "border-2 rounded-xl transition-all",
-                      !answered && "border-amber-200 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-900/10",
+                      !answered && "border-amber-200 dark:border-amber-800 bg-amber-50 dark:bg-amber-900/10",
                       answered &&
                         isCorrect &&
-                        "border-emerald-200 dark:border-emerald-800 bg-emerald-50/50 dark:bg-emerald-900/10",
-                      answered && !isCorrect && "border-red-200 dark:border-red-800 bg-red-50/50 dark:bg-red-900/10",
+                        "border-emerald-200 dark:border-emerald-800 bg-emerald-50 dark:bg-emerald-900/10",
+                      answered && !isCorrect && "border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/10",
                     )}
                   >
                     <button
                       onClick={() => toggleQuestion(answer.question.id)}
-                      className="w-full p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors rounded-t-xl"
+                      className="w-full p-4 flex items-center justify-between hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors rounded-t-xl"
                     >
-                      <div className="flex items-center gap-3 min-w-0">
+                      <div className="flex items-center gap-3 min-w-0 flex-1">
                         <div
                           className={cn(
                             "w-8 h-8 rounded-lg flex items-center justify-center font-bold text-sm shrink-0",
@@ -224,26 +211,17 @@ const QuizAttemptResultContent: React.FC = () => {
 
                         <div className="shrink-0">
                           {!answered && (
-                            <Badge
-                              variant="outline"
-                              className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700"
-                            >
+                            <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 border-amber-300 dark:border-amber-700">
                               Chưa trả lời
                             </Badge>
                           )}
                           {answered && isCorrect && (
-                            <Badge
-                              variant="outline"
-                              className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700"
-                            >
+                            <Badge className="bg-emerald-100 dark:bg-emerald-900/30 text-emerald-700 dark:text-emerald-400 border-emerald-300 dark:border-emerald-700">
                               Đúng (+{answer.score} điểm)
                             </Badge>
                           )}
                           {answered && !isCorrect && (
-                            <Badge
-                              variant="outline"
-                              className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700"
-                            >
+                            <Badge className="bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400 border-red-300 dark:border-red-700">
                               Sai (0 điểm)
                             </Badge>
                           )}
@@ -258,11 +236,7 @@ const QuizAttemptResultContent: React.FC = () => {
                     </button>
 
                     {isExpanded && (
-                      <div className="p-4 pt-0 border-t border-slate-200 dark:border-slate-800">
-                        <h3 className="font-semibold text-slate-900 dark:text-slate-100 mb-4 whitespace-pre-wrap">
-                          {answer.question.content}
-                        </h3>
-
+                      <div className="p-4 pt-4 border-t border-slate-200 dark:border-slate-700">
                         {isMCQ(answer.question.questionType) && fullQuestion?.options && (
                           <div className="space-y-2">
                             {fullQuestion.options.map((option, optIndex) => {
@@ -281,7 +255,7 @@ const QuizAttemptResultContent: React.FC = () => {
                                       "border-red-300 dark:border-red-700 bg-red-50 dark:bg-red-900/20",
                                     !isCorrectOption &&
                                       !isSelected &&
-                                      "border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900",
+                                      "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800",
                                   )}
                                 >
                                   <div
@@ -320,7 +294,7 @@ const QuizAttemptResultContent: React.FC = () => {
 
                         {isEssay(answer.question.questionType) && (
                           <div className="space-y-3">
-                            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4">
+                            <div className="bg-slate-100 dark:bg-slate-800 rounded-lg p-4 border border-slate-200 dark:border-slate-700">
                               <p className="text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
                                 Câu trả lời của bạn:
                               </p>

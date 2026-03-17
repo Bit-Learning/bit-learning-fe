@@ -128,7 +128,7 @@ const ExamDetailContent: React.FC = () => {
 
   if (examLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <Skeleton className="h-8 w-64 mb-8" />
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
@@ -148,7 +148,7 @@ const ExamDetailContent: React.FC = () => {
 
   if (!exam) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
         <Card className="max-w-md">
           <CardContent className="p-12 text-center">
             <FileText className="w-16 h-16 text-slate-400 mx-auto mb-4" />
@@ -162,7 +162,7 @@ const ExamDetailContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-slate-50 via-blue-50/30 to-slate-50 dark:from-slate-950 dark:via-slate-900 dark:to-slate-950">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-900">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <nav className="flex items-center gap-2 mb-8 text-sm font-medium text-slate-500 dark:text-slate-400">
           <button onClick={() => navigate({ to: "/exams" })} className="hover:text-primary transition-colors">
@@ -174,87 +174,83 @@ const ExamDetailContent: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
-            <Card className="border-2 border-blue-100 dark:border-blue-900/50 shadow-md">
-              <CardContent className="p-8">
-                <div className="flex items-start gap-4 mb-4">
-                  <div className="w-16 h-16 bg-linear-to-br from-blue-500 to-purple-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
+            <Card className="border-2 p-0 border-blue-200 dark:border-blue-800 overflow-hidden">
+              <div className="px-8 py-6 border-b border-blue-200 dark:border-slate-700">
+                <div className="flex items-start gap-4">
+                  <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center shrink-0 shadow-lg">
                     <FileText className="w-8 h-8 text-white" />
                   </div>
                   <div className="flex-1">
-                    <Badge className="mb-3 text-xs font-mono">{exam.code}</Badge>
-                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 mb-3 leading-tight">
+                    <div className="flex items-center gap-2 mb-3">
+                      <Badge className="text-xs font-mono border-slate-200 dark:border-slate-700">{exam.code}</Badge>
+                      {exam.isPublished ? (
+                        <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
+                          <CheckCircle2 className="w-3 h-3 mr-1" />
+                          Đang mở
+                        </Badge>
+                      ) : (
+                        <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
+                          <Lock className="w-3 h-3 mr-1" />
+                          Chưa mở
+                        </Badge>
+                      )}
+                    </div>
+                    <h1 className="text-3xl font-black text-slate-900 dark:text-slate-100 leading-tight">
                       {exam.name}
                     </h1>
-                    {exam.matrixVersion && (
-                      <p className="text-slate-600 dark:text-slate-400">
-                        Phạm vi kiến thức: <span className="font-semibold">{exam.matrixVersion.name}</span>
-                      </p>
-                    )}
                   </div>
                 </div>
+              </div>
 
-                <div className="flex flex-wrap gap-3 mt-6">
-                  {exam.isPublished ? (
-                    <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800">
-                      <CheckCircle2 className="w-3 h-3 mr-1" />
-                      Đang mở
-                    </Badge>
-                  ) : (
-                    <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 border-amber-200 dark:border-amber-800">
-                      <Lock className="w-3 h-3 mr-1" />
-                      Chưa mở
-                    </Badge>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
+              <CardContent className="px-8 pb-8">
+                <div className="space-y-6">
+                  <div>
+                    <h2 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-900 dark:text-slate-100">
+                      <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                      Hướng dẫn và Quy định
+                    </h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center shrink-0">
+                          <Timer className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm mb-1 text-slate-900 dark:text-slate-100">Thời gian làm bài</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">
+                            {exam.durationInMinutes} phút không nghỉ
+                          </p>
+                        </div>
+                      </div>
 
-            <Card>
-              <CardContent className="p-6">
-                <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <BookOpen className="w-5 h-5 text-primary" />
-                  Hướng dẫn và Quy định
-                </h2>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-950/30 border border-blue-100 dark:border-blue-900/50">
-                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <Timer className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm mb-1">Thời gian làm bài</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">
-                        {exam.durationInMinutes} phút không nghỉ
-                      </p>
-                    </div>
-                  </div>
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center shrink-0">
+                          <BookOpen className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm mb-1 text-slate-900 dark:text-slate-100">Chế độ làm bài</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Thi chính thức hoặc Luyện tập</p>
+                        </div>
+                      </div>
 
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-purple-50 dark:bg-purple-950/30 border border-purple-100 dark:border-purple-900/50">
-                    <div className="w-10 h-10 bg-purple-100 dark:bg-purple-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <BookOpen className="w-5 h-5 text-purple-600 dark:text-purple-400" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm mb-1">Chế độ làm bài</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Thi chính thức hoặc Luyện tập</p>
-                    </div>
-                  </div>
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center shrink-0">
+                          <Star className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm mb-1 text-slate-900 dark:text-slate-100">Tự động lưu</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Câu trả lời được lưu liên tục</p>
+                        </div>
+                      </div>
 
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-amber-50 dark:bg-amber-950/30 border border-amber-100 dark:border-amber-900/50">
-                    <div className="w-10 h-10 bg-amber-100 dark:bg-amber-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <Star className="w-5 h-5 text-amber-600 dark:text-amber-400" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm mb-1">Tự động lưu</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Câu trả lời được lưu liên tục</p>
-                    </div>
-                  </div>
-
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-100 dark:border-red-900/50">
-                    <div className="w-10 h-10 bg-red-100 dark:bg-red-900/50 rounded-lg flex items-center justify-center shrink-0">
-                      <Lock className="w-5 h-5 text-red-600 dark:text-red-400" />
-                    </div>
-                    <div>
-                      <p className="font-bold text-sm mb-1">Bảo mật</p>
-                      <p className="text-sm text-slate-600 dark:text-slate-400">Không quay phim, chụp ảnh đề</p>
+                      <div className="flex items-start gap-3 p-4 rounded-xl bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800">
+                        <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/50 rounded-lg flex items-center justify-center shrink-0">
+                          <Lock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm mb-1 text-slate-900 dark:text-slate-100">Bảo mật</p>
+                          <p className="text-sm text-slate-600 dark:text-slate-400">Không quay phim, chụp ảnh đề</p>
+                        </div>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -262,9 +258,9 @@ const ExamDetailContent: React.FC = () => {
             </Card>
 
             <Card>
-              <CardContent className="p-6">
+              <CardContent className="px-6">
                 <h2 className="text-xl font-bold mb-4 flex items-center gap-2">
-                  <Clock className="w-5 h-5 text-primary" />
+                  <Clock className="w-5 h-5 text-blue-600 dark:text-blue-400" />
                   Lịch sử làm bài
                 </h2>
 
@@ -277,16 +273,16 @@ const ExamDetailContent: React.FC = () => {
                       return (
                         <div
                           key={`attempt-${attempt.id}`}
-                          className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                          className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors bg-white dark:bg-slate-800"
                         >
                           <div className="flex items-center justify-between gap-4 flex-wrap">
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                              <div className="w-12 h-12 bg-red-50 dark:bg-red-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-red-200 dark:border-red-900/50 shrink-0">
-                                <span className="text-red-600 dark:text-red-400">#{index + 1}</span>
+                              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-blue-200 dark:border-blue-800 shrink-0">
+                                <span className="text-blue-600 dark:text-blue-400">#{index + 1}</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <Badge className="bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400 border-red-200 dark:border-red-800 text-xs">
+                                  <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800 text-xs">
                                     Chế độ Thi
                                   </Badge>
                                   {isSubmitted ? (
@@ -304,7 +300,7 @@ const ExamDetailContent: React.FC = () => {
                                 <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                                   {formatDate(attempt.submittedAt || attempt.startTime)}
                                 </p>
-                                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 mt-1">
+                                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
                                   <Timer className="w-3 h-3" />
                                   {formatDuration(attempt.startTime, attempt.submittedAt)}
                                 </div>
@@ -369,16 +365,16 @@ const ExamDetailContent: React.FC = () => {
                       return (
                         <div
                           key={`session-${session.id}`}
-                          className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700 transition-colors"
+                          className="p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 hover:border-slate-300 dark:hover:border-slate-600 transition-colors bg-white dark:bg-slate-800"
                         >
                           <div className="flex items-center justify-between gap-4 flex-wrap">
                             <div className="flex items-center gap-4 flex-1 min-w-0">
-                              <div className="w-12 h-12 bg-blue-50 dark:bg-blue-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-blue-200 dark:border-blue-900/50 shrink-0">
-                                <span className="text-blue-600 dark:text-blue-400">L{index + 1}</span>
+                              <div className="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-lg flex items-center justify-center font-bold text-lg border-2 border-emerald-200 dark:border-emerald-800 shrink-0">
+                                <span className="text-emerald-600 dark:text-emerald-400">L{index + 1}</span>
                               </div>
                               <div className="flex-1 min-w-0">
                                 <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                  <Badge className="bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400 border-blue-200 dark:border-blue-800 text-xs">
+                                  <Badge className="bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400 border-emerald-200 dark:border-emerald-800 text-xs">
                                     Chế độ Luyện tập
                                   </Badge>
                                   {isSubmitted ? (
@@ -400,7 +396,7 @@ const ExamDetailContent: React.FC = () => {
                                 <p className="font-semibold text-slate-900 dark:text-slate-100 text-sm">
                                   {formatDate(session.startTime)}
                                 </p>
-                                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-500 mt-1">
+                                <div className="flex items-center gap-2 text-xs text-slate-500 dark:text-slate-400 mt-1">
                                   <BookOpen className="w-3 h-3" />
                                   Câu {session.currentIndex + 1} / {exam?.examQuestions?.length || 0}
                                 </div>
@@ -464,8 +460,8 @@ const ExamDetailContent: React.FC = () => {
 
           <div className="lg:col-span-1">
             <div className="sticky top-6 space-y-4">
-              <Card className="border-2 border-primary/20 shadow-xl overflow-hidden">
-                <div className="bg-linear-to-r from-blue-600 to-purple-600 p-6 text-white">
+              <Card className="border-2 p-0 border-blue-200 dark:border-blue-800 overflow-hidden">
+                <div className="bg-blue-600 p-6 text-white">
                   <h3 className="font-bold text-lg flex items-center gap-2">
                     <BarChart3 className="w-5 h-5" />
                     Tóm tắt đề thi
@@ -474,7 +470,7 @@ const ExamDetailContent: React.FC = () => {
 
                 <CardContent className="p-6 space-y-6">
                   <div className="space-y-4">
-                    <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
                       <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
                         <HelpCircle className="w-4 h-4" />
                         Số câu hỏi
@@ -482,7 +478,7 @@ const ExamDetailContent: React.FC = () => {
                       <span className="font-bold text-lg">{exam.examQuestions?.length || 0}</span>
                     </div>
 
-                    <div className="flex justify-between items-center py-3 border-b border-slate-100 dark:border-slate-800">
+                    <div className="flex justify-between items-center py-3 border-b border-slate-200 dark:border-slate-700">
                       <span className="text-slate-600 dark:text-slate-400 flex items-center gap-2">
                         <Timer className="w-4 h-4" />
                         Thời gian
@@ -506,7 +502,7 @@ const ExamDetailContent: React.FC = () => {
                       <div className="space-y-3">
                         <Button
                           size="lg"
-                          className="w-full gap-2 bg-linear-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white shadow-lg shadow-blue-500/30 dark:shadow-blue-900/50 font-bold text-base h-12"
+                          className="w-full gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white shadow-lg shadow-blue-500/30 font-bold text-base h-12"
                           onClick={() => setShowModeModal(true)}
                         >
                           <PlayCircle className="w-5 h-5" />
@@ -532,7 +528,7 @@ const ExamDetailContent: React.FC = () => {
               </Card>
 
               <button
-                className="w-full p-4 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 hover:text-primary dark:hover:text-primary cursor-pointer transition-colors text-sm font-medium rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700"
+                className="w-full p-4 flex items-center justify-center gap-2 text-slate-500 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors text-sm font-medium rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 border-2 border-transparent hover:border-slate-200 dark:hover:border-slate-700"
                 onClick={() => {
                   toast.info({
                     title: "Trợ giúp",

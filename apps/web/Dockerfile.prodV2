@@ -1,0 +1,50 @@
+# ============================
+# 1️⃣ BUILD STAGE
+# ============================
+FROM node:24-alpine AS builder
+
+WORKDIR /app
+
+# Enable pnpm
+RUN corepack enable && corepack prepare pnpm@10.28.2 --activate
+
+# Copy workspace configuration from monorepo root
+COPY package.json pnpm-lock.yaml pnpm-workspace.yaml ./
+
+# Copy all package.json files to establish workspace structure
+COPY apps/web/package.json ./apps/web/
+COPY packages/lib/package.json ./packages/lib/
+COPY packages/ui/package.json ./packages/ui/
+COPY packages/typescript-config/package.json ./packages/typescript-config/
+
+# Install ALL dependencies
+RUN pnpm install --frozen-lockfile
+
+# Copy source code
+COPY packages/lib ./packages/lib
+COPY packages/ui ./packages/ui
+COPY packages/typescript-config ./packages/typescript-config
+COPY apps/web ./apps/web
+COPY turbo.json ./turbo.json
+
+# Build web app
+RUN pnpm --filter ./apps/web run build
+
+# ============================
+# 2️⃣ RUNTIME STAGE (NO NGINX)
+# ============================
+FROM node:24-alpine AS runtime
+
+WORKDIR /app
+
+# Install lightweight static server
+RUN npm install -g serve
+
+# Copy build output
+COPY --from=builder /app/apps/web/dist ./dist
+
+# Expose port
+EXPOSE 5173
+
+# Start static server
+CMD ["serve", "-s", "dist", "-l", "5173"]
