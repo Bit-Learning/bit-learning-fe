@@ -17,7 +17,7 @@ const CodeEditorPreview = () => {
 					</div>
 				</div>
 				<div className="p-6 font-mono text-sm leading-relaxed overflow-hidden">
-					<p>
+					<p className="text-white">
 						<span className="text-purple-400">import</span> BitLearning_core
 					</p>
 					<p className="mt-2 text-slate-400"># Khởi tạo robot AI hỗ trợ</p>
