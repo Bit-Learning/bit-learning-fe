@@ -1,10 +1,10 @@
 import React, { useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
+import { MessageCircle, Send, X, Loader2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Textarea } from "@workspace/ui/components/Textarea";
 import { Label } from "@workspace/ui/components/label";
-// import { useCreateClarification } from "../queries/useContest";
-// import type { CreateClarificationRequest } from "../types/contest.type";
+import { useCreateClarification } from "../queries/useContest";
+import type { CreateClarificationRequest } from "../types/contest.type";
 
 interface Problem {
   contestProblemId: string;
@@ -27,9 +27,8 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
 }) => {
   const [selectedProblem, setSelectedProblem] = useState<string>("");
   const [questionContent, setQuestionContent] = useState("");
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // const createClarification = useCreateClarification();
+  const createClarification = useCreateClarification();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,33 +37,23 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
       return;
     }
 
-    setIsSubmitting(true);
-
     try {
-      // const request: CreateClarificationRequest = {
-      //   contestProblemId: selectedProblem || undefined,
-      //   question: questionContent,
-      // };
-      // await createClarification.mutateAsync({ contestId, request });
-
-      console.log("Question submitted:", {
-        contestId,
-        problemId: selectedProblem,
+      const request: CreateClarificationRequest = {
+        contestProblemId: selectedProblem || undefined,
         question: questionContent,
-      });
+      };
+      await createClarification.mutateAsync({ contestId, request });
 
       setSelectedProblem("");
       setQuestionContent("");
       onClose();
     } catch (error) {
-      console.error("Failed to submit question:", error);
-    } finally {
-      setIsSubmitting(false);
+      alert("Không thể gửi câu hỏi. Vui lòng thử lại!");
     }
   };
 
   const handleClose = () => {
-    if (!isSubmitting) {
+    if (!createClarification.isPending) {
       setSelectedProblem("");
       setQuestionContent("");
       onClose();
@@ -75,33 +64,28 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
-      {/* Backdrop */}
-      <div className="fixed inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={handleClose} />
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={handleClose} />
 
-      {/* Modal Content */}
-      <div className="relative bg-white dark:bg-slate-900 w-full max-w-xl rounded-2xl shadow-2xl overflow-hidden mx-4 z-10">
-        {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100 dark:border-slate-800">
+      <div className="relative bg-white w-full max-w-xl rounded-lg shadow-xl overflow-hidden mx-4 z-10">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center bg-blue-50 dark:bg-primary/10 rounded-xl text-primary">
+            <div className="w-10 h-10 flex items-center justify-center bg-blue-50 rounded-lg text-blue-600">
               <MessageCircle className="w-5 h-5" />
             </div>
-            <h3 className="text-lg font-bold text-slate-900 dark:text-white">Đặt câu hỏi cho Ban tổ chức</h3>
+            <h3 className="text-lg font-bold text-gray-900">Đặt câu hỏi cho Ban tổ chức</h3>
           </div>
           <button
             onClick={handleClose}
-            disabled={isSubmitting}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-colors disabled:opacity-50"
+            disabled={createClarification.isPending}
+            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Form */}
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
-          {/* Problem Selection */}
           <div className="space-y-2">
-            <Label htmlFor="problem-select" className="text-sm font-bold">
+            <Label htmlFor="problem-select" className="text-sm font-semibold">
               Chọn bài tập liên quan
             </Label>
             <div className="relative">
@@ -109,7 +93,7 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
                 id="problem-select"
                 value={selectedProblem}
                 onChange={(e) => setSelectedProblem(e.target.value)}
-                className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-2.5 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition-all"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
                 <option value="">Chung (Vấn đề khác)</option>
                 {problems.map((problem) => (
@@ -121,10 +105,9 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
             </div>
           </div>
 
-          {/* Question Content */}
           <div className="space-y-2">
-            <Label htmlFor="question-content" className="text-sm font-bold">
-              Nội dung câu hỏi <span className="text-rose-500">*</span>
+            <Label htmlFor="question-content" className="text-sm font-semibold">
+              Nội dung câu hỏi <span className="text-red-500">*</span>
             </Label>
             <Textarea
               id="question-content"
@@ -133,33 +116,35 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
               placeholder="Nhập thắc mắc của bạn về đề bài hoặc kỹ thuật..."
               rows={6}
               required
-              className="w-full bg-slate-50 dark:bg-slate-800/50 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 text-sm focus:ring-2 focus:ring-primary focus:border-primary transition-all resize-none placeholder:text-slate-400"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none placeholder:text-gray-400"
             />
-            <p className="text-xs text-slate-400 italic">
-              Câu hỏi của bạn sẽ được gửi tới Ban tổ chức và có thể được công khai nếu mang tính đóng góp chung.
+            <p className="text-xs text-gray-400 italic">
+              Câu hỏi của bạn sẽ được gửi tới Ban tổ chức và có thể được công khai.
             </p>
           </div>
         </form>
 
-        {/* Footer */}
-        <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/30 flex items-center justify-end gap-3 border-t border-slate-100 dark:border-slate-800">
+        <div className="px-6 py-4 bg-gray-50 flex items-center justify-end gap-3 border-t border-gray-200">
           <Button
             type="button"
             variant="outline"
             onClick={handleClose}
-            isDisabled={isSubmitting}
-            className="border-slate-200 dark:border-slate-700"
+            isDisabled={createClarification.isPending}
+            className="border-gray-200"
           >
             Hủy
           </Button>
           <Button
             type="button"
             onClick={handleSubmit}
-            isDisabled={isSubmitting || !questionContent.trim()}
-            className="bg-primary hover:bg-blue-600 text-white shadow-md"
+            isDisabled={createClarification.isPending || !questionContent.trim()}
+            className="bg-blue-600 hover:bg-blue-700 text-white"
           >
-            {isSubmitting ? (
-              "Đang gửi..."
+            {createClarification.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                Đang gửi...
+              </>
             ) : (
               <>
                 Gửi câu hỏi

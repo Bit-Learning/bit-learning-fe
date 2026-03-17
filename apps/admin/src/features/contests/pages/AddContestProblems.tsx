@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from "react";
+import React, { useState, useMemo, useEffect } from "react";
 import { Search, Plus, Check, X, Filter, Code, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
@@ -23,10 +23,16 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
 
   const availableProblems = availableProblemsData?.data || [];
 
-  const [activeProblem, setActiveProblem] = useState<ProblemBriefResponse | null>(availableProblems[0] || null);
+  const [activeProblem, setActiveProblem] = useState<ProblemBriefResponse | null>(null);
   const [activeTab, setActiveTab] = useState<"content" | "testcases" | "details">("content");
   const [searchQuery, setSearchQuery] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("Tất cả");
+
+  useEffect(() => {
+    if (!activeProblem && availableProblems.length > 0) {
+      setActiveProblem(availableProblems[0]!);
+    }
+  }, [availableProblems, activeProblem]);
 
   const { data: problemDetailData, isLoading: isLoadingDetail } = useProblemDetail(activeProblem?.id || "", undefined, {
     enabled: !!activeProblem,
@@ -66,23 +72,31 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
   const handleAddProblem = async (problem: ProblemBriefResponse) => {
     if (!contestProblems) return;
 
-    await addProblemMutation.mutateAsync({
-      contestId,
-      request: {
-        problemId: problem.id,
-        orderIndex: contestProblems.length + 1,
-      },
-    });
+    try {
+      await addProblemMutation.mutateAsync({
+        contestId,
+        request: {
+          problemId: problem.id,
+          orderIndex: contestProblems.length + 1,
+        },
+      });
+    } catch (error) {
+      alert("Không thể thêm bài tập. Vui lòng thử lại!");
+    }
   };
 
   const handleRemoveProblem = async (problem: ProblemBriefResponse) => {
     const contestProblem = getContestProblem(problem.id);
     if (!contestProblem) return;
 
-    await removeProblemMutation.mutateAsync({
-      contestId,
-      contestProblemId: contestProblem.contestProblemId,
-    });
+    try {
+      await removeProblemMutation.mutateAsync({
+        contestId,
+        contestProblemId: contestProblem.contestProblemId,
+      });
+    } catch (error) {
+      alert("Không thể gỡ bài tập. Vui lòng thử lại!");
+    }
   };
 
   const toggleProblem = (problem: ProblemBriefResponse) => {
@@ -97,11 +111,15 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
     if (!contestProblems || contestProblems.length === 0) return;
 
     if (confirm(`Bạn có chắc chắn muốn xóa tất cả ${contestProblems.length} bài tập?`)) {
-      for (const problem of contestProblems) {
-        await removeProblemMutation.mutateAsync({
-          contestId,
-          contestProblemId: problem.contestProblemId,
-        });
+      try {
+        for (const problem of contestProblems) {
+          await removeProblemMutation.mutateAsync({
+            contestId,
+            contestProblemId: problem.contestProblemId,
+          });
+        }
+      } catch (error) {
+        alert("Có lỗi xảy ra khi xóa bài tập!");
       }
     }
   };
@@ -136,6 +154,7 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
   }, [availableProblems, searchQuery, difficultyFilter]);
 
   const currentProblemData = activeProblem ? getContestProblem(activeProblem.id) : null;
+  const isProcessing = addProblemMutation.isPending || removeProblemMutation.isPending;
 
   if (isLoadingProblems || isLoadingContestProblems) {
     return (
@@ -146,10 +165,6 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
         </div>
       </div>
     );
-  }
-
-  if (!activeProblem && availableProblems.length > 0) {
-    setActiveProblem(availableProblems[0]!);
   }
 
   return (
@@ -222,15 +237,22 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
                         e.stopPropagation();
                         toggleProblem(problem);
                       }}
-                      disabled={addProblemMutation.isPending || removeProblemMutation.isPending}
+                      disabled={isProcessing}
                       className={cn(
-                        "absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center shadow-md transition-all disabled:opacity-50",
+                        "absolute top-4 right-4 w-8 h-8 rounded-lg flex items-center justify-center shadow-md transition-all",
+                        isProcessing && "cursor-not-allowed opacity-50",
                         isSelected
                           ? "bg-blue-600 text-white"
                           : "border border-gray-200 text-gray-400 hover:bg-blue-600 hover:text-white hover:border-blue-600",
                       )}
                     >
-                      {isSelected ? <Check className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+                      {isProcessing ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : isSelected ? (
+                        <Check className="w-4 h-4" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
                     </button>
                   </div>
 
@@ -297,19 +319,19 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
                 <Button
                   variant="outline"
                   onClick={() => toggleProblem(activeProblem)}
-                  disabled={removeProblemMutation.isPending}
+                  disabled={isProcessing}
                   className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
                 >
-                  <X className="w-4 h-4" />
+                  {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
                   Gỡ khỏi kỳ thi
                 </Button>
               ) : (
                 <Button
                   onClick={() => handleAddProblem(activeProblem)}
-                  disabled={addProblemMutation.isPending}
+                  disabled={isProcessing}
                   className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
                 >
-                  <Plus className="w-4 h-4" />
+                  {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
                   Thêm vào kỳ thi
                 </Button>
               )}
@@ -459,7 +481,7 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
         <div className="flex items-center gap-4">
           <button
             onClick={handleClearAll}
-            disabled={!contestProblems || contestProblems.length === 0 || removeProblemMutation.isPending}
+            disabled={!contestProblems || contestProblems.length === 0 || isProcessing}
             className="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             Xóa tất cả
