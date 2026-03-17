@@ -27,7 +27,7 @@ const StudentProblemListContent: React.FC = () => {
 
   const toggleFavorite = useToggleFavorite();
 
-  const problems = problemsData?.content || [];
+  const problems = problemsData?.data || [];
   const pageInfo = problemsData?.page;
   const totalPages = pageInfo?.totalPages || 0;
   const totalElements = pageInfo?.totalElements || 0;

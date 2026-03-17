@@ -189,7 +189,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                         >
                           <td className="px-6 py-4">
                             <a
-                              onClick={() => navigate({ to: `/mentor/problems/${problem.id}` })}
+                              onClick={() => navigate({ to: `/mentor/problem/${problem.id}/` })}
                               className="text-sm font-semibold text-blue-600 hover:underline cursor-pointer"
                             >
                               {problem.title}
@@ -227,7 +227,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => navigate({ to: `/mentor/problem/${problem.id}` })}
+                                onClick={() => navigate({ to: `/mentor/problem/${problem.id}/` })}
                                 className="p-1.5 h-auto text-slate-400 hover:text-blue-600"
                                 aria-label="Xem"
                               >
@@ -259,7 +259,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                   </tbody>
                 </table>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-center">
                     <nav className="flex items-center gap-1">
@@ -309,7 +308,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
         </Card>
       </div>
 
-      {/* Delete Modal */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/50" onClick={() => setDeleteId(null)} />

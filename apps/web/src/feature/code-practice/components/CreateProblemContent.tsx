@@ -1,534 +1,706 @@
 import React, { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Save,
-  Plus,
-  Trash2,
-  Clock,
-  HardDrive,
-  Loader2,
-  Info,
-  FileText,
-  Tag,
-  Eye,
-  CheckCircle2,
-  Code2,
-  GripVertical,
-  ArrowLeft,
-} from "lucide-react";
+import * as z from "zod";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Textarea } from "@workspace/ui/components/Textarea";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Label } from "@workspace/ui/components/label";
-import { cn } from "@workspace/ui/lib/utils";
-import { Difficulty, Language } from "../types/coding.type";
+import { Difficulty, ParamType, ParamTypeInfo } from "../types/coding.type";
 import {
   useCreateProblem,
-  useUpdateProblem,
-  useCreateTestCase,
-  useCreateCodeTemplate,
+  useGenerateCodeTemplates,
+  useBulkCreateTestCases,
   useProblemDetail,
+  useUpdateProblem,
 } from "../queries/useCoding";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { ArrowLeft } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 
-const formSchema = z.object({
-  title: z.string().min(3, "Tiêu đề ít nhất 3 ký tự").max(200),
+const problemSchema = z.object({
+  title: z.string().min(1, "Tiêu đề không được để trống"),
   slug: z
     .string()
-    .min(3)
-    .max(100)
-    .regex(/^[a-z0-9-]+$/, "Chỉ chứa chữ thường, số và dấu -"),
-  description: z.string().min(50, "Mô tả ít nhất 50 ký tự"),
+    .min(1, "Slug không được để trống")
+    .regex(/^[a-z0-9-]+$/, "Slug chỉ chứa chữ thường, số và dấu gạch ngang"),
+  description: z.string().min(1, "Mô tả không được để trống"),
   difficulty: z.nativeEnum(Difficulty),
-  timeLimitMs: z.number().min(100).max(30000),
-  memoryLimitMb: z.number().min(16).max(1024),
-  isPublic: z.boolean(),
-  tags: z.array(z.string()),
-  codeTemplates: z.array(
-    z.object({
-      language: z.nativeEnum(Language),
-      templateCode: z.string().min(1),
-    }),
-  ),
+  timeLimitMs: z.number().min(100, "Thời gian tối thiểu 100ms").max(30000, "Thời gian tối đa 30000ms"),
+  memoryLimitMb: z.number().min(8, "Bộ nhớ tối thiểu 8MB").max(512, "Bộ nhớ tối đa 512MB"),
+  isPublic: z.boolean().default(false),
+  tags: z.array(z.string()).default([]),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-const defaultTemplates: Record<Language, string> = {
-  [Language.CPP]: `#include <bits/stdc++.h>
-using namespace std;
-
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    // Your code here
-
-    return 0;
-}`,
-  [Language.JAVA]: `import java.util.*;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        // Your code here
-    }
-}`,
-  [Language.PYTHON]: `# Your code here
-`,
-  [Language.JAVASCRIPT]: `const readline = require('readline');
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+const functionParamSchema = z.object({
+  name: z.string().min(1, "Tên tham số không được để trống"),
+  type: z.nativeEnum(ParamType),
 });
 
-// Your code here
-`,
-};
+const generateTemplateSchema = z.object({
+  functionName: z
+    .string()
+    .min(1, "Tên hàm không được để trống")
+    .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, "Tên hàm không hợp lệ"),
+  returnType: z.nativeEnum(ParamType),
+  parameters: z.array(functionParamSchema).min(1, "Cần ít nhất 1 tham số"),
+});
 
-const languageOptions = [
-  { value: Language.CPP, label: "C++", icon: "⚡" },
-  { value: Language.JAVA, label: "Java", icon: "☕" },
-  { value: Language.PYTHON, label: "Python", icon: "🐍" },
-  { value: Language.JAVASCRIPT, label: "JavaScript", icon: "🟨" },
-];
+const combinedSchema = problemSchema.merge(generateTemplateSchema);
 
-const CreateProblemContent: React.FC = () => {
+type ProblemFormData = z.infer<typeof problemSchema>;
+type GenerateTemplateFormData = z.infer<typeof generateTemplateSchema>;
+type CombinedFormData = z.infer<typeof combinedSchema>;
+
+interface CreateProblemContentProps {
+  mode?: "create" | "edit";
+  problemId?: string;
+}
+
+const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "create", problemId }) => {
+  const [createdProblemId, setCreatedProblemId] = useState<string | null>(null);
+  const [tagInput, setTagInput] = useState("");
+  const [testCasesJson, setTestCasesJson] = useState("");
+  const [jsonFormatError, setJsonFormatError] = useState<string | null>(null);
   const navigate = useNavigate();
-  const params = useParams({ strict: false });
-  const problemId = params?.id;
-  const isEditMode = !!problemId;
 
-  const [currentTag, setCurrentTag] = useState("");
+  const isEditMode = mode === "edit" && !!problemId;
 
-  const createProblem = useCreateProblem();
-  const updateProblem = useUpdateProblem();
-  const createTestCase = useCreateTestCase();
-  const createCodeTemplate = useCreateCodeTemplate();
+  const createProblemMutation = useCreateProblem();
+  const updateProblemMutation = useUpdateProblem();
+  const generateTemplatesMutation = useGenerateCodeTemplates();
+  const bulkCreateTestCasesMutation = useBulkCreateTestCases();
 
-  const { data: existingProblem, isLoading: isLoadingProblem } = useProblemDetail(problemId || "", Language.PYTHON, {
+  const { data: problemData, isLoading: isProblemLoading } = useProblemDetail(problemId || "", undefined, {
     enabled: isEditMode,
   });
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const combinedForm = useForm<CombinedFormData>({
+    resolver: zodResolver(combinedSchema) as Resolver<CombinedFormData>,
     defaultValues: {
       title: "",
       slug: "",
       description: "",
       difficulty: Difficulty.EASY,
-      timeLimitMs: 1000,
+      timeLimitMs: 2000,
       memoryLimitMb: 256,
       isPublic: false,
       tags: [],
-      codeTemplates: [{ language: Language.PYTHON, templateCode: defaultTemplates[Language.PYTHON] }],
+      functionName: "solution",
+      returnType: ParamType.INT,
+      parameters: [{ name: "nums", type: ParamType.INT_ARRAY }],
     },
   });
 
-  const {
-    fields: templateFields,
-    append: appendTemplate,
-    remove: removeTemplate,
-  } = useFieldArray({
-    control: form.control,
-    name: "codeTemplates",
+  const { fields, append, remove } = useFieldArray({
+    control: combinedForm.control,
+    name: "parameters",
   });
 
   useEffect(() => {
-    if (isEditMode && existingProblem) {
-      form.reset({
-        title: existingProblem.title,
-        slug: existingProblem.slug,
-        description: existingProblem.description,
-        difficulty: existingProblem.difficulty,
-        timeLimitMs: existingProblem.timeLimitMs,
-        memoryLimitMb: existingProblem.memoryLimitMb,
-        isPublic: existingProblem.isPublic,
-        tags: existingProblem.tags || [],
-        codeTemplates: [{ language: Language.PYTHON, templateCode: existingProblem.codeTemplate }],
-      });
+    if (isEditMode && problemData && !isProblemLoading) {
+      combinedForm.setValue("title", problemData.title);
+      combinedForm.setValue("slug", problemData.slug);
+      combinedForm.setValue("description", problemData.description);
+      combinedForm.setValue("difficulty", problemData.difficulty);
+      combinedForm.setValue("timeLimitMs", problemData.timeLimitMs);
+      combinedForm.setValue("memoryLimitMb", problemData.memoryLimitMb);
+      combinedForm.setValue("isPublic", problemData.isPublic);
+      combinedForm.setValue("tags", problemData.tags);
     }
-  }, [existingProblem, isEditMode, form]);
+  }, [isEditMode, problemData, isProblemLoading, combinedForm]);
 
-  const watchTitle = form.watch("title");
-  const watchTags = form.watch("tags");
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    combinedForm.setValue("title", title);
 
-  const generateSlug = () => {
-    const slug = watchTitle
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
-    form.setValue("slug", slug);
-  };
-
-  const addTag = () => {
-    if (currentTag && !watchTags.includes(currentTag)) {
-      form.setValue("tags", [...watchTags, currentTag]);
-      setCurrentTag("");
+    if (!isEditMode) {
+      const slug = title
+        .toLowerCase()
+        .replace(/[^a-z0-9\s-]/g, "")
+        .replace(/\s+/g, "-")
+        .replace(/-+/g, "-")
+        .trim();
+      combinedForm.setValue("slug", slug);
     }
   };
 
-  const removeTag = (tag: string) => {
-    form.setValue(
+  const handleAddTag = () => {
+    if (tagInput.trim()) {
+      const currentTags = combinedForm.getValues("tags");
+      if (!currentTags.includes(tagInput.trim())) {
+        combinedForm.setValue("tags", [...currentTags, tagInput.trim()]);
+        setTagInput("");
+      }
+    }
+  };
+
+  const handleRemoveTag = (tag: string) => {
+    const currentTags = combinedForm.getValues("tags");
+    combinedForm.setValue(
       "tags",
-      watchTags.filter((t) => t !== tag),
+      currentTags.filter((t) => t !== tag),
     );
   };
 
-  const addLanguageTemplate = (lang: Language) => {
-    const exists = templateFields.some((f) => f.language === lang);
-    if (!exists) {
-      appendTemplate({ language: lang, templateCode: defaultTemplates[lang] });
-    }
-  };
-
-  const onSubmit = async (values: FormValues) => {
+  const onSubmitCombined = async (data: CombinedFormData) => {
     try {
-      let finalProblemId = problemId;
+      const problemDataPayload: ProblemFormData = {
+        title: data.title,
+        slug: data.slug,
+        description: data.description,
+        difficulty: data.difficulty,
+        timeLimitMs: data.timeLimitMs,
+        memoryLimitMb: data.memoryLimitMb,
+        isPublic: data.isPublic,
+        tags: data.tags,
+      };
 
-      if (isEditMode) {
-        await updateProblem.mutateAsync({
-          problemId: problemId!,
-          data: {
-            title: values.title,
-            slug: values.slug,
-            description: values.description,
-            difficulty: values.difficulty,
-            timeLimitMs: values.timeLimitMs,
-            memoryLimitMb: values.memoryLimitMb,
-            isPublic: values.isPublic,
-            tags: values.tags,
-          },
+      let finalProblemId: string;
+
+      if (isEditMode && problemId) {
+        await updateProblemMutation.mutateAsync({
+          problemId,
+          data: problemDataPayload,
         });
+        navigate({ to: "/mentor/problem" });
+        return;
       } else {
-        const res = await createProblem.mutateAsync({
-          title: values.title,
-          slug: values.slug,
-          description: values.description,
-          difficulty: values.difficulty,
-          timeLimitMs: values.timeLimitMs,
-          memoryLimitMb: values.memoryLimitMb,
-          isPublic: values.isPublic,
-          tags: values.tags,
+        const response = await createProblemMutation.mutateAsync(problemDataPayload);
+        const newProblemId = response.data.data?.id;
+
+        if (!newProblemId) {
+          throw new Error("Không thể lấy ID bài toán");
+        }
+        finalProblemId = newProblemId;
+
+        const templateData: GenerateTemplateFormData = {
+          functionName: data.functionName,
+          returnType: data.returnType,
+          parameters: data.parameters,
+        };
+
+        await generateTemplatesMutation.mutateAsync({
+          problemId: finalProblemId,
+          data: templateData,
         });
 
-        if (!res.data?.data?.id) {
-          throw new Error("Failed to create problem: missing problem ID");
-        }
-
-        finalProblemId = res.data.data.id;
+        setCreatedProblemId(finalProblemId);
       }
-
-      if (finalProblemId) {
-        await Promise.all(
-          values.codeTemplates.map((ct) => createCodeTemplate.mutateAsync({ problemId: finalProblemId!, data: ct })),
-        );
-      }
-
-      navigate({ to: "/mentor/problem" });
     } catch (error) {
-      console.error(error);
+      console.error("Lỗi khi xử lý bài toán:", error);
     }
   };
 
-  const isSubmitting =
-    createProblem.isPending || updateProblem.isPending || createTestCase.isPending || createCodeTemplate.isPending;
+  const handleFormatJson = () => {
+    if (!testCasesJson.trim()) {
+      return;
+    }
 
-  if (isEditMode && isLoadingProblem) {
-    return <div className="p-8">Đang tải...</div>;
+    try {
+      const parsed = JSON.parse(testCasesJson);
+      const formatted = JSON.stringify(parsed, null, 2);
+      setTestCasesJson(formatted);
+      setJsonFormatError(null);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : "Định dạng JSON không hợp lệ";
+      setJsonFormatError(errorMessage);
+    }
+  };
+
+  const handleImportTestCases = async () => {
+    if (!createdProblemId || !testCasesJson.trim()) {
+      return;
+    }
+
+    try {
+      const testCases = JSON.parse(testCasesJson);
+      await bulkCreateTestCasesMutation.mutateAsync({
+        problemId: createdProblemId,
+        data: {
+          testCases,
+          replaceExisting: false,
+        },
+      });
+      setTestCasesJson("");
+      setJsonFormatError(null);
+    } catch (error) {
+      console.error("Nhập test cases thất bại:", error);
+      const errorMessage = error instanceof Error ? error.message : "JSON không hợp lệ hoặc nhập thất bại";
+      setJsonFormatError(errorMessage);
+    }
+  };
+
+  if (isEditMode && isProblemLoading) {
+    return (
+      <div className="max-w-6xl mx-auto p-8">
+        <div className="flex items-center justify-center h-64">
+          <p className="text-lg text-gray-600">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-8">
-      <div className=" max-w-6xl mx-auto px-8">
+    <div className="max-w-6xl mx-auto p-8">
+      <div className="mb-10">
         <Button
           variant="outline"
           size="lg"
-          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
-          onClick={() => navigate({ to: "/mentor/problem" })}
+          className="gap-2 mb-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={() =>
+            navigate({
+              to: isEditMode ? `/mentor/problem/${problemId}/` : "/mentor/problem",
+            })
+          }
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Quay lại
         </Button>
-        <h1 className="mt-4 text-3xl font-bold">{isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}</h1>
-        <p className="mt-2 text-gray-600">{isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}</p>
+        <h1 className="text-4xl font-bold text-gray-900 mb-3">
+          {isEditMode ? "Chỉnh sửa Bài Toán" : "Tạo Bài Toán Mới"}
+        </h1>
+        <p className="text-lg text-gray-600">
+          {isEditMode
+            ? "Cập nhật thông tin bài toán và code templates"
+            : "Tạo bài toán lập trình với tính năng tự động sinh code templates cho 4 ngôn ngữ"}
+        </p>
       </div>
 
-      <div className="max-w-6xl mx-auto px-8 py-10 space-y-8">
-        <Card className="overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-            <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-              <Info className="w-5 h-5 text-blue-600" />
-              Thông tin cơ bản
-            </h2>
-          </div>
-          <CardContent className="p-6 space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tiêu đề bài tập</Label>
-                <Input {...form.register("title")} placeholder="VD: Two Sum" className="bg-white dark:bg-slate-800" />
-                {form.formState.errors.title && (
-                  <p className="text-sm text-red-500">{form.formState.errors.title.message}</p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Slug (URL)</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={generateSlug} className="text-xs h-6">
-                    Tạo tự động
-                  </Button>
-                </div>
-                <Input {...form.register("slug")} placeholder="two-sum" className="bg-slate-50 dark:bg-slate-800/50" />
-                {form.formState.errors.slug && (
-                  <p className="text-sm text-red-500">{form.formState.errors.slug.message}</p>
-                )}
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mức độ</Label>
-              <div className="flex gap-3">
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    {...form.register("difficulty")}
-                    type="radio"
-                    value={Difficulty.EASY}
-                    className="hidden peer"
-                  />
-                  <div className="text-center py-2.5 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-400 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-600 dark:peer-checked:bg-emerald-500/10 dark:peer-checked:text-emerald-400 transition-all">
-                    Dễ
+      <div className="space-y-8">
+        {(!isEditMode && !createdProblemId) || isEditMode ? (
+          <Card className="border-2 border-gray-200 shadow-sm">
+            <CardContent className="px-8">
+              <form onSubmit={combinedForm.handleSubmit(onSubmitCombined)} className="space-y-10">
+                <div className="space-y-6">
+                  <div className="border-b-2 border-gray-200 pb-4 flex items-center justify-between">
+                    <h2 className="text-2xl font-bold text-gray-900">Thông tin cơ bản</h2>
                   </div>
-                </label>
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    {...form.register("difficulty")}
-                    type="radio"
-                    value={Difficulty.MEDIUM}
-                    className="hidden peer"
-                  />
-                  <div className="text-center py-2.5 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-400 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-600 dark:peer-checked:bg-amber-500/10 dark:peer-checked:text-amber-400 transition-all">
-                    Trung bình
+
+                  <div>
+                    <Label htmlFor="title" className="text-base font-semibold text-gray-900 mb-3 block">
+                      Tiêu đề <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="title"
+                      {...combinedForm.register("title")}
+                      onChange={handleTitleChange}
+                      placeholder="Ví dụ: Tổng hai số"
+                      className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                    />
+                    {combinedForm.formState.errors.title && (
+                      <p className="text-sm text-red-500 mt-2">{combinedForm.formState.errors.title.message}</p>
+                    )}
                   </div>
-                </label>
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    {...form.register("difficulty")}
-                    type="radio"
-                    value={Difficulty.HARD}
-                    className="hidden peer"
-                  />
-                  <div className="text-center py-2.5 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-400 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-600 dark:peer-checked:bg-red-500/10 dark:peer-checked:text-red-400 transition-all">
-                    Khó
+
+                  <div>
+                    <Label htmlFor="slug" className="text-base font-semibold text-gray-900 mb-3 block">
+                      Đường dẫn (Slug) <span className="text-red-500">*</span>
+                    </Label>
+                    <Input
+                      id="slug"
+                      {...combinedForm.register("slug")}
+                      placeholder="tong-hai-so"
+                      className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                      disabled={!!isEditMode}
+                    />
+                    {combinedForm.formState.errors.slug && (
+                      <p className="text-sm text-red-500 mt-2">{combinedForm.formState.errors.slug.message}</p>
+                    )}
+                    {isEditMode && <p className="text-sm text-gray-500 mt-2">Slug không thể thay đổi khi chỉnh sửa</p>}
                   </div>
-                </label>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Giới hạn thời gian (ms)
-                </Label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    type="number"
-                    {...form.register("timeLimitMs", { valueAsNumber: true })}
-                    className="pl-10 bg-white dark:bg-slate-800"
-                  />
-                </div>
-                {form.formState.errors.timeLimitMs && (
-                  <p className="text-sm text-red-500">{form.formState.errors.timeLimitMs.message}</p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Giới hạn bộ nhớ (MB)</Label>
-                <div className="relative">
-                  <HardDrive className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
-                    type="number"
-                    {...form.register("memoryLimitMb", { valueAsNumber: true })}
-                    className="pl-10 bg-white dark:bg-slate-800"
-                  />
-                </div>
-                {form.formState.errors.memoryLimitMb && (
-                  <p className="text-sm text-red-500">{form.formState.errors.memoryLimitMb.message}</p>
-                )}
-              </div>
-            </div>
-          </CardContent>
-        </Card>
+                  <div>
+                    <Label htmlFor="description" className="text-base font-semibold text-gray-900 mb-3 block">
+                      Mô tả đề bài <span className="text-red-500">*</span>
+                    </Label>
+                    <Textarea
+                      id="description"
+                      {...combinedForm.register("description")}
+                      rows={8}
+                      placeholder="Nhập mô tả chi tiết về đề bài, yêu cầu, ví dụ..."
+                      className="text-base border-2 border-gray-300 focus:border-blue-500"
+                    />
+                    {combinedForm.formState.errors.description && (
+                      <p className="text-sm text-red-500 mt-2">{combinedForm.formState.errors.description.message}</p>
+                    )}
+                  </div>
 
-        <Card className="overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-            <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-              <FileText className="w-5 h-5 text-blue-600" />
-              Nội dung đề bài
-            </h2>
-          </div>
-          <CardContent className="p-6">
-            <Textarea
-              {...form.register("description")}
-              rows={12}
-              className="font-mono text-sm bg-white dark:bg-slate-900 resize-none"
-              placeholder="Nhập mô tả chi tiết bài tập tại đây..."
-            />
-            <p className="mt-3 text-xs text-slate-400">
-              Bạn có thể sử dụng Markdown để trình bày đề bài chuyên nghiệp hơn.
-            </p>
-            {form.formState.errors.description && (
-              <p className="text-sm text-red-500 mt-2">{form.formState.errors.description.message}</p>
-            )}
-          </CardContent>
-        </Card>
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div>
+                      <Label htmlFor="difficulty" className="text-base font-semibold text-gray-900 mb-3 block">
+                        Độ khó <span className="text-red-500">*</span>
+                      </Label>
+                      <select
+                        id="difficulty"
+                        {...combinedForm.register("difficulty")}
+                        className="h-12 text-base block w-full rounded-md border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        <option value={Difficulty.EASY}>Dễ</option>
+                        <option value={Difficulty.MEDIUM}>Trung bình</option>
+                        <option value={Difficulty.HARD}>Khó</option>
+                      </select>
+                    </div>
 
-        <Card className="overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                <Code2 className="w-5 h-5 text-blue-600" />
-                Code Templates
-              </h2>
-              <select
-                onChange={(e) => {
-                  if (e.target.value) {
-                    addLanguageTemplate(e.target.value as Language);
-                    e.target.value = "";
-                  }
-                }}
-                className="text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-3 py-1.5"
-              >
-                <option value="">Thêm ngôn ngữ</option>
-                {languageOptions
-                  .filter((l) => !templateFields.some((f) => f.language === l.value))
-                  .map((lang) => (
-                    <option key={lang.value} value={lang.value}>
-                      {lang.icon} {lang.label}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </div>
-          <CardContent className="p-6 space-y-4">
-            {templateFields.map((field, index) => {
-              const langOpt = languageOptions.find((l) => l.value === field.language);
-              return (
-                <Card key={field.id} className="bg-slate-50 dark:bg-slate-900/50">
-                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <span className="text-sm font-semibold flex items-center gap-2">
-                      <span>{langOpt?.icon}</span>
-                      {langOpt?.label}
-                    </span>
-                    {templateFields.length > 1 && (
+                    <div>
+                      <Label htmlFor="timeLimitMs" className="text-base font-semibold text-gray-900 mb-3 block">
+                        Giới hạn thời gian (ms) <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="timeLimitMs"
+                        type="number"
+                        {...combinedForm.register("timeLimitMs", { valueAsNumber: true })}
+                        className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="memoryLimitMb" className="text-base font-semibold text-gray-900 mb-3 block">
+                        Giới hạn bộ nhớ (MB) <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="memoryLimitMb"
+                        type="number"
+                        {...combinedForm.register("memoryLimitMb", { valueAsNumber: true })}
+                        className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+
+                  <div>
+                    <Label className="text-base font-semibold text-gray-900 mb-3 block">Thẻ tag</Label>
+                    <div className="flex gap-3">
+                      <Input
+                        value={tagInput}
+                        onChange={(e) => setTagInput(e.target.value)}
+                        onKeyPress={(e) => e.key === "Enter" && (e.preventDefault(), handleAddTag())}
+                        placeholder="Nhập thẻ tag và nhấn Enter..."
+                        className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                      />
                       <Button
                         type="button"
-                        variant="ghost"
-                        size="lg"
-                        onClick={() => removeTemplate(index)}
-                        className="text-red-500 hover:text-red-600"
+                        onClick={handleAddTag}
+                        variant="outline"
+                        className="h-12 px-6 text-base font-semibold border-2 border-gray-300 hover:bg-gray-50"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        Thêm
                       </Button>
-                    )}
+                    </div>
+                    <div className="flex flex-wrap gap-2 mt-3">
+                      {combinedForm.watch("tags").map((tag) => (
+                        <Badge key={tag} className="bg-blue-100 text-blue-700 hover:bg-blue-200 px-3 py-1.5 text-sm">
+                          {tag}
+                          <button
+                            type="button"
+                            onClick={() => handleRemoveTag(tag)}
+                            className="ml-2 hover:text-red-600 font-bold"
+                          >
+                            ×
+                          </button>
+                        </Badge>
+                      ))}
+                    </div>
                   </div>
-                  <CardContent className="p-4">
-                    <Textarea
-                      {...form.register(`codeTemplates.${index}.templateCode`)}
-                      rows={12}
-                      className="font-mono text-sm bg-slate-900 text-slate-300"
+
+                  <div className="flex items-center gap-3 pt-2">
+                    <input
+                      type="checkbox"
+                      id="isPublic"
+                      {...combinedForm.register("isPublic")}
+                      className="w-5 h-5 text-blue-600 rounded border-2 border-gray-300 focus:ring-blue-500"
                     />
-                    {form.formState.errors.codeTemplates?.[index]?.templateCode && (
-                      <p className="text-sm text-red-500 mt-1">
-                        {form.formState.errors.codeTemplates[index]?.templateCode?.message}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </CardContent>
-        </Card>
+                    <Label htmlFor="isPublic" className="cursor-pointer text-base font-medium text-gray-700">
+                      Công khai (hiển thị cho tất cả người dùng)
+                    </Label>
+                  </div>
+                </div>
 
-        <div className="grid grid-cols-2 gap-8">
-          <Card className="overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-              <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                <Tag className="w-5 h-5 text-blue-600" />
-                Gắn thẻ
-              </h2>
-            </div>
-            <CardContent className="p-6 space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  value={currentTag}
-                  onChange={(e) => setCurrentTag(e.target.value)}
-                  placeholder="array, dp..."
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                  className="bg-white dark:bg-slate-800"
-                />
-                <Button type="button" variant="outline" onClick={addTag}>
-                  <Plus className="w-4 h-4" />
+                {!isEditMode && (
+                  <div className="space-y-6">
+                    <div className="border-b-2 border-gray-200 pb-4">
+                      <div className="flex items-center gap-3">
+                        <div>
+                          <h2 className="text-2xl font-bold text-gray-900">Tạo mẫu Code tự động</h2>
+                          <p className="text-sm text-gray-600 mt-1">Python, Java, C++, JavaScript</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <Label htmlFor="functionName" className="text-base font-semibold text-gray-900 mb-3 block">
+                        Tên hàm <span className="text-red-500">*</span>
+                      </Label>
+                      <Input
+                        id="functionName"
+                        {...combinedForm.register("functionName")}
+                        placeholder="solution"
+                        className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                      />
+                      {combinedForm.formState.errors.functionName && (
+                        <p className="text-sm text-red-500 mt-2">
+                          {combinedForm.formState.errors.functionName.message}
+                        </p>
+                      )}
+                    </div>
+
+                    <div>
+                      <Label htmlFor="returnType" className="text-base font-semibold text-gray-900 mb-3 block">
+                        Kiểu dữ liệu trả về <span className="text-red-500">*</span>
+                      </Label>
+                      <select
+                        id="returnType"
+                        {...combinedForm.register("returnType")}
+                        className="h-12 text-base block w-full rounded-md border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      >
+                        {Object.values(ParamType).map((type) => (
+                          <option key={type} value={type}>
+                            {ParamTypeInfo[type].displayName} ({ParamTypeInfo[type].javaType})
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-4">
+                        <Label className="text-base font-semibold text-gray-900">
+                          Tham số đầu vào <span className="text-red-500">*</span>
+                        </Label>
+                        <Button
+                          type="button"
+                          onClick={() => append({ name: "", type: ParamType.INT })}
+                          className="cursor-pointer h-9 px-5 bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold"
+                        >
+                          + Thêm tham số
+                        </Button>
+                      </div>
+
+                      <div className="space-y-4">
+                        {fields.map((field, index) => (
+                          <div key={field.id} className="flex gap-4 items-start">
+                            <div className="flex-1">
+                              <Input
+                                {...combinedForm.register(`parameters.${index}.name`)}
+                                placeholder="Tên tham số (vd: nums, target)"
+                                className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                              />
+                            </div>
+                            <div className="flex-1">
+                              <select
+                                {...combinedForm.register(`parameters.${index}.type`)}
+                                className="h-12 text-base block w-full rounded-md border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                              >
+                                {Object.values(ParamType).map((type) => (
+                                  <option key={type} value={type}>
+                                    {ParamTypeInfo[type].displayName}
+                                  </option>
+                                ))}
+                              </select>
+                            </div>
+                            <Button
+                              type="button"
+                              onClick={() => remove(index)}
+                              isDisabled={fields.length === 1}
+                              variant="outline"
+                              className="cursor-pointer h-12 px-5 text-base font-semibold text-red-600 border-2 border-gray-300 hover:bg-red-50"
+                            >
+                              Xóa
+                            </Button>
+                          </div>
+                        ))}
+                      </div>
+                      {combinedForm.formState.errors.parameters && (
+                        <p className="text-sm text-red-500 mt-2">{combinedForm.formState.errors.parameters.message}</p>
+                      )}
+                    </div>
+
+                    <div className="bg-gray-50 border-2 border-gray-200 p-6 rounded-lg">
+                      <h3 className="text-base font-semibold text-gray-900 mb-4">Xem trước khai báo hàm</h3>
+                      <div className="space-y-3">
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">Java:</span>
+                          <code className="block text-base text-blue-600 font-mono mt-1.5 bg-white p-3 rounded border border-gray-200">
+                            {ParamTypeInfo[combinedForm.watch("returnType")]?.javaType || "int"}{" "}
+                            {combinedForm.watch("functionName")}(
+                            {combinedForm
+                              .watch("parameters")
+                              .map((p) => `${ParamTypeInfo[p.type]?.javaType || "int"} ${p.name}`)
+                              .join(", ")}
+                            )
+                          </code>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">Python:</span>
+                          <code className="block text-base text-green-600 font-mono mt-1.5 bg-white p-3 rounded border border-gray-200">
+                            def {combinedForm.watch("functionName")}(
+                            {combinedForm
+                              .watch("parameters")
+                              .map((p) => `${p.name}: ${ParamTypeInfo[p.type]?.pythonType || "int"}`)
+                              .join(", ")}
+                            ) -&gt; {ParamTypeInfo[combinedForm.watch("returnType")]?.pythonType || "int"}
+                          </code>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">C++:</span>
+                          <code className="block text-base text-purple-600 font-mono mt-1.5 bg-white p-3 rounded border border-gray-200">
+                            {ParamTypeInfo[combinedForm.watch("returnType")]?.cppType || "int"}{" "}
+                            {combinedForm.watch("functionName")}(
+                            {combinedForm
+                              .watch("parameters")
+                              .map((p) => `${ParamTypeInfo[p.type]?.cppType || "int"} ${p.name}`)
+                              .join(", ")}
+                            )
+                          </code>
+                        </div>
+                        <div>
+                          <span className="text-sm font-medium text-gray-600">JavaScript:</span>
+                          <code className="block text-base text-yellow-600 font-mono mt-1.5 bg-white p-3 rounded border border-gray-200">
+                            function {combinedForm.watch("functionName")}(
+                            {combinedForm
+                              .watch("parameters")
+                              .map((p) => p.name)
+                              .join(", ")}
+                            )
+                          </code>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <Button
+                  type="submit"
+                  className="cursor-pointer w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold"
+                  isDisabled={
+                    createProblemMutation.isPending ||
+                    updateProblemMutation.isPending ||
+                    (!isEditMode && generateTemplatesMutation.isPending)
+                  }
+                >
+                  {createProblemMutation.isPending ||
+                  updateProblemMutation.isPending ||
+                  (!isEditMode && generateTemplatesMutation.isPending)
+                    ? "Đang xử lý..."
+                    : isEditMode
+                      ? "💾 Cập nhật bài toán"
+                      : "🚀 Tạo bài toán"}
                 </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {watchTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1 pr-1">
-                    {tag}
-                    <button type="button" onClick={() => removeTag(tag)} className="ml-1 hover:text-red-500">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-xs text-slate-400 italic">Thêm các tag để phân loại bài tập.</p>
+              </form>
             </CardContent>
           </Card>
+        ) : (
+          <></>
+        )}
 
-          <Card className="overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-              <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                <Eye className="w-5 h-5 text-blue-600" />
-                Cài đặt hiển thị
-              </h2>
-            </div>
-            <CardContent className="p-6 flex items-center justify-between">
-              <div>
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Công khai bài tập</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Mọi người đều có thể thấy bài tập này
-                </p>
+        {!isEditMode && createdProblemId && (
+          <Card className="border-2 border-gray-200 shadow-sm">
+            <CardContent className="px-8">
+              <div className="mb-8">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-blue-600 text-lg">📤</span>
+                  </div>
+                  <h2 className="text-2xl font-bold text-gray-900">Nhập Test Cases hàng loạt</h2>
+                </div>
+                <p className="text-base text-gray-600 ml-13">Nhập các test cases theo định dạng JSON</p>
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" {...form.register("isPublic")} className="sr-only peer" />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
+
+              <div className="space-y-6">
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <Label htmlFor="testcases" className="text-base font-semibold text-gray-900">
+                      Dữ liệu JSON <span className="text-red-500">*</span>
+                    </Label>
+                    <Button
+                      type="button"
+                      onClick={handleFormatJson}
+                      variant="outline"
+                      className="h-10 px-4 text-sm font-semibold border-2 border-gray-300 hover:bg-gray-50"
+                      isDisabled={!testCasesJson.trim()}
+                    >
+                      Định dạng JSON
+                    </Button>
+                  </div>
+                  <Textarea
+                    id="testcases"
+                    value={testCasesJson}
+                    onChange={(e) => {
+                      setTestCasesJson(e.target.value);
+                      setJsonFormatError(null);
+                    }}
+                    rows={15}
+                    placeholder={`[
+  {
+    "input": "1\\\\n2",
+    "expectedOutput": "3",
+    "isSample": true
+  },
+  {
+    "input": "5\\\\n10",
+    "expectedOutput": "15",
+    "isSample": false
+  }
+]`}
+                    className={`font-mono text-base border-2 focus:border-blue-500 ${
+                      jsonFormatError ? "border-red-300 focus:border-red-500" : "border-gray-300"
+                    }`}
+                  />
+                  {jsonFormatError && <p className="text-sm text-red-500 mt-2">❌ {jsonFormatError}</p>}
+                </div>
+
+                <div className="bg-blue-50 border-2 border-blue-200 p-5 rounded-lg">
+                  <p className="font-semibold text-base text-blue-900 mb-3">📋 Hướng dẫn định dạng:</p>
+                  <ul className="list-disc list-inside space-y-2 text-base text-blue-800">
+                    <li>
+                      Mỗi test case cần có: <code className="bg-blue-100 px-2 py-0.5 rounded">input</code>,{" "}
+                      <code className="bg-blue-100 px-2 py-0.5 rounded">expectedOutput</code>
+                    </li>
+                    <li>
+                      <code className="bg-blue-100 px-2 py-0.5 rounded">isSample</code> (tùy chọn): true để hiển thị cho
+                      người dùng, false để ẩn
+                    </li>
+                    <li>
+                      Dữ liệu input/output phân tách bằng <code className="bg-blue-100 px-2 py-0.5 rounded">\\n</code>{" "}
+                      (double backslash) cho nhiều dòng
+                    </li>
+                    <li>
+                      Ví dụ: <code className="bg-blue-100 px-2 py-0.5 rounded">"input": "3\\n1 2 3\\n6"</code> sẽ tạo ra
+                      3 dòng
+                    </li>
+                  </ul>
+                </div>
+
+                <Button
+                  onClick={handleImportTestCases}
+                  className="cursor-pointer w-full h-12 bg-blue-600 hover:bg-blue-700 text-white text-lg font-semibold"
+                  isDisabled={bulkCreateTestCasesMutation.isPending || !testCasesJson.trim()}
+                >
+                  {bulkCreateTestCasesMutation.isPending ? "Đang nhập..." : "📥 Nhập Test Cases"}
+                </Button>
+
+                {bulkCreateTestCasesMutation.isSuccess && (
+                  <div className="bg-green-50 border-2 border-green-200 p-5 rounded-lg">
+                    <p className="text-base font-semibold text-green-800">
+                      ✅ Hoàn thành! Bài toán đã được tạo thành công với đầy đủ code templates và test cases.
+                    </p>
+                  </div>
+                )}
+              </div>
             </CardContent>
           </Card>
-        </div>
-
-        <div className="flex items-center justify-end gap-4 pt-4 pb-12">
-          <Button variant="outline" size="lg" onClick={() => navigate({ to: "/mentor/problem" })} className="px-8 py-5">
-            Hủy
-          </Button>
-          <Button
-            onClick={form.handleSubmit(onSubmit)}
-            isDisabled={isSubmitting}
-            size="lg"
-            className="px-10 py-5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/30 gap-2"
-          >
-            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {isEditMode ? "Cập nhật bài tập" : "Tạo bài tập"}
-          </Button>
-        </div>
+        )}
       </div>
+
+      {!isEditMode && createdProblemId && (
+        <div className="mt-8 bg-gray-50 border-2 border-gray-400 p-5 rounded-lg">
+          <div className="flex items-center justify-between text-base">
+            <span className="font-semibold text-gray-900">Mã bài toán:</span>
+            <code className="bg-white border-2 border-gray-500 px-4 py-2 rounded text-blue-600 font-bold">
+              {createdProblemId}
+            </code>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
