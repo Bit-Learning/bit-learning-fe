@@ -3,6 +3,16 @@ name: Build, Push & Deploy – PROD
 on:
     push:
         branches: [main,develop]
+        paths:
+          - "apps/web/**"
+          - "apps/admin/**"
+          - "packages/**"
+          - "package.json"
+          - "pnpm-lock.yaml"
+          - "vite.config.*"
+          - "tailwind.config.*"
+          - "tsconfig*.json"
+          - ".github/workflows/**"
     workflow_dispatch:
 
 concurrency:
