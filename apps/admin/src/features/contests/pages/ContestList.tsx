@@ -8,119 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Skeleton } from "@/components/ui/skeleton";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
-// const contestsList: ContestListDTO[] = [
-//   {
-//     contestId: "1",
-//     title: "Vòng chung kết Olympic Tin học 2024",
-//     slug: "olympic-2024-final",
-//     status: ContestStatus.RUNNING,
-//     startTime: "2024-05-24T08:00:00",
-//     endTime: "2024-05-24T11:30:00",
-//     problemCount: 8,
-//     participantCount: 1240,
-//     isRegistered: true,
-//   },
-//   {
-//     contestId: "2",
-//     title: "Lập trình thi đấu tuần #12",
-//     slug: "weekly-contest-12",
-//     status: ContestStatus.UPCOMING,
-//     startTime: "2024-05-28T20:00:00",
-//     endTime: "2024-05-28T22:00:00",
-//     problemCount: 5,
-//     participantCount: 856,
-//     isRegistered: false,
-//   },
-//   {
-//     contestId: "3",
-//     title: "Kiểm tra tư duy giải thuật C++",
-//     slug: "cpp-algorithm-test",
-//     status: ContestStatus.ENDED,
-//     startTime: "2024-05-20T14:00:00",
-//     endTime: "2024-05-20T15:30:00",
-//     problemCount: 6,
-//     participantCount: 3420,
-//     isRegistered: true,
-//   },
-//   {
-//     contestId: "4",
-//     title: "Thách thức Python cơ bản",
-//     slug: "python-basic-challenge",
-//     status: ContestStatus.ENDED,
-//     startTime: "2024-05-18T09:00:00",
-//     endTime: "2024-05-18T10:30:00",
-//     problemCount: 4,
-//     participantCount: 512,
-//     isRegistered: true,
-//   },
-//   {
-//     contestId: "5",
-//     title: "Code Marathon 2024",
-//     slug: "code-marathon-2024",
-//     status: ContestStatus.UPCOMING,
-//     startTime: "2024-06-01T09:00:00",
-//     endTime: "2024-06-01T17:00:00",
-//     problemCount: 10,
-//     participantCount: 2100,
-//     isRegistered: true,
-//   },
-//   {
-//     contestId: "6",
-//     title: "Dynamic Programming Challenge",
-//     slug: "dp-challenge",
-//     status: ContestStatus.ENDED,
-//     startTime: "2024-05-15T19:00:00",
-//     endTime: "2024-05-15T21:00:00",
-//     problemCount: 5,
-//     participantCount: 780,
-//     isRegistered: false,
-//   },
-//   {
-//     contestId: "7",
-//     title: "Hackathon Sinh viên HCMC",
-//     slug: "hackathon-hcmc",
-//     status: ContestStatus.RUNNING,
-//     startTime: "2024-05-25T08:00:00",
-//     endTime: "2024-05-25T20:00:00",
-//     problemCount: 12,
-//     participantCount: 450,
-//     isRegistered: true,
-//   },
-//   {
-//     contestId: "8",
-//     title: "Graph Theory Basics",
-//     slug: "graph-theory-basics",
-//     status: ContestStatus.ENDED,
-//     startTime: "2024-05-12T14:00:00",
-//     endTime: "2024-05-12T16:00:00",
-//     problemCount: 4,
-//     participantCount: 920,
-//     isRegistered: false,
-//   },
-//   {
-//     contestId: "9",
-//     title: "Cuộc thi lập trình Java Spring Boot",
-//     slug: "java-spring-boot-contest",
-//     status: ContestStatus.UPCOMING,
-//     startTime: "2024-06-05T10:00:00",
-//     endTime: "2024-06-05T14:00:00",
-//     problemCount: 6,
-//     participantCount: 340,
-//     isRegistered: false,
-//   },
-//   {
-//     contestId: "10",
-//     title: "AI & Machine Learning Challenge",
-//     slug: "ai-ml-challenge",
-//     status: ContestStatus.ENDED,
-//     startTime: "2024-05-10T09:00:00",
-//     endTime: "2024-05-10T12:00:00",
-//     problemCount: 5,
-//     participantCount: 1560,
-//     isRegistered: true,
-//   },
-// ];
-
 const ContestListPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
@@ -386,21 +273,21 @@ const ContestListPage: React.FC = () => {
                         <div className="flex justify-end gap-2">
                           <Button
                             onClick={() => navigate({ to: "/contests/$id", params: { id: contest.contestId } })}
-                            className="p-3 text-slate-100 hover:text-primary dark:hover:text-blue-400 transition-colors"
+                            className="p-3 text-slate-100 hover:text-white transition-colors"
                             title="Xem"
                           >
                             <Eye className="w-5 h-5" />
                           </Button>
                           <Button
                             onClick={() => navigate({ to: "/contests/$id/edit", params: { id: contest.contestId } })}
-                            className="p-3 text-slate-100 hover:text-amber-600 dark:hover:text-amber-400 transition-colors"
+                            className="p-3 text-slate-100 hover:text-white transition-colors"
                             title="Sửa"
                           >
                             <Edit className="w-5 h-5" />
                           </Button>
                           <Button
                             onClick={() => handleDeleteClick(contest)}
-                            className="p-3 text-slate-100 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+                            className="p-3 text-slate-100 hover:text-white  transition-colors"
                             title="Xóa"
                           >
                             <Trash2 className="w-5 h-5" />

@@ -1,5 +1,5 @@
 import React from "react";
-import { Info, TrendingUp, Users, FileText, Award } from "lucide-react";
+import { Info, TrendingUp } from "lucide-react";
 import type { ContestDetailDTO } from "../types/contest.type";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -23,25 +23,11 @@ export const ContestOverview: React.FC<ContestOverviewProps> = ({ contest }) => 
     {
       label: "Người đăng ký",
       value: contest.participantCount.toString(),
-      icon: Users,
       color: "bg-blue-100 text-blue-600",
-    },
-    {
-      label: "Trực tuyến",
-      value: contest.participantCount.toString(),
-      icon: TrendingUp,
-      color: "bg-blue-100 text-blue-600",
-    },
-    {
-      label: "Bài nộp",
-      value: "450",
-      icon: FileText,
-      color: "bg-orange-100 text-orange-600",
     },
     {
       label: "Bài tập",
       value: contest.problemCount.toString(),
-      icon: Award,
       color: "bg-orange-100 text-orange-600",
     },
   ];

@@ -13,7 +13,7 @@ import { ContestSubmissions } from "../components/ContestSubmissions";
 import { ContestClarifications } from "../components/ContestClarifications";
 
 const ContestDetailPage: React.FC = () => {
-  const { id } = useParams({ from: "/_authenticated/contests/$id" });
+  const { id } = useParams({ from: "/_authenticated/contests/$id/" });
   const navigate = useNavigate();
   const { data: contest, isLoading } = useContestDetail(id);
   const [activeTab, setActiveTab] = useState("overview");

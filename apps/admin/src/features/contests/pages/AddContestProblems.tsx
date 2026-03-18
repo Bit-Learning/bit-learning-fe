@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { Search, Plus, Check, X, Filter, Code, AlertCircle, ArrowLeft, Loader2 } from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Difficulty, ProblemBriefResponse } from "../types/problem.type";
@@ -8,13 +8,9 @@ import { useProblems, useProblemDetail } from "../queries/useProblem";
 import { useAddProblem, useRemoveProblem, useContestProblems } from "../queries/useContest";
 import { cn } from "@/shared/lib/utils";
 
-interface AddContestProblemsProps {
-  contestId?: string;
-}
-
-const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: propContestId }) => {
+const AddContestProblems: React.FC = () => {
   const navigate = useNavigate();
-  const contestId = propContestId || "1";
+  const { id: contestId } = useParams({ from: "/_authenticated/contests/$id/manage-problems" });
 
   const { data: availableProblemsData, isLoading: isLoadingProblems } = useProblems();
   const { data: contestProblems, isLoading: isLoadingContestProblems } = useContestProblems(contestId);
@@ -169,7 +165,6 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
 
   return (
     <div className="flex h-screen overflow-hidden bg-gray-50">
-      {/* Left Sidebar - Problem List */}
       <div className="w-105 border-r border-gray-200 flex flex-col bg-white">
         <div className="p-4 border-b border-gray-200 space-y-3">
           <div className="relative">
@@ -289,9 +284,7 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
         </div>
       </div>
 
-      {/* Main Content Area */}
       <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Header */}
         <div className="px-8 py-6 bg-white border-b border-gray-200 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <Button variant="outline" onClick={handleBack} className="gap-2 border-gray-300">
@@ -339,7 +332,6 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
           )}
         </div>
 
-        {/* Tabs */}
         <div className="px-8 bg-white border-b border-gray-200">
           <div className="flex gap-8">
             {[
@@ -363,7 +355,6 @@ const AddContestProblems: React.FC<AddContestProblemsProps> = ({ contestId: prop
           </div>
         </div>
 
-        {/* Content */}
         <div className="flex-1 overflow-y-auto p-8 bg-gray-50">
           {!activeProblem ? (
             <div className="flex items-center justify-center h-full">

@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { useContestSubmissions, useRejudgeSubmission, useContestProblems } from "../queries/useContest";
-import { Search, Filter, RefreshCw, Code, Loader2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import { Search, RefreshCw, Code, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -131,11 +130,6 @@ export const ContestSubmissions: React.FC<ContestSubmissionsProps> = ({ contestI
             className="pl-9"
           />
         </div>
-
-        <Button variant="outline" className="border-gray-300">
-          <Filter className="w-4 h-4 mr-2" />
-          Lọc nâng cao
-        </Button>
       </div>
 
       <Card className="bg-white border-gray-200">
