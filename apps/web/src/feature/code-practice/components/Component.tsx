@@ -6,7 +6,7 @@ import { Badge } from "@workspace/ui/components/Badge";
 
 export const statusConfig: Record<SubmissionStatus, { label: string; color: string; icon: React.ReactNode }> = {
   PENDING: { label: "Pending", color: "text-slate-500", icon: <Loader2 className="w-4 h-4 animate-spin" /> },
-  JUDGING: { label: "Judging", color: "text-blue-500", icon: <Loader2 className="w-4 h-4 animate-spin" /> },
+  RUNNING: { label: "Judging", color: "text-blue-500", icon: <Loader2 className="w-4 h-4 animate-spin" /> },
   ACCEPTED: { label: "Accepted", color: "text-emerald-600", icon: <CheckCircle2 className="w-4 h-4" /> },
   WRONG_ANSWER: { label: "Wrong Answer", color: "text-rose-600", icon: <X className="w-4 h-4" /> },
   TIME_LIMIT_EXCEEDED: { label: "Time Limit", color: "text-amber-600", icon: <Timer className="w-4 h-4" /> },

@@ -89,14 +89,15 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </div>
           <Button
             onClick={() => navigate({ to: "/mentor/problem/create" })}
-            className="bg-blue-600 hover:bg-blue-700 text-white gap-2"
+            size="xl"
+            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white gap-2"
           >
             <Plus className="w-5 h-5" />
             Tạo bài tập mới
           </Button>
         </div>
 
-        <Card className="mb-6">
+        <Card className="mb-6 border-gray-400">
           <CardContent>
             <div className="flex flex-wrap gap-2">
               <div className="flex-1 min-w-75 relative">
@@ -138,8 +139,8 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </CardContent>
         </Card>
 
-        <Card>
-          <CardContent className="p-0">
+        <Card className="p-0 border-gray-400">
+          <CardContent className="px-0">
             {isLoading ? (
               <div className="p-4">
                 <TableSkeleton />
@@ -149,19 +150,19 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                 <table className="w-full text-left">
                   <thead>
                     <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                      <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider">
                         Tiêu đề
                       </th>
-                      <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider text-center">
                         Độ khó
                       </th>
-                      <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider text-center">
                         Trạng thái
                       </th>
-                      <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider">
                         Ngày tạo
                       </th>
-                      <th className="px-6 py-4 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-right">
+                      <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider text-center">
                         Thao tác
                       </th>
                     </tr>
@@ -189,8 +190,8 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                         >
                           <td className="px-6 py-4">
                             <a
-                              onClick={() => navigate({ to: `/mentor/problems/${problem.id}` })}
-                              className="text-sm font-semibold text-blue-600 hover:underline cursor-pointer"
+                              onClick={() => navigate({ to: `/mentor/problem/${problem.id}/` })}
+                              className="text-md font-bold text-blue-600 hover:underline cursor-pointer"
                             >
                               {problem.title}
                             </a>
@@ -222,12 +223,12 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                           <td className="px-6 py-4 text-sm text-slate-600 dark:text-slate-400">
                             {format(new Date(problem.createdAt), "dd 'thg' M, yyyy", { locale: vi })}
                           </td>
-                          <td className="px-6 py-4 text-right">
-                            <div className="flex justify-end gap-2">
+                          <td className="px-6 py-4 text-center">
+                            <div className="flex justify-center gap-2">
                               <Button
                                 variant="ghost"
                                 size="icon"
-                                onClick={() => navigate({ to: `/mentor/problem/${problem.id}` })}
+                                onClick={() => navigate({ to: `/mentor/problem/${problem.id}/` })}
                                 className="p-1.5 h-auto text-slate-400 hover:text-blue-600"
                                 aria-label="Xem"
                               >
@@ -259,7 +260,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                   </tbody>
                 </table>
 
-                {/* Pagination */}
                 {totalPages > 1 && (
                   <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-center">
                     <nav className="flex items-center gap-1">
@@ -309,7 +309,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
         </Card>
       </div>
 
-      {/* Delete Modal */}
       {deleteId && (
         <div className="fixed inset-0 z-50 flex items-center justify-center">
           <div className="fixed inset-0 bg-black/50" onClick={() => setDeleteId(null)} />

@@ -1,27 +1,11 @@
-import React, { JSX } from "react";
-import {
-  Star,
-  CheckCircle,
-  Code,
-  Users,
-  FileText,
-  Timer,
-  Calendar,
-  Rocket,
-  Database,
-  Network,
-  Target,
-  CalendarDays,
-  Radio,
-  Award,
-  Clock,
-  LogIn,
-} from "lucide-react";
+import React from "react";
+import { Star, Code, Users, FileText, Timer, Calendar, Clock, LogIn, Loader2 } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import { ContestListDTO, ContestStatus } from "../types/contest.type";
 import { Link } from "@tanstack/react-router";
+import { useRegisterContest } from "../queries/useContest";
 
 interface ContestCardProps {
   contest: ContestListDTO & {
@@ -45,9 +29,6 @@ interface ContestCardProps {
 
 const getContestIcon = (title: string) => {
   if (title.includes("Olympic") || title.includes("C++") || title.includes("Pascal")) return Code;
-  if (title.includes("Python") || title.includes("Cấu trúc dữ liệu")) return Database;
-  if (title.includes("Chứng chỉ")) return Network;
-  if (title.includes("Thuật toán") || title.includes("quy hoạch")) return Target;
   return Code;
 };
 
@@ -57,29 +38,20 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
   const isOngoing = contest.status === ContestStatus.RUNNING;
   const isUpcoming = contest.status === ContestStatus.UPCOMING;
 
-  const getStatusBadge = (): JSX.Element => {
+  const registerMutation = useRegisterContest();
+
+  const handleRegister = () => {
+    registerMutation.mutate(contest.contestId);
+  };
+
+  const getStatusBadge = () => {
     if (isOngoing) {
-      return (
-        <Badge className="bg-green-500 text-white text-[10px] font-black uppercase animate-pulse">
-          <Radio className="w-3 h-3 mr-1" />
-          Đang diễn ra
-        </Badge>
-      );
+      return <Badge className="bg-green-500 text-white text-xs font-semibold">Đang diễn ra</Badge>;
     }
     if (isUpcoming) {
-      return (
-        <Badge className="bg-blue-500 text-white text-[10px] font-black uppercase">
-          <CalendarDays className="w-3 h-3 mr-1" />
-          Sắp tới
-        </Badge>
-      );
+      return <Badge className="bg-blue-500 text-white text-xs font-semibold">Sắp tới</Badge>;
     }
-    return (
-      <Badge className="bg-slate-400 text-white text-[10px] font-black uppercase">
-        <CheckCircle className="w-3 h-3 mr-1" />
-        Đã kết thúc
-      </Badge>
-    );
+    return <Badge className="bg-gray-400 text-white text-xs font-semibold">Đã kết thúc</Badge>;
   };
 
   const formatDate = (dateString: string): string => {
@@ -94,83 +66,74 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
 
   return (
     <Card
-      className={`group rounded-2xl p-6 transition-all hover:shadow-xl relative overflow-hidden flex flex-col ${
+      className={`group rounded-lg p-6 transition-all hover:shadow-xl relative overflow-hidden flex flex-col border ${
         isEnded
-          ? "bg-white/60 dark:bg-slate-900/40 opacity-80 grayscale-[0.5] hover:grayscale-0 hover:opacity-100"
+          ? "bg-gray-50 opacity-75 hover:opacity-100 border-gray-400"
           : isOngoing
-            ? "border-2 border-green-500/30"
-            : ""
+            ? "bg-white border-green-500 shadow-md"
+            : "bg-white border-gray-400"
       }`}
     >
       <div className="absolute top-0 right-0 p-4 flex flex-col items-end gap-2">
         {getStatusBadge()}
         {contest.isRegistered && (
-          <Badge className="bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400 text-[10px] font-bold uppercase border border-amber-200 dark:border-amber-800">
+          <Badge className="bg-yellow-100 text-yellow-700 text-xs font-semibold border border-yellow-200">
             <Star className="w-3 h-3 mr-1 fill-current" />
             Đã đăng ký
           </Badge>
         )}
       </div>
 
-      <div className="flex items-start gap-4 mb-6">
+      <div className="flex items-start gap-4 mb-2 border-b pb-2 border-black ">
         <div
-          className={`w-14 h-14 rounded-xl flex items-center justify-center shrink-0 ${
-            isEnded
-              ? "bg-slate-100 dark:bg-slate-800"
-              : isOngoing
-                ? "bg-green-100 dark:bg-green-900/20"
-                : "bg-blue-100 dark:bg-blue-900/20"
+          className={`w-12 h-12 rounded-lg flex items-center justify-center shrink-0 ${
+            isEnded ? "bg-gray-100" : isOngoing ? "bg-green-100" : "bg-blue-100"
           }`}
         >
-          <Icon className={`w-8 h-8 ${isEnded ? "text-slate-500" : isOngoing ? "text-green-600" : "text-blue-600"}`} />
+          <Icon className={`w-7 h-7 ${isEnded ? "text-gray-500" : isOngoing ? "text-green-800" : "text-blue-800"}`} />
         </div>
         <div className="pr-20">
           <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors leading-tight">
             {contest.title}
           </h3>
-          <p className="text-sm text-slate-500 mt-1">
+          <p className="text-sm text-gray-500 mt-1">
             {contest.description || `${contest.problemCount} bài tập • ${contest.durationMinutes || 120} phút`}
           </p>
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+      <div className="grid grid-cols-2 gap-4 mb-2">
+        <div className="flex items-center gap-2 text-gray-800 text-sm">
           <Users className="w-5 h-5" />
           <span className="font-medium">
             {contest.participantCount.toLocaleString()} {contest.isRegistered && !isEnded ? "Đã đăng ký" : "Thí sinh"}
           </span>
         </div>
         {contest.problemCount ? (
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+          <div className="flex items-center gap-2 text-gray-800 text-sm">
             <FileText className="w-5 h-5" />
             <span className="font-medium">{contest.problemCount} Bài tập</span>
           </div>
-        ) : (
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
-            <Award className="w-5 h-5" />
-            <span className="font-medium">Xem Kết quả</span>
-          </div>
-        )}
+        ) : null}
         {contest.durationMinutes && (
-          <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+          <div className="flex items-center gap-2 text-gray-800 text-sm">
             <Timer className="w-5 h-5" />
             <span className="font-medium">{contest.durationMinutes} Phút</span>
           </div>
         )}
-        <div className="flex items-center gap-2 text-slate-600 dark:text-slate-400 text-sm">
+        <div className="flex items-center gap-2 text-gray-800 text-sm">
           {isUpcoming ? <Clock className="w-5 h-5" /> : <Calendar className="w-5 h-5" />}
           <span className="font-medium">{formatDate(isUpcoming ? contest.startTime : contest.endTime)}</span>
         </div>
       </div>
 
       {contest.progress && (
-        <div className="space-y-3 mb-6">
-          <div className="flex justify-between text-xs font-bold text-slate-500">
+        <div className="space-y-3 mb-4">
+          <div className="flex justify-between text-xs font-semibold text-gray-500">
             <span>Tiến trình cuộc thi</span>
             <span className="text-green-600">Còn lại: {contest.timeLeft}</span>
           </div>
-          <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+          <div className="w-full h-2 bg-gray-100 rounded-full overflow-hidden">
             <div
               className="h-full bg-green-500 rounded-full transition-all"
               style={{ width: `${contest.progress}%` }}
@@ -180,38 +143,32 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
       )}
 
       {contest.countdown && !contest.progress && (
-        <div className="p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl mb-6">
-          <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Bắt đầu sau:</p>
-          <div className="flex items-center gap-4 text-2xl font-bold tracking-tight text-blue-600">
+        <div className="p-4 bg-gray-50 rounded-lg mb-4">
+          <p className="text-xs font-semibold text-gray-500 mb-1">Bắt đầu sau:</p>
+          <div className="flex items-center gap-4 text-2xl font-bold text-blue-600">
             {contest.countdown.d && (
               <>
                 <span>{String(contest.countdown.d).padStart(2, "0")}d</span>
-                <span className="text-slate-300">:</span>
+                <span className="text-gray-300">:</span>
               </>
             )}
             <span>{String(contest.countdown.h || 0).padStart(2, "0")}h</span>
-            <span className="text-slate-300">:</span>
+            <span className="text-gray-300">:</span>
             <span>{String(contest.countdown.m || 0).padStart(2, "0")}m</span>
-            {contest.countdown.s !== undefined && (
-              <>
-                <span className="text-slate-300">:</span>
-                <span>{String(contest.countdown.s).padStart(2, "0")}s</span>
-              </>
-            )}
           </div>
         </div>
       )}
 
       {contest.myScore && contest.myRank && (
-        <div className="mb-6 flex gap-4">
+        <div className="mb-3 flex gap-4">
           <div>
-            <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Điểm số</p>
+            <p className="text-xs font-semibold text-gray-500 mb-1">Điểm số</p>
             <p className="text-2xl font-bold text-blue-600">
               {contest.myScore.current}/{contest.myScore.total}
             </p>
           </div>
           <div>
-            <p className="text-[10px] font-black uppercase text-slate-400 mb-1">Thứ hạng</p>
+            <p className="text-xs font-semibold text-gray-500 mb-1">Thứ hạng</p>
             <p className="text-2xl font-bold text-blue-600">
               #{contest.myRank}/{contest.participantCount.toLocaleString()}
             </p>
@@ -220,38 +177,66 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
       )}
 
       <div className="mt-auto">
-        {isOngoing && (
+        {isOngoing && contest.isRegistered && (
           <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
-            <Button className="w-full bg-blue-600 text-white font-bold py-5 rounded-xl hover:bg-blue-700 shadow-lg shadow-blue-600/20">
+            <Button className="w-full bg-blue-600 text-white font-semibold py-5 rounded-lg hover:bg-blue-700">
               <span>Vào phòng thi</span>
               <LogIn className="w-5 h-5 ml-2" />
             </Button>
           </Link>
         )}
 
-        {isUpcoming && contest.isRegistered && (
+        {isOngoing && !contest.isRegistered && (
           <Button
-            className="w-full bg-slate-100 dark:bg-slate-800 text-blue-800 font-bold py-5 rounded-xl border border-blue-600/20 cursor-default"
+            className="w-full bg-white text-blue-800 font-bold py-5 rounded-lg border border-blue-400 cursor-default"
             isDisabled
           >
-            Đã sẵn sàng tham gia
+            Quá hạn đăng ký
           </Button>
         )}
 
+        {isUpcoming && contest.isRegistered && (
+          <div className="flex items-center gap-3">
+            <Button
+              className="w-full bg-white text-blue-800 font-bold py-5 rounded-lg border border-blue-400 cursor-default"
+              isDisabled
+            >
+              Đã sẵn sàng tham gia
+            </Button>
+            <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
+              <Button className="w-full bg-blue-600 text-white font-semibold py-5 rounded-lg hover:bg-blue-700">
+                <span>Xem chi tiết</span>
+                <LogIn className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
+          </div>
+        )}
+
         {isUpcoming && !contest.isRegistered && (
-          <Button className="w-full border-2 border-blue-600 text-white font-bold py-5 rounded-xl hover:bg-blue-600 hover:text-white transition-all">
-            Đăng ký ngay
+          <Button
+            onClick={handleRegister}
+            isDisabled={registerMutation.isPending}
+            className="w-full border-2 border-blue-600 text-white font-semibold py-5 rounded-lg hover:bg-blue-600 hover:text-white transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {registerMutation.isPending ? (
+              <>
+                <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                Đang đăng ký...
+              </>
+            ) : (
+              "Đăng ký ngay"
+            )}
           </Button>
         )}
 
         {isEnded && (
-          <div className="flex gap-2">
-            <Button variant="outline" className="flex-1 border-2 text-sm font-bold py-5 rounded-xl">
-              Luyện tập lại
-            </Button>
-            <Button className="flex-1 bg-slate-800 text-white font-bold  py-5 rounded-xl text-sm hover:bg-slate-700">
-              Xem Lời giải
-            </Button>
+          <div>
+            <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
+              <Button className="w-full bg-blue-600 text-white font-semibold py-5 rounded-lg hover:bg-blue-700">
+                <span>Xem chi tiết</span>
+                <LogIn className="w-5 h-5 ml-2" />
+              </Button>
+            </Link>
           </div>
         )}
       </div>

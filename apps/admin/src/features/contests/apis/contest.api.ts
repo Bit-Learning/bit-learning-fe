@@ -23,6 +23,8 @@ import type {
   AnswerClarificationRequest,
   ContestListParams,
   ContestSubmissionParams,
+  ContestRegistrationDTO,
+  PageableParams,
 } from "../types/contest.type";
 
 const CONTEST_BASE = "/contests";
@@ -95,6 +97,15 @@ export const adminContestApi = {
     return api.delete(`${ADMIN_BASE}/${contestId}`);
   },
 
+  getContestRegistrations(
+    contestId: string,
+    params?: PageableParams,
+  ): Promise<AxiosResponse<ApiResponse<ContestRegistrationDTO>>> {
+    return api.get(`${ADMIN_BASE}/${contestId}/registrations`, {
+      params,
+    });
+  },
+
   addProblem(
     contestId: string,
     request: AddProblemRequest,
@@ -140,5 +151,3 @@ export const adminContestApi = {
     return api.put(`${ADMIN_BASE}/${contestId}/clarifications/${clarificationId}`, request);
   },
 };
-
-export default contestApi;

@@ -261,3 +261,19 @@ export interface ContestSubmissionParams {
   page?: number;
   size?: number;
 }
+
+export interface ContestRegistrationDTO {
+  registrationId: string;
+  userId: number;
+  username: string;
+  fullName: string;
+  email: string;
+  avatar: string;
+  registeredAt: string;
+}
+
+export interface PageableParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}

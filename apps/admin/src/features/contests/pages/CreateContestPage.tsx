@@ -12,12 +12,14 @@ import {
   Shield,
   TrendingUp,
   Users,
-  ChevronLeft,
+  Loader2,
+  Pencil,
+  ArrowLeft,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "@tanstack/react-router";
-import { useCreateContest, useUpdateContest } from "../queries/useContest";
+import { useParams } from "@tanstack/react-router";
+import { useContestDetail, useCreateContest, useUpdateContest } from "../queries/useContest";
 import { useNavigate } from "@tanstack/react-router";
 
 interface ContestUpsertDTO {
@@ -27,13 +29,10 @@ interface ContestUpsertDTO {
   endTime: string;
 }
 
-interface CreateContestPageProps {
-  contestId?: string;
-  initialData?: ContestUpsertDTO;
-}
-
-export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId, initialData }) => {
+export const CreateContestPage: React.FC = () => {
+  const { id: contestId } = useParams({ strict: false });
   const navigate = useNavigate();
+  const { data: contest, isLoading } = useContestDetail(contestId!);
   const createMutation = useCreateContest();
   const updateMutation = useUpdateContest();
 
@@ -49,24 +48,33 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
   const [isPreview, setIsPreview] = useState(false);
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const toLocalInputValue = (isoString: string) => {
+    const d = new Date(isoString);
+    const offset = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+  };
+
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    } else {
+    if (contest) {
+      setFormData({
+        title: contest.title ?? "",
+        description: contest.description ?? "",
+        startTime: contest.startTime ? toLocalInputValue(contest.startTime) : "",
+        endTime: contest.endTime ? toLocalInputValue(contest.endTime) : "",
+      });
+    } else if (!isEditMode) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(9, 0, 0, 0);
-
       const endTime = new Date(tomorrow);
       endTime.setHours(12, 0, 0, 0);
-
       setFormData((prev) => ({
         ...prev,
         startTime: tomorrow.toISOString().slice(0, 16),
         endTime: endTime.toISOString().slice(0, 16),
       }));
     }
-  }, [initialData]);
+  }, [contest]);
 
   const calculateDuration = () => {
     if (!formData.startTime || !formData.endTime) return "0 giờ 0 phút";
@@ -127,11 +135,9 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
     try {
       if (isEditMode && contestId) {
         await updateMutation.mutateAsync({ contestId, data: formData });
-        console.log("Update contest:", contestId, formData);
         navigate({ to: "/contests/$id", params: { id: contestId } });
       } else {
         await createMutation.mutateAsync(formData);
-        console.log("Create contest:", formData);
         navigate({ to: "/contests" });
       }
     } catch (error) {
@@ -139,25 +145,36 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
     }
   };
 
-  // Handle cancel
   const handleCancel = () => {
-    // navigate({ to: "/contests" });
-    console.log("Cancel");
+    navigate({ to: "/contests" });
   };
+
+  const handleBack = () => {
+    navigate({
+      to: isEditMode ? `/contests/${contestId}` : "/contests",
+    });
+  };
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Đang tải cuộc thi...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-8">
       <div className="mb-8">
-        <nav className="flex items-center text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-          <Link to="/contests" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-            <ChevronLeft className="w-4 h-4" />
-            Quản lý cuộc thi
-          </Link>
-          <span className="mx-2 text-slate-300 dark:text-slate-700">/</span>
-          <span className="text-slate-900 dark:text-white">
-            {isEditMode ? "Chỉnh sửa cuộc thi" : "Tạo cuộc thi mới"}
-          </span>
-        </nav>
+        <div className="mb-4">
+          <Button variant="outline" onClick={handleBack} className="gap-2 border-gray-300">
+            <ArrowLeft className="w-4 h-4" />
+            Quay lại danh sách
+          </Button>
+        </div>
         <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
           {isEditMode ? "Chỉnh sửa cuộc thi" : "Tạo cuộc thi mới"}
         </h2>
@@ -321,10 +338,10 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
           <Button type="button" variant="ghost" onClick={handleCancel} className="px-6">
             Hủy
           </Button>
-          <Button type="button" onClick={handleSubmit} className="px-8 gap-2 shadow-lg">
+          <Button type="button" onClick={handleSubmit} className="px-8 py-5 gap-2 shadow-lg">
             {isEditMode ? (
               <>
-                <Eye className="w-4 h-4" />
+                <Pencil className="w-4 h-4" />
                 Cập nhật cuộc thi
               </>
             ) : (
@@ -337,7 +354,6 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
         </div>
       </Card>
 
-      {/* Feature Cards */}
       <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 opacity-60">
         <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-3">
           <Shield className="w-5 h-5 text-slate-400" />

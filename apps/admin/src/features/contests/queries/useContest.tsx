@@ -9,6 +9,7 @@ import type {
   SubmitRequest,
   CreateClarificationRequest,
   AnswerClarificationRequest,
+  PageableParams,
 } from "../types/contest.type";
 
 export const contestKeys = {
@@ -30,6 +31,8 @@ export const contestKeys = {
     submissions: (contestId: string, params?: ContestSubmissionParams) =>
       [...contestKeys.admin.all, contestId, "submissions", params] as const,
     leaderboard: (contestId: string) => [...contestKeys.admin.all, contestId, "leaderboard"] as const,
+    registrations: (contestId: string, params?: PageableParams) =>
+      [...contestKeys.admin.all, contestId, "registrations", params] as const,
   },
 };
 
@@ -367,5 +370,16 @@ export const useAnswerClarification = () => {
         description: error?.response?.data?.message || "Đã xảy ra lỗi khi trả lời câu hỏi.",
       });
     },
+  });
+};
+
+export const useAdminContestRegistrations = (contestId: string, params?: PageableParams) => {
+  return useQuery({
+    queryKey: contestKeys.admin.registrations(contestId, params),
+    queryFn: async () => {
+      const res = await adminContestApi.getContestRegistrations(contestId, params);
+      return res.data;
+    },
+    enabled: !!contestId,
   });
 };

@@ -23,6 +23,11 @@ import {
   ProblemFilters,
   SubmissionFilters,
   Language,
+  BulkCreateTestCaseRequest,
+  BulkCreateTestCaseResponse,
+  TestCaseResponse,
+  GenerateCodeTemplatesRequest,
+  GenerateCodeTemplatesResponse,
 } from "../types/coding.type";
 
 export const problemApi = {
@@ -81,6 +86,21 @@ export const problemApi = {
     return api.delete(`/problems/${problemId}/testcases/${testCaseId}`);
   },
 
+  bulkCreateTestCases(
+    problemId: string,
+    data: BulkCreateTestCaseRequest,
+  ): Promise<AxiosResponse<ApiResponse<BulkCreateTestCaseResponse>>> {
+    return api.post(`/problems/${problemId}/testcases/bulk`, data);
+  },
+
+  deleteAllTestCases(problemId: string): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.delete(`/problems/${problemId}/testcases`);
+  },
+
+  getAllTestCases(problemId: string): Promise<AxiosResponse<ApiResponse<TestCaseResponse[]>>> {
+    return api.get(`/problems/${problemId}/testcases`);
+  },
+
   createCodeTemplate(
     problemId: string,
     data: CreateCodeTemplateRequest,
@@ -96,11 +116,18 @@ export const problemApi = {
     return api.delete(`/problems/${problemId}/code-templates/${language}`);
   },
 
+  generateCodeTemplates(
+    problemId: string,
+    data: GenerateCodeTemplatesRequest,
+  ): Promise<AxiosResponse<ApiResponse<GenerateCodeTemplatesResponse>>> {
+    return api.post(`/problems/${problemId}/generate-code-templates`, data);
+  },
+
   toggleFavorite(problemId: string): Promise<AxiosResponse<ApiResponse<ToggleFavoriteResponse>>> {
     return api.post(`/problems/${problemId}/favorite`);
   },
 
-  getFavoriteProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse>>> {
+  getFavoriteProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
     return api.get("/problems/favorites", { params: filters });
   },
 };
@@ -114,7 +141,7 @@ export const submissionApi = {
     return api.get(`/submissions/${submissionId}`);
   },
 
-  getUserSubmissions(filters?: SubmissionFilters): Promise<AxiosResponse<ApiResponse<SubmissionBriefResponse>>> {
+  getUserSubmissions(filters?: SubmissionFilters): Promise<AxiosResponse<ApiResponse<SubmissionBriefResponse[]>>> {
     return api.get("/submissions", { params: filters });
   },
 

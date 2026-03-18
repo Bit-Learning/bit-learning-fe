@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   FileCode,
   Upload,
@@ -17,35 +17,28 @@ import { Badge } from "@workspace/ui/components/Badge";
 import { Language } from "../types/contest.type";
 import { useSubmitSolution } from "../queries/useContest";
 import { useParams } from "@tanstack/react-router";
+import { useCodeTemplates } from "@/feature/code-practice/queries/useCoding";
 
 type SubmitMode = "editor" | "file";
 
 interface ProblemSubmitTabProps {
   contestProblemId: string;
+  problemId: string;
+  disabled?: boolean;
 }
 
-export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({ contestProblemId }) => {
+export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
+  contestProblemId,
+  problemId,
+  disabled = false,
+}) => {
   const { id } = useParams({ strict: false });
   const { mutate: submitSolution, isPending } = useSubmitSolution();
+  const { data: codeTemplates, isLoading: isTemplatesLoading } = useCodeTemplates(problemId);
 
   const [mode, setMode] = useState<SubmitMode>("editor");
   const [language, setLanguage] = useState<Language>(Language.PYTHON);
-  const [code, setCode] = useState(`def two_sum(nums, target):
-    # Dùng hash map để tối ưu thời gian tìm kiếm O(n)
-    hash_map = {}
-    for i, num in enumerate(nums):
-        complement = target - num
-        if complement in hash_map:
-            return [hash_map[complement], i]
-        hash_map[num] = i
-    return []
-
-# Đọc input từ stdin
-line1 = input().split()
-n, target = int(line1[0]), int(line1[1])
-nums = list(map(int, input().split()))
-result = two_sum(nums, target)
-print(f"{result[0]} {result[1]}")`);
+  const [code, setCode] = useState("");
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [showTestResult, setShowTestResult] = useState(false);
 
@@ -55,6 +48,15 @@ print(f"{result[0]} {result[1]}")`);
     { value: Language.JAVA, label: "Java 11 (OpenJDK)" },
     { value: Language.JAVASCRIPT, label: "JavaScript (Node.js 16)" },
   ];
+
+  useEffect(() => {
+    if (codeTemplates && codeTemplates.length > 0) {
+      const template = codeTemplates.find((t) => t.language === language);
+      if (template) {
+        setCode(template.templateCode);
+      }
+    }
+  }, [language, codeTemplates]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -110,12 +112,21 @@ print(f"{result[0]} {result[1]}")`);
         return ".java";
       case Language.JAVASCRIPT:
         return ".js";
-      case Language.C:
-        return ".c";
       default:
         return ".txt";
     }
   };
+
+  if (isTemplatesLoading) {
+    return (
+      <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-sm text-slate-600">Đang tải code template...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden">
@@ -168,7 +179,7 @@ print(f"{result[0]} {result[1]}")`);
           <div className="flex items-center gap-3">
             <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
               <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              Đã lưu tự động
+              Code template đã load
             </span>
           </div>
         )}
@@ -201,7 +212,7 @@ print(f"{result[0]} {result[1]}")`);
 
             <div className="flex-1 relative font-mono text-sm overflow-hidden flex">
               <div className="w-12 bg-slate-900/50 text-slate-600 text-right pr-3 py-4 select-none border-r border-slate-800/50 text-xs leading-5">
-                {Array.from({ length: 20 }, (_, i) => (
+                {Array.from({ length: Math.max(20, code.split("\n").length) }, (_, i) => (
                   <div key={i}>{i + 1}</div>
                 ))}
               </div>
@@ -209,7 +220,7 @@ print(f"{result[0]} {result[1]}")`);
                 <textarea
                   value={code}
                   onChange={(e) => setCode(e.target.value)}
-                  className="absolute inset-0 w-full h-full bg-transparent text-slate-300 p-4 resize-none outline-none focus:ring-0 placeholder-slate-600 caret-primary leading-5"
+                  className="absolute inset-0 w-full h-full bg-transparent text-slate-300 p-4 resize-none outline-none focus:ring-0 placeholder-slate-600 caret-primary leading-5 font-mono text-sm"
                   spellCheck={false}
                   placeholder="// Viết code của bạn ở đây..."
                 />
@@ -334,7 +345,7 @@ print(f"{result[0]} {result[1]}")`);
             <Button
               variant="outline"
               onClick={handleRunTest}
-              isDisabled={isPending}
+              isDisabled={isPending || disabled}
               className="flex-1 sm:flex-none px-6 py-5 rounded-lg border border-slate-200 dark:border-slate-700 font-bold text-sm bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
             >
               <Play className="w-5 h-5 text-slate-500" />
@@ -342,7 +353,7 @@ print(f"{result[0]} {result[1]}")`);
             </Button>
             <Button
               onClick={handleSubmit}
-              isDisabled={isPending || (mode === "file" && !uploadedFile)}
+              isDisabled={isPending || (mode === "file" && !uploadedFile) || disabled}
               className="flex-1 sm:flex-none px-8 py-5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Rocket className="w-5 h-5" />
