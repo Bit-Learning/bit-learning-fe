@@ -12,7 +12,7 @@ import AddTestCaseModal from "./AddTestCaseModal";
 const MentorProblemDetailContent: React.FC = () => {
   const { id: problemId } = useParams({ strict: false });
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState<"description" | "testcases" | "templates" | "stats">("description");
+  const [activeTab, setActiveTab] = useState<"description" | "testcases" | "templates">("description");
   const [selectedLanguage, setSelectedLanguage] = useState<Language>(Language.CPP);
   const [showAddTestCaseModal, setShowAddTestCaseModal] = useState(false);
 
@@ -132,7 +132,7 @@ const MentorProblemDetailContent: React.FC = () => {
           <button
             onClick={() => setActiveTab("description")}
             className={cn(
-              "pb-4 text-sm font-medium transition-all",
+              "cursor-pointer pb-4 text-sm font-medium transition-all",
               activeTab === "description"
                 ? "text-blue-600 font-bold border-b-2 border-blue-600"
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
@@ -143,7 +143,7 @@ const MentorProblemDetailContent: React.FC = () => {
           <button
             onClick={() => setActiveTab("testcases")}
             className={cn(
-              "pb-4 text-sm font-medium transition-all",
+              "cursor-pointer pb-4 text-sm font-medium transition-all",
               activeTab === "testcases"
                 ? "text-blue-600 font-bold border-b-2 border-blue-600"
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
@@ -154,24 +154,13 @@ const MentorProblemDetailContent: React.FC = () => {
           <button
             onClick={() => setActiveTab("templates")}
             className={cn(
-              "pb-4 text-sm font-medium transition-all",
+              "cursor-pointer pb-4 text-sm font-medium transition-all",
               activeTab === "templates"
                 ? "text-blue-600 font-bold border-b-2 border-blue-600"
                 : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
             )}
           >
             Mẫu Code
-          </button>
-          <button
-            onClick={() => setActiveTab("stats")}
-            className={cn(
-              "pb-4 text-sm font-medium transition-all flex items-center gap-1.5",
-              activeTab === "stats"
-                ? "text-blue-600 font-bold border-b-2 border-blue-600"
-                : "text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200",
-            )}
-          >
-            Thống kê
           </button>
         </div>
 
