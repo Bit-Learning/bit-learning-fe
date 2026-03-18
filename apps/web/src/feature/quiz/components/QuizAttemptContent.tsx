@@ -22,10 +22,12 @@ import { useQuizAttempt, useSaveQuizAnswer, useSubmitQuizAttempt } from "../quer
 import { useExam } from "@/feature/exam/queries/useExam";
 import { useExamTimer } from "../queries/useExamTimer";
 import { QuestionNavigationState } from "../types/quiz.type";
+import { useTabLock } from "../queries/useTabLock";
 
 const QuizAttemptContent: React.FC = () => {
   const navigate = useNavigate();
   const { attemptId } = useParams({ from: "/_layout/quiz-attempts/$attemptId/" });
+  const { status: lockStatus, releaseLock } = useTabLock(Number(attemptId));
 
   const dispatch = useDispatch();
   const answersMap = useSelector(selectAnswersMap);
@@ -52,6 +54,14 @@ const QuizAttemptContent: React.FC = () => {
   const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
   const lastSaveTimeRef = useRef(lastSaveTime);
   const answersMapRef = useRef(answersMap);
+
+  useEffect(() => {
+    if (lockStatus === "denied") {
+      timer.stop();
+      dispatch(stopTimerAction());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockStatus, dispatch]);
 
   useEffect(() => {
     hasUnsavedChangesRef.current = hasUnsavedChanges;
@@ -111,9 +121,11 @@ const QuizAttemptContent: React.FC = () => {
   }, [saveMutation, attemptId]);
 
   const handleAutoSubmit = useCallback(async () => {
-    console.log("⏰ Hết giờ - tự động lưu và nộp bài...");
-
-    await handleSaveAll();
+    console.log("Hết giờ - tự động lưu và nộp bài...");
+    releaseLock();
+    if (hasUnsavedChangesRef.current) {
+      await handleSaveAll();
+    }
 
     try {
       await submitMutation.mutateAsync({
@@ -123,7 +135,8 @@ const QuizAttemptContent: React.FC = () => {
             questionId: answer.question.id,
             selectedOptionIds: answer.selectedOptionIds,
             answerText: answer.answerText ?? undefined,
-            navigationState: QuestionNavigationState.ANSWERED,
+            navigationState:
+              "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
           })),
         },
       });
@@ -160,7 +173,7 @@ const QuizAttemptContent: React.FC = () => {
     const autoSaveInterval = setInterval(() => {
       const now = Date.now();
       if (hasUnsavedChangesRef.current && now - lastSaveTimeRef.current >= 120000) {
-        console.log("🔄 Auto-save triggered (2 minutes elapsed)");
+        console.log("Auto-save triggered (2 minutes elapsed)");
         handleSaveAll();
       }
     }, 10000);
@@ -271,7 +284,10 @@ const QuizAttemptContent: React.FC = () => {
 
   const handleSubmitExam = async () => {
     timer.stop();
-    await handleSaveAll();
+    releaseLock();
+    if (hasUnsavedChangesRef.current) {
+      await handleSaveAll();
+    }
 
     try {
       await submitMutation.mutateAsync({
@@ -313,6 +329,39 @@ const QuizAttemptContent: React.FC = () => {
 
   const isEssay = (type: string) => type?.toUpperCase() === "ESSAY";
   const isMCQ = (type: string) => type?.toUpperCase() === "MCQ";
+
+  if (lockStatus === "acquiring") {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-slate-500">Đang khởi tạo...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (lockStatus === "denied") {
+    return (
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center p-4">
+        <Card className="max-w-md shadow-xl border-2 border-amber-200 dark:border-amber-800">
+          <CardContent className="p-10 text-center">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-slate-900 dark:text-slate-100">Bài thi đang mở ở tab khác</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+              Bạn chỉ được làm bài thi trên một tab hoặc trình duyệt tại một thời điểm. Vui lòng đóng tab này và quay
+              lại tab đang làm bài.
+            </p>
+            <Button variant="outline" onClick={() => window.close()} className="border-slate-200 dark:border-slate-700">
+              Đóng tab này
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   if (attemptLoading || examLoading) {
     return (
