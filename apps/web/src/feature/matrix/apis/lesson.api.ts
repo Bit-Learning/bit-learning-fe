@@ -20,4 +20,7 @@ export const lessonApi = {
   ): Promise<AxiosResponse<ApiResponse<TLessonResponse[]>>> {
     return api.get(`/lessons/subject/${subjectId}`, { params });
   },
+  getByChapter(chapterId: number): Promise<AxiosResponse<ApiResponse<TLessonResponse[]>>> {
+    return api.get(`/lessons/chapter/${chapterId}`);
+  },
 };

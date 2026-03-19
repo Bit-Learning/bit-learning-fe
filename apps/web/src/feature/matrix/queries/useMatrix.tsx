@@ -1,6 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
-import { matrixApi, matrixVersionApi, matrixDetailApi } from "../api/matrix.api";
+import { matrixApi, matrixVersionApi, matrixDetailApi } from "../apis/matrix.api";
 import type { TMatrixRequest, TMatrixVersionRequest, TMatrixDetailRequest } from "../types/matrix.type";
 
 export const matrixKeys = {

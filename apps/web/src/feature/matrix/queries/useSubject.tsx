@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { subjectApi } from "../api/subject.api";
+import { subjectApi } from "../apis/subject.api";
 
 export const useSubjectsList = () => {
   return useQuery({

@@ -16,7 +16,6 @@ import {
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { Badge } from "@workspace/ui/components/Badge";
 import { useMatrixDetail, useMatrixVersions, useDeleteMatrix, useToggleMatrixActive } from "../queries/useMatrix";
 import MatrixFormModal from "./MatrixFormModal";
 import VersionFormModal from "./VersionFormModal";
@@ -271,7 +270,7 @@ const MatrixDetailContent: React.FC = () => {
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
                         isLatest
                           ? "bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
-                          : "border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                          : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       }`}
                     >
                       <Eye className="h-4 w-4" />
@@ -281,7 +280,7 @@ const MatrixDetailContent: React.FC = () => {
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
                         isLatest
                           ? "bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
-                          : "border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                          : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       }`}
                     >
                       <Pencil className="h-4 w-4" />
@@ -289,12 +288,16 @@ const MatrixDetailContent: React.FC = () => {
                     </Button>
                     <Button
                       onClick={() =>
-                        navigate({ to: "/mentor/matrix/$id/generate", params: { id: matrix.id.toString() } })
+                        navigate({
+                          to: "/mentor/matrix/$id/generate",
+                          params: { id: matrix.id.toString() },
+                          search: { versionId: version.id },
+                        })
                       }
                       className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
                         isLatest
                           ? "bg-blue-800 text-white shadow-sm shadow-blue-500/20 hover:bg-blue-700"
-                          : "border border-slate-200 text-slate-700 hover:bg-slate-50 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                          : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
                       }`}
                     >
                       <Sparkles className="h-4 w-4" />
@@ -330,13 +333,6 @@ const MatrixDetailContent: React.FC = () => {
             ) : !exams || exams?.page?.totalElements === 0 ? (
               <div className="p-12 text-center">
                 <p className="text-slate-600 dark:text-slate-400">Chưa có đề thi nào được tạo từ ma trận này</p>
-                <Button
-                  onClick={() => navigate({ to: "/mentor/matrix/$id/generate", params: { id: matrix.id.toString() } })}
-                  className="mt-4 bg-blue-800 text-white hover:bg-blue-700"
-                >
-                  <Sparkles className="mr-2 h-4 w-4" />
-                  Tạo đề thi đầu tiên
-                </Button>
               </div>
             ) : (
               <table className="w-full">
