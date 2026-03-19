@@ -115,7 +115,7 @@ const QuestionDetailContent: React.FC = () => {
       </div>
 
       <div className="space-y-6">
-        <Card>
+        <Card className="border border-gray-400">
           <CardHeader>
             <div className="flex items-center gap-2 flex-wrap">
               <span
@@ -180,7 +180,7 @@ const QuestionDetailContent: React.FC = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="border border-gray-400">
           <CardHeader>
             <h2 className="text-lg font-semibold">Thông tin bổ sung</h2>
           </CardHeader>

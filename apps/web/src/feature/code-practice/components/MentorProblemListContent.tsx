@@ -89,31 +89,30 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </div>
           <Button
             onClick={() => navigate({ to: "/mentor/problem/create" })}
-            size="xl"
-            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white gap-2"
+            className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
           >
             <Plus className="w-5 h-5" />
             Tạo bài tập mới
           </Button>
         </div>
 
-        <Card className="mb-6 border-gray-400">
-          <CardContent>
-            <div className="flex flex-wrap gap-2">
-              <div className="flex-1 min-w-75 relative">
+        <div className="bg-white px-6 py-4 mb-6 rounded-md border-2 border-slate-400 overflow-hidden">
+          <div>
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="relative flex-1">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
                 <Input
                   value={search}
                   onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 bg-slate-50 dark:bg-slate-800 border-none focus:ring-2 focus:ring-blue-500/50"
+                  className="pl-10 py-5 border-2"
                   placeholder="Tìm kiếm bài tập..."
                 />
               </div>
-              <div className="w-48">
+              <div>
                 <select
                   value={difficulty}
                   onChange={(e) => setDifficulty(e.target.value)}
-                  className="w-full h-9 px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-blue-500/50 text-sm text-slate-600 dark:text-slate-300 outline-none"
+                  className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="all">Độ khó: Tất cả</option>
                   <option value="EASY">Dễ</option>
@@ -121,26 +120,23 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                   <option value="HARD">Khó</option>
                 </select>
               </div>
-              <div className="w-48">
+              <div>
                 <select
                   value={visibility}
                   onChange={(e) => setVisibility(e.target.value)}
-                  className="w-full h-9 px-3 py-2 bg-slate-50 dark:bg-slate-800 border-none rounded-lg focus:ring-2 focus:ring-blue-500/50 text-sm text-slate-600 dark:text-slate-300 outline-none"
+                  className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
                 >
                   <option value="all">Trạng thái: Tất cả</option>
                   <option value="public">Công khai</option>
                   <option value="private">Nháp</option>
                 </select>
               </div>
-              <Button variant="outline" className="text-slate-600 dark:text-slate-300">
-                Làm mới
-              </Button>
             </div>
-          </CardContent>
-        </Card>
+          </div>
+        </div>
 
-        <Card className="p-0 border-gray-400">
-          <CardContent className="px-0">
+        <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+          <div className="px-0">
             {isLoading ? (
               <div className="p-4">
                 <TableSkeleton />
@@ -149,7 +145,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
               <>
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
+                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-400 dark:border-slate-800">
                       <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider">
                         Tiêu đề
                       </th>
@@ -305,8 +301,8 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                 )}
               </>
             )}
-          </CardContent>
-        </Card>
+          </div>
+        </div>
       </div>
 
       {deleteId && (

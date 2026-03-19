@@ -158,7 +158,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto p-8">
+    <div className="mx-auto p-8 bg-slate-50 dark:bg-slate-950 ">
       <div className="mb-6">
         <Button
           variant="outline"

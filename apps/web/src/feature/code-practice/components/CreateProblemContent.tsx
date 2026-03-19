@@ -88,7 +88,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       tags: [],
       functionName: "solution",
       returnType: ParamType.INT,
-      parameters: [{ name: "nums", type: ParamType.INT_ARRAY }],
+      parameters: [{ name: "nums", type: ParamType.INT }],
     },
   });
 
@@ -262,38 +262,38 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
 
   if (isEditMode && isProblemLoading) {
     return (
-      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
         <div className="text-center">
-          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-lg text-gray-600">Đang tải dữ liệu...</p>
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-blue-600 dark:text-slate-200 font-medium">Đang tải dữ liệu...</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="max-w-6xl mx-auto p-8">
-      <div className="mb-10">
+    <div className="max-w-6xl mx-auto p-4">
+      <div className="mb-5">
         <Button
           variant="outline"
           size="lg"
-          className="gap-2 mb-4 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          className="gap-2 mb-4 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
           onClick={() => navigate({ to: isEditMode ? `/mentor/problem/${problemId}/` : "/mentor/problem" })}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Quay lại
         </Button>
-        <h1 className="text-4xl font-bold text-gray-900 mb-3">
+        <h1 className="text-3xl font-bold text-gray-900 mb-2">
           {isEditMode ? "Chỉnh sửa Bài Toán" : "Tạo Bài Toán Mới"}
         </h1>
-        <p className="text-lg text-gray-600">
+        <p className="text-md text-gray-600">
           {isEditMode
             ? "Cập nhật thông tin bài toán và code templates"
-            : "Tạo bài toán lập trình với tính năng tự động sinh code templates cho 4 ngôn ngữ"}
+            : "Tạo bài toán lập trình với tính năng tự động tạo mẫu code"}
         </p>
       </div>
 
-      <Card className="border-2 border-gray-200 shadow-sm">
+      <Card className="border-2 border-gray-400">
         <CardContent className="px-8">
           <form onSubmit={combinedForm.handleSubmit(onSubmitCombined)} className="space-y-10">
             <div className="space-y-6">
@@ -537,7 +537,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                   )}
                 </div>
 
-                <div className="bg-gray-50 border-2 border-gray-200 p-6 rounded-lg">
+                <div className="bg-gray-50 border-2 border-gray-400 p-6 rounded-md">
                   <h3 className="text-base font-semibold text-gray-900 mb-4">Xem trước khai báo hàm</h3>
                   <div className="space-y-3">
                     <div>

@@ -7,7 +7,9 @@ export default function SlideManagementPage() {
     <>
       <PageMeta title="Quản lý Slide bài giảng - Mentor" description="Tạo và quản lý slide bài giảng với AI" />
       <MentorLayout>
-        <SlideManagementView />
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+          <SlideManagementView />
+        </div>
       </MentorLayout>
     </>
   );

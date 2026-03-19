@@ -7,7 +7,7 @@ const CreateQuestionPage: React.FC = () => {
     <>
       <PageMeta title="Tạo câu hỏi - Bit Learning" description="Tạo câu hỏi mới" />
       <MentorLayout>
-        <div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
           <QuestionFormContent />
         </div>
       </MentorLayout>

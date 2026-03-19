@@ -6,6 +6,8 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { useMyPublishRequests, usePendingApproval } from "../queries/useQuestion";
 import { QuestionLevel, QuestionType, ApprovalStatus, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
+import { Pagination } from "@/shared/components/Pagination";
+import { Skeleton } from "@workspace/ui/components/Skeleton";
 
 const levelColors: Record<QuestionLevel, string> = {
   [QuestionLevel.EASY]: "bg-green-100 text-green-700",
@@ -99,7 +101,7 @@ export default function QuestionApprovalTableView() {
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
                   "cursor-pointer px-4 py-2 text-sm font-medium rounded-lg transition-colors",
-                  activeTab === tab.id ? "bg-slate-100 text-slate-900" : "text-slate-600 hover:bg-slate-50",
+                  activeTab === tab.id ? "bg-slate-200 text-slate-900" : "text-slate-800 hover:bg-slate-50",
                 )}
               >
                 {tab.label}
@@ -110,8 +112,10 @@ export default function QuestionApprovalTableView() {
 
         <div className="flex-1">
           {isLoading ? (
-            <div className="flex items-center justify-center h-64">
-              <div className="text-slate-500">Đang tải...</div>
+            <div className="p-6 space-y-2">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <Skeleton key={i} className="h-16 w-full rounded-lg" />
+              ))}
             </div>
           ) : questions.length === 0 ? (
             <div className="flex flex-col items-center justify-center h-64 text-center">
@@ -122,23 +126,23 @@ export default function QuestionApprovalTableView() {
               </p>
             </div>
           ) : (
-            <div className="bg-white my-6 rounded-lg border border-slate-200 overflow-hidden">
+            <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
               <table className="w-full">
-                <thead className="bg-slate-50 border-b border-slate-200">
+                <thead className="bg-slate-50 border-b border-slate-400">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-32">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-32">
                       ID
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider">
                       Nội dung câu hỏi
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-32">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-36">
                       Ngày gửi
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-600 uppercase tracking-wider w-40">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-40">
                       Trạng thái
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-slate-600 uppercase tracking-wider w-50">
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-800 uppercase tracking-wider w-52">
                       Thao tác
                     </th>
                   </tr>
@@ -159,20 +163,20 @@ export default function QuestionApprovalTableView() {
                               {question.questionLevel === QuestionLevel.HARD && "Khó"}
                             </Badge>
                             <span className="text-xs text-slate-500">•</span>
-                            <span className="text-xs text-slate-600">
+                            <span className="text-xs text-slate-800">
                               {question.questionType === QuestionType.MCQ ? "Trắc nghiệm" : "Tự luận"}
                             </span>
                             {question.lesson && (
                               <>
                                 <span className="text-xs text-slate-500">•</span>
-                                <span className="text-xs text-slate-600">{question.lesson.name}</span>
+                                <span className="text-xs text-slate-800">{question.lesson.name}</span>
                               </>
                             )}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <div className="text-sm text-slate-600">{formatDate(question.createdAt)}</div>
+                        <div className="text-sm text-slate-800">{formatDate(question.createdAt)}</div>
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-2">
@@ -198,14 +202,23 @@ export default function QuestionApprovalTableView() {
                       <td className="px-2 py-4">
                         <div className="flex items-center justify-center gap-3">
                           {question.approvalStatus === ApprovalStatus.REJECTED && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
-                              onClick={() => setSelectedQuestion(question)}
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </Button>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
+                                onClick={() => setSelectedQuestion(question)}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 ml-4 hover:bg-blue-50 hover:text-blue-600"
+                              >
+                                <span className="text-sm">Sửa & Gửi lại</span>
+                              </Button>
+                            </div>
                           )}
                           {question.approvalStatus === ApprovalStatus.APPROVED && (
                             <Button
@@ -227,13 +240,6 @@ export default function QuestionApprovalTableView() {
                               <Eye className="w-4 h-4" />
                             </Button>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 ml-4 hover:bg-blue-50 hover:text-blue-600"
-                          >
-                            <span className="text-sm">Sửa & Gửi lại</span>
-                          </Button>
                         </div>
                       </td>
                     </tr>
@@ -242,34 +248,7 @@ export default function QuestionApprovalTableView() {
               </table>
 
               {pagination && pagination.totalPages > 1 && (
-                <div className="px-6 py-4 border-t border-slate-200 flex items-center justify-between">
-                  <div className="text-sm text-slate-600">
-                    Hiển thị <span className="font-medium">{pagination.page + 1}</span> đến{" "}
-                    <span className="font-medium">{pagination.totalPages}</span> trong{" "}
-                    <span className="font-medium">{pagination.totalElements}</span> yêu cầu
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      isDisabled={pagination.first}
-                      onClick={() => setPage((p) => p - 1)}
-                    >
-                      &lt;
-                    </Button>
-                    <Button variant="default" size="sm" className="min-w-8">
-                      {pagination.page + 1}
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      isDisabled={pagination.last}
-                      onClick={() => setPage((p) => p + 1)}
-                    >
-                      &gt;
-                    </Button>
-                  </div>
-                </div>
+                <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
               )}
             </div>
           )}

@@ -10,7 +10,7 @@ const MyQuestionsApprovalPage: React.FC = () => {
         description="Quản lý danh sách yêu cầu duyệt câu hỏi"
       />
       <MentorLayout>
-        <div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
           <QuestionApprovalTableView />
         </div>
       </MentorLayout>

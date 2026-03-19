@@ -35,7 +35,14 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", code: "", description: "", duration: 60, totalScore: 10, subjectId: 0 },
+    defaultValues: {
+      name: "",
+      code: "",
+      description: "",
+      duration: 30,
+      totalScore: 10,
+      subjectId: 0,
+    },
   });
 
   const { mutate: create, isPending: creating } = useCreateMatrix();
@@ -48,7 +55,7 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
         name: data?.name || "",
         code: data?.code || "",
         description: data?.description || "",
-        duration: data?.duration || 60,
+        duration: data?.duration || 30,
         totalScore: data?.totalScore || 10,
         subjectId: data?.subject?.id || 0,
       });
@@ -67,42 +74,45 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="w-full max-w-lg p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold">{isEdit ? "Sửa" : "Tạo"} ma trận đề thi</h2>
+      <Card className="w-full max-w-2xl p-8 rounded-xl shadow-xl">
+        <div className="flex items-center justify-between mb-6">
+          <h2 className="text-xl font-bold text-slate-800 dark:text-white">
+            {isEdit ? "Chỉnh sửa" : "Tạo"} ma trận đề thi
+          </h2>
           <Button variant="ghost" size="sm" onPress={onClose}>
-            <X className="h-4 w-4" />
+            <X className="h-5 w-5" />
           </Button>
         </div>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+            <div className="grid grid-cols-2 gap-5">
               <FormField
                 control={form.control}
                 name="name"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
+                    <FormLabel className="text-sm font-semibold">
                       Tên ma trận <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="VD: Ma trận Tin học lớp 10" {...field} />
+                      <Input className="h-11 text-sm" placeholder="VD: Ma trận Tin học lớp 10" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="code"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>
+                    <FormLabel className="text-sm font-semibold">
                       Mã ma trận <span className="text-destructive">*</span>
                     </FormLabel>
                     <FormControl>
-                      <Input placeholder="VD: MT-TIN-10" {...field} />
+                      <Input className="h-11 text-sm" placeholder="VD: MT-TIN-10" {...field} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -115,12 +125,12 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
               name="subjectId"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>
+                  <FormLabel className="text-sm font-semibold">
                     Môn học <span className="text-destructive">*</span>
                   </FormLabel>
                   <FormControl>
                     <select
-                      className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                      className="h-11 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-blue-500"
                       value={field.value || ""}
                       onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
                     >
@@ -137,16 +147,17 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 gap-5">
               <FormField
                 control={form.control}
                 name="duration"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Thời gian (phút)</FormLabel>
+                    <FormLabel className="text-sm font-semibold">Thời gian (phút)</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
+                        className="h-11 text-sm"
                         min={1}
                         {...field}
                         onChange={(e) => field.onChange(parseInt(e.target.value) || 0)}
@@ -156,15 +167,17 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
                   </FormItem>
                 )}
               />
+
               <FormField
                 control={form.control}
                 name="totalScore"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Tổng điểm</FormLabel>
+                    <FormLabel className="text-sm font-semibold">Tổng điểm</FormLabel>
                     <FormControl>
                       <Input
                         type="number"
+                        className="h-11 text-sm"
                         min={0}
                         step={0.5}
                         {...field}
@@ -182,22 +195,22 @@ const MatrixFormModal: React.FC<Props> = ({ isOpen, onClose, data }) => {
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Mô tả</FormLabel>
+                  <FormLabel className="text-sm font-semibold">Mô tả</FormLabel>
                   <FormControl>
-                    <Textarea placeholder="Mô tả về ma trận..." rows={3} {...field} />
+                    <Textarea className="min-h-20 text-sm" placeholder="Mô tả về ma trận..." {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="flex justify-end gap-2 pt-4">
-              <Button type="button" variant="outline" onPress={onClose}>
+            <div className="flex justify-end gap-3 pt-4">
+              <Button type="button" variant="outline" size="lg" onPress={onClose}>
                 Hủy
               </Button>
-              <Button type="submit" isDisabled={isPending}>
+              <Button type="submit" size="lg" isDisabled={isPending}>
                 {isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-                {isEdit ? "Cập nhật" : "Tạo"}
+                {isEdit ? "Cập nhật" : "Tạo ma trận"}
               </Button>
             </div>
           </form>
