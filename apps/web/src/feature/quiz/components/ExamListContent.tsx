@@ -121,13 +121,13 @@ const ExamListContent: React.FC = () => {
               </p>
             </div>
 
-            <div className="relative max-w-xl">
+            <div className="relative max-w-7xl">
               <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
               <Input
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm kiếm theo tên đề thi hoặc mã đề..."
-                className="pl-12 h-12 text-base shadow-sm border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20"
+                className="pl-12 h-12 text-base shadow-sm border-slate-400 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
           </div>
@@ -156,7 +156,7 @@ const ExamListContent: React.FC = () => {
             </CardContent>
           </Card>
         ) : (
-          <div className="space-y-4">
+          <div className="space-y-6">
             {filteredExams.map((exam) => {
               const isCompleted = exam.status === "COMPLETED";
               const isUpcoming = exam.status === "UPCOMING";
@@ -166,11 +166,11 @@ const ExamListContent: React.FC = () => {
                 <Card
                   key={exam.id}
                   className={cn(
-                    "group transition-all duration-300 border-2 overflow-hidden",
-                    isCompleted && "bg-emerald-50/50 dark:bg-emerald-900/10 border-emerald-200 dark:border-emerald-800",
-                    isUpcoming && "bg-amber-50/50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-800",
+                    "group transition-all duration-300 py-0 border-2 rounded-md overflow-hidden",
+                    isCompleted && " border-emerald-600 dark:border-emerald-800",
+                    isUpcoming && " border-amber-600 dark:border-amber-800",
                     isOpen &&
-                      "border-blue-200 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer bg-white dark:bg-slate-800",
+                      "border-blue-600 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer bg-white dark:bg-slate-800",
                   )}
                   onClick={() => isOpen && handleExamClick(exam)}
                 >

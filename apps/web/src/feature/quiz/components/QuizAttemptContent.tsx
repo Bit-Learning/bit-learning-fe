@@ -123,11 +123,11 @@ const QuizAttemptContent: React.FC = () => {
   const handleAutoSubmit = useCallback(async () => {
     console.log("Hết giờ - tự động lưu và nộp bài...");
     releaseLock();
-    if (hasUnsavedChangesRef.current) {
-      await handleSaveAll();
-    }
-
     try {
+      if (hasUnsavedChangesRef.current) {
+        await handleSaveAll();
+      }
+
       await submitMutation.mutateAsync({
         attemptId: Number(attemptId),
         data: {
@@ -285,11 +285,12 @@ const QuizAttemptContent: React.FC = () => {
   const handleSubmitExam = async () => {
     timer.stop();
     releaseLock();
-    if (hasUnsavedChangesRef.current) {
-      await handleSaveAll();
-    }
 
     try {
+      if (hasUnsavedChangesRef.current) {
+        await handleSaveAll();
+      }
+
       await submitMutation.mutateAsync({
         attemptId: Number(attemptId),
         data: {
@@ -413,31 +414,9 @@ const QuizAttemptContent: React.FC = () => {
           </div>
         )}
 
-        {hasUnsavedChanges && (
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">
-                  Có thay đổi chưa được lưu. Hệ thống sẽ tự động lưu sau 2 phút.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                onClick={handleSaveAll}
-                isDisabled={isSavingAll}
-                className="gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-              >
-                <Save className="w-4 h-4" />
-                {isSavingAll ? "Đang lưu..." : "Lưu ngay"}
-              </Button>
-            </div>
-          </div>
-        )}
-
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+            <Card className="border-2 border-blue-200 dark:border-blue-800 ">
               <CardContent className="p-8">
                 <div className="mb-6">
                   <Badge className="mb-4 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 font-bold">
@@ -543,8 +522,8 @@ const QuizAttemptContent: React.FC = () => {
           </div>
 
           <aside className="lg:col-span-1 space-y-4">
-            <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-lg sticky top-6">
-              <CardContent className="p-6 space-y-4">
+            <Card className="border-2 border-blue-200 dark:border-blue-800  top-6">
+              <CardContent className="px-6 space-y-4">
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                   <div className="flex items-center gap-3">
                     <Timer
@@ -564,26 +543,7 @@ const QuizAttemptContent: React.FC = () => {
                   </div>
                 </div>
 
-                <Button
-                  size="lg"
-                  className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 shadow-lg"
-                  onClick={handleSaveAll}
-                  isDisabled={isSavingAll || answeredCount === 0}
-                >
-                  <Save className="w-5 h-5" />
-                  {isSavingAll ? "Đang lưu..." : `Lưu tất cả (${answeredCount})`}
-                </Button>
-
-                <Button
-                  size="lg"
-                  className="w-full gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-lg"
-                  onClick={() => setShowSubmitConfirm(true)}
-                >
-                  <Send className="w-5 h-5" />
-                  Nộp bài thi
-                </Button>
-
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
+                <div className="pt-4 border-t-3 border-slate-400 dark:border-slate-700">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3">Danh sách câu hỏi</h3>
 
                   <div className="grid grid-cols-5 gap-2 mb-4">
@@ -608,7 +568,7 @@ const QuizAttemptContent: React.FC = () => {
                     })}
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-500 dark:text-slate-400">Đã trả lời:</span>
                       <span className="font-bold text-slate-900 dark:text-slate-100">
@@ -625,6 +585,27 @@ const QuizAttemptContent: React.FC = () => {
                       <span className="text-slate-500 dark:text-slate-400">Tiến độ:</span>
                       <span className="text-slate-900 dark:text-slate-100 font-semibold">{progress}%</span>
                     </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 py-4 border-t-3 border-slate-400">
+                    <Button
+                      size="lg"
+                      className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 shadow-lg"
+                      onClick={handleSaveAll}
+                      isDisabled={isSavingAll || answeredCount === 0}
+                    >
+                      <Save className="w-5 h-5" />
+                      {isSavingAll ? "Đang lưu..." : `Lưu tất cả (${answeredCount})`}
+                    </Button>
+
+                    <Button
+                      size="lg"
+                      className="w-full gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-lg"
+                      onClick={() => setShowSubmitConfirm(true)}
+                    >
+                      <Send className="w-5 h-5" />
+                      Nộp bài thi
+                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -683,7 +664,7 @@ const QuizAttemptContent: React.FC = () => {
                   isDisabled={submitMutation.isPending}
                 >
                   <Send className="w-5 h-5" />
-                  {submitMutation.isPending ? "Đang nộp bài..." : "Xác nhận nộp bài"}
+                  {submitMutation.isPending || isSavingAll ? "Đang nộp bài..." : "Xác nhận nộp bài"}
                 </Button>
                 <Button
                   variant="outline"
