@@ -1,7 +1,11 @@
 {
-	"permissions": {
-		"allow": ["Bash(npx tsr:*)", "Bash(npm run dev:*)"],
-		"deny": [],
-		"ask": []
-	}
+  "permissions": {
+    "allow": [
+      "Bash(npx tsr:*)",
+      "Bash(npm run dev:*)",
+      "Bash(find F:/Capstone/bit-learning-fe -path */elkjs/*.d.ts)"
+    ],
+    "deny": [],
+    "ask": []
+  }
 }
