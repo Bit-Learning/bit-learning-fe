@@ -99,12 +99,6 @@ const MatrixListContent: React.FC = () => {
                 key={matrix.id}
                 matrix={matrix}
                 onEdit={() => setModal({ open: true, data: matrix })}
-                onGenerate={() =>
-                  navigate({
-                    to: "/mentor/matrix/$id/generate",
-                    params: { id: matrix.id.toString() },
-                  })
-                }
                 onViewDetail={() =>
                   navigate({
                     to: "/mentor/matrix/$id",

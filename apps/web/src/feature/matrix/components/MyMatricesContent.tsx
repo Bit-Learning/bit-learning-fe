@@ -31,7 +31,7 @@ const MyMatricesContent: React.FC = () => {
   return (
     <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="max-w-8xl mx-auto">
-        <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Quản lý Ma trận đề thi</h1>
             <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Ngân hàng ma trận đề thi</p>
@@ -49,7 +49,7 @@ const MyMatricesContent: React.FC = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
-              className="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-lg focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none"
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-400 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
               placeholder="Tìm kiếm ma trận..."
               type="text"
               value={search}
@@ -96,12 +96,6 @@ const MyMatricesContent: React.FC = () => {
                 key={matrix.id}
                 matrix={matrix}
                 onEdit={() => setModal({ open: true, data: matrix })}
-                onGenerate={() =>
-                  navigate({
-                    to: "/mentor/matrix/$id/generate",
-                    params: { id: matrix.id.toString() },
-                  })
-                }
                 onViewDetail={() =>
                   navigate({
                     to: "/mentor/matrix/$id",

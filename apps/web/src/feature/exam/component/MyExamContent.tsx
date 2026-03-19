@@ -35,27 +35,27 @@ const MyExamsContent: React.FC = () => {
   };
 
   return (
-    <main className="flex-1 p-8 bg-slate-50 dark:bg-slate-950">
-      <header className="flex justify-between items-center mb-8">
+    <div className="flex-1 p-8 bg-slate-50 dark:bg-slate-950">
+      <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">Đề thi của tôi</h1>
-          <p className="text-slate-500 dark:text-slate-400 mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
             Quản lý các đề thi bạn đã tạo cho học sinh của mình.
           </p>
         </div>
         <Button
           onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
-          className="bg-primary hover:bg-blue-700 text-white px-6 py-5 rounded-xl font-semibold flex items-center gap-2 transition-all"
+          className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
         >
           <Plus className="h-5 w-5" />
           Tạo đề thi mới
         </Button>
-      </header>
+      </div>
 
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <input
-          className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-gray-400 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+          className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-400 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
           placeholder="Tìm kiếm theo tên đề thi, mã đề hoặc ngôn ngữ..."
           type="text"
           value={search}
@@ -63,7 +63,7 @@ const MyExamsContent: React.FC = () => {
         />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-gray-400 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
+      <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -186,7 +186,7 @@ const MyExamsContent: React.FC = () => {
           </>
         )}
       </div>
-    </main>
+    </div>
   );
 };
 

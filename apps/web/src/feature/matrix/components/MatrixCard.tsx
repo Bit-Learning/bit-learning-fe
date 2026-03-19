@@ -5,15 +5,14 @@ import type { TMatrixResponse } from "../types/matrix.type";
 interface Props {
   matrix: TMatrixResponse;
   onEdit: () => void;
-  onGenerate: () => void;
   onViewDetail: () => void;
 }
 
-const MatrixCard: React.FC<Props> = ({ matrix, onEdit, onGenerate: _onGenerate, onViewDetail }) => {
+const MatrixCard: React.FC<Props> = ({ matrix, onEdit, onViewDetail }) => {
   const [showMenu, setShowMenu] = useState(false);
 
   return (
-    <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-xl overflow-hidden hover:shadow-lg transition-shadow duration-300">
+    <div className="bg-white dark:bg-slate-900 border-2 border-slate-400 dark:border-slate-800 rounded-md overflow-hidden hover:shadow-lg transition-shadow duration-300">
       <div className="p-6">
         <div className="flex justify-between items-start mb-4">
           <span

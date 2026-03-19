@@ -126,23 +126,23 @@ export default function QuestionApprovalTableView() {
               </p>
             </div>
           ) : (
-            <div className="bg-white my-6 rounded-md border border-slate-400 overflow-hidden">
+            <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-400">
                   <tr>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider w-32">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-32">
                       ID
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider">
                       Nội dung câu hỏi
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider w-32">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-36">
                       Ngày gửi
                     </th>
-                    <th className="px-6 py-4 text-left text-xs font-semibold text-slate-800 uppercase tracking-wider w-40">
+                    <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-40">
                       Trạng thái
                     </th>
-                    <th className="px-6 py-4 text-center text-xs font-semibold text-slate-800 uppercase tracking-wider w-50">
+                    <th className="px-6 py-4 text-center text-sm font-semibold text-slate-800 uppercase tracking-wider w-52">
                       Thao tác
                     </th>
                   </tr>
@@ -202,14 +202,23 @@ export default function QuestionApprovalTableView() {
                       <td className="px-2 py-4">
                         <div className="flex items-center justify-center gap-3">
                           {question.approvalStatus === ApprovalStatus.REJECTED && (
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
-                              onClick={() => setSelectedQuestion(question)}
-                            >
-                              <XCircle className="w-4 h-4" />
-                            </Button>
+                            <div className="flex items-center gap-3">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
+                                onClick={() => setSelectedQuestion(question)}
+                              >
+                                <XCircle className="w-4 h-4" />
+                              </Button>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 ml-4 hover:bg-blue-50 hover:text-blue-600"
+                              >
+                                <span className="text-sm">Sửa & Gửi lại</span>
+                              </Button>
+                            </div>
                           )}
                           {question.approvalStatus === ApprovalStatus.APPROVED && (
                             <Button
@@ -231,13 +240,6 @@ export default function QuestionApprovalTableView() {
                               <Eye className="w-4 h-4" />
                             </Button>
                           )}
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 ml-4 hover:bg-blue-50 hover:text-blue-600"
-                          >
-                            <span className="text-sm">Sửa & Gửi lại</span>
-                          </Button>
                         </div>
                       </td>
                     </tr>

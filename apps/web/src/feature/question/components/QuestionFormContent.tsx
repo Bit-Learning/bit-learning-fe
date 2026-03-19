@@ -1,19 +1,18 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Plus, Trash2, AlertCircle, Check, Save, ChevronDown } from "lucide-react";
 import { z } from "zod";
 import { useForm, useFieldArray } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
-import { Label } from "@workspace/ui/components/label";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@/shared/components/Sonner";
 import { useCreateQuestion, useUpdateQuestion, useQuestion } from "../queries/useQuestion";
 import { QuestionRequest, QuestionType, QuestionLevel } from "../types/question.type";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
-import { useLessonsBySubject } from "@/feature/matrix/queries/useLesson";
+import { useChaptersBySubject } from "@/feature/matrix/queries/useChapter";
+import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
 
 const optionSchema = z.object({
   label: z.string(),
@@ -44,67 +43,24 @@ const formSchema = z
         });
       }
     }
+    if (data.questionType === "ESSAY") {
+      if (!data.canonicalAnswer || data.canonicalAnswer.trim() === "") {
+        ctx.addIssue({
+          code: z.ZodIssueCode.custom,
+          path: ["canonicalAnswer"],
+          message: "Vui lòng nhập đáp án cho câu tự luận",
+        });
+      }
+    }
   });
 
 type FormValues = z.infer<typeof formSchema>;
 
-const FieldError = ({ message }: { message?: string }) =>
-  message ? <p className="text-xs text-red-500 mt-1">{message}</p> : null;
-
-const SelectField = ({
-  label,
-  required,
-  hint,
-  error,
-  children,
-  ...props
-}: React.SelectHTMLAttributes<HTMLSelectElement> & {
-  label: string;
-  required?: boolean;
-  hint?: string;
-  error?: string;
-}) => (
-  <div>
-    <Label htmlFor={props.id}>
-      {label} {required && <span className="text-red-500">*</span>}
-    </Label>
-    <div className="relative mt-1.5">
-      <select
-        {...props}
-        className="w-full appearance-none rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 pr-8 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {children}
-      </select>
-      <ChevronDown className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-    </div>
-    {hint && !error && <p className="text-xs text-muted-foreground mt-1">{hint}</p>}
-    <FieldError message={error} />
-  </div>
-);
-
-const TextareaField = ({
-  label,
-  required,
-  error,
-  rows = 4,
-  ...props
-}: React.TextareaHTMLAttributes<HTMLTextAreaElement> & {
-  label: string;
-  required?: boolean;
-  error?: string;
-}) => (
-  <div>
-    <Label htmlFor={props.id}>
-      {label} {required && <span className="text-red-500">*</span>}
-    </Label>
-    <textarea
-      {...props}
-      rows={rows}
-      className="w-full mt-1.5 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary"
-    />
-    <FieldError message={error} />
-  </div>
-);
+const label = "block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2";
+const select =
+  "w-full appearance-none px-4 py-3 pr-10 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
+const textarea =
+  "w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none";
 
 interface Props {
   mode?: "create" | "edit";
@@ -114,6 +70,8 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   const navigate = useNavigate();
   const params = useParams({ strict: false });
   const questionId = mode === "edit" && (params as any).id ? Number((params as any).id) : undefined;
+
+  const [chapterId, setChapterId] = useState<number | undefined>(undefined);
 
   const createQuestion = useCreateQuestion();
   const updateQuestion = useUpdateQuestion();
@@ -139,14 +97,14 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     },
   });
 
-  const { fields, append, remove } = useFieldArray({
-    control: form.control,
-    name: "options",
-  });
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: "options" });
 
   const questionType = form.watch("questionType");
   const subjectId = form.watch("subjectId");
-  const { data: lessons } = useLessonsBySubject(subjectId, { size: 50 });
+
+  const { data: chapters } = useChaptersBySubject(subjectId);
+  const { data: lessons } = useLessonsByChapter(chapterId);
+
   useEffect(() => {
     if (mode === "edit" && existingQuestion) {
       form.reset({
@@ -169,10 +127,13 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   }, [mode, existingQuestion]);
 
   useEffect(() => {
-    if (mode === "create") {
-      form.setValue("lessonId", undefined);
-    }
+    setChapterId(undefined);
+    form.setValue("lessonId", undefined);
   }, [subjectId]);
+
+  useEffect(() => {
+    form.setValue("lessonId", undefined);
+  }, [chapterId]);
 
   const addOption = () => {
     const labels = ["A", "B", "C", "D", "E", "F"];
@@ -224,9 +185,9 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
         <Skeleton className="h-10 w-64 mb-8" />
         <Card>
           <CardContent className="p-6 space-y-4">
-            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-12 w-full" />
             <Skeleton className="h-32 w-full" />
-            <Skeleton className="h-10 w-full" />
+            <Skeleton className="h-12 w-full" />
           </CardContent>
         </Card>
       </div>
@@ -234,180 +195,306 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   }
 
   return (
-    <div className="container mx-auto p-6 max-w-4xl">
-      <div className="mb-6">
+    <div className="container mx-auto p-6 max-w-6xl">
+      <div className="mb-8">
         <Button
           variant="outline"
           size="lg"
-          className="gap-2 mb-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          className="gap-2 mb-4 border-slate-300 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-all"
           onClick={() => navigate({ to: backTo })}
         >
           <ArrowLeft className="h-4 w-4" />
           Quay lại
         </Button>
-        <h1 className="text-3xl font-bold">{mode === "edit" ? "Chỉnh sửa câu hỏi" : "Tạo câu hỏi mới"}</h1>
-        <p className="text-muted-foreground mt-1">
-          {mode === "edit" ? "Cập nhật thông tin câu hỏi" : "Điền thông tin để tạo câu hỏi mới"}
+        <h1 className="text-3xl font-bold text-slate-900 dark:text-white">
+          {mode === "edit" ? "Chỉnh sửa câu hỏi" : "Tạo câu hỏi mới"}
+        </h1>
+        <p className="text-slate-500 dark:text-slate-400 mt-1.5 text-base">
+          {mode === "edit" ? "Cập nhật thông tin câu hỏi" : "Điền đầy đủ thông tin để tạo câu hỏi mới"}
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="space-y-6">
-        <Card>
-          <CardHeader>
-            <h2 className="text-lg font-semibold">Thông tin cơ bản</h2>
+        <Card className="border-2 border-slate-300 rounded-md">
+          <CardHeader className="pb-4 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Thông tin cơ bản</h2>
+            <p className="text-sm text-slate-500 mt-0.5">Phân loại và gắn nhãn câu hỏi</p>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <SelectField
-                id="questionType"
-                label="Loại câu hỏi"
-                required
-                value={form.watch("questionType")}
-                onChange={(e) => form.setValue("questionType", e.target.value as QuestionType)}
-                error={form.formState.errors.questionType?.message}
-              >
-                <option value="MCQ">Trắc nghiệm</option>
-                <option value="ESSAY">Tự luận</option>
-              </SelectField>
+          <CardContent className="space-y-5">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className={label}>
+                  Loại câu hỏi <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={form.watch("questionType")}
+                    onChange={(e) => form.setValue("questionType", e.target.value as QuestionType)}
+                    className={select}
+                  >
+                    <option value="MCQ">Trắc nghiệm (MCQ)</option>
+                    <option value="ESSAY">Tự luận (Essay)</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                </div>
+                {form.formState.errors.questionType && (
+                  <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {form.formState.errors.questionType.message}
+                  </p>
+                )}
+              </div>
 
-              <SelectField
-                id="questionLevel"
-                label="Độ khó"
-                required
-                value={form.watch("questionLevel")}
-                onChange={(e) => form.setValue("questionLevel", e.target.value as QuestionLevel)}
-                error={form.formState.errors.questionLevel?.message}
-              >
-                <option value="EASY">Dễ</option>
-                <option value="MEDIUM">Trung bình</option>
-                <option value="HARD">Khó</option>
-              </SelectField>
+              <div>
+                <label className={label}>
+                  Độ khó <span className="text-red-500">*</span>
+                </label>
+                <div className="relative">
+                  <select
+                    value={form.watch("questionLevel")}
+                    onChange={(e) => form.setValue("questionLevel", e.target.value as QuestionLevel)}
+                    className={select}
+                  >
+                    <option value="EASY">🟢 Dễ</option>
+                    <option value="MEDIUM">🟡 Trung bình</option>
+                    <option value="HARD">🔴 Khó</option>
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                </div>
+                {form.formState.errors.questionLevel && (
+                  <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {form.formState.errors.questionLevel.message}
+                  </p>
+                )}
+              </div>
             </div>
 
-            <SelectField
-              id="subjectId"
-              label="Môn học"
-              value={form.watch("subjectId") || ""}
-              onChange={(e) => form.setValue("subjectId", e.target.value ? Number(e.target.value) : undefined)}
-              error={form.formState.errors.subjectId?.message}
-            >
-              <option value="">-- Chọn môn học --</option>
-              {subjects?.map((subject) => (
-                <option key={subject.id} value={subject.id}>
-                  {subject.name}
-                </option>
-              ))}
-            </SelectField>
+            <div>
+              <label className={label}>Môn học</label>
+              <div className="relative">
+                <select
+                  value={form.watch("subjectId") || ""}
+                  onChange={(e) => form.setValue("subjectId", e.target.value ? Number(e.target.value) : undefined)}
+                  className={select}
+                >
+                  <option value="">-- Chọn môn học --</option>
+                  {subjects?.map((subject) => (
+                    <option key={subject.id} value={subject.id}>
+                      {subject.name}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+              </div>
+            </div>
 
-            <SelectField
-              id="lessonId"
-              label="Bài học"
-              value={form.watch("lessonId") || ""}
-              onChange={(e) => form.setValue("lessonId", e.target.value ? Number(e.target.value) : undefined)}
-              disabled={!subjectId}
-              hint={!subjectId ? "Vui lòng chọn môn học trước" : undefined}
-              error={form.formState.errors.lessonId?.message}
-            >
-              <option value="">-- Chọn bài học --</option>
-              {lessons?.map((lesson) => (
-                <option key={lesson.id} value={lesson.id}>
-                  {lesson.name}
-                </option>
-              ))}
-            </SelectField>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+              <div>
+                <label className={label}>Chương</label>
+                <div className="relative">
+                  <select
+                    value={chapterId || ""}
+                    onChange={(e) => setChapterId(e.target.value ? Number(e.target.value) : undefined)}
+                    disabled={!subjectId}
+                    className={select}
+                  >
+                    <option value="">-- Chọn chương --</option>
+                    {chapters?.map((chapter, index) => (
+                      <option key={chapter.id} value={chapter.id}>
+                        Chương {index + 1}: {chapter.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                </div>
+                {!subjectId && <p className="text-xs text-slate-400 mt-1.5">Vui lòng chọn môn học trước</p>}
+              </div>
 
-            <TextareaField
-              id="content"
-              label="Nội dung câu hỏi"
-              required
-              rows={4}
-              placeholder="Nhập nội dung câu hỏi..."
-              {...form.register("content")}
-              error={form.formState.errors.content?.message}
-            />
+              <div>
+                <label className={label}>Bài học</label>
+                <div className="relative">
+                  <select
+                    value={form.watch("lessonId") || ""}
+                    onChange={(e) => form.setValue("lessonId", e.target.value ? Number(e.target.value) : undefined)}
+                    disabled={!chapterId}
+                    className={select}
+                  >
+                    <option value="">-- Chọn bài học --</option>
+                    {lessons?.map((lesson) => (
+                      <option key={lesson.id} value={lesson.id}>
+                        {lesson.name}
+                      </option>
+                    ))}
+                  </select>
+                  <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                </div>
+                {!chapterId && <p className="text-xs text-slate-400 mt-1.5">Vui lòng chọn chương trước</p>}
+                {form.formState.errors.lessonId && (
+                  <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                    <AlertCircle className="h-3 w-3" />
+                    {form.formState.errors.lessonId.message}
+                  </p>
+                )}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
 
-            <TextareaField
-              id="canonicalAnswer"
-              label="Đáp án / Hướng dẫn giải"
-              rows={5}
-              placeholder="Nhập đáp án chi tiết hoặc hướng dẫn giải..."
-              {...form.register("canonicalAnswer")}
-              error={form.formState.errors.canonicalAnswer?.message}
-            />
+        <Card className="border-2 border-slate-300 rounded-md">
+          <CardHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
+            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Nội dung câu hỏi</h2>
+            <p className="text-sm text-slate-500 mt-0.5">Nhập câu hỏi và đáp án chi tiết</p>
+          </CardHeader>
+          <CardContent className="space-y-5">
+            <div>
+              <label className={label}>
+                Câu hỏi <span className="text-red-500">*</span>
+              </label>
+              <textarea
+                rows={4}
+                placeholder="Nhập nội dung câu hỏi..."
+                {...form.register("content")}
+                className={textarea}
+              />
+              {form.formState.errors.content && (
+                <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {form.formState.errors.content.message}
+                </p>
+              )}
+            </div>
+
+            <div>
+              <label className={label}>
+                Đáp án / Hướng dẫn giải
+                {form.watch("questionType") === "ESSAY" && <span className="text-red-500"> *</span>}
+              </label>
+
+              <textarea
+                rows={5}
+                placeholder="Nhập đáp án chi tiết hoặc hướng dẫn giải..."
+                {...form.register("canonicalAnswer")}
+                className={textarea}
+              />
+
+              {form.formState.errors.canonicalAnswer && (
+                <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {form.formState.errors.canonicalAnswer.message}
+                </p>
+              )}
+            </div>
           </CardContent>
         </Card>
 
         {questionType === "MCQ" && (
-          <Card>
-            <CardHeader className="flex flex-row items-center justify-between">
-              <h2 className="text-lg font-semibold">Các đáp án</h2>
-              <Button type="button" variant="outline" size="sm" onClick={addOption} className="gap-2">
+          <Card className="border-2 border-slate-300 rounded-md">
+            <CardHeader className="pb-2 border-b border-slate-100 dark:border-slate-800 flex flex-row items-center justify-between">
+              <div>
+                <h2 className="text-base font-semibold text-slate-900 dark:text-white">Các đáp án</h2>
+                <p className="text-sm text-slate-500 mt-0.5">Tick vào đáp án đúng</p>
+              </div>
+              <Button type="button" variant="outline" size="sm" onClick={addOption} className="gap-2 shrink-0">
                 <Plus className="h-4 w-4" />
                 Thêm đáp án
               </Button>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-900">
-                <AlertCircle className="h-5 w-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
+              <div className="flex items-start gap-2.5 p-3.5 bg-blue-50 dark:bg-blue-950/30 rounded-lg border border-blue-200 dark:border-blue-900">
+                <AlertCircle className="h-4 w-4 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                 <p className="text-sm text-blue-800 dark:text-blue-200">
-                  Click vào checkbox để chọn đáp án đúng. Chỉ được chọn 1 đáp án đúng duy nhất.
+                  Chỉ được chọn <strong>1 đáp án đúng</strong> duy nhất bằng cách tick vào checkbox.
                 </p>
               </div>
 
               {(form.formState.errors.options as any)?.message && (
-                <FieldError message={(form.formState.errors.options as any).message} />
+                <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
+                  <AlertCircle className="h-3 w-3" />
+                  {(form.formState.errors.options as any).message}
+                </p>
               )}
 
-              {fields.map((field, index) => {
-                const isCorrect = form.watch(`options.${index}.isCorrect`);
-                return (
-                  <div
-                    key={field.id}
-                    className="flex items-start gap-3 p-4 border border-gray-200 dark:border-gray-800 rounded-lg"
-                  >
-                    <div className="flex items-center gap-3 flex-1">
-                      <div className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={isCorrect}
-                          onChange={() => setCorrectOption(index)}
-                          className="h-5 w-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                        />
-                        {isCorrect && <Check className="h-4 w-4 text-green-600" />}
-                      </div>
-                      <span className="font-semibold text-sm w-6">{field.label}</span>
-                      <div className="flex-1">
-                        <Input
-                          {...form.register(`options.${index}.content`)}
-                          placeholder={`Nhập nội dung đáp án ${field.label}...`}
-                        />
-                        <FieldError message={form.formState.errors.options?.[index]?.content?.message} />
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => removeOption(index)}
-                      className="text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-                      isDisabled={fields.length <= 2}
+              <div className="space-y-3">
+                {fields.map((field, index) => {
+                  const isCorrect = form.watch(`options.${index}.isCorrect`);
+                  return (
+                    <div
+                      key={field.id}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-lg border transition-all ${
+                        isCorrect
+                          ? "border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
+                          : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
+                      }`}
                     >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                );
-              })}
+                      <input
+                        type="checkbox"
+                        checked={isCorrect}
+                        onChange={() => setCorrectOption(index)}
+                        className="h-5 w-5 rounded border-slate-300 text-green-600 focus:ring-green-500 cursor-pointer shrink-0"
+                      />
+                      <span
+                        className={`text-sm font-bold w-5 shrink-0 ${isCorrect ? "text-green-700 dark:text-green-400" : "text-slate-500"}`}
+                      >
+                        {field.label}
+                      </span>
+                      <input
+                        {...form.register(`options.${index}.content`)}
+                        placeholder={`Nhập nội dung đáp án ${field.label}...`}
+                        className={`flex-1 px-3 py-2.5 rounded-md border text-base outline-none transition-all ${
+                          isCorrect
+                            ? "border-green-300 bg-green-50 dark:bg-green-900/10 dark:border-green-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-green-400"
+                            : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
+                        }`}
+                      />
+                      {isCorrect && (
+                        <span className="flex items-center gap-1 text-xs font-bold text-green-700 dark:text-green-400 shrink-0">
+                          <Check className="h-3.5 w-3.5" /> Đúng
+                        </span>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => removeOption(index)}
+                        disabled={fields.length <= 2}
+                        className="text-slate-400 hover:text-red-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors p-1 shrink-0"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
             </CardContent>
           </Card>
         )}
 
-        <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" size="lg" variant="outline" onClick={() => navigate({ to: backTo })}>
+        <div className="flex justify-end gap-3 pt-2 pb-8">
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            onClick={() => navigate({ to: backTo })}
+            className="px-6 py-5  border-slate-400"
+          >
             Hủy
           </Button>
-          <Button type="submit" size="lg" className="gap-2" isDisabled={isSubmitting}>
-            {mode === "edit" ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
-            {isSubmitting ? "Đang xử lý..." : mode === "edit" ? "Lưu thay đổi" : "Tạo câu hỏi"}
+          <Button
+            type="submit"
+            size="lg"
+            className="px-8 py-5 gap-2 bg-blue-600 hover:bg-blue-700 text-white shadow-md shadow-blue-500/20"
+            isDisabled={isSubmitting}
+          >
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                <span className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                Đang xử lý...
+              </span>
+            ) : (
+              <>
+                {mode === "edit" ? <Save className="h-4 w-4" /> : <Plus className="h-4 w-4" />}
+                {mode === "edit" ? "Lưu thay đổi" : "Tạo câu hỏi"}
+              </>
+            )}
           </Button>
         </div>
       </form>

@@ -123,7 +123,7 @@ const MatrixDetailContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-4 grid grid-cols-2 gap-6 rounded-md border border-slate-400 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-6 rounded-md border-2 border-slate-400 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-800 dark:bg-blue-900/20">
               <Fingerprint className="h-5 w-5" />
