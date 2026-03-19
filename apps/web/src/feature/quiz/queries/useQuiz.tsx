@@ -66,7 +66,7 @@ export const useQuizAttemptsByExam = (examId: number, params?: PaginationParams)
     queryKey: quizKeys.attempts.examAttempts(examId, params),
     queryFn: async () => {
       const response = await quizAttemptApi.getAttemptsByExam(examId, params);
-      return response.data.data;
+      return response.data;
     },
     enabled: !!examId,
     staleTime: 5 * 60 * 1000,

@@ -52,6 +52,7 @@ export interface QuizAttemptResponse {
 
 export interface QuizAttemptBriefResponse {
   id: number;
+  user: UserSummaryResponse;
   exam: ExamBriefResponse;
   status: QuizAttemptStatus;
   startTime: string;
@@ -164,9 +165,10 @@ export interface ExamBriefResponse {
 
 export interface UserSummaryResponse {
   id: number;
-  username: string;
-  email: string;
-  fullName?: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  role: string;
 }
 
 export interface PaginationParams {
