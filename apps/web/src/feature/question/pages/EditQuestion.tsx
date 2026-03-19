@@ -7,7 +7,7 @@ const EditQuestionPage: React.FC = () => {
     <>
       <PageMeta title="Chỉnh sửa câu hỏi - Bit Learning" description="Chỉnh sửa thông tin câu hỏi" />
       <MentorLayout>
-        <div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
           <QuestionFormContent mode="edit" />
         </div>
       </MentorLayout>

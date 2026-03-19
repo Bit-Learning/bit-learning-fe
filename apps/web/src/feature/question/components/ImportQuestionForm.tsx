@@ -715,7 +715,7 @@ const ImportQuestionForm: React.FC = () => {
   );
 
   return (
-    <div className="mx-auto p-6">
+    <div className="mx-auto p-6 min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mb-6">
         <Button
           variant="outline"

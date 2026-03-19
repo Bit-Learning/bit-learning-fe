@@ -7,7 +7,7 @@ const QuestionDetailPage: React.FC = () => {
     <>
       <PageMeta title="Chi tiết câu hỏi - Bit Learning" description="Xem chi tiết thông tin câu hỏi" />
       <MentorLayout>
-        <div>
+        <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
           <QuestionDetailContent />
         </div>
       </MentorLayout>

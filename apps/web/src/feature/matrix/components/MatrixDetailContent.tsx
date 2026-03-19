@@ -58,7 +58,7 @@ const MatrixDetailContent: React.FC = () => {
   };
   if (isLoading) {
     return (
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl">
           <Skeleton className="mb-4 h-8 w-32" />
           <Skeleton className="mb-8 h-48 w-full" />
@@ -70,7 +70,7 @@ const MatrixDetailContent: React.FC = () => {
 
   if (!matrix) {
     return (
-      <main className="flex-1 p-8">
+      <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
         <div className="mx-auto max-w-7xl">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
@@ -90,32 +90,33 @@ const MatrixDetailContent: React.FC = () => {
   const latestVersion = sortedVersions[0];
 
   return (
-    <main className="flex-1 p-8">
+    <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto">
         <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <Button
               variant="outline"
               size="lg"
-              className="mb-2 gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+              className="mb-2 gap-2 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
               onClick={() => navigate({ to: "/mentor/matrix/my" })}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
-              Quay lại
+              Quay lại danh sách
             </Button>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white">{matrix.name}</h1>
           </div>
           <div className="flex items-center gap-3">
             <button
               onClick={() => setEditModal(true)}
-              className="flex items-center gap-2 rounded-lg border border-slate-200 bg-white px-4 py-2 text-sm font-medium transition-all hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+              className="cursor-pointer flex items-center gap-2 rounded-lg border border-slate-400 bg-white px-4 py-3 text-sm font-medium transition-all hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
             >
               <Pencil className="h-4 w-4" />
               Chỉnh sửa ma trận
             </button>
             <button
               onClick={handleDelete}
-              className="flex items-center gap-2 rounded-lg border border-red-200 px-4 py-2 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/30"
+              disabled={deleting}
+              className="cursor-pointer flex items-center gap-2 rounded-lg border border-red-200 px-4 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/30"
             >
               <Trash2 className="h-4 w-4" />
               Xóa
@@ -123,13 +124,13 @@ const MatrixDetailContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-8 grid grid-cols-2 gap-6 rounded-xl border border-slate-200 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-4">
+        <div className="mb-4 grid grid-cols-2 gap-6 rounded-md border border-slate-400 bg-white p-4 dark:border-slate-800 dark:bg-slate-900 md:grid-cols-4">
           <div className="flex items-center gap-3">
             <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-800 dark:bg-blue-900/20">
               <Fingerprint className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-500">
                 Mã ma trận
               </p>
               <p className="text-sm font-semibold">{matrix.code}</p>
@@ -140,7 +141,7 @@ const MatrixDetailContent: React.FC = () => {
               <BookOpen className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-500">
                 Môn học
               </p>
               <p className="text-sm font-semibold">{matrix.subject?.name || "Chưa xác định"}</p>
@@ -151,18 +152,18 @@ const MatrixDetailContent: React.FC = () => {
               <Clock className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-500">
                 Thời gian
               </p>
               <p className="text-sm font-semibold">{matrix.duration} phút</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-purple-50 text-purple-600 dark:bg-purple-900/20">
+            <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-blue-50 text-blue-600 dark:bg-blue-900/20">
               <Award className="h-5 w-5" />
             </div>
             <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 dark:text-slate-500">
+              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-800 dark:text-slate-500">
                 Tổng điểm
               </p>
               <p className="text-sm font-semibold">{matrix.totalScore}</p>
@@ -170,11 +171,11 @@ const MatrixDetailContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-8 flex items-center justify-between border-b border-slate-200 dark:border-slate-800">
+        <div className="mb-6 flex items-center justify-between border-b border-slate-300 dark:border-slate-800">
           <div className="flex gap-8">
             <button
               onClick={() => setActiveTab("versions")}
-              className={`pb-4 text-sm font-bold transition-colors ${
+              className={`cursor-pointer not-even:pb-4 text-sm font-bold transition-colors ${
                 activeTab === "versions"
                   ? "border-b-2 border-blue-800 text-blue-800"
                   : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -184,7 +185,7 @@ const MatrixDetailContent: React.FC = () => {
             </button>
             <button
               onClick={() => setActiveTab("exams")}
-              className={`pb-4 text-sm font-medium transition-colors ${
+              className={`cursor-pointer pb-4 text-sm font-medium transition-colors ${
                 activeTab === "exams"
                   ? "border-b-2 border-blue-800 text-blue-800"
                   : "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
@@ -193,15 +194,13 @@ const MatrixDetailContent: React.FC = () => {
               Đề thi đã tạo ({exams?.page?.totalElements || 0})
             </button>
           </div>
-          {activeTab === "versions" && (
-            <button
-              onClick={() => setVersionModal(true)}
-              className="mb-4 flex items-center gap-2 rounded-lg bg-blue-800 px-4 py-2 text-sm font-medium text-white shadow-sm shadow-blue-500/30 transition-all hover:bg-blue-700"
-            >
-              <Plus className="h-4 w-4" />
-              Tạo phiên bản mới
-            </button>
-          )}
+          <button
+            onClick={() => setVersionModal(true)}
+            className="cursor-pointer mb-4 flex items-center gap-2 rounded-lg bg-blue-800 px-4 py-3 text-sm font-medium text-white shadow-sm shadow-blue-500/30 transition-all hover:bg-blue-700"
+          >
+            <Plus className="h-4 w-4" />
+            Tạo phiên bản mới
+          </button>
         </div>
 
         {activeTab === "versions" && (
@@ -322,7 +321,7 @@ const MatrixDetailContent: React.FC = () => {
         )}
 
         {activeTab === "exams" && (
-          <div className="overflow-hidden rounded-xl border border-slate-200 bg-white dark:border-slate-800 dark:bg-slate-900">
+          <div className="overflow-hidden rounded-md border border-slate-400 bg-white dark:border-slate-800 dark:bg-slate-900">
             {examsLoading ? (
               <div className="p-8 text-center">
                 <div className="mx-auto h-8 w-8 animate-spin rounded-full border-4 border-blue-500 border-t-transparent" />
@@ -330,7 +329,7 @@ const MatrixDetailContent: React.FC = () => {
               </div>
             ) : !exams || exams?.page?.totalElements === 0 ? (
               <div className="p-12 text-center">
-                <p className="text-slate-500 dark:text-slate-400">Chưa có đề thi nào được tạo từ ma trận này</p>
+                <p className="text-slate-600 dark:text-slate-400">Chưa có đề thi nào được tạo từ ma trận này</p>
                 <Button
                   onClick={() => navigate({ to: "/mentor/matrix/$id/generate", params: { id: matrix.id.toString() } })}
                   className="mt-4 bg-blue-800 text-white hover:bg-blue-700"
@@ -341,7 +340,7 @@ const MatrixDetailContent: React.FC = () => {
               </div>
             ) : (
               <table className="w-full">
-                <thead className="border-b border-slate-200 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
+                <thead className="border-b border-slate-400 bg-slate-50 dark:border-slate-800 dark:bg-slate-800/50">
                   <tr>
                     <th className="px-6 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500">
                       Thông tin đề thi

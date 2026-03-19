@@ -456,7 +456,7 @@ const GenerateExamFlow: React.FC = () => {
   );
 
   return (
-    <main className="flex-1 p-8">
+    <main className="flex-1 bg-slate-50 dark:bg-slate-950 p-8">
       <div className="max-w-7xl mx-auto">
         {currentStep === "check" && renderCheckStep()}
         {currentStep === "setup" && renderSetupStep()}

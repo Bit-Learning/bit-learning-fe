@@ -2,21 +2,19 @@ import { useNavigate, useParams } from "@tanstack/react-router";
 import { useState } from "react";
 import {
   ArrowLeft,
-  Download,
   FileText,
   Clock,
   Award,
-  BookOpen,
   Check,
   Share2,
   MoreVertical,
   AlertCircle,
   CheckCircle,
   BarChart3,
-  Users,
   Loader2,
   Search,
   Eye,
+  Lock,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
@@ -61,7 +59,7 @@ const ExamDetailContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <main className="flex-1 p-8">
+      <main className="flex-1 bg-slate-50 dark:bg-slate-950 p-8">
         <div className="max-w-7xl mx-auto">
           <Skeleton className="h-8 w-32 mb-4" />
           <Skeleton className="h-10 w-64 mb-8" />
@@ -76,7 +74,7 @@ const ExamDetailContent: React.FC = () => {
 
   if (!exam) {
     return (
-      <main className="flex-1 p-8">
+      <main className="flex-1 bg-slate-50 dark:bg-slate-950 p-8">
         <div className="max-w-7xl mx-auto">
           <Card>
             <CardContent className="flex flex-col items-center justify-center py-16">
@@ -92,9 +90,9 @@ const ExamDetailContent: React.FC = () => {
   const essayQuestions = exam.examQuestions.filter((q) => q.question.questionType === QuestionType.ESSAY);
 
   return (
-    <main className="flex-1 dark:bg-slate-950">
-      <div className="mb-4 bg-white px-4">
-        <div className="flex items-center justify-between">
+    <main className="flex-1 bg-slate-50 dark:bg-slate-950">
+      <div className="mb-6 bg-white">
+        <div className="flex items-center justify-between border-b px-6 border-slate-400">
           <div className="flex items-center gap-4 py-4">
             <Button
               variant="outline"
@@ -133,18 +131,18 @@ const ExamDetailContent: React.FC = () => {
           </div>
         </div>
       </div>
-      <div className="mx-auto p-8 bg-slate-50">
+      <div className="mx-auto px-8 bg-slate-50">
         <div className="flex gap-6">
           <div className="w-80 space-y-4 shrink-0">
             {exam.isPublished ? (
-              <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-xl p-4 flex items-start gap-3">
+              <div className="bg-green-50 dark:bg-green-900/10 border border-green-400 dark:border-green-900/30 rounded-md p-4 flex items-start gap-3">
                 <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
                 <p className="text-sm text-green-800 dark:text-green-300">
                   Đề thi đã được xuất bản thành công. Học sinh hiện có thể vào thi.
                 </p>
               </div>
             ) : (
-              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-xl p-4 flex items-start gap-3">
+              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-400 dark:border-amber-900/30 rounded-md p-4 flex items-start gap-3">
                 <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
                 <p className="text-sm text-amber-800 dark:text-amber-300">
                   Đề thi chưa được công bố. Nhấn "Xuất bản" để học sinh có thể làm bài.
@@ -152,7 +150,7 @@ const ExamDetailContent: React.FC = () => {
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4 space-y-2">
+            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md p-4 space-y-2">
               <button
                 onClick={() => handleDownload("pdf")}
                 disabled={downloadExam.isPending}
@@ -179,7 +177,7 @@ const ExamDetailContent: React.FC = () => {
               </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md p-4">
               <button
                 onClick={handleTogglePublish}
                 disabled={isPublishing}
@@ -200,11 +198,10 @@ const ExamDetailContent: React.FC = () => {
               </button>
             </div>
 
-            {/* Warning - Only show when published */}
             {exam.isPublished && (
-              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-200 dark:border-amber-900/30 rounded-xl p-4">
+              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-400 dark:border-amber-900/30 rounded-md p-4">
                 <div className="flex items-start gap-2">
-                  <span className="text-amber-600 dark:text-amber-400 text-lg">🔒</span>
+                  <Lock className="text-amber-600 dark:text-amber-400 text-lg" />
                   <p className="text-xs text-amber-800 dark:text-amber-300">
                     Đang khóa (không thể chỉnh sửa khi đã xuất bản)
                   </p>
@@ -212,8 +209,7 @@ const ExamDetailContent: React.FC = () => {
               </div>
             )}
 
-            {/* Exam Stats */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md p-4">
               <h3 className="font-bold text-slate-900 dark:text-white mb-4">THÔNG SỐ ĐỀ THI</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -243,14 +239,12 @@ const ExamDetailContent: React.FC = () => {
             </div>
           </div>
 
-          {/* Main Content */}
           <div className="flex-1">
-            {/* Tabs */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md overflow-hidden">
               <div className="border-b border-slate-200 dark:border-slate-800 flex">
                 <button
                   onClick={() => setActiveTab("questions")}
-                  className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  className={`cursor-pointer px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                     activeTab === "questions"
                       ? "border-blue-600 text-blue-600 dark:text-blue-400"
                       : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -260,7 +254,7 @@ const ExamDetailContent: React.FC = () => {
                 </button>
                 <button
                   onClick={() => setActiveTab("stats")}
-                  className={`px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
+                  className={`cursor-pointer px-6 py-3 text-sm font-medium border-b-2 transition-colors ${
                     activeTab === "stats"
                       ? "border-blue-600 text-blue-600 dark:text-blue-400"
                       : "border-transparent text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white"
@@ -270,7 +264,6 @@ const ExamDetailContent: React.FC = () => {
                 </button>
               </div>
 
-              {/* Questions Tab */}
               {activeTab === "questions" && (
                 <div className="p-6 space-y-6">
                   {exam.examQuestions.map((examQuestion, index) => (
@@ -356,18 +349,13 @@ const ExamDetailContent: React.FC = () => {
               )}
 
               <div className="flex-1 overflow-y-auto p-8 custom-scrollbar">
-                {/* Settings Tab */}
                 {activeTab === "stats" && (
                   <div className="p-6 mx-auto space-y-6">
-                    {/* Score Overview Cards */}
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
-                      {/* Circular Progress Card */}
                       <div className="lg:col-span-5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 shadow-sm flex items-center gap-10">
-                        {/* Circular Progress */}
                         <div className="flex flex-col items-center">
                           <div className="relative w-36 h-36 flex items-center justify-center">
                             <svg className="w-full h-full -rotate-90" viewBox="0 0 100 100">
-                              {/* Background circle */}
                               <circle
                                 cx="50"
                                 cy="50"
@@ -377,7 +365,6 @@ const ExamDetailContent: React.FC = () => {
                                 strokeWidth="8"
                                 className="text-slate-200 dark:text-slate-700"
                               />
-                              {/* Progress circle */}
                               <circle
                                 cx="50"
                                 cy="50"
@@ -400,7 +387,6 @@ const ExamDetailContent: React.FC = () => {
                           </div>
                         </div>
 
-                        {/* Stats */}
                         <div className="flex-1 space-y-5">
                           <div className="space-y-1">
                             <p className="text-xs text-slate-500 font-bold uppercase tracking-wider">
@@ -437,7 +423,6 @@ const ExamDetailContent: React.FC = () => {
                         </div>
                       </div>
 
-                      {/* Chart Card */}
                       <div className="lg:col-span-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl p-8 shadow-sm">
                         <div className="flex items-center justify-between mb-8">
                           <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-wider">
@@ -484,7 +469,6 @@ const ExamDetailContent: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Student List */}
                     <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl shadow-sm overflow-hidden">
                       <div className="p-6 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between">
                         <div>
@@ -700,7 +684,6 @@ const ExamDetailContent: React.FC = () => {
                         </table>
                       </div>
 
-                      {/* Pagination */}
                       <div className="px-8 py-6 border-t border-slate-100 dark:border-slate-800 flex items-center justify-center gap-10">
                         <button
                           disabled

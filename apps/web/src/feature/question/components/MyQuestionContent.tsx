@@ -178,11 +178,11 @@ const MyQuestionsContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="bg-white rounded-lg shadow-sm border border-gray-200">
-          <div className="p-6 border-b border-gray-200">
+        <div className="bg-white rounded-md border border-gray-400">
+          <div className="p-6 border-b border-gray-400">
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
                 <Input
                   placeholder="Tìm kiếm nội dung câu hỏi..."
                   value={search}
@@ -244,7 +244,7 @@ const MyQuestionsContent: React.FC = () => {
               <div className="overflow-x-auto">
                 <table className="w-full">
                   <thead>
-                    <tr className="border-b border-gray-200 bg-gray-50">
+                    <tr className="border-b border-gray-300 bg-gray-50">
                       <th className="text-left p-4 w-12">
                         <input
                           type="checkbox"
@@ -255,23 +255,23 @@ const MyQuestionsContent: React.FC = () => {
                           className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                         />
                       </th>
-                      <th className="text-left p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                      <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
                         NỘI DUNG CÂU HỎI
                       </th>
-                      <th className="text-left p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                      <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
                         MỨC ĐỘ
                       </th>
-                      <th className="text-left p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                      <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
                         LOẠI
                       </th>
-                      <th className="text-left p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                      <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
                         MÔN HỌC
                       </th>
-                      <th className="text-left p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
+                      <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
                         TRẠNG THÁI
                       </th>
-                      <th className="text-center p-4 font-semibold text-xs text-gray-600 uppercase tracking-wider">
-                        HÀNH ĐỘNG
+                      <th className="text-center p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
+                        THAO TÁC
                       </th>
                     </tr>
                   </thead>

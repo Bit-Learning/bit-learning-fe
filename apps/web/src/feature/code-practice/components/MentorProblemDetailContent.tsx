@@ -6,7 +6,7 @@ import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { cn } from "@workspace/ui/lib/utils";
 import { Difficulty, Language } from "../types/coding.type";
-import { useProblemDetail, useProblemStatistics, useCreateTestCase } from "../queries/useCoding";
+import { useProblemDetail, useProblemStatistics, useCreateTestCase, useAllTestCases } from "../queries/useCoding";
 import AddTestCaseModal from "./AddTestCaseModal";
 
 const MentorProblemDetailContent: React.FC = () => {
@@ -18,6 +18,9 @@ const MentorProblemDetailContent: React.FC = () => {
 
   const { data: problem, isLoading } = useProblemDetail(problemId || "", selectedLanguage);
   const { data: statistics } = useProblemStatistics(problemId || "");
+  const { data: allTestCases, isLoading: isLoadingTestCases } = useAllTestCases(problemId || "", {
+    enabled: activeTab === "testcases",
+  });
   const createTestCase = useCreateTestCase();
 
   const handleAddTestCase = async (data: { input: string; expectedOutput: string; isSample: boolean }) => {
@@ -34,10 +37,10 @@ const MentorProblemDetailContent: React.FC = () => {
 
   if (isLoading || !problem) {
     return (
-      <div className="min-h-screen bg-[#f8f6f6] dark:bg-[#221610] flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
-          <p className="text-slate-600 dark:text-slate-400 font-medium">Đang tải...</p>
+          <p className="text-blue-600 dark:text-slate-200 font-medium">Đang tải...</p>
         </div>
       </div>
     );
@@ -61,13 +64,13 @@ const MentorProblemDetailContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-400 dark:border-slate-800 sticky top-0 z-10">
         <div className="mx-auto px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
               variant="outline"
               size="lg"
-              className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+              className="gap-2 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
               onClick={() => navigate({ to: "/mentor/problem" })}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -99,7 +102,7 @@ const MentorProblemDetailContent: React.FC = () => {
         </div>
       </header>
 
-      <div className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
+      <div className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-400 dark:border-slate-800">
         <div className="mx-auto px-8 py-3 flex items-center gap-6 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-slate-500 dark:text-slate-400 font-medium">Độ khó:</span>
@@ -128,7 +131,7 @@ const MentorProblemDetailContent: React.FC = () => {
       </div>
 
       <div className="mx-auto px-8 pt-6">
-        <div className="flex gap-8 border-b border-slate-200 dark:border-slate-800">
+        <div className="flex gap-8 border-b border-slate-300 dark:border-slate-800">
           <button
             onClick={() => setActiveTab("description")}
             className={cn(
@@ -169,39 +172,6 @@ const MentorProblemDetailContent: React.FC = () => {
             {activeTab === "description" && (
               <div className="prose prose-slate dark:prose-invert max-w-none">
                 <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{problem.description}</div>
-                {problem.sampleTestcases && problem.sampleTestcases.length > 0 && (
-                  <div className="mt-8">
-                    <h3 className="text-lg font-bold mb-4 flex items-center gap-2 text-slate-800 dark:text-white">
-                      <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-                      Ví dụ
-                    </h3>
-                    <div className="space-y-4">
-                      {problem.sampleTestcases.map((testcase, index) => (
-                        <Card key={testcase.id} className="bg-slate-50 dark:bg-slate-900/50">
-                          <CardContent className="p-5">
-                            <h4 className="text-xs font-bold text-slate-400 dark:text-slate-500 uppercase tracking-widest mb-3">
-                              Ví dụ {index + 1}
-                            </h4>
-                            <div className="space-y-2 text-sm font-mono">
-                              <div className="flex gap-4">
-                                <span className="text-slate-400 w-16">Input:</span>
-                                <span className="text-slate-700 dark:text-slate-200 font-semibold">
-                                  {testcase.input}
-                                </span>
-                              </div>
-                              <div className="flex gap-4">
-                                <span className="text-slate-400 w-16">Output:</span>
-                                <span className="text-slate-700 dark:text-slate-200 font-semibold">
-                                  {testcase.expectedOutput}
-                                </span>
-                              </div>
-                            </div>
-                          </CardContent>
-                        </Card>
-                      ))}
-                    </div>
-                  </div>
-                )}
               </div>
             )}
 
@@ -210,7 +180,7 @@ const MentorProblemDetailContent: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <h2 className="text-lg font-bold flex items-center gap-2 text-slate-800 dark:text-white">
                     <span className="w-1.5 h-6 bg-blue-600 rounded-full"></span>
-                    Test Case mẫu ({problem.sampleTestcases?.length || 0})
+                    Test Case mẫu ({allTestCases?.length || 0})
                   </h2>
                   <Button onClick={() => setShowAddTestCaseModal(true)} className="bg-blue-600 hover:bg-blue-700 gap-2">
                     <Plus className="w-4 h-4" />
@@ -218,52 +188,75 @@ const MentorProblemDetailContent: React.FC = () => {
                   </Button>
                 </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {problem.sampleTestcases?.map((testcase, index) => (
-                    <Card
-                      key={testcase.id}
-                      className="bg-white dark:bg-slate-900 border-slate-200 dark:border-slate-800 group"
-                    >
-                      <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
-                        <span className="text-sm font-semibold">Test Case #{index + 1}</span>
-                        <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="p-1.5 h-auto hover:bg-slate-200 dark:hover:bg-slate-700"
-                          >
-                            <Edit className="w-4 h-4 text-slate-500" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="p-1.5 h-auto hover:bg-red-50 dark:hover:bg-red-900/30"
-                          >
-                            <Trash2 className="w-4 h-4 text-red-500" />
-                          </Button>
+                {isLoadingTestCases ? (
+                  <div className="min-h-screen bg-slate-50 dark:bg-slate-800 flex items-center justify-center">
+                    <div className="text-center">
+                      <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+                      <p className="text-blue-600 dark:text-slate-200 font-medium">Đang tải test case...</p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    {allTestCases?.map((testcase, index) => (
+                      <Card
+                        key={testcase.id}
+                        className="bg-white p-0 dark:bg-slate-900 border-slate-400 dark:border-slate-800 group"
+                      >
+                        <div className="px-4 py-3 border-b border-slate-400 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-semibold">Test Case #{index + 1}</span>
+
+                            <Badge
+                              className={cn(
+                                "text-[12px] font-bold px-2 py-1",
+                                testcase.isSample
+                                  ? "bg-emerald-100 text-emerald-700 dark:bg-emerald-500/10 dark:text-emerald-400"
+                                  : "bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300",
+                              )}
+                            >
+                              {testcase.isSample ? "Ví dụ" : "Ẩn"}
+                            </Badge>
+                          </div>
+
+                          <div className="flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1.5 h-auto hover:bg-slate-200 dark:hover:bg-slate-700"
+                            >
+                              <Edit className="w-4 h-4 text-slate-500" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="p-1.5 h-auto hover:bg-red-50 dark:hover:bg-red-900/30"
+                            >
+                              <Trash2 className="w-4 h-4 text-red-500" />
+                            </Button>
+                          </div>
                         </div>
-                      </div>
-                      <CardContent className="p-4 space-y-3">
-                        <div>
-                          <label className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">
-                            Input
-                          </label>
-                          <code className="block w-full p-2 bg-slate-900 text-slate-100 rounded text-xs font-mono whitespace-pre-wrap">
-                            {testcase.input}
-                          </code>
-                        </div>
-                        <div>
-                          <label className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">
-                            Output
-                          </label>
-                          <code className="block w-full p-2 bg-emerald-950 text-emerald-400 rounded text-xs font-mono whitespace-pre-wrap">
-                            {testcase.expectedOutput}
-                          </code>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+                        <CardContent className="p-4 space-y-3">
+                          <div>
+                            <label className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">
+                              Input
+                            </label>
+                            <code className="block w-full p-2 bg-slate-900 text-slate-100 rounded text-xs font-mono whitespace-pre-wrap">
+                              {testcase.input}
+                            </code>
+                          </div>
+                          <div>
+                            <label className="text-[10px] uppercase tracking-wider font-bold text-slate-400 mb-1 block">
+                              Output
+                            </label>
+                            <code className="block w-full p-2 bg-emerald-950 text-emerald-400 rounded text-xs font-mono whitespace-pre-wrap">
+                              {testcase.expectedOutput}
+                            </code>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -318,7 +311,7 @@ const MentorProblemDetailContent: React.FC = () => {
           </div>
 
           <div className="col-span-3 space-y-6">
-            <Card>
+            <Card className="border-slate-400">
               <CardContent className="p-6">
                 <h4 className="text-sm font-bold mb-4 flex items-center gap-2 text-slate-800 dark:text-white">
                   <Tag className="w-5 h-5 text-blue-600" />
@@ -329,7 +322,7 @@ const MentorProblemDetailContent: React.FC = () => {
                     <Badge
                       key={tag}
                       variant="outline"
-                      className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-semibold border-slate-200 dark:border-slate-700 hover:border-blue-500/50 cursor-pointer"
+                      className="px-3 py-1 bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-slate-200 text-xs font-semibold border-blue-400 dark:border-slate-700 hover:border-blue-500/50 cursor-pointer"
                     >
                       {tag}
                     </Badge>
@@ -339,7 +332,7 @@ const MentorProblemDetailContent: React.FC = () => {
             </Card>
 
             {statistics && (
-              <Card>
+              <Card className="border-slate-400">
                 <CardContent className="p-6">
                   <h4 className="text-sm font-bold mb-4 flex items-center gap-2 text-slate-800 dark:text-white">
                     <TrendingUp className="w-5 h-5 text-blue-600" />

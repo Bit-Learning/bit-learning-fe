@@ -20,14 +20,14 @@ const MyExamsContent: React.FC = () => {
   const getStatusBadge = (isPublished: boolean) => {
     if (isPublished) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
           Đã xuất bản
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
         <span className="w-1.5 h-1.5 rounded-full bg-slate-400"></span>
         Nháp
       </span>
@@ -35,7 +35,7 @@ const MyExamsContent: React.FC = () => {
   };
 
   return (
-    <main className="flex-1 p-8">
+    <main className="flex-1 p-8 bg-slate-50 dark:bg-slate-950">
       <header className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">Đề thi của tôi</h1>
@@ -45,7 +45,7 @@ const MyExamsContent: React.FC = () => {
         </div>
         <Button
           onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
-          className="bg-primary hover:bg-blue-700 text-white px-6 py-5 rounded-xl font-semibold flex items-center gap-2 shadow-lg shadow-blue-200 dark:shadow-none transition-all"
+          className="bg-primary hover:bg-blue-700 text-white px-6 py-5 rounded-xl font-semibold flex items-center gap-2 transition-all"
         >
           <Plus className="h-5 w-5" />
           Tạo đề thi mới
@@ -55,7 +55,7 @@ const MyExamsContent: React.FC = () => {
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <input
-          className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+          className="w-full pl-12 pr-4 py-3.5 bg-white dark:bg-slate-900 border border-gray-400 dark:border-slate-800 rounded-xl focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
           placeholder="Tìm kiếm theo tên đề thi, mã đề hoặc ngôn ngữ..."
           type="text"
           value={search}
@@ -63,7 +63,7 @@ const MyExamsContent: React.FC = () => {
         />
       </div>
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl overflow-hidden shadow-sm">
+      <div className="bg-white dark:bg-slate-900 border border-gray-400 dark:border-slate-800 rounded-xl overflow-hidden shadow-sm">
         {isLoading ? (
           <div className="p-6 space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -96,17 +96,17 @@ const MyExamsContent: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">
+                  <tr className="border-b border-gray-400 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                    <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider">
                       Thông tin đề thi
                     </th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Mã đề</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Thời gian</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-center">
+                    <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider">Mã đề</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider">Thời gian</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider text-center">
                       Thang điểm
                     </th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider">Trạng thái</th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-400 uppercase tracking-wider text-right">
+                    <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider">Trạng thái</th>
+                    <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider text-center">
                       Thao tác
                     </th>
                   </tr>
@@ -126,7 +126,7 @@ const MyExamsContent: React.FC = () => {
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 rounded-md text-xs font-semibold">
+                        <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-xs font-semibold">
                           {exam.code}
                         </span>
                       </td>
