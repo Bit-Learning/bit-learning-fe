@@ -1,16 +1,16 @@
 import { Item, Root as Radio } from "@radix-ui/react-radio-group";
 import { CircleCheck, RotateCcw, Settings } from "lucide-react";
 import type { SVGProps } from "react";
-import { IconDir } from "@/assets/custom/icon-dir";
-import { IconLayoutCompact } from "@/assets/custom/icon-layout-compact";
-import { IconLayoutDefault } from "@/assets/custom/icon-layout-default";
-import { IconLayoutFull } from "@/assets/custom/icon-layout-full";
-import { IconSidebarFloating } from "@/assets/custom/icon-sidebar-floating";
-import { IconSidebarInset } from "@/assets/custom/icon-sidebar-inset";
-import { IconSidebarSidebar } from "@/assets/custom/icon-sidebar-sidebar";
-import { IconThemeDark } from "@/assets/custom/icon-theme-dark";
-import { IconThemeLight } from "@/assets/custom/icon-theme-light";
-import { IconThemeSystem } from "@/assets/custom/icon-theme-system";
+import { IconDir } from "@/shared/assets/custom/icon-dir";
+import { IconLayoutCompact } from "@/shared/assets/custom/icon-layout-compact";
+import { IconLayoutDefault } from "@/shared/assets/custom/icon-layout-default";
+import { IconLayoutFull } from "@/shared/assets/custom/icon-layout-full";
+import { IconSidebarFloating } from "@/shared/assets/custom/icon-sidebar-floating";
+import { IconSidebarInset } from "@/shared/assets/custom/icon-sidebar-inset";
+import { IconSidebarSidebar } from "@/shared/assets/custom/icon-sidebar-sidebar";
+import { IconThemeDark } from "@/shared/assets/custom/icon-theme-dark";
+import { IconThemeLight } from "@/shared/assets/custom/icon-theme-light";
+import { IconThemeSystem } from "@/shared/assets/custom/icon-theme-system";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -121,7 +121,7 @@ function RadioGroupItem({
         className={cn(
           "ring-border relative rounded-[6px] ring-[1px]",
           "group-data-[state=checked]:ring-primary group-data-[state=checked]:shadow-2xl",
-          "group-focus-visible:ring-2"
+          "group-focus-visible:ring-2",
         )}
         role="img"
         aria-hidden="false"
@@ -131,14 +131,14 @@ function RadioGroupItem({
           className={cn(
             "fill-primary size-6 stroke-white",
             "group-data-[state=unchecked]:hidden",
-            "absolute top-0 right-0 translate-x-1/2 -translate-y-1/2"
+            "absolute top-0 right-0 translate-x-1/2 -translate-y-1/2",
           )}
           aria-hidden="true"
         />
         <item.icon
           className={cn(
             !isTheme &&
-              "stroke-primary fill-primary group-data-[state=unchecked]:stroke-muted-foreground group-data-[state=unchecked]:fill-muted-foreground"
+              "stroke-primary fill-primary group-data-[state=unchecked]:stroke-muted-foreground group-data-[state=unchecked]:fill-muted-foreground",
           )}
           aria-hidden="true"
         />

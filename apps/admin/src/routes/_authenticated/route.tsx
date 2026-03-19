@@ -1,5 +1,5 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
-import { AuthenticatedLayout } from "@/components/layout/authenticated-layout";
+import { AuthenticatedLayout } from "@/layout/authenticated-layout";
 import { getAccessToken } from "@/shared/lib/cookies";
 
 export const Route = createFileRoute("/_authenticated")({

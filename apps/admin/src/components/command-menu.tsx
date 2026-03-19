@@ -12,7 +12,7 @@ import {
 } from "@/components/ui/command";
 import { useSearch } from "@/shared/context/search-provider";
 import { useTheme } from "@/shared/context/theme-provider";
-import { sidebarData } from "./layout/data/sidebar-data";
+import { sidebarData } from "../layout/data/sidebar-data";
 import { ScrollArea } from "./ui/scroll-area";
 
 export function CommandMenu() {
@@ -25,7 +25,7 @@ export function CommandMenu() {
       setOpen(false);
       command();
     },
-    [setOpen]
+    [setOpen],
   );
 
   return (
