@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams } from "@tanstack/react-router";
-import { RefreshCw, Search, Eye, ChevronDown, Loader2 } from "lucide-react";
+import { RefreshCw, Search, Eye, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { useMySubmissions } from "../queries/useContest";
@@ -74,8 +74,11 @@ const ContestSubmissionsContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-full">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)] bg-slate-50 dark:bg-slate-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-md text-slate-800">Đang tải...</p>
+        </div>
       </div>
     );
   }

@@ -90,7 +90,7 @@ export interface LectureDetail {
 }
 
 export enum CourseLevel {
-  BEGINNER = "BEGINNER",
+  BEGINNING = "BEGINNING",
   INTERMEDIATE = "INTERMEDIATE",
   ADVANCED = "ADVANCED",
 }

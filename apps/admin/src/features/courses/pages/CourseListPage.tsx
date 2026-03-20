@@ -98,38 +98,38 @@ export const CourseListPage: React.FC = () => {
         </Card>
       ) : (
         <>
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 lg:grid-cols-3">
+          <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {filteredCourses.map((course: CoursePreview) => (
               <Card key={course.id} className="overflow-hidden p-0 transition-shadow hover:shadow-lg">
-                <div className="relative flex aspect-video items-center justify-center bg-linear-to-br from-blue-500 to-indigo-600">
+                <div className="relative flex aspect-video items-center justify-center">
                   {course.thumbnailUrl ? (
-                    <img src={course.thumbnailUrl} alt={course.title} className="h-full w-full object-cover" />
+                    <img src={course.thumbnailUrl} alt={course.title} className="h-42 w-full object-cover" />
                   ) : (
                     <BookOpen className="h-16 w-16 text-white/50" />
                   )}
+
+                  <div className="absolute right-3 top-3">
+                    <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"} className="shrink-0">
+                      {course.status === "PUBLISHED" ? "Đã xuất bản" : "Chưa xuất bản"}
+                    </Badge>{" "}
+                  </div>
                 </div>
 
-                <div className="space-y-3 p-4">
+                <div className="space-y-3 px-4 pb-3">
                   <div className="flex items-start justify-between gap-2">
                     <div className="flex-1">
-                      <h3 className="line-clamp-2 h-14 text-lg font-semibold">{course.title}</h3>
+                      <h3 className="line-clamp-2 h-12 text-md font-semibold">{course.title}</h3>
                     </div>
-                    {course.status && (
-                      <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"} className="shrink-0">
-                        {course.status === "PUBLISHED" ? "Đã xuất bản" : "Chưa xuất bản"}
-                      </Badge>
-                    )}
                   </div>
 
-                  <div className="flex items-center gap-4 text-sm text-gray-600">
+                  <div className="flex items-center justify-between gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
                       <BookOpen className="h-4 w-4" />
                       <span>Lớp {course.grade}</span>
                     </div>
-                  </div>
-
-                  <div className="text-2xl font-bold text-blue-600">
-                    {course.price === 0 ? "Miễn phí" : `${course.price.toLocaleString("vi-VN")} ₫`}
+                    <div className="text-lg font-bold text-blue-600">
+                      {course.price === 0 ? "Miễn phí" : `${course.price.toLocaleString("vi-VN")} ₫`}
+                    </div>
                   </div>
 
                   <div className="flex items-center gap-2 border-t pt-3">

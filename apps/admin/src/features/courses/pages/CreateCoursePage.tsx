@@ -8,7 +8,6 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCourse } from "../queries/useCourse";
 import { CourseLevel, CreateCourseRequest, Language } from "../types/course.type";
@@ -51,7 +50,7 @@ export const CreateCoursePage: React.FC = () => {
       outcome: "",
       requirement: "",
       audience: "",
-      level: CourseLevel.BEGINNER,
+      level: CourseLevel.BEGINNING,
       grade: 3,
     },
   });
@@ -91,7 +90,7 @@ export const CreateCoursePage: React.FC = () => {
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
             <div className="col-span-2">
-              <Label className="text-md">Ảnh bìa khóa học *</Label>
+              <Label className="text-base font-semibold">Ảnh bìa khóa học *</Label>
               <div
                 className={cn(
                   "relative mt-2 cursor-pointer rounded-xl border-2 border-dashed p-8 text-center transition-colors hover:border-blue-400",
@@ -133,7 +132,9 @@ export const CreateCoursePage: React.FC = () => {
             </div>
 
             <div className="col-span-2 space-y-2">
-              <Label htmlFor="title">Tên khóa học *</Label>
+              <Label htmlFor="title" className="text-base font-semibold">
+                Tên khóa học *
+              </Label>
               <Input
                 id="title"
                 {...register("title")}
@@ -144,7 +145,9 @@ export const CreateCoursePage: React.FC = () => {
             </div>
 
             <div className="col-span-2 space-y-2">
-              <Label htmlFor="subtitle">Mô tả ngắn *</Label>
+              <Label htmlFor="subtitle" className="text-base font-semibold">
+                Mô tả ngắn *
+              </Label>
               <Input
                 id="subtitle"
                 {...register("subtitle")}
@@ -155,11 +158,13 @@ export const CreateCoursePage: React.FC = () => {
             </div>
 
             <div className="col-span-2 space-y-2">
-              <Label htmlFor="description">Mô tả chi tiết *</Label>
+              <Label htmlFor="description" className="text-base font-semibold">
+                Mô tả chi tiết *
+              </Label>
               <Textarea
                 id="description"
                 {...register("description")}
-                rows={4}
+                rows={6}
                 placeholder="Mô tả chi tiết về khóa học..."
                 className={cn(errors.description && "border-red-500")}
               />
@@ -167,7 +172,9 @@ export const CreateCoursePage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="price">Giá khóa học (VNĐ) *</Label>
+              <Label htmlFor="price" className="text-base font-semibold">
+                Giá khóa học (VNĐ) *
+              </Label>
               <Input
                 id="price"
                 type="number"
@@ -180,82 +187,88 @@ export const CreateCoursePage: React.FC = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="grade">Khối lớp *</Label>
-              <Select defaultValue="3" onValueChange={(value) => setValue("grade", Number(value))}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
-                    <SelectItem key={g} value={String(g)}>
-                      Lớp {g}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <Label htmlFor="grade" className="text-base font-semibold">
+                Khối lớp *
+              </Label>
+              <select
+                id="grade"
+                defaultValue="3"
+                onChange={(e) => setValue("grade", Number(e.target.value))}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                {[3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((g) => (
+                  <option key={g} value={String(g)}>
+                    Lớp {g}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="language">Ngôn ngữ *</Label>
-              <Select
+              <Label htmlFor="language" className="text-base font-semibold">
+                Ngôn ngữ *
+              </Label>
+              <select
+                id="language"
                 defaultValue={Language.VIETNAMESE}
-                onValueChange={(value) => setValue("language", value as Language)}
+                onChange={(e) => setValue("language", e.target.value as Language)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={Language.VIETNAMESE}>Tiếng Việt</SelectItem>
-                  <SelectItem value={Language.ENGLISH}>English</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value={Language.VIETNAMESE}>Tiếng Việt</option>
+                <option value={Language.ENGLISH}>English</option>
+              </select>
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="level">Cấp độ *</Label>
-              <Select
-                defaultValue={CourseLevel.BEGINNER}
-                onValueChange={(value) => setValue("level", value as CourseLevel)}
+              <Label htmlFor="level" className="text-base font-semibold">
+                Cấp độ *
+              </Label>
+              <select
+                id="level"
+                defaultValue={CourseLevel.BEGINNING}
+                onChange={(e) => setValue("level", e.target.value as CourseLevel)}
+                className="w-full rounded-md border border-input bg-background px-3 py-2 text-sm shadow-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value={CourseLevel.BEGINNER}>Cơ bản</SelectItem>
-                  <SelectItem value={CourseLevel.INTERMEDIATE}>Trung cấp</SelectItem>
-                  <SelectItem value={CourseLevel.ADVANCED}>Nâng cao</SelectItem>
-                </SelectContent>
-              </Select>
+                <option value={CourseLevel.BEGINNING}>Cơ bản</option>
+                <option value={CourseLevel.INTERMEDIATE}>Trung cấp</option>
+                <option value={CourseLevel.ADVANCED}>Nâng cao</option>
+              </select>
             </div>
 
             <div className="col-span-2 space-y-2">
-              <Label htmlFor="outcome">Học viên sẽ học được gì? *</Label>
+              <Label htmlFor="outcome" className="text-base font-semibold">
+                Học viên sẽ học được gì? *
+              </Label>
               <Textarea
                 id="outcome"
                 {...register("outcome")}
-                rows={3}
+                rows={5}
                 className={cn(errors.outcome && "border-red-500")}
               />
               {errors.outcome && <p className="text-sm text-red-500">{errors.outcome.message}</p>}
             </div>
 
             <div className="col-span-2 space-y-2">
-              <Label htmlFor="requirement">Yêu cầu *</Label>
+              <Label htmlFor="requirement" className="text-base font-semibold">
+                Yêu cầu *
+              </Label>
               <Textarea
                 id="requirement"
                 {...register("requirement")}
-                rows={3}
+                rows={5}
                 className={cn(errors.requirement && "border-red-500")}
               />
               {errors.requirement && <p className="text-sm text-red-500">{errors.requirement.message}</p>}
             </div>
 
             <div className="col-span-2 space-y-2">
-              <Label htmlFor="audience">Đối tượng học viên *</Label>
+              <Label htmlFor="audience" className="text-base font-semibold">
+                Đối tượng học viên *
+              </Label>
               <Textarea
                 id="audience"
                 {...register("audience")}
-                rows={3}
+                rows={5}
                 className={cn(errors.audience && "border-red-500")}
               />
               {errors.audience && <p className="text-sm text-red-500">{errors.audience.message}</p>}

@@ -14,6 +14,7 @@ import { Book, ChevronDown, LogOut, Menu, Settings, User, User2Icon, ShoppingCar
 import { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import { useCart } from "@/feature/order/queries/useCart";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -159,6 +160,12 @@ const Header: React.FC = () => {
                     <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
                       {mergeName(userInfo.firstName, userInfo.lastName)}
                     </span>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                        {userInfo.wallet.balance}
+                      </span>
+                      <BitCoinIcon size={16} />
+                    </div>
                   </div>
                 </Button>
                 <MenuPopover placement="bottom end">

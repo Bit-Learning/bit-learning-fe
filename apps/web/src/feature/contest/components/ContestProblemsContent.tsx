@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { CheckCircle, XCircle, Minus, Code, Clock, Copy, Send, FileText, AlertCircle, Lock } from "lucide-react";
+import { CheckCircle, XCircle, Minus, Code, Clock, Send, FileText, AlertCircle, Lock } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { useContestProblems, useContestDetail } from "../queries/useContest";
 import { useProblemDetail } from "@/feature/code-practice/queries/useCoding";
@@ -21,7 +21,6 @@ const ContestProblemsContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("description");
   const [selectedProblem, setSelectedProblem] = useState<ContestProblemListDTO | null>(null);
 
-  // Load problem detail for description and test cases
   const { data: problemDetail, isLoading: isProblemDetailLoading } = useProblemDetail(
     selectedProblem?.problemId || "",
     undefined,
@@ -93,10 +92,10 @@ const ContestProblemsContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)] bg-slate-50 dark:bg-slate-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-sm text-slate-600">Đang tải danh sách bài tập...</p>
+          <p className="mt-4 text-md text-slate-800">Đang tải danh sách bài tập...</p>
         </div>
       </div>
     );
@@ -104,15 +103,9 @@ const ContestProblemsContent: React.FC = () => {
 
   if (!problems || problems.length === 0) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
         <div className="text-center max-w-md space-y-4">
-          <div className="w-20 h-20 mx-auto rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
-            <Lock className="w-10 h-10 text-orange-600 dark:text-orange-400" />
-          </div>
-          <h3 className="text-2xl font-bold text-slate-900 dark:text-slate-100">Cuộc thi chưa bắt đầu</h3>
-          <p className="text-slate-600 dark:text-slate-400">
-            Bạn chưa thể xem đề bài và nộp bài. Vui lòng quay lại khi cuộc thi bắt đầu.
-          </p>
+          <p className="text-slate-600 dark:text-slate-400">Chưa có bài thi nào</p>
         </div>
       </div>
     );
@@ -120,7 +113,7 @@ const ContestProblemsContent: React.FC = () => {
 
   if (isUpcoming) {
     return (
-      <div className="flex items-center justify-center h-full">
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
         <div className="text-center max-w-md space-y-4">
           <div className="w-20 h-20 mx-auto rounded-full bg-orange-100 dark:bg-orange-900/30 flex items-center justify-center">
             <Lock className="w-10 h-10 text-orange-600 dark:text-orange-400" />
@@ -228,7 +221,7 @@ const ContestProblemsContent: React.FC = () => {
           {selectedProblem && (
             <section className="max-w-4xl mx-auto p-8 space-y-8">
               {isProblemDetailLoading ? (
-                <div className="flex items-center justify-center py-12">
+                <div className="flex items-center justify-center min-h-[calc(100vh-100px)] ">
                   <div className="text-center">
                     <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
                     <p className="mt-4 text-sm text-slate-600">Đang tải đề bài...</p>

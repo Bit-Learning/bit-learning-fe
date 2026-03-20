@@ -1,11 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import ReactQuill from "react-quill-new";
 import "react-quill-new/dist/quill.snow.css";
-import { FileText, HelpCircle, Loader2, Trash2, Upload, Video, X } from "lucide-react";
+import { FileText, HelpCircle, Loader2, Upload, Video, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -15,7 +15,6 @@ import { Textarea } from "@/components/ui/textarea";
 import {
   useCreateLectureText,
   useCreateLectureVideo,
-  useDeleteLecture,
   useLectureText,
   useUpdateLecture,
   useUpdateLectureText,
@@ -84,7 +83,6 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const updateLectureMutation = useUpdateLecture();
   const updateTextMutation = useUpdateLectureText();
   const updateVideoMutation = useUpdateLectureVideo();
-  const deleteLectureMutation = useDeleteLecture();
 
   const videoForm = useForm<VideoFormValues>({
     resolver: zodResolver(lectureBaseSchema),
@@ -148,7 +146,12 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
   useEffect(() => {
     if (textData?.content) {
-      textForm.setValue("content", textData.content);
+      textForm.reset({
+        title: lecture?.title || "",
+        description: lecture?.description || "",
+        isPreviewable: lecture?.isPreviewable || false,
+        content: textData.content,
+      });
     }
   }, [textData, textForm]);
 
@@ -254,18 +257,6 @@ const LectureModal: React.FC<LectureModalProps> = ({
       onClose();
     } catch (error) {
       console.error("Failed to save text lecture:", error);
-    }
-  };
-
-  const handleDelete = async () => {
-    if (!lecture) return;
-    if (!confirm("Bạn có chắc muốn xóa bài học này?")) return;
-    try {
-      await deleteLectureMutation.mutateAsync(lecture.id);
-      onSuccess?.();
-      onClose();
-    } catch (error) {
-      console.error("Failed to delete lecture:", error);
     }
   };
 
@@ -382,17 +373,6 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
               {mode === "edit" && (
                 <div className="flex justify-between border-t pt-4">
-                  <Button
-                    type="button"
-                    variant="outline"
-                    onClick={handleDelete}
-                    disabled={deleteLectureMutation.isPending}
-                    className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                  >
-                    {deleteLectureMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Xóa bài học
-                  </Button>
                   <div className="flex gap-2">
                     <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                       Hủy
@@ -451,15 +431,21 @@ const LectureModal: React.FC<LectureModalProps> = ({
                     <HtmlPasteButton onInsert={handleInsertHtml(textContentRef, textForm.setValue, "content")} />
                   </div>
                   <div className={textForm.formState.errors.content ? "rounded-lg border-2 border-red-500" : ""}>
-                    <ReactQuill
-                      ref={textContentRef as any}
-                      theme="snow"
-                      value={textForm.watch("content") || ""}
-                      onChange={(value) => textForm.setValue("content", value)}
-                      modules={quillModules}
-                      formats={quillFormats}
-                      placeholder="Nhập nội dung bài học"
-                      style={{ height: "400px", marginBottom: "50px" }}
+                    <Controller
+                      control={textForm.control}
+                      name="content"
+                      render={({ field }) => (
+                        <ReactQuill
+                          ref={textContentRef as any}
+                          theme="snow"
+                          value={field.value || ""}
+                          onChange={field.onChange}
+                          modules={quillModules}
+                          formats={quillFormats}
+                          placeholder="Nhập nội dung bài học"
+                          style={{ height: "400px", marginBottom: "50px" }}
+                        />
+                      )}
                     />
                   </div>
                   {textForm.formState.errors.content && (
@@ -480,17 +466,6 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
                 {mode === "edit" && (
                   <div className="flex justify-between border-t pt-4">
-                    <Button
-                      type="button"
-                      variant="outline"
-                      onClick={handleDelete}
-                      disabled={deleteLectureMutation.isPending}
-                      className="text-red-500 hover:bg-red-50 hover:text-red-600"
-                    >
-                      {deleteLectureMutation.isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      <Trash2 className="mr-2 h-4 w-4" />
-                      Xóa bài học
-                    </Button>
                     <div className="flex gap-2">
                       <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
                         Hủy

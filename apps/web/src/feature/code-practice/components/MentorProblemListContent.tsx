@@ -11,6 +11,7 @@ import { Difficulty, ProblemBriefResponse } from "../types/coding.type";
 import { useProblems, useDeleteProblem } from "../queries/useCoding";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
+import { Pagination } from "@/shared/components/Pagination";
 
 const TableSkeleton: React.FC = () => (
   <div className="space-y-3">
@@ -256,49 +257,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                   </tbody>
                 </table>
 
-                {totalPages > 1 && (
-                  <div className="px-6 py-4 bg-slate-50 dark:bg-slate-800/50 border-t border-slate-200 dark:border-slate-800 flex justify-center">
-                    <nav className="flex items-center gap-1">
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handlePageChange(Math.max(0, page - 1))}
-                        isDisabled={page === 0}
-                        className="p-2 h-auto hover:bg-white dark:hover:bg-slate-700 text-slate-500"
-                      >
-                        <span className="text-lg leading-none">‹</span>
-                      </Button>
-                      {[...Array(Math.min(5, totalPages))].map((_, i) => {
-                        const pageNum = i;
-                        return (
-                          <Button
-                            key={i}
-                            variant={page === pageNum ? "default" : "ghost"}
-                            size="icon"
-                            onClick={() => handlePageChange(pageNum)}
-                            className={cn(
-                              "w-8 h-8 font-medium text-sm",
-                              page === pageNum
-                                ? "bg-blue-600 text-white hover:bg-blue-700"
-                                : "hover:bg-white dark:hover:bg-slate-700 text-slate-600 dark:text-slate-400",
-                            )}
-                          >
-                            {pageNum + 1}
-                          </Button>
-                        );
-                      })}
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => handlePageChange(Math.min(totalPages - 1, page + 1))}
-                        isDisabled={page >= totalPages - 1}
-                        className="p-2 h-auto hover:bg-white dark:hover:bg-slate-700 text-slate-500"
-                      >
-                        <span className="text-lg leading-none">›</span>
-                      </Button>
-                    </nav>
-                  </div>
-                )}
+                {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
               </>
             )}
           </div>

@@ -84,7 +84,7 @@ const CheckoutContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="mx-auto max-w-4xl">
-          <div className="flex min-h-125 flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-lg">
+          <div className="flex min-h-125 flex-col items-center justify-center rounded-2xl bg-white p-12 ">
             <ShoppingBag className="mb-6 h-32 w-32 text-gray-300" />
             <h3 className="mb-3 text-3xl font-bold text-gray-900">
               {isDirectCheckout ? "Không tìm thấy khóa học" : "Giỏ hàng trống"}
@@ -132,9 +132,9 @@ const CheckoutContent: React.FC = () => {
           <p className="text-lg text-gray-600">Chỉ còn một bước nữa để bắt đầu học tập!</p>
         </div>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <Card className="overflow-hidden p-0 shadow-lg">
+            <Card className="overflow-hidden p-0 border-gray-400 rounded-md">
               <CardHeader className="bg-blue-600 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <Package className="h-7 w-7" />
@@ -147,7 +147,7 @@ const CheckoutContent: React.FC = () => {
                 {courses.map((course, index) => (
                   <div
                     key={course.id}
-                    className="overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 hover:border-blue-300 hover:shadow-md transition-all"
+                    className="overflow-hidden rounded-md border-2 border-gray-200 bg-white p-5 hover:border-blue-300 hover:shadow-md transition-all"
                     style={{
                       animation: "slideIn 0.5s ease-out",
                       animationDelay: `${index * 100}ms`,
@@ -162,7 +162,6 @@ const CheckoutContent: React.FC = () => {
                       />
                       <div className="min-w-0 flex-1">
                         <h4 className="mb-2 font-bold text-gray-900 line-clamp-2">{course.title}</h4>
-                        <p className="mb-3 text-sm text-gray-600">{course.instructorName}</p>
 
                         <div className="mb-3 flex items-center gap-2 text-sm">
                           <div className="flex items-center gap-1">
@@ -195,7 +194,7 @@ const CheckoutContent: React.FC = () => {
               </CardContent>
             </Card>
 
-            <Card className="overflow-hidden p-0 shadow-lg">
+            <Card className="overflow-hidden p-0 border-gray-400 rounded-md">
               <CardHeader className="bg-orange-500 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <CreditCard className="h-7 w-7" />
@@ -226,7 +225,7 @@ const CheckoutContent: React.FC = () => {
                     selected={paymentMethod === PaymentMethod.WALLET}
                     onClick={() => setPaymentMethod(PaymentMethod.WALLET)}
                     icon={<Wallet className="h-10 w-10 text-white" />}
-                    title="Ví BitHub"
+                    title="Ví BitLearning"
                     description="Thanh toán bằng số dư ví - Tức thì"
                     color="orange"
                   />
@@ -236,7 +235,7 @@ const CheckoutContent: React.FC = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-8 overflow-hidden rounded-2xl bg-white shadow-xl">
+            <div className="sticky top-8 overflow-hidden border-gray-400 rounded-md bg-white border ">
               <div className="bg-orange-500 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <ShoppingBag className="h-7 w-7" />
@@ -272,7 +271,7 @@ const CheckoutContent: React.FC = () => {
                 <Button
                   onClick={handleCheckout}
                   isDisabled={isPending}
-                  className="group w-full rounded-xl bg-blue-600 py-5 text-lg font-bold text-white hover:bg-blue-700 shadow-lg transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                  className="group w-full rounded-xl bg-blue-600 py-5 text-lg font-bold text-white hover:bg-blue-700  transition-all disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isPending ? (
                     <>
