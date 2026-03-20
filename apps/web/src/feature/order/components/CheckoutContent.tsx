@@ -9,7 +9,9 @@ import { useCreateOrder } from "@/feature/order/queries/useOrder";
 import { PaymentMethod } from "@/feature/order/types/order.type";
 import { useCart } from "../queries/useCart";
 import { useCourseDetail } from "@/feature/course/queries/useCourse";
+import { useUserProfile } from "@/feature/user/queries/useUser";
 import { PaymentMethodCard } from "./PaymentMethodCard";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 const CheckoutContent: React.FC = () => {
   const navigate = useNavigate();
@@ -19,46 +21,38 @@ const CheckoutContent: React.FC = () => {
   const [voucherCodes, setVoucherCodes] = useState<Record<number, string>>({});
 
   const { data: cartCourses, isLoading: cartLoading } = useCart();
-
   const { data: singleCourse, isLoading: courseLoading } = useCourseDetail(search.courseId);
-
   const { mutate: createOrder, isPending } = useCreateOrder();
+  const { data: userProfile } = useUserProfile();
+
+  const walletBalance = userProfile?.wallet?.balance ?? 0;
 
   const isDirectCheckout = !!search.courseId;
   const isLoading = isDirectCheckout ? courseLoading : cartLoading;
 
   const courses = useMemo(() => {
-    if (isDirectCheckout && singleCourse) {
-      return [singleCourse];
-    }
+    if (isDirectCheckout && singleCourse) return [singleCourse];
     return cartCourses || [];
   }, [isDirectCheckout, singleCourse, cartCourses]);
 
   const cartSummary = useMemo(() => {
-    if (!courses || courses.length === 0) {
-      return { totalItems: 0, totalAmount: 0 };
-    }
-
+    if (!courses || courses.length === 0) return { totalItems: 0, totalAmount: 0 };
     const totalAmount = courses.reduce((sum, course) => sum + course.price, 0);
-
-    return {
-      totalItems: courses.length,
-      totalAmount,
-    };
+    return { totalItems: courses.length, totalAmount };
   }, [courses]);
+
+  const isWalletInsufficient = paymentMethod === PaymentMethod.WALLET && walletBalance < cartSummary.totalAmount;
 
   const handleCheckout = () => {
     if (!courses || courses.length === 0) return;
+    if (isWalletInsufficient) return;
 
     const orderDetails = courses.map((course) => ({
       courseId: course.id,
       voucherCode: voucherCodes[course.id] || undefined,
     }));
 
-    createOrder({
-      paymentMethod,
-      details: orderDetails,
-    });
+    createOrder({ paymentMethod, details: orderDetails });
   };
 
   const handleBack = () => {
@@ -84,7 +78,7 @@ const CheckoutContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="mx-auto max-w-4xl">
-          <div className="flex min-h-125 flex-col items-center justify-center rounded-2xl bg-white p-12 ">
+          <div className="flex min-h-125 flex-col items-center justify-center rounded-2xl bg-white p-12">
             <ShoppingBag className="mb-6 h-32 w-32 text-gray-300" />
             <h3 className="mb-3 text-3xl font-bold text-gray-900">
               {isDirectCheckout ? "Không tìm thấy khóa học" : "Giỏ hàng trống"}
@@ -133,7 +127,9 @@ const CheckoutContent: React.FC = () => {
         </div>
 
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          {/* Left column */}
           <div className="space-y-6 lg:col-span-2">
+            {/* Course list */}
             <Card className="overflow-hidden p-0 border-gray-400 rounded-md">
               <CardHeader className="bg-blue-600 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
@@ -162,7 +158,6 @@ const CheckoutContent: React.FC = () => {
                       />
                       <div className="min-w-0 flex-1">
                         <h4 className="mb-2 font-bold text-gray-900 line-clamp-2">{course.title}</h4>
-
                         <div className="mb-3 flex items-center gap-2 text-sm">
                           <div className="flex items-center gap-1">
                             <Star className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
@@ -172,16 +167,10 @@ const CheckoutContent: React.FC = () => {
                             Lớp {course.grade}
                           </span>
                         </div>
-
                         <Input
                           placeholder="Nhập mã voucher (nếu có)"
                           value={voucherCodes[course.id] || ""}
-                          onChange={(e) =>
-                            setVoucherCodes((prev) => ({
-                              ...prev,
-                              [course.id]: e.target.value,
-                            }))
-                          }
+                          onChange={(e) => setVoucherCodes((prev) => ({ ...prev, [course.id]: e.target.value }))}
                           className="w-full rounded-lg border-gray-300 text-sm focus:border-blue-500 focus:ring-2 focus:ring-blue-200"
                         />
                       </div>
@@ -194,6 +183,7 @@ const CheckoutContent: React.FC = () => {
               </CardContent>
             </Card>
 
+            {/* Payment method */}
             <Card className="overflow-hidden p-0 border-gray-400 rounded-md">
               <CardHeader className="bg-orange-500 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
@@ -228,6 +218,8 @@ const CheckoutContent: React.FC = () => {
                     title="Ví BitLearning"
                     description="Thanh toán bằng số dư ví - Tức thì"
                     color="orange"
+                    walletBalance={walletBalance}
+                    totalAmount={cartSummary.totalAmount}
                   />
                 </div>
               </CardContent>
@@ -235,7 +227,7 @@ const CheckoutContent: React.FC = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-8 overflow-hidden border-gray-400 rounded-md bg-white border ">
+            <div className="sticky top-8 overflow-hidden border-gray-400 rounded-md bg-white border">
               <div className="bg-orange-500 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <ShoppingBag className="h-7 w-7" />
@@ -266,12 +258,48 @@ const CheckoutContent: React.FC = () => {
                       {cartSummary.totalAmount.toLocaleString()}đ
                     </span>
                   </div>
+
+                  {paymentMethod === PaymentMethod.WALLET && (
+                    <div
+                      className={`flex items-center justify-between rounded-lg px-4 py-3 border ${
+                        isWalletInsufficient ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-200"
+                      }`}
+                    >
+                      <div className="flex items-center gap-1.5">
+                        <BitCoinIcon size={20} />
+                        <span
+                          className={`text-sm font-medium ${isWalletInsufficient ? "text-red-600" : "text-amber-700"}`}
+                        >
+                          Số dư BIT
+                        </span>
+                      </div>
+                      <span className={`font-bold text-sm ${isWalletInsufficient ? "text-red-600" : "text-amber-700"}`}>
+                        {walletBalance.toLocaleString("vi-VN")} BIT
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                {isWalletInsufficient && (
+                  <div className="rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-sm text-red-600">
+                    <p className="font-semibold mb-0.5">⚠ Số dư không đủ</p>
+                    <p>
+                      Bạn cần thêm{" "}
+                      <span className="font-bold">
+                        {(cartSummary.totalAmount - walletBalance).toLocaleString("vi-VN")} BIT
+                      </span>{" "}
+                      để thanh toán.{" "}
+                      <a href="/profile/top-up" className="underline font-semibold text-red-700 hover:text-red-800">
+                        Nạp thêm ngay
+                      </a>
+                    </p>
+                  </div>
+                )}
 
                 <Button
                   onClick={handleCheckout}
-                  isDisabled={isPending}
-                  className="group w-full rounded-xl bg-blue-600 py-5 text-lg font-bold text-white hover:bg-blue-700  transition-all disabled:cursor-not-allowed disabled:opacity-70"
+                  isDisabled={isPending || isWalletInsufficient}
+                  className="group w-full rounded-xl bg-blue-600 py-5 text-lg font-bold text-white hover:bg-blue-700 transition-all disabled:cursor-not-allowed disabled:opacity-70"
                 >
                   {isPending ? (
                     <>
@@ -301,14 +329,8 @@ const CheckoutContent: React.FC = () => {
 
       <style>{`
         @keyframes slideIn {
-          from {
-            opacity: 0;
-            transform: translateX(-20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateX(0);
-          }
+          from { opacity: 0; transform: translateX(-20px); }
+          to   { opacity: 1; transform: translateX(0); }
         }
       `}</style>
     </div>

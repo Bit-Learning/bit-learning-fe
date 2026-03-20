@@ -157,14 +157,14 @@ const Header: React.FC = () => {
                     </AvatarFallback>
                   </Avatar>
                   <div className="hidden md:flex flex-col items-start">
-                    <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
+                    <span className="text-md font-bold text-gray-900 dark:text-gray-100">
                       {mergeName(userInfo.firstName, userInfo.lastName)}
                     </span>
                     <div className="flex items-center justify-center gap-2">
-                      <span className="text-sm font-semibold text-gray-900 dark:text-gray-100">
-                        {userInfo.wallet.balance}
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-100">
+                        {userInfo.wallet.balance.toLocaleString("vi-VN")}
                       </span>
-                      <BitCoinIcon size={16} />
+                      <BitCoinIcon size={18} />
                     </div>
                   </div>
                 </Button>

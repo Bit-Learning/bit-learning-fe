@@ -9,6 +9,7 @@ import { useAllCourses, useCourseActions, useCourseState, usePrefetchCourse } fr
 import type { CoursePreview } from "../types/course.type";
 import { useAppDispatch } from "@/shared/redux/store";
 import { setPageSizeAction } from "../store/course.store";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 const AllCoursesContent: React.FC = () => {
   const navigate = useNavigate();
@@ -235,11 +236,11 @@ const AllCoursesContent: React.FC = () => {
                     })
                   }
                 >
-                  <div className="relative h-48 overflow-hidden rounded-xl">
+                  <div className="relative h-48 aspect-video overflow-hidden rounded-xl">
                     <img
                       src={course.thumbnailUrl}
                       alt={course.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-120"
                     />
 
                     <div className="absolute left-3 top-3">
@@ -259,11 +260,11 @@ const AllCoursesContent: React.FC = () => {
 
                   <CardContent className="p-0">
                     <div className="space-y-3">
-                      <h3 className="text-xl line-clamp-2 h-18 font-bold text-slate-900 dark:text-white transition-colors group-hover:text-blue-700">
+                      <h3 className="text-xl line-clamp-2 h-15 font-bold text-slate-900 dark:text-white transition-colors group-hover:text-blue-700">
                         {course.title}
                       </h3>
 
-                      <div className="flex items-center justify-between gap-2 text-sm">
+                      <div className="flex items-end justify-between gap-2 text-sm">
                         <div className="flex items-center gap-2">
                           <div className="flex">
                             {[...Array(5)].map((_, i) => (
@@ -280,8 +281,13 @@ const AllCoursesContent: React.FC = () => {
                           <span className="text-md text-gray-600 dark:text-gray-400">({course.ratingCount || 0})</span>
                         </div>
 
-                        <div className="flex items-center">
-                          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">
+                        <div className="flex flex-col items-end gap-0.5">
+                          {course.price > 0 && (
+                            <span className="flex items-center gap-1 text-sm font-semibold text-amber-600">
+                              ~ {course.price.toLocaleString("vi-VN")} <BitCoinIcon size={18} />
+                            </span>
+                          )}
+                          <span className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                             {course.price === 0 ? "Miễn phí" : `${course.price.toLocaleString()}đ`}
                           </span>
                         </div>
