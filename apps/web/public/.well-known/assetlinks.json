@@ -1,0 +1,12 @@
+[
+	{
+		"relation": ["delegate_permission/common.handle_all_urls"],
+		"target": {
+			"namespace": "android_app",
+			"package_name": "com.app.bitlearning",
+			"sha256_cert_fingerprints": [
+				"83:DB:80:00:FE:E6:67:4F:08:AD:E9:B9:54:E3:08:3F:05:2F:B9:EC:2E:66:4B:81:6C:18:4B:35:E7:6C:C0:23"
+			]
+		}
+	}
+]

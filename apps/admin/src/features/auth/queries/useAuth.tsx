@@ -7,14 +7,14 @@ import { authApi } from "../api/auth.api";
 import type { TAdminLoginRequest } from "../types/auth.types";
 
 export const authQueryKeys = {
-  all: ["auth"] as const,
-  profile: () => [...authQueryKeys.all, "profile"] as const,
-  session: () => [...authQueryKeys.all, "session"] as const,
+	all: ["auth"] as const,
+	profile: () => [...authQueryKeys.all, "profile"] as const,
+	session: () => [...authQueryKeys.all, "session"] as const,
 };
 
 interface UseLoginOptions {
-  redirectTo?: string;
-  on2FARequired?: (email: string) => void;
+	redirectTo?: string;
+	on2FARequired?: (email: string) => void;
 }
 
 export function useLogin(options: UseLoginOptions = {}) {

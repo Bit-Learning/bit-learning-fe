@@ -1,7 +1,12 @@
 import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import { endpoints } from "@/shared/constants/endpoints";
-import type { TAdminLoginRequest, TAdminLoginResponse, TAdminUser, TRefreshTokenRequest } from "../types/auth.types";
+import type {
+	TAdminLoginRequest,
+	TAdminLoginResponse,
+	TAdminUser,
+	TRefreshTokenRequest,
+} from "../types/auth.types";
 
 export const authApi = {
   adminLogin: (requestBody: TAdminLoginRequest): Promise<AxiosResponse<{ data: TAdminLoginResponse }>> =>

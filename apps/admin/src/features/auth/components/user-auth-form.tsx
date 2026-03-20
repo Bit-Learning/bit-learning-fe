@@ -6,7 +6,14 @@ import { toast } from "sonner";
 import { z } from "zod";
 import { PasswordInput } from "@/components/password-input";
 import { Button } from "@/components/ui/button";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+	Form,
+	FormControl,
+	FormField,
+	FormItem,
+	FormLabel,
+	FormMessage,
+} from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { cn } from "@/shared/lib/utils";
 import { useLogin } from "../queries/useAuth";
@@ -19,7 +26,7 @@ const formSchema = z.object({
 });
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
-  redirectTo?: string;
+	redirectTo?: string;
 }
 
 export const UserAuthForm: React.FC<UserAuthFormProps> = ({ className, redirectTo, ...props }) => {

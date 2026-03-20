@@ -5,9 +5,9 @@ export type TAdminLoginRequest = {
 };
 
 export type TAdminLoginResponse = {
-  accessToken: string;
-  refreshToken: string;
-  user: TAdminUser;
+	accessToken: string;
+	refreshToken: string;
+	user: TAdminUser;
 };
 
 export type TAdminUser = {
@@ -26,5 +26,5 @@ export type TAdminUser = {
 };
 
 export type TRefreshTokenRequest = {
-  refreshToken: string;
+	refreshToken: string;
 };
