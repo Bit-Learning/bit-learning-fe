@@ -4,7 +4,7 @@ import { toast } from "@/shared/components/Sonner";
 import { Shield, ShieldCheck, ShieldOff } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
-import { Disable2FA } from "../api/auth.api";
+import { authApi } from "../api/auth.api";
 import Enable2FAComponent from "./Enable2FA";
 
 interface TwoFactorSettingsProps {
@@ -18,7 +18,7 @@ const TwoFactorSettings: React.FC<TwoFactorSettingsProps> = ({ is2FAEnabled, use
   const queryClient = useQueryClient();
 
   const disableMutation = useMutation({
-    mutationFn: Disable2FA,
+    mutationFn: authApi.disable2FA,
     onSuccess: () => {
       toast.success({
         title: "Thành công",
@@ -87,7 +87,7 @@ const TwoFactorSettings: React.FC<TwoFactorSettingsProps> = ({ is2FAEnabled, use
               {!is2FAEnabled ? (
                 <Button
                   onClick={() => setShowEnable2FA(true)}
-                  className="rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 font-semibold text-white hover:from-blue-700 hover:to-blue-800"
+                  className="rounded-xl bg-blue-700 font-semibold text-white hover:from-blue-700 hover:to-blue-800"
                 >
                   Bật xác thực hai yếu tố
                 </Button>

@@ -11,9 +11,7 @@ import { Input } from "@/components/ui/input";
 import { cn, sleep } from "@/shared/lib/utils";
 
 const formSchema = z.object({
-  email: z.email({
-    error: (iss) => (iss.input === "" ? "Please enter your email" : undefined),
-  }),
+  email: z.string().min(1, "Vui lòng nhập email").email("Email không hợp lệ"),
 });
 
 export function ForgotPasswordForm({ className, ...props }: React.HTMLAttributes<HTMLFormElement>) {
@@ -27,40 +25,48 @@ export function ForgotPasswordForm({ className, ...props }: React.HTMLAttributes
 
   function onSubmit(data: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    // eslint-disable-next-line no-console
-    console.log(data);
 
     toast.promise(sleep(2000), {
-      loading: "Sending email...",
+      loading: "Đang gửi email...",
       success: () => {
         setIsLoading(false);
         form.reset();
         navigate({ to: "/otp" });
-        return `Email sent to ${data.email}`;
+        return `Đã gửi email đến ${data.email}`;
       },
-      error: "Error",
+      error: () => {
+        setIsLoading(false);
+        return "Gửi email thất bại. Vui lòng thử lại.";
+      },
     });
   }
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={cn("grid gap-2", className)} {...props}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={cn("grid gap-3", className)} {...props}>
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-sm font-semibold text-slate-600">Email</FormLabel>
               <FormControl>
-                <Input placeholder="name@example.com" {...field} />
+                <Input
+                  placeholder="ten@example.com"
+                  className="h-11 rounded-lg border-2 focus:border-blue-500 focus:ring-blue-100"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button className="mt-2" disabled={isLoading}>
-          Continue
-          {isLoading ? <Loader2 className="animate-spin" /> : <ArrowRight />}
+        <Button
+          className="mt-1 h-11 w-full rounded-lg bg-blue-600 font-semibold text-white hover:bg-blue-700"
+          disabled={isLoading}
+        >
+          Tiếp tục
+          {isLoading ? <Loader2 className="h-4 w-4 animate-spin" /> : <ArrowRight className="h-4 w-4" />}
         </Button>
       </form>
     </Form>

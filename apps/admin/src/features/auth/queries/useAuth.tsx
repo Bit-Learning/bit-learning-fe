@@ -3,8 +3,8 @@ import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
 import { setAuthTokens } from "@/shared/lib/cookies";
 import { useAuthStore } from "@/shared/stores/auth-store";
-import { AdminLogin } from "../api/auth.api";
-import { TAdminLoginRequest } from "../types/auth.types";
+import { authApi } from "../api/auth.api";
+import type { TAdminLoginRequest } from "../types/auth.types";
 
 export const authQueryKeys = {
   all: ["auth"] as const,
@@ -24,7 +24,7 @@ export function useLogin(options: UseLoginOptions = {}) {
   const { auth } = useAuthStore();
 
   return useMutation({
-    mutationFn: (data: TAdminLoginRequest) => AdminLogin(data).then((res) => res.data.data),
+    mutationFn: (data: TAdminLoginRequest) => authApi.adminLogin(data).then((res) => res.data.data),
     onSuccess: (data: any) => {
       if (data.requires2FA) {
         on2FARequired?.(data.email);
@@ -33,7 +33,6 @@ export function useLogin(options: UseLoginOptions = {}) {
 
       const { accessToken, refreshToken, user } = data;
 
-      // ✅ FIX: Check for ADMIN or MANAGER roles (consistent with types)
       if (user.role !== "ADMIN" && user.role !== "MANAGER") {
         toast.error("Truy cập bị từ chối. Chỉ quản trị viên và nhà quản lý mới có quyền truy cập.");
         return;
@@ -45,7 +44,7 @@ export function useLogin(options: UseLoginOptions = {}) {
       auth.setUser({
         accountNo: user.id.toString(),
         email: user.email,
-        role: [user.role], // Will be ["ADMIN"] or ["MANAGER"]
+        role: [user.role],
         exp: Date.now() + 24 * 60 * 60 * 1000,
         firstName: user.firstName,
         lastName: user.lastName,
@@ -54,7 +53,6 @@ export function useLogin(options: UseLoginOptions = {}) {
 
       queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() });
 
-      // ✅ FIX: More friendly welcome message
       const roleText = user.role === "ADMIN" ? "Quản trị viên" : "Nhà quản lý";
       toast.success(`Chào mừng ${roleText} ${user.firstName}!`);
 
@@ -84,47 +82,18 @@ export function useLogout() {
   const queryClient = useQueryClient();
   const { auth } = useAuthStore();
 
-  const logout = () => {
-    auth.reset();
-    queryClient.clear();
-    toast.success("Đăng xuất thành công");
-    navigate({ to: "/sign-in", replace: true });
+  const logout = async () => {
+    try {
+      await authApi.logout();
+    } catch {
+      // Tiếp tục dù API lỗi
+    } finally {
+      auth.reset();
+      queryClient.clear();
+      toast.success("Đăng xuất thành công");
+      navigate({ to: "/sign-in", replace: true });
+    }
   };
 
   return { logout };
-}
-
-interface UseBypassLoginOptions {
-  redirectTo?: string;
-  role?: "ADMIN" | "MANAGER"; // ✅ Allow choosing role for bypass
-}
-
-export function useBypassLogin(options: UseBypassLoginOptions = {}) {
-  const { redirectTo = "/", role = "ADMIN" } = options;
-  const navigate = useNavigate();
-  const { auth } = useAuthStore();
-
-  const bypassLogin = () => {
-    const fakeAccessToken = `fake-access-token-${Date.now()}`;
-    const fakeRefreshToken = `fake-refresh-token-${Date.now()}`;
-
-    setAuthTokens(fakeAccessToken, fakeRefreshToken);
-    auth.setAccessToken(fakeAccessToken);
-    auth.setRefreshToken(fakeRefreshToken);
-    auth.setUser({
-      accountNo: "1",
-      email: role === "ADMIN" ? "admin@example.com" : "manager@example.com",
-      role: [role],
-      exp: Date.now() + 24 * 60 * 60 * 1000,
-      firstName: role === "ADMIN" ? "Admin" : "Manager",
-      lastName: "User",
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${role}`,
-    });
-
-    const roleText = role === "ADMIN" ? "Quản trị viên" : "Nhà quản lý";
-    toast.success(`🚀 Bypass thành công - Chào ${roleText}!`);
-    navigate({ to: redirectTo, replace: true });
-  };
-
-  return { bypassLogin };
 }

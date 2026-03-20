@@ -1,9 +1,7 @@
-// Admin-specific auth types (ADMIN role only)
-
 export type TAdminLoginRequest = {
   email: string;
   password: string;
-  role: "ADMIN" | "MANAGER"; // Only ADMIN role allowed
+  role: "ADMIN" | "MANAGER";
 };
 
 export type TAdminLoginResponse = {
@@ -20,7 +18,7 @@ export type TAdminUser = {
   avatar: string;
   email: string;
   activated: boolean;
-  role: "ADMIN" | "MANAGER"; // Only admin and staff can access admin panel
+  role: "ADMIN" | "MANAGER";
   langKey: string;
   lastLoginAttempt: string | null;
   createdAt: string;

@@ -10,7 +10,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { z } from "zod";
 import { setAuthTokens } from "@/shared/lib/cookies";
-import { Complete2FA } from "../api/auth.api";
+import { authApi } from "../api/auth.api";
 import { setIsAuthenticatedAction, setUserInfoAction } from "../store";
 
 const totpSchema = z.object({
@@ -37,7 +37,7 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({ e
   });
 
   const verifyMutation = useMutation({
-    mutationFn: (data: { email: string; totpCode: string }) => Complete2FA(data),
+    mutationFn: (data: { email: string; totpCode: string }) => authApi.complete2FA(data),
     onSuccess: (response) => {
       console.log("[2FA] Complete2FA response:", response);
       const loginData = response.data.data;
