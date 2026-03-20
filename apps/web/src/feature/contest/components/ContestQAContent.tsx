@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from "react";
 import { useParams } from "@tanstack/react-router";
-import { Search, MessageSquarePlus, ShieldCheck, Lock, Globe, ChevronLeft, ChevronRight, Loader2 } from "lucide-react";
+import { Search, MessageSquarePlus, ShieldCheck, Lock, Globe, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Badge } from "@workspace/ui/components/Badge";
@@ -55,8 +55,11 @@ const ContestQAContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="h-full flex items-center justify-center bg-gray-50">
-        <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)] bg-slate-50 dark:bg-slate-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-md text-slate-800">Đang tải...</p>
+        </div>
       </div>
     );
   }
@@ -65,7 +68,6 @@ const ContestQAContent: React.FC = () => {
     <>
       <div className="h-full overflow-auto bg-gray-50">
         <div className="max-w-5xl mx-auto px-6 py-8">
-          {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Hỏi đáp & Giải thích</h2>
@@ -73,7 +75,6 @@ const ContestQAContent: React.FC = () => {
             </div>
 
             <div className="flex items-center gap-3">
-              {/* Search */}
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
                 <Input
@@ -85,7 +86,6 @@ const ContestQAContent: React.FC = () => {
                 />
               </div>
 
-              {/* Ask Question Button */}
               <Button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
                 <MessageSquarePlus className="w-4 h-4 mr-2" />
                 Đặt câu hỏi
@@ -93,12 +93,10 @@ const ContestQAContent: React.FC = () => {
             </div>
           </div>
 
-          {/* Questions List */}
           <div className="space-y-4">
             {filteredClarifications.map((clarification) => (
               <Card key={clarification.clarificationId} className="overflow-hidden">
                 <CardContent className="p-5">
-                  {/* Question Header */}
                   <div className="flex items-start justify-between mb-3">
                     <div className="flex items-center gap-2">
                       <Avatar className="w-7 h-7">
@@ -137,7 +135,6 @@ const ContestQAContent: React.FC = () => {
                       </div>
                     </div>
 
-                    {/* Status Badge */}
                     <Badge
                       variant={clarification.answer ? "default" : "secondary"}
                       className={`text-xs px-2.5 py-1 ${
@@ -148,10 +145,8 @@ const ContestQAContent: React.FC = () => {
                     </Badge>
                   </div>
 
-                  {/* Question Content */}
                   <p className="text-sm text-gray-700 leading-relaxed">{clarification.question}</p>
 
-                  {/* Answer */}
                   {clarification.answer && clarification.answeredBy && (
                     <div className="mt-4 p-4 bg-gray-50 rounded-lg border-l-4 border-green-500">
                       <div className="flex items-center justify-between mb-2">
@@ -173,7 +168,6 @@ const ContestQAContent: React.FC = () => {
             ))}
           </div>
 
-          {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6">
               <div className="text-sm text-gray-500">
