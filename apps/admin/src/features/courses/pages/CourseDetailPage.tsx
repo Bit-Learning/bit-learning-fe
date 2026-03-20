@@ -236,11 +236,7 @@ export const CourseDetailPage: React.FC = () => {
               size="lg"
               disabled={validateCourseMutation.isPending}
               variant={isPublished ? "outline" : "default"}
-              className={
-                isPublished
-                  ? "border-none"
-                  : "gap-2 bg-linear-to-r from-green-600 to-emerald-600 hover:from-green-700 hover:to-emerald-700"
-              }
+              className={isPublished ? "border-none" : "gap-2 bg-emerald-600 hover:from-green-700 hover:to-emerald-700"}
             >
               {validateCourseMutation.isPending ? (
                 <>
@@ -260,7 +256,7 @@ export const CourseDetailPage: React.FC = () => {
           <Button
             onClick={() => setModalState({ type: "edit-course" })}
             size="lg"
-            className="gap-2 bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+            className="gap-2 bg-blue-600 hover:from-blue-700 hover:to-indigo-700"
           >
             <Settings className="h-4 w-4" />
             Chỉnh sửa khóa học

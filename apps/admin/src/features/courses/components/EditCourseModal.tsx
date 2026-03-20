@@ -34,7 +34,7 @@ const updateCourseSchema = z.object({
 type UpdateCourseFormValues = z.infer<typeof updateCourseSchema>;
 
 const LEVELS = [
-  { value: CourseLevel.BEGINNER, label: "Cơ bản" },
+  { value: CourseLevel.BEGINNING, label: "Cơ bản" },
   { value: CourseLevel.INTERMEDIATE, label: "Trung cấp" },
   { value: CourseLevel.ADVANCED, label: "Nâng cao" },
 ];
@@ -101,8 +101,8 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="max-h-[95vh] w-full max-w-4xl overflow-hidden">
-        <div className="shrink-0 bg-linear-to-r from-blue-600 to-indigo-600 p-6 text-white">
+      <Card className="max-h-[95vh] w-full p-0 max-w-4xl overflow-hidden">
+        <div className="shrink-0 p-6 bg-blue-600 text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
@@ -119,7 +119,6 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
           </div>
         </div>
 
-        {/* Form Content */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
           <Tabs defaultValue="basic" className="flex flex-1 flex-col overflow-hidden">
             <TabsList className="mx-6 mt-4 grid w-auto shrink-0 grid-cols-3">
@@ -137,9 +136,7 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
               </TabsTrigger>
             </TabsList>
 
-            {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              {/* Tab: Thông tin cơ bản */}
               <TabsContent value="basic" className="mt-0 space-y-6">
                 <div className="space-y-5">
                   <div className="space-y-1">
@@ -261,7 +258,6 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
                 </div>
               </TabsContent>
 
-              {/* Tab: Ảnh bìa */}
               <TabsContent value="thumbnail" className="mt-0">
                 <div className="flex flex-col items-center space-y-6">
                   <div className="w-full max-w-2xl">
@@ -299,7 +295,7 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
               <Button
                 type="submit"
                 disabled={isLoading}
-                className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
+                className="bg-blue-600 hover:from-blue-700 hover:to-indigo-700"
               >
                 {isLoading ? (
                   <>
