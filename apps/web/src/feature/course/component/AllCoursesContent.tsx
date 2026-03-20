@@ -222,7 +222,7 @@ const AllCoursesContent: React.FC = () => {
 
         {courses.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10 mb-8">
               {courses.map((course: CoursePreview) => (
                 <Card
                   key={course.id}
@@ -235,7 +235,7 @@ const AllCoursesContent: React.FC = () => {
                     })
                   }
                 >
-                  <div className="relative h-40 overflow-hidden rounded-xl">
+                  <div className="relative h-48 overflow-hidden rounded-xl">
                     <img
                       src={course.thumbnailUrl}
                       alt={course.title}
@@ -243,11 +243,11 @@ const AllCoursesContent: React.FC = () => {
                     />
 
                     <div className="absolute left-3 top-3">
-                      <Badge className="bg-blue-700 text-xs text-white">Lớp {course.grade}</Badge>
+                      <Badge className="bg-blue-700 text-sm text-white">Lớp {course.grade}</Badge>
                     </div>
 
                     <div className="absolute right-3 top-3">
-                      <Badge className="bg-orange-600 text-xs text-white">{getCourseLevelLabel(course.level)}</Badge>
+                      <Badge className="bg-orange-600 text-sm text-white">{getCourseLevelLabel(course.level)}</Badge>
                     </div>
 
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
@@ -259,7 +259,7 @@ const AllCoursesContent: React.FC = () => {
 
                   <CardContent className="p-0">
                     <div className="space-y-3">
-                      <h3 className="text-md line-clamp-2 h-12 font-bold text-slate-900 dark:text-white transition-colors group-hover:text-blue-700">
+                      <h3 className="text-xl line-clamp-2 h-18 font-bold text-slate-900 dark:text-white transition-colors group-hover:text-blue-700">
                         {course.title}
                       </h3>
 
@@ -269,7 +269,7 @@ const AllCoursesContent: React.FC = () => {
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                className={`h-4 w-4 ${
+                                className={`h-5 w-5 ${
                                   i < Math.floor(course.ratingStar || 5)
                                     ? "fill-yellow-400 text-yellow-400"
                                     : "fill-gray-200 text-gray-200"
@@ -277,11 +277,11 @@ const AllCoursesContent: React.FC = () => {
                               />
                             ))}
                           </div>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">({course.ratingCount || 0})</span>
+                          <span className="text-md text-gray-600 dark:text-gray-400">({course.ratingCount || 0})</span>
                         </div>
 
                         <div className="flex items-center">
-                          <span className="text-lg font-bold text-blue-700 dark:text-blue-400">
+                          <span className="text-xl font-bold text-blue-700 dark:text-blue-400">
                             {course.price === 0 ? "Miễn phí" : `${course.price.toLocaleString()}đ`}
                           </span>
                         </div>
