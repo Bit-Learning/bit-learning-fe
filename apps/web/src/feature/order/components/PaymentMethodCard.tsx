@@ -38,12 +38,12 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
     <div
       onClick={onClick}
       className={`group cursor-pointer overflow-hidden rounded-2xl border-2 transition-all ${
-        selected ? `${styles.border} ${styles.bg} shadow-lg` : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
+        selected ? `${styles.border} ${styles.bg} ` : "border-gray-200 hover:border-blue-300 hover:bg-gray-50"
       }`}
     >
       <div className="flex items-center gap-4 p-6">
         <div
-          className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl ${styles.iconBg} shadow-lg transition-transform group-hover:scale-105`}
+          className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl ${styles.iconBg}  transition-transform group-hover:scale-105`}
         >
           {icon}
         </div>

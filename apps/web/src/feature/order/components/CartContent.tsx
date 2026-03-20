@@ -61,13 +61,13 @@ const CartContent: React.FC = () => {
     return (
       <div className="min-h-screen bg-slate-50 p-4 md:p-8">
         <div className="mx-auto max-w-7xl">
-          <div className="flex min-h-125 flex-col items-center justify-center rounded-2xl bg-white p-12 shadow-lg">
+          <div className="flex min-h-200 flex-col items-center justify-center rounded-md bg-white p-12 ">
             <ShoppingCart className="mb-6 h-32 w-32 text-gray-300" />
             <h2 className="mb-3 text-3xl font-bold text-gray-900">Giỏ hàng trống</h2>
             <p className="mb-8 text-center text-lg text-gray-600">Hãy thêm khóa học vào giỏ hàng để bắt đầu học tập!</p>
             <Button
               onClick={() => navigate({ to: "/courses" })}
-              className="rounded-xl bg-blue-600 px-8 py-3 font-semibold text-white hover:bg-blue-700 transition-colors"
+              className="rounded-xl bg-blue-600 px-8 py-5 font-semibold text-white hover:bg-blue-700 transition-colors"
             >
               Khám phá khóa học
             </Button>
@@ -85,9 +85,9 @@ const CartContent: React.FC = () => {
           <p className="text-lg text-gray-600">{courses.length} khóa học đang chờ bạn</p>
         </div>
 
-        <div className="grid gap-8 lg:grid-cols-3">
+        <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <Card className="overflow-hidden p-0 shadow-lg">
+            <Card className="overflow-hidden p-0 border-gray-400 rounded-md">
               <CardHeader className="bg-blue-600 p-6">
                 <CardTitle className="flex items-center gap-3 text-white">
                   <ShoppingCart className="h-7 w-7" />
@@ -114,7 +114,6 @@ const CartContent: React.FC = () => {
 
                       <div className="min-w-0 flex-1">
                         <h3 className="mb-2 text-lg font-bold text-gray-900 line-clamp-2">{course.title}</h3>
-                        <p className="mb-3 text-sm text-gray-600">{course.instructorName}</p>
 
                         <div className="flex items-center gap-2">
                           <div className="flex items-center gap-1">
@@ -161,7 +160,7 @@ const CartContent: React.FC = () => {
           </div>
 
           <div className="lg:col-span-1">
-            <div className="sticky top-8 overflow-hidden rounded-2xl bg-white shadow-xl">
+            <div className="sticky top-8 overflow-hidden border-gray-400 rounded-md bg-white border">
               <div className="bg-orange-500 p-6">
                 <h2 className="flex items-center gap-3 text-2xl font-bold text-white">
                   <ShoppingCart className="h-6 w-6" />
@@ -170,7 +169,7 @@ const CartContent: React.FC = () => {
               </div>
 
               <div className="space-y-6 p-6">
-                <div className="space-y-4 rounded-xl bg-slate-50 p-5">
+                <div className="space-y-4 rounded-md bg-slate-50 p-5">
                   <div className="flex justify-between text-sm">
                     <span className="text-gray-600">Số lượng khóa học</span>
                     <span className="font-semibold text-gray-900">{summary.itemCount}</span>
@@ -184,7 +183,7 @@ const CartContent: React.FC = () => {
 
                 <Button
                   onClick={handleCheckout}
-                  className="group flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 py-6 text-lg font-bold text-white hover:bg-blue-700 shadow-lg transition-all"
+                  className="group flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 py-6 text-lg font-bold text-white hover:bg-blue-700  transition-all"
                 >
                   Tiến hành thanh toán
                   <ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />

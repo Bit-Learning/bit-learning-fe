@@ -1,5 +1,5 @@
 import React from "react";
-import { User, Lock, History, Bell, BookOpen } from "lucide-react";
+import { User, Lock, History, Bell, BookOpen, Wallet } from "lucide-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { Card } from "@workspace/ui/components/Card";
 import { Badge } from "@workspace/ui/components/Badge";
@@ -22,6 +22,13 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ unreadCount = 0,
       label: "Thông tin cá nhân",
       badge: null,
       to: "/profile",
+    },
+    {
+      id: "top-up",
+      icon: Wallet,
+      label: "Nạp tiền",
+      badge: null,
+      to: "/profile/top-up",
     },
     {
       id: "my-course",
