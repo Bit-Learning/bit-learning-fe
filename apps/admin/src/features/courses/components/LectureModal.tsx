@@ -452,7 +452,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
                   </div>
                   <div className={textForm.formState.errors.content ? "rounded-lg border-2 border-red-500" : ""}>
                     <ReactQuill
-                      ref={textContentRef}
+                      ref={textContentRef as any}
                       theme="snow"
                       value={textForm.watch("content") || ""}
                       onChange={(value) => textForm.setValue("content", value)}
