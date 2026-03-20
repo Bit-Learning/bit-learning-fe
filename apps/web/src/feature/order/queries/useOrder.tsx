@@ -1,7 +1,8 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
 import { orderApi } from "../apis/order.api";
-import { OrderCreateRequest } from "../types/order.type";
+import { OrderCreateRequest, PaymentMethod } from "../types/order.type";
+import { useNavigate } from "@tanstack/react-router";
 
 export const useMyOrders = (params?: { page?: number; size?: number; sort?: string; direction?: "ASC" | "DESC" }) => {
   return useQuery({
@@ -34,17 +35,20 @@ export const useOrdersByUserId = (
 
 export const useCreateOrder = () => {
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
   return useMutation({
     mutationFn: async (request: OrderCreateRequest) => {
       const response = await orderApi.createOrder(request);
-      return response.data.data;
+      return { data: response.data.data, paymentMethod: request.paymentMethod };
     },
-    onSuccess: (data) => {
+    onSuccess: ({ data, paymentMethod }) => {
       queryClient.invalidateQueries({ queryKey: ["cart"] });
       queryClient.invalidateQueries({ queryKey: ["orders"] });
 
-      if (data) {
+      if (paymentMethod === PaymentMethod.WALLET) {
+        navigate({ to: "/payment-result", search: { status: "success" } });
+      } else if (data) {
         window.location.href = data;
       } else {
         toast.success({ title: "Đặt hàng thành công" });

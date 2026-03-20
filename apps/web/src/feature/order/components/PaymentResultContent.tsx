@@ -1,16 +1,19 @@
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
-import { CheckCircle, XCircle, Package, Calendar, CreditCard, Home, AlertCircle, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Package, Calendar, CreditCard, Home, AlertCircle, Loader2, Wallet } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 
 type PaymentStatus = "loading" | "success" | "failed";
+type PaymentGateway = "WALLET" | "VNPAY" | "PAYOS" | "UNKNOWN";
 
 interface DisplayInfo {
   orderCode: string;
   transactionId: string;
   errorMessage: string;
+  gateway: PaymentGateway;
 }
 
 const PaymentResultContent: React.FC = () => {
@@ -22,6 +25,7 @@ const PaymentResultContent: React.FC = () => {
     orderCode: "",
     transactionId: "",
     errorMessage: "",
+    gateway: "UNKNOWN",
   });
 
   const hasProcessed = useRef(false);
@@ -30,43 +34,47 @@ const PaymentResultContent: React.FC = () => {
     if (hasProcessed.current) return;
     hasProcessed.current = true;
 
+    const isWallet = searchParams.gateway === "WALLET" || searchParams.status === "success";
     const isVNPay = "vnp_ResponseCode" in searchParams;
-    const isPayOS = "status" in searchParams;
+    const isPayOS = !isWallet && !isVNPay && "status" in searchParams;
 
     const process = async () => {
+      if (isWallet) {
+        setDisplayInfo({
+          orderCode: searchParams.orderCode ?? "—",
+          transactionId: searchParams.transactionId ?? "—",
+          errorMessage: "",
+          gateway: "WALLET",
+        });
+        setPaymentStatus("success");
+        return;
+      }
+
       if (isPayOS) {
         const isCancelled = searchParams.cancel === "true" || searchParams.status === "CANCELLED";
         const isPaid = searchParams.status === "PAID" && !isCancelled;
-
         setDisplayInfo({
           orderCode: searchParams.orderCode ?? "",
           transactionId: searchParams.id ?? "",
           errorMessage: isCancelled
             ? "Bạn đã hủy giao dịch. Vui lòng thử lại nếu muốn tiếp tục thanh toán."
             : "Có lỗi xảy ra trong quá trình thanh toán. Vui lòng kiểm tra lại thông tin thẻ hoặc liên hệ ngân hàng.",
+          gateway: "PAYOS",
         });
         setPaymentStatus(isPaid ? "success" : "failed");
         return;
       }
 
       if (isVNPay) {
-        const baseInfo: DisplayInfo = {
+        const success = searchParams.vnp_ResponseCode === "00";
+        setDisplayInfo({
           orderCode: searchParams.vnp_OrderInfo ?? "",
           transactionId: searchParams.vnp_TransactionNo ?? "",
           errorMessage:
             "Có lỗi xảy ra trong quá trình thanh toán. Vui lòng kiểm tra lại thông tin thẻ hoặc liên hệ ngân hàng.",
-        };
-
-        try {
-          setDisplayInfo(baseInfo);
-          setPaymentStatus(searchParams.vnp_ResponseCode === "00" ? "success" : "failed");
-        } catch {
-          setDisplayInfo({
-            ...baseInfo,
-            errorMessage: "Không thể xác minh giao dịch. Vui lòng liên hệ hỗ trợ.",
-          });
-          setPaymentStatus("failed");
-        }
+          gateway: "VNPAY",
+        });
+        setPaymentStatus(success ? "success" : "failed");
         return;
       }
 
@@ -74,6 +82,7 @@ const PaymentResultContent: React.FC = () => {
         orderCode: "",
         transactionId: "",
         errorMessage: "Không tìm thấy thông tin giao dịch. Vui lòng liên hệ hỗ trợ.",
+        gateway: "UNKNOWN",
       });
       setPaymentStatus("failed");
     };
@@ -82,10 +91,11 @@ const PaymentResultContent: React.FC = () => {
   }, [searchParams]);
 
   const isPaid = paymentStatus === "success";
+  const isWallet = displayInfo.gateway === "WALLET";
 
   if (paymentStatus === "loading") {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50 p-4">
+      <div className="flex min-h-screen items-center justify-center bg-slate-50 to-indigo-50 p-4">
         <div className="text-center">
           <Loader2 className="mx-auto mb-6 h-16 w-16 animate-spin text-blue-600" />
           <p className="text-lg font-medium text-gray-700">Đang xử lý kết quả thanh toán...</p>
@@ -101,7 +111,6 @@ const PaymentResultContent: React.FC = () => {
           className={`overflow-hidden rounded-md p-0 border-2 ${isPaid ? "border-green-500" : "border-red-500"}`}
           style={{ animation: "slideUp 0.6s ease-out" }}
         >
-          {" "}
           <CardHeader className={`px-8 py-10 text-center ${isPaid ? "bg-green-600" : "bg-red-600"}`}>
             <div className="relative mx-auto mb-6 flex h-24 w-24 items-center justify-center">
               <div
@@ -123,30 +132,60 @@ const PaymentResultContent: React.FC = () => {
               {isPaid ? "Đơn hàng của bạn đã được xác nhận" : "Giao dịch đã bị hủy hoặc không thành công"}
             </p>
           </CardHeader>
+
           <CardContent className="space-y-6 p-8">
             <div className="space-y-4 rounded-xl bg-gray-50 p-5 border border-gray-400">
               <h2 className="text-lg font-bold text-gray-900">Thông tin đơn hàng</h2>
               <div className="space-y-3">
-                <InfoRow
-                  icon={<Package className="h-5 w-5" />}
-                  label="Mã đơn hàng"
-                  value={displayInfo.orderCode || "—"}
-                />
-                <InfoRow
-                  icon={<CreditCard className="h-5 w-5" />}
-                  label="Mã giao dịch"
-                  value={displayInfo.transactionId ? `#${displayInfo.transactionId}` : "—"}
-                />
+                {!isWallet && (
+                  <>
+                    <InfoRow
+                      icon={<Package className="h-5 w-5" />}
+                      label="Mã đơn hàng"
+                      value={displayInfo.orderCode || "—"}
+                    />
+                    <InfoRow
+                      icon={<CreditCard className="h-5 w-5" />}
+                      label="Mã giao dịch"
+                      value={displayInfo.transactionId ? `#${displayInfo.transactionId}` : "—"}
+                    />
+                  </>
+                )}
                 <InfoRow
                   icon={<Calendar className="h-5 w-5" />}
                   label="Thời gian"
                   value={new Date().toLocaleString("vi-VN")}
                 />
+                <InfoRow
+                  icon={isWallet ? <Wallet className="h-5 w-5" /> : <CreditCard className="h-5 w-5" />}
+                  label="Phương thức"
+                  value={
+                    displayInfo.gateway === "WALLET"
+                      ? "Ví BitLearning"
+                      : displayInfo.gateway === "PAYOS"
+                        ? "PayOS"
+                        : displayInfo.gateway === "VNPAY"
+                          ? "VNPay"
+                          : "—"
+                  }
+                />
               </div>
             </div>
 
+            {isWallet && isPaid && (
+              <div className="rounded-xl border border-amber-200 bg-amber-50 p-5 flex items-center gap-4">
+                <BitCoinIcon size={40} />
+                <div>
+                  <p className="font-bold text-amber-800">Ví BIT đã được trừ thành công</p>
+                  <p className="text-sm text-amber-700 mt-0.5">
+                    Số dư ví của bạn đã được cập nhật. Kiểm tra ví tại trang hồ sơ.
+                  </p>
+                </div>
+              </div>
+            )}
+
             {!isPaid && (
-              <div className="rounded-2xl border-2 border-red-200 bg-red-50 p-6">
+              <div className="rounded-xl border-2 border-red-200 bg-red-50 p-6">
                 <div className="flex items-start gap-3">
                   <AlertCircle className="h-6 w-6 shrink-0 text-red-600" />
                   <div>
@@ -161,7 +200,7 @@ const PaymentResultContent: React.FC = () => {
               <Button
                 onClick={() => navigate({ to: "/" })}
                 variant="outline"
-                className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-gray-400 bg-white py-6 text-lg font-semibold text-gray-900 transition-all hover:border-gray-400 hover:bg-gray-50"
+                className="flex w-full items-center justify-center gap-3 rounded-xl border-2 border-gray-400 bg-white py-6 text-lg font-semibold text-gray-900 hover:border-gray-400 hover:bg-gray-50 transition-all"
               >
                 <Home className="h-6 w-6" />
                 Về trang chủ

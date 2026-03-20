@@ -20,7 +20,7 @@ const PRESET_AMOUNTS = [
 
 const toBIT = (vnd: number) => vnd;
 
-const formatBIT = (bit: number) => bit.toLocaleString("vi-VN") + " BIT";
+const formatBIT = (bit: number) => bit.toLocaleString("vi-VN");
 
 export const TopUpContent: React.FC = () => {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
@@ -91,7 +91,8 @@ export const TopUpContent: React.FC = () => {
 
               <div className="flex items-center gap-1.5 mt-2">
                 <BitCoinIcon size={32} />
-                <span className="text-blue-100 text-lg font-medium">{formatBIT(currentBIT)}</span>
+                <span className="text-slate-100 text-lg font-bold">{formatBIT(currentBIT)}</span>
+                <span className="text-lg font-semibold text-amber-300">BIT</span>
               </div>
             </div>
             <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
@@ -106,7 +107,7 @@ export const TopUpContent: React.FC = () => {
                   <BitCoinIcon size={18} />
                   BIT sau khi nạp
                 </span>
-                <span className="text-amber-300 font-semibold">{formatBIT(currentBIT + earnedBIT)}</span>
+                <span className="text-amber-300 font-semibold">{formatBIT(currentBIT + earnedBIT)} BIT</span>
               </div>
             </div>
           ) : null}
@@ -238,8 +239,9 @@ export const TopUpContent: React.FC = () => {
 
               <div className="flex justify-between items-center pb-3 border-b border-blue-500">
                 <span className="text-blue-100 flex items-center gap-1">
-                  <BitCoinIcon size={16} />
-                  BIT nhận được
+                  <BitCoinIcon size={18} />
+                  <span className=" font-semibold text-amber-300">BIT</span>
+                  nhận được
                 </span>
                 <span className="font-bold text-amber-300">{earnedBIT > 0 ? `+${formatBIT(earnedBIT)}` : "0 BIT"}</span>
               </div>
