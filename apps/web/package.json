@@ -43,7 +43,7 @@
 		"framer-motion": "^12.23.24",
 		"hls.js": "^1.6.15",
 		"html-to-image": "^1.11.13",
-		"i18next": "^25.8.18",
+		"i18next": "^25.8.20",
 		"i18next-browser-languagedetector": "^8.2.1",
 		"js-cookie": "^3.0.5",
 		"lucide-react": "^0.562.0",
