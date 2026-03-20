@@ -129,15 +129,15 @@ const AllCoursesContent: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <section className="text-center pt-4 pb-12 bg-white dark:bg-slate-800 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-8 rounded-2xl shadow-sm">
-          <div className="inline-flex items-center gap-2 px-3 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-bold mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-bold mb-4">
             <Sparkles className="w-4 h-4" />
             <span>Học tập không giới hạn</span>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
-            Khóa học Tin học <br className="hidden md:block" /> từ <span className="text-blue-600">Lớp 1</span> đến{" "}
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-5 leading-tight">
+            Khóa học Tin học <br className="hidden md:block" /> từ <span className="text-blue-600">Lớp 3</span> đến{" "}
             <span className="text-blue-600">Lớp 12</span>
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-md text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             Chương trình học tin học toàn diện, cập nhật theo xu hướng công nghệ mới nhất dành cho học sinh từ Tiểu học
             đến THPT.
           </p>
@@ -154,7 +154,7 @@ const AllCoursesContent: React.FC = () => {
               <select
                 value={selectedGrade ?? "all"}
                 onChange={(e) => selectGrade(e.target.value === "all" ? null : Number(e.target.value))}
-                className="pr-10 pl-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="pr-10 pl-2 py-2 rounded-lg border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
                 <option value="all">Tất cả lớp</option>
                 <option value="3">Lớp 3</option>
@@ -172,7 +172,7 @@ const AllCoursesContent: React.FC = () => {
               <select
                 value={selectedLevel ?? "all"}
                 onChange={(e) => selectLevel(e.target.value === "all" ? null : (e.target.value as any))}
-                className="pr-10 pl-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="pr-10 pl-2 py-2 rounded-lg border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
                 <option value="all">Tất cả cấp độ</option>
                 <option value="BEGINNING">Cơ bản</option>
@@ -185,7 +185,7 @@ const AllCoursesContent: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="pr-10 pl-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="pr-10 pl-2 py-2 rounded-lg border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 >
                   <option value="default">Mặc định</option>
                   <option value="price_asc">Giá tăng dần</option>
@@ -196,7 +196,7 @@ const AllCoursesContent: React.FC = () => {
               {(selectedGrade !== null || selectedLevel !== null || sortBy !== "default") && (
                 <button
                   onClick={resetFilters}
-                  className="cursor-pointer px-6 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all font-medium"
+                  className="cursor-pointer px-6 py-2 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all font-medium"
                 >
                   Xóa bộ lọc
                 </button>

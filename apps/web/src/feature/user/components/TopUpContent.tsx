@@ -2,6 +2,7 @@ import { useState } from "react";
 import { Wallet, CreditCard, Zap, CheckCircle2, ArrowRight, TrendingUp } from "lucide-react";
 import { useAddBalanceToWallet } from "@/feature/order/queries/usePayment";
 import { useUserProfile } from "../queries/useUser";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 export enum PaymentMethod {
   VNPAY = "VNPAY",
@@ -17,6 +18,10 @@ const PRESET_AMOUNTS = [
   { value: 500000, label: "500.000đ" },
 ];
 
+const toBIT = (vnd: number) => vnd;
+
+const formatBIT = (bit: number) => bit.toLocaleString("vi-VN") + " BIT";
+
 export const TopUpContent: React.FC = () => {
   const [selectedAmount, setSelectedAmount] = useState<number | null>(null);
   const [customAmount, setCustomAmount] = useState<string>("");
@@ -26,7 +31,11 @@ export const TopUpContent: React.FC = () => {
   const { data: userProfile } = useUserProfile();
 
   const currentBalance = userProfile?.wallet?.balance || 0;
+  const currentBIT = toBIT(currentBalance);
+
   const finalAmount = customAmount ? parseInt(customAmount.replace(/\D/g, "")) : selectedAmount;
+
+  const earnedBIT = finalAmount ? toBIT(finalAmount) : 0;
 
   const handleAmountSelect = (amount: number) => {
     setSelectedAmount(amount);
@@ -48,18 +57,21 @@ export const TopUpContent: React.FC = () => {
       alert("Vui lòng chọn số tiền tối thiểu 10.000đ");
       return;
     }
-
     if (isPending) return;
-
-    addBalance({ amount: finalAmount, paymentMethod });
+    addBalance(
+      { amount: finalAmount, paymentMethod },
+      {
+        onSuccess: () => {
+          setSelectedAmount(null);
+          setCustomAmount("");
+          setPaymentMethod(PaymentMethod.VNPAY);
+        },
+      },
+    );
   };
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat("vi-VN", {
-      style: "currency",
-      currency: "VND",
-    }).format(amount);
-  };
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount);
 
   return (
     <div className="max-w-7xl mx-auto p-6">
@@ -76,21 +88,28 @@ export const TopUpContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <p className="text-blue-100 text-sm font-medium mb-1">Số dư hiện tại</p>
-              <p className="text-white text-3xl font-bold">{formatCurrency(currentBalance)}</p>
+
+              <div className="flex items-center gap-1.5 mt-2">
+                <BitCoinIcon size={32} />
+                <span className="text-blue-100 text-lg font-medium">{formatBIT(currentBIT)}</span>
+              </div>
             </div>
             <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
               <TrendingUp className="w-8 h-8 text-white" />
             </div>
           </div>
 
-          {finalAmount && (
-            <div className="mt-4 pt-4 border-t border-blue-500/30">
+          {finalAmount ? (
+            <div className="mt-4 pt-4 border-t border-blue-500/30 space-y-1">
               <div className="flex items-center justify-between text-sm">
-                <span className="text-blue-100">Số dư sau khi nạp</span>
-                <span className="text-white font-semibold text-lg">{formatCurrency(currentBalance + finalAmount)}</span>
+                <span className="text-blue-100 flex items-center gap-1">
+                  <BitCoinIcon size={18} />
+                  BIT sau khi nạp
+                </span>
+                <span className="text-amber-300 font-semibold">{formatBIT(currentBIT + earnedBIT)}</span>
               </div>
             </div>
-          )}
+          ) : null}
         </div>
       </div>
 
@@ -100,22 +119,31 @@ export const TopUpContent: React.FC = () => {
             <h2 className="text-lg font-semibold text-gray-900 mb-4">Chọn số tiền</h2>
 
             <div className="grid grid-cols-3 gap-3 mb-4">
-              {PRESET_AMOUNTS.map((preset) => (
-                <button
-                  key={preset.value}
-                  onClick={() => handleAmountSelect(preset.value)}
-                  className={`
-                    py-3 px-4 rounded-lg border-2 font-medium transition-all
-                    ${
-                      selectedAmount === preset.value
-                        ? "border-blue-600 bg-blue-50 text-blue-700"
-                        : "border-gray-200 hover:border-blue-300 text-gray-700"
-                    }
-                  `}
-                >
-                  {preset.label}
-                </button>
-              ))}
+              {PRESET_AMOUNTS.map((preset) => {
+                const isSelected = selectedAmount === preset.value;
+                return (
+                  <button
+                    key={preset.value}
+                    onClick={() => handleAmountSelect(preset.value)}
+                    className={`
+                      cursor-pointer py-3 px-4 rounded-lg border-2 font-medium transition-all text-left
+                      ${
+                        isSelected
+                          ? "border-blue-600 bg-blue-50 text-blue-700"
+                          : "border-gray-200 hover:border-blue-300 text-gray-700"
+                      }
+                    `}
+                  >
+                    <div className="text-sm font-semibold">{preset.label}</div>
+                    <div className={`flex items-center gap-1 mt-1 ${isSelected ? "opacity-100" : "opacity-60"}`}>
+                      <BitCoinIcon size={14} />
+                      <span className="text-xs font-medium text-amber-600">
+                        +{toBIT(preset.value).toLocaleString("vi-VN")} BIT
+                      </span>
+                    </div>
+                  </button>
+                );
+              })}
             </div>
 
             <div className="relative">
@@ -130,7 +158,22 @@ export const TopUpContent: React.FC = () => {
                 />
                 <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">đ</span>
               </div>
-              <p className="text-xs text-gray-500 mt-2">Số tiền tối thiểu: 10.000đ</p>
+              <div className="flex items-center justify-between mt-2">
+                <p className="text-xs text-gray-500">Số tiền tối thiểu: 10.000đ</p>
+                {earnedBIT > 0 && customAmount && (
+                  <div className="flex items-center gap-1 text-xs font-medium text-amber-600">
+                    <BitCoinIcon size={14} />
+                    <span>+{earnedBIT.toLocaleString("vi-VN")} BIT</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-4 flex items-center gap-2 bg-amber-50 rounded-lg px-4 py-2.5 border border-amber-100">
+              <BitCoinIcon size={22} />
+              <p className="text-xs text-amber-700 font-medium">
+                Tỷ lệ quy đổi: <span className="font-bold">1.000đ = 1.000 BIT</span>
+              </p>
             </div>
           </div>
 
@@ -141,7 +184,7 @@ export const TopUpContent: React.FC = () => {
               <button
                 onClick={() => setPaymentMethod(PaymentMethod.VNPAY)}
                 className={`
-                  w-full p-4 rounded-lg border-2 flex items-center gap-4 transition-all
+                  cursor-pointer w-full p-4 rounded-lg border-2 flex items-center gap-4 transition-all
                   ${
                     paymentMethod === PaymentMethod.VNPAY
                       ? "border-blue-600 bg-blue-50"
@@ -162,7 +205,7 @@ export const TopUpContent: React.FC = () => {
               <button
                 onClick={() => setPaymentMethod(PaymentMethod.PAYOS)}
                 className={`
-                  w-full p-4 rounded-lg border-2 flex items-center gap-4 transition-all
+                  cursor-pointer w-full p-4 rounded-lg border-2 flex items-center gap-4 transition-all
                   ${
                     paymentMethod === PaymentMethod.PAYOS
                       ? "border-blue-600 bg-blue-50"
@@ -189,13 +232,16 @@ export const TopUpContent: React.FC = () => {
 
             <div className="space-y-3 mb-6">
               <div className="flex justify-between items-center pb-3 border-b border-blue-500">
-                <span className="text-blue-100">Số dư hiện tại</span>
-                <span className="font-semibold">{formatCurrency(currentBalance)}</span>
+                <span className="text-blue-100">Số tiền nạp</span>
+                <span className="text-xl font-bold">{finalAmount ? formatCurrency(finalAmount) : "0đ"}</span>
               </div>
 
               <div className="flex justify-between items-center pb-3 border-b border-blue-500">
-                <span className="text-blue-100">Số tiền nạp</span>
-                <span className="text-xl font-bold">{finalAmount ? formatCurrency(finalAmount) : "0đ"}</span>
+                <span className="text-blue-100 flex items-center gap-1">
+                  <BitCoinIcon size={16} />
+                  BIT nhận được
+                </span>
+                <span className="font-bold text-amber-300">{earnedBIT > 0 ? `+${formatBIT(earnedBIT)}` : "0 BIT"}</span>
               </div>
 
               <div className="flex justify-between items-center pb-3 border-b border-blue-500">
@@ -204,7 +250,7 @@ export const TopUpContent: React.FC = () => {
               </div>
 
               <div className="flex justify-between items-center pt-2">
-                <span className="text-blue-100">Số dư mới</span>
+                <span className="text-blue-100">Tổng tiền </span>
                 <span className="text-2xl font-bold">
                   {finalAmount ? formatCurrency(currentBalance + finalAmount) : formatCurrency(currentBalance)}
                 </span>
@@ -214,15 +260,15 @@ export const TopUpContent: React.FC = () => {
             <button
               onClick={handleSubmit}
               disabled={!finalAmount || finalAmount < 10000 || isPending}
-              className="w-full bg-white text-blue-600 py-3 px-4 rounded-lg font-semibold
-                       hover:bg-blue-50 transition-colors disabled:opacity-50
-                       disabled:cursor-not-allowed flex items-center justify-center gap-2"
+              className="cursor-pointer w-full bg-white text-blue-600 py-3 px-4 rounded-lg font-semibold
+                         hover:bg-blue-50 transition-colors disabled:opacity-50
+                         disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
               {isPending ? (
                 "Đang xử lý..."
               ) : (
                 <>
-                  Tiếp tục thanh toán
+                  Thanh toán
                   <ArrowRight className="w-5 h-5" />
                 </>
               )}

@@ -27,13 +27,7 @@ interface ContestCardProps {
   };
 }
 
-const getContestIcon = (title: string) => {
-  if (title.includes("Olympic") || title.includes("C++") || title.includes("Pascal")) return Code;
-  return Code;
-};
-
 export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
-  const Icon = getContestIcon(contest.title);
   const isEnded = contest.status === ContestStatus.ENDED;
   const isOngoing = contest.status === ContestStatus.RUNNING;
   const isUpcoming = contest.status === ContestStatus.UPCOMING;
@@ -66,7 +60,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
 
   return (
     <Card
-      className={`group rounded-lg p-6 transition-all hover:shadow-xl relative overflow-hidden flex flex-col border ${
+      className={`group rounded-md p-6 border-2 transition-all hover:shadow-xl relative overflow-hidden flex flex-col  ${
         isEnded
           ? "bg-gray-50 opacity-75 hover:opacity-100 border-gray-400"
           : isOngoing
@@ -90,12 +84,14 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
             isEnded ? "bg-gray-100" : isOngoing ? "bg-green-100" : "bg-blue-100"
           }`}
         >
-          <Icon className={`w-7 h-7 ${isEnded ? "text-gray-500" : isOngoing ? "text-green-800" : "text-blue-800"}`} />
+          <Code className={`w-7 h-7 ${isEnded ? "text-gray-500" : isOngoing ? "text-green-800" : "text-blue-800"}`} />
         </div>
         <div className="pr-20">
-          <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors leading-tight">
-            {contest.title}
-          </h3>
+          <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
+            <h3 className="text-xl font-bold group-hover:text-blue-600 transition-colors leading-tight">
+              {contest.title}
+            </h3>
+          </Link>
           <p className="text-sm text-gray-500 mt-1">
             {contest.description || `${contest.problemCount} bài tập • ${contest.durationMinutes || 120} phút`}
           </p>
