@@ -9,6 +9,7 @@ import type React from "react";
 import { useEffect } from "react";
 import { useAppDispatch } from "@/shared/redux/store";
 import { setPageSizeAction } from "@/feature/course/store/course.store";
+import { Pagination } from "@/shared/components/Pagination";
 
 const MyCoursesContent: React.FC = () => {
   const navigate = useNavigate();
@@ -49,11 +50,6 @@ const MyCoursesContent: React.FC = () => {
     });
   };
 
-  const handlePageChange = (newPage: number) => {
-    changePage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
-
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-slate-900">
@@ -82,7 +78,6 @@ const MyCoursesContent: React.FC = () => {
   }
 
   const courses: MyCourse[] = Array.isArray(data?.data) ? data.data : [];
-  const totalElements = data?.page?.totalElements || 0;
   const totalPages = data?.page?.totalPages || 0;
 
   if (courses.length === 0) {
@@ -154,7 +149,7 @@ const MyCoursesContent: React.FC = () => {
                         <Star
                           key={i}
                           className={`h-4 w-4 ${
-                            i < Math.floor(course.ratingStar || 0)
+                            i < Math.floor(course.ratingStar || 5)
                               ? "fill-yellow-400 text-yellow-400"
                               : "fill-gray-200 text-gray-200"
                           }`}
@@ -196,29 +191,7 @@ const MyCoursesContent: React.FC = () => {
         </div>
 
         {totalPages > 1 && (
-          <div className="mt-8 flex items-center justify-center gap-2">
-            <Button
-              variant="outline"
-              isDisabled={pagination.page === 0}
-              onPress={() => handlePageChange(pagination.page - 1)}
-              className="rounded-lg px-4 py-2"
-            >
-              Trang trước
-            </Button>
-
-            <span className="px-4 text-sm text-gray-600 dark:text-gray-400">
-              Trang {pagination.page + 1} / {totalPages}
-            </span>
-
-            <Button
-              variant="outline"
-              isDisabled={pagination.page >= totalPages - 1}
-              onPress={() => handlePageChange(pagination.page + 1)}
-              className="rounded-lg px-4 py-2"
-            >
-              Trang sau
-            </Button>
-          </div>
+          <Pagination currentPage={pagination.page} totalPages={totalPages} onPageChange={changePage} />
         )}
       </div>
     </div>

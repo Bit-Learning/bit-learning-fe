@@ -9,7 +9,7 @@ export const useMyOrders = (params?: { page?: number; size?: number; sort?: stri
     queryKey: ["orders", "me", params],
     queryFn: async () => {
       const response = await orderApi.getMyOrders(params);
-      return response.data.data;
+      return response.data;
     },
   });
 };
