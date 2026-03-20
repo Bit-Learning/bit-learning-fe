@@ -10,7 +10,7 @@ import type React from "react";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
-import { Enable2FA, Verify2FA } from "../api/auth.api";
+import { authApi } from "../api/auth.api";
 import type { TTwoFactorAuthResponse } from "../types/auth.type";
 
 const verifySchema = z.object({
@@ -40,7 +40,7 @@ const Enable2FAComponent: React.FC<Enable2FAProps> = ({ onSuccess, onCancel }) =
 
   // Mutation to enable 2FA
   const enableMutation = useMutation({
-    mutationFn: Enable2FA,
+    mutationFn: authApi.enable2FA,
     onSuccess: async (response) => {
       const data: TTwoFactorAuthResponse = response.data.data;
       setQrData(data);
@@ -75,7 +75,7 @@ const Enable2FAComponent: React.FC<Enable2FAProps> = ({ onSuccess, onCancel }) =
 
   // Mutation to verify TOTP code
   const verifyMutation = useMutation({
-    mutationFn: (data: { totpCode: string }) => Verify2FA(data),
+    mutationFn: (data: { totpCode: string }) => authApi.verify2FA(data),
     onSuccess: () => {
       toast.success({
         title: "Thành công",
@@ -133,7 +133,7 @@ const Enable2FAComponent: React.FC<Enable2FAProps> = ({ onSuccess, onCancel }) =
               <Button
                 onClick={handleEnable}
                 isDisabled={enableMutation.isPending}
-                className="h-12 w-full rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-blue-800"
+                className="h-12 w-full rounded-xl bg-blue-600 font-semibold text-white shadow-md transition-all hover:from-blue-700 hover:to-blue-800"
               >
                 {enableMutation.isPending ? "Đang xử lý..." : "Bật xác thực hai yếu tố"}
               </Button>
@@ -215,7 +215,7 @@ const Enable2FAComponent: React.FC<Enable2FAProps> = ({ onSuccess, onCancel }) =
                       <Button
                         type="submit"
                         isDisabled={verifyMutation.isPending || form.watch("totpCode").length !== 6}
-                        className="h-12 flex-1 rounded-xl bg-gradient-to-r from-green-600 to-green-700 font-semibold text-white shadow-md transition-all hover:from-green-700 hover:to-green-800"
+                        className="h-12 flex-1 rounded-xl bg-green-700 font-semibold text-white shadow-md transition-all hover:from-green-700 hover:to-green-800"
                       >
                         {verifyMutation.isPending ? "Đang xác thực..." : "Xác nhận và kích hoạt"}
                       </Button>

@@ -1,10 +1,7 @@
-// Admin-specific auth types
-
-export type TUserRole = "ADMIN" | "MANAGER" | "STUDENT" | "MENTOR";
-
 export type TAdminLoginRequest = {
-	email: string;
-	password: string;
+  email: string;
+  password: string;
+  role: "ADMIN" | "MANAGER";
 };
 
 export type TAdminLoginResponse = {
@@ -14,18 +11,18 @@ export type TAdminLoginResponse = {
 };
 
 export type TAdminUser = {
-	id: number;
-	username: string;
-	firstName: string;
-	lastName: string;
-	avatar: string;
-	email: string;
-	activated: boolean;
-	role: TUserRole;
-	langKey: string;
-	lastLoginAttempt: string | null;
-	createdAt: string;
-	updatedAt: string;
+  id: number;
+  username: string;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  email: string;
+  activated: boolean;
+  role: "ADMIN" | "MANAGER";
+  langKey: string;
+  lastLoginAttempt: string | null;
+  createdAt: string;
+  updatedAt: string;
 };
 
 export type TRefreshTokenRequest = {
