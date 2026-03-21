@@ -253,9 +253,7 @@ export const TopUpContent: React.FC = () => {
 
               <div className="flex justify-between items-center pt-2">
                 <span className="text-blue-100">Tổng tiền </span>
-                <span className="text-2xl font-bold">
-                  {finalAmount ? formatCurrency(currentBalance + finalAmount) : formatCurrency(currentBalance)}
-                </span>
+                <span className="text-xl font-bold">{finalAmount ? formatCurrency(finalAmount) : "0đ"}</span>
               </div>
             </div>
 
