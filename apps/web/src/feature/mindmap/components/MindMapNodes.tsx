@@ -1,84 +1,27 @@
+import type React from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 
 interface MindMapNodeData {
     label: string;
-    description: string;
-    theme?: MindMapNodeTheme;
+    description?: string;
+    /** CSS inline style từ theme_config.nodeStyles.* */
+    nodeStyle: React.CSSProperties;
+    /** Màu handle từ theme_config.colors[depth] */
+    handleColor: string;
 }
 
-export interface MindMapNodeTheme {
-    from: string;
-    to: string;
-    border: string;
-    text: string;
-    description: string;
-    handle: string;
-    shadow?: string;
-}
+// ─── Invisible handles ────────────────────────────────────────────────────────
+// Vẫn functional cho edge routing nhưng không hiển thị ra ngoài
 
-const DEFAULT_ROOT_THEME: MindMapNodeTheme = {
-    from: "#6366f1",
-    to: "#7c3aed",
-    border: "#818cf8",
-    text: "#ffffff",
-    description: "#e0e7ff",
-    handle: "#a5b4fc",
-    shadow: "rgba(99,102,241,0.35)",
+const hiddenHandle: React.CSSProperties = {
+    width: 8,
+    height: 8,
+    border: "none",
+    opacity: 0,
+    pointerEvents: "none",
 };
 
-const DEFAULT_BRANCH_THEME: MindMapNodeTheme = {
-    from: "#eff6ff",
-    to: "#e0f2fe",
-    border: "#93c5fd",
-    text: "#1e3a8a",
-    description: "#1d4ed8",
-    handle: "#60a5fa",
-    shadow: "rgba(59,130,246,0.2)",
-};
-
-const DEFAULT_LEAF_THEME: MindMapNodeTheme = {
-    from: "#ecfdf5",
-    to: "#f0fdfa",
-    border: "#a7f3d0",
-    text: "#065f46",
-    description: "#0f766e",
-    handle: "#34d399",
-    shadow: "rgba(16,185,129,0.2)",
-};
-
-function getNodeStyle(theme: MindMapNodeTheme) {
-    return {
-        background: `linear-gradient(135deg, ${theme.from}, ${theme.to})`,
-        borderColor: theme.border,
-        color: theme.text,
-        boxShadow: `0 10px 24px -10px ${theme.shadow ?? "rgba(0,0,0,0.2)"}`,
-    };
-}
-
-function RadialHandles({ colorClass, hasSource = true, hasTarget = true }: { colorClass: string; hasSource?: boolean; hasTarget?: boolean }) {
-    return (
-        <>
-            {hasTarget && (
-                <>
-                    <Handle id="target-top" type="target" position={Position.Top} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="target-right" type="target" position={Position.Right} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="target-bottom" type="target" position={Position.Bottom} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="target-left" type="target" position={Position.Left} className={`${colorClass} w-2! h-2!`} />
-                </>
-            )}
-            {hasSource && (
-                <>
-                    <Handle id="source-top" type="source" position={Position.Top} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="source-right" type="source" position={Position.Right} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="source-bottom" type="source" position={Position.Bottom} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="source-left" type="source" position={Position.Left} className={`${colorClass} w-2! h-2!`} />
-                </>
-            )}
-        </>
-    );
-}
-
-function RadialHandlesWithColor({
+function RadialHandles({
     handleColor,
     hasSource = true,
     hasTarget = true,
@@ -87,48 +30,30 @@ function RadialHandlesWithColor({
     hasSource?: boolean;
     hasTarget?: boolean;
 }) {
+    const s = { ...hiddenHandle, background: handleColor };
     return (
         <>
             {hasTarget && (
                 <>
-                    <Handle id="target-top" type="target" position={Position.Top} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="target-right" type="target" position={Position.Right} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="target-bottom" type="target" position={Position.Bottom} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="target-left" type="target" position={Position.Left} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
+                    <Handle id="target-top"    type="target" position={Position.Top}    style={s} />
+                    <Handle id="target-right"  type="target" position={Position.Right}  style={s} />
+                    <Handle id="target-bottom" type="target" position={Position.Bottom} style={s} />
+                    <Handle id="target-left"   type="target" position={Position.Left}   style={s} />
                 </>
             )}
             {hasSource && (
                 <>
-                    <Handle id="source-top" type="source" position={Position.Top} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="source-right" type="source" position={Position.Right} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="source-bottom" type="source" position={Position.Bottom} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="source-left" type="source" position={Position.Left} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
+                    <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
+                    <Handle id="source-right"  type="source" position={Position.Right}  style={s} />
+                    <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
+                    <Handle id="source-left"   type="source" position={Position.Left}   style={s} />
                 </>
             )}
         </>
     );
 }
 
-function SymmetricHandles({ colorClass, hasSource = true, hasTarget = true }: { colorClass: string; hasSource?: boolean; hasTarget?: boolean }) {
-    return (
-        <>
-            {hasTarget && (
-                <>
-                    <Handle id="target-left" type="target" position={Position.Left} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="target-right" type="target" position={Position.Right} className={`${colorClass} w-2! h-2!`} />
-                </>
-            )}
-            {hasSource && (
-                <>
-                    <Handle id="source-left" type="source" position={Position.Left} className={`${colorClass} w-2! h-2!`} />
-                    <Handle id="source-right" type="source" position={Position.Right} className={`${colorClass} w-2! h-2!`} />
-                </>
-            )}
-        </>
-    );
-}
-
-function SymmetricHandlesWithColor({
+function SymmetricHandles({
     handleColor,
     hasSource = true,
     hasTarget = true,
@@ -137,177 +62,248 @@ function SymmetricHandlesWithColor({
     hasSource?: boolean;
     hasTarget?: boolean;
 }) {
+    const s = { ...hiddenHandle, background: handleColor };
     return (
         <>
             {hasTarget && (
                 <>
-                    <Handle id="target-left" type="target" position={Position.Left} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="target-right" type="target" position={Position.Right} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
+                    <Handle id="target-left"  type="target" position={Position.Left}  style={s} />
+                    <Handle id="target-right" type="target" position={Position.Right} style={s} />
                 </>
             )}
             {hasSource && (
                 <>
-                    <Handle id="source-left" type="source" position={Position.Left} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
-                    <Handle id="source-right" type="source" position={Position.Right} className="w-2! h-2!" style={{ backgroundColor: handleColor }} />
+                    <Handle id="source-left"  type="source" position={Position.Left}  style={s} />
+                    <Handle id="source-right" type="source" position={Position.Right} style={s} />
                 </>
             )}
         </>
     );
 }
 
-export function MindMapRootNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_ROOT_THEME;
-    return (
-        <div className="rounded-2xl border-2 px-6 py-4 min-w-45 max-w-65" style={getNodeStyle(appliedTheme)}>
-            <div className="text-center">
-                <p className="text-base font-bold leading-tight">{label}</p>
-                {description && (
-                    <p className="mt-1.5 text-xs leading-snug opacity-90" style={{ color: appliedTheme.description }}>{description}</p>
-                )}
-            </div>
-            <Handle type="source" position={Position.Bottom} className="w-2! h-2!" style={{ backgroundColor: appliedTheme.handle }} />
-        </div>
-    );
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+/** Tách borderRadius khỏi nodeStyle — chúng ta tự kiểm soát hình dạng node */
+function splitNodeStyle(nodeStyle: React.CSSProperties) {
+    const { borderRadius: _br, border: _b, boxShadow: _bs, ...rest } = nodeStyle;
+    return rest;
 }
 
-export function MindMapBranchNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_BRANCH_THEME;
-    return (
-        <div className="rounded-xl border px-5 py-3 min-w-40 max-w-60" style={getNodeStyle(appliedTheme)}>
-            <div className="text-center">
-                <p className="text-sm font-semibold">{label}</p>
-                {description && (
-                    <p className="mt-1 text-xs leading-snug" style={{ color: appliedTheme.description }}>{description}</p>
-                )}
-            </div>
-            <Handle type="target" position={Position.Top} className="w-2! h-2!" style={{ backgroundColor: appliedTheme.handle }} />
-            <Handle type="source" position={Position.Bottom} className="w-2! h-2!" style={{ backgroundColor: appliedTheme.handle }} />
-        </div>
-    );
-}
-
-export function MindMapLeafNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_LEAF_THEME;
-    return (
-        <div className="rounded-lg border px-4 py-2.5 min-w-35 max-w-55" style={getNodeStyle(appliedTheme)}>
-            <div className="text-center">
-                <p className="text-xs font-medium">{label}</p>
-                {description && (
-                    <p className="mt-0.5 text-[11px] leading-snug" style={{ color: appliedTheme.description }}>{description}</p>
-                )}
-            </div>
-            <Handle type="target" position={Position.Top} className="w-2! h-2!" style={{ backgroundColor: appliedTheme.handle }} />
-        </div>
-    );
-}
+// ─── Radial nodes ─────────────────────────────────────────────────────────────
 
 export function MindMapRadialRootNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_ROOT_THEME;
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
     return (
-        <div className="rounded-full border-2 px-6 py-5 min-w-44 max-w-56 text-center" style={getNodeStyle(appliedTheme)}>
-            <p className="text-sm font-bold leading-tight">{label}</p>
+        <div
+            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words rounded-2xl px-6 py-4 text-center transition-shadow hover:shadow-2xl"
+            style={{
+                ...baseStyle,
+                border: `2.5px solid ${handleColor}`,
+                boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
+            }}
+        >
+            <p className="text-sm font-extrabold leading-tight tracking-tight">{label}</p>
             {description && (
-                <p className="mt-1.5 text-[11px] leading-snug opacity-90" style={{ color: appliedTheme.description }}>{description}</p>
+                <p className="mt-1.5 text-[11px] font-normal leading-snug opacity-80">{description}</p>
             )}
-            <RadialHandlesWithColor handleColor={appliedTheme.handle} hasSource hasTarget={false} />
+            <RadialHandles handleColor={handleColor} hasSource hasTarget={false} />
         </div>
     );
 }
 
 export function MindMapRadialBranchNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_BRANCH_THEME;
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
     return (
-        <div className="rounded-full border px-5 py-4 min-w-38 max-w-52 text-center" style={getNodeStyle(appliedTheme)}>
-            <p className="text-xs font-semibold">{label}</p>
+        <div
+            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words rounded-xl px-5 py-3 text-center transition-shadow hover:shadow-xl"
+            style={{
+                ...baseStyle,
+                border: `1.5px solid ${handleColor}70`,
+                boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
+            }}
+        >
+            <p className="text-xs font-bold leading-tight">{label}</p>
             {description && (
-                <p className="mt-1 text-[11px] leading-snug" style={{ color: appliedTheme.description }}>{description}</p>
+                <p className="mt-1 text-[10px] leading-snug opacity-75">{description}</p>
             )}
-            <RadialHandlesWithColor handleColor={appliedTheme.handle} />
+            <RadialHandles handleColor={handleColor} />
         </div>
     );
 }
 
 export function MindMapRadialLeafNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_LEAF_THEME;
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
     return (
-        <div className="rounded-full border px-4 py-3 min-w-34 max-w-48 text-center" style={getNodeStyle(appliedTheme)}>
-            <p className="text-xs font-medium">{label}</p>
+        <div
+            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words rounded-lg px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
+            style={{
+                ...baseStyle,
+                border: `1px solid ${handleColor}45`,
+                boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
+            }}
+        >
+            <p className="text-[11px] font-semibold leading-tight">{label}</p>
             {description && (
-                <p className="mt-0.5 text-[11px] leading-snug" style={{ color: appliedTheme.description }}>{description}</p>
+                <p className="mt-0.5 text-[10px] leading-snug opacity-70">{description}</p>
             )}
-            <RadialHandlesWithColor handleColor={appliedTheme.handle} hasSource={false} hasTarget />
+            <RadialHandles handleColor={handleColor} hasSource={false} hasTarget />
         </div>
     );
 }
 
+// ─── Symmetric nodes ──────────────────────────────────────────────────────────
+
 export function MindMapSymmetricRootNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_ROOT_THEME;
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
     return (
-        <div className="rounded-2xl border-2 px-6 py-4 min-w-45 max-w-65" style={getNodeStyle(appliedTheme)}>
-            <div className="text-center">
-                <p className="text-base font-bold leading-tight">{label}</p>
-                {description && (
-                    <p className="mt-1.5 text-xs leading-snug opacity-90" style={{ color: appliedTheme.description }}>{description}</p>
-                )}
-            </div>
-            <SymmetricHandlesWithColor handleColor={appliedTheme.handle} hasSource hasTarget={false} />
+        <div
+            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words rounded-2xl px-6 py-4 text-center transition-shadow hover:shadow-2xl"
+            style={{
+                ...baseStyle,
+                border: `2.5px solid ${handleColor}`,
+                boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
+            }}
+        >
+            <p className="text-sm font-extrabold leading-tight tracking-tight">{label}</p>
+            {description && (
+                <p className="mt-1.5 text-[11px] font-normal leading-snug opacity-80">{description}</p>
+            )}
+            <SymmetricHandles handleColor={handleColor} hasSource hasTarget={false} />
         </div>
     );
 }
 
 export function MindMapSymmetricBranchNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_BRANCH_THEME;
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
     return (
-        <div className="rounded-xl border px-5 py-3 min-w-40 max-w-60" style={getNodeStyle(appliedTheme)}>
-            <div className="text-center">
-                <p className="text-sm font-semibold">{label}</p>
-                {description && (
-                    <p className="mt-1 text-xs leading-snug" style={{ color: appliedTheme.description }}>{description}</p>
-                )}
-            </div>
-            <SymmetricHandlesWithColor handleColor={appliedTheme.handle} />
+        <div
+            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words rounded-xl px-5 py-3 text-center transition-shadow hover:shadow-xl"
+            style={{
+                ...baseStyle,
+                border: `1.5px solid ${handleColor}70`,
+                boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
+            }}
+        >
+            <p className="text-xs font-bold leading-tight">{label}</p>
+            {description && (
+                <p className="mt-1 text-[10px] leading-snug opacity-75">{description}</p>
+            )}
+            <SymmetricHandles handleColor={handleColor} />
         </div>
     );
 }
 
 export function MindMapSymmetricLeafNode({ data }: NodeProps) {
-    const { label, description, theme } = data as unknown as MindMapNodeData;
-    const appliedTheme = theme ?? DEFAULT_LEAF_THEME;
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
     return (
-        <div className="rounded-lg border px-4 py-2.5 min-w-35 max-w-55" style={getNodeStyle(appliedTheme)}>
-            <div className="text-center">
-                <p className="text-xs font-medium">{label}</p>
-                {description && (
-                    <p className="mt-0.5 text-[11px] leading-snug" style={{ color: appliedTheme.description }}>{description}</p>
-                )}
-            </div>
-            <SymmetricHandlesWithColor handleColor={appliedTheme.handle} hasSource={false} hasTarget />
+        <div
+            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words rounded-lg px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
+            style={{
+                ...baseStyle,
+                border: `1px solid ${handleColor}45`,
+                boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
+            }}
+        >
+            <p className="text-[11px] font-semibold leading-tight">{label}</p>
+            {description && (
+                <p className="mt-0.5 text-[10px] leading-snug opacity-70">{description}</p>
+            )}
+            <SymmetricHandles handleColor={handleColor} hasSource={false} hasTarget />
         </div>
     );
 }
 
+// ─── Horizontal nodes ─────────────────────────────────────────────────────────
+
+export function MindMapRootNode({ data }: NodeProps) {
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
+    const s = { ...hiddenHandle, background: handleColor };
+    return (
+        <div
+            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words rounded-2xl px-6 py-4 text-center"
+            style={{
+                ...baseStyle,
+                border: `2.5px solid ${handleColor}`,
+                boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38`,
+            }}
+        >
+            <p className="text-sm font-extrabold leading-tight">{label}</p>
+            {description && (
+                <p className="mt-1.5 text-[11px] leading-snug opacity-80">{description}</p>
+            )}
+            <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
+        </div>
+    );
+}
+
+export function MindMapBranchNode({ data }: NodeProps) {
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
+    const s = { ...hiddenHandle, background: handleColor };
+    return (
+        <div
+            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words rounded-xl px-5 py-3 text-center"
+            style={{
+                ...baseStyle,
+                border: `1.5px solid ${handleColor}70`,
+                boxShadow: `0 4px 16px ${handleColor}28`,
+            }}
+        >
+            <p className="text-xs font-bold leading-tight">{label}</p>
+            {description && (
+                <p className="mt-1 text-[10px] leading-snug opacity-75">{description}</p>
+            )}
+            <Handle id="target-top"    type="target" position={Position.Top}    style={s} />
+            <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
+        </div>
+    );
+}
+
+export function MindMapLeafNode({ data }: NodeProps) {
+    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const baseStyle = splitNodeStyle(nodeStyle);
+    const s = { ...hiddenHandle, background: handleColor };
+    return (
+        <div
+            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words rounded-lg px-4 py-2.5 text-center"
+            style={{
+                ...baseStyle,
+                border: `1px solid ${handleColor}45`,
+                boxShadow: `0 2px 10px ${handleColor}18`,
+            }}
+        >
+            <p className="text-[11px] font-semibold leading-tight">{label}</p>
+            {description && (
+                <p className="mt-0.5 text-[10px] leading-snug opacity-70">{description}</p>
+            )}
+            <Handle id="target-top" type="target" position={Position.Top} style={s} />
+        </div>
+    );
+}
+
+// ─── NodeTypes maps ───────────────────────────────────────────────────────────
+
 export const mindMapNodeTypes = {
-    mindMapRoot: MindMapRootNode,
+    mindMapRoot:   MindMapRootNode,
     mindMapBranch: MindMapBranchNode,
-    mindMapLeaf: MindMapLeafNode,
+    mindMapLeaf:   MindMapLeafNode,
 };
 
 export const mindMapRadialNodeTypes = {
-    mindMapRoot: MindMapRadialRootNode,
+    mindMapRoot:   MindMapRadialRootNode,
     mindMapBranch: MindMapRadialBranchNode,
-    mindMapLeaf: MindMapRadialLeafNode,
+    mindMapLeaf:   MindMapRadialLeafNode,
 };
 
 export const mindMapSymmetricNodeTypes = {
-    mindMapRoot: MindMapSymmetricRootNode,
+    mindMapRoot:   MindMapSymmetricRootNode,
     mindMapBranch: MindMapSymmetricBranchNode,
-    mindMapLeaf: MindMapSymmetricLeafNode,
+    mindMapLeaf:   MindMapSymmetricLeafNode,
 };

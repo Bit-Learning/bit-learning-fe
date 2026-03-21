@@ -5,10 +5,8 @@ import type {
     GenerateMindMapRequest,
     MindMapGalleryResponse,
     MindMapGenerateResponse,
-    MindMapVersionDetailDto,
     MindMapVersionDto,
     RefineRequest,
-    SavedMindMapDetailDto,
     SavedMindMapDto,
 } from "../types/mindmap.type";
 
@@ -35,12 +33,12 @@ export const mindmapApi = {
         page = 0,
         size = 10,
     ): Promise<AxiosResponse<ApiResponse<SavedMindMapDto[]>>> =>
-        api.get("/mindmap/saved", { params: { page, size, sort: "createdAt,desc" } }),
+        api.get("/mindmap/saved", { params: { page, size, sort: "createdAt,DESC" } }),
 
     // GET /mindmap/saved/{id}
     getById: (
         id: number,
-    ): Promise<AxiosResponse<ApiResponse<SavedMindMapDetailDto>>> =>
+    ): Promise<AxiosResponse<ApiResponse<SavedMindMapDto>>> =>
         api.get(`/mindmap/saved/${id}`),
 
     // DELETE /mindmap/saved/{id}
@@ -57,7 +55,7 @@ export const mindmapApi = {
     getVersion: (
         id: number,
         versionNumber: number,
-    ): Promise<AxiosResponse<ApiResponse<MindMapVersionDetailDto>>> =>
+    ): Promise<AxiosResponse<ApiResponse<MindMapVersionDto>>> =>
         api.get(`/mindmap/saved/${id}/versions/${versionNumber}`),
 
     // POST /mindmap/saved/{id}/versions/{version_number}/restore

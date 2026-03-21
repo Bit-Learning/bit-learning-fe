@@ -2,19 +2,14 @@ import { useState } from "react";
 import { Loader2, BookMarked, Trash2, Upload, ChevronLeft, ChevronRight } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { toast } from "@/shared/components/Sonner";
-import { savedMindMapApi } from "../apis/mindmap.api";
+import { mindmapApi } from "../apis/mindmap.api";
 import { useGetSavedMindMaps, useDeleteSavedMindMap } from "../queries/use-mindmap-queries";
-import type { SavedMindMapDetailDto } from "../types/mindmap.type";
+import type { SavedMindMapDto } from "../types/mindmap.type";
 
 interface SavedMindMapsPanelProps {
-    onLoad: (detail: SavedMindMapDetailDto) => void;
+    onLoad: (detail: SavedMindMapDto) => void;
 }
 
-const LAYOUT_LABEL: Record<string, string> = {
-    "radial": "Tỏa tròn",
-    "symmetric-horizontal": "Đối xứng",
-    "horizontal": "Ngang",
-};
 
 function formatDate(dateStr: string) {
     try {
@@ -45,7 +40,7 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
     const handleLoad = async (id: number) => {
         setLoadingId(id);
         try {
-            const res = await savedMindMapApi.getById(id);
+            const res = await mindmapApi.getById(id);
             const detail = res.data.data;
             if (detail) {
                 onLoad(detail);
@@ -126,9 +121,6 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
                                 <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
                                     {item.topic}
                                 </span>
-                                <span className="rounded-full bg-slate-100 px-2.5 py-0.5 text-xs font-medium text-slate-600 dark:bg-slate-800 dark:text-slate-300">
-                                    {LAYOUT_LABEL[item.layoutType] ?? item.layoutType}
-                                </span>
                             </div>
 
                             {/* Date */}
@@ -181,7 +173,7 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
                                             ) : (
                                                 <Upload className="h-4 w-4" />
                                             )}
-                                            Tải lên
+                                            Sử dụng
                                         </Button>
                                     </>
                                 )}
