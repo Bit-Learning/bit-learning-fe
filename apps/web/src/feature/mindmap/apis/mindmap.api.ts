@@ -8,6 +8,8 @@ import type {
     MindMapVersionDto,
     RefineRequest,
     SavedMindMapDto,
+    SaveTreeRequest,
+    SaveTreeResponse,
 } from "../types/mindmap.type";
 
 export const mindmapApi = {
@@ -64,4 +66,11 @@ export const mindmapApi = {
         versionNumber: number,
     ): Promise<AxiosResponse<ApiResponse<MindMapGenerateResponse>>> =>
         api.post(`/mindmap/saved/${id}/versions/${versionNumber}/restore`),
+
+    // POST /mindmap/saved/{id}/save
+    saveTree: (
+        id: number,
+        request: SaveTreeRequest,
+    ): Promise<AxiosResponse<ApiResponse<SaveTreeResponse>>> =>
+        api.post(`/mindmap/saved/${id}/save`, request),
 };

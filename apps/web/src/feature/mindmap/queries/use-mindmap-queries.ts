@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { mindmapApi } from "../apis/mindmap.api";
-import type { GenerateMindMapRequest, RefineRequest } from "../types/mindmap.type";
+import type { GenerateMindMapRequest, RefineRequest, SaveTreeRequest } from "../types/mindmap.type";
 
 // ─── Query Keys ───────────────────────────────────────────────────────────────
 
@@ -110,6 +110,20 @@ export const useRestoreMindMapVersion = () => {
             id: number;
             versionNumber: number;
         }) => mindmapApi.restoreVersion(id, versionNumber),
+        onSuccess: (_data, { id }) => {
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.versions(id) });
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.detail(id) });
+        },
+    });
+};
+
+// ─── Save Tree ────────────────────────────────────────────────────────────────
+
+export const useSaveMindMapTree = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, request }: { id: number; request: SaveTreeRequest }) =>
+            mindmapApi.saveTree(id, request),
         onSuccess: (_data, { id }) => {
             queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.versions(id) });
             queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.detail(id) });

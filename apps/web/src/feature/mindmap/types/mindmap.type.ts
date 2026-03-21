@@ -119,6 +119,20 @@ export interface SavedMindMapDto {
     updatedAt: string;                 // camelCase
 }
 
+// ─── Save Tree ────────────────────────────────────────────────────────────────
+
+export interface SaveTreeRequest {
+    treeData: MindMapTreeNode;
+}
+
+export interface SaveTreeResponse {
+    id: number;
+    version_number: number;        // @JsonProperty
+    change_description: string;    // @JsonProperty
+    treeData: MindMapTreeNode;
+    created_at: string;            // @JsonProperty
+}
+
 // ─── Version History ──────────────────────────────────────────────────────────
 // Dùng cho cả GET /versions (list) và GET /versions/{vn} — cùng một DTO
 // Không có structure_config/theme_config → dùng config của mindmap hiện tại khi preview

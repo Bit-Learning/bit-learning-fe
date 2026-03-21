@@ -30,12 +30,14 @@ import {
     History,
     Eye,
     AlertTriangle,
+    Save,
 } from "lucide-react";
 import {
     useGenerateMindMap,
     useGetMindMapGallery,
     useGetSavedMindMaps,
     useRefineMindMap,
+    useSaveMindMapTree,
 } from "../queries/use-mindmap-queries";
 import { mindMapNodeTypes, mindMapRadialNodeTypes, mindMapSymmetricNodeTypes } from "./MindMapNodes";
 import type {
@@ -107,6 +109,7 @@ export default function MindMapView() {
     const { data: galleryData, isLoading: isGalleryLoading } = useGetMindMapGallery();
     const { mutate: generate, isPending: isGenerating } = useGenerateMindMap();
     const { mutate: refine, isPending: isRefining } = useRefineMindMap();
+    const { mutate: saveTree, isPending: isSaving } = useSaveMindMapTree();
 
     const gallery = galleryData?.data?.data;
 
@@ -324,6 +327,18 @@ export default function MindMapView() {
 
     const handleSaveNodeEdit = () => {
         if (!editingNode) return;
+        // Sync label/description into currentTreeRef so handleSaveTree sends up-to-date data
+        const updateTreeNode = (node: MindMapTreeNode): MindMapTreeNode => {
+            if (node.id === editingNode.id) {
+                return { ...node, label: editingNode.label, description: editingNode.description };
+            }
+            return node.children?.length
+                ? { ...node, children: node.children.map(updateTreeNode) }
+                : node;
+        };
+        if (currentTreeRef.current) {
+            currentTreeRef.current = updateTreeNode(currentTreeRef.current);
+        }
         setNodes((prev) =>
             prev.map((n) =>
                 n.id === editingNode.id
@@ -332,6 +347,24 @@ export default function MindMapView() {
             ),
         );
         setEditingNode(null);
+    };
+
+    // ── Save Tree ─────────────────────────────────────────────────────────────
+    const handleSaveTree = () => {
+        if (!currentMindMapId || !currentTreeRef.current) return;
+        saveTree(
+            { id: currentMindMapId, request: { treeData: currentTreeRef.current } },
+            {
+                onSuccess: (res) => {
+                    const data = res.data.data;
+                    if (data) setCurrentVersion(data.version_number);
+                    toast.success({ title: `Đã lưu (version ${data?.version_number ?? ""})` });
+                },
+                onError: () => {
+                    toast.error({ title: "Lưu thất bại, vui lòng thử lại" });
+                },
+            },
+        );
     };
 
     // ── Export PNG ───────────────────────────────────────────────────────────
@@ -450,8 +483,8 @@ export default function MindMapView() {
                 <button
                     onClick={() => setActiveTab("generate")}
                     className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeTab === "generate"
-                            ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
-                            : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                        : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                         }`}
                 >
                     <Sparkles className="h-4 w-4" />
@@ -460,8 +493,8 @@ export default function MindMapView() {
                 <button
                     onClick={() => setActiveTab("saved")}
                     className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${activeTab === "saved"
-                            ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
-                            : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+                        ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
+                        : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
                         }`}
                 >
                     <BookMarked className="h-4 w-4" />
@@ -519,6 +552,23 @@ export default function MindMapView() {
                                 <ImageDown className="h-4 w-4" />
                                 {t("mindmap.button.export")}
                             </Button>
+
+                            {/* Save tree */}
+                            {currentMindMapId && !isPreviewingVersion && (
+                                <Button
+                                    variant="outline"
+                                    onPress={handleSaveTree}
+                                    isDisabled={isSaving || isPending}
+                                    className="shrink-0 gap-2"
+                                >
+                                    {isSaving ? (
+                                        <Loader2 className="h-4 w-4 animate-spin" />
+                                    ) : (
+                                        <Save className="h-4 w-4" />
+                                    )}
+                                    Lưu
+                                </Button>
+                            )}
 
                             {/* Version history toggle */}
                             {currentMindMapId && (
@@ -718,7 +768,7 @@ export default function MindMapView() {
                             <Wand2 className="h-4 w-4 shrink-0 text-indigo-500" />
                             <Input
                                 className="flex-1"
-                                placeholder="Nhập yêu cầu tinh chỉnh, ví dụ: Thêm nhánh về quang hợp C4..."
+                                placeholder="Nhập yêu cầu tinh chỉnh, ví dụ: Thêm nhánh về lập trình Java..."
                                 value={refineInstruction}
                                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRefineInstruction(e.target.value)}
                                 onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {

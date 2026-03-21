@@ -5,7 +5,11 @@
       "Bash(npm run dev:*)",
       "Bash(find F:/Capstone/bit-learning-fe -path */elkjs/*.d.ts)",
       "Bash(npx tsc:*)",
-      "Bash(node:*)"
+      "Bash(node:*)",
+      "Bash(find /f/Capstone/bit-learning-fe -type f \\\\\\(-name *.json -o -name *.ts -o -name *.tsx \\\\\\))",
+      "Bash(xargs grep:*)",
+      "WebSearch",
+      "WebFetch(domain:eclipse.dev)"
     ],
     "deny": [],
     "ask": []
