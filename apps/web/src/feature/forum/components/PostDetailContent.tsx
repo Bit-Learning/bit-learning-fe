@@ -402,10 +402,13 @@ const PostDetailContent: React.FC = () => {
               <div key={c.id} className="py-5">
                 <CommentItem
                   comment={c}
+                  replyingTo={replyingTo}
+                  setReplyingTo={setReplyingTo}
                   onReply={(id) => setReplyingTo(id)}
                   onEdit={(comment) => setEditingComment(comment.id)}
                   onDelete={(id) => deleteCommentMutation.mutate(id)}
                   onLike={(id) => likeCommentMutation.mutate(id)}
+                  onSubmitReply={(content, id) => replyCommentMutation.mutate({ id, content })}
                 />
               </div>
             ))}
