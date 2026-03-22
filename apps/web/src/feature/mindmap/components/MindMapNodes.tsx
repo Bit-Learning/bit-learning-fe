@@ -1,6 +1,8 @@
 import type React from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 
+export type NodeShape = "rounded" | "pill" | "square" | "soft";
+
 interface MindMapNodeData {
     label: string;
     description?: string;
@@ -8,6 +10,18 @@ interface MindMapNodeData {
     nodeStyle: React.CSSProperties;
     /** Màu handle từ theme_config.colors[depth] */
     handleColor: string;
+    /** Hình dạng node — được chọn từ ShapePicker */
+    nodeShape?: NodeShape;
+}
+
+function getBorderRadius(shape: NodeShape | undefined, level: "root" | "branch" | "leaf"): string {
+    switch (shape) {
+        case "pill":   return "9999px";
+        case "square": return "0px";
+        case "soft":   return "4px";
+        default:
+            return level === "root" ? "16px" : level === "branch" ? "12px" : "8px";
+    }
 }
 
 // ─── Invisible handles ────────────────────────────────────────────────────────
@@ -92,13 +106,14 @@ function splitNodeStyle(nodeStyle: React.CSSProperties) {
 // ─── Radial nodes ─────────────────────────────────────────────────────────────
 
 export function MindMapRadialRootNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     return (
         <div
-            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words rounded-2xl px-6 py-4 text-center transition-shadow hover:shadow-2xl"
+            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words px-6 py-4 text-center transition-shadow hover:shadow-2xl"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "root"),
                 border: `2.5px solid ${handleColor}`,
                 boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
             }}
@@ -113,13 +128,14 @@ export function MindMapRadialRootNode({ data }: NodeProps) {
 }
 
 export function MindMapRadialBranchNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     return (
         <div
-            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words rounded-xl px-5 py-3 text-center transition-shadow hover:shadow-xl"
+            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words px-5 py-3 text-center transition-shadow hover:shadow-xl"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "branch"),
                 border: `1.5px solid ${handleColor}70`,
                 boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
             }}
@@ -134,13 +150,14 @@ export function MindMapRadialBranchNode({ data }: NodeProps) {
 }
 
 export function MindMapRadialLeafNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     return (
         <div
-            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words rounded-lg px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
+            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "leaf"),
                 border: `1px solid ${handleColor}45`,
                 boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
             }}
@@ -157,13 +174,14 @@ export function MindMapRadialLeafNode({ data }: NodeProps) {
 // ─── Symmetric nodes ──────────────────────────────────────────────────────────
 
 export function MindMapSymmetricRootNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     return (
         <div
-            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words rounded-2xl px-6 py-4 text-center transition-shadow hover:shadow-2xl"
+            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words px-6 py-4 text-center transition-shadow hover:shadow-2xl"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "root"),
                 border: `2.5px solid ${handleColor}`,
                 boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
             }}
@@ -178,13 +196,14 @@ export function MindMapSymmetricRootNode({ data }: NodeProps) {
 }
 
 export function MindMapSymmetricBranchNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     return (
         <div
-            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words rounded-xl px-5 py-3 text-center transition-shadow hover:shadow-xl"
+            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words px-5 py-3 text-center transition-shadow hover:shadow-xl"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "branch"),
                 border: `1.5px solid ${handleColor}70`,
                 boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
             }}
@@ -199,13 +218,14 @@ export function MindMapSymmetricBranchNode({ data }: NodeProps) {
 }
 
 export function MindMapSymmetricLeafNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     return (
         <div
-            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words rounded-lg px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
+            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "leaf"),
                 border: `1px solid ${handleColor}45`,
                 boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
             }}
@@ -222,14 +242,15 @@ export function MindMapSymmetricLeafNode({ data }: NodeProps) {
 // ─── Horizontal nodes ─────────────────────────────────────────────────────────
 
 export function MindMapRootNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     const s = { ...hiddenHandle, background: handleColor };
     return (
         <div
-            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words rounded-2xl px-6 py-4 text-center"
+            className="relative min-w-[160px] max-w-[230px] cursor-default select-none break-words px-6 py-4 text-center"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "root"),
                 border: `2.5px solid ${handleColor}`,
                 boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38`,
             }}
@@ -244,14 +265,15 @@ export function MindMapRootNode({ data }: NodeProps) {
 }
 
 export function MindMapBranchNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     const s = { ...hiddenHandle, background: handleColor };
     return (
         <div
-            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words rounded-xl px-5 py-3 text-center"
+            className="relative min-w-[130px] max-w-[200px] cursor-default select-none break-words px-5 py-3 text-center"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "branch"),
                 border: `1.5px solid ${handleColor}70`,
                 boxShadow: `0 4px 16px ${handleColor}28`,
             }}
@@ -267,14 +289,15 @@ export function MindMapBranchNode({ data }: NodeProps) {
 }
 
 export function MindMapLeafNode({ data }: NodeProps) {
-    const { label, description, nodeStyle, handleColor } = data as unknown as MindMapNodeData;
+    const { label, description, nodeStyle, handleColor, nodeShape } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
     const s = { ...hiddenHandle, background: handleColor };
     return (
         <div
-            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words rounded-lg px-4 py-2.5 text-center"
+            className="relative min-w-[110px] max-w-[175px] cursor-default select-none break-words px-4 py-2.5 text-center"
             style={{
                 ...baseStyle,
+                borderRadius: getBorderRadius(nodeShape, "leaf"),
                 border: `1px solid ${handleColor}45`,
                 boxShadow: `0 2px 10px ${handleColor}18`,
             }}

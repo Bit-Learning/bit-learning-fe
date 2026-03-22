@@ -50,7 +50,7 @@ import type {
 import { runElkLayout, getAlgorithmFamily } from "../utils/elk-layout";
 import SavedMindMapsPanel from "./SavedMindMapsPanel";
 import VersionHistorySidebar from "./VersionHistorySidebar";
-import { StructurePicker, ThemePicker } from "./GalleryPicker";
+import { StructurePicker, ThemePicker, ShapePicker, type NodeShape } from "./GalleryPicker";
 
 type ActiveTab = "generate" | "saved";
 
@@ -65,6 +65,8 @@ export default function MindMapView() {
     const [showSettings, setShowSettings] = useState(false);
     const [selectedStructureId, setSelectedStructureId] = useState<number | undefined>(undefined);
     const [selectedThemeId, setSelectedThemeId] = useState<number | undefined>(undefined);
+    const [nodeShape, setNodeShape] = useState<NodeShape>("rounded");
+    const nodeShapeRef = useRef<NodeShape>("rounded");
 
     // ── Canvas state ─────────────────────────────────────────────────────────
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -141,7 +143,7 @@ export default function MindMapView() {
 
         let cancelled = false;
         setIsApplyingLayout(true);
-        runElkLayout(tree, structure, theme)
+        runElkLayout(tree, structure, theme, nodeShapeRef.current)
             .then(({ nodes: rfNodes, edges: rfEdges }) => {
                 if (cancelled) return;
                 setNodes(rfNodes);
@@ -155,6 +157,12 @@ export default function MindMapView() {
         // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [selectedStructureId, selectedThemeId, isPreviewingVersion]);
 
+    // Patch shape vào nodes khi user đổi — không cần re-run ELK
+    useEffect(() => {
+        nodeShapeRef.current = nodeShape;
+        setNodes((prev) => prev.map((n) => ({ ...n, data: { ...n.data, nodeShape } })));
+    }, [nodeShape, setNodes]);
+
     // ── ELK layout handler ───────────────────────────────────────────────────
     const applyLayout = useCallback(
         async (response: MindMapGenerateResponse) => {
@@ -164,6 +172,7 @@ export default function MindMapView() {
                     response.tree,
                     response.structure_config,
                     response.theme_config,
+                    nodeShapeRef.current,
                 );
                 setNodes(rfNodes);
                 setEdges(rfEdges);
@@ -253,6 +262,7 @@ export default function MindMapView() {
                 detail.treeData,
                 structure,
                 theme,
+                nodeShapeRef.current,
             );
             setNodes(rfNodes);
             setEdges(rfEdges);
@@ -293,6 +303,7 @@ export default function MindMapView() {
                 detail.treeData,
                 detail.structure_config,
                 detail.theme_config,
+                nodeShapeRef.current,
             );
             setNodes(rfNodes);
             setEdges(rfEdges);
@@ -533,6 +544,13 @@ export default function MindMapView() {
                                 selectedId={selectedThemeId}
                                 onChange={setSelectedThemeId}
                                 disabled={isPending || isGalleryLoading}
+                            />
+
+                            {/* Shape picker */}
+                            <ShapePicker
+                                value={nodeShape}
+                                onChange={setNodeShape}
+                                disabled={isPending}
                             />
 
                             <Button

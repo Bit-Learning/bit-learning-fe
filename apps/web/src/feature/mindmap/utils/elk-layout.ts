@@ -85,6 +85,7 @@ export async function runElkLayout(
     tree: MindMapTreeNode,
     structureConfig: StructureConfig,
     themeConfig: ThemeConfig,
+    nodeShape?: string,
 ): Promise<{ nodes: Node[]; edges: Edge[] }> {
     const flatNodes = flattenTree(tree);
 
@@ -144,6 +145,7 @@ export async function runElkLayout(
                 description: n.description ?? "",
                 nodeStyle,
                 handleColor,
+                nodeShape,
             },
         };
     });

@@ -2,6 +2,55 @@ import { useEffect, useRef, useState } from "react";
 import { Check, ChevronDown, Layout, Palette } from "lucide-react";
 import type { StructureConfig, ThemeConfig } from "../types/mindmap.type";
 
+// ─── NodeShape ────────────────────────────────────────────────────────────────
+
+export type NodeShape = "rounded" | "pill" | "square" | "soft";
+
+const SHAPES: { value: NodeShape; label: string; rx: number }[] = [
+    { value: "rounded", label: "Tròn vừa", rx: 5 },
+    { value: "pill",    label: "Viên thuốc", rx: 14 },
+    { value: "square",  label: "Vuông góc", rx: 0 },
+    { value: "soft",    label: "Bo nhẹ", rx: 2 },
+];
+
+function ShapeIcon({ rx }: { rx: number }) {
+    return (
+        <svg width="30" height="18" viewBox="0 0 30 18" fill="none">
+            <rect x="1" y="1" width="28" height="16" rx={rx} fill="currentColor" fillOpacity={0.12} stroke="currentColor" strokeWidth="1.5" />
+        </svg>
+    );
+}
+
+interface ShapePickerProps {
+    value: NodeShape;
+    onChange: (shape: NodeShape) => void;
+    disabled?: boolean;
+}
+
+export function ShapePicker({ value, onChange, disabled }: ShapePickerProps) {
+    return (
+        <div className="flex items-center gap-0.5 rounded-md border border-slate-300 bg-white px-1 py-1 dark:border-slate-600 dark:bg-slate-800">
+            {SHAPES.map((s) => (
+                <button
+                    key={s.value}
+                    type="button"
+                    title={s.label}
+                    disabled={disabled}
+                    onClick={() => onChange(s.value)}
+                    className={`flex items-center justify-center rounded px-1.5 py-0.5 transition-colors
+                        ${value === s.value
+                            ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300"
+                            : "text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
+                        }
+                        disabled:cursor-not-allowed disabled:opacity-50`}
+                >
+                    <ShapeIcon rx={s.rx} />
+                </button>
+            ))}
+        </div>
+    );
+}
+
 // ─── Shared hook — close on outside click / Escape ────────────────────────────
 
 function useDropdown() {
