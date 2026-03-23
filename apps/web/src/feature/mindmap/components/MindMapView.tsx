@@ -49,6 +49,32 @@ import type {
 } from "../types/mindmap.type";
 import { runElkLayout, getAlgorithmFamily } from "../utils/elk-layout";
 import SavedMindMapsPanel from "./SavedMindMapsPanel";
+
+// ─── Tree helpers ─────────────────────────────────────────────────────────────
+
+function addChildToTree(tree: MindMapTreeNode, parentId: string, newChild: MindMapTreeNode): MindMapTreeNode {
+    if (tree.id === parentId) {
+        return { ...tree, children: [...(tree.children ?? []), newChild] };
+    }
+    return { ...tree, children: (tree.children ?? []).map((c) => addChildToTree(c, parentId, newChild)) };
+}
+
+function removeNodeFromTree(tree: MindMapTreeNode, nodeId: string): MindMapTreeNode | null {
+    if (tree.id === nodeId) return null;
+    const children = (tree.children ?? [])
+        .map((c) => removeNodeFromTree(c, nodeId))
+        .filter((c): c is MindMapTreeNode => c !== null);
+    return { ...tree, children };
+}
+
+function findNodeInTree(tree: MindMapTreeNode, id: string): MindMapTreeNode | null {
+    if (tree.id === id) return tree;
+    for (const child of tree.children ?? []) {
+        const found = findNodeInTree(child, id);
+        if (found) return found;
+    }
+    return null;
+}
 import VersionHistorySidebar from "./VersionHistorySidebar";
 import { StructurePicker, ThemePicker, ShapePicker, type NodeShape } from "./GalleryPicker";
 
@@ -67,6 +93,9 @@ export default function MindMapView() {
     const [selectedThemeId, setSelectedThemeId] = useState<number | undefined>(undefined);
     const [nodeShape, setNodeShape] = useState<NodeShape>("rounded");
     const nodeShapeRef = useRef<NodeShape>("rounded");
+    // Stable refs cho node action callbacks — tránh stale closures
+    const addChildCallbackRef = useRef<(parentId: string) => void>(() => {});
+    const deleteNodeCallbackRef = useRef<(nodeId: string) => void>(() => {});
 
     // ── Canvas state ─────────────────────────────────────────────────────────
     const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
@@ -94,6 +123,23 @@ export default function MindMapView() {
     // ── UI toggles ───────────────────────────────────────────────────────────
     const [showVersionSidebar, setShowVersionSidebar] = useState(false);
     const [activeTab, setActiveTab] = useState<ActiveTab>("generate");
+
+    // ── withExtras — inject callbacks + shape vào rfNodes sau mỗi ELK run ────
+    // Dùng refs để đảm bảo luôn đọc giá trị mới nhất, không cần deps
+    const withExtras = useCallback((rfNodes: Node[]): Node[] =>
+        rfNodes.map((n) => ({
+            ...n,
+            data: {
+                ...n.data,
+                nodeShape: nodeShapeRef.current,
+                onAddChild: () => addChildCallbackRef.current(n.id),
+                // Root node không được xóa
+                onDeleteNode: n.type !== "mindMapRoot"
+                    ? () => deleteNodeCallbackRef.current(n.id)
+                    : undefined,
+            },
+        }))
+    , []);
 
     // ── Refine ───────────────────────────────────────────────────────────────
     const [refineInstruction, setRefineInstruction] = useState("");
@@ -146,7 +192,7 @@ export default function MindMapView() {
         runElkLayout(tree, structure, theme, nodeShapeRef.current)
             .then(({ nodes: rfNodes, edges: rfEdges }) => {
                 if (cancelled) return;
-                setNodes(rfNodes);
+                setNodes(withExtras(rfNodes));
                 setEdges(rfEdges);
                 setCanvasBackground(theme.background);
             })
@@ -163,6 +209,67 @@ export default function MindMapView() {
         setNodes((prev) => prev.map((n) => ({ ...n, data: { ...n.data, nodeShape } })));
     }, [nodeShape, setNodes]);
 
+    // ── Node add / delete ────────────────────────────────────────────────────
+    const handleAddChildNode = useCallback(async (parentId: string) => {
+        const tree = currentTreeRef.current;
+        if (!tree || !gallery || isPreviewingVersion) return;
+        const structure = gallery.structures.find((s) => s.id === selectedStructureId);
+        const theme = gallery.themes.find((t) => t.id === selectedThemeId);
+        if (!structure || !theme) return;
+
+        const parentInTree = findNodeInTree(tree, parentId);
+        const newType: "branch" | "leaf" = parentInTree?.type === "root" ? "branch" : "leaf";
+        const newChild: MindMapTreeNode = {
+            id: `node-${Date.now()}`,
+            label: "Nút mới",
+            description: "",
+            type: newType,
+            children: [],
+        };
+        const newTree = addChildToTree(tree, parentId, newChild);
+        currentTreeRef.current = newTree;
+
+        setIsApplyingLayout(true);
+        try {
+            const { nodes: rfNodes, edges: rfEdges } = await runElkLayout(newTree, structure, theme, nodeShapeRef.current);
+            setNodes(withExtras(rfNodes));
+            setEdges(rfEdges);
+        } catch {
+            toast.error({ title: "Lỗi khi thêm node" });
+        } finally {
+            setIsApplyingLayout(false);
+        }
+    }, [gallery, selectedStructureId, selectedThemeId, isPreviewingVersion, withExtras, setNodes, setEdges]);
+
+    const handleDeleteNode = useCallback(async (nodeId: string) => {
+        const tree = currentTreeRef.current;
+        if (!tree || !gallery || isPreviewingVersion || tree.id === nodeId) return;
+        const structure = gallery.structures.find((s) => s.id === selectedStructureId);
+        const theme = gallery.themes.find((t) => t.id === selectedThemeId);
+        if (!structure || !theme) return;
+
+        const newTree = removeNodeFromTree(tree, nodeId);
+        if (!newTree) return;
+        currentTreeRef.current = newTree;
+
+        setIsApplyingLayout(true);
+        try {
+            const { nodes: rfNodes, edges: rfEdges } = await runElkLayout(newTree, structure, theme, nodeShapeRef.current);
+            setNodes(withExtras(rfNodes));
+            setEdges(rfEdges);
+        } catch {
+            toast.error({ title: "Lỗi khi xóa node" });
+        } finally {
+            setIsApplyingLayout(false);
+        }
+    }, [gallery, selectedStructureId, selectedThemeId, isPreviewingVersion, withExtras, setNodes, setEdges]);
+
+    // Sync callback refs — để withExtras luôn gọi đúng handler mới nhất
+    useEffect(() => {
+        addChildCallbackRef.current = handleAddChildNode;
+        deleteNodeCallbackRef.current = handleDeleteNode;
+    }, [handleAddChildNode, handleDeleteNode]);
+
     // ── ELK layout handler ───────────────────────────────────────────────────
     const applyLayout = useCallback(
         async (response: MindMapGenerateResponse) => {
@@ -174,7 +281,7 @@ export default function MindMapView() {
                     response.theme_config,
                     nodeShapeRef.current,
                 );
-                setNodes(rfNodes);
+                setNodes(withExtras(rfNodes));
                 setEdges(rfEdges);
                 setCurrentMindMapId(response.id);
                 setCurrentVersion(response.current_version);
@@ -189,7 +296,7 @@ export default function MindMapView() {
                 setIsApplyingLayout(false);
             }
         },
-        [setNodes, setEdges],
+        [setNodes, setEdges, withExtras],
     );
 
     // ── Generate ─────────────────────────────────────────────────────────────
@@ -264,7 +371,7 @@ export default function MindMapView() {
                 theme,
                 nodeShapeRef.current,
             );
-            setNodes(rfNodes);
+            setNodes(withExtras(rfNodes));
             setEdges(rfEdges);
             setCanvasBackground(theme.background);
             setIsPreviewingVersion(true);
@@ -305,7 +412,7 @@ export default function MindMapView() {
                 detail.theme_config,
                 nodeShapeRef.current,
             );
-            setNodes(rfNodes);
+            setNodes(withExtras(rfNodes));
             setEdges(rfEdges);
             setTopic(detail.topic);
             setCurrentTitle(detail.title);
@@ -765,6 +872,7 @@ export default function MindMapView() {
                             <VersionHistorySidebar
                                 mindMapId={currentMindMapId}
                                 currentVersion={currentVersion}
+                                previewVersionNumber={previewVersionNumber}
                                 onPreview={handlePreviewVersion}
                                 onRestored={handleVersionRestored}
                                 onClose={() => setShowVersionSidebar(false)}

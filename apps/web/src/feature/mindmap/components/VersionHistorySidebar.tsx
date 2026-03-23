@@ -9,6 +9,7 @@ import type { MindMapGenerateResponse, MindMapVersionDto } from "../types/mindma
 interface VersionHistorySidebarProps {
     mindMapId: number;
     currentVersion: number;
+    previewVersionNumber?: number | null;
     onPreview: (detail: MindMapVersionDto) => void;
     onRestored: (response: MindMapGenerateResponse) => void;
     onClose: () => void;
@@ -31,6 +32,7 @@ function formatDate(dateStr: string) {
 export default function VersionHistorySidebar({
     mindMapId,
     currentVersion,
+    previewVersionNumber,
     onPreview,
     onRestored,
     onClose,
@@ -103,6 +105,7 @@ export default function VersionHistorySidebar({
                     <ol className="relative border-l border-slate-200 pl-4 dark:border-slate-700">
                         {versions.map((v) => {
                             const isCurrent = v.version_number === currentVersion;
+                            const isPreviewing = v.version_number === previewVersionNumber;
                             const isLoadingThis = loadingVersion === v.version_number;
 
                             return (
@@ -110,24 +113,38 @@ export default function VersionHistorySidebar({
                                     {/* Timeline dot */}
                                     <span
                                         className={`absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 ${
-                                            isCurrent
-                                                ? "border-indigo-600 bg-indigo-600"
-                                                : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900"
+                                            isPreviewing
+                                                ? "border-amber-500 bg-amber-500"
+                                                : isCurrent
+                                                    ? "border-indigo-600 bg-indigo-600"
+                                                    : "border-slate-300 bg-white dark:border-slate-600 dark:bg-slate-900"
                                         }`}
                                     />
 
-                                    <div className="rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+                                    <div className={`rounded-lg border p-3 ${
+                                        isPreviewing
+                                            ? "border-amber-300 bg-amber-50 dark:border-amber-700 dark:bg-amber-950/40"
+                                            : "border-slate-200 bg-slate-50 dark:border-slate-700 dark:bg-slate-800/50"
+                                    }`}>
                                         <div className="flex items-center gap-2">
                                             <span
                                                 className={`text-xs font-semibold ${
-                                                    isCurrent
-                                                        ? "text-indigo-600 dark:text-indigo-400"
-                                                        : "text-slate-700 dark:text-slate-300"
+                                                    isPreviewing
+                                                        ? "text-amber-700 dark:text-amber-400"
+                                                        : isCurrent
+                                                            ? "text-indigo-600 dark:text-indigo-400"
+                                                            : "text-slate-700 dark:text-slate-300"
                                                 }`}
                                             >
                                                 v{v.version_number}
                                             </span>
-                                            {isCurrent && (
+                                            {isPreviewing && (
+                                                <span className="flex items-center gap-0.5 rounded-full bg-amber-100 px-1.5 py-0.5 text-[10px] font-medium text-amber-700 dark:bg-amber-900 dark:text-amber-300">
+                                                    <Eye className="h-2.5 w-2.5" />
+                                                    Đang xem
+                                                </span>
+                                            )}
+                                            {isCurrent && !isPreviewing && (
                                                 <span className="rounded-full bg-indigo-100 px-1.5 py-0.5 text-[10px] font-medium text-indigo-700 dark:bg-indigo-900 dark:text-indigo-300">
                                                     Hiện tại
                                                 </span>
@@ -147,14 +164,16 @@ export default function VersionHistorySidebar({
                                                     variant="outline"
                                                     onPress={() => handlePreview(v.version_number)}
                                                     isDisabled={isLoadingThis || isRestoring}
-                                                    className="flex h-7 flex-1 items-center justify-center gap-1 text-xs"
+                                                    className={`flex h-7 flex-1 items-center justify-center gap-1 text-xs ${
+                                                        isPreviewing ? "border-amber-400 text-amber-700 dark:border-amber-600 dark:text-amber-400" : ""
+                                                    }`}
                                                 >
                                                     {isLoadingThis ? (
                                                         <Loader2 className="h-3 w-3 animate-spin" />
                                                     ) : (
                                                         <Eye className="h-3 w-3" />
                                                     )}
-                                                    Xem
+                                                    {isPreviewing ? "Xem lại" : "Xem"}
                                                 </Button>
                                                 <Button
                                                     onPress={() => handleRestore(v.version_number)}
