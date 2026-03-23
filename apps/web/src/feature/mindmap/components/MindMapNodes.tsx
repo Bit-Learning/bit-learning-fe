@@ -302,6 +302,7 @@ export function MindMapRootNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-1.5 text-[11px] leading-snug opacity-80">{description}</p>
             )}
+            <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
             <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
         </div>
     );
@@ -327,6 +328,8 @@ export function MindMapBranchNode({ data }: NodeProps) {
                 <p className="mt-1 text-[10px] leading-snug opacity-75">{description}</p>
             )}
             <Handle id="target-top"    type="target" position={Position.Top}    style={s} />
+            <Handle id="target-bottom" type="target" position={Position.Bottom} style={s} />
+            <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
             <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
         </div>
     );
@@ -352,6 +355,8 @@ export function MindMapLeafNode({ data }: NodeProps) {
                 <p className="mt-0.5 text-[10px] leading-snug opacity-70">{description}</p>
             )}
             <Handle id="target-top"    type="target" position={Position.Top}    style={s} />
+            <Handle id="target-bottom" type="target" position={Position.Bottom} style={s} />
+            <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
             <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
         </div>
     );

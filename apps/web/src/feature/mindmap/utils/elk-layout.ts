@@ -179,8 +179,10 @@ export async function runElkLayout(
             if (!sourceNode || !targetNode) return base;
 
             if (algorithmFamily === "horizontal") {
-                // Chỉ nối top ↔ bottom
-                return { ...base, sourceHandle: "source-bottom", targetHandle: "target-top" };
+                // Dùng vị trí thực tế để phân biệt UP (source-top) vs DOWN (source-bottom)
+                const dir = getDirection(sourceNode, targetNode);
+                const vDir = dir === "top" ? "top" : "bottom";
+                return { ...base, sourceHandle: `source-${vDir}`, targetHandle: `target-${oppositeDir(vDir)}` };
             }
 
             if (algorithmFamily === "symmetric") {
