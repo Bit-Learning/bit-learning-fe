@@ -1,24 +1,40 @@
 import { useEffect, useRef, useState } from "react";
-import { Check, ChevronDown, Layout, Palette } from "lucide-react";
+import { Check, ChevronDown, Layout, Palette, Shapes } from "lucide-react";
 import type { StructureConfig, ThemeConfig } from "../types/mindmap.type";
+import type { NodeShape } from "./MindMapNodes";
 
-// ─── NodeShape ────────────────────────────────────────────────────────────────
+export type { NodeShape };
 
-export type NodeShape = "rounded" | "pill" | "square" | "soft";
+// ─── ShapePicker ──────────────────────────────────────────────────────────────
 
-const SHAPES: { value: NodeShape; label: string; rx: number }[] = [
-    { value: "rounded", label: "Tròn vừa", rx: 5 },
-    { value: "pill",    label: "Viên thuốc", rx: 14 },
-    { value: "square",  label: "Vuông góc", rx: 0 },
-    { value: "soft",    label: "Bo nhẹ", rx: 2 },
+const SHAPES: { value: NodeShape; label: string }[] = [
+    { value: "rounded", label: "Tròn vừa" },
+    { value: "pill",    label: "Viên thuốc" },
+    { value: "square",  label: "Vuông góc" },
+    { value: "circle",  label: "Hình tròn" },
+    { value: "diamond", label: "Hình thoi" },
+    { value: "hexagon", label: "Lục giác" },
 ];
 
-function ShapeIcon({ rx }: { rx: number }) {
-    return (
-        <svg width="30" height="18" viewBox="0 0 30 18" fill="none">
-            <rect x="1" y="1" width="28" height="16" rx={rx} fill="currentColor" fillOpacity={0.12} stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-    );
+function ShapeIcon({ shape }: { shape: NodeShape }) {
+    const fill = "currentColor";
+    const fillOp = 0.15;
+    const stroke = "currentColor";
+    const sw = 1.5;
+    switch (shape) {
+        case "rounded":
+            return <svg width="32" height="20" viewBox="0 0 32 20" fill="none"><rect x="1" y="1" width="30" height="18" rx="5" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} /></svg>;
+        case "pill":
+            return <svg width="32" height="20" viewBox="0 0 32 20" fill="none"><rect x="1" y="1" width="30" height="18" rx="9" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} /></svg>;
+        case "square":
+            return <svg width="32" height="20" viewBox="0 0 32 20" fill="none"><rect x="1" y="1" width="30" height="18" rx="0" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} /></svg>;
+        case "circle":
+            return <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10.5" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} /></svg>;
+        case "diamond":
+            return <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polygon points="12,1 23,12 12,23 1,12" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} strokeLinejoin="round" /></svg>;
+        case "hexagon":
+            return <svg width="28" height="24" viewBox="0 0 28 24" fill="none"><polygon points="7,1 21,1 27,12 21,23 7,23 1,12" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} strokeLinejoin="round" /></svg>;
+    }
 }
 
 interface ShapePickerProps {
@@ -28,25 +44,60 @@ interface ShapePickerProps {
 }
 
 export function ShapePicker({ value, onChange, disabled }: ShapePickerProps) {
+    const { open, setOpen, ref } = useDropdown();
+    const selected = SHAPES.find((s) => s.value === value) ?? SHAPES[0];
+
     return (
-        <div className="flex items-center gap-0.5 rounded-md border border-slate-300 bg-white px-1 py-1 dark:border-slate-600 dark:bg-slate-800">
-            {SHAPES.map((s) => (
-                <button
-                    key={s.value}
-                    type="button"
-                    title={s.label}
-                    disabled={disabled}
-                    onClick={() => onChange(s.value)}
-                    className={`flex items-center justify-center rounded px-1.5 py-0.5 transition-colors
-                        ${value === s.value
-                            ? "bg-indigo-100 text-indigo-600 dark:bg-indigo-900 dark:text-indigo-300"
-                            : "text-slate-400 hover:bg-slate-100 hover:text-slate-600 dark:text-slate-500 dark:hover:bg-slate-700 dark:hover:text-slate-300"
-                        }
-                        disabled:cursor-not-allowed disabled:opacity-50`}
-                >
-                    <ShapeIcon rx={s.rx} />
-                </button>
-            ))}
+        <div ref={ref} className="relative">
+            <button
+                type="button"
+                onClick={() => !disabled && setOpen((v) => !v)}
+                disabled={disabled}
+                className={`flex items-center gap-2 rounded-md border px-3 py-2 text-sm transition-colors
+                    ${open
+                        ? "border-indigo-500 bg-indigo-50 text-indigo-700 dark:border-indigo-500 dark:bg-indigo-950 dark:text-indigo-300"
+                        : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-slate-500"
+                    }
+                    disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+                <Shapes className="h-3.5 w-3.5 shrink-0 text-slate-400" />
+                <span className="max-w-24 truncate">{selected.label}</span>
+                <ChevronDown className={`h-3.5 w-3.5 shrink-0 text-slate-400 transition-transform ${open ? "rotate-180" : ""}`} />
+            </button>
+
+            {open && (
+                <div className="absolute left-0 top-full z-50 mt-1 w-56 rounded-xl border border-slate-200 bg-white p-3 shadow-xl dark:border-slate-700 dark:bg-slate-900">
+                    <p className="mb-2.5 text-xs font-semibold uppercase tracking-wide text-slate-500 dark:text-slate-400">
+                        Hình dạng node
+                    </p>
+                    <div className="grid grid-cols-3 gap-1.5">
+                        {SHAPES.map((s) => {
+                            const isSelected = s.value === value;
+                            return (
+                                <button
+                                    key={s.value}
+                                    type="button"
+                                    title={s.label}
+                                    onClick={() => { onChange(s.value); setOpen(false); }}
+                                    className={`relative flex flex-col items-center gap-1 rounded-lg border-2 px-2 py-2.5 transition-all
+                                        ${isSelected
+                                            ? "border-indigo-500 bg-indigo-50 text-indigo-600 dark:bg-indigo-950 dark:text-indigo-300"
+                                            : "border-transparent text-slate-500 hover:border-slate-300 hover:bg-slate-50 dark:text-slate-400 dark:hover:border-slate-600 dark:hover:bg-slate-800"
+                                        }`}
+                                >
+                                    <ShapeIcon shape={s.value} />
+                                    <span className="text-[10px] font-medium leading-tight">{s.label}</span>
+                                    {isSelected && (
+                                        <span className="absolute right-1 top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-indigo-500">
+                                            <Check className="h-2 w-2 text-white" />
+                                        </span>
+                                    )}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     );
 }

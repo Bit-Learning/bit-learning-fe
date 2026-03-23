@@ -61,24 +61,6 @@ export function getAlgorithmFamily(structureConfig: StructureConfig): AlgorithmF
     return "radial";
 }
 
-// ─── Edge handle direction ────────────────────────────────────────────────────
-
-type HandleDirection = "top" | "right" | "bottom" | "left";
-
-function getDirection(source: Node, target: Node): HandleDirection {
-    const dx = target.position.x - source.position.x;
-    const dy = target.position.y - source.position.y;
-    if (Math.abs(dx) >= Math.abs(dy)) return dx >= 0 ? "right" : "left";
-    return dy >= 0 ? "bottom" : "top";
-}
-
-function oppositeDir(dir: HandleDirection): HandleDirection {
-    if (dir === "top") return "bottom";
-    if (dir === "bottom") return "top";
-    if (dir === "left") return "right";
-    return "left";
-}
-
 // ─── Main export ──────────────────────────────────────────────────────────────
 
 export async function runElkLayout(
@@ -140,6 +122,7 @@ export async function runElkLayout(
             id: n.id,
             type,
             position: { x: elkNode?.x ?? 0, y: elkNode?.y ?? 0 },
+            zIndex: 1,
             data: {
                 label: n.label,
                 description: n.description ?? "",
@@ -150,18 +133,12 @@ export async function runElkLayout(
         };
     });
 
-    const nodeMap = new Map(rfNodes.map((n) => [n.id, n]));
-
     // Edge style từ theme_config.edgeStyle + edgeType từ structure_config
     const { animated: edgeAnimated, stroke, strokeWidth, ...restEdgeStyle } = themeConfig.edgeStyle;
-    const algorithmFamily = getAlgorithmFamily(structureConfig);
 
     const rfEdges: Edge[] = flatNodes
         .filter((n) => n.parentId !== undefined)
         .map((n) => {
-            const sourceNode = nodeMap.get(n.parentId!);
-            const targetNode = nodeMap.get(n.id);
-
             const base: Edge = {
                 id: `e-${n.parentId}-${n.id}`,
                 source: n.parentId!,
@@ -176,25 +153,8 @@ export async function runElkLayout(
                 },
             };
 
-            if (!sourceNode || !targetNode) return base;
-
-            if (algorithmFamily === "horizontal") {
-                // Dùng vị trí thực tế để phân biệt UP (source-top) vs DOWN (source-bottom)
-                const dir = getDirection(sourceNode, targetNode);
-                const vDir = dir === "top" ? "top" : "bottom";
-                return { ...base, sourceHandle: `source-${vDir}`, targetHandle: `target-${oppositeDir(vDir)}` };
-            }
-
-            if (algorithmFamily === "symmetric") {
-                // Chỉ nối left ↔ right
-                const dir = getDirection(sourceNode, targetNode);
-                const hDir = dir === "left" ? "left" : "right";
-                return { ...base, sourceHandle: `source-${hDir}`, targetHandle: `target-${oppositeDir(hDir)}` };
-            }
-
-            // radial: chọn hướng tốt nhất theo vị trí thực tế
-            const dir = getDirection(sourceNode, targetNode);
-            return { ...base, sourceHandle: `source-${dir}`, targetHandle: `target-${oppositeDir(dir)}` };
+            // Handles nằm ở trung tâm node — không cần chỉ định hướng
+            return base;
         });
 
     return { nodes: rfNodes, edges: rfEdges };

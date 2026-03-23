@@ -2,7 +2,7 @@ import type React from "react";
 import { Handle, Position, type NodeProps } from "@xyflow/react";
 import { Plus, X } from "lucide-react";
 
-export type NodeShape = "rounded" | "pill" | "square" | "soft";
+export type NodeShape = "rounded" | "pill" | "square" | "circle" | "diamond" | "hexagon";
 
 interface MindMapNodeData {
     label: string;
@@ -50,83 +50,47 @@ function NodeActions({ onAdd, onDelete }: { onAdd?: () => void; onDelete?: () =>
     );
 }
 
-function getBorderRadius(shape: NodeShape | undefined, level: "root" | "branch" | "leaf"): string {
+/** Trả về CSS shape riêng — clip-path shapes bỏ qua border/boxShadow của node */
+function getShapeStyle(shape: NodeShape | undefined, level: "root" | "branch" | "leaf"): React.CSSProperties {
     switch (shape) {
-        case "pill":   return "9999px";
-        case "square": return "0px";
-        case "soft":   return "4px";
+        case "pill":    return { borderRadius: "9999px" };
+        case "square":  return { borderRadius: "0px" };
+        case "circle":  return { borderRadius: "50%", aspectRatio: "1 / 1", minWidth: "unset", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" };
+        case "diamond": return { borderRadius: 0, clipPath: "polygon(50% 0%,100% 50%,50% 100%,0% 50%)", aspectRatio: "1 / 1", minWidth: "unset", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" };
+        case "hexagon": return { borderRadius: 0, clipPath: "polygon(25% 0%,75% 0%,100% 50%,75% 100%,25% 100%,0% 50%)", display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center" };
         default:
-            return level === "root" ? "16px" : level === "branch" ? "12px" : "8px";
+            return { borderRadius: level === "root" ? "16px" : level === "branch" ? "12px" : "8px" };
     }
 }
 
-// ─── Invisible handles ────────────────────────────────────────────────────────
-// Vẫn functional cho edge routing nhưng không hiển thị ra ngoài
+function isClipPath(shape: NodeShape | undefined): boolean {
+    return shape === "diamond" || shape === "hexagon";
+}
 
-const hiddenHandle: React.CSSProperties = {
-    width: 8,
-    height: 8,
+// ─── Center handles ───────────────────────────────────────────────────────────
+// Đặt handle tại trung tâm node — edge nối vào giữa, node đè lên endpoint
+
+const centerHandleStyle: React.CSSProperties = {
+    width: 1,
+    height: 1,
+    minWidth: 1,
+    minHeight: 1,
     border: "none",
     opacity: 0,
     pointerEvents: "none",
+    position: "absolute",
+    top: "50%",
+    left: "50%",
+    right: "auto",
+    bottom: "auto",
+    transform: "translate(-50%, -50%)",
 };
 
-function RadialHandles({
-    handleColor,
-    hasSource = true,
-    hasTarget = true,
-}: {
-    handleColor: string;
-    hasSource?: boolean;
-    hasTarget?: boolean;
-}) {
-    const s = { ...hiddenHandle, background: handleColor };
+function CenterHandles({ hasSource = true, hasTarget = true }: { hasSource?: boolean; hasTarget?: boolean }) {
     return (
         <>
-            {hasTarget && (
-                <>
-                    <Handle id="target-top"    type="target" position={Position.Top}    style={s} />
-                    <Handle id="target-right"  type="target" position={Position.Right}  style={s} />
-                    <Handle id="target-bottom" type="target" position={Position.Bottom} style={s} />
-                    <Handle id="target-left"   type="target" position={Position.Left}   style={s} />
-                </>
-            )}
-            {hasSource && (
-                <>
-                    <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
-                    <Handle id="source-right"  type="source" position={Position.Right}  style={s} />
-                    <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
-                    <Handle id="source-left"   type="source" position={Position.Left}   style={s} />
-                </>
-            )}
-        </>
-    );
-}
-
-function SymmetricHandles({
-    handleColor,
-    hasSource = true,
-    hasTarget = true,
-}: {
-    handleColor: string;
-    hasSource?: boolean;
-    hasTarget?: boolean;
-}) {
-    const s = { ...hiddenHandle, background: handleColor };
-    return (
-        <>
-            {hasTarget && (
-                <>
-                    <Handle id="target-left"  type="target" position={Position.Left}  style={s} />
-                    <Handle id="target-right" type="target" position={Position.Right} style={s} />
-                </>
-            )}
-            {hasSource && (
-                <>
-                    <Handle id="source-left"  type="source" position={Position.Left}  style={s} />
-                    <Handle id="source-right" type="source" position={Position.Right} style={s} />
-                </>
-            )}
+            {hasTarget && <Handle id="target" type="target" position={Position.Top}    style={centerHandleStyle} />}
+            {hasSource && <Handle id="source" type="source" position={Position.Bottom} style={centerHandleStyle} />}
         </>
     );
 }
@@ -144,14 +108,17 @@ function splitNodeStyle(nodeStyle: React.CSSProperties) {
 export function MindMapRadialRootNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[160px] max-w-[230px] cursor-default select-none break-words px-6 py-4 text-center transition-shadow hover:shadow-2xl"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "root"),
-                border: `2.5px solid ${handleColor}`,
-                boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
+                ...getShapeStyle(nodeShape, "root"),
+                ...(!clipped && {
+                    border: `2.5px solid ${handleColor}`,
+                    boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} />
@@ -159,7 +126,7 @@ export function MindMapRadialRootNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-1.5 text-[11px] font-normal leading-snug opacity-80">{description}</p>
             )}
-            <RadialHandles handleColor={handleColor} hasSource hasTarget={false} />
+            <CenterHandles hasSource hasTarget={false} />
         </div>
     );
 }
@@ -167,14 +134,17 @@ export function MindMapRadialRootNode({ data }: NodeProps) {
 export function MindMapRadialBranchNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild, onDeleteNode } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[130px] max-w-[200px] cursor-default select-none break-words px-5 py-3 text-center transition-shadow hover:shadow-xl"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "branch"),
-                border: `1.5px solid ${handleColor}70`,
-                boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
+                ...getShapeStyle(nodeShape, "branch"),
+                ...(!clipped && {
+                    border: `1.5px solid ${handleColor}70`,
+                    boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} onDelete={onDeleteNode} />
@@ -182,7 +152,7 @@ export function MindMapRadialBranchNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-1 text-[10px] leading-snug opacity-75">{description}</p>
             )}
-            <RadialHandles handleColor={handleColor} />
+            <CenterHandles />
         </div>
     );
 }
@@ -190,14 +160,17 @@ export function MindMapRadialBranchNode({ data }: NodeProps) {
 export function MindMapRadialLeafNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild, onDeleteNode } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[110px] max-w-[175px] cursor-default select-none break-words px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "leaf"),
-                border: `1px solid ${handleColor}45`,
-                boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
+                ...getShapeStyle(nodeShape, "leaf"),
+                ...(!clipped && {
+                    border: `1px solid ${handleColor}45`,
+                    boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} onDelete={onDeleteNode} />
@@ -205,7 +178,7 @@ export function MindMapRadialLeafNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-0.5 text-[10px] leading-snug opacity-70">{description}</p>
             )}
-            <RadialHandles handleColor={handleColor} hasSource hasTarget />
+            <CenterHandles />
         </div>
     );
 }
@@ -215,14 +188,17 @@ export function MindMapRadialLeafNode({ data }: NodeProps) {
 export function MindMapSymmetricRootNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[160px] max-w-[230px] cursor-default select-none break-words px-6 py-4 text-center transition-shadow hover:shadow-2xl"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "root"),
-                border: `2.5px solid ${handleColor}`,
-                boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
+                ...getShapeStyle(nodeShape, "root"),
+                ...(!clipped && {
+                    border: `2.5px solid ${handleColor}`,
+                    boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38, 0 2px 8px rgba(0,0,0,0.14)`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} />
@@ -230,7 +206,7 @@ export function MindMapSymmetricRootNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-1.5 text-[11px] font-normal leading-snug opacity-80">{description}</p>
             )}
-            <SymmetricHandles handleColor={handleColor} hasSource hasTarget={false} />
+            <CenterHandles hasSource hasTarget={false} />
         </div>
     );
 }
@@ -238,14 +214,17 @@ export function MindMapSymmetricRootNode({ data }: NodeProps) {
 export function MindMapSymmetricBranchNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild, onDeleteNode } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[130px] max-w-[200px] cursor-default select-none break-words px-5 py-3 text-center transition-shadow hover:shadow-xl"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "branch"),
-                border: `1.5px solid ${handleColor}70`,
-                boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
+                ...getShapeStyle(nodeShape, "branch"),
+                ...(!clipped && {
+                    border: `1.5px solid ${handleColor}70`,
+                    boxShadow: `0 4px 16px ${handleColor}28, 0 1px 5px rgba(0,0,0,0.1)`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} onDelete={onDeleteNode} />
@@ -253,7 +232,7 @@ export function MindMapSymmetricBranchNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-1 text-[10px] leading-snug opacity-75">{description}</p>
             )}
-            <SymmetricHandles handleColor={handleColor} />
+            <CenterHandles />
         </div>
     );
 }
@@ -261,14 +240,17 @@ export function MindMapSymmetricBranchNode({ data }: NodeProps) {
 export function MindMapSymmetricLeafNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild, onDeleteNode } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[110px] max-w-[175px] cursor-default select-none break-words px-4 py-2.5 text-center transition-shadow hover:shadow-lg"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "leaf"),
-                border: `1px solid ${handleColor}45`,
-                boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
+                ...getShapeStyle(nodeShape, "leaf"),
+                ...(!clipped && {
+                    border: `1px solid ${handleColor}45`,
+                    boxShadow: `0 2px 10px ${handleColor}18, 0 1px 3px rgba(0,0,0,0.07)`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} onDelete={onDeleteNode} />
@@ -276,7 +258,7 @@ export function MindMapSymmetricLeafNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-0.5 text-[10px] leading-snug opacity-70">{description}</p>
             )}
-            <SymmetricHandles handleColor={handleColor} hasSource hasTarget />
+            <CenterHandles />
         </div>
     );
 }
@@ -286,15 +268,17 @@ export function MindMapSymmetricLeafNode({ data }: NodeProps) {
 export function MindMapRootNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
-    const s = { ...hiddenHandle, background: handleColor };
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[160px] max-w-[230px] cursor-default select-none break-words px-6 py-4 text-center"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "root"),
-                border: `2.5px solid ${handleColor}`,
-                boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38`,
+                ...getShapeStyle(nodeShape, "root"),
+                ...(!clipped && {
+                    border: `2.5px solid ${handleColor}`,
+                    boxShadow: `0 0 0 5px ${handleColor}22, 0 8px 28px ${handleColor}38`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} />
@@ -302,8 +286,7 @@ export function MindMapRootNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-1.5 text-[11px] leading-snug opacity-80">{description}</p>
             )}
-            <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
-            <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
+            <CenterHandles hasSource hasTarget={false} />
         </div>
     );
 }
@@ -311,15 +294,17 @@ export function MindMapRootNode({ data }: NodeProps) {
 export function MindMapBranchNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild, onDeleteNode } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
-    const s = { ...hiddenHandle, background: handleColor };
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[130px] max-w-[200px] cursor-default select-none break-words px-5 py-3 text-center"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "branch"),
-                border: `1.5px solid ${handleColor}70`,
-                boxShadow: `0 4px 16px ${handleColor}28`,
+                ...getShapeStyle(nodeShape, "branch"),
+                ...(!clipped && {
+                    border: `1.5px solid ${handleColor}70`,
+                    boxShadow: `0 4px 16px ${handleColor}28`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} onDelete={onDeleteNode} />
@@ -327,10 +312,7 @@ export function MindMapBranchNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-1 text-[10px] leading-snug opacity-75">{description}</p>
             )}
-            <Handle id="target-top"    type="target" position={Position.Top}    style={s} />
-            <Handle id="target-bottom" type="target" position={Position.Bottom} style={s} />
-            <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
-            <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
+            <CenterHandles />
         </div>
     );
 }
@@ -338,15 +320,17 @@ export function MindMapBranchNode({ data }: NodeProps) {
 export function MindMapLeafNode({ data }: NodeProps) {
     const { label, description, nodeStyle, handleColor, nodeShape, onAddChild, onDeleteNode } = data as unknown as MindMapNodeData;
     const baseStyle = splitNodeStyle(nodeStyle);
-    const s = { ...hiddenHandle, background: handleColor };
+    const clipped = isClipPath(nodeShape);
     return (
         <div
             className="group relative min-w-[110px] max-w-[175px] cursor-default select-none break-words px-4 py-2.5 text-center"
             style={{
                 ...baseStyle,
-                borderRadius: getBorderRadius(nodeShape, "leaf"),
-                border: `1px solid ${handleColor}45`,
-                boxShadow: `0 2px 10px ${handleColor}18`,
+                ...getShapeStyle(nodeShape, "leaf"),
+                ...(!clipped && {
+                    border: `1px solid ${handleColor}45`,
+                    boxShadow: `0 2px 10px ${handleColor}18`,
+                }),
             }}
         >
             <NodeActions onAdd={onAddChild} onDelete={onDeleteNode} />
@@ -354,10 +338,7 @@ export function MindMapLeafNode({ data }: NodeProps) {
             {description && (
                 <p className="mt-0.5 text-[10px] leading-snug opacity-70">{description}</p>
             )}
-            <Handle id="target-top"    type="target" position={Position.Top}    style={s} />
-            <Handle id="target-bottom" type="target" position={Position.Bottom} style={s} />
-            <Handle id="source-top"    type="source" position={Position.Top}    style={s} />
-            <Handle id="source-bottom" type="source" position={Position.Bottom} style={s} />
+            <CenterHandles />
         </div>
     );
 }
