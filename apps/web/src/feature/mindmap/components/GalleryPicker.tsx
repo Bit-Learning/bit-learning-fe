@@ -9,9 +9,9 @@ export type { NodeShape };
 
 const SHAPES: { value: NodeShape; label: string }[] = [
     { value: "rounded", label: "Tròn vừa" },
-    { value: "pill",    label: "Viên thuốc" },
-    { value: "square",  label: "Vuông góc" },
-    { value: "circle",  label: "Hình tròn" },
+    { value: "pill", label: "Viên thuốc" },
+    { value: "square", label: "Vuông góc" },
+    { value: "circle", label: "Hình tròn" },
     { value: "diamond", label: "Hình thoi" },
     { value: "hexagon", label: "Lục giác" },
 ];
@@ -29,7 +29,7 @@ function ShapeIcon({ shape }: { shape: NodeShape }) {
         case "square":
             return <svg width="32" height="20" viewBox="0 0 32 20" fill="none"><rect x="1" y="1" width="30" height="18" rx="0" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} /></svg>;
         case "circle":
-            return <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="10.5" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} /></svg>;
+            return <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="8.75" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} /></svg>;
         case "diamond":
             return <svg width="24" height="24" viewBox="0 0 24 24" fill="none"><polygon points="12,1 23,12 12,23 1,12" fill={fill} fillOpacity={fillOp} stroke={stroke} strokeWidth={sw} strokeLinejoin="round" /></svg>;
         case "hexagon":
@@ -45,7 +45,7 @@ interface ShapePickerProps {
 
 export function ShapePicker({ value, onChange, disabled }: ShapePickerProps) {
     const { open, setOpen, ref } = useDropdown();
-    const selected = SHAPES.find((s) => s.value === value) ?? SHAPES[0];
+    const selected = SHAPES.find((s) => s.value === value) ?? { value: "rounded" as NodeShape, label: "Tròn vừa" };
 
     return (
         <div ref={ref} className="relative">
