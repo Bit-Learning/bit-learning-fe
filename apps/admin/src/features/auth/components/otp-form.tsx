@@ -10,7 +10,7 @@ import { showSubmittedData } from "@/shared/lib/show-submitted-data";
 import { cn } from "@/shared/lib/utils";
 
 const formSchema = z.object({
-  otp: z.string().min(6, "Please enter the 6-digit code.").max(6, "Please enter the 6-digit code."),
+  otp: z.string().min(6, "Vui lòng nhập đủ 6 chữ số.").max(6, "Vui lòng nhập đủ 6 chữ số."),
 });
 
 type OtpFormProps = React.HTMLAttributes<HTMLFormElement>;
@@ -38,13 +38,13 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
 
   return (
     <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className={cn("grid gap-2", className)} {...props}>
+      <form onSubmit={form.handleSubmit(onSubmit)} className={cn("grid gap-4", className)} {...props}>
         <FormField
           control={form.control}
           name="otp"
           render={({ field }) => (
             <FormItem>
-              <FormLabel className="sr-only">One-Time Password</FormLabel>
+              <FormLabel className="sr-only">Mã xác thực</FormLabel>
               <FormControl>
                 <InputOTP
                   maxLength={6}
@@ -52,18 +52,18 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
                   containerClassName='justify-between sm:[&>[data-slot="input-otp-group"]>div]:w-12'
                 >
                   <InputOTPGroup>
-                    <InputOTPSlot index={0} />
-                    <InputOTPSlot index={1} />
+                    <InputOTPSlot index={0} className="border-slate-200 focus:border-blue-500" />
+                    <InputOTPSlot index={1} className="border-slate-200 focus:border-blue-500" />
                   </InputOTPGroup>
                   <InputOTPSeparator />
                   <InputOTPGroup>
-                    <InputOTPSlot index={2} />
-                    <InputOTPSlot index={3} />
+                    <InputOTPSlot index={2} className="border-slate-200 focus:border-blue-500" />
+                    <InputOTPSlot index={3} className="border-slate-200 focus:border-blue-500" />
                   </InputOTPGroup>
                   <InputOTPSeparator />
                   <InputOTPGroup>
-                    <InputOTPSlot index={4} />
-                    <InputOTPSlot index={5} />
+                    <InputOTPSlot index={4} className="border-slate-200 focus:border-blue-500" />
+                    <InputOTPSlot index={5} className="border-slate-200 focus:border-blue-500" />
                   </InputOTPGroup>
                 </InputOTP>
               </FormControl>
@@ -71,8 +71,11 @@ export function OtpForm({ className, ...props }: OtpFormProps) {
             </FormItem>
           )}
         />
-        <Button className="mt-2" disabled={otp.length < 6 || isLoading}>
-          Verify
+        <Button
+          className="mt-1 h-11 w-full rounded-lg bg-blue-600 font-semibold text-white hover:bg-blue-700"
+          disabled={otp.length < 6 || isLoading}
+        >
+          Xác nhận
         </Button>
       </form>
     </Form>

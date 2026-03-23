@@ -11,7 +11,7 @@ import { useForm } from "react-hook-form";
 import { useDispatch } from "react-redux";
 import { z } from "zod";
 import { setAccessToken } from "@/shared/lib/cookies";
-import { LoginWith2FA } from "../api/auth.api";
+import { authApi } from "../api/auth.api";
 import { setIsAuthenticatedAction, setUserInfoAction } from "../store";
 
 const formSchema = z.object({
@@ -46,7 +46,7 @@ const LoginWith2FAForm: React.FC<LoginWith2FAFormProps> = ({ initialEmail = "", 
   });
 
   const loginMutation = useMutation({
-    mutationFn: (data: { email: string; password: string; totpCode: string }) => LoginWith2FA(data),
+    mutationFn: (data: { email: string; password: string; totpCode: string }) => authApi.loginWith2FA(data),
     onSuccess: (response) => {
       const userData = response.data.data;
       // Store access token
@@ -196,7 +196,7 @@ const LoginWith2FAForm: React.FC<LoginWith2FAFormProps> = ({ initialEmail = "", 
                 </div>
 
                 <Button
-                  className="h-12 w-full rounded-xl bg-gradient-to-r from-blue-700 to-blue-800 font-semibold text-white shadow-lg hover:from-blue-800 hover:to-blue-900"
+                  className="h-12 w-full rounded-xl bg-blue-800 font-semibold text-white shadow-lg hover:from-blue-800 hover:to-blue-900"
                   type="submit"
                   isDisabled={loginMutation.isPending}
                 >

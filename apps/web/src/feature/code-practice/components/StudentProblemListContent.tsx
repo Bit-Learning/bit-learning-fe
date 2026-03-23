@@ -58,7 +58,7 @@ const StudentProblemListContent: React.FC = () => {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Đang tải...</p>
+          <p className="mt-4 text-gray-800">Đang tải...</p>
         </div>
       </div>
     );
@@ -111,37 +111,37 @@ const StudentProblemListContent: React.FC = () => {
             </Button>
           </div>
         </div>
-        <Card className="bg-white p-0 border-gray-200">
-          <CardContent className="p-0">
+        <Card className="bg-white p-0 border-2 border-gray-400 rounded-md">
+          <CardContent className="px-0">
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider w-35">
+                  <tr className="bg-gray-50 border-b border-gray-400">
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider w-35">
                       Trạng thái
                     </th>
 
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">
                       Tên bài tập
                     </th>
 
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Độ khó</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">Độ khó</th>
 
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">
                       <div className="flex items-center gap-1">
                         <Users className="w-3 h-3" />
                         Người đã giải
                       </div>
                     </th>
 
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">
                       <div className="flex items-center gap-1">
                         <TrendingUp className="w-3 h-3" />
-                        Tỷ lệ chấp nhận
+                        Tỷ lệ đúng
                       </div>
                     </th>
 
-                    <th className="px-6 py-4 text-xs font-semibold text-gray-600 uppercase tracking-wider">Chủ đề</th>
+                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">Chủ đề</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-gray-200">
@@ -203,15 +203,13 @@ const StudentProblemListContent: React.FC = () => {
               </table>
             </div>
 
-            <div className="px-6 py-4 border-t border-gray-200 flex items-center justify-between">
-              <p className="text-sm text-gray-600">
+            <div className="px-6 border-t border-gray-400 flex items-center justify-between">
+              <p className="text-sm text-gray-800 py-4">
                 Hiển thị <span className="font-medium text-gray-900">{page * size + 1}</span> –{" "}
                 <span className="font-medium text-gray-900">{Math.min((page + 1) * size, totalElements)}</span> trong
                 tổng số <span className="font-medium text-gray-900">{totalElements}</span> bài tập
               </p>
-              <div className="flex items-center gap-2">
-                <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-              </div>
+              {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
             </div>
           </CardContent>
         </Card>

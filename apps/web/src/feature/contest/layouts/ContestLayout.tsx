@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useParams, useLocation } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { Timer, ListChecks, Trophy, MessageSquare, Bell, Terminal, Users } from "lucide-react";
+import { Timer, ListChecks, Trophy, MessageSquare, Bell, Users } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@workspace/ui/components/Avatar";
 import { useContestDetail } from "../queries/useContest";
 import { useUserProfile } from "@/feature/user/queries/useUser";
@@ -50,10 +50,10 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
 
   if (contestLoading) {
     return (
-      <div className="flex-1 flex items-center justify-center bg-slate-50 dark:bg-slate-950">
+      <div className="flex items-center justify-center min-h-[calc(100vh-10px)] bg-slate-50 dark:bg-slate-950">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
-          <p className="mt-4 text-sm text-slate-600">Đang tải cuộc thi...</p>
+          <p className="mt-4 text-md text-slate-800">Đang tải cuộc thi...</p>
         </div>
       </div>
     );

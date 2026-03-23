@@ -48,7 +48,7 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
       setQuestionContent("");
       onClose();
     } catch (error) {
-      alert("Không thể gửi câu hỏi. Vui lòng thử lại!");
+      console.log("Không thể gửi câu hỏi. Vui lòng thử lại!");
     }
   };
 

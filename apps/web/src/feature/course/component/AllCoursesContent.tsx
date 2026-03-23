@@ -9,6 +9,7 @@ import { useAllCourses, useCourseActions, useCourseState, usePrefetchCourse } fr
 import type { CoursePreview } from "../types/course.type";
 import { useAppDispatch } from "@/shared/redux/store";
 import { setPageSizeAction } from "../store/course.store";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 const AllCoursesContent: React.FC = () => {
   const navigate = useNavigate();
@@ -129,15 +130,15 @@ const AllCoursesContent: React.FC = () => {
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <section className="text-center pt-4 pb-12 bg-white dark:bg-slate-800 -mx-4 sm:-mx-6 lg:-mx-8 px-4 sm:px-6 lg:px-8 mb-8 rounded-2xl shadow-sm">
-          <div className="inline-flex items-center gap-2 px-3 rounded-full bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-bold mb-6">
+          <div className="inline-flex items-center gap-2 px-3 py-2 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 text-sm font-bold mb-4">
             <Sparkles className="w-4 h-4" />
             <span>Học tập không giới hạn</span>
           </div>
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-extrabold text-slate-900 dark:text-white mb-6 leading-tight">
-            Khóa học Tin học <br className="hidden md:block" /> từ <span className="text-blue-600">Lớp 1</span> đến{" "}
+          <h1 className="text-2xl md:text-4xl lg:text-5xl font-extrabold text-slate-900 dark:text-white mb-5 leading-tight">
+            Khóa học Tin học <br className="hidden md:block" /> từ <span className="text-blue-600">Lớp 3</span> đến{" "}
             <span className="text-blue-600">Lớp 12</span>
           </h1>
-          <p className="text-lg text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
+          <p className="text-md text-slate-600 dark:text-slate-400 max-w-2xl mx-auto">
             Chương trình học tin học toàn diện, cập nhật theo xu hướng công nghệ mới nhất dành cho học sinh từ Tiểu học
             đến THPT.
           </p>
@@ -154,7 +155,7 @@ const AllCoursesContent: React.FC = () => {
               <select
                 value={selectedGrade ?? "all"}
                 onChange={(e) => selectGrade(e.target.value === "all" ? null : Number(e.target.value))}
-                className="pr-10 pl-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="pr-10 pl-2 py-2 rounded-lg border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
                 <option value="all">Tất cả lớp</option>
                 <option value="3">Lớp 3</option>
@@ -172,7 +173,7 @@ const AllCoursesContent: React.FC = () => {
               <select
                 value={selectedLevel ?? "all"}
                 onChange={(e) => selectLevel(e.target.value === "all" ? null : (e.target.value as any))}
-                className="pr-10 pl-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                className="pr-10 pl-2 py-2 rounded-lg border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
               >
                 <option value="all">Tất cả cấp độ</option>
                 <option value="BEGINNING">Cơ bản</option>
@@ -185,7 +186,7 @@ const AllCoursesContent: React.FC = () => {
                 <select
                   value={sortBy}
                   onChange={(e) => setSortBy(e.target.value as any)}
-                  className="pr-10 pl-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
+                  className="pr-10 pl-2 py-2 rounded-lg border border-slate-400 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 transition-all"
                 >
                   <option value="default">Mặc định</option>
                   <option value="price_asc">Giá tăng dần</option>
@@ -196,7 +197,7 @@ const AllCoursesContent: React.FC = () => {
               {(selectedGrade !== null || selectedLevel !== null || sortBy !== "default") && (
                 <button
                   onClick={resetFilters}
-                  className="cursor-pointer px-6 py-2 rounded-lg bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all font-medium"
+                  className="cursor-pointer px-6 py-2 rounded-md bg-slate-200 dark:bg-slate-700 text-slate-700 dark:text-slate-300 hover:bg-slate-300 dark:hover:bg-slate-600 transition-all font-medium"
                 >
                   Xóa bộ lọc
                 </button>
@@ -222,7 +223,7 @@ const AllCoursesContent: React.FC = () => {
 
         {courses.length > 0 ? (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-10 mb-8">
               {courses.map((course: CoursePreview) => (
                 <Card
                   key={course.id}
@@ -235,19 +236,19 @@ const AllCoursesContent: React.FC = () => {
                     })
                   }
                 >
-                  <div className="relative h-40 overflow-hidden rounded-xl">
+                  <div className="relative h-48 aspect-video overflow-hidden rounded-xl">
                     <img
                       src={course.thumbnailUrl}
                       alt={course.title}
-                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
+                      className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-120"
                     />
 
                     <div className="absolute left-3 top-3">
-                      <Badge className="bg-blue-700 text-xs text-white">Lớp {course.grade}</Badge>
+                      <Badge className="bg-blue-700 text-sm text-white">Lớp {course.grade}</Badge>
                     </div>
 
                     <div className="absolute right-3 top-3">
-                      <Badge className="bg-orange-600 text-xs text-white">{getCourseLevelLabel(course.level)}</Badge>
+                      <Badge className="bg-orange-600 text-sm text-white">{getCourseLevelLabel(course.level)}</Badge>
                     </div>
 
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity group-hover:opacity-100">
@@ -259,17 +260,17 @@ const AllCoursesContent: React.FC = () => {
 
                   <CardContent className="p-0">
                     <div className="space-y-3">
-                      <h3 className="text-md line-clamp-2 h-12 font-bold text-slate-900 dark:text-white transition-colors group-hover:text-blue-700">
+                      <h3 className="text-xl line-clamp-2 h-15 font-bold text-slate-900 dark:text-white transition-colors group-hover:text-blue-700">
                         {course.title}
                       </h3>
 
-                      <div className="flex items-center justify-between gap-2 text-sm">
+                      <div className="flex items-end justify-between gap-2 text-sm">
                         <div className="flex items-center gap-2">
                           <div className="flex">
                             {[...Array(5)].map((_, i) => (
                               <Star
                                 key={i}
-                                className={`h-4 w-4 ${
+                                className={`h-5 w-5 ${
                                   i < Math.floor(course.ratingStar || 5)
                                     ? "fill-yellow-400 text-yellow-400"
                                     : "fill-gray-200 text-gray-200"
@@ -277,11 +278,16 @@ const AllCoursesContent: React.FC = () => {
                               />
                             ))}
                           </div>
-                          <span className="text-sm text-gray-600 dark:text-gray-400">({course.ratingCount || 0})</span>
+                          <span className="text-md text-gray-600 dark:text-gray-400">({course.ratingCount || 0})</span>
                         </div>
 
-                        <div className="flex items-center">
-                          <span className="text-lg font-bold text-blue-700 dark:text-blue-400">
+                        <div className="flex flex-col items-end gap-0.5">
+                          {course.price > 0 && (
+                            <span className="flex items-center gap-1 text-sm font-semibold text-amber-600">
+                              ~ {course.price.toLocaleString("vi-VN")} <BitCoinIcon size={18} />
+                            </span>
+                          )}
+                          <span className="text-2xl font-bold text-blue-700 dark:text-blue-400">
                             {course.price === 0 ? "Miễn phí" : `${course.price.toLocaleString()}đ`}
                           </span>
                         </div>

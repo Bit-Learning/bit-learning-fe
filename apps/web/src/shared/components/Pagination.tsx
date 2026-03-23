@@ -34,11 +34,11 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-center gap-2 py-8">
+    <div className="flex items-center justify-center gap-2 py-4">
       <button
         onClick={() => onPageChange(currentPage - 1)}
         disabled={currentPage === 0}
-        className="w-10 h-10 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+        className="cursor-pointer w-8 h-8 border border-gray-400 rounded-lg text-black hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
       >
         <ChevronLeft className="w-5 h-5" />
       </button>
@@ -59,7 +59,7 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
           <button
             key={pageNum}
             onClick={() => onPageChange(pageNum)}
-            className={`w-10 h-10 font-bold rounded-lg transition-all ${
+            className={`cursor-pointer w-8 h-8 font-bold rounded-lg transition-all ${
               isActive
                 ? "bg-blue-700 text-white shadow-sm"
                 : "border border-gray-200 text-gray-600 font-medium hover:border-blue-700 hover:text-blue-700"
@@ -73,7 +73,7 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
       <button
         onClick={() => onPageChange(currentPage + 1)}
         disabled={currentPage >= totalPages - 1}
-        className="w-10 h-10 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+        className="cursor-pointer w-8 h-8 border border-gray-400 rounded-lg text-black hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
       >
         <ChevronRight className="w-5 h-5" />
       </button>

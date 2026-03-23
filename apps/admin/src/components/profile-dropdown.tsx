@@ -13,7 +13,7 @@ import {
   DropdownMenuShortcut,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { GetAdminProfile } from "@/features/auth/api/auth.api";
+import { authApi } from "@/features/auth/api/auth.api";
 import useDialogState from "@/shared/hooks/use-dialog-state";
 import { useAuthStore } from "@/shared/stores/auth-store";
 
@@ -24,7 +24,7 @@ export function ProfileDropdown() {
   // Fetch admin profile
   const { data: profileData } = useQuery({
     queryKey: ["adminProfile"],
-    queryFn: () => GetAdminProfile(),
+    queryFn: () => authApi.getAdminProfile(),
     enabled: !!auth.accessToken,
   });
 

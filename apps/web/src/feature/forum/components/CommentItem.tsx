@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { ThumbsUp, ThumbsDown, Reply, Edit, Trash2 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import type { Comment } from "../types/forum.type";
@@ -6,13 +6,28 @@ import { AuthorAvatar } from "./AuthorAvatar";
 
 interface CommentItemProps {
   comment: Comment;
+  replyingTo: number | null;
+  setReplyingTo: (id: number | null) => void;
   onReply: (commentId: number) => void;
   onEdit: (comment: Comment) => void;
   onDelete: (commentId: number) => void;
   onLike: (commentId: number) => void;
+  onSubmitReply: (content: string, commentId: number) => void;
 }
 
-export const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEdit, onDelete, onLike }) => {
+export const CommentItem: React.FC<CommentItemProps> = ({
+  comment,
+  onReply,
+  onEdit,
+  onDelete,
+  onLike,
+  replyingTo,
+  setReplyingTo,
+  onSubmitReply,
+}) => {
+  const [replyContent, setReplyContent] = useState("");
+
+  const isReplying = replyingTo === comment.id;
   const formatDate = (date: string) => {
     const now = new Date();
     const commentDate = new Date(date);
@@ -77,12 +92,47 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEd
           <Button
             variant="ghost"
             className="text-blue-600 gap-1.5 h-auto p-0 hover:underline font-semibold"
-            onClick={() => onReply(comment.id)}
+            onClick={() => setReplyingTo(isReplying ? null : comment.id)}
           >
             <Reply className="w-4 h-4" />
             Trả lời
           </Button>
         </div>
+
+        {isReplying && (
+          <div className="mt-4 ml-1">
+            <textarea
+              className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+              rows={3}
+              placeholder="Nhập phản hồi..."
+              value={replyContent}
+              onChange={(e) => setReplyContent(e.target.value)}
+            />
+
+            <div className="flex justify-end gap-2 mt-2">
+              <Button
+                variant="ghost"
+                onClick={() => {
+                  setReplyingTo(null);
+                  setReplyContent("");
+                }}
+              >
+                Huỷ
+              </Button>
+
+              <Button
+                isDisabled={!replyContent.trim()}
+                onClick={() => {
+                  onSubmitReply(replyContent, comment.id);
+                  setReplyContent("");
+                  setReplyingTo(null);
+                }}
+              >
+                Gửi
+              </Button>
+            </div>
+          </div>
+        )}
 
         {comment.replies && comment.replies.length > 0 && (
           <div className="mt-8 pl-8 border-l-2 border-gray-100 space-y-6">
@@ -90,10 +140,13 @@ export const CommentItem: React.FC<CommentItemProps> = ({ comment, onReply, onEd
               <CommentItem
                 key={reply.id}
                 comment={reply}
+                replyingTo={replyingTo}
+                setReplyingTo={setReplyingTo}
                 onReply={onReply}
                 onEdit={onEdit}
                 onDelete={onDelete}
                 onLike={onLike}
+                onSubmitReply={onSubmitReply}
               />
             ))}
           </div>

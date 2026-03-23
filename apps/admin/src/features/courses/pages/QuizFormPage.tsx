@@ -63,6 +63,7 @@ export const QuizFormPage: React.FC = () => {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema) as Resolver<QuizFormValues>,
@@ -287,6 +288,7 @@ export const QuizFormPage: React.FC = () => {
                 control={control}
                 register={register}
                 errors={errors}
+                setValue={setValue}
                 onRemove={() => removeQuestion(questionIndex)}
                 canRemove={questionFields.length > 1}
               />

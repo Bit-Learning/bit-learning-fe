@@ -13,6 +13,7 @@ interface QuestionCardProps {
   control: any;
   register: any;
   errors: any;
+  setValue: any;
   onRemove: () => void;
   canRemove: boolean;
 }
@@ -22,6 +23,7 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
   control,
   register,
   errors,
+  setValue,
   onRemove,
   canRemove,
 }) => {
@@ -85,8 +87,11 @@ export const QuestionCard: React.FC<QuestionCardProps> = ({
               key={answer.id}
               questionIndex={questionIndex}
               answerIndex={answerIndex}
+              control={control}
               register={register}
               errors={errors}
+              setValue={setValue}
+              answersLength={answerFields.length}
               onRemove={() => removeAnswer(answerIndex)}
               canRemove={answerFields.length > 2}
             />

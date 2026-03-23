@@ -1,11 +1,12 @@
 import React from "react";
-import { User, Lock, History, Bell, BookOpen } from "lucide-react";
+import { User, Lock, History, Bell, BookOpen, Wallet } from "lucide-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { Card } from "@workspace/ui/components/Card";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Avatar, AvatarImage, AvatarFallback } from "@workspace/ui/components/Avatar";
 import { cn } from "@workspace/ui/lib/utils";
 import { TUserProfile } from "../types/user.type";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 interface ProfileSidebarProps {
   unreadCount?: number;
@@ -22,6 +23,13 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ unreadCount = 0,
       label: "Thông tin cá nhân",
       badge: null,
       to: "/profile",
+    },
+    {
+      id: "top-up",
+      icon: Wallet,
+      label: "Nạp xu BIT",
+      badge: null,
+      to: "/profile/top-up",
     },
     {
       id: "my-course",
@@ -71,6 +79,19 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ unreadCount = 0,
             </h3>
             <p className="text-xs text-slate-500 mt-1">Học viên tại bit learning</p>
           </div>
+        </div>
+        <div className="px-4 py-3 border-b border-slate-50 flex items-center gap-2 bg-amber-50">
+          <BitCoinIcon size={32} />
+          <div className="flex flex-col leading-tight">
+            <span className="text-[11px] text-slate-500 font-medium">Số dư xu</span>
+            <span className="text-base font-bold text-amber-700">
+              {userInfo?.wallet.balance.toLocaleString("vi-VN")}{" "}
+              <span className="text-xs font-semibold text-amber-500">BIT</span>
+            </span>
+          </div>
+          <Link to="/profile/top-up" className="ml-auto text-[11px] font-semibold text-primary hover:underline">
+            + Nạp thêm
+          </Link>
         </div>
 
         <nav className="p-4 space-y-1">

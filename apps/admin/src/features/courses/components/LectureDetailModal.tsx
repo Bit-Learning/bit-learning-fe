@@ -3,8 +3,9 @@ import { CheckCircle, FileText, HelpCircle, Video, XCircle, X } from "lucide-rea
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
-import { useLectureQuiz, useLectureText, useVideoUrls } from "../queries/useLecture";
-import { LectureDetail } from "../types/course.type";
+import { useLectureQuiz, useLectureText } from "../queries/useLecture";
+import type { LectureDetail } from "../types/course.type";
+import HlsVideoPlayer from "./VideoPlayer";
 
 interface LectureDetailModalProps {
   lecture: LectureDetail;
@@ -15,7 +16,6 @@ interface LectureDetailModalProps {
 export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture, onClose, onEdit }) => {
   const { data: textData, isLoading: textLoading } = useLectureText(lecture.type === "TEXT" ? lecture.id : 0);
   const { data: quizData, isLoading: quizLoading } = useLectureQuiz(lecture.type === "QUIZ" ? lecture.id : 0);
-  const { m3u8Url } = useVideoUrls(lecture.type === "VIDEO" ? lecture.id : 0);
 
   const renderContent = () => {
     switch (lecture.type) {
@@ -31,12 +31,8 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
                 <div dangerouslySetInnerHTML={{ __html: lecture.description }} className="prose prose-sm max-w-none" />
               </div>
             )}
-            <div className="aspect-video overflow-hidden rounded-lg bg-black">
-              <video src={m3u8Url} controls className="h-full w-full">
-                <track kind="captions" srcLang="vi" label="Tiếng Việt" />
-                Trình duyệt không hỗ trợ video
-              </video>
-            </div>
+            {/* Dùng HlsVideoPlayer thay cho <video src> trực tiếp */}
+            <HlsVideoPlayer lectureId={lecture.id} />
           </div>
         );
 

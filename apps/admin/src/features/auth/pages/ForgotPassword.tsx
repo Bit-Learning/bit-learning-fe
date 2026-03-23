@@ -6,30 +6,29 @@ import { ForgotPasswordForm } from "../components/forgot-password-form";
 
 const ForgotPassword: React.FC = () => {
   return (
-    <>
-      <AuthLayout>
-        <Card className="gap-4">
-          <CardHeader>
-            <CardTitle className="text-lg tracking-tight">Forgot Password</CardTitle>
-            <CardDescription>
-              Enter your registered email and <br /> we will send you a link to reset your password.
-            </CardDescription>
-          </CardHeader>
-          <CardContent>
-            <ForgotPasswordForm />
-          </CardContent>
-          <CardFooter>
-            <p className="text-muted-foreground mx-auto px-8 text-center text-sm text-balance">
-              Don't have an account?{" "}
-              <Link to="/sign-up" className="hover:text-primary underline underline-offset-4">
-                Sign up
-              </Link>
-              .
-            </p>
-          </CardFooter>
-        </Card>
-      </AuthLayout>
-    </>
+    <AuthLayout>
+      <Card className="gap-4">
+        <CardHeader>
+          <CardTitle className="text-lg tracking-tight text-slate-800">Quên mật khẩu</CardTitle>
+          <CardDescription>
+            Nhập email đã đăng ký và chúng tôi sẽ gửi <br />
+            liên kết đặt lại mật khẩu cho bạn.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <ForgotPasswordForm />
+        </CardContent>
+        <CardFooter>
+          <p className="text-muted-foreground mx-auto px-8 text-center text-sm text-balance">
+            Nhớ mật khẩu rồi?{" "}
+            <Link to="/sign-in" className="font-semibold text-blue-600 underline-offset-4 hover:underline">
+              Đăng nhập
+            </Link>
+            .
+          </p>
+        </CardFooter>
+      </Card>
+    </AuthLayout>
   );
 };
 

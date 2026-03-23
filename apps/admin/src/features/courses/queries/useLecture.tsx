@@ -49,6 +49,30 @@ export const useFetchVideoM3u8 = (id: number) => {
   });
 };
 
+export const useVideoStream = (lectureId: number) => {
+  return useQuery({
+    queryKey: [...lectureKeys.video(lectureId), "stream"],
+    queryFn: async () => {
+      const response = await lectureApi.fetchVideoM3u8(lectureId);
+      const m3u8Text: string = response.data;
+
+      const baseUrl = `${import.meta.env.VITE_API_BASE_URL}/lectures/lecture-videos/${lectureId}`;
+
+      const rewritten = m3u8Text.replace(/^(?!#)(.+\.ts.*)$/gm, (line) => {
+        if (line.startsWith("http")) return line;
+        return `${baseUrl}/${line.trim()}`;
+      });
+
+      const blob = new Blob([rewritten], { type: "application/vnd.apple.mpegurl" });
+      const blobUrl = URL.createObjectURL(blob);
+
+      return blobUrl;
+    },
+    enabled: !!lectureId,
+    gcTime: 0,
+  });
+};
+
 export const useUpdateLecture = () => {
   const queryClient = useQueryClient();
 
@@ -57,10 +81,7 @@ export const useUpdateLecture = () => {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Cập nhật bài học thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Cập nhật bài học thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -79,10 +100,7 @@ export const useDeleteLecture = () => {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Xóa bài học thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Xóa bài học thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -101,12 +119,8 @@ export const useHideOrShowLecture = () => {
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-
       const action = variables.isHidden ? "ẩn" : "hiện";
-      toast.success({
-        title: `Đã ${action} bài học`,
-        description: response.data.message,
-      });
+      toast.success({ title: `Đã ${action} bài học`, description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -125,10 +139,7 @@ export const useCreateLectureVideo = () => {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Tạo bài học video thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Tạo bài học video thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -147,10 +158,7 @@ export const useUpdateLectureVideo = () => {
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.video(variables.id) });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Cập nhật video thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Cập nhật video thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -169,10 +177,7 @@ export const useCreateLectureQuiz = () => {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Tạo bài quiz thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Tạo bài quiz thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -192,10 +197,7 @@ export const useUpdateLectureQuiz = () => {
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.quiz(variables.id) });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Cập nhật bài quiz thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Cập nhật bài quiz thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -214,10 +216,7 @@ export const useCreateLectureText = () => {
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Tạo bài học văn bản thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Tạo bài học văn bản thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -237,10 +236,7 @@ export const useUpdateLectureText = () => {
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.text(variables.id) });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
-      toast.success({
-        title: "Cập nhật bài học văn bản thành công",
-        description: response.data.message,
-      });
+      toast.success({ title: "Cập nhật bài học văn bản thành công", description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({
@@ -249,17 +245,4 @@ export const useUpdateLectureText = () => {
       });
     },
   });
-};
-
-export const useVideoUrls = (lectureId: number) => {
-  const m3u8Url = lectureApi.getVideoM3u8Url(lectureId);
-
-  const getSegmentUrl = (segment: string) => {
-    return lectureApi.getVideoSegmentUrl(lectureId, segment);
-  };
-
-  return {
-    m3u8Url,
-    getSegmentUrl,
-  };
 };

@@ -12,86 +12,70 @@ import type {
 } from "../types/lecture.type";
 
 export const lectureApi = {
-  getVideoM3u8Url(id: number): string {
-    return `${api.defaults.baseURL}lectures/lecture-videos/${id}/m3u8`;
-  },
-
-  getVideoSegmentUrl(id: number, segment: string): string {
-    return `${api.defaults.baseURL}lectures/lecture-videos/${id}/${segment}`;
-  },
   fetchVideoM3u8(id: number): Promise<AxiosResponse<string>> {
-    return api.get(`lectures/lecture-videos/${id}/m3u8`, {
+    return api.get(`/lectures/lecture-videos/${id}/m3u8`, {
       responseType: "text",
-      headers: {
-        Accept: "application/vnd.apple.mpegurl",
-      },
+      headers: { Accept: "application/vnd.apple.mpegurl" },
     });
   },
 
   fetchVideoSegment(id: number, segment: string): Promise<AxiosResponse<Blob>> {
-    return api.get(`lectures/lecture-videos/${id}/${segment}`, {
+    return api.get(`/lectures/lecture-videos/${id}/${segment}`, {
       responseType: "blob",
-      headers: {
-        Accept: "video/MP2T",
-      },
+      headers: { Accept: "video/MP2T" },
     });
   },
+
   getLectureQuizById(id: number): Promise<AxiosResponse<ApiResponse<LectureQuizDetail>>> {
-    return api.get(`lectures/lecture-quizzes/${id}`);
+    return api.get(`/lectures/lecture-quizzes/${id}`);
   },
+
   getLectureTextById(id: number): Promise<AxiosResponse<ApiResponse<LectureTextDetail>>> {
-    return api.get(`lectures/lecture-texts/${id}`);
+    return api.get(`/lectures/lecture-texts/${id}`);
   },
+
   updateLecture(id: number, data: UpdateLectureRequest): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.patch(`lectures/${id}`, data);
+    return api.patch(`/lectures/${id}`, data);
   },
 
   deleteLecture(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.delete(`lectures/${id}/force`);
+    return api.delete(`/lectures/${id}/force`);
   },
 
   hideOrShowLecture(id: number, isHidden: boolean): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.delete(`lectures/${id}`, {
-      params: { isHidden },
-    });
+    return api.delete(`/lectures/${id}`, { params: { isHidden } });
   },
 
   createLectureVideo(request: string, video: File): Promise<AxiosResponse<ApiResponse<void>>> {
     const formData = new FormData();
     formData.append("request", request);
     formData.append("video", video);
-
-    return api.post(`lectures/lecture-videos`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    return api.post(`/lectures/lecture-videos`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
   },
 
   updateLectureVideo(id: number, video: File): Promise<AxiosResponse<ApiResponse<void>>> {
     const formData = new FormData();
     formData.append("video", video);
-
-    return api.patch(`lectures/lecture-videos/${id}`, formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+    return api.patch(`/lectures/lecture-videos/${id}`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
     });
   },
 
   createLectureQuiz(data: CreateLectureQuizRequest): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.post(`lectures/lecture-quizzes`, data);
+    return api.post(`/lectures/lecture-quizzes`, data);
   },
 
   updateLectureQuiz(id: number, quizzes: QuizUpdateRequest[]): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.patch(`lectures/lecture-quizzes/${id}`, quizzes);
+    return api.patch(`/lectures/lecture-quizzes/${id}`, quizzes);
   },
 
   createLectureText(data: CreateLectureTextRequest): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.post(`lectures/lecture-texts`, data);
+    return api.post(`/lectures/lecture-texts`, data);
   },
 
   updateLectureText(id: number, data: UpdateLectureTextRequest): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.patch(`lectures/lecture-texts/${id}`, data);
+    return api.patch(`/lectures/lecture-texts/${id}`, data);
   },
 };
