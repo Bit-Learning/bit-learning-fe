@@ -3,48 +3,74 @@ import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
 import type {
     GenerateMindMapRequest,
-    MindMapResponse,
-    SaveMindMapRequest,
-    SavedMindMapDetailDto,
+    MindMapGalleryResponse,
+    MindMapGenerateResponse,
+    MindMapVersionDto,
+    RefineRequest,
     SavedMindMapDto,
+    SaveTreeRequest,
+    SaveTreeResponse,
 } from "../types/mindmap.type";
 
-export const radialmindmapApi = {
-    generateRadialLayout: async (
+export const mindmapApi = {
+    // GET /mindmap/gallery
+    getGallery: (): Promise<AxiosResponse<ApiResponse<MindMapGalleryResponse>>> =>
+        api.get("/mindmap/gallery"),
+
+    // POST /mindmap/generate — auto-saves, trả về id
+    generate: (
         request: GenerateMindMapRequest,
-    ): Promise<AxiosResponse<ApiResponse<MindMapResponse>>> => {
-        return api.post("/mindmap/generate/radial-layout", request);
-    },
-};
+    ): Promise<AxiosResponse<ApiResponse<MindMapGenerateResponse>>> =>
+        api.post("/mindmap/generate", request),
 
+    // POST /mindmap/saved/{id}/refine
+    refine: (
+        id: number,
+        request: RefineRequest,
+    ): Promise<AxiosResponse<ApiResponse<MindMapGenerateResponse>>> =>
+        api.post(`/mindmap/saved/${id}/refine`, request),
 
-export const symmetrichorizontalmindmapApi = {
-    generateSymmetricHorizontalLayout: async (
-        request: GenerateMindMapRequest,
-    ): Promise<AxiosResponse<ApiResponse<MindMapResponse>>> => {
-        return api.post("/mindmap/generate/symmetric-horizontal-layout", request);
-    },
-};
+    // GET /mindmap/saved
+    listSaved: (
+        page = 0,
+        size = 10,
+    ): Promise<AxiosResponse<ApiResponse<SavedMindMapDto[]>>> =>
+        api.get("/mindmap/saved", { params: { page, size, sort: "createdAt,DESC" } }),
 
-export const horizontalmindmapApi = {
-    generateHorizontalLayout: async (
-        request: GenerateMindMapRequest,
-    ): Promise<AxiosResponse<ApiResponse<MindMapResponse>>> => {
-        return api.post("/mindmap/generate/horizontal-layout", request);
-    },
-};
+    // GET /mindmap/saved/{id}
+    getById: (
+        id: number,
+    ): Promise<AxiosResponse<ApiResponse<SavedMindMapDto>>> =>
+        api.get(`/mindmap/saved/${id}`),
 
-export const savedMindMapApi = {
-    save: async (request: SaveMindMapRequest): Promise<AxiosResponse<ApiResponse<SavedMindMapDto>>> => {
-        return api.post("/mindmap/saved", request);
-    },
-    list: async (page = 0, size = 12): Promise<AxiosResponse<ApiResponse<SavedMindMapDto[]>>> => {
-        return api.get("/mindmap/saved", { params: { page, size } });
-    },
-    getById: async (id: number): Promise<AxiosResponse<ApiResponse<SavedMindMapDetailDto>>> => {
-        return api.get(`/mindmap/saved/${id}`);
-    },
-    delete: async (id: number): Promise<AxiosResponse<ApiResponse<void>>> => {
-        return api.delete(`/mindmap/saved/${id}`);
-    },
+    // DELETE /mindmap/saved/{id}
+    delete: (id: number): Promise<AxiosResponse<ApiResponse<void>>> =>
+        api.delete(`/mindmap/saved/${id}`),
+
+    // GET /mindmap/saved/{id}/versions
+    listVersions: (
+        id: number,
+    ): Promise<AxiosResponse<ApiResponse<MindMapVersionDto[]>>> =>
+        api.get(`/mindmap/saved/${id}/versions`),
+
+    // GET /mindmap/saved/{id}/versions/{version_number}
+    getVersion: (
+        id: number,
+        versionNumber: number,
+    ): Promise<AxiosResponse<ApiResponse<MindMapVersionDto>>> =>
+        api.get(`/mindmap/saved/${id}/versions/${versionNumber}`),
+
+    // POST /mindmap/saved/{id}/versions/{version_number}/restore
+    restoreVersion: (
+        id: number,
+        versionNumber: number,
+    ): Promise<AxiosResponse<ApiResponse<MindMapGenerateResponse>>> =>
+        api.post(`/mindmap/saved/${id}/versions/${versionNumber}/restore`),
+
+    // POST /mindmap/saved/{id}/save
+    saveTree: (
+        id: number,
+        request: SaveTreeRequest,
+    ): Promise<AxiosResponse<ApiResponse<SaveTreeResponse>>> =>
+        api.post(`/mindmap/saved/${id}/save`, request),
 };

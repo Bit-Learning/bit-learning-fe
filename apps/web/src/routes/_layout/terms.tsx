@@ -6,7 +6,7 @@ export const Route = createFileRoute("/_layout/terms")({
 
 function TermsPage() {
 	return (
-		<div className="container py-10">
+		<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
 			<h1 className="mb-4 text-3xl font-bold">Terms of Service</h1>
 			<p className="mb-2">
 				Welcome to our application. By using our services, you agree to comply

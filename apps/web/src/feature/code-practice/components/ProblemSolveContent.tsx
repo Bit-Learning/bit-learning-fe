@@ -4,7 +4,12 @@ import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { useProblemDetail, useProblemSubmissions, useSubmitCode, useSubmissionResult } from "../queries/useCoding";
+import {
+	useProblemDetail,
+	useProblemSubmissions,
+	useSubmitCode,
+	useSubmissionResult,
+} from "../queries/useCoding";
 import { DifficultyBadge } from "./DifficultyBadge";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
 import { Language, SubmissionStatus } from "../types/coding.type";

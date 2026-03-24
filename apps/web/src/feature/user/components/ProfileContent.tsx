@@ -22,6 +22,7 @@ import {
 	useUploadCoverImage,
 } from "../queries/useUser";
 import type { TUserProfile, TSocialProfile } from "../types/user.type";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 export const ProfileContent = () => {
 	const { data: userProfile, isLoading } = useUserProfile();
@@ -93,8 +94,9 @@ export const ProfileContent = () => {
 		</div>
 	);
 
-	if (isLoading)
-		return <div className="grow text-center py-12">Đang tải...</div>;
+	if (isLoading) {
+		return <Loader />;
+	}
 
 	const fullName =
 		`${formData.firstName || ""} ${formData.lastName || ""}`.trim();

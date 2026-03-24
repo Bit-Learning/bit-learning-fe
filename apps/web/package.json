@@ -21,7 +21,7 @@
 		"@sentry/react": "^10.27.0",
 		"@sentry/vite-plugin": "^4.6.1",
 		"@splidejs/react-splide": "^0.7.12",
-		"@stomp/stompjs": "^7.2.1",
+		"@stomp/stompjs": "^7.3.0",
 		"@tanstack/react-query": "^5.90.21",
 		"@tanstack/react-query-devtools": "^5.91.3",
 		"@tanstack/react-router": "^1.132.37",
@@ -39,6 +39,7 @@
 		"dompurify": "^3.3.3",
 		"echarts": "^6.0.0",
 		"echarts-for-react": "^3.0.5",
+		"elkjs": "^0.11.1",
 		"file-saver": "^2.0.5",
 		"framer-motion": "^12.23.24",
 		"hls.js": "^1.6.15",
@@ -46,8 +47,8 @@
 		"i18next": "^25.8.18",
 		"i18next-browser-languagedetector": "^8.2.1",
 		"js-cookie": "^3.0.5",
-		"lucide-react": "^0.562.0",
-		"motion": "^12.23.6",
+		"lucide-react": "^0.577.0",
+		"motion": "^12.37.0",
 		"pdfjs-dist": "5.5.207",
 		"prettier": "^3.8.1",
 		"prismjs": "^1.30.0",
@@ -59,6 +60,7 @@
 		"react-helmet-async": "^2.0.5",
 		"react-hook-form": "^7.71.2",
 		"react-i18next": "^15.6.0",
+		"react-icons": "^5.6.0",
 		"react-markdown": "^10.1.0",
 		"react-qr-code": "^2.0.18",
 		"react-redux": "^9.2.0",
@@ -91,6 +93,6 @@
 		"typescript": "^5.9.2",
 		"vite": "^7.1.7",
 		"vite-plugin-imagemin": "^0.6.1",
-		"vitest": "^4.0.14"
+		"vitest": "^4.1.1"
 	}
 }

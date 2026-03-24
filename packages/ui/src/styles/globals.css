@@ -22,8 +22,8 @@
   --popover: oklch(98.5% 0 0);
   --popover-foreground: oklch(0.145 0 0);
   --popover-shadow: 0 10px 25px 0 oklch(0 0 0 / 0.1);
-  --primary: oklch(48.8% 0.243 264.376);
-  --primary-foreground: oklch(54.6% 0.245 262.881);
+  --primary: #137fec;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.97 0 0);
   --secondary-foreground: oklch(26.9% 0 0);
   --muted: oklch(0.97 0 0);
@@ -61,8 +61,8 @@
   --popover: oklch(22.9% 0 0);
   --popover-foreground: oklch(0.985 0 0);
   --popover-shadow: 0 10px 25px 0 oklch(0 0 0 / 0.4);
-  --primary: oklch(54.6% 0.245 262.881);
-  --primary-foreground: oklch(62.3% 0.214 259.815);
+  --primary: #137fec;
+  --primary-foreground: #ffffff;
   --secondary: oklch(0.269 0 0);
   --secondary-foreground: oklch(97% 0 0);
   --muted: oklch(0.269 0 0);
@@ -140,6 +140,7 @@
   * {
     @apply border-border outline-ring/50;
   }
+
   body {
     @apply bg-background text-foreground;
   }
@@ -152,17 +153,27 @@
     font-weight: var(--shiki-dark-font-weight) !important;
     text-decoration: var(--shiki-dark-text-decoration) !important;
   }
+
   .maplibregl-popup-content {
-    @apply bg-transparent! shadow-none! p-0! rounded-none!;
+    @apply !bg-transparent !shadow-none !p-0 !rounded-none;
   }
+
   .maplibregl-popup-tip {
-    @apply hidden!;
+    @apply !hidden;
   }
 }
 
 @layer utilities {
   .button-3d {
-    @apply border border-black/10 shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1),0_1px_3px_0_rgba(0,0,0,0.15)] dark:border-none dark:shadow-[inset_0_1px_0_0_rgba(255,255,255,0.1)];
+    @apply border border-black/10;
+    box-shadow:
+      inset 0 1px 0 0 rgba(255, 255, 255, 0.1),
+      0 1px 3px 0 rgba(0, 0, 0, 0.15);
+  }
+
+  .dark .button-3d {
+    @apply border-none;
+    box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.1);
   }
 
 }
