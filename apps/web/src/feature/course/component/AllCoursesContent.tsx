@@ -2,6 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent } from "@workspace/ui/components/Card";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import {
 	BookOpen,
 	Play,
@@ -92,36 +93,7 @@ const AllCoursesContent: React.FC = () => {
 	};
 
 	if (isLoading) {
-		return (
-			<div className="min-h-screen transition-colors duration-300 bg-slate-50 dark:bg-slate-900">
-				<div
-					className="fixed inset-0 -z-10"
-					style={{
-						backgroundImage:
-							"radial-gradient(rgb(226 232 240) 1px, transparent 1px)",
-						backgroundSize: "40px 40px",
-					}}
-				/>
-				<div
-					className="fixed inset-0 -z-10 dark:block hidden"
-					style={{
-						backgroundImage:
-							"radial-gradient(rgb(30 41 59) 1px, transparent 1px)",
-						backgroundSize: "40px 40px",
-					}}
-				/>
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-					<div className="flex h-96 items-center justify-center">
-						<div className="text-center">
-							<div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-b-2 border-blue-700" />
-							<p className="text-gray-600 dark:text-gray-400">
-								Đang tải khóa học...
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
+		return <Loader />;
 	}
 
 	if (error) {
@@ -169,9 +141,6 @@ const AllCoursesContent: React.FC = () => {
 						backgroundPosition: "center",
 					}}
 				>
-					{/* 👇 giảm opacity cho đỡ mờ */}
-					<div className="absolute inset- bg-white/40 dark:bg-slate-900/50" />
-
 					{/* 👇 layout flex */}
 					<div className="relative flex flex-col md:flex-row items-center justify-between gap-8">
 						{/* LEFT - TEXT */}
