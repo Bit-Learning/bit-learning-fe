@@ -1,4 +1,7 @@
 import { FormatError, Language } from "@/feature/code-practice/types/coding.type";
+import prettier from "prettier/standalone";
+import prettierBabel from "prettier/plugins/babel";
+import prettierEstree from "prettier/plugins/estree";
 
 export const LANGUAGE_EXTENSIONS: Record<Language, string> = {
   [Language.CPP]: ".cpp",
@@ -635,33 +638,21 @@ export function validatePythonIndentation(code: string): FormatError[] {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     const trimmed = line?.trim();
-
     if (!trimmed || trimmed.startsWith("#")) continue;
 
-    const indent = line?.length! - line?.trimStart().length!;
+    const indent = line!.length - line!.trimStart().length;
 
-    if (line?.includes("\t")) {
-      errors.push({
-        line: i + 1,
-        message: "Use spaces instead of tabs for indentation",
-      });
+    if (line!.includes("\t")) {
+      errors.push({ line: i + 1, message: "Use spaces instead of tabs for indentation" });
       continue;
     }
-
     if (indent % 4 !== 0) {
-      errors.push({
-        line: i + 1,
-        message: "Indentation should be a multiple of 4 spaces",
-      });
+      errors.push({ line: i + 1, message: "Indentation should be a multiple of 4 spaces" });
     }
-
     if (trimmed.endsWith(":")) {
       indentStack.push(indent + 4);
     } else {
-      while (indentStack.length > 1 && indent < indentStack[indentStack.length - 1]!) {
-        indentStack.pop();
-      }
-
+      while (indentStack.length > 1 && indent < indentStack[indentStack.length - 1]!) indentStack.pop();
       if (indent !== indentStack[indentStack.length - 1] && indent !== 0) {
         errors.push({
           line: i + 1,
@@ -674,78 +665,145 @@ export function validatePythonIndentation(code: string): FormatError[] {
   return errors;
 }
 
-function formatPythonCode(code: string): string {
-  const lines = code.split("\n");
-  const formatted: string[] = [];
-  let indentLevel = 0;
-
-  for (let line of lines) {
-    const trimmed = line.trim();
-
-    if (!trimmed) {
-      formatted.push("");
-      continue;
-    }
-
-    if (
-      trimmed.startsWith("elif ") ||
-      trimmed.startsWith("else:") ||
-      trimmed.startsWith("except ") ||
-      trimmed.startsWith("except:") ||
-      trimmed.startsWith("finally:")
-    ) {
-      indentLevel = Math.max(0, indentLevel - 1);
-    }
-
-    const indent = "    ".repeat(indentLevel);
-    formatted.push(indent + trimmed);
-
-    if (trimmed.endsWith(":")) {
-      indentLevel++;
-    }
-  }
-
-  return formatted.join("\n");
-}
-
 function formatCStyleCode(code: string): string {
   const lines = code.split("\n");
   const formatted: string[] = [];
   let indentLevel = 0;
 
-  for (let line of lines) {
+  for (const line of lines) {
     const trimmed = line.trim();
-
     if (!trimmed) {
       formatted.push("");
       continue;
     }
-
-    if (trimmed.startsWith("}")) {
-      indentLevel = Math.max(0, indentLevel - 1);
-    }
-
-    const indent = "  ".repeat(indentLevel);
-    formatted.push(indent + trimmed);
-
-    const openBraces = (trimmed.match(/{/g) || []).length;
-    const closeBraces = (trimmed.match(/}/g) || []).length;
-    indentLevel += openBraces - closeBraces;
-    indentLevel = Math.max(0, indentLevel);
+    if (trimmed.startsWith("}")) indentLevel = Math.max(0, indentLevel - 1);
+    formatted.push("  ".repeat(indentLevel) + trimmed);
+    const open = (trimmed.match(/{/g) || []).length;
+    const close = (trimmed.match(/}/g) || []).length;
+    indentLevel = Math.max(0, indentLevel + open - close);
   }
 
   return formatted.join("\n");
 }
 
-export function formatCode(code: string, language: Language): string {
-  switch (language) {
-    case Language.PYTHON:
-      return formatPythonCode(code);
-    case Language.CPP:
-    case Language.JAVA:
-    case Language.JAVASCRIPT:
-      return formatCStyleCode(code);
-    default:
-      return code;
+async function formatJavaScript(code: string): Promise<string> {
+  return await prettier.format(code, {
+    parser: "babel",
+    plugins: [prettierBabel, prettierEstree],
+    printWidth: 100,
+    tabWidth: 2,
+    semi: true,
+    singleQuote: false,
+  });
+}
+
+let pythonWorker: Worker | null = null;
+const pendingRequests = new Map<string, { resolve: (v: string) => void; reject: (e: any) => void }>();
+
+function getPythonWorker(): Worker {
+  if (pythonWorker) return pythonWorker;
+
+  pythonWorker = new Worker(new URL("./python-formatter.worker.ts", import.meta.url), { type: "module" });
+
+  pythonWorker.onmessage = (e: MessageEvent) => {
+    const { id, result, error, syntaxError } = e.data;
+    const pending = pendingRequests.get(id);
+    if (!pending) return;
+    pendingRequests.delete(id);
+
+    if (syntaxError) {
+      pending.reject(Object.assign(new Error(error), { syntaxError: true, code: result }));
+    } else if (error) {
+      pending.reject(new Error(error));
+    } else {
+      pending.resolve(result);
+    }
+  };
+
+  pythonWorker.onerror = (e) => console.error("Python worker error:", e);
+
+  return pythonWorker;
+}
+
+async function formatPython(code: string): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const id = crypto.randomUUID();
+    pendingRequests.set(id, { resolve, reject });
+    getPythonWorker().postMessage({ code, id });
+
+    setTimeout(() => {
+      if (pendingRequests.has(id)) {
+        pendingRequests.delete(id);
+        reject(new Error("Python formatter timeout"));
+      }
+    }, 60_000);
+  });
+}
+
+let clangFormat: any = null;
+
+async function loadClangFormat() {
+  if (clangFormat) return clangFormat;
+
+  await new Promise<void>((resolve, reject) => {
+    if (document.querySelector("script[data-clang-format]")) {
+      resolve();
+      return;
+    }
+    const script = document.createElement("script");
+    script.src = "https://cdn.jsdelivr.net/npm/clang-format-wasm@0.0.14/clang-format/clang-format.js";
+    script.dataset.clangFormat = "true";
+    script.onload = () => resolve();
+    script.onerror = () => reject(new Error("Failed to load clang-format-wasm"));
+    document.head.appendChild(script);
+  });
+
+  clangFormat = await (window as any).createClangFormat();
+  return clangFormat;
+}
+
+async function formatCpp(code: string): Promise<string> {
+  const cf = await loadClangFormat();
+  return cf.format(code, JSON.stringify({ BasedOnStyle: "Google", IndentWidth: 2, ColumnLimit: 100 }));
+}
+
+async function formatJava(code: string): Promise<string> {
+  try {
+    const res = await fetch("/api/format/java", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ code }),
+    });
+    if (!res.ok) throw new Error();
+    const { formatted } = await res.json();
+    return formatted;
+  } catch {
+    return formatCStyleCode(code);
+  }
+}
+
+export async function formatCode(
+  code: string,
+  language: Language,
+): Promise<{ formatted: string; syntaxError?: boolean; message?: string }> {
+  try {
+    switch (language) {
+      case Language.PYTHON:
+        return { formatted: await formatPython(code) };
+      case Language.JAVASCRIPT:
+        return { formatted: await formatJavaScript(code) };
+      case Language.CPP:
+        return { formatted: await formatCpp(code) };
+      case Language.JAVA:
+        return { formatted: await formatJava(code) };
+      default:
+        return { formatted: code };
+    }
+  } catch (e: any) {
+    if (e.syntaxError) {
+      return { formatted: e.code ?? code, syntaxError: true, message: e.message };
+    }
+    console.error("formatCode error:", e);
+    return { formatted: code };
   }
 }

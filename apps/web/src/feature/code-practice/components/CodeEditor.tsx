@@ -53,7 +53,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [activeFileId, setActiveFileId] = useState("1");
   const [copied, setCopied] = useState(false);
   const [formatErrors, setFormatErrors] = useState<any[]>([]);
-  const [showFormatErrors, setShowFormatErrors] = useState(false);
+  const [isFormatting, setIsFormatting] = useState(false);
+  const [formatMessage, setFormatMessage] = useState<string | null>(null);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
@@ -109,10 +110,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     if (activeFile?.language === Language.PYTHON) {
       const errors = validatePythonIndentation(activeFile.content);
       setFormatErrors(errors);
-      setShowFormatErrors(errors.length > 0);
     } else {
       setFormatErrors([]);
-      setShowFormatErrors(false);
     }
   }, [activeFile?.content, activeFile?.language]);
 
@@ -121,10 +120,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     [activeFile?.content, activeFile?.language],
   );
 
-  const handleFormat = useCallback(() => {
-    const formatted = formatCode(activeFile.content, activeFile.language);
-    handleCodeChange(formatted);
-    setShowFormatErrors(false);
+  const handleFormat = useCallback(async () => {
+    setIsFormatting(true);
+    setFormatMessage(null);
+    try {
+      const { formatted, syntaxError, message } = await formatCode(activeFile.content, activeFile.language);
+      handleCodeChange(formatted);
+      if (syntaxError && message) {
+        setFormatMessage(message);
+      }
+    } finally {
+      setIsFormatting(false);
+    }
   }, [activeFile?.content, activeFile?.language, handleCodeChange]);
 
   const handleKeyDown = useCallback(
@@ -296,10 +303,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           )}
         </div>
         <div className="flex items-center gap-4 text-gray-400">
-          <button onClick={handleFormat} className="hover:text-white transition-colors flex items-center gap-1.5">
-            <Wand2 className="w-5 h-5" />
-            <span className="text-xs">Format</span>
+          <button
+            onClick={handleFormat}
+            disabled={isFormatting}
+            className="hover:text-white transition-colors flex items-center gap-1.5 disabled:opacity-50"
+          >
+            {isFormatting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
+            <span className="text-xs">{isFormatting ? "Formatting..." : "Format"}</span>
           </button>
+
           <div className="h-5 w-px bg-gray-600" />
           <button onClick={handleDownload} className="hover:text-white transition-colors">
             <Download className="w-5 h-5" />
@@ -320,26 +332,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       </div>
 
       <div className={cn("relative overflow-hidden flex", submissionResult ? "h-[60%]" : "flex-1")}>
-        {showFormatErrors && formatErrors.length > 0 && (
-          <div className="absolute bottom-0 left-0 right-0 bg-yellow-900/30 border-b border-yellow-700 px-4 py-2 flex items-start gap-3 z-10">
-            <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
-            <div className="flex-1">
-              <div className="text-yellow-400 font-semibold text-sm mb-1">Formatting Issues</div>
-              <div className="text-yellow-200 text-xs space-y-1 max-h-20 overflow-y-auto">
-                {formatErrors.slice(0, 3).map((error: any, idx: number) => (
-                  <div key={idx}>
-                    Line {error.line}: {error.message}
-                  </div>
-                ))}
-              </div>
-            </div>
-            <button
-              onClick={handleFormat}
-              className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold rounded"
-            >
-              Auto Fix
-            </button>
-            <button onClick={() => setShowFormatErrors(false)} className="text-yellow-400 hover:text-white">
+        {formatMessage && (
+          <div className="absolute bottom-0 left-0 right-0 bg-orange-900/30 border-b border-orange-700 px-4 py-2 flex items-center gap-3 z-10">
+            <AlertCircle className="w-4 h-4 text-orange-400 shrink-0" />
+            <span className="text-orange-200 text-xs flex-1">{formatMessage}</span>
+            <button onClick={() => setFormatMessage(null)} className="text-orange-400 hover:text-white">
               <X className="w-4 h-4" />
             </button>
           </div>
