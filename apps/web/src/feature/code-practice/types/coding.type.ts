@@ -460,3 +460,20 @@ export interface GenerateCodeTemplatesRequest {
 export interface GenerateCodeTemplatesResponse {
   templates: CodeTemplateResponse[];
 }
+
+export interface CodeFile {
+  id: string;
+  name: string;
+  content: string;
+  language: Language;
+}
+
+export interface Problem {
+  timeLimitMs: number;
+  memoryLimitMb: number;
+}
+
+export interface FormatError {
+  line: number;
+  message: string;
+}
