@@ -1,13 +1,7 @@
 import { Link } from "@tanstack/react-router";
-import {
-	Facebook,
-	Instagram,
-	Linkedin,
-	Mail,
-	MapPin,
-	Phone,
-	Twitter,
-} from "lucide-react";
+import { Mail, MapPin, Phone } from "lucide-react";
+import { SiFacebook } from "react-icons/si";
+import { FaLinkedin, FaInstagramSquare, FaTwitter } from "react-icons/fa";
 
 const Footer: React.FC = () => {
 	return (
@@ -33,25 +27,25 @@ const Footer: React.FC = () => {
 								href="#"
 								className="text-gray-400 transition-colors hover:text-blue-400"
 							>
-								<Facebook className="h-5 w-5" />
+								<SiFacebook className="h-5 w-5" />
 							</a>
 							<a
 								href="#"
 								className="text-gray-400 transition-colors hover:text-blue-400"
 							>
-								<Twitter className="h-5 w-5" />
+								<FaTwitter className="h-5 w-5" />
 							</a>
 							<a
 								href="#"
 								className="text-gray-400 transition-colors hover:text-pink-400"
 							>
-								<Instagram className="h-5 w-5" />
+								<FaInstagramSquare className="h-5 w-5" />
 							</a>
 							<a
 								href="#"
 								className="text-gray-400 transition-colors hover:text-blue-600"
 							>
-								<Linkedin className="h-5 w-5" />
+								<FaLinkedin className="h-5 w-5" />
 							</a>
 						</div>
 					</div>
@@ -156,16 +150,16 @@ const Footer: React.FC = () => {
 						<div className="space-y-3">
 							<div className="flex items-center space-x-3">
 								<Phone className="h-5 w-5 text-blue-400" />
-								<span className="text-gray-300">0767.666.299</span>
+								<span className="text-gray-300">0123.456.789</span>
 							</div>
 							<div className="flex items-center space-x-3">
 								<Mail className="h-5 w-5 text-blue-400" />
-								<span className="text-gray-300">bithubvn@gmail.com</span>
+								<span className="text-gray-300">bitlearning@gmail.com</span>
 							</div>
 							<div className="flex items-start space-x-3">
 								<MapPin className="mt-1 h-5 w-5 text-blue-400" />
 								<span className="text-gray-300">
-									929 Âu Cơ, Phường Tân Sơn Nhì, Hồ Chí Minh
+									7 Đ. D1, Long Thạnh Mỹ, Thủ Đức, Hồ Chí Minh 700000
 								</span>
 							</div>
 						</div>
@@ -190,12 +184,6 @@ const Footer: React.FC = () => {
 								className="text-sm text-gray-400 transition-colors hover:text-blue-400"
 							>
 								Điều khoản sử dụng
-							</Link>
-							<Link
-								to="/"
-								className="text-sm text-gray-400 transition-colors hover:text-blue-400"
-							>
-								Liên hệ
 							</Link>
 							<Link
 								to="/about"
