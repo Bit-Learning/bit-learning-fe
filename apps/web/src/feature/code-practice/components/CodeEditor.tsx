@@ -1,0 +1,459 @@
+import React, { useState, useRef, useEffect, useMemo, useCallback } from "react";
+import {
+  Copy,
+  Check,
+  RotateCcw,
+  Settings,
+  Maximize,
+  Terminal,
+  X,
+  Clock,
+  HardDrive,
+  Send,
+  Loader2,
+  Plus,
+  Download,
+  AlertCircle,
+  Wand2,
+} from "lucide-react";
+import { CodeFile, Language, Problem, SubmissionResultResponse, SubmissionStatus } from "../types/coding.type";
+import { formatCode, highlightCode, LANGUAGE_EXTENSIONS, validatePythonIndentation } from "@/shared/lib/code-editor";
+import { FileTab } from "./FileTab";
+import { cn } from "@workspace/ui/lib/utils";
+import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
+
+interface CodeEditorProps {
+  language: Language;
+  code: string;
+  problem: Problem;
+  submissionResult: SubmissionResultResponse | null;
+  isSubmitting: boolean;
+  onLanguageChange: (language: Language) => void;
+  onCodeChange: (code: string) => void;
+  onSubmit: () => void;
+  onReset: () => void;
+  onCloseResult?: () => void;
+}
+
+export const CodeEditor: React.FC<CodeEditorProps> = ({
+  language,
+  code,
+  problem,
+  submissionResult,
+  isSubmitting,
+  onLanguageChange,
+  onCodeChange,
+  onSubmit,
+  onReset,
+  onCloseResult,
+}) => {
+  const [files, setFiles] = useState<CodeFile[]>([
+    { id: "1", name: `main${LANGUAGE_EXTENSIONS[language]}`, content: code, language },
+  ]);
+  const [activeFileId, setActiveFileId] = useState("1");
+  const [copied, setCopied] = useState(false);
+  const [formatErrors, setFormatErrors] = useState<any[]>([]);
+  const [showFormatErrors, setShowFormatErrors] = useState(false);
+
+  const textareaRef = useRef<HTMLTextAreaElement>(null);
+  const highlightRef = useRef<HTMLPreElement>(null);
+  const lineNumbersRef = useRef<HTMLDivElement>(null);
+  const isInternalChange = useRef(false);
+
+  const activeFile = files.find((f) => f.id === activeFileId)!;
+
+  const handleCodeChange = useCallback(
+    (newCode: string) => {
+      isInternalChange.current = true;
+      setFiles((prev) => prev.map((f) => (f.id === activeFileId ? { ...f, content: newCode } : f)));
+      onCodeChange(newCode);
+    },
+    [activeFileId, onCodeChange],
+  );
+
+  useEffect(() => {
+    if (isInternalChange.current) {
+      isInternalChange.current = false;
+      return;
+    }
+    setFiles((prev) => prev.map((f) => (f.id === activeFileId ? { ...f, content: code } : f)));
+  }, [code]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    setFiles((prev) =>
+      prev.map((f) => {
+        if (f.id !== activeFileId) return f;
+        const newName = f.name.replace(/\.(cpp|java|py|js)$/, LANGUAGE_EXTENSIONS[language]);
+        return { ...f, language, name: newName };
+      }),
+    );
+  }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    const highlight = highlightRef.current;
+    const lineNumbers = lineNumbersRef.current;
+    if (!textarea || !highlight) return;
+
+    const handleScroll = () => {
+      highlight.scrollTop = textarea.scrollTop;
+      highlight.scrollLeft = textarea.scrollLeft;
+      if (lineNumbers) lineNumbers.scrollTop = textarea.scrollTop;
+    };
+
+    textarea.addEventListener("scroll", handleScroll, { passive: true });
+    return () => textarea.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    if (activeFile?.language === Language.PYTHON) {
+      const errors = validatePythonIndentation(activeFile.content);
+      setFormatErrors(errors);
+      setShowFormatErrors(errors.length > 0);
+    } else {
+      setFormatErrors([]);
+      setShowFormatErrors(false);
+    }
+  }, [activeFile?.content, activeFile?.language]);
+
+  const highlightedCode = useMemo(
+    () => highlightCode(activeFile?.content ?? "", activeFile?.language ?? language),
+    [activeFile?.content, activeFile?.language],
+  );
+
+  const handleFormat = useCallback(() => {
+    const formatted = formatCode(activeFile.content, activeFile.language);
+    handleCodeChange(formatted);
+    setShowFormatErrors(false);
+  }, [activeFile?.content, activeFile?.language, handleCodeChange]);
+
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+      const textarea = e.currentTarget;
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      const value = activeFile.content;
+      const indent = activeFile.language === Language.PYTHON ? "    " : "  ";
+
+      if (e.key === "Tab") {
+        e.preventDefault();
+
+        if (start !== end) {
+          const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+          const lineEnd = value.indexOf("\n", end) === -1 ? value.length : value.indexOf("\n", end);
+          const selectedLines = value.slice(lineStart, lineEnd).split("\n");
+
+          const processed = e.shiftKey
+            ? selectedLines.map((l) =>
+                l.startsWith(indent) ? l.slice(indent.length) : l.startsWith("\t") ? l.slice(1) : l,
+              )
+            : selectedLines.map((l) => indent + l);
+
+          const newCode = value.slice(0, lineStart) + processed.join("\n") + value.slice(lineEnd);
+          handleCodeChange(newCode);
+          setTimeout(() => {
+            textarea.selectionStart = lineStart;
+            textarea.selectionEnd = lineStart + processed.join("\n").length;
+          }, 0);
+          return;
+        }
+
+        if (e.shiftKey) {
+          const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+          const before = value.slice(lineStart, start);
+          const remove = before.endsWith(indent) ? indent.length : before.endsWith("\t") ? 1 : 0;
+          if (remove) {
+            const newCode = value.slice(0, start - remove) + value.slice(start);
+            handleCodeChange(newCode);
+            setTimeout(() => {
+              textarea.selectionStart = textarea.selectionEnd = start - remove;
+            }, 0);
+          }
+        } else {
+          const newCode = value.slice(0, start) + indent + value.slice(end);
+          handleCodeChange(newCode);
+          setTimeout(() => {
+            textarea.selectionStart = textarea.selectionEnd = start + indent.length;
+          }, 0);
+        }
+        return;
+      }
+
+      if (e.key === "Enter") {
+        e.preventDefault();
+        const lineStart = value.lastIndexOf("\n", start - 1) + 1;
+        const currentLine = value.slice(lineStart, start);
+        const currentIndent = currentLine.match(/^(\s+)/)?.[1] ?? "";
+        const extra = currentLine.trimEnd().endsWith(":") || currentLine.trimEnd().endsWith("{") ? indent : "";
+
+        const newCode = value.slice(0, start) + "\n" + currentIndent + extra + value.slice(end);
+        handleCodeChange(newCode);
+        setTimeout(() => {
+          textarea.selectionStart = textarea.selectionEnd = start + 1 + currentIndent.length + extra.length;
+        }, 0);
+        return;
+      }
+
+      if ((e.ctrlKey || e.metaKey) && e.key === "s") {
+        e.preventDefault();
+        handleFormat();
+      }
+    },
+    [activeFile?.content, activeFile?.language, handleCodeChange, handleFormat],
+  );
+
+  const handleAddFile = useCallback(() => {
+    const newFile: CodeFile = {
+      id: Date.now().toString(),
+      name: `file${files.length}${LANGUAGE_EXTENSIONS[activeFile.language]}`,
+      content: "",
+      language: activeFile.language,
+    };
+    setFiles((prev) => [...prev, newFile]);
+    setActiveFileId(newFile.id);
+  }, [files.length, activeFile?.language]);
+
+  const handleDeleteFile = useCallback(
+    (id: string) => {
+      if (files.length === 1) return;
+      setFiles((prev) => prev.filter((f) => f.id !== id));
+      if (activeFileId === id) {
+        setActiveFileId(files[0]?.id === id ? files[1]?.id! : files[0]?.id!);
+      }
+    },
+    [files, activeFileId],
+  );
+
+  const handleCopyCode = useCallback(() => {
+    navigator.clipboard.writeText(activeFile.content);
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  }, [activeFile?.content]);
+
+  const handleDownload = useCallback(() => {
+    const blob = new Blob([activeFile.content], { type: "text/plain" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = activeFile.name;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, [activeFile?.content, activeFile?.name]);
+
+  const passedCount =
+    submissionResult?.testcaseResults?.filter((r) => r.status === SubmissionStatus.ACCEPTED).length ?? 0;
+  const totalCount = submissionResult?.testcaseResults?.length ?? 0;
+
+  return (
+    <>
+      <div className="h-12 flex items-center bg-gray-800 border-b border-gray-700">
+        <div className="flex items-center px-4">
+          <div className="flex gap-1.5">
+            <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
+            <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
+            <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
+          </div>
+        </div>
+        <div className="flex flex-1 overflow-x-auto">
+          {files.map((file) => (
+            <FileTab
+              key={file.id}
+              file={file}
+              isActive={file.id === activeFileId}
+              onClick={() => setActiveFileId(file.id)}
+              onDelete={() => handleDeleteFile(file.id)}
+              canDelete={files.length > 1}
+            />
+          ))}
+        </div>
+        <button
+          onClick={handleAddFile}
+          className="cursor-pointer px-4 py-2 hover:bg-gray-700 transition-colors border-l text-white border-gray-700"
+        >
+          <Plus className="w-4 h-4" />
+        </button>
+      </div>
+
+      <div className="h-12 flex items-center justify-between px-4 bg-gray-800 border-b border-gray-700">
+        <div className="flex items-center gap-2">
+          <select
+            value={language}
+            onChange={(e) => onLanguageChange(e.target.value as Language)}
+            className="bg-gray-700 px-3 py-1.5 rounded-md text-sm font-medium text-gray-200 border-none cursor-pointer hover:bg-gray-600"
+          >
+            <option value={Language.CPP}>C++</option>
+            <option value={Language.JAVA}>Java</option>
+            <option value={Language.PYTHON}>Python</option>
+            <option value={Language.JAVASCRIPT}>JavaScript</option>
+          </select>
+          {formatErrors.length > 0 && (
+            <div className="flex items-center gap-1.5 text-yellow-400 text-xs">
+              <AlertCircle className="w-4 h-4" />
+              <span>
+                {formatErrors.length} formatting issue{formatErrors.length > 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
+        </div>
+        <div className="flex items-center gap-4 text-gray-400">
+          <button onClick={handleFormat} className="hover:text-white transition-colors flex items-center gap-1.5">
+            <Wand2 className="w-5 h-5" />
+            <span className="text-xs">Format</span>
+          </button>
+          <div className="h-5 w-px bg-gray-600" />
+          <button onClick={handleDownload} className="hover:text-white transition-colors">
+            <Download className="w-5 h-5" />
+          </button>
+          <button onClick={handleCopyCode} className="hover:text-white transition-colors">
+            {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
+          </button>
+          <button onClick={onReset} className="hover:text-white transition-colors">
+            <RotateCcw className="w-5 h-5" />
+          </button>
+          <button className="hover:text-white transition-colors">
+            <Settings className="w-5 h-5" />
+          </button>
+          <button className="hover:text-white transition-colors">
+            <Maximize className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      <div className={cn("relative overflow-hidden flex", submissionResult ? "h-[60%]" : "flex-1")}>
+        {showFormatErrors && formatErrors.length > 0 && (
+          <div className="absolute bottom-0 left-0 right-0 bg-yellow-900/30 border-b border-yellow-700 px-4 py-2 flex items-start gap-3 z-10">
+            <AlertCircle className="w-5 h-5 text-yellow-400 shrink-0 mt-0.5" />
+            <div className="flex-1">
+              <div className="text-yellow-400 font-semibold text-sm mb-1">Formatting Issues</div>
+              <div className="text-yellow-200 text-xs space-y-1 max-h-20 overflow-y-auto">
+                {formatErrors.slice(0, 3).map((error: any, idx: number) => (
+                  <div key={idx}>
+                    Line {error.line}: {error.message}
+                  </div>
+                ))}
+              </div>
+            </div>
+            <button
+              onClick={handleFormat}
+              className="px-3 py-1 bg-yellow-600 hover:bg-yellow-700 text-white text-xs font-semibold rounded"
+            >
+              Auto Fix
+            </button>
+            <button onClick={() => setShowFormatErrors(false)} className="text-yellow-400 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <div
+          ref={lineNumbersRef}
+          className="shrink-0 w-12 bg-gray-900 border-r border-gray-700 pt-4 pb-4 overflow-hidden select-none"
+        >
+          <div className="font-mono text-sm text-gray-500 text-right pr-3" style={{ lineHeight: 1.6 }}>
+            {activeFile.content.split("\n").map((_, idx) => (
+              <div key={idx}>{idx + 1}</div>
+            ))}
+          </div>
+        </div>
+
+        <div className="relative flex-1 h-full bg-gray-900 font-mono text-sm overflow-hidden">
+          <pre
+            ref={highlightRef}
+            className="absolute inset-0 p-4 pointer-events-none whitespace-pre overflow-auto m-0"
+            style={{ color: "#e5e7eb", lineHeight: 1.6 }}
+            dangerouslySetInnerHTML={{ __html: highlightedCode }}
+          />
+          <textarea
+            ref={textareaRef}
+            value={activeFile.content}
+            onChange={(e) => handleCodeChange(e.target.value)}
+            onKeyDown={handleKeyDown}
+            spellCheck={false}
+            className="absolute inset-0 p-4 resize-none border-0 outline-none bg-transparent whitespace-pre overflow-auto"
+            style={{ color: "transparent", caretColor: "white", lineHeight: 1.6 }}
+          />
+        </div>
+      </div>
+
+      {submissionResult && (
+        <div className="h-1/3 min-h-50 bg-gray-950 border-t border-gray-800 flex flex-col">
+          <div className="px-4 py-2 border-b border-gray-800 flex items-center justify-between bg-gray-900">
+            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
+              <Terminal className="w-4 h-4" />
+              Kết quả nộp bài
+            </div>
+            <button onClick={onCloseResult} className="text-gray-500 hover:text-white">
+              <X className="w-4 h-4" />
+            </button>
+          </div>
+          <div className="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-2">
+            <div className="flex items-center gap-2 mb-3">
+              <SubmissionStatusBadge status={submissionResult.status} showIcon />
+              <span className="text-gray-500">
+                ({passedCount}/{totalCount} test cases passed)
+              </span>
+            </div>
+            {submissionResult.testcaseResults?.map((result, idx) => {
+              const isPass = result.status === SubmissionStatus.ACCEPTED;
+              return (
+                <div key={result.testcaseId} className="flex gap-4">
+                  <span className={cn("font-bold", isPass ? "text-green-500" : "text-red-500")}>CASE {idx + 1}:</span>
+                  <span className="text-gray-400">
+                    {result.executionTimeMs}ms | {result.memoryUsageMb}MB
+                  </span>
+                  <span className={isPass ? "text-green-400" : "text-red-400"}>{isPass ? "✓ Chính xác" : "✗ Sai"}</span>
+                </div>
+              );
+            })}
+            {submissionResult.errorMessage && (
+              <div className="mt-3 p-3 bg-red-900/20 border border-red-800 rounded text-red-400">
+                <div className="font-bold mb-1">Error:</div>
+                <div className="whitespace-pre-wrap">{submissionResult.errorMessage}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      <div className="h-16 flex items-center justify-between px-6 bg-gray-900 border-t border-gray-800">
+        <div className="flex items-center gap-2 text-gray-400">
+          <Clock className="w-4 h-4" />
+          <span className="text-sm">{problem.timeLimitMs}ms</span>
+          <div className="mx-2 h-4 w-px bg-gray-700" />
+          <HardDrive className="w-4 h-4" />
+          <span className="text-sm">{problem.memoryLimitMb}MB</span>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            disabled
+            className="px-5 py-2 rounded bg-gray-800 text-gray-400 text-sm font-semibold border border-gray-700 cursor-not-allowed"
+          >
+            Chạy thử
+          </button>
+          <button
+            onClick={onSubmit}
+            disabled={isSubmitting || !activeFile.content.trim()}
+            className={cn(
+              "px-6 py-2 rounded text-white text-sm font-semibold transition-all flex items-center gap-2",
+              isSubmitting || !activeFile.content.trim()
+                ? "bg-gray-700 cursor-not-allowed"
+                : "bg-blue-600 hover:bg-blue-700",
+            )}
+          >
+            {isSubmitting ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Đang nộp...</span>
+              </>
+            ) : (
+              <>
+                <span>Nộp bài</span>
+                <Send className="w-4 h-4" />
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+};
