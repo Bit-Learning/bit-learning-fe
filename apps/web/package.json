@@ -90,6 +90,6 @@
 		"typescript": "^5.9.2",
 		"vite": "^7.1.7",
 		"vite-plugin-imagemin": "^0.6.1",
-		"vitest": "^4.0.14"
+		"vitest": "^4.1.1"
 	}
 }
