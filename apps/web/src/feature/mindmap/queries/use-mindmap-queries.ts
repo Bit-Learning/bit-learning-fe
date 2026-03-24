@@ -1,67 +1,132 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import {
-    radialmindmapApi,
-    symmetrichorizontalmindmapApi,
-    horizontalmindmapApi,
-    savedMindMapApi,
-} from "../apis/mindmap.api";
-import type { GenerateMindMapRequest, SaveMindMapRequest } from "../types/mindmap.type";
+import { mindmapApi } from "../apis/mindmap.api";
+import type { GenerateMindMapRequest, RefineRequest, SaveTreeRequest } from "../types/mindmap.type";
+
+// ─── Query Keys ───────────────────────────────────────────────────────────────
 
 export const mindmapKeys = {
     all: ["mindmap"] as const,
-    generate: () => [...mindmapKeys.all, "generate"] as const,
+    gallery: () => [...mindmapKeys.all, "gallery"] as const,
+    saved: {
+        all: ["mindmap", "saved"] as const,
+        list: (page: number, size: number) =>
+            [...mindmapKeys.saved.all, "list", page, size] as const,
+        detail: (id: number) => [...mindmapKeys.saved.all, "detail", id] as const,
+        versions: (id: number) => [...mindmapKeys.saved.all, "versions", id] as const,
+        version: (id: number, versionNumber: number) =>
+            [...mindmapKeys.saved.all, "version", id, versionNumber] as const,
+    },
 };
 
-export const savedMindMapKeys = {
-    all: ["savedMindMap"] as const,
-    list: (page: number, size: number) => [...savedMindMapKeys.all, "list", page, size] as const,
-    detail: (id: number) => [...savedMindMapKeys.all, "detail", id] as const,
-};
+// ─── Gallery ──────────────────────────────────────────────────────────────────
 
-export const useGenerateRadialMindMap = () => {
-    return useMutation({
-        mutationFn: (request: GenerateMindMapRequest) =>
-            radialmindmapApi.generateRadialLayout(request),
+export const useGetMindMapGallery = () =>
+    useQuery({
+        queryKey: mindmapKeys.gallery(),
+        queryFn: () => mindmapApi.getGallery(),
+        staleTime: 1000 * 60 * 10, // gallery ít thay đổi, cache 10 phút
     });
-};
 
-export const useGenerateSymmetricHorizontalMindMap = () => {
-    return useMutation({
-        mutationFn: (request: GenerateMindMapRequest) =>
-            symmetrichorizontalmindmapApi.generateSymmetricHorizontalLayout(request),
-    });
-};
+// ─── Generate ─────────────────────────────────────────────────────────────────
 
-export const useGenerateHorizontalMindMap = () => {
-    return useMutation({
-        mutationFn: (request: GenerateMindMapRequest) =>
-            horizontalmindmapApi.generateHorizontalLayout(request),
-    });
-};
-
-export const useSaveMindMap = () => {
+export const useGenerateMindMap = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (request: SaveMindMapRequest) => savedMindMapApi.save(request),
+        mutationFn: (request: GenerateMindMapRequest) => mindmapApi.generate(request),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: savedMindMapKeys.all });
+            // Generate tự lưu → invalidate saved list
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.all });
         },
     });
 };
 
-export const useGetSavedMindMaps = (page = 0, size = 12) => {
-    return useQuery({
-        queryKey: savedMindMapKeys.list(page, size),
-        queryFn: () => savedMindMapApi.list(page, size),
+// ─── Refine ───────────────────────────────────────────────────────────────────
+
+export const useRefineMindMap = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, request }: { id: number; request: RefineRequest }) =>
+            mindmapApi.refine(id, request),
+        onSuccess: (_data, { id }) => {
+            // Invalidate versions và detail của mindmap đó
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.versions(id) });
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.detail(id) });
+        },
     });
 };
+
+// ─── Saved List ───────────────────────────────────────────────────────────────
+
+export const useGetSavedMindMaps = (page = 0, size = 10) =>
+    useQuery({
+        queryKey: mindmapKeys.saved.list(page, size),
+        queryFn: () => mindmapApi.listSaved(page, size),
+    });
+
+// ─── Saved Detail ─────────────────────────────────────────────────────────────
+
+export const useGetSavedMindMapDetail = (id: number) =>
+    useQuery({
+        queryKey: mindmapKeys.saved.detail(id),
+        queryFn: () => mindmapApi.getById(id),
+        enabled: id > 0,
+    });
+
+// ─── Delete ───────────────────────────────────────────────────────────────────
 
 export const useDeleteSavedMindMap = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: (id: number) => savedMindMapApi.delete(id),
+        mutationFn: (id: number) => mindmapApi.delete(id),
         onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: savedMindMapKeys.all });
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.all });
+        },
+    });
+};
+
+// ─── Version History ──────────────────────────────────────────────────────────
+
+export const useGetMindMapVersions = (id: number) =>
+    useQuery({
+        queryKey: mindmapKeys.saved.versions(id),
+        queryFn: () => mindmapApi.listVersions(id),
+        enabled: id > 0,
+    });
+
+export const useGetMindMapVersion = (id: number, versionNumber: number) =>
+    useQuery({
+        queryKey: mindmapKeys.saved.version(id, versionNumber),
+        queryFn: () => mindmapApi.getVersion(id, versionNumber),
+        enabled: id > 0 && versionNumber > 0,
+    });
+
+export const useRestoreMindMapVersion = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({
+            id,
+            versionNumber,
+        }: {
+            id: number;
+            versionNumber: number;
+        }) => mindmapApi.restoreVersion(id, versionNumber),
+        onSuccess: (_data, { id }) => {
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.versions(id) });
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.detail(id) });
+        },
+    });
+};
+
+// ─── Save Tree ────────────────────────────────────────────────────────────────
+
+export const useSaveMindMapTree = () => {
+    const queryClient = useQueryClient();
+    return useMutation({
+        mutationFn: ({ id, request }: { id: number; request: SaveTreeRequest }) =>
+            mindmapApi.saveTree(id, request),
+        onSuccess: (_data, { id }) => {
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.versions(id) });
+            queryClient.invalidateQueries({ queryKey: mindmapKeys.saved.detail(id) });
         },
     });
 };

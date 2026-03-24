@@ -298,6 +298,9 @@ importers:
       echarts-for-react:
         specifier: ^3.0.5
         version: 3.0.6(echarts@6.0.0)(react@19.2.4)
+      elkjs:
+        specifier: ^0.11.1
+        version: 0.11.1
       file-saver:
         specifier: ^2.0.5
         version: 2.0.5
@@ -4440,6 +4443,9 @@ packages:
 
   electron-to-chromium@1.5.283:
     resolution: {integrity: sha512-3vifjt1HgrGW/h76UEeny+adYApveS9dH2h3p57JYzBSXJIKUJAvtmIytDKjcSCt9xHfrNCFJ7gts6vkhuq++w==}
+
+  elkjs@0.11.1:
+    resolution: {integrity: sha512-zxxR9k+rx5ktMwT/FwyLdPCrq7xN6e4VGGHH8hA01vVYKjTFik7nHOxBnAYtrgYUB1RpAiLvA1/U2YraWxyKKg==}
 
   embla-carousel-autoplay@8.6.0:
     resolution: {integrity: sha512-OBu5G3nwaSXkZCo1A6LTaFMZ8EpkYbwIaH+bPqdBnDGQ2fh4+NbzjXjs2SktoPNKCtflfVMc75njaDHOYXcrsA==}
@@ -11725,6 +11731,8 @@ snapshots:
       zrender: 6.0.0
 
   electron-to-chromium@1.5.283: {}
+
+  elkjs@0.11.1: {}
 
   embla-carousel-autoplay@8.6.0(embla-carousel@8.6.0):
     dependencies:
