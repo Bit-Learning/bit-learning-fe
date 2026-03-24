@@ -3,7 +3,7 @@ name: Test Build Pre Deployment
 on:
     workflow_dispatch:
     pull_request:
-        branches: [main]
+        branches: [main, develop]
         paths:
           - "apps/web/**"
           - "apps/admin/**"
