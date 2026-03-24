@@ -5,14 +5,16 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
-	useProblemDetail,
-	useProblemSubmissions,
-	useSubmitCode,
-	useSubmissionResult,
+  useProblemDetail,
+  useProblemSubmissions,
+  useSubmitCode,
+  useSubmissionResult,
+  useRunCode,
+  useDebugCode,
 } from "../queries/useCoding";
 import { DifficultyBadge } from "./DifficultyBadge";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
-import { Language, SubmissionStatus } from "../types/coding.type";
+import { Language, RunCodeResponse, DebugResponse, DebugRequest } from "../types/coding.type";
 import { CodeEditor } from "./CodeEditor";
 
 const ProblemSolveContent: React.FC = () => {
@@ -23,7 +25,10 @@ const ProblemSolveContent: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [leftTab, setLeftTab] = useState<"description" | "submissions">("description");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [runResult, setRunResult] = useState<RunCodeResponse | null>(null);
+  const [debugResult, setDebugResult] = useState<DebugResponse | null>(null);
+  const [debugLines, setDebugLines] = useState<string>("1");
+  const [debugVars, setDebugVars] = useState<string>("");
 
   const { data: problem, isLoading: problemLoading } = useProblemDetail(problemId || "", language, {
     enabled: !!problemId,
@@ -35,6 +40,8 @@ const ProblemSolveContent: React.FC = () => {
   });
 
   const submitCode = useSubmitCode();
+  const runCode = useRunCode();
+  const debugCode = useDebugCode();
 
   const { data: submissionResult } = useSubmissionResult(submissionId || "");
 
@@ -48,19 +55,66 @@ const ProblemSolveContent: React.FC = () => {
 
   const handleSubmit = async (): Promise<void> => {
     if (!problem) return;
-
     try {
       const response = await submitCode.mutateAsync({
         problemId: problem.id,
         language,
         sourceCode: code,
       });
-
       if (response.data.data?.submissionId) {
         setSubmissionId(response.data.data.submissionId);
+        setRunResult(null);
+        setDebugResult(null);
       }
     } catch (error) {
       console.error("Submit error:", error);
+    }
+  };
+
+  const handleRun = async (): Promise<void> => {
+    if (!problem) return;
+    try {
+      const response = await runCode.mutateAsync({
+        problemId: problem.id,
+        language,
+        sourceCode: code,
+      });
+      if (response.data.data) {
+        setRunResult(response.data.data);
+        setSubmissionId(null);
+        setDebugResult(null);
+      }
+    } catch (error) {
+      console.error("Run error:", error);
+    }
+  };
+
+  const handleDebug = async (): Promise<void> => {
+    const parsedLines = debugLines
+      .split(",")
+      .map((s) => parseInt(s.trim(), 10))
+      .filter((n) => !isNaN(n) && n > 0);
+    const parsedVars = debugVars
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (!problem || parsedLines.length === 0) return;
+    try {
+      const request: DebugRequest = {
+        code,
+        language,
+        lines: parsedLines,
+        variables: parsedVars.length > 0 ? parsedVars : undefined,
+      };
+      const response = await debugCode.mutateAsync(request);
+      if (response.data.data) {
+        setDebugResult(response.data.data);
+        setSubmissionId(null);
+        setRunResult(null);
+      }
+    } catch (error) {
+      console.error("Debug error:", error);
     }
   };
 
@@ -70,22 +124,15 @@ const ProblemSolveContent: React.FC = () => {
     }
   };
 
-  const handleCopyCode = (): void => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCloseResult = (): void => {
+    setSubmissionId(null);
+    setRunResult(null);
+    setDebugResult(null);
   };
 
   const handleBack = (): void => {
     navigate({ to: "/problem" });
   };
-
-  const languageOptions = [
-    { value: Language.PYTHON, label: "Python" },
-    { value: Language.JAVA, label: "Java" },
-    { value: Language.CPP, label: "C++" },
-    { value: Language.JAVASCRIPT, label: "JavaScript" },
-  ];
 
   if (problemLoading) {
     return (
@@ -132,7 +179,7 @@ const ProblemSolveContent: React.FC = () => {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setLeftTab(tab.id as any)}
+                onClick={() => setLeftTab(tab.id as "description" | "submissions")}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors",
                   leftTab === tab.id ? "bg-gray-100 font-medium text-gray-900" : "text-gray-600 hover:text-gray-900",
@@ -159,6 +206,15 @@ const ProblemSolveContent: React.FC = () => {
                 )}
 
                 <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{problem.description}</div>
+
+                {problem.constraints && (
+                  <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Constraints</p>
+                    <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                      {problem.constraints}
+                    </div>
+                  </div>
+                )}
 
                 {problem.sampleTestcases?.length > 0 && (
                   <div className="space-y-3 mt-4 pt-4 border-t border-gray-200">
@@ -252,13 +308,23 @@ const ProblemSolveContent: React.FC = () => {
               timeLimitMs: problem.timeLimitMs,
               memoryLimitMb: problem.memoryLimitMb,
             }}
-            submissionResult={submissionResult!}
+            submissionResult={submissionResult ?? null}
+            runResult={runResult}
+            debugResult={debugResult}
             isSubmitting={submitCode.isPending}
+            isRunning={runCode.isPending}
+            isDebugging={debugCode.isPending}
             onLanguageChange={setLanguage}
             onCodeChange={setCode}
             onSubmit={handleSubmit}
+            onRun={handleRun}
+            onDebug={handleDebug}
             onReset={handleReset}
-            onCloseResult={() => setSubmissionId(null)}
+            onCloseResult={handleCloseResult}
+            debugLines={debugLines}
+            debugVars={debugVars}
+            onDebugLinesChange={setDebugLines}
+            onDebugVarsChange={setDebugVars}
           />
         </section>
       </main>
@@ -267,7 +333,7 @@ const ProblemSolveContent: React.FC = () => {
         <div
           className="h-full bg-blue-600 transition-all duration-300"
           style={{ width: `${(passedCount / totalCount) * 100 || 0}%` }}
-        ></div>
+        />
       </div>
     </div>
   );

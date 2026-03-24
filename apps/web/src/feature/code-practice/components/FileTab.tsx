@@ -1,10 +1,17 @@
 import React from "react";
 import { FileCode, X } from "lucide-react";
-import { CodeFile } from "../types/coding.type";
 import { cn } from "@workspace/ui/lib/utils";
+import { Language } from "../types/coding.type";
+
+export interface EditorFile {
+  id: string;
+  name: string;
+  content: string;
+  language: Language;
+}
 
 interface FileTabProps {
-  file: CodeFile;
+  file: EditorFile;
   isActive: boolean;
   onClick: () => void;
   onDelete: () => void;

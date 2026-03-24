@@ -2,32 +2,36 @@ import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
 import {
-  CreateProblemRequest,
-  CreateProblemResponse,
-  UpdateProblemRequest,
-  CreateTestCaseRequest,
-  CreateTestCaseResponse,
-  UpdateTestCaseRequest,
-  CreateCodeTemplateRequest,
-  CreateCodeTemplateResponse,
-  CodeTemplateResponse,
-  ProblemBriefResponse,
-  ProblemDetailResponse,
-  ProblemStatisticsResponse,
-  ToggleFavoriteResponse,
-  SubmitCodeRequest,
-  SubmitCodeResponse,
-  SubmissionResultResponse,
-  SubmissionBriefResponse,
-  UserSubmissionStatsResponse,
-  ProblemFilters,
-  SubmissionFilters,
-  Language,
-  BulkCreateTestCaseRequest,
-  BulkCreateTestCaseResponse,
-  TestCaseResponse,
-  GenerateCodeTemplatesRequest,
-  GenerateCodeTemplatesResponse,
+  type CreateProblemRequest,
+  type CreateProblemResponse,
+  type UpdateProblemRequest,
+  type CreateTestCaseRequest,
+  type CreateTestCaseResponse,
+  type UpdateTestCaseRequest,
+  type CreateCodeTemplateRequest,
+  type CreateCodeTemplateResponse,
+  type CodeTemplateResponse,
+  type ProblemBriefResponse,
+  type ProblemDetailResponse,
+  type ProblemStatisticsResponse,
+  type ToggleFavoriteResponse,
+  type SubmitCodeRequest,
+  type SubmitCodeResponse,
+  type SubmissionResultResponse,
+  type SubmissionBriefResponse,
+  type UserSubmissionStatsResponse,
+  type ProblemFilters,
+  type SubmissionFilters,
+  type Language,
+  type BulkCreateTestCaseRequest,
+  type BulkCreateTestCaseResponse,
+  type TestCaseResponse,
+  type GenerateCodeTemplatesRequest,
+  type GenerateCodeTemplatesResponse,
+  type RunCodeRequest,
+  type RunCodeResponse,
+  type DebugRequest,
+  type DebugResponse,
 } from "../types/coding.type";
 
 export const problemApi = {
@@ -51,9 +55,7 @@ export const problemApi = {
   },
 
   getProblemDetail(problemId: string, language?: Language): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
-    return api.get(`/problems/${problemId}`, {
-      params: { language: language || Language.CPP },
-    });
+    return api.get(`/problems/${problemId}`, { params: { language: language || "CPP" } });
   },
 
   getProblemStatistics(problemId: string): Promise<AxiosResponse<ApiResponse<ProblemStatisticsResponse>>> {
@@ -99,6 +101,19 @@ export const problemApi = {
 
   getAllTestCases(problemId: string): Promise<AxiosResponse<ApiResponse<TestCaseResponse[]>>> {
     return api.get(`/problems/${problemId}/testcases`);
+  },
+
+  importTestCasesFromFile(
+    problemId: string,
+    file: File,
+    replaceExisting = false,
+  ): Promise<AxiosResponse<ApiResponse<BulkCreateTestCaseResponse>>> {
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("replaceExisting", String(replaceExisting));
+    return api.post(`/problems/${problemId}/testcases/import`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
   },
 
   createCodeTemplate(
@@ -147,5 +162,13 @@ export const submissionApi = {
 
   getUserSubmissionStats(): Promise<AxiosResponse<ApiResponse<UserSubmissionStatsResponse>>> {
     return api.get("/submissions/stats");
+  },
+
+  runCode(data: RunCodeRequest): Promise<AxiosResponse<ApiResponse<RunCodeResponse>>> {
+    return api.post("/submissions/run", data);
+  },
+
+  debugCode(data: DebugRequest): Promise<AxiosResponse<ApiResponse<DebugResponse>>> {
+    return api.post("/submissions/debug", data);
   },
 };

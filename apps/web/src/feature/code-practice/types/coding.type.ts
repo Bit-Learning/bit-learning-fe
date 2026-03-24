@@ -208,17 +208,11 @@ export const ParamTypeInfo: Record<
   },
 };
 
-export const isArrayType = (type: ParamType): boolean => {
-  return type.includes("ARRAY");
-};
+export const isArrayType = (type: ParamType): boolean => type.includes("ARRAY");
 
-export const is2DArrayType = (type: ParamType): boolean => {
-  return type.includes("2D_ARRAY");
-};
+export const is2DArrayType = (type: ParamType): boolean => type.includes("2D_ARRAY");
 
-export const isPrimitiveType = (type: ParamType): boolean => {
-  return !isArrayType(type);
-};
+export const isPrimitiveType = (type: ParamType): boolean => !isArrayType(type);
 
 export const getTypeForLanguage = (type: ParamType, language: "java" | "python" | "cpp" | "js"): string => {
   const info = ParamTypeInfo[type];
@@ -248,10 +242,16 @@ export const getDefaultValueForLanguage = (type: ParamType, language: "java" | "
   }
 };
 
+export interface CodeFile {
+  name: string;
+  content: string;
+}
+
 export interface CreateProblemRequest {
   title: string;
   slug: string;
   description: string;
+  constraints?: string;
   difficulty: Difficulty;
   timeLimitMs: number;
   memoryLimitMb: number;
@@ -263,6 +263,7 @@ export interface UpdateProblemRequest {
   title: string;
   slug: string;
   description: string;
+  constraints?: string;
   difficulty: Difficulty;
   timeLimitMs: number;
   memoryLimitMb: number;
@@ -348,6 +349,7 @@ export interface ProblemDetailResponse {
   title: string;
   slug: string;
   description: string;
+  constraints?: string;
   difficulty: Difficulty;
   timeLimitMs: number;
   memoryLimitMb: number;
@@ -375,7 +377,9 @@ export interface ToggleFavoriteResponse {
 export interface SubmitCodeRequest {
   problemId: string;
   language: Language;
-  sourceCode: string;
+  sourceCode?: string;
+  files?: CodeFile[];
+  entryFile?: string;
 }
 
 export interface SubmitCodeResponse {
@@ -431,6 +435,56 @@ export interface UserSubmissionStatsResponse {
   totalProblems: number;
 }
 
+export interface RunCodeRequest {
+  problemId?: string;
+  language: Language;
+  sourceCode?: string;
+  files?: CodeFile[];
+  entryFile?: string;
+  input?: string;
+}
+
+export interface RunTestCaseResult {
+  orderIndex: number;
+  status: SubmissionStatus;
+  input: string;
+  expectedOutput: string;
+  actualOutput?: string;
+  executionTimeMs: number;
+  memoryUsageMb: number;
+  errorMessage?: string;
+}
+
+export interface RunCodeResponse {
+  overallStatus: SubmissionStatus;
+  language: Language;
+  compileError?: string;
+  testCaseResults: RunTestCaseResult[];
+}
+
+export interface DebugRequest {
+  code?: string;
+  language: Language;
+  lines: number[];
+  variables?: string[];
+  input?: string;
+  files?: CodeFile[];
+  entryFile?: string;
+}
+
+export interface DebugStep {
+  line: number;
+  iteration: number;
+  variables: Record<string, string>;
+}
+
+export interface DebugResponse {
+  status: SubmissionStatus;
+  steps: DebugStep[];
+  output?: string;
+  error?: string;
+}
+
 export interface ProblemFilters {
   page?: number;
   size?: number;
@@ -459,13 +513,6 @@ export interface GenerateCodeTemplatesRequest {
 
 export interface GenerateCodeTemplatesResponse {
   templates: CodeTemplateResponse[];
-}
-
-export interface CodeFile {
-  id: string;
-  name: string;
-  content: string;
-  language: Language;
 }
 
 export interface Problem {

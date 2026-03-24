@@ -15,22 +15,44 @@ import {
   Download,
   AlertCircle,
   Wand2,
+  Play,
+  Bug,
+  ChevronRight,
 } from "lucide-react";
-import { CodeFile, Language, Problem, SubmissionResultResponse, SubmissionStatus } from "../types/coding.type";
+import {
+  Language,
+  Problem,
+  SubmissionResultResponse,
+  SubmissionStatus,
+  RunCodeResponse,
+  DebugResponse,
+} from "../types/coding.type";
 import { formatCode, highlightCode, LANGUAGE_EXTENSIONS, validatePythonIndentation } from "@/shared/lib/code-editor";
-import { FileTab } from "./FileTab";
+import { EditorFile, FileTab } from "./FileTab";
 import { cn } from "@workspace/ui/lib/utils";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
+
+type BottomPanelTab = "submission" | "run" | "debug";
 
 interface CodeEditorProps {
   language: Language;
   code: string;
   problem: Problem;
   submissionResult: SubmissionResultResponse | null;
+  runResult: RunCodeResponse | null;
+  debugResult: DebugResponse | null;
   isSubmitting: boolean;
+  isRunning: boolean;
+  isDebugging: boolean;
   onLanguageChange: (language: Language) => void;
   onCodeChange: (code: string) => void;
   onSubmit: () => void;
+  debugLines: string;
+  debugVars: string;
+  onDebugLinesChange: (v: string) => void;
+  onDebugVarsChange: (v: string) => void;
+  onRun: () => void;
+  onDebug: () => void;
   onReset: () => void;
   onCloseResult?: () => void;
 }
@@ -40,14 +62,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   code,
   problem,
   submissionResult,
+  runResult,
+  debugResult,
   isSubmitting,
+  isRunning,
+  isDebugging,
   onLanguageChange,
   onCodeChange,
   onSubmit,
+  onRun,
+  onDebug,
   onReset,
   onCloseResult,
+  debugLines,
+  debugVars,
+  onDebugLinesChange,
+  onDebugVarsChange,
 }) => {
-  const [files, setFiles] = useState<CodeFile[]>([
+  const [files, setFiles] = useState<EditorFile[]>([
     { id: "1", name: `main${LANGUAGE_EXTENSIONS[language]}`, content: code, language },
   ]);
   const [activeFileId, setActiveFileId] = useState("1");
@@ -55,7 +87,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [formatErrors, setFormatErrors] = useState<any[]>([]);
   const [isFormatting, setIsFormatting] = useState(false);
   const [formatMessage, setFormatMessage] = useState<string | null>(null);
-
+  const [bottomTab, setBottomTab] = useState<BottomPanelTab>("submission");
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
@@ -115,6 +147,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     }
   }, [activeFile?.content, activeFile?.language]);
 
+  useEffect(() => {
+    if (submissionResult) setBottomTab("submission");
+  }, [submissionResult]);
+
+  useEffect(() => {
+    if (runResult) setBottomTab("run");
+  }, [runResult]);
+
+  useEffect(() => {
+    if (debugResult) setBottomTab("debug");
+  }, [debugResult]);
+
   const highlightedCode = useMemo(
     () => highlightCode(activeFile?.content ?? "", activeFile?.language ?? language),
     [activeFile?.content, activeFile?.language],
@@ -126,9 +170,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     try {
       const { formatted, syntaxError, message } = await formatCode(activeFile.content, activeFile.language);
       handleCodeChange(formatted);
-      if (syntaxError && message) {
-        setFormatMessage(message);
-      }
+      if (syntaxError && message) setFormatMessage(message);
     } finally {
       setIsFormatting(false);
     }
@@ -210,7 +252,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   );
 
   const handleAddFile = useCallback(() => {
-    const newFile: CodeFile = {
+    const newFile: EditorFile = {
       id: Date.now().toString(),
       name: `file${files.length}${LANGUAGE_EXTENSIONS[activeFile.language]}`,
       content: "",
@@ -250,6 +292,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const passedCount =
     submissionResult?.testcaseResults?.filter((r) => r.status === SubmissionStatus.ACCEPTED).length ?? 0;
   const totalCount = submissionResult?.testcaseResults?.length ?? 0;
+
+  const hasBottomPanel = !!(submissionResult || runResult || debugResult);
+
+  const parsedDebugLines = debugLines
+    .split(",")
+    .map((s) => parseInt(s.trim(), 10))
+    .filter((n) => !isNaN(n) && n > 0);
 
   return (
     <>
@@ -311,7 +360,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             {isFormatting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
             <span className="text-xs">{isFormatting ? "Formatting..." : "Format"}</span>
           </button>
-
           <div className="h-5 w-px bg-gray-600" />
           <button onClick={handleDownload} className="hover:text-white transition-colors">
             <Download className="w-5 h-5" />
@@ -331,7 +379,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         </div>
       </div>
 
-      <div className={cn("relative overflow-hidden flex", submissionResult ? "h-[60%]" : "flex-1")}>
+      <div className={cn("relative overflow-hidden flex", hasBottomPanel ? "h-[55%]" : "flex-1")}>
         {formatMessage && (
           <div className="absolute bottom-0 left-0 right-0 bg-orange-900/30 border-b border-orange-700 px-4 py-2 flex items-center gap-3 z-10">
             <AlertCircle className="w-4 h-4 text-orange-400 shrink-0" />
@@ -372,47 +420,187 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         </div>
       </div>
 
-      {submissionResult && (
-        <div className="h-1/3 min-h-50 bg-gray-950 border-t border-gray-800 flex flex-col">
-          <div className="px-4 py-2 border-b border-gray-800 flex items-center justify-between bg-gray-900">
-            <div className="flex items-center gap-2 text-xs font-bold text-gray-400 uppercase tracking-wider">
-              <Terminal className="w-4 h-4" />
-              Kết quả nộp bài
+      {hasBottomPanel && (
+        <div className="flex-1 min-h-0 bg-gray-950 border-t border-gray-800 flex flex-col">
+          <div className="px-4 py-0 border-b border-gray-800 flex items-center justify-between bg-gray-900">
+            <div className="flex items-center gap-1">
+              {submissionResult && (
+                <button
+                  onClick={() => setBottomTab("submission")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2",
+                    bottomTab === "submission"
+                      ? "text-blue-400 border-blue-500"
+                      : "text-gray-500 border-transparent hover:text-gray-300",
+                  )}
+                >
+                  <Terminal className="w-3.5 h-3.5" />
+                  Kết quả nộp
+                </button>
+              )}
+              {runResult && (
+                <button
+                  onClick={() => setBottomTab("run")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2",
+                    bottomTab === "run"
+                      ? "text-green-400 border-green-500"
+                      : "text-gray-500 border-transparent hover:text-gray-300",
+                  )}
+                >
+                  <Play className="w-3.5 h-3.5" />
+                  Chạy thử
+                </button>
+              )}
+              {debugResult && (
+                <button
+                  onClick={() => setBottomTab("debug")}
+                  className={cn(
+                    "flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2",
+                    bottomTab === "debug"
+                      ? "text-yellow-400 border-yellow-500"
+                      : "text-gray-500 border-transparent hover:text-gray-300",
+                  )}
+                >
+                  <Bug className="w-3.5 h-3.5" />
+                  Debug
+                </button>
+              )}
             </div>
-            <button onClick={onCloseResult} className="text-gray-500 hover:text-white">
+            <button onClick={onCloseResult} className="text-gray-500 hover:text-white p-1">
               <X className="w-4 h-4" />
             </button>
           </div>
-          <div className="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-2">
-            <div className="flex items-center gap-2 mb-3">
-              <SubmissionStatusBadge status={submissionResult.status} showIcon />
-              <span className="text-gray-500">
-                ({passedCount}/{totalCount} test cases passed)
-              </span>
-            </div>
-            {submissionResult.testcaseResults?.map((result, idx) => {
-              const isPass = result.status === SubmissionStatus.ACCEPTED;
-              return (
-                <div key={result.testcaseId} className="flex gap-4">
-                  <span className={cn("font-bold", isPass ? "text-green-500" : "text-red-500")}>CASE {idx + 1}:</span>
-                  <span className="text-gray-400">
-                    {result.executionTimeMs}ms | {result.memoryUsageMb}MB
+
+          <div className="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-2">
+            {bottomTab === "submission" && submissionResult && (
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <SubmissionStatusBadge status={submissionResult.status} showIcon />
+                  <span className="text-gray-500">
+                    ({passedCount}/{totalCount} test cases passed)
                   </span>
-                  <span className={isPass ? "text-green-400" : "text-red-400"}>{isPass ? "✓ Chính xác" : "✗ Sai"}</span>
                 </div>
-              );
-            })}
-            {submissionResult.errorMessage && (
-              <div className="mt-3 p-3 bg-red-900/20 border border-red-800 rounded text-red-400">
-                <div className="font-bold mb-1">Error:</div>
-                <div className="whitespace-pre-wrap">{submissionResult.errorMessage}</div>
-              </div>
+                {submissionResult.testcaseResults?.map((result, idx) => {
+                  const isPass = result.status === SubmissionStatus.ACCEPTED;
+                  return (
+                    <div key={result.testcaseId} className="flex gap-4">
+                      <span className={cn("font-bold", isPass ? "text-green-500" : "text-red-500")}>
+                        CASE {idx + 1}:
+                      </span>
+                      <span className="text-gray-400">
+                        {result.executionTimeMs}ms | {result.memoryUsageMb}MB
+                      </span>
+                      <span className={isPass ? "text-green-400" : "text-red-400"}>
+                        {isPass ? "✓ Chính xác" : "✗ Sai"}
+                      </span>
+                      {!isPass && result.actualOutput && <span className="text-red-300">→ {result.actualOutput}</span>}
+                    </div>
+                  );
+                })}
+                {submissionResult.errorMessage && (
+                  <div className="mt-3 p-3 bg-red-900/20 border border-red-800 rounded text-red-400">
+                    <div className="font-bold mb-1">Error:</div>
+                    <div className="whitespace-pre-wrap">{submissionResult.errorMessage}</div>
+                  </div>
+                )}
+              </>
+            )}
+
+            {bottomTab === "run" && runResult && (
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <SubmissionStatusBadge status={runResult.overallStatus} showIcon />
+                  {runResult.compileError && <span className="text-red-400 text-xs">Compile error</span>}
+                </div>
+                {runResult.compileError && (
+                  <div className="p-3 bg-red-900/20 border border-red-800 rounded text-red-400 mb-3">
+                    <div className="font-bold mb-1">Compile Error:</div>
+                    <div className="whitespace-pre-wrap">{runResult.compileError}</div>
+                  </div>
+                )}
+                {runResult.testCaseResults.map((tc, idx) => {
+                  const isPass = tc.status === SubmissionStatus.ACCEPTED;
+                  return (
+                    <div key={idx} className="border border-gray-800 rounded p-3 space-y-1.5">
+                      <div className="flex items-center justify-between">
+                        <span className={cn("font-bold", isPass ? "text-green-500" : "text-red-500")}>
+                          Case {idx + 1}
+                        </span>
+                        <span className="text-gray-500">
+                          {tc.executionTimeMs}ms | {tc.memoryUsageMb}MB
+                        </span>
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <div>
+                          <div className="text-gray-500 mb-0.5">Input</div>
+                          <pre className="bg-gray-900 p-1.5 rounded text-gray-300 whitespace-pre-wrap">{tc.input}</pre>
+                        </div>
+                        <div>
+                          <div className="text-gray-500 mb-0.5">Expected</div>
+                          <pre className="bg-gray-900 p-1.5 rounded text-gray-300 whitespace-pre-wrap">
+                            {tc.expectedOutput}
+                          </pre>
+                        </div>
+                      </div>
+                      {!isPass && (
+                        <div>
+                          <div className="text-red-400 mb-0.5">Got</div>
+                          <pre className="bg-red-900/20 border border-red-800 p-1.5 rounded text-red-300 whitespace-pre-wrap">
+                            {tc.actualOutput || tc.errorMessage || "(no output)"}
+                          </pre>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </>
+            )}
+
+            {bottomTab === "debug" && debugResult && (
+              <>
+                <div className="flex items-center gap-2 mb-3">
+                  <SubmissionStatusBadge status={debugResult.status} showIcon />
+                  {debugResult.output && <span className="text-gray-400">Output: {debugResult.output}</span>}
+                </div>
+                {debugResult.error && (
+                  <div className="p-3 bg-red-900/20 border border-red-800 rounded text-red-400 mb-3">
+                    <div className="font-bold mb-1">Error:</div>
+                    <div className="whitespace-pre-wrap">{debugResult.error}</div>
+                  </div>
+                )}
+                {debugResult.steps.length === 0 && !debugResult.error && (
+                  <div className="text-gray-500">Không có bước debug nào được ghi lại.</div>
+                )}
+                {debugResult.steps.map((step, idx) => (
+                  <div key={idx} className="border border-gray-800 rounded p-3 space-y-1">
+                    <div className="flex items-center gap-2 text-yellow-400 font-bold">
+                      <ChevronRight className="w-3 h-3" />
+                      <span>Line {step.line}</span>
+                      {step.iteration > 0 && (
+                        <span className="text-gray-500 font-normal">iteration #{step.iteration}</span>
+                      )}
+                    </div>
+                    {Object.keys(step.variables).length > 0 && (
+                      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 pl-5 text-xs">
+                        {Object.entries(step.variables).map(([k, v]) => (
+                          <div key={k} className="flex gap-2">
+                            <span className="text-purple-400">{k}</span>
+                            <span className="text-gray-500">=</span>
+                            <span className="text-green-300">{v}</span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </>
             )}
           </div>
         </div>
       )}
 
-      <div className="h-16 flex items-center justify-between px-6 bg-gray-900 border-t border-gray-800">
+      <div className="h-16 flex items-center justify-between px-6 bg-gray-900 border-t border-gray-800 shrink-0">
         <div className="flex items-center gap-2 text-gray-400">
           <Clock className="w-4 h-4" />
           <span className="text-sm">{problem.timeLimitMs}ms</span>
@@ -422,11 +610,51 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         </div>
         <div className="flex items-center gap-3">
           <button
-            disabled
-            className="px-5 py-2 rounded bg-gray-800 text-gray-400 text-sm font-semibold border border-gray-700 cursor-not-allowed"
+            onClick={onRun}
+            disabled={isRunning || !activeFile.content.trim()}
+            className={cn(
+              "px-4 py-2 rounded text-sm font-semibold border transition-all flex items-center gap-2",
+              isRunning || !activeFile.content.trim()
+                ? "bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed"
+                : "bg-gray-800 text-green-400 border-green-700 hover:bg-green-900/30",
+            )}
           >
-            Chạy thử
+            {isRunning ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Đang chạy...</span>
+              </>
+            ) : (
+              <>
+                <Play className="w-4 h-4" />
+                <span>Chạy thử</span>
+              </>
+            )}
           </button>
+
+          <button
+            onClick={onDebug}
+            disabled={isDebugging || !activeFile.content.trim() || parsedDebugLines.length === 0}
+            className={cn(
+              "px-4 py-2 rounded text-sm font-semibold border transition-all flex items-center gap-2",
+              isDebugging || !activeFile.content.trim() || parsedDebugLines.length === 0
+                ? "bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed"
+                : "bg-gray-800 text-yellow-400 border-yellow-700 hover:bg-yellow-900/30",
+            )}
+          >
+            {isDebugging ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Đang debug...</span>
+              </>
+            ) : (
+              <>
+                <Bug className="w-4 h-4" />
+                <span>Debug</span>
+              </>
+            )}
+          </button>
+
           <button
             onClick={onSubmit}
             disabled={isSubmitting || !activeFile.content.trim()}
@@ -451,6 +679,30 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </button>
         </div>
       </div>
+
+      {!hasBottomPanel && (
+        <div className="px-6 py-2 bg-gray-900 border-t border-gray-800 flex items-center gap-3">
+          <div className="flex items-center gap-2">
+            <Bug className="w-3.5 h-3.5 text-yellow-500" />
+            <span className="text-xs text-gray-400">Debug lines:</span>
+            <input
+              value={debugLines}
+              onChange={(e) => onDebugLinesChange(e.target.value)}
+              placeholder="e.g. 3,7,12"
+              className="bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-200 w-28 focus:outline-none focus:border-yellow-600"
+            />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-gray-400">Watch vars:</span>
+            <input
+              value={debugVars}
+              onChange={(e) => onDebugVarsChange(e.target.value)}
+              placeholder="e.g. x,y,result"
+              className="bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-200 w-32 focus:outline-none focus:border-yellow-600"
+            />
+          </div>
+        </div>
+      )}
     </>
   );
 };
