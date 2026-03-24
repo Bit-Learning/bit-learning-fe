@@ -1,10 +1,11 @@
 import {
 	createFileRoute,
 	Outlet,
+	useLocation,
 	useMatches,
 	useNavigate,
 } from "@tanstack/react-router";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Footer from "@/layouts/footer";
 import GameHeader from "@/layouts/game-header";
 import Header from "@/layouts/header";
@@ -14,6 +15,7 @@ import BotStatusWidget from "@/shared/components/BotStatusWidget";
 
 function LayoutComponent() {
 	const matches = useMatches();
+	const location = useLocation();
 	// Get the last match (current active route) to extract staticData
 	const currentMatch = matches.at(-1);
 	const headerStyle = currentMatch?.staticData?.headerStyle || "default";
@@ -30,27 +32,32 @@ function LayoutComponent() {
 	};
 
 	return (
-		<motion.div
-			className="flex min-h-screen flex-col"
-			initial={{ opacity: 0, y: 30 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.8, ease: "easeOut" }}
-		>
-			{renderHeader()}
-			<main className="flex-1">
-				<motion.div
-					initial={{ opacity: 0, y: 40 }}
-					animate={{ opacity: 1, y: 0 }}
-					transition={{ duration: 0.6, delay: 0.2 }}
-				>
-					<Outlet />
-				</motion.div>
-			</main>
+		<AnimatePresence mode="wait">
+			<motion.div
+				key={location.pathname}
+				initial={{ opacity: 0, y: 10 }}
+				animate={{ opacity: 1, y: 0 }}
+				exit={{ opacity: 0, y: -10 }}
+				transition={{ duration: 0.2 }}
+			>
+				{renderHeader()}
+				<main className="flex-1">
+					<motion.div
+						initial={{ opacity: 0, y: 40 }}
+						animate={{ opacity: 1, y: 0 }}
+						transition={{ duration: 0.6, delay: 0.2 }}
+					>
+						<Outlet />
+					</motion.div>
+				</main>
 
-			<BotStatusWidget onNavigateToFull={() => navigate({ to: "/chat-ai" })} />
-			<ScrollToTop />
-			<Footer />
-		</motion.div>
+				<BotStatusWidget
+					onNavigateToFull={() => navigate({ to: "/chat-ai" })}
+				/>
+				<ScrollToTop />
+				<Footer />
+			</motion.div>
+		</AnimatePresence>
 	);
 }
 
