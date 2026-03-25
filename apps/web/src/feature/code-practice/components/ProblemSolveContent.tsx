@@ -5,15 +5,25 @@ import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/componen
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
-	useProblemDetail,
-	useProblemSubmissions,
-	useSubmitCode,
-	useSubmissionResult,
+  useProblemDetail,
+  useProblemSubmissions,
+  useSubmitCode,
+  useSubmissionResult,
+  useRunCode,
+  useDebugCode,
 } from "../queries/useCoding";
 import { DifficultyBadge } from "./DifficultyBadge";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
-import { Language, SubmissionStatus } from "../types/coding.type";
+import {
+  Language,
+  RunCodeResponse,
+  DebugResponse,
+  SubmitCodeRequest,
+  RunCodeRequest,
+  DebugRequest,
+} from "../types/coding.type";
 import { CodeEditor } from "./CodeEditor";
+import { EditorFile } from "./FileTab";
 
 const ProblemSolveContent: React.FC = () => {
   const { id: problemId } = useParams({ strict: false });
@@ -23,7 +33,13 @@ const ProblemSolveContent: React.FC = () => {
   const [code, setCode] = useState<string>("");
   const [leftTab, setLeftTab] = useState<"description" | "submissions">("description");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
-  const [copied, setCopied] = useState<boolean>(false);
+  const [runResult, setRunResult] = useState<RunCodeResponse | null>(null);
+  const [debugResult, setDebugResult] = useState<DebugResponse | null>(null);
+  const [debugLines, setDebugLines] = useState<string>("1");
+  const [debugVars, setDebugVars] = useState<string>("");
+
+  const [editorFiles, setEditorFiles] = useState<EditorFile[]>([]);
+  const [activeFileId, setActiveFileId] = useState<string>("1");
 
   const { data: problem, isLoading: problemLoading } = useProblemDetail(problemId || "", language, {
     enabled: !!problemId,
@@ -35,6 +51,8 @@ const ProblemSolveContent: React.FC = () => {
   });
 
   const submitCode = useSubmitCode();
+  const runCode = useRunCode();
+  const debugCode = useDebugCode();
 
   const { data: submissionResult } = useSubmissionResult(submissionId || "");
 
@@ -46,21 +64,85 @@ const ProblemSolveContent: React.FC = () => {
     }
   }, [problem?.codeTemplate, language]);
 
+  const isMultiFile = editorFiles.length > 1;
+
+  const getActiveFileName = () => {
+    return editorFiles.find((f) => f.id === activeFileId)?.name ?? "main";
+  };
+
+  const toCodeFiles = () => editorFiles.map((f) => ({ name: f.name, content: f.content }));
+
   const handleSubmit = async (): Promise<void> => {
     if (!problem) return;
-
     try {
-      const response = await submitCode.mutateAsync({
-        problemId: problem.id,
-        language,
-        sourceCode: code,
-      });
+      const request: SubmitCodeRequest = isMultiFile
+        ? { problemId: problem.id, language, files: toCodeFiles(), entryFile: getActiveFileName() }
+        : { problemId: problem.id, language, sourceCode: code };
 
+      const response = await submitCode.mutateAsync(request);
       if (response.data.data?.submissionId) {
         setSubmissionId(response.data.data.submissionId);
+        setRunResult(null);
+        setDebugResult(null);
       }
     } catch (error) {
       console.error("Submit error:", error);
+    }
+  };
+
+  const handleRun = async (): Promise<void> => {
+    if (!problem) return;
+    try {
+      const request: RunCodeRequest = isMultiFile
+        ? { language, files: toCodeFiles(), entryFile: getActiveFileName() }
+        : { problemId: problem.id, language, sourceCode: code };
+
+      const response = await runCode.mutateAsync(request);
+      if (response.data.data) {
+        setRunResult(response.data.data);
+        setSubmissionId(null);
+        setDebugResult(null);
+      }
+    } catch (error) {
+      console.error("Run error:", error);
+    }
+  };
+
+  const handleDebug = async (): Promise<void> => {
+    const parsedLines = debugLines
+      .split(",")
+      .map((s) => parseInt(s.trim(), 10))
+      .filter((n) => !isNaN(n) && n > 0);
+    const parsedVars = debugVars
+      .split(",")
+      .map((s) => s.trim())
+      .filter(Boolean);
+
+    if (parsedLines.length === 0) return;
+    try {
+      const request: DebugRequest = isMultiFile
+        ? {
+            language,
+            lines: parsedLines,
+            variables: parsedVars.length > 0 ? parsedVars : undefined,
+            files: toCodeFiles(),
+            entryFile: getActiveFileName(),
+          }
+        : {
+            language,
+            code,
+            lines: parsedLines,
+            variables: parsedVars.length > 0 ? parsedVars : undefined,
+          };
+
+      const response = await debugCode.mutateAsync(request);
+      if (response.data.data) {
+        setDebugResult(response.data.data);
+        setSubmissionId(null);
+        setRunResult(null);
+      }
+    } catch (error) {
+      console.error("Debug error:", error);
     }
   };
 
@@ -70,22 +152,19 @@ const ProblemSolveContent: React.FC = () => {
     }
   };
 
-  const handleCopyCode = (): void => {
-    navigator.clipboard.writeText(code);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+  const handleCloseResult = (): void => {
+    setSubmissionId(null);
+    setRunResult(null);
+    setDebugResult(null);
   };
 
-  const handleBack = (): void => {
-    navigate({ to: "/problem" });
+  const handleFilesChange = (files: EditorFile[], newActiveFileId: string) => {
+    setEditorFiles(files);
+    setActiveFileId(newActiveFileId);
+    if (files.length === 1) {
+      setCode(files[0]?.content!);
+    }
   };
-
-  const languageOptions = [
-    { value: Language.PYTHON, label: "Python" },
-    { value: Language.JAVA, label: "Java" },
-    { value: Language.CPP, label: "C++" },
-    { value: Language.JAVASCRIPT, label: "JavaScript" },
-  ];
 
   if (problemLoading) {
     return (
@@ -101,9 +180,7 @@ const ProblemSolveContent: React.FC = () => {
   if (!problem) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600">Không tìm thấy bài tập</p>
-        </div>
+        <p className="text-gray-600">Không tìm thấy bài tập</p>
       </div>
     );
   }
@@ -115,14 +192,15 @@ const ProblemSolveContent: React.FC = () => {
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <main className="flex-1 flex overflow-hidden mx-auto w-full">
         <section className="w-1/2 flex flex-col border-r border-gray-200 bg-white">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={handleBack} className="p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors">
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <h1 className="text-xl font-bold text-gray-900">{problem.title}</h1>
-              <DifficultyBadge difficulty={problem.difficulty} />
-            </div>
+          <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+            <button
+              onClick={() => navigate({ to: "/problem" })}
+              className="p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">{problem.title}</h1>
+            <DifficultyBadge difficulty={problem.difficulty} />
           </div>
 
           <div className="h-10 border-b border-gray-200 flex items-center px-4 gap-2">
@@ -132,7 +210,7 @@ const ProblemSolveContent: React.FC = () => {
             ].map((tab) => (
               <button
                 key={tab.id}
-                onClick={() => setLeftTab(tab.id as any)}
+                onClick={() => setLeftTab(tab.id as "description" | "submissions")}
                 className={cn(
                   "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors",
                   leftTab === tab.id ? "bg-gray-100 font-medium text-gray-900" : "text-gray-600 hover:text-gray-900",
@@ -159,6 +237,15 @@ const ProblemSolveContent: React.FC = () => {
                 )}
 
                 <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{problem.description}</div>
+
+                {problem.constraints && (
+                  <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Ràng buộc: </p>
+                    <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
+                      {problem.constraints}
+                    </div>
+                  </div>
+                )}
 
                 {problem.sampleTestcases?.length > 0 && (
                   <div className="space-y-3 mt-4 pt-4 border-t border-gray-200">
@@ -241,24 +328,32 @@ const ProblemSolveContent: React.FC = () => {
         </section>
 
         <div className="w-1.5 bg-gray-200 hover:bg-blue-200 cursor-col-resize transition-colors flex items-center justify-center">
-          <div className="h-8 w-0.5 bg-gray-300 rounded-full"></div>
+          <div className="h-8 w-0.5 bg-gray-300 rounded-full" />
         </div>
 
         <section className="flex-1 flex flex-col bg-gray-900 overflow-hidden">
           <CodeEditor
             language={language}
             code={code}
-            problem={{
-              timeLimitMs: problem.timeLimitMs,
-              memoryLimitMb: problem.memoryLimitMb,
-            }}
-            submissionResult={submissionResult!}
+            problem={{ timeLimitMs: problem.timeLimitMs, memoryLimitMb: problem.memoryLimitMb }}
+            submissionResult={submissionResult ?? null}
+            runResult={runResult}
+            debugResult={debugResult}
             isSubmitting={submitCode.isPending}
+            isRunning={runCode.isPending}
+            isDebugging={debugCode.isPending}
+            debugLines={debugLines}
+            debugVars={debugVars}
             onLanguageChange={setLanguage}
             onCodeChange={setCode}
+            onFilesChange={handleFilesChange}
+            onDebugLinesChange={setDebugLines}
+            onDebugVarsChange={setDebugVars}
             onSubmit={handleSubmit}
+            onRun={handleRun}
+            onDebug={handleDebug}
             onReset={handleReset}
-            onCloseResult={() => setSubmissionId(null)}
+            onCloseResult={handleCloseResult}
           />
         </section>
       </main>
@@ -267,7 +362,7 @@ const ProblemSolveContent: React.FC = () => {
         <div
           className="h-full bg-blue-600 transition-all duration-300"
           style={{ width: `${(passedCount / totalCount) * 100 || 0}%` }}
-        ></div>
+        />
       </div>
     </div>
   );

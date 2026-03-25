@@ -10,6 +10,8 @@ import {
   type UpdateTestCaseRequest,
   type CreateCodeTemplateRequest,
   type SubmitCodeRequest,
+  type RunCodeRequest,
+  type DebugRequest,
   type ProblemFilters,
   type SubmissionFilters,
   type Language,
@@ -127,16 +129,10 @@ export const useCreateProblem = () => {
     mutationFn: (data: CreateProblemRequest) => problemApi.createProblem(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: problemKeys.all });
-      toast.success({
-        title: "Thành công",
-        description: "Tạo bài toán thành công",
-      });
+      toast.success({ title: "Thành công", description: "Tạo bài toán thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể tạo bài toán",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể tạo bài toán" });
     },
   });
 };
@@ -148,16 +144,10 @@ export const useUpdateProblem = () => {
       problemApi.updateProblem(problemId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: problemKeys.all });
-      toast.success({
-        title: "Thành công",
-        description: "Cập nhật bài toán thành công",
-      });
+      toast.success({ title: "Thành công", description: "Cập nhật bài toán thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể cập nhật bài toán",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật bài toán" });
     },
   });
 };
@@ -168,16 +158,10 @@ export const useDeleteProblem = () => {
     mutationFn: (problemId: string) => problemApi.deleteProblem(problemId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: problemKeys.all });
-      toast.success({
-        title: "Thành công",
-        description: "Đã xóa bài toán",
-      });
+      toast.success({ title: "Thành công", description: "Đã xóa bài toán" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể xóa bài toán",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể xóa bài toán" });
     },
   });
 };
@@ -188,22 +172,12 @@ export const useCreateTestCase = () => {
     mutationFn: ({ problemId, data }: { problemId: string; data: CreateTestCaseRequest }) =>
       problemApi.createTestCase(problemId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.detail(variables.problemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.testcases(variables.problemId),
-      });
-      toast.success({
-        title: "Thành công",
-        description: "Thêm test case thành công",
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.testcases(variables.problemId) });
+      toast.success({ title: "Thành công", description: "Thêm test case thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể thêm test case",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể thêm test case" });
     },
   });
 };
@@ -221,22 +195,12 @@ export const useUpdateTestCase = () => {
       data: UpdateTestCaseRequest;
     }) => problemApi.updateTestCase(problemId, testCaseId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.detail(variables.problemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.testcases(variables.problemId),
-      });
-      toast.success({
-        title: "Thành công",
-        description: "Cập nhật test case thành công",
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.testcases(variables.problemId) });
+      toast.success({ title: "Thành công", description: "Cập nhật test case thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể cập nhật test case",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật test case" });
     },
   });
 };
@@ -247,22 +211,12 @@ export const useDeleteTestCase = () => {
     mutationFn: ({ problemId, testCaseId }: { problemId: string; testCaseId: string }) =>
       problemApi.deleteTestCase(problemId, testCaseId),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.detail(variables.problemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.testcases(variables.problemId),
-      });
-      toast.success({
-        title: "Thành công",
-        description: "Đã xóa test case",
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.testcases(variables.problemId) });
+      toast.success({ title: "Thành công", description: "Đã xóa test case" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể xóa test case",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể xóa test case" });
     },
   });
 };
@@ -273,22 +227,12 @@ export const useBulkCreateTestCases = () => {
     mutationFn: ({ problemId, data }: { problemId: string; data: BulkCreateTestCaseRequest }) =>
       problemApi.bulkCreateTestCases(problemId, data),
     onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.detail(variables.problemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.testcases(variables.problemId),
-      });
-      toast.success({
-        title: "Thành công",
-        description: `Đã tạo ${response.data.data?.createdCount || 0} test cases`,
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.testcases(variables.problemId) });
+      toast.success({ title: "Thành công", description: `Đã tạo ${response.data.data?.createdCount || 0} test cases` });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể tạo test cases hàng loạt",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể tạo test cases hàng loạt" });
     },
   });
 };
@@ -298,22 +242,31 @@ export const useDeleteAllTestCases = () => {
   return useMutation({
     mutationFn: (problemId: string) => problemApi.deleteAllTestCases(problemId),
     onSuccess: (_, problemId) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.detail(problemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.testcases(problemId),
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.testcases(problemId) });
+      toast.success({ title: "Thành công", description: "Đã xóa tất cả test cases" });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể xóa test cases" });
+    },
+  });
+};
+
+export const useImportTestCasesFromFile = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ problemId, file, replaceExisting }: { problemId: string; file: File; replaceExisting?: boolean }) =>
+      problemApi.importTestCasesFromFile(problemId, file, replaceExisting),
+    onSuccess: (response, variables) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.testcases(variables.problemId) });
       toast.success({
         title: "Thành công",
-        description: "Đã xóa tất cả test cases",
+        description: `Đã import ${response.data.data?.createdCount || 0} test cases`,
       });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể xóa test cases",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể import test cases" });
     },
   });
 };
@@ -324,22 +277,12 @@ export const useCreateCodeTemplate = () => {
     mutationFn: ({ problemId, data }: { problemId: string; data: CreateCodeTemplateRequest }) =>
       problemApi.createCodeTemplate(problemId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.templates(variables.problemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.detail(variables.problemId),
-      });
-      toast.success({
-        title: "Thành công",
-        description: "Thêm code template thành công",
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.templates(variables.problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
+      toast.success({ title: "Thành công", description: "Thêm code template thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể thêm code template",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể thêm code template" });
     },
   });
 };
@@ -350,19 +293,11 @@ export const useDeleteCodeTemplate = () => {
     mutationFn: ({ problemId, language }: { problemId: string; language: Language }) =>
       problemApi.deleteCodeTemplate(problemId, language),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.templates(variables.problemId),
-      });
-      toast.success({
-        title: "Thành công",
-        description: "Đã xóa code template",
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.templates(variables.problemId) });
+      toast.success({ title: "Thành công", description: "Đã xóa code template" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể xóa code template",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể xóa code template" });
     },
   });
 };
@@ -373,22 +308,12 @@ export const useGenerateCodeTemplates = () => {
     mutationFn: ({ problemId, data }: { problemId: string; data: GenerateCodeTemplatesRequest }) =>
       problemApi.generateCodeTemplates(problemId, data),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.templates(variables.problemId),
-      });
-      queryClient.invalidateQueries({
-        queryKey: problemKeys.detail(variables.problemId),
-      });
-      toast.success({
-        title: "Thành công",
-        description: "Đã tạo code templates cho tất cả ngôn ngữ",
-      });
+      queryClient.invalidateQueries({ queryKey: problemKeys.templates(variables.problemId) });
+      queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
+      toast.success({ title: "Thành công", description: "Đã tạo code templates cho tất cả ngôn ngữ" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể tạo code templates",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể tạo code templates" });
     },
   });
 };
@@ -401,10 +326,7 @@ export const useToggleFavorite = () => {
       queryClient.invalidateQueries({ queryKey: problemKeys.all });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể cập nhật yêu thích",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật yêu thích" });
     },
   });
 };
@@ -415,16 +337,10 @@ export const useSubmitCode = () => {
     mutationFn: (data: SubmitCodeRequest) => submissionApi.submitCode(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: submissionKeys.all });
-      toast.success({
-        title: "Đã nộp bài",
-        description: "Code của bạn đang được chấm...",
-      });
+      toast.success({ title: "Đã nộp bài", description: "Code của bạn đang được chấm..." });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể nộp bài",
-      });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể nộp bài" });
     },
   });
 };
@@ -440,7 +356,6 @@ export const useSubmissionResult = (submissionId: string) => {
     refetchInterval: (query) => {
       const data = query.state.data;
       if (!data) return false;
-
       const finalStatuses = [
         SubmissionStatus.ACCEPTED,
         SubmissionStatus.WRONG_ANSWER,
@@ -448,7 +363,6 @@ export const useSubmissionResult = (submissionId: string) => {
         SubmissionStatus.RUNTIME_ERROR,
         SubmissionStatus.TIME_LIMIT_EXCEEDED,
       ];
-
       return finalStatuses.includes(data.status) ? false : 1000;
     },
   });
@@ -473,6 +387,24 @@ export const useUserSubmissionStats = () => {
     queryFn: async () => {
       const response = await submissionApi.getUserSubmissionStats();
       return response.data.data;
+    },
+  });
+};
+
+export const useRunCode = () => {
+  return useMutation({
+    mutationFn: (data: RunCodeRequest) => submissionApi.runCode(data),
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể chạy code" });
+    },
+  });
+};
+
+export const useDebugCode = () => {
+  return useMutation({
+    mutationFn: (data: DebugRequest) => submissionApi.debugCode(data),
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể debug code" });
     },
   });
 };
