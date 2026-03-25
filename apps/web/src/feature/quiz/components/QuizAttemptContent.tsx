@@ -27,7 +27,9 @@ import { useTabLock } from "../queries/useTabLock";
 const QuizAttemptContent: React.FC = () => {
   const navigate = useNavigate();
   const { attemptId } = useParams({ from: "/_layout/quiz-attempts/$attemptId/" });
-  const { status: lockStatus, releaseLock } = useTabLock(Number(attemptId));
+  const numericAttemptId = Number(attemptId);
+
+  const { status: lockStatus, releaseLock } = useTabLock(numericAttemptId);
 
   const dispatch = useDispatch();
   const answersMap = useSelector(selectAnswersMap);
@@ -35,10 +37,12 @@ const QuizAttemptContent: React.FC = () => {
   const timeRemaining = useSelector(selectTimeRemaining);
   const stats = useSelector(selectQuestionStats);
 
-  const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(Number(attemptId));
+  const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(numericAttemptId);
   const { data: examData, isLoading: examLoading } = useExam(attemptData?.exam?.id || 0, {
     enabled: !!attemptData?.exam?.id,
   });
+
+  const deviceToken = attemptData?.deviceToken ?? "";
 
   const saveMutation = useSaveQuizAnswer();
   const submitMutation = useSubmitQuizAttempt();
@@ -54,6 +58,20 @@ const QuizAttemptContent: React.FC = () => {
   const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
   const lastSaveTimeRef = useRef(lastSaveTime);
   const answersMapRef = useRef(answersMap);
+  const deviceTokenRef = useRef(deviceToken);
+
+  useEffect(() => {
+    hasUnsavedChangesRef.current = hasUnsavedChanges;
+  }, [hasUnsavedChanges]);
+  useEffect(() => {
+    lastSaveTimeRef.current = lastSaveTime;
+  }, [lastSaveTime]);
+  useEffect(() => {
+    answersMapRef.current = answersMap;
+  }, [answersMap]);
+  useEffect(() => {
+    deviceTokenRef.current = deviceToken;
+  }, [deviceToken]);
 
   useEffect(() => {
     if (lockStatus === "denied") {
@@ -64,18 +82,6 @@ const QuizAttemptContent: React.FC = () => {
   }, [lockStatus, dispatch]);
 
   useEffect(() => {
-    hasUnsavedChangesRef.current = hasUnsavedChanges;
-  }, [hasUnsavedChanges]);
-
-  useEffect(() => {
-    lastSaveTimeRef.current = lastSaveTime;
-  }, [lastSaveTime]);
-
-  useEffect(() => {
-    answersMapRef.current = answersMap;
-  }, [answersMap]);
-
-  useEffect(() => {
     if (attemptData && !isStoreInitialized) {
       dispatch(setQuizAttemptAction(attemptData));
       setIsStoreInitialized(true);
@@ -83,6 +89,9 @@ const QuizAttemptContent: React.FC = () => {
   }, [attemptData, isStoreInitialized, dispatch]);
 
   const handleSaveAll = useCallback(async () => {
+    const token = deviceTokenRef.current;
+    if (!token) return;
+
     const currentAnswersMap = answersMapRef.current;
     const answeredQuestions = Object.values(currentAnswersMap).filter((answer) => {
       const type = answer.question.questionType?.toUpperCase();
@@ -93,21 +102,23 @@ const QuizAttemptContent: React.FC = () => {
     if (answeredQuestions.length === 0) return;
 
     setIsSavingAll(true);
-    const savePromises = answeredQuestions.map((answer) => {
-      return saveMutation.mutateAsync({
-        attemptId: Number(attemptId),
+
+    const savePromises = answeredQuestions.map((answer) =>
+      saveMutation.mutateAsync({
+        attemptId: numericAttemptId,
+        deviceToken: token,
         data: {
           questionId: answer.question.id,
           answerText: answer.answerText,
           selectedOptionIds: answer.selectedOptionIds,
           questionNo: answer.questionNo,
           navigationState:
-            answer.answerText?.trim() || answer.selectedOptionIds?.length
+            answer.answerText?.trim() || (answer.selectedOptionIds?.length ?? 0) > 0
               ? QuestionNavigationState.ANSWERED
               : QuestionNavigationState.UNANSWERED,
         },
-      });
-    });
+      }),
+    );
 
     try {
       await Promise.all(savePromises);
@@ -118,28 +129,33 @@ const QuizAttemptContent: React.FC = () => {
     } finally {
       setIsSavingAll(false);
     }
-  }, [saveMutation, attemptId]);
+  }, [saveMutation, numericAttemptId]);
 
   const handleAutoSubmit = useCallback(async () => {
+    const token = deviceTokenRef.current;
     console.log("Hết giờ - tự động lưu và nộp bài...");
     releaseLock();
+
     try {
       if (hasUnsavedChangesRef.current) {
         await handleSaveAll();
       }
 
-      await submitMutation.mutateAsync({
-        attemptId: Number(attemptId),
-        data: {
-          answers: Object.values(answersMapRef.current).map((answer) => ({
-            questionId: answer.question.id,
-            selectedOptionIds: answer.selectedOptionIds,
-            answerText: answer.answerText ?? undefined,
-            navigationState:
-              "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
-          })),
-        },
-      });
+      if (token) {
+        await submitMutation.mutateAsync({
+          attemptId: numericAttemptId,
+          deviceToken: token,
+          data: {
+            answers: Object.values(answersMapRef.current).map((answer) => ({
+              questionId: answer.question.id,
+              selectedOptionIds: answer.selectedOptionIds,
+              answerText: answer.answerText ?? undefined,
+              navigationState:
+                "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
+            })),
+          },
+        });
+      }
     } catch (error) {
       console.error("Auto-submit failed:", error);
     } finally {
@@ -148,10 +164,10 @@ const QuizAttemptContent: React.FC = () => {
         params: { attemptId: String(attemptId) },
       });
     }
-  }, [handleSaveAll, submitMutation, attemptId, navigate]);
+  }, [handleSaveAll, submitMutation, numericAttemptId, navigate, releaseLock]);
 
   const timer = useExamTimer({
-    attemptId: Number(attemptId),
+    attemptId: numericAttemptId,
     onTick: (seconds: number) => {
       if (seconds === 300) {
         setShowTimeWarning(true);
@@ -172,11 +188,11 @@ const QuizAttemptContent: React.FC = () => {
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
       const now = Date.now();
-      if (hasUnsavedChangesRef.current && now - lastSaveTimeRef.current >= 120000) {
+      if (hasUnsavedChangesRef.current && now - lastSaveTimeRef.current >= 120_000) {
         console.log("Auto-save triggered (2 minutes elapsed)");
         handleSaveAll();
       }
-    }, 10000);
+    }, 10_000);
 
     return () => {
       clearInterval(autoSaveInterval);
@@ -283,6 +299,9 @@ const QuizAttemptContent: React.FC = () => {
   };
 
   const handleSubmitExam = async () => {
+    const token = deviceTokenRef.current;
+    if (!token) return;
+
     timer.stop();
     releaseLock();
 
@@ -292,7 +311,8 @@ const QuizAttemptContent: React.FC = () => {
       }
 
       await submitMutation.mutateAsync({
-        attemptId: Number(attemptId),
+        attemptId: numericAttemptId,
+        deviceToken: token,
         data: {
           answers: Object.values(answersMap).map((answer) => ({
             questionId: answer.question.id,
@@ -309,12 +329,30 @@ const QuizAttemptContent: React.FC = () => {
         params: { attemptId: String(attemptId) },
       });
     } catch (error: any) {
-      if (error.response?.data?.message?.includes("unanswered")) {
+      if (error.response?.status === 202 || error.response?.data?.data?.requiresConfirmation) {
         const confirmSubmit = window.confirm(
           `Bạn còn ${stats.unanswered} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài không?`,
         );
         if (confirmSubmit) {
-          await handleSubmitExam();
+          await submitMutation.mutateAsync({
+            attemptId: numericAttemptId,
+            deviceToken: token,
+            data: {
+              confirmSubmit: true,
+              answers: Object.values(answersMap).map((answer) => ({
+                questionId: answer.question.id,
+                selectedOptionIds: answer.selectedOptionIds,
+                answerText: answer.answerText ?? undefined,
+                navigationState:
+                  "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
+              })),
+            },
+          });
+
+          navigate({
+            to: "/quiz-attempts/$attemptId/result",
+            params: { attemptId: String(attemptId) },
+          });
         } else {
           timer.start();
         }
@@ -327,7 +365,6 @@ const QuizAttemptContent: React.FC = () => {
   };
 
   const getOptionLabel = (index: number) => String.fromCharCode(65 + index);
-
   const isEssay = (type: string) => type?.toUpperCase() === "ESSAY";
   const isMCQ = (type: string) => type?.toUpperCase() === "MCQ";
 
@@ -416,7 +453,7 @@ const QuizAttemptContent: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Card className="border-2 border-blue-200 dark:border-blue-800 ">
+            <Card className="border-2 border-blue-200 dark:border-blue-800">
               <CardContent className="p-8">
                 <div className="mb-6">
                   <Badge className="mb-4 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 font-bold">
@@ -522,7 +559,7 @@ const QuizAttemptContent: React.FC = () => {
           </div>
 
           <aside className="lg:col-span-1 space-y-4">
-            <Card className="border-2 border-blue-200 dark:border-blue-800  top-6">
+            <Card className="border-2 border-blue-200 dark:border-blue-800 top-6">
               <CardContent className="px-6 space-y-4">
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                   <div className="flex items-center gap-3">

@@ -98,12 +98,39 @@ export const useStartQuizAttempt = () => {
   });
 };
 
+export const useResumeQuizAttempt = () => {
+  const dispatch = useAppDispatch();
+
+  return useMutation({
+    mutationFn: ({ examId, deviceToken }: { examId: number; deviceToken?: string }) =>
+      quizAttemptApi.resumeAttempt(examId, deviceToken ?? ""),
+    onSuccess: (response) => {
+      const data = response.data.data!;
+      // Hydrate store with fresh attempt data + new deviceToken
+      dispatch(setQuizAttemptAction(data));
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể tiếp tục bài thi",
+      });
+    },
+  });
+};
+
 export const useSaveQuizAnswer = () => {
   const dispatch = useAppDispatch();
 
   return useMutation({
-    mutationFn: ({ attemptId, data }: { attemptId: number; data: QuizAttemptAnswerRequest }) =>
-      quizAttemptApi.saveOrUpdateAnswer(attemptId, data),
+    mutationFn: ({
+      attemptId,
+      deviceToken,
+      data,
+    }: {
+      attemptId: number;
+      deviceToken: string;
+      data: QuizAttemptAnswerRequest;
+    }) => quizAttemptApi.saveOrUpdateAnswer(attemptId, deviceToken, data),
     onSuccess: (response) => {
       dispatch(updateAnswerAction(response.data.data!));
     },
@@ -119,13 +146,15 @@ export const useUpdateNavigationState = () => {
   return useMutation({
     mutationFn: ({
       attemptId,
+      deviceToken,
       questionId,
       navigationState,
     }: {
       attemptId: number;
+      deviceToken: string;
       questionId: number;
       navigationState: QuestionNavigationState;
-    }) => quizAttemptApi.updateNavigationState(attemptId, questionId, navigationState),
+    }) => quizAttemptApi.updateNavigationState(attemptId, deviceToken, questionId, navigationState),
     onSuccess: (response) => {
       dispatch(updateAnswerAction(response.data.data!));
     },
@@ -136,8 +165,15 @@ export const useSubmitQuizAttempt = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ attemptId, data }: { attemptId: number; data: SubmitQuizAttemptRequest }) =>
-      quizAttemptApi.submitAttempt(attemptId, data),
+    mutationFn: ({
+      attemptId,
+      deviceToken,
+      data,
+    }: {
+      attemptId: number;
+      deviceToken: string;
+      data: SubmitQuizAttemptRequest;
+    }) => quizAttemptApi.submitAttempt(attemptId, deviceToken, data),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: quizKeys.attempts.all });
 
@@ -162,8 +198,15 @@ export const useSubmitQuizAttempt = () => {
 
 export const useSendHeartbeat = () => {
   return useMutation({
-    mutationFn: ({ attemptId, data }: { attemptId: number; data: QuizHeartbeatRequest }) =>
-      quizAttemptApi.sendHeartbeat(attemptId, data),
+    mutationFn: ({
+      attemptId,
+      deviceToken,
+      data,
+    }: {
+      attemptId: number;
+      deviceToken: string;
+      data: QuizHeartbeatRequest;
+    }) => quizAttemptApi.sendHeartbeat(attemptId, deviceToken, data),
     retry: 3,
     retryDelay: 1000,
   });
@@ -261,7 +304,6 @@ export const useToggleMarkAnswer = () => {
       data: QuizSessionAnswerRequest;
     }) => {
       dispatch(toggleMarkAction(questionId));
-
       return quizSessionAnswerApi.saveOrUpdateAnswer(sessionId, data);
     },
     onSuccess: (response) => {
