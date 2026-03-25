@@ -240,7 +240,7 @@ const ProblemSolveContent: React.FC = () => {
 
                 {problem.constraints && (
                   <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Constraints</p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Ràng buộc: </p>
                     <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
                       {problem.constraints}
                     </div>

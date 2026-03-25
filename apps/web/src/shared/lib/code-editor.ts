@@ -643,11 +643,11 @@ export function validatePythonIndentation(code: string): FormatError[] {
     const indent = line!.length - line!.trimStart().length;
 
     if (line!.includes("\t")) {
-      errors.push({ line: i + 1, message: "Use spaces instead of tabs for indentation" });
+      errors.push({ line: i + 1, message: "Dùng dấu cách thay vì tab để thụt lề" });
       continue;
     }
     if (indent % 4 !== 0) {
-      errors.push({ line: i + 1, message: "Indentation should be a multiple of 4 spaces" });
+      errors.push({ line: i + 1, message: "Thụt lề phải là bội số của 4 dấu cách" });
     }
     if (trimmed.endsWith(":")) {
       indentStack.push(indent + 4);
@@ -656,7 +656,7 @@ export function validatePythonIndentation(code: string): FormatError[] {
       if (indent !== indentStack[indentStack.length - 1] && indent !== 0) {
         errors.push({
           line: i + 1,
-          message: `Unexpected indentation (expected ${indentStack[indentStack.length - 1]} spaces)`,
+          message: `Thụt lề không hợp lệ (cần ${indentStack[indentStack.length - 1]} dấu cách)`,
         });
       }
     }
@@ -720,7 +720,7 @@ function getPythonWorker(): Worker {
     }
   };
 
-  pythonWorker.onerror = (e) => console.error("Python worker error:", e);
+  pythonWorker.onerror = (e) => console.error("Lỗi Python worker:", e);
 
   return pythonWorker;
 }
@@ -734,7 +734,7 @@ async function formatPython(code: string): Promise<string> {
     setTimeout(() => {
       if (pendingRequests.has(id)) {
         pendingRequests.delete(id);
-        reject(new Error("Python formatter timeout"));
+        reject(new Error("Hết thời gian định dạng Python"));
       }
     }, 60_000);
   });
@@ -754,7 +754,7 @@ async function loadClangFormat() {
     script.src = "https://cdn.jsdelivr.net/npm/clang-format-wasm@0.0.14/clang-format/clang-format.js";
     script.dataset.clangFormat = "true";
     script.onload = () => resolve();
-    script.onerror = () => reject(new Error("Failed to load clang-format-wasm"));
+    script.onerror = () => reject(new Error("Không thể tải clang-format-wasm"));
     document.head.appendChild(script);
   });
 
@@ -803,7 +803,7 @@ export async function formatCode(
     if (e.syntaxError) {
       return { formatted: e.code ?? code, syntaxError: true, message: e.message };
     }
-    console.error("formatCode error:", e);
+    console.error("Lỗi định dạng code:", e);
     return { formatted: code };
   }
 }

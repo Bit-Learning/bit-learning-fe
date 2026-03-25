@@ -26,6 +26,7 @@ const problemSchema = z.object({
     .min(1, "Slug không được để trống")
     .regex(/^[a-z0-9-]+$/, "Slug chỉ chứa chữ thường, số và dấu gạch ngang"),
   description: z.string().min(1, "Mô tả không được để trống"),
+  constraints: z.string().optional(),
   difficulty: z.nativeEnum(Difficulty),
   timeLimitMs: z.number().min(100, "Thời gian tối thiểu 100ms").max(30000, "Thời gian tối đa 30000ms"),
   memoryLimitMb: z.number().min(8, "Bộ nhớ tối thiểu 8MB").max(512, "Bộ nhớ tối đa 512MB"),
@@ -81,6 +82,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       title: "",
       slug: "",
       description: "",
+      constraints: "",
       difficulty: Difficulty.EASY,
       timeLimitMs: 2000,
       memoryLimitMb: 256,
@@ -107,6 +109,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       combinedForm.setValue("memoryLimitMb", problemData.memoryLimitMb);
       combinedForm.setValue("isPublic", problemData.isPublic);
       combinedForm.setValue("tags", problemData.tags);
+      combinedForm.setValue("constraints", problemData.constraints ?? "");
     }
   }, [isEditMode, problemData, isProblemLoading, combinedForm]);
 
@@ -215,6 +218,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
         title: data.title,
         slug: data.slug,
         description: data.description,
+        constraints: data.constraints || undefined,
         difficulty: data.difficulty,
         timeLimitMs: data.timeLimitMs,
         memoryLimitMb: data.memoryLimitMb,
@@ -348,6 +352,19 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                 {combinedForm.formState.errors.description && (
                   <p className="text-sm text-red-500 mt-2">{combinedForm.formState.errors.description.message}</p>
                 )}
+              </div>
+
+              <div>
+                <Label htmlFor="constraints" className="text-base font-semibold text-gray-900 mb-3 block">
+                  Ràng buộc
+                </Label>
+                <Textarea
+                  id="constraints"
+                  {...combinedForm.register("constraints")}
+                  rows={4}
+                  placeholder="Ví dụ: 1 ≤ n ≤ 10^5, -10^9 ≤ nums[i] ≤ 10^9"
+                  className="text-base border-2 border-gray-300 focus:border-blue-500 font-mono"
+                />
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
