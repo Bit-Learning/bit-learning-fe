@@ -16,7 +16,6 @@ import {
 	UpdateUserProfile,
 	UploadAvatar,
 	UploadCoverImage,
-	ToggleMfa,
 	DeactivateAccount,
 	GetInstructors,
 	GetFollowStats,
@@ -234,42 +233,6 @@ export function useUploadCoverImage() {
 				title: "Tải ảnh bìa thất bại",
 				description: errorMessage,
 			});
-		},
-		onSettled: () => {
-			dispatch(setIsLoadingAction(false));
-		},
-	});
-}
-
-export function useToggleMfa() {
-	const dispatch = useAppDispatch();
-	const queryClient = useQueryClient();
-
-	return useMutation({
-		mutationFn: async (enable: boolean) => {
-			const response = await ToggleMfa(enable);
-			return response.data;
-		},
-		onMutate: () => {
-			dispatch(setIsLoadingAction(true));
-		},
-		onSuccess: (data) => {
-			queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
-			dispatch(setUserInfoAction(data.data));
-			toast.success({
-				title: data.data?.mfaEnabled
-					? "Đã bật xác thực 2 lớp"
-					: "Đã tắt xác thực 2 lớp",
-				description: data.data?.mfaEnabled
-					? "Tài khoản của bạn đã được bảo vệ bằng xác thực 2 lớp."
-					: "Xác thực 2 lớp đã được tắt.",
-			});
-		},
-		onError: (error: any) => {
-			const errorMessage =
-				error?.response?.data?.message || "Thao tác thất bại";
-			dispatch(setErrorAction(errorMessage));
-			toast.error({ title: "Lỗi", description: errorMessage });
 		},
 		onSettled: () => {
 			dispatch(setIsLoadingAction(false));
