@@ -60,3 +60,24 @@ export type TWalletInfo = {
 	id: number;
 	balance: number;
 };
+
+export type TFollowStats = {
+	userId: number;
+	followersCount: number;
+	followingCount: number;
+	isFollowing: boolean;
+};
+
+export type TInstructor = {
+	id: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	avatar: string;
+	coverImage?: string;
+	email: string;
+	role: string;
+	bio?: string;
+	jobTitle?: string;
+	socialProfile?: TSocialProfile;
+};

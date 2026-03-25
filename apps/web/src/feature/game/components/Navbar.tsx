@@ -13,7 +13,7 @@ export function Navbar() {
 		<nav className={styles.nav}>
 			<div className={styles.inner}>
 				<div className={styles.left}>
-					<Link to="/" className={styles.logo}>
+					<Link to="/games" className={styles.logo}>
 						<span className={styles.logoIcon}>
 							<span className="material-icons">videogame_asset</span>
 						</span>
@@ -31,33 +31,6 @@ export function Navbar() {
 								Trang chủ
 							</Link>
 						</li>
-						{navItems.map((item) => (
-							<li key={item.title}>
-								{item.to ? (
-									<Link
-										to={item.to}
-										className={styles.link}
-										activeProps={{ className: styles.linkActive }}
-									>
-										{item.title}
-									</Link>
-								) : (
-									<button
-										type="button"
-										className={styles.link}
-										onClick={() => {
-											// For grouped items, navigate to the first child route
-											const firstChild = item.items?.[0];
-											if (firstChild?.to) {
-												navigate({ to: firstChild.to });
-											}
-										}}
-									>
-										{item.title}
-									</button>
-								)}
-							</li>
-						))}
 					</ul>
 				</div>
 				<div className={styles.right}>

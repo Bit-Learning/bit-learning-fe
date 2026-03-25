@@ -3,9 +3,60 @@ import gameService, {
 	type LeaderboardEntry,
 	type Page,
 } from "../services/gameService";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import {
+	ChevronLeft,
+	ChevronRight,
+	UserPlus,
+	UserMinus,
+	Eye,
+} from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import {
+	useFollowUser,
+	useUnfollowUser,
+	useFollowStats,
+} from "@/feature/user/queries/useUser";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/shared/redux/store";
+
+function FollowButton({ userId }: { userId: number }) {
+	const { data: stats, isLoading } = useFollowStats(userId);
+	const followMutation = useFollowUser();
+	const unfollowMutation = useUnfollowUser();
+	const auth = useSelector((state: RootState) => state.auth);
+	const currentUserId = auth.userInfo?.id;
+
+	if (isLoading || currentUserId === userId) return null;
+
+	const isFollowing = stats?.isFollowing ?? false;
+
+	return (
+		<button
+			onClick={(e) => {
+				e.stopPropagation();
+				isFollowing
+					? unfollowMutation.mutate(userId)
+					: followMutation.mutate(userId);
+			}}
+			disabled={followMutation.isPending || unfollowMutation.isPending}
+			className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium transition-colors ${
+				isFollowing
+					? "bg-gray-200 text-gray-700 hover:bg-red-100 hover:text-red-600"
+					: "bg-blue-500 text-white hover:bg-blue-600"
+			}`}
+		>
+			{isFollowing ? (
+				<UserMinus className="w-3.5 h-3.5" />
+			) : (
+				<UserPlus className="w-3.5 h-3.5" />
+			)}
+			{isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
+		</button>
+	);
+}
 
 export default function Leaderboard() {
+	const navigate = useNavigate();
 	const [leaderboard, setLeaderboard] = useState<Page<LeaderboardEntry> | null>(
 		null,
 	);
@@ -26,18 +77,6 @@ export default function Leaderboard() {
 			console.error("Failed to load leaderboard", error);
 		} finally {
 			setLoading(false);
-		}
-	};
-
-	const handlePreviousPage = () => {
-		if (leaderboard && !leaderboard.first) {
-			setCurrentPage(currentPage - 1);
-		}
-	};
-
-	const handleNextPage = () => {
-		if (leaderboard && !leaderboard.last) {
-			setCurrentPage(currentPage + 1);
 		}
 	};
 
@@ -79,6 +118,9 @@ export default function Leaderboard() {
 							<th className="px-6 py-4 text-left text-sm font-bold text-gray-800">
 								Games Played
 							</th>
+							<th className="px-6 py-4 text-center text-sm font-bold text-gray-800">
+								Actions
+							</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-200">
@@ -102,6 +144,23 @@ export default function Leaderboard() {
 									</td>
 									<td className="px-6 py-4 text-gray-600">
 										{entry.gamesPlayed}
+									</td>
+									<td className="px-6 py-4">
+										<div className="flex items-center justify-center gap-2">
+											<button
+												onClick={() =>
+													navigate({
+														to: "/profile/$userId",
+														params: { userId: String(entry.userId) },
+													})
+												}
+												className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 transition-colors"
+											>
+												<Eye className="w-3.5 h-3.5" />
+												Xem
+											</button>
+											<FollowButton userId={entry.userId} />
+										</div>
 									</td>
 								</tr>
 							);
@@ -133,10 +192,9 @@ export default function Leaderboard() {
 							<span className="font-semibold">{leaderboard.totalElements}</span>{" "}
 							players
 						</div>
-
 						<div className="flex items-center gap-2">
 							<button
-								onClick={handlePreviousPage}
+								onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
 								disabled={leaderboard.first}
 								className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-colors ${
 									leaderboard.first
@@ -147,14 +205,16 @@ export default function Leaderboard() {
 								<ChevronLeft className="w-4 h-4" />
 								Previous
 							</button>
-
 							<span className="text-sm text-gray-700 px-4">
 								Page <span className="font-semibold">{currentPage + 1}</span> of{" "}
 								<span className="font-semibold">{leaderboard.totalPages}</span>
 							</span>
-
 							<button
-								onClick={handleNextPage}
+								onClick={() =>
+									setCurrentPage((p) =>
+										Math.min(leaderboard.totalPages - 1, p + 1),
+									)
+								}
 								disabled={leaderboard.last}
 								className={`flex items-center gap-1 px-4 py-2 rounded-lg font-medium transition-colors ${
 									leaderboard.last
