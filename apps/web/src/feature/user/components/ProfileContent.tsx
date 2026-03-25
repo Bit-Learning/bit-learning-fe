@@ -117,14 +117,10 @@ export const ProfileContent = () => {
 						src={formData.coverImage || "/user_no_wallpaper.jpg"}
 					/>
 					<label className="absolute top-4 right-4">
-						<Button
-							variant="outline"
-							size="sm"
-							className="bg-white/90 backdrop-blur cursor-pointer"
-						>
-							<Camera className="w-4 h-4 mr-2" />
+						<span className="inline-flex items-center gap-1.5 justify-center whitespace-nowrap rounded-sm text-sm font-medium h-7 px-2 bg-white/90 backdrop-blur cursor-pointer border shadow-sm hover:bg-white transition-all">
+							<Camera className="w-4 h-4" />
 							Thay đổi ảnh bìa
-						</Button>
+						</span>
 						<input
 							className="hidden"
 							type="file"
