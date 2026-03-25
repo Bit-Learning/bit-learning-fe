@@ -1,12 +1,55 @@
 import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 
+type DashboardSearch = {
+	correct?: number;
+	total?: number;
+	time?: number;
+	title?: string;
+};
+
 export const Route = createFileRoute("/matching/dashboard")({
 	component: DashboardPage,
+	validateSearch: (search: Record<string, unknown>): DashboardSearch => ({
+		correct:
+			typeof search.correct === "number"
+				? search.correct
+				: typeof search.correct === "string"
+					? Number(search.correct)
+					: 0,
+		total:
+			typeof search.total === "number"
+				? search.total
+				: typeof search.total === "string"
+					? Number(search.total)
+					: 0,
+		time:
+			typeof search.time === "number"
+				? search.time
+				: typeof search.time === "string"
+					? Number(search.time)
+					: 0,
+		title: typeof search.title === "string" ? search.title : undefined,
+	}),
 });
 
 export default function DashboardPage() {
 	const navigate = useNavigate();
+	const { correct = 0, total = 0, time = 0, title } = Route.useSearch();
+
+	const minutes = Math.floor(time / 60);
+	const seconds = time % 60;
+	const timeDisplay = `${String(minutes).padStart(2, "0")}:${String(seconds).padStart(2, "0")}`;
+	const isPerfect = correct === total && total > 0;
+	const pct = total > 0 ? Math.round((correct / total) * 100) : 0;
+
+	const feedback = isPerfect
+		? "Bạn làm rất tốt, hãy tiếp tục phát huy nhé! 🌟"
+		: pct >= 70
+			? "Khá tốt! Hãy thử lại để đạt điểm tuyệt đối nhé! 💪"
+			: pct > 0
+				? "Cố gắng thêm nhé, bạn sẽ làm tốt hơn! 📚"
+				: "Hãy bắt đầu chơi để xem kết quả của bạn! 🎮";
 
 	return (
 		<div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
@@ -36,12 +79,11 @@ export default function DashboardPage() {
 				</header>
 
 				{/* Content */}
-				<main className="flex flex-1 items-center justify-center p-4 lg:p-10 confetti-bg">
+				<main className="flex flex-1 items-center justify-center p-4 lg:p-10">
 					<div className="w-full max-w-2xl">
 						<div className="relative overflow-hidden rounded-xl bg-white dark:bg-slate-900 shadow-xl shadow-primary/5 p-8 lg:p-12 text-center border border-primary/10">
-							{/* Decorative */}
-							<div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-primary/5"></div>
-							<div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-primary/5"></div>
+							<div className="absolute -top-12 -right-12 h-32 w-32 rounded-full bg-primary/5" />
+							<div className="absolute -bottom-12 -left-12 h-32 w-32 rounded-full bg-primary/5" />
 
 							{/* Header */}
 							<div className="mb-8">
@@ -51,15 +93,19 @@ export default function DashboardPage() {
 									</span>
 								</div>
 								<h1 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-3">
-									Chúc mừng bạn đã hoàn thành!
+									{isPerfect
+										? "Chúc mừng bạn đã hoàn thành!"
+										: "Kết quả của bạn"}
 								</h1>
-								<p className="text-lg text-slate-500 dark:text-slate-400">
-									Bạn đã xuất sắc vượt qua thử thách nối cặp.
-								</p>
+								{title && (
+									<p className="text-lg text-slate-500 dark:text-slate-400">
+										{title}
+									</p>
+								)}
 							</div>
 
 							{/* Stats */}
-							<div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+							<div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-10">
 								<div className="flex flex-col items-center justify-center rounded-xl bg-primary/5 p-6 border border-primary/10">
 									<span className="material-symbols-outlined text-primary mb-2 text-3xl">
 										task_alt
@@ -67,7 +113,9 @@ export default function DashboardPage() {
 									<p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
 										Số câu đúng
 									</p>
-									<p className="text-4xl font-bold text-primary">4/4</p>
+									<p className="text-4xl font-bold text-primary">
+										{correct}/{total}
+									</p>
 								</div>
 								<div className="flex flex-col items-center justify-center rounded-xl bg-primary/5 p-6 border border-primary/10">
 									<span className="material-symbols-outlined text-primary mb-2 text-3xl">
@@ -76,14 +124,29 @@ export default function DashboardPage() {
 									<p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
 										Thời gian
 									</p>
-									<p className="text-4xl font-bold text-primary">01:30</p>
+									<p className="text-4xl font-bold text-primary">
+										{timeDisplay}
+									</p>
+								</div>
+								<div className="flex flex-col items-center justify-center rounded-xl bg-primary/5 p-6 border border-primary/10">
+									<span className="material-symbols-outlined text-primary mb-2 text-3xl">
+										percent
+									</span>
+									<p className="text-sm font-medium text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+										Tỷ lệ đúng
+									</p>
+									<p className="text-4xl font-bold text-primary">{pct}%</p>
 								</div>
 							</div>
 
 							{/* Feedback */}
-							<div className="rounded-lg bg-green-50 dark:bg-green-900/20 p-4 mb-10 border border-green-100 dark:border-green-900/30">
-								<p className="text-green-700 dark:text-green-400 font-medium text-lg">
-									"Bạn làm rất tốt, hãy tiếp tục phát huy nhé! 🌟"
+							<div
+								className={`rounded-lg p-4 mb-10 border ${isPerfect ? "bg-green-50 dark:bg-green-900/20 border-green-100 dark:border-green-900/30" : "bg-blue-50 dark:bg-blue-900/20 border-blue-100 dark:border-blue-900/30"}`}
+							>
+								<p
+									className={`font-medium text-lg ${isPerfect ? "text-green-700 dark:text-green-400" : "text-blue-700 dark:text-blue-400"}`}
+								>
+									"{feedback}"
 								</p>
 							</div>
 

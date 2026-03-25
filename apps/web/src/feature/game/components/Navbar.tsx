@@ -31,6 +31,15 @@ export function Navbar() {
 								Trang chủ
 							</Link>
 						</li>
+						<li>
+							<Link
+								to="/leaderboard"
+								className={styles.link}
+								activeProps={{ className: styles.linkActive }}
+							>
+								Bảng xếp hạng
+							</Link>
+						</li>
 					</ul>
 				</div>
 				<div className={styles.right}>

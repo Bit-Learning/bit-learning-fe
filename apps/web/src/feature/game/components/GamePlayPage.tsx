@@ -1,9 +1,10 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 import type { Game } from "../services/gameService";
 import gameService from "../services/gameService";
+import { toast } from "@/shared/components/Sonner";
 
 interface GamePlayPageProps {
 	id: number;
@@ -17,10 +18,13 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const [game, setGame] = useState<Game | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [loading, setLoading] = useState(true);
+	const [tracked, setTracked] = useState(false);
 	const gameContainerRef = useRef<HTMLIFrameElement>(null);
+	const startTimeRef = useRef<number>(Date.now());
 
 	useEffect(() => {
 		loadGame();
+		startTimeRef.current = Date.now();
 	}, [id]);
 
 	useEffect(() => {
@@ -28,28 +32,67 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			setIsFullscreen(!!document.fullscreenElement);
 		};
 		document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-		return () => {
+		return () =>
 			document.removeEventListener("fullscreenchange", handleFullscreenChange);
-		};
 	}, []);
+
+	const trackResult = useCallback(
+		async (score: number, duration?: number) => {
+			if (!username || tracked) return;
+			setTracked(true);
+			const elapsed =
+				duration ?? Math.round((Date.now() - startTimeRef.current) / 1000);
+			try {
+				await gameService.trackPlay(id, username, score, elapsed);
+				toast.success({
+					title: "Kết quả đã được ghi nhận",
+					description: `Điểm: ${score} | Thời gian: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
+				});
+			} catch (e) {
+				console.error("Tracking error", e);
+				setTracked(false);
+			}
+		},
+		[id, username, tracked],
+	);
+
+	// Listen for postMessage from the game iframe
+	// Games should send: { type: "GAME_OVER", score: number, duration?: number }
+	useEffect(() => {
+		const handleMessage = (event: MessageEvent) => {
+			const data = event.data;
+			if (data && data.type === "GAME_OVER" && typeof data.score === "number") {
+				trackResult(data.score, data.duration);
+			}
+		};
+		window.addEventListener("message", handleMessage);
+		return () => window.removeEventListener("message", handleMessage);
+	}, [trackResult]);
+
+	// Track on page leave (unload / navigate away) as fallback
+	// If the game never sent GAME_OVER, record with score 0 and elapsed duration
+	useEffect(() => {
+		const handleBeforeUnload = () => {
+			if (!tracked && username) {
+				const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
+				// Use sendBeacon for reliability on page unload
+				const params = new URLSearchParams({
+					userId: username,
+					score: "0",
+					duration: String(elapsed),
+				});
+				navigator.sendBeacon(`/api/games/${id}/play?${params.toString()}`);
+			}
+		};
+		window.addEventListener("beforeunload", handleBeforeUnload);
+		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
+	}, [id, username, tracked]);
 
 	const loadGame = async () => {
 		try {
 			setLoading(true);
 			const gameData = await gameService.getGameById(id);
 			setGame(gameData);
-
-			// Track play activity
-			if (username) {
-				const randomScore = Math.floor(Math.random() * 1000);
-				try {
-					await gameService.trackPlay(id, username, randomScore);
-					console.log("Play tracked with score:", randomScore);
-				} catch (e) {
-					console.error("Tracking error", e);
-				}
-			}
 		} catch (e) {
 			console.error("Failed to load game", e);
 		} finally {
@@ -57,9 +100,17 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 		}
 	};
 
+	const handleBack = () => {
+		// Track before navigating away if not already tracked
+		if (!tracked && username) {
+			const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
+			trackResult(0, elapsed);
+		}
+		navigate({ to: "/games/$id", params: { id: String(id) } });
+	};
+
 	const toggleFullscreen = () => {
 		if (!gameContainerRef.current) return;
-
 		if (!document.fullscreenElement) {
 			gameContainerRef.current.requestFullscreen().catch((err) => {
 				console.error(`Error attempting to enable fullscreen: ${err.message}`);
@@ -96,7 +147,6 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 		);
 	}
 
-	// Build the game URL with parameters
 	const gameUrl = `${game.playUrl}?gameId=${game.id}&userId=${encodeURIComponent(username || "")}`;
 
 	return (
@@ -104,9 +154,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			<div className="bg-gray-900 text-white p-4 flex justify-between items-center shadow-lg">
 				<div className="flex items-center gap-4">
 					<button
-						onClick={() =>
-							navigate({ to: "/games/$id", params: { id: String(id) } })
-						}
+						onClick={handleBack}
 						className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
 					>
 						← Back
@@ -115,6 +163,11 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 					{!username && (
 						<span className="text-yellow-500 text-sm">
 							⚠️ Not logged in - game progress won't be tracked
+						</span>
+					)}
+					{tracked && (
+						<span className="text-emerald-400 text-sm">
+							✅ Kết quả đã ghi nhận
 						</span>
 					)}
 				</div>

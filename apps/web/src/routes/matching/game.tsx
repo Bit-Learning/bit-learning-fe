@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
 	CURRICULUM_DATA,
 	GAME_DATA,
@@ -10,7 +10,10 @@ import { useAudio } from "@/feature/game/components/AudioProvider";
 import { AudioToggle } from "@/feature/game/components/AudioToggle";
 import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
 import matchingGameService from "@/feature/game/services/matchingGameService";
+import gameService from "@/feature/game/services/gameService";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/shared/redux/store";
 
 type GameSearch = {
 	grade?: number;
@@ -76,10 +79,14 @@ export default function GamePage() {
 	const navigate = useNavigate();
 	const { playSound, stopSound } = useAudio();
 	const { grade = 3, topic = "A" } = Route.useSearch();
+	const auth = useSelector((state: RootState) => state.auth);
+	const username = auth.userInfo?.username ?? null;
 
 	const [gameData, setGameData] = useState(() => GAME_DATA);
 	const [loading, setLoading] = useState(true);
 	const [error, setError] = useState<string | null>(null);
+	const startTimeRef = useRef<number>(Date.now());
+	const trackedRef = useRef(false);
 
 	useEffect(() => {
 		let isMounted = true;
@@ -111,6 +118,17 @@ export default function GamePage() {
 	}, [grade, topic]);
 
 	const [stageIndex, setStageIndex] = useState(0);
+
+	// Track matching game result to backend
+	const trackMatchingResult = (correctCount: number, totalCount: number) => {
+		if (trackedRef.current) return;
+		trackedRef.current = true;
+		const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
+		const score = Math.round((correctCount / Math.max(totalCount, 1)) * 100);
+		gameService.recordScore(score, elapsed).catch(() => {
+			trackedRef.current = false;
+		});
+	};
 	// Pause background music while in the game route
 	useEffect(() => {
 		stopSound("game-background-music");
@@ -144,6 +162,24 @@ export default function GamePage() {
 	const [isGameOver, setIsGameOver] = useState(false);
 
 	const isLastStage = stageIndex >= gameData.stages.length - 1;
+
+	const goToDashboard = () => {
+		const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
+		const totalPairs = gameData.stages.reduce(
+			(sum, s) => sum + s.pairs.length,
+			0,
+		);
+		trackMatchingResult(matchedPairIds.length, totalPairs);
+		navigate({
+			to: "/matching/dashboard",
+			search: {
+				correct: matchedPairIds.length,
+				total: totalPairs,
+				time: elapsed,
+				title: gameData.meta.title,
+			},
+		});
+	};
 
 	const isPairMatched = (pairId: string) => matchedPairIds.includes(pairId);
 
@@ -596,7 +632,7 @@ export default function GamePage() {
 						Làm lại
 					</button>
 					<button
-						onClick={() => navigate({ to: "/matching/dashboard" })}
+						onClick={goToDashboard}
 						className="px-8 py-2.5 rounded-lg bg-primary text-white font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all flex items-center gap-2"
 					>
 						Kiểm tra kết quả
@@ -631,7 +667,7 @@ export default function GamePage() {
 							</button>
 							{isLastStage && (
 								<button
-									onClick={() => navigate({ to: "/matching/dashboard" })}
+									onClick={goToDashboard}
 									className="w-full bg-slate-100 dark:bg-slate-800 font-bold py-4 rounded-xl text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
 								>
 									Xem kết quả
@@ -662,7 +698,7 @@ export default function GamePage() {
 								Chơi lại
 							</button>
 							<button
-								onClick={() => navigate({ to: "/matching/dashboard" })}
+								onClick={goToDashboard}
 								className="w-full bg-slate-100 dark:bg-slate-800 font-bold py-4 rounded-xl text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
 							>
 								Quay lại bảng điều khiển
