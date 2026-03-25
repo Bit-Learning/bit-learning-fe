@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Receipt, Eye, Wallet } from "lucide-react";
+import { Receipt, Eye, Wallet, CheckCircle2, Clock, XCircle } from "lucide-react";
 import { Card } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
@@ -27,10 +27,15 @@ export const HistoryContent = () => {
 
   const getStatusBadge = (status: string) => {
     if (status === "COMPLETED")
-      return { variant: "default" as const, text: "Thành công", class: "bg-emerald-100 text-emerald-700" };
+      return {
+        variant: "default" as const,
+        text: "Thành công",
+        class: "bg-emerald-100 text-emerald-700",
+        icon: CheckCircle2,
+      };
     if (status === "PENDING")
-      return { variant: "secondary" as const, text: "Đang xử lý", class: "bg-amber-100 text-amber-700" };
-    return { variant: "destructive" as const, text: "Đã hủy", class: "bg-rose-100 text-rose-700" };
+      return { variant: "secondary" as const, text: "Đang xử lý", class: "bg-amber-100 text-amber-700", icon: Clock };
+    return { variant: "destructive" as const, text: "Đã hủy", class: "bg-rose-100 text-rose-700", icon: XCircle };
   };
 
   const handleViewDetail = (order: OrderInfo) => {
@@ -117,11 +122,19 @@ export const HistoryContent = () => {
                             {order.totalAmount.toLocaleString("vi-VN")}đ
                           </td>
                           <td className="py-5">
-                            <Badge className={`text-sm px-4 ${statusInfo.class}`}>{statusInfo.text}</Badge>
+                            <Badge className={`text-sm px-3 flex items-center gap-1.5 w-fit ${statusInfo.class}`}>
+                              <statusInfo.icon className="w-3.5 h-3.5" />
+                              {statusInfo.text}
+                            </Badge>
                           </td>
-                          <td className="py-2 text-right">
-                            <Button variant="ghost" size="sm" onClick={() => handleViewDetail(order)}>
-                              <Eye className="w-8 h-8" />
+                          <td className=" text-right">
+                            <Button
+                              variant="ghost"
+                              size="lg"
+                              className="text-slate-700 hover:text-slate-900"
+                              onClick={() => handleViewDetail(order)}
+                            >
+                              <Eye size="lg" className="w-8 h-8" />
                             </Button>
                           </td>
                         </tr>
