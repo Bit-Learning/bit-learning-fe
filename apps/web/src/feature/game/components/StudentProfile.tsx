@@ -1,9 +1,16 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight } from "lucide-react";
+import { ChevronLeft, ChevronRight, UserPlus, UserMinus } from "lucide-react";
 import studentService, {
 	type StudentProfile,
 	type PlayHistoryItem,
 } from "../services/studentService";
+import {
+	useFollowStats,
+	useFollowUser,
+	useUnfollowUser,
+} from "@/feature/user/queries/useUser";
+import { useSelector } from "react-redux";
+import type { RootState } from "@/shared/redux/store";
 
 interface StudentProfileViewProps {
 	userId: number;
@@ -21,6 +28,12 @@ export default function StudentProfileView({
 	const [totalItems, setTotalItems] = useState(0);
 	const [loading, setLoading] = useState(true);
 
+	const { data: followStats } = useFollowStats(userId);
+	const followMutation = useFollowUser();
+	const unfollowMutation = useUnfollowUser();
+	const auth = useSelector((state: RootState) => state.auth);
+	const currentUserId = auth.userInfo?.id;
+
 	useEffect(() => {
 		fetchProfile();
 		fetchPlayHistory(currentPage);
@@ -28,7 +41,6 @@ export default function StudentProfileView({
 
 	const fetchProfile = async () => {
 		try {
-			console.log("Fetching profile for userId:", userId);
 			const data = await studentService.getStudentProfile(userId);
 			setProfile(data);
 		} catch (error) {
@@ -47,6 +59,14 @@ export default function StudentProfileView({
 			console.error("Failed to load play history", error);
 		} finally {
 			setLoading(false);
+		}
+	};
+
+	const handleFollowToggle = () => {
+		if (followStats?.isFollowing) {
+			unfollowMutation.mutate(userId);
+		} else {
+			followMutation.mutate(userId);
 		}
 	};
 
@@ -75,7 +95,32 @@ export default function StudentProfileView({
 							{profile.username.charAt(0).toUpperCase()}
 						</div>
 						<div className="flex-1">
-							<h1 className="text-4xl font-bold mb-2">{profile.username}</h1>
+							<div className="flex items-center gap-4 mb-2">
+								<h1 className="text-4xl font-bold">{profile.username}</h1>
+								{currentUserId !== userId && (
+									<button
+										onClick={handleFollowToggle}
+										disabled={
+											followMutation.isPending || unfollowMutation.isPending
+										}
+										className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-colors ${
+											followStats?.isFollowing
+												? "bg-gray-700 text-gray-300 hover:bg-red-900 hover:text-red-300"
+												: "bg-blue-600 text-white hover:bg-blue-700"
+										}`}
+									>
+										{followStats?.isFollowing ? (
+											<>
+												<UserMinus className="w-4 h-4" /> Bỏ theo dõi
+											</>
+										) : (
+											<>
+												<UserPlus className="w-4 h-4" /> Theo dõi
+											</>
+										)}
+									</button>
+								)}
+							</div>
 							<p className="text-gray-300 mb-4">{profile.email}</p>
 							<div className="flex gap-6">
 								<div className="bg-black/30 rounded-lg px-6 py-3">
@@ -88,6 +133,22 @@ export default function StudentProfileView({
 									</div>
 									<div className="text-sm text-gray-400">Games Played</div>
 								</div>
+								{followStats && (
+									<>
+										<div className="bg-black/30 rounded-lg px-6 py-3">
+											<div className="text-2xl font-bold">
+												{followStats.followersCount}
+											</div>
+											<div className="text-sm text-gray-400">Followers</div>
+										</div>
+										<div className="bg-black/30 rounded-lg px-6 py-3">
+											<div className="text-2xl font-bold">
+												{followStats.followingCount}
+											</div>
+											<div className="text-sm text-gray-400">Following</div>
+										</div>
+									</>
+								)}
 								<div className="bg-black/30 rounded-lg px-6 py-3">
 									<div className="text-sm font-bold">
 										{new Date(profile.createdAt).toLocaleDateString()}
@@ -104,7 +165,6 @@ export default function StudentProfileView({
 					<h2 className="text-2xl font-bold mb-6">
 						Play History ({totalItems} games)
 					</h2>
-
 					{loading ? (
 						<div className="text-center py-12">
 							<div className="text-gray-500">Loading...</div>
@@ -154,8 +214,6 @@ export default function StudentProfileView({
 									</div>
 								))}
 							</div>
-
-							{/* Pagination */}
 							{totalPages > 1 && (
 								<div className="flex justify-center items-center gap-4 mt-8">
 									<button
@@ -165,11 +223,9 @@ export default function StudentProfileView({
 									>
 										<ChevronLeft className="w-5 h-5" />
 									</button>
-
 									<span className="text-gray-400">
 										Page {currentPage + 1} of {totalPages}
 									</span>
-
 									<button
 										onClick={() =>
 											setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
