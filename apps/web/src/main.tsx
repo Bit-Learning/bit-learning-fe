@@ -3,7 +3,6 @@ import { Toaster } from "@/shared/components/Sonner";
 import "@/shared/i18n/i18n";
 import "@workspace/ui/globals.css";
 import ReactDOM from "react-dom/client";
-import "./instrument";
 import { routeTree } from "./routeTree.gen";
 import { SearchProvider } from "./shared/context/search-context";
 
