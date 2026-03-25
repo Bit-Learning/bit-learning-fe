@@ -44,13 +44,14 @@ interface CodeEditorProps {
   isSubmitting: boolean;
   isRunning: boolean;
   isDebugging: boolean;
-  onLanguageChange: (language: Language) => void;
-  onCodeChange: (code: string) => void;
-  onSubmit: () => void;
   debugLines: string;
   debugVars: string;
+  onLanguageChange: (language: Language) => void;
+  onCodeChange: (code: string) => void;
+  onFilesChange: (files: EditorFile[], activeFileId: string) => void;
   onDebugLinesChange: (v: string) => void;
   onDebugVarsChange: (v: string) => void;
+  onSubmit: () => void;
   onRun: () => void;
   onDebug: () => void;
   onReset: () => void;
@@ -67,17 +68,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   isSubmitting,
   isRunning,
   isDebugging,
+  debugLines,
+  debugVars,
   onLanguageChange,
   onCodeChange,
+  onFilesChange,
+  onDebugLinesChange,
+  onDebugVarsChange,
   onSubmit,
   onRun,
   onDebug,
   onReset,
   onCloseResult,
-  debugLines,
-  debugVars,
-  onDebugLinesChange,
-  onDebugVarsChange,
 }) => {
   const [files, setFiles] = useState<EditorFile[]>([
     { id: "1", name: `main${LANGUAGE_EXTENSIONS[language]}`, content: code, language },
@@ -88,6 +90,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [isFormatting, setIsFormatting] = useState(false);
   const [formatMessage, setFormatMessage] = useState<string | null>(null);
   const [bottomTab, setBottomTab] = useState<BottomPanelTab>("submission");
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
@@ -95,13 +98,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
   const activeFile = files.find((f) => f.id === activeFileId)!;
 
+  const notifyFilesChange = useCallback(
+    (next: EditorFile[], nextActiveId: string) => {
+      onFilesChange(next, nextActiveId);
+    },
+    [onFilesChange],
+  );
+
   const handleCodeChange = useCallback(
     (newCode: string) => {
       isInternalChange.current = true;
-      setFiles((prev) => prev.map((f) => (f.id === activeFileId ? { ...f, content: newCode } : f)));
+      setFiles((prev) => {
+        const next = prev.map((f) => (f.id === activeFileId ? { ...f, content: newCode } : f));
+        notifyFilesChange(next, activeFileId);
+        return next;
+      });
       onCodeChange(newCode);
     },
-    [activeFileId, onCodeChange],
+    [activeFileId, onCodeChange, notifyFilesChange],
   );
 
   useEffect(() => {
@@ -113,13 +127,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [code]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    setFiles((prev) =>
-      prev.map((f) => {
+    setFiles((prev) => {
+      const next = prev.map((f) => {
         if (f.id !== activeFileId) return f;
         const newName = f.name.replace(/\.(cpp|java|py|js)$/, LANGUAGE_EXTENSIONS[language]);
         return { ...f, language, name: newName };
-      }),
-    );
+      });
+      notifyFilesChange(next, activeFileId);
+      return next;
+    });
   }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -127,21 +143,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     const highlight = highlightRef.current;
     const lineNumbers = lineNumbersRef.current;
     if (!textarea || !highlight) return;
-
     const handleScroll = () => {
       highlight.scrollTop = textarea.scrollTop;
       highlight.scrollLeft = textarea.scrollLeft;
       if (lineNumbers) lineNumbers.scrollTop = textarea.scrollTop;
     };
-
     textarea.addEventListener("scroll", handleScroll, { passive: true });
     return () => textarea.removeEventListener("scroll", handleScroll);
   }, []);
 
   useEffect(() => {
     if (activeFile?.language === Language.PYTHON) {
-      const errors = validatePythonIndentation(activeFile.content);
-      setFormatErrors(errors);
+      setFormatErrors(validatePythonIndentation(activeFile.content));
     } else {
       setFormatErrors([]);
     }
@@ -150,11 +163,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   useEffect(() => {
     if (submissionResult) setBottomTab("submission");
   }, [submissionResult]);
-
   useEffect(() => {
     if (runResult) setBottomTab("run");
   }, [runResult]);
-
   useEffect(() => {
     if (debugResult) setBottomTab("debug");
   }, [debugResult]);
@@ -186,41 +197,34 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
       if (e.key === "Tab") {
         e.preventDefault();
-
         if (start !== end) {
           const lineStart = value.lastIndexOf("\n", start - 1) + 1;
           const lineEnd = value.indexOf("\n", end) === -1 ? value.length : value.indexOf("\n", end);
           const selectedLines = value.slice(lineStart, lineEnd).split("\n");
-
           const processed = e.shiftKey
             ? selectedLines.map((l) =>
                 l.startsWith(indent) ? l.slice(indent.length) : l.startsWith("\t") ? l.slice(1) : l,
               )
             : selectedLines.map((l) => indent + l);
-
-          const newCode = value.slice(0, lineStart) + processed.join("\n") + value.slice(lineEnd);
-          handleCodeChange(newCode);
+          handleCodeChange(value.slice(0, lineStart) + processed.join("\n") + value.slice(lineEnd));
           setTimeout(() => {
             textarea.selectionStart = lineStart;
             textarea.selectionEnd = lineStart + processed.join("\n").length;
           }, 0);
           return;
         }
-
         if (e.shiftKey) {
           const lineStart = value.lastIndexOf("\n", start - 1) + 1;
           const before = value.slice(lineStart, start);
           const remove = before.endsWith(indent) ? indent.length : before.endsWith("\t") ? 1 : 0;
           if (remove) {
-            const newCode = value.slice(0, start - remove) + value.slice(start);
-            handleCodeChange(newCode);
+            handleCodeChange(value.slice(0, start - remove) + value.slice(start));
             setTimeout(() => {
               textarea.selectionStart = textarea.selectionEnd = start - remove;
             }, 0);
           }
         } else {
-          const newCode = value.slice(0, start) + indent + value.slice(end);
-          handleCodeChange(newCode);
+          handleCodeChange(value.slice(0, start) + indent + value.slice(end));
           setTimeout(() => {
             textarea.selectionStart = textarea.selectionEnd = start + indent.length;
           }, 0);
@@ -234,9 +238,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         const currentLine = value.slice(lineStart, start);
         const currentIndent = currentLine.match(/^(\s+)/)?.[1] ?? "";
         const extra = currentLine.trimEnd().endsWith(":") || currentLine.trimEnd().endsWith("{") ? indent : "";
-
-        const newCode = value.slice(0, start) + "\n" + currentIndent + extra + value.slice(end);
-        handleCodeChange(newCode);
+        handleCodeChange(value.slice(0, start) + "\n" + currentIndent + extra + value.slice(end));
         setTimeout(() => {
           textarea.selectionStart = textarea.selectionEnd = start + 1 + currentIndent.length + extra.length;
         }, 0);
@@ -258,19 +260,37 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       content: "",
       language: activeFile.language,
     };
-    setFiles((prev) => [...prev, newFile]);
+    setFiles((prev) => {
+      const next = [...prev, newFile];
+      notifyFilesChange(next, newFile.id);
+      return next;
+    });
     setActiveFileId(newFile.id);
-  }, [files.length, activeFile?.language]);
+  }, [files.length, activeFile?.language, notifyFilesChange]);
 
   const handleDeleteFile = useCallback(
     (id: string) => {
       if (files.length === 1) return;
-      setFiles((prev) => prev.filter((f) => f.id !== id));
-      if (activeFileId === id) {
-        setActiveFileId(files[0]?.id === id ? files[1]?.id! : files[0]?.id!);
-      }
+      const newActiveId = activeFileId === id ? (files[0]?.id === id ? files[1]?.id! : files[0]?.id!) : activeFileId;
+      setFiles((prev) => {
+        const next = prev.filter((f) => f.id !== id);
+        notifyFilesChange(next, newActiveId);
+        return next;
+      });
+      if (activeFileId === id) setActiveFileId(newActiveId);
     },
-    [files, activeFileId],
+    [files, activeFileId, notifyFilesChange],
+  );
+
+  const handleRenameFile = useCallback(
+    (id: string, newName: string) => {
+      setFiles((prev) => {
+        const next = prev.map((f) => (f.id === id ? { ...f, name: newName } : f));
+        notifyFilesChange(next, activeFileId);
+        return next;
+      });
+    },
+    [activeFileId, notifyFilesChange],
   );
 
   const handleCopyCode = useCallback(() => {
@@ -292,9 +312,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const passedCount =
     submissionResult?.testcaseResults?.filter((r) => r.status === SubmissionStatus.ACCEPTED).length ?? 0;
   const totalCount = submissionResult?.testcaseResults?.length ?? 0;
-
   const hasBottomPanel = !!(submissionResult || runResult || debugResult);
-
   const parsedDebugLines = debugLines
     .split(",")
     .map((s) => parseInt(s.trim(), 10))
@@ -318,6 +336,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               isActive={file.id === activeFileId}
               onClick={() => setActiveFileId(file.id)}
               onDelete={() => handleDeleteFile(file.id)}
+              onRename={(newName) => handleRenameFile(file.id, newName)}
               canDelete={files.length > 1}
             />
           ))}
@@ -389,7 +408,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </button>
           </div>
         )}
-
         <div
           ref={lineNumbersRef}
           className="shrink-0 w-12 bg-gray-900 border-r border-gray-700 pt-4 pb-4 overflow-hidden select-none"
@@ -400,7 +418,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             ))}
           </div>
         </div>
-
         <div className="relative flex-1 h-full bg-gray-900 font-mono text-sm overflow-hidden">
           <pre
             ref={highlightRef}
@@ -511,7 +528,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <>
                 <div className="flex items-center gap-2 mb-3">
                   <SubmissionStatusBadge status={runResult.overallStatus} showIcon />
-                  {runResult.compileError && <span className="text-red-400 text-xs">Compile error</span>}
                 </div>
                 {runResult.compileError && (
                   <div className="p-3 bg-red-900/20 border border-red-800 rounded text-red-400 mb-3">
@@ -536,12 +552,14 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                           <div className="text-gray-500 mb-0.5">Input</div>
                           <pre className="bg-gray-900 p-1.5 rounded text-gray-300 whitespace-pre-wrap">{tc.input}</pre>
                         </div>
-                        <div>
-                          <div className="text-gray-500 mb-0.5">Expected</div>
-                          <pre className="bg-gray-900 p-1.5 rounded text-gray-300 whitespace-pre-wrap">
-                            {tc.expectedOutput}
-                          </pre>
-                        </div>
+                        {tc.expectedOutput && (
+                          <div>
+                            <div className="text-gray-500 mb-0.5">Expected</div>
+                            <pre className="bg-gray-900 p-1.5 rounded text-gray-300 whitespace-pre-wrap">
+                              {tc.expectedOutput}
+                            </pre>
+                          </div>
+                        )}
                       </div>
                       {!isPass && (
                         <div>
@@ -561,7 +579,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <>
                 <div className="flex items-center gap-2 mb-3">
                   <SubmissionStatusBadge status={debugResult.status} showIcon />
-                  {debugResult.output && <span className="text-gray-400">Output: {debugResult.output}</span>}
+                  {debugResult.output && <span className="text-gray-400">stdout: {debugResult.output}</span>}
                 </div>
                 {debugResult.error && (
                   <div className="p-3 bg-red-900/20 border border-red-800 rounded text-red-400 mb-3">
@@ -680,29 +698,27 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         </div>
       </div>
 
-      {!hasBottomPanel && (
-        <div className="px-6 py-2 bg-gray-900 border-t border-gray-800 flex items-center gap-3">
-          <div className="flex items-center gap-2">
-            <Bug className="w-3.5 h-3.5 text-yellow-500" />
-            <span className="text-xs text-gray-400">Debug lines:</span>
-            <input
-              value={debugLines}
-              onChange={(e) => onDebugLinesChange(e.target.value)}
-              placeholder="e.g. 3,7,12"
-              className="bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-200 w-28 focus:outline-none focus:border-yellow-600"
-            />
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-xs text-gray-400">Watch vars:</span>
-            <input
-              value={debugVars}
-              onChange={(e) => onDebugVarsChange(e.target.value)}
-              placeholder="e.g. x,y,result"
-              className="bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-200 w-32 focus:outline-none focus:border-yellow-600"
-            />
-          </div>
+      <div className="px-6 py-2 bg-gray-900 border-t border-gray-800 flex items-center gap-4 shrink-0">
+        <div className="flex items-center gap-2">
+          <Bug className="w-3.5 h-3.5 text-yellow-500" />
+          <span className="text-xs text-gray-400">Debug lines:</span>
+          <input
+            value={debugLines}
+            onChange={(e) => onDebugLinesChange(e.target.value)}
+            placeholder="e.g. 3,7,12"
+            className="bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-200 w-28 focus:outline-none focus:border-yellow-600"
+          />
         </div>
-      )}
+        <div className="flex items-center gap-2">
+          <span className="text-xs text-gray-400">Watch vars:</span>
+          <input
+            value={debugVars}
+            onChange={(e) => onDebugVarsChange(e.target.value)}
+            placeholder="e.g. x,y,result"
+            className="bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-200 w-32 focus:outline-none focus:border-yellow-600"
+          />
+        </div>
+      </div>
     </>
   );
 };

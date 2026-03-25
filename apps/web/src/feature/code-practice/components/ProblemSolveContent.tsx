@@ -14,8 +14,16 @@ import {
 } from "../queries/useCoding";
 import { DifficultyBadge } from "./DifficultyBadge";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
-import { Language, RunCodeResponse, DebugResponse, DebugRequest } from "../types/coding.type";
+import {
+  Language,
+  RunCodeResponse,
+  DebugResponse,
+  SubmitCodeRequest,
+  RunCodeRequest,
+  DebugRequest,
+} from "../types/coding.type";
 import { CodeEditor } from "./CodeEditor";
+import { EditorFile } from "./FileTab";
 
 const ProblemSolveContent: React.FC = () => {
   const { id: problemId } = useParams({ strict: false });
@@ -29,6 +37,9 @@ const ProblemSolveContent: React.FC = () => {
   const [debugResult, setDebugResult] = useState<DebugResponse | null>(null);
   const [debugLines, setDebugLines] = useState<string>("1");
   const [debugVars, setDebugVars] = useState<string>("");
+
+  const [editorFiles, setEditorFiles] = useState<EditorFile[]>([]);
+  const [activeFileId, setActiveFileId] = useState<string>("1");
 
   const { data: problem, isLoading: problemLoading } = useProblemDetail(problemId || "", language, {
     enabled: !!problemId,
@@ -53,14 +64,22 @@ const ProblemSolveContent: React.FC = () => {
     }
   }, [problem?.codeTemplate, language]);
 
+  const isMultiFile = editorFiles.length > 1;
+
+  const getActiveFileName = () => {
+    return editorFiles.find((f) => f.id === activeFileId)?.name ?? "main";
+  };
+
+  const toCodeFiles = () => editorFiles.map((f) => ({ name: f.name, content: f.content }));
+
   const handleSubmit = async (): Promise<void> => {
     if (!problem) return;
     try {
-      const response = await submitCode.mutateAsync({
-        problemId: problem.id,
-        language,
-        sourceCode: code,
-      });
+      const request: SubmitCodeRequest = isMultiFile
+        ? { problemId: problem.id, language, files: toCodeFiles(), entryFile: getActiveFileName() }
+        : { problemId: problem.id, language, sourceCode: code };
+
+      const response = await submitCode.mutateAsync(request);
       if (response.data.data?.submissionId) {
         setSubmissionId(response.data.data.submissionId);
         setRunResult(null);
@@ -74,11 +93,11 @@ const ProblemSolveContent: React.FC = () => {
   const handleRun = async (): Promise<void> => {
     if (!problem) return;
     try {
-      const response = await runCode.mutateAsync({
-        problemId: problem.id,
-        language,
-        sourceCode: code,
-      });
+      const request: RunCodeRequest = isMultiFile
+        ? { language, files: toCodeFiles(), entryFile: getActiveFileName() }
+        : { problemId: problem.id, language, sourceCode: code };
+
+      const response = await runCode.mutateAsync(request);
       if (response.data.data) {
         setRunResult(response.data.data);
         setSubmissionId(null);
@@ -99,14 +118,23 @@ const ProblemSolveContent: React.FC = () => {
       .map((s) => s.trim())
       .filter(Boolean);
 
-    if (!problem || parsedLines.length === 0) return;
+    if (parsedLines.length === 0) return;
     try {
-      const request: DebugRequest = {
-        code,
-        language,
-        lines: parsedLines,
-        variables: parsedVars.length > 0 ? parsedVars : undefined,
-      };
+      const request: DebugRequest = isMultiFile
+        ? {
+            language,
+            lines: parsedLines,
+            variables: parsedVars.length > 0 ? parsedVars : undefined,
+            files: toCodeFiles(),
+            entryFile: getActiveFileName(),
+          }
+        : {
+            language,
+            code,
+            lines: parsedLines,
+            variables: parsedVars.length > 0 ? parsedVars : undefined,
+          };
+
       const response = await debugCode.mutateAsync(request);
       if (response.data.data) {
         setDebugResult(response.data.data);
@@ -130,8 +158,12 @@ const ProblemSolveContent: React.FC = () => {
     setDebugResult(null);
   };
 
-  const handleBack = (): void => {
-    navigate({ to: "/problem" });
+  const handleFilesChange = (files: EditorFile[], newActiveFileId: string) => {
+    setEditorFiles(files);
+    setActiveFileId(newActiveFileId);
+    if (files.length === 1) {
+      setCode(files[0]?.content!);
+    }
   };
 
   if (problemLoading) {
@@ -148,9 +180,7 @@ const ProblemSolveContent: React.FC = () => {
   if (!problem) {
     return (
       <div className="h-screen flex items-center justify-center bg-gray-50">
-        <div className="text-center">
-          <p className="text-gray-600">Không tìm thấy bài tập</p>
-        </div>
+        <p className="text-gray-600">Không tìm thấy bài tập</p>
       </div>
     );
   }
@@ -162,14 +192,15 @@ const ProblemSolveContent: React.FC = () => {
     <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
       <main className="flex-1 flex overflow-hidden mx-auto w-full">
         <section className="w-1/2 flex flex-col border-r border-gray-200 bg-white">
-          <div className="p-4 border-b border-gray-200 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <button onClick={handleBack} className="p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors">
-                <ChevronLeft className="w-5 h-5" />
-              </button>
-              <h1 className="text-xl font-bold text-gray-900">{problem.title}</h1>
-              <DifficultyBadge difficulty={problem.difficulty} />
-            </div>
+          <div className="p-4 border-b border-gray-200 flex items-center gap-3">
+            <button
+              onClick={() => navigate({ to: "/problem" })}
+              className="p-2 cursor-pointer rounded hover:bg-gray-100 transition-colors"
+            >
+              <ChevronLeft className="w-5 h-5" />
+            </button>
+            <h1 className="text-xl font-bold text-gray-900">{problem.title}</h1>
+            <DifficultyBadge difficulty={problem.difficulty} />
           </div>
 
           <div className="h-10 border-b border-gray-200 flex items-center px-4 gap-2">
@@ -297,34 +328,32 @@ const ProblemSolveContent: React.FC = () => {
         </section>
 
         <div className="w-1.5 bg-gray-200 hover:bg-blue-200 cursor-col-resize transition-colors flex items-center justify-center">
-          <div className="h-8 w-0.5 bg-gray-300 rounded-full"></div>
+          <div className="h-8 w-0.5 bg-gray-300 rounded-full" />
         </div>
 
         <section className="flex-1 flex flex-col bg-gray-900 overflow-hidden">
           <CodeEditor
             language={language}
             code={code}
-            problem={{
-              timeLimitMs: problem.timeLimitMs,
-              memoryLimitMb: problem.memoryLimitMb,
-            }}
+            problem={{ timeLimitMs: problem.timeLimitMs, memoryLimitMb: problem.memoryLimitMb }}
             submissionResult={submissionResult ?? null}
             runResult={runResult}
             debugResult={debugResult}
             isSubmitting={submitCode.isPending}
             isRunning={runCode.isPending}
             isDebugging={debugCode.isPending}
+            debugLines={debugLines}
+            debugVars={debugVars}
             onLanguageChange={setLanguage}
             onCodeChange={setCode}
+            onFilesChange={handleFilesChange}
+            onDebugLinesChange={setDebugLines}
+            onDebugVarsChange={setDebugVars}
             onSubmit={handleSubmit}
             onRun={handleRun}
             onDebug={handleDebug}
             onReset={handleReset}
             onCloseResult={handleCloseResult}
-            debugLines={debugLines}
-            debugVars={debugVars}
-            onDebugLinesChange={setDebugLines}
-            onDebugVarsChange={setDebugVars}
           />
         </section>
       </main>
