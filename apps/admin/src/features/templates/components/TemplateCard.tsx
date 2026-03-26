@@ -37,7 +37,7 @@ interface TemplateCardProps {
 export const TemplateCard: React.FC<TemplateCardProps> = ({ template, onClick, onEdit, onDownload, onDelete }) => {
   return (
     <Card
-      className="group cursor-pointer hover:shadow-xl hover:shadow-slate-200/50 transition-all overflow-hidden border-slate-200"
+      className="group cursor-pointer hover:shadow-xl hover:shadow-slate-200/50 transition-all overflow-hidden border-slate-200 p-0"
       onClick={onClick}
     >
       <div className="relative aspect-video bg-slate-100 overflow-hidden">
