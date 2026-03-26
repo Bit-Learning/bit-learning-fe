@@ -19,7 +19,7 @@ import {
 } from "@workspace/ui/components/Avatar";
 import { Button } from "@workspace/ui/components/Button";
 import {
-	useViewUserProfile,
+	useViewUserProfileByUsername,
 	useFollowStats,
 	useFollowUser,
 	useUnfollowUser,
@@ -33,17 +33,21 @@ import type { StudentProfile } from "@/feature/game/services/studentService";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 interface PublicProfileContentProps {
-	userId: number;
+	username: string;
 }
 
-export const PublicProfileContent = ({ userId }: PublicProfileContentProps) => {
-	const { data: userProfile, isLoading } = useViewUserProfile(userId);
-	const { data: followStats } = useFollowStats(userId);
+export const PublicProfileContent = ({
+	username,
+}: PublicProfileContentProps) => {
+	const { data: userProfile, isLoading } =
+		useViewUserProfileByUsername(username);
+	const userId = userProfile?.id;
+	const { data: followStats } = useFollowStats(userId ?? 0);
 	const followMutation = useFollowUser();
 	const unfollowMutation = useUnfollowUser();
 	const auth = useSelector((state: RootState) => state.auth);
 	const currentUserId = auth.userInfo?.id;
-	const isOwnProfile = currentUserId === userId;
+	const isOwnProfile = userId != null && currentUserId === userId;
 
 	// Game metadata
 	const [gameProfile, setGameProfile] = useState<StudentProfile | null>(null);
@@ -54,6 +58,7 @@ export const PublicProfileContent = ({ userId }: PublicProfileContentProps) => {
 	const [historyLoading, setHistoryLoading] = useState(false);
 
 	useEffect(() => {
+		if (!userId) return;
 		studentService
 			.getStudentProfile(userId)
 			.then(setGameProfile)
@@ -61,6 +66,7 @@ export const PublicProfileContent = ({ userId }: PublicProfileContentProps) => {
 	}, [userId]);
 
 	useEffect(() => {
+		if (!userId) return;
 		setHistoryLoading(true);
 		studentService
 			.getStudentPlayHistory(userId, historyPage, 8)
@@ -74,6 +80,7 @@ export const PublicProfileContent = ({ userId }: PublicProfileContentProps) => {
 	}, [userId, historyPage]);
 
 	const handleFollowToggle = () => {
+		if (!userId) return;
 		if (followStats?.isFollowing) {
 			unfollowMutation.mutate(userId);
 		} else {
@@ -223,7 +230,7 @@ export const PublicProfileContent = ({ userId }: PublicProfileContentProps) => {
 				</div>
 
 				{historyLoading ? (
-					<div className="text-center py-8 text-slate-400">Đang tải...</div>
+					<Loader />
 				) : playHistory.length > 0 ? (
 					<>
 						<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">

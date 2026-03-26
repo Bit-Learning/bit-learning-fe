@@ -22,6 +22,7 @@ import {
 	useNotifications,
 } from "@/feature/notification/queries/use-notification-queries";
 import { NotificationMessage } from "@/feature/notification/channel";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 export const NotificationsContent = () => {
 	const [page, setPage] = useState(0);
@@ -141,7 +142,7 @@ export const NotificationsContent = () => {
 
 				<div className="p-8 space-y-4">
 					{isLoading ? (
-						<div className="text-center py-12 text-slate-500">Đang tải...</div>
+						<Loader />
 					) : notifications.length === 0 ? (
 						<div className="text-center py-12 text-slate-500">
 							Không có thông báo nào

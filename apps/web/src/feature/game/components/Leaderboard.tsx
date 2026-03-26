@@ -34,7 +34,24 @@ const AVATAR_COLORS = [
 	"#14B8A6",
 ];
 
-function Avatar({ userId, username }: { userId: number; username: string }) {
+function Avatar({
+	userId,
+	username,
+	avatar,
+}: {
+	userId: number;
+	username: string;
+	avatar?: string | null;
+}) {
+	if (avatar) {
+		return (
+			<img
+				src={avatar}
+				alt={username}
+				className="w-10 h-10 rounded-full object-cover flex-shrink-0"
+			/>
+		);
+	}
 	const bg = AVATAR_COLORS[userId % AVATAR_COLORS.length];
 	const initials = username.slice(0, 2).toUpperCase();
 	return (
@@ -167,6 +184,22 @@ function PodiumCard({
 					#{rank}
 				</span>
 				<span className="text-4xl block mb-1">{s.medal}</span>
+				{entry.avatar ? (
+					<img
+						src={entry.avatar}
+						alt={entry.username}
+						className="w-12 h-12 rounded-full object-cover mx-auto mb-1"
+					/>
+				) : (
+					<div
+						className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-black text-white mx-auto mb-1"
+						style={{
+							background: AVATAR_COLORS[entry.userId % AVATAR_COLORS.length],
+						}}
+					>
+						{entry.username.slice(0, 2).toUpperCase()}
+					</div>
+				)}
 				<div className="text-sm font-black text-gray-800 mb-0.5 truncate">
 					{entry.username}
 				</div>
@@ -207,22 +240,28 @@ export default function Leaderboard() {
 		}
 	};
 
-	const handleViewProfile = (userId: number) => {
-		navigate({ to: "/profile/$userId", params: { userId: String(userId) } });
+	const handleViewProfile = (username: string) => {
+		navigate({
+			to: "/profile/$username",
+			params: { username },
+		});
 	};
 
 	if (loading) return <Loader />;
 
 	const maxScore = leaderboard?.content[0]?.totalScore ?? 1;
 
-	// On page 0: podium = top 3, table = rest (index 3+)
+	// On page 0: podium = top 3 (if 3+), table = rest
+	// If fewer than 3 on page 0: no podium, show all in table
 	// On other pages: no podium, table = all entries
-	const podiumEntries =
-		currentPage === 0 ? (leaderboard?.content.slice(0, 3) ?? []) : [];
-	const tableEntries =
-		currentPage === 0
-			? (leaderboard?.content.slice(3) ?? [])
-			: (leaderboard?.content ?? []);
+	const hasPodium =
+		currentPage === 0 && (leaderboard?.content.length ?? 0) >= 3;
+	const podiumEntries = hasPodium
+		? (leaderboard?.content.slice(0, 3) ?? [])
+		: [];
+	const tableEntries = hasPodium
+		? (leaderboard?.content.slice(3) ?? [])
+		: (leaderboard?.content ?? []);
 
 	return (
 		<div className="max-w-3xl mx-auto px-4 py-8">
@@ -245,8 +284,8 @@ export default function Leaderboard() {
 				</p>
 			</div>
 
-			{/* Podium — only on page 0 */}
-			{podiumEntries.length === 3 && (
+			{/* Podium — only when 3+ entries on page 0 */}
+			{hasPodium && (
 				<div className="flex items-end justify-center gap-3 mb-10">
 					{[
 						{ entry: podiumEntries[1]!, rank: 2 as const },
@@ -257,7 +296,7 @@ export default function Leaderboard() {
 							key={entry.userId}
 							entry={entry}
 							rank={rank}
-							onClick={() => handleViewProfile(entry.userId)}
+							onClick={() => handleViewProfile(entry.username)}
 						/>
 					))}
 				</div>
@@ -267,13 +306,13 @@ export default function Leaderboard() {
 			<div className="flex flex-col gap-2">
 				{tableEntries.map((entry, index) => {
 					const globalRank =
-						currentPage * pageSize + (currentPage === 0 ? 3 : 0) + index;
+						currentPage * pageSize + (hasPodium ? 3 : 0) + index;
 					return (
 						<div
 							key={entry.userId}
 							className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 cursor-pointer transition-all hover:translate-x-1 hover:bg-white hover:shadow-md"
 							style={{ animationDelay: `${index * 0.04}s` }}
-							onClick={() => handleViewProfile(entry.userId)}
+							onClick={() => handleViewProfile(entry.username)}
 						>
 							{/* Rank */}
 							<span className="text-base font-black text-gray-400 min-w-[36px] text-center">
@@ -281,7 +320,11 @@ export default function Leaderboard() {
 							</span>
 
 							{/* Avatar */}
-							<Avatar userId={entry.userId} username={entry.username} />
+							<Avatar
+								userId={entry.userId}
+								username={entry.username}
+								avatar={entry.avatar}
+							/>
 
 							{/* Info */}
 							<div className="flex-1 min-w-0">
@@ -306,7 +349,7 @@ export default function Leaderboard() {
 								onClick={(e) => e.stopPropagation()}
 							>
 								<button
-									onClick={() => handleViewProfile(entry.userId)}
+									onClick={() => handleViewProfile(entry.username)}
 									className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
 								>
 									<Eye className="w-3.5 h-3.5" />

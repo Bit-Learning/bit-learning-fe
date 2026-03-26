@@ -4,17 +4,20 @@ import { ProfileContent } from "../components/ProfileContent";
 import { PublicProfileContent } from "../components/PublicProfileContent";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
+import { useViewUserProfileByUsername } from "../queries/useUser";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 interface UserProfilePageProps {
-	viewUserId?: number;
+	viewUsername?: string;
 }
 
 export const UserProfilePage: React.FC<UserProfilePageProps> = ({
-	viewUserId,
+	viewUsername,
 }) => {
 	const auth = useSelector((state: RootState) => state.auth);
-	const currentUserId = auth.userInfo?.id;
-	const isViewingOther = viewUserId != null && viewUserId !== currentUserId;
+	const currentUsername = auth.userInfo?.username;
+	const isViewingOther =
+		viewUsername != null && viewUsername !== currentUsername;
 
 	return (
 		<>
@@ -32,7 +35,7 @@ export const UserProfilePage: React.FC<UserProfilePageProps> = ({
 			/>
 			<UserProfileLayout>
 				{isViewingOther ? (
-					<PublicProfileContent userId={viewUserId} />
+					<PublicProfileContent username={viewUsername} />
 				) : (
 					<ProfileContent />
 				)}

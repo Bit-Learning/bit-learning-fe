@@ -50,6 +50,7 @@ export interface LikeResponse {
 export interface LeaderboardEntry {
 	userId: number;
 	username: string;
+	avatar: string | null;
 	totalScore: number;
 	gamesPlayed: number;
 }

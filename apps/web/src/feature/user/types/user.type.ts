@@ -68,6 +68,17 @@ export type TFollowStats = {
 	isFollowing: boolean;
 };
 
+export type TFollowUser = {
+	id: number;
+	userId: number;
+	username: string;
+	firstName: string;
+	lastName: string;
+	avatar: string;
+	bio?: string;
+	followedAt: string;
+};
+
 export type TInstructor = {
 	id: number;
 	username: string;

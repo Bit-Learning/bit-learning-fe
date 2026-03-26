@@ -158,7 +158,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 			<aside className="w-full lg:w-70 shrink-0 lg:sticky lg:top-28">
 				<Card className="overflow-hidden">
 					<div className="p-3 border-b border-slate-50 flex items-center gap-3">
-						<Avatar className="size-12">
+						<Avatar className="size-16">
 							<AvatarImage
 								src={
 									userInfo?.avatar ||
@@ -176,7 +176,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 									(userInfo?.lastName || "") || "Người dùng"}
 							</h3>
 							<p className="text-xs text-slate-500 mt-1">
-								Học viên tại bit learning
+								Học viên tại Bit Learning
 							</p>
 						</div>
 					</div>

@@ -13,6 +13,7 @@ import {
 	ChangePassword,
 	GetUserProfile,
 	ViewUserProfile,
+	ViewUserProfileByUsername,
 	UpdateUserProfile,
 	UploadAvatar,
 	UploadCoverImage,
@@ -21,6 +22,8 @@ import {
 	GetFollowStats,
 	FollowUser,
 	UnfollowUser,
+	GetFollowers,
+	GetFollowing,
 } from "../api/user.api";
 import type {
 	TChangePasswordRequest,
@@ -30,8 +33,12 @@ import type {
 export const userQueryKeys = {
 	all: ["profile"] as const,
 	viewProfile: (userId: number) => ["viewProfile", userId] as const,
+	viewProfileByUsername: (username: string) =>
+		["viewProfile", "username", username] as const,
 	instructors: (page: number) => ["instructors", page] as const,
 	followStats: (userId: number) => ["followStats", userId] as const,
+	followers: (userId: number) => ["followers", userId] as const,
+	following: (userId: number) => ["following", userId] as const,
 };
 
 export function useUserProfile() {
@@ -77,6 +84,17 @@ export function useViewUserProfile(userId: number) {
 			return response.data.data;
 		},
 		enabled: !!userId,
+	});
+}
+
+export function useViewUserProfileByUsername(username: string) {
+	return useQuery({
+		queryKey: userQueryKeys.viewProfileByUsername(username),
+		queryFn: async () => {
+			const response = await ViewUserProfileByUsername(username);
+			return response.data.data;
+		},
+		enabled: !!username,
 	});
 }
 
@@ -292,6 +310,28 @@ export function useFollowStats(userId: number) {
 	});
 }
 
+export function useFollowers(userId: number) {
+	return useQuery({
+		queryKey: userQueryKeys.followers(userId),
+		queryFn: async () => {
+			const response = await GetFollowers(userId);
+			return response.data.content;
+		},
+		enabled: !!userId,
+	});
+}
+
+export function useFollowing(userId: number) {
+	return useQuery({
+		queryKey: userQueryKeys.following(userId),
+		queryFn: async () => {
+			const response = await GetFollowing(userId);
+			return response.data.content;
+		},
+		enabled: !!userId,
+	});
+}
+
 export function useFollowUser() {
 	const queryClient = useQueryClient();
 
@@ -300,19 +340,47 @@ export function useFollowUser() {
 			const response = await FollowUser(userId);
 			return response.data;
 		},
-		onSuccess: (_data, userId) => {
-			queryClient.invalidateQueries({
+		onMutate: async (userId) => {
+			await queryClient.cancelQueries({
 				queryKey: userQueryKeys.followStats(userId),
 			});
-			toast.success({
-				title: "Đã theo dõi",
-				description: "Bạn đã theo dõi người dùng này.",
-			});
+			const previous = queryClient.getQueryData(
+				userQueryKeys.followStats(userId),
+			);
+			queryClient.setQueryData(userQueryKeys.followStats(userId), (old: any) =>
+				old
+					? {
+							...old,
+							isFollowing: true,
+							followersCount: (old.followersCount ?? 0) + 1,
+						}
+					: old,
+			);
+			return { previous, userId };
 		},
-		onError: (error: any) => {
+		onError: (error: any, userId, context) => {
+			if (context?.previous !== undefined) {
+				queryClient.setQueryData(
+					userQueryKeys.followStats(userId),
+					context.previous,
+				);
+			}
 			toast.error({
 				title: "Lỗi",
 				description: error?.response?.data?.message || "Theo dõi thất bại",
+			});
+		},
+		onSettled: (_data, _error, userId) => {
+			setTimeout(() => {
+				queryClient.invalidateQueries({
+					queryKey: userQueryKeys.followStats(userId),
+				});
+			}, 1000);
+		},
+		onSuccess: () => {
+			toast.success({
+				title: "Đã theo dõi",
+				description: "Bạn đã theo dõi người dùng này.",
 			});
 		},
 	});
@@ -326,19 +394,47 @@ export function useUnfollowUser() {
 			const response = await UnfollowUser(userId);
 			return response.data;
 		},
-		onSuccess: (_data, userId) => {
-			queryClient.invalidateQueries({
+		onMutate: async (userId) => {
+			await queryClient.cancelQueries({
 				queryKey: userQueryKeys.followStats(userId),
 			});
-			toast.success({
-				title: "Đã bỏ theo dõi",
-				description: "Bạn đã bỏ theo dõi người dùng này.",
-			});
+			const previous = queryClient.getQueryData(
+				userQueryKeys.followStats(userId),
+			);
+			queryClient.setQueryData(userQueryKeys.followStats(userId), (old: any) =>
+				old
+					? {
+							...old,
+							isFollowing: false,
+							followersCount: Math.max((old.followersCount ?? 1) - 1, 0),
+						}
+					: old,
+			);
+			return { previous, userId };
 		},
-		onError: (error: any) => {
+		onError: (error: any, userId, context) => {
+			if (context?.previous !== undefined) {
+				queryClient.setQueryData(
+					userQueryKeys.followStats(userId),
+					context.previous,
+				);
+			}
 			toast.error({
 				title: "Lỗi",
 				description: error?.response?.data?.message || "Bỏ theo dõi thất bại",
+			});
+		},
+		onSettled: (_data, _error, userId) => {
+			setTimeout(() => {
+				queryClient.invalidateQueries({
+					queryKey: userQueryKeys.followStats(userId),
+				});
+			}, 1000);
+		},
+		onSuccess: () => {
+			toast.success({
+				title: "Đã bỏ theo dõi",
+				description: "Bạn đã bỏ theo dõi người dùng này.",
 			});
 		},
 	});

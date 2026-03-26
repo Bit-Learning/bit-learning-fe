@@ -23,6 +23,12 @@ export function ViewUserProfile(
 	});
 }
 
+export function ViewUserProfileByUsername(
+	username: string,
+): Promise<AxiosResponse<ApiResponse<TUserProfile>, any>> {
+	return api.get(`${endpoints.ACCOUNT}/profile/view/${username}`);
+}
+
 export function UpdateUserProfile(
 	requestBody: TUpdateUserRequest,
 ): Promise<AxiosResponse<ApiResponse<TUserProfile>, any>> {
@@ -98,4 +104,24 @@ export function UnfollowUser(
 	userId: number,
 ): Promise<AxiosResponse<ApiResponse<string>, any>> {
 	return api.post(`${endpoints.ACCOUNT}/${userId}/unfollow`);
+}
+
+export function GetFollowers(
+	userId: number,
+	page = 0,
+	size = 20,
+): Promise<AxiosResponse<any, any>> {
+	return api.get(`${endpoints.ACCOUNT}/${userId}/followers`, {
+		params: { page, size },
+	});
+}
+
+export function GetFollowing(
+	userId: number,
+	page = 0,
+	size = 20,
+): Promise<AxiosResponse<any, any>> {
+	return api.get(`${endpoints.ACCOUNT}/${userId}/following`, {
+		params: { page, size },
+	});
 }
