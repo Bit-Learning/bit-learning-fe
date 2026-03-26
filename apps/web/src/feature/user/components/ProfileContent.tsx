@@ -255,6 +255,7 @@ export const ProfileContent = () => {
 	const handleSave = () => {
 		if (hasSocialErrors()) return;
 		updateProfileMutation.mutate({
+			username: formData.username,
 			firstName: formData.firstName,
 			lastName: formData.lastName,
 			pronouns: formData.pronouns,
@@ -445,7 +446,10 @@ export const ProfileContent = () => {
 										<Input
 											className="pl-9"
 											value={formData.username || ""}
-											disabled
+											onChange={(e) =>
+												handleFieldChange("username", e.target.value)
+											}
+											placeholder="Nhập tên người dùng"
 										/>
 									</div>
 								</div>
