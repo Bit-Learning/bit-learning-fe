@@ -126,7 +126,7 @@ export default function QuestionApprovalTableView() {
               </p>
             </div>
           ) : (
-            <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+            <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
               <table className="w-full">
                 <thead className="bg-slate-50 border-b border-slate-400">
                   <tr>

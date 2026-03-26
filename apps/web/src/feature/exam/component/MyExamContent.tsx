@@ -55,7 +55,7 @@ const MyExamsContent: React.FC = () => {
       <div className="relative mb-6">
         <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
         <input
-          className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-400 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+          className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
           placeholder="Tìm kiếm theo tên đề thi, mã đề hoặc ngôn ngữ..."
           type="text"
           value={search}
@@ -63,7 +63,7 @@ const MyExamsContent: React.FC = () => {
         />
       </div>
 
-      <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+      <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -96,7 +96,7 @@ const MyExamsContent: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-400 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                     <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider">
                       Thông tin đề thi
                     </th>

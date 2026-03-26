@@ -49,7 +49,7 @@ const MyMatricesContent: React.FC = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
             <input
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-400 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
               placeholder="Tìm kiếm ma trận..."
               type="text"
               value={search}

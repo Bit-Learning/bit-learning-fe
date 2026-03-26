@@ -185,7 +185,7 @@ const MyQuestionsContent: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white px-6 py-4 rounded-md border-2 border-slate-400 overflow-hidden">
+        <div className="bg-white px-6 py-4 rounded-md border-2 border-slate-200 overflow-hidden">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
@@ -247,7 +247,7 @@ const MyQuestionsContent: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+            <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-300 bg-gray-50">

@@ -43,8 +43,8 @@ const ChapterGroup: React.FC<GroupProps> = ({
   const { data: lessons } = useLessonsByChapter(group.chapterId || undefined);
 
   return (
-    <div className="border-2 border-gray-400 dark:border-slate-700 rounded-md overflow-hidden">
-      <div className="flex items-center gap-3 px-4 py-3 border-b-2 border-gray-400 bg-slate-50 dark:bg-slate-800/50">
+    <div className="border-2 border-slate-200 dark:border-slate-700 rounded-md overflow-hidden">
+      <div className="flex items-center gap-3 px-4 py-3 border-b-2 border-slate-200 bg-slate-50 dark:bg-slate-800/50">
         <select
           value={group.chapterId}
           onChange={(e) => onUpdateChapter(gIdx, Number(e.target.value))}

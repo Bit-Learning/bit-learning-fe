@@ -97,7 +97,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </Button>
         </div>
 
-        <div className="bg-white px-6 py-4 mb-6 rounded-md border-2 border-slate-400 overflow-hidden">
+        <div className="bg-white px-6 py-4 mb-6 rounded-md border-2 border-slate-200 overflow-hidden">
           <div>
             <div className="flex flex-col md:flex-row gap-4">
               <div className="relative flex-1">
@@ -136,7 +136,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </div>
         </div>
 
-        <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+        <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
           <div className="px-0">
             {isLoading ? (
               <div className="p-4">
@@ -146,7 +146,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
               <>
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-400 dark:border-slate-800">
+                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                       <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider">
                         Tiêu đề
                       </th>

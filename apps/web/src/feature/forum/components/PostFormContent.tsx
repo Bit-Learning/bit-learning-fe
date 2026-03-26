@@ -170,7 +170,7 @@ const PostFormContent: React.FC = () => {
           />
         </div>
       )}
-      <div className="bg-white border-b border-gray-400 sticky top-0 z-30">
+      <div className="bg-white border-b border-slate-200 sticky top-0 z-30">
         <div className="max-w-4xl mx-auto px-4 h-12 flex items-center">
           <button
             className="cursor-pointer flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"

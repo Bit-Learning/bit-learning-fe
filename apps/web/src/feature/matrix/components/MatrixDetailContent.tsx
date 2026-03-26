@@ -96,7 +96,7 @@ const MatrixDetailContent: React.FC = () => {
             <Button
               variant="outline"
               size="lg"
-              className="mb-2 gap-2 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+              className="mb-2 gap-2 border-slate-200 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
               onClick={() => navigate({ to: "/mentor/matrix/my" })}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
