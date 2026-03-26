@@ -8,8 +8,6 @@ import {
   Eye,
   Lightbulb,
   Database,
-  Users,
-  ArrowRight,
   Sparkles,
   AlertCircle,
 } from "lucide-react";
@@ -22,6 +20,10 @@ import { Switch } from "@/components/ui/switch";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { useCreateTemplate } from "../queries/useTemplate";
 import { PdfPreviewModal } from "../components/PdfPreviewModal";
+import * as pdfjsLib from "pdfjs-dist";
+import workerUrl from "pdfjs-dist/build/pdf.worker.min.mjs?url";
+
+pdfjsLib.GlobalWorkerOptions.workerSrc = workerUrl;
 
 interface ValidationErrors {
   name?: string;
@@ -37,6 +39,7 @@ export const TemplateCreatePage: React.FC = () => {
   const [isActive, setIsActive] = useState(true);
   const [pdfFile, setPdfFile] = useState<File | null>(null);
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
+  const [pdfFirstPage, setPdfFirstPage] = useState<string | null>(null);
   const [errors, setErrors] = useState<ValidationErrors>({});
   const [touched, setTouched] = useState<Record<string, boolean>>({});
   const [isPreviewOpen, setIsPreviewOpen] = useState(false);
@@ -111,11 +114,28 @@ export const TemplateCreatePage: React.FC = () => {
     }
   };
 
-  const handlePdfFileChange = (file: File | null) => {
+  const handlePdfFileChange = async (file: File | null) => {
     setPdfFile(file);
+    setPdfFirstPage(null);
     if (touched.templateFile && file) {
       const error = validateField("templateFile", file);
       setErrors((prev) => ({ ...prev, templateFile: error }));
+    }
+    if (!file) return;
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: arrayBuffer }).promise;
+      const page = await pdf.getPage(1);
+      const viewport = page.getViewport({ scale: 1.5 });
+      const canvas = document.createElement("canvas");
+      const context = canvas.getContext("2d");
+      if (!context) return;
+      canvas.height = viewport.height;
+      canvas.width = viewport.width;
+      await page.render({ canvasContext: context, viewport, canvas }).promise;
+      setPdfFirstPage(canvas.toDataURL("image/png"));
+    } catch {
+      // silently fail — fallback to placeholder
     }
   };
 
@@ -218,7 +238,7 @@ export const TemplateCreatePage: React.FC = () => {
         </header>
 
         <div className="flex-1 overflow-y-auto p-8">
-          <div className="max-w-6xl mx-auto">
+          <div className="max-w-7xl mx-auto">
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
               <div className="lg:col-span-2 space-y-6">
                 {hasErrors && touched.name && (
@@ -422,12 +442,12 @@ export const TemplateCreatePage: React.FC = () => {
               </div>
 
               <div className="lg:col-span-1">
-                <div className="sticky top-8">
+                <div>
                   <h4 className="text-xs font-bold text-slate-500 uppercase tracking-widest mb-4 flex items-center gap-2">
                     <Eye className="w-4 h-4" />
                     Preview (Xem trước thư viện)
                   </h4>
-                  <Card className="overflow-hidden group hover:-translate-y-1 transition-all duration-300 shadow-lg border-slate-200">
+                  <Card className="overflow-hidden p-0 group hover:-translate-y-1 transition-all duration-300 border-slate-200">
                     <div className="relative aspect-video bg-slate-100 overflow-hidden">
                       {thumbnailFile ? (
                         <img
@@ -435,12 +455,17 @@ export const TemplateCreatePage: React.FC = () => {
                           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
                           src={URL.createObjectURL(thumbnailFile)}
                         />
-                      ) : (
+                      ) : pdfFirstPage ? (
                         <img
                           alt="Template Preview"
-                          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                          src="https://images.unsplash.com/photo-1557804506-669a67965ba0?w=800&h=450&fit=crop"
+                          className="w-full h-full object-contain transition-transform duration-500 group-hover:scale-110"
+                          src={pdfFirstPage}
                         />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center gap-2 text-slate-300">
+                          <FileText className="w-12 h-12" />
+                          <p className="text-xs font-medium text-slate-400">Chưa có nội dung</p>
+                        </div>
                       )}
                       <div className="absolute inset-0 bg-linear-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4">
                         <Badge className="bg-white/20 backdrop-blur-md text-white text-xs border-0">
@@ -470,12 +495,6 @@ export const TemplateCreatePage: React.FC = () => {
                           >
                             PDF
                           </Badge>
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] bg-slate-50 text-slate-500 font-bold uppercase"
-                          >
-                            {pdfFile ? "DOCUMENT" : "24 PAGES"}
-                          </Badge>
                         </div>
                         <span className="text-[10px] font-medium text-slate-400 flex items-center gap-1">
                           <Database className="w-3 h-3" />{" "}
@@ -489,29 +508,6 @@ export const TemplateCreatePage: React.FC = () => {
                         {description ||
                           "Mô tả chi tiết về slide giúp mentor dễ dàng lựa chọn bộ khung phù hợp cho bài giảng của mình."}
                       </p>
-                      <div className="flex items-center justify-between pt-4 border-t border-slate-100">
-                        <div className="flex items-center gap-3">
-                          <div className="flex -space-x-2">
-                            <div className="w-7 h-7 rounded-full bg-slate-200 border-2 border-white flex items-center justify-center">
-                              <Users className="w-3 h-3 text-slate-400" />
-                            </div>
-                            <div className="w-7 h-7 rounded-full bg-blue-100 border-2 border-white flex items-center justify-center">
-                              <span className="text-[10px] font-bold text-blue-600">+8</span>
-                            </div>
-                          </div>
-                          <span className="text-[10px] font-semibold text-slate-400 uppercase tracking-tight">
-                            Lượt tải: 0
-                          </span>
-                        </div>
-                        <Button
-                          variant="link"
-                          size="sm"
-                          className="text-blue-600 text-xs font-bold p-0 h-auto hover:no-underline"
-                        >
-                          Sử dụng ngay
-                          <ArrowRight className="w-3 h-3 ml-1" />
-                        </Button>
-                      </div>
                     </CardContent>
                   </Card>
 
@@ -559,7 +555,6 @@ export const TemplateCreatePage: React.FC = () => {
         </div>
       </main>
 
-      {/* Preview Modal */}
       <PdfPreviewModal
         isOpen={isPreviewOpen}
         onClose={() => setIsPreviewOpen(false)}

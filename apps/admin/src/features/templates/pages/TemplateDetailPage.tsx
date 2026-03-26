@@ -1,87 +1,75 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import {
-  ChevronRight,
-  Download,
-  Users,
-  Calendar,
-  Database,
-  FileText,
-  CheckCircle,
-  ZoomIn,
-  Maximize,
-  Sparkles,
-  ImageIcon,
-} from "lucide-react";
+import { ChevronRight, Download, Calendar, FileText, CheckCircle, BookOpen, Loader2, ExternalLink } from "lucide-react";
+import { Worker, Viewer } from "@react-pdf-viewer/core";
+import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
+import "@react-pdf-viewer/core/lib/styles/index.css";
+import "@react-pdf-viewer/default-layout/lib/styles/index.css";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { slideImages, sampleTemplates } from "../data/templates";
+import { Skeleton } from "@/components/ui/skeleton";
 import { useTemplate, useDeleteTemplate } from "../queries/useTemplate";
-import { PreviewModal } from "../components/PreviewModal";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { formatDate } from "../components/TemplateCard";
+
+const PDFJS_WORKER_URL = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
 export const TemplateDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { id } = useParams({ from: "/_authenticated/templates/$id/" });
   const templateId = parseInt(id);
 
-  const [selectedSlide, setSelectedSlide] = useState(0);
-  const [isPreviewOpen, setIsPreviewOpen] = useState(false);
+  const [isDeleteOpen, setIsDeleteOpen] = useState(false);
+  const defaultLayoutPluginInstance = defaultLayoutPlugin();
 
-  // const { data: templateData, isLoading, isError } = useTemplate(templateId);
+  const { data: templateData, isLoading, isError } = useTemplate(templateId);
   const deleteTemplate = useDeleteTemplate();
 
-  const template = {
-    id: 6,
-    name: "Marketing Strategy Deck",
-    description: "Mẫu slide phân tích thị trường, chiến lược nội dung và KPI tracking.",
-    url: "https://example.com/templates/template-6.pptx",
-    thumbnailUrl: "https://images.unsplash.com/photo-1553877522-43269d4ea984?w=800&h=450&fit=crop",
-    createdAt: "2024-02-25T00:00:00Z",
-    updatedAt: "2024-02-25T00:00:00Z",
-  };
-
-  // if (isLoading) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <div className="text-center">
-  //         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-  //         <p className="text-slate-600">Đang tải dữ liệu...</p>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // if (isError || !template) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <div className="text-center">
-  //         <h2 className="text-2xl font-bold text-slate-900 mb-2">Template không tồn tại</h2>
-  //         <Button onClick={() => navigate({ to: "/templates" })}>Quay lại danh sách</Button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+  const template = templateData?.data;
 
   const handleDownload = () => {
-    window.open(template.url, "_blank");
+    if (template?.url) window.open(template.url, "_blank");
   };
 
   const handleDelete = () => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa mẫu slide này?")) {
-      deleteTemplate.mutate(templateId, {
-        onSuccess: () => {
-          navigate({ to: "/templates" });
-        },
-      });
-    }
+    deleteTemplate.mutate(templateId, {
+      onSuccess: () => {
+        setIsDeleteOpen(false);
+        navigate({ to: "/templates" });
+      },
+    });
   };
+
+  if (isLoading) {
+    return (
+      <main className="flex-1 overflow-y-auto bg-white">
+        <div className="max-w-7xl mx-auto px-10 py-8 space-y-6">
+          <Skeleton className="h-10 w-64" />
+          <div className="grid grid-cols-12 gap-8">
+            <Skeleton className="col-span-8 h-150 rounded-xl" />
+            <Skeleton className="col-span-4 h-96 rounded-xl" />
+          </div>
+        </div>
+      </main>
+    );
+  }
+
+  if (isError || !template) {
+    return (
+      <main className="flex-1 flex items-center justify-center bg-white">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold text-slate-900 mb-2">Template không tồn tại</h2>
+          <Button onClick={() => navigate({ to: "/templates" })}>Quay lại danh sách</Button>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <>
       <main className="flex-1 overflow-y-auto bg-white">
-        <div className="max-w-360 mx-auto px-10 py-8">
+        <div className=" mx-auto p-8">
           <div className="flex items-center justify-between mb-8 border-b border-slate-100 pb-8">
             <div>
               <nav className="flex text-sm text-slate-500 mb-2 items-center gap-2">
@@ -108,10 +96,9 @@ export const TemplateDetailPage: React.FC = () => {
               <Button
                 variant="outline"
                 className="text-red-600 border-red-200 hover:bg-red-50"
-                onClick={handleDelete}
-                disabled={deleteTemplate.isPending}
+                onClick={() => setIsDeleteOpen(true)}
               >
-                {deleteTemplate.isPending ? "Đang xóa..." : "Xóa mẫu"}
+                Xóa mẫu
               </Button>
               <Button
                 className="bg-blue-600 hover:bg-blue-700 shadow-md shadow-blue-100"
@@ -123,57 +110,49 @@ export const TemplateDetailPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-12 gap-8">
-            <div className="col-span-12 lg:col-span-8 space-y-6">
-              <Card className="overflow-hidden border-slate-200 shadow-sm">
-                <div className="aspect-video w-full bg-slate-50 relative group">
-                  <img
-                    alt="Slide Main Preview"
-                    className="w-full h-full object-cover"
-                    src={slideImages[selectedSlide]}
-                  />
-                  <div className="absolute inset-x-0 bottom-0 p-6 bg-linear-to-t from-black/50 to-transparent flex justify-between items-end opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Badge className="bg-black/30 backdrop-blur-md text-white border-0">
-                      Slide {selectedSlide + 1}: Cover Layout
-                    </Badge>
-                    <div className="flex gap-2">
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="rounded-full backdrop-blur-md bg-white/20 hover:bg-white hover:text-slate-900 border-0"
-                      >
-                        <ZoomIn className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        size="icon"
-                        variant="secondary"
-                        className="rounded-full backdrop-blur-md bg-white/20 hover:bg-white hover:text-slate-900 border-0"
-                        onClick={() => setIsPreviewOpen(true)}
-                      >
-                        <Maximize className="w-4 h-4" />
-                      </Button>
+            {/* PDF Viewer */}
+            <div className="col-span-12 lg:col-span-8">
+              <Card className="overflow-hidden border-slate-200 shadow-sm" style={{ height: 680 }}>
+                {template.url ? (
+                  <Worker workerUrl={PDFJS_WORKER_URL}>
+                    <div style={{ height: "100%" }}>
+                      <Viewer
+                        fileUrl={template.url}
+                        plugins={[defaultLayoutPluginInstance]}
+                        renderLoader={(percentages) => (
+                          <div className="flex flex-col items-center justify-center h-full gap-3">
+                            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                            <p className="text-sm text-slate-500">Đang tải... {Math.round(percentages)}%</p>
+                          </div>
+                        )}
+                        renderError={() => (
+                          <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+                            <BookOpen size={40} className="opacity-30" />
+                            <p className="text-sm">Không thể tải file xem trước.</p>
+                            <a
+                              href={template.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                            >
+                              <ExternalLink size={14} />
+                              Mở trực tiếp
+                            </a>
+                          </div>
+                        )}
+                      />
                     </div>
+                  </Worker>
+                ) : (
+                  <div className="w-full h-full flex flex-col items-center justify-center gap-3 text-slate-300">
+                    <FileText className="w-16 h-16" />
+                    <p className="text-sm text-slate-400">Không có file để hiển thị</p>
                   </div>
-                </div>
-                <div className="p-6 border-t border-slate-50 overflow-x-auto">
-                  <div className="flex gap-4 min-w-max pb-2">
-                    {slideImages.map((img, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => setSelectedSlide(idx)}
-                        className={`w-40 aspect-video rounded-xl overflow-hidden border-2 transition-all ${
-                          idx === selectedSlide
-                            ? "border-blue-600 ring-4 ring-blue-50"
-                            : "border-transparent hover:border-slate-300 opacity-70 hover:opacity-100"
-                        }`}
-                      >
-                        <img alt={`Thumbnail ${idx + 1}`} className="w-full h-full object-cover" src={img} />
-                      </button>
-                    ))}
-                  </div>
-                </div>
+                )}
               </Card>
             </div>
 
+            {/* Info sidebar */}
             <div className="col-span-12 lg:col-span-4 space-y-6">
               <Card className="border-slate-200 shadow-sm">
                 <CardContent className="p-8">
@@ -198,17 +177,10 @@ export const TemplateDetailPage: React.FC = () => {
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-slate-500 font-medium flex items-center gap-3">
-                        <Database className="w-5 h-5 text-slate-400" />
-                        Dung lượng
-                      </span>
-                      <span className="text-sm font-bold text-slate-900">4.2 MB</span>
-                    </div>
-                    <div className="flex justify-between items-center">
-                      <span className="text-sm text-slate-500 font-medium flex items-center gap-3">
                         <FileText className="w-5 h-5 text-slate-400" />
                         Định dạng
                       </span>
-                      <span className="text-sm font-bold text-slate-900">.pptx</span>
+                      <span className="text-sm font-bold text-slate-900">.pdf</span>
                     </div>
                     <div className="flex justify-between items-center">
                       <span className="text-sm text-slate-500 font-medium flex items-center gap-3">
@@ -223,38 +195,31 @@ export const TemplateDetailPage: React.FC = () => {
                 </CardContent>
               </Card>
 
-              <Card className="bg-blue-600 text-white border-0 shadow-sm relative overflow-hidden">
-                <CardContent className="p-8 relative z-10">
-                  <h4 className="text-xl font-bold mb-4">Tính năng đặc biệt</h4>
-                  <ul className="space-y-4">
-                    <li className="flex items-center gap-3 font-medium">
-                      <div className="bg-white/20 p-1 rounded-lg">
-                        <Sparkles className="w-5 h-5" />
-                      </div>
-                      Hỗ trợ 20+ layouts đa dạng
-                    </li>
-                    <li className="flex items-center gap-3 font-medium">
-                      <div className="bg-white/20 p-1 rounded-lg">
-                        <ImageIcon className="w-5 h-5" />
-                      </div>
-                      Tùy chỉnh màu sắc linh hoạt
-                    </li>
-                    <li className="flex items-center gap-3 font-medium">
-                      <div className="bg-white/20 p-1 rounded-lg">
-                        <CheckCircle className="w-5 h-5" />
-                      </div>
-                      Độ phân giải 4K (3840x2160)
-                    </li>
-                  </ul>
+              <Card className="border-slate-200 shadow-sm">
+                <CardContent className="p-6">
+                  <a
+                    href={template.url}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                    Mở PDF trong tab mới
+                  </a>
                 </CardContent>
-                <FileText className="absolute -bottom-6 -right-6 w-36 h-36 opacity-10 rotate-12" />
               </Card>
             </div>
           </div>
         </div>
       </main>
 
-      <PreviewModal isOpen={isPreviewOpen} onClose={() => setIsPreviewOpen(false)} templateName={template.name} />
+      <DeleteConfirmModal
+        open={isDeleteOpen}
+        itemName={template.name}
+        isPending={deleteTemplate.isPending}
+        onConfirm={handleDelete}
+        onClose={() => setIsDeleteOpen(false)}
+      />
     </>
   );
 };
