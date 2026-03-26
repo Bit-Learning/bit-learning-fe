@@ -1,7 +1,7 @@
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { EditIcon, TrashIcon } from "lucide-react";
+import { EditIcon, EyeIcon, TrashIcon } from "lucide-react";
 
 interface TemplateCardProps {
   id: number;
@@ -11,11 +11,12 @@ interface TemplateCardProps {
   isActive: boolean;
   colors?: string[];
   metaChips?: string[];
+  onView: (id: number) => void;
   onEdit: (id: number) => void;
   onDelete: (id: number) => void;
 }
 
-export function TemplateCard({
+export const TemplateCard = ({
   id,
   name,
   description,
@@ -23,11 +24,12 @@ export function TemplateCard({
   isActive,
   colors,
   metaChips,
+  onView,
   onEdit,
   onDelete,
-}: TemplateCardProps) {
+}: TemplateCardProps) => {
   return (
-    <Card className="group relative overflow-hidden transition-shadow hover:shadow-md p-0">
+    <Card className="group relative overflow-hidden transition-shadow p-0 hover:shadow-md">
       <div className="bg-muted relative h-36 w-full overflow-hidden">
         {thumbnailUrl ? (
           <img src={thumbnailUrl} alt={name} className="h-full w-full object-cover" />
@@ -48,22 +50,11 @@ export function TemplateCard({
         <Badge variant={isActive ? "default" : "secondary"} className="absolute top-2 right-2 text-xs">
           {isActive ? "Active" : "Inactive"}
         </Badge>
-
-        <div className="absolute inset-0 flex items-center justify-center gap-2 bg-black/40 opacity-0 transition-opacity group-hover:opacity-100">
-          <Button size="sm" variant="secondary" onClick={() => onEdit(id)}>
-            <EditIcon className="mr-1 h-3.5 w-3.5" />
-            Sửa
-          </Button>
-          <Button size="sm" variant="destructive" onClick={() => onDelete(id)}>
-            <TrashIcon className="mr-1 h-3.5 w-3.5" />
-            Xóa
-          </Button>
-        </div>
       </div>
 
-      <CardContent className="p-3">
-        <p className="truncate text-sm font-semibold">{name}</p>
-        {description && <p className="text-muted-foreground mt-0.5 line-clamp-2 text-xs">{description}</p>}
+      <CardContent className="px-3">
+        <p className="truncate text-md font-semibold">{name}</p>
+        {description && <p className="text-muted-foreground mt-0.5 line-clamp-2 text-sm">{description}</p>}
         {metaChips && metaChips.length > 0 && (
           <div className="mt-2 flex flex-wrap gap-1">
             {metaChips.map((chip) => (
@@ -74,6 +65,26 @@ export function TemplateCard({
           </div>
         )}
       </CardContent>
+
+      <div className="px-3 mb-2 flex justify-center gap-1.5 transition-opacity group-hover:opacity-100">
+        <Button size="sm" variant="ghost" onClick={() => onView(id)}>
+          <EyeIcon className="mr-1 h-3.5 w-3.5" />
+          Xem
+        </Button>
+        <Button size="sm" variant="ghost" onClick={() => onEdit(id)}>
+          <EditIcon className="mr-1 h-3.5 w-3.5" />
+          Sửa
+        </Button>
+        <Button
+          size="sm"
+          variant="ghost"
+          className="text-destructive hover:text-destructive"
+          onClick={() => onDelete(id)}
+        >
+          <TrashIcon className="mr-1 h-3.5 w-3.5" />
+          Xóa
+        </Button>
+      </div>
     </Card>
   );
-}
+};

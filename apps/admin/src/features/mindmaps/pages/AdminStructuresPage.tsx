@@ -12,6 +12,7 @@ import {
 import { MindMapStructureRequest, StructureConfigDto } from "../types/mindmap.type";
 import { TemplateCard } from "../components/TemplateCard";
 import { StructureFormDialog } from "../components/StructureFormDialog";
+import StructureDetailModal from "../components/StructureDetailModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 export default function AdminStructuresPage() {
@@ -24,6 +25,7 @@ export default function AdminStructuresPage() {
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<StructureConfigDto | undefined>();
+  const [viewTarget, setViewTarget] = useState<StructureConfigDto | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<StructureConfigDto | undefined>();
 
   const filtered = structures.filter((s) => s.name.toLowerCase().includes(search.toLowerCase()));
@@ -33,14 +35,14 @@ export default function AdminStructuresPage() {
     setFormOpen(true);
   };
 
+  const openView = (id: number) => setViewTarget(structures.find((s) => s.id === id));
+
   const openEdit = (id: number) => {
     setEditTarget(structures.find((s) => s.id === id));
     setFormOpen(true);
   };
 
-  const openDelete = (id: number) => {
-    setDeleteTarget(structures.find((s) => s.id === id));
-  };
+  const openDelete = (id: number) => setDeleteTarget(structures.find((s) => s.id === id));
 
   const handleFormSubmit = (data: MindMapStructureRequest, thumbnail: File | null) => {
     if (editTarget) {
@@ -70,7 +72,7 @@ export default function AdminStructuresPage() {
         </Button>
       </div>
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-full">
         <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input className="pl-9" placeholder="Tìm kiếm..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
@@ -96,12 +98,15 @@ export default function AdminStructuresPage() {
               thumbnailUrl={s.thumbnailUrl}
               isActive={s.isActive}
               metaChips={[s.elkAlgorithm, ...(s.edgeType ? [s.edgeType] : [])]}
+              onView={openView}
               onEdit={openEdit}
               onDelete={openDelete}
             />
           ))}
         </div>
       )}
+
+      <StructureDetailModal open={!!viewTarget} data={viewTarget} onClose={() => setViewTarget(undefined)} />
 
       <StructureFormDialog
         open={formOpen}

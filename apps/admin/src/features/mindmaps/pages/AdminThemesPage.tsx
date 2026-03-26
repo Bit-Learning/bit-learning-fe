@@ -7,6 +7,7 @@ import { useAdminThemes, useAdminCreateTheme, useAdminPatchTheme, useAdminDelete
 import { MindMapThemeRequest, ThemeConfigDto } from "../types/mindmap.type";
 import { TemplateCard } from "../components/TemplateCard";
 import { ThemeFormDialog } from "../components/ThemeFormDialog";
+import ThemeDetailModal from "../components/ThemeDetailModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 
 export default function AdminThemesPage() {
@@ -19,6 +20,7 @@ export default function AdminThemesPage() {
   const [search, setSearch] = useState("");
   const [formOpen, setFormOpen] = useState(false);
   const [editTarget, setEditTarget] = useState<ThemeConfigDto | undefined>();
+  const [viewTarget, setViewTarget] = useState<ThemeConfigDto | undefined>();
   const [deleteTarget, setDeleteTarget] = useState<ThemeConfigDto | undefined>();
 
   const filtered = themes.filter((t) => t.name.toLowerCase().includes(search.toLowerCase()));
@@ -28,14 +30,14 @@ export default function AdminThemesPage() {
     setFormOpen(true);
   };
 
+  const openView = (id: number) => setViewTarget(themes.find((t) => t.id === id));
+
   const openEdit = (id: number) => {
     setEditTarget(themes.find((t) => t.id === id));
     setFormOpen(true);
   };
 
-  const openDelete = (id: number) => {
-    setDeleteTarget(themes.find((t) => t.id === id));
-  };
+  const openDelete = (id: number) => setDeleteTarget(themes.find((t) => t.id === id));
 
   const handleFormSubmit = (data: MindMapThemeRequest, thumbnail: File | null) => {
     if (editTarget) {
@@ -65,7 +67,7 @@ export default function AdminThemesPage() {
         </Button>
       </div>
 
-      <div className="relative max-w-sm">
+      <div className="relative max-w-full">
         <SearchIcon className="text-muted-foreground absolute top-1/2 left-3 h-4 w-4 -translate-y-1/2" />
         <Input className="pl-9" placeholder="Tìm kiếm..." value={search} onChange={(e) => setSearch(e.target.value)} />
       </div>
@@ -91,12 +93,15 @@ export default function AdminThemesPage() {
               thumbnailUrl={t.thumbnailUrl}
               isActive={t.isActive}
               colors={t.colors}
+              onView={openView}
               onEdit={openEdit}
               onDelete={openDelete}
             />
           ))}
         </div>
       )}
+
+      <ThemeDetailModal open={!!viewTarget} data={viewTarget} onClose={() => setViewTarget(undefined)} />
 
       <ThemeFormDialog
         open={formOpen}
