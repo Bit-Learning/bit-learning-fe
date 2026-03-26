@@ -1,4 +1,4 @@
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient, useMutation } from "@tanstack/react-query";
 import { useSelector } from "react-redux";
 import { useAppDispatch } from "@/shared/redux/store";
 import { courseApi } from "../api/course.api";
@@ -140,4 +140,35 @@ export const usePrefetchCourse = () => {
 
 export const useCourseState = () => {
   return useSelector(selectCourseState);
+};
+
+export const useCertificate = (courseId: number, enabled = false) => {
+  return useQuery({
+    queryKey: ["courses", "certificate", courseId],
+    queryFn: async () => {
+      const response = await courseApi.getCertificate(courseId);
+      return URL.createObjectURL(response.data);
+    },
+    enabled: enabled && !!courseId,
+    staleTime: 10 * 60 * 1000,
+    gcTime: 15 * 60 * 1000,
+  });
+};
+
+export const useDownloadCertificate = () => {
+  return useMutation({
+    mutationFn: (courseId: number) => {
+      courseApi.downloadCertificate(courseId);
+      return Promise.resolve();
+    },
+  });
+};
+
+export const useVerifyCertificate = () => {
+  return useMutation({
+    mutationFn: async (file: File) => {
+      const response = await courseApi.verifyCertificate(file);
+      return response.data.data;
+    },
+  });
 };

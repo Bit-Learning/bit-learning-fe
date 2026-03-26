@@ -46,6 +46,7 @@ export interface QuizAttemptResponse {
   score?: number;
   timeRemaining?: number;
   answers: QuizAttemptAnswerResponse[];
+  deviceToken: string;
   createdAt: string;
   updatedAt: string;
 }

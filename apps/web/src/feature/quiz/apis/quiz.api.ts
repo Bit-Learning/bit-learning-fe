@@ -31,32 +31,42 @@ export const quizAttemptApi = {
     return api.get(`/quiz-attempts/${attemptId}`);
   },
 
-  resumeAttempt(examId: number): Promise<AxiosResponse<ApiResponse<QuizAttemptResponse>>> {
-    return api.get(`/quiz-attempts/resume/exam/${examId}`);
+  resumeAttempt(examId: number, deviceToken: string): Promise<AxiosResponse<ApiResponse<QuizAttemptResponse>>> {
+    return api.get(`/quiz-attempts/resume/exam/${examId}`, {
+      headers: { "X-Device-Token": deviceToken },
+    });
   },
 
   saveOrUpdateAnswer(
     attemptId: number,
+    deviceToken: string,
     data: QuizAttemptAnswerRequest,
   ): Promise<AxiosResponse<ApiResponse<QuizAttemptAnswerResponse>>> {
-    return api.post(`/quiz-attempts/${attemptId}/answers`, data);
+    return api.post(`/quiz-attempts/${attemptId}/answers`, data, {
+      headers: { "X-Device-Token": deviceToken },
+    });
   },
 
   updateNavigationState(
     attemptId: number,
+    deviceToken: string,
     questionId: number,
     navigationState: QuestionNavigationState,
   ): Promise<AxiosResponse<ApiResponse<QuizAttemptAnswerResponse>>> {
     return api.put(`/quiz-attempts/${attemptId}/questions/${questionId}/navigation-state`, null, {
       params: { navigationState },
+      headers: { "X-Device-Token": deviceToken },
     });
   },
 
   submitAttempt(
     attemptId: number,
+    deviceToken: string,
     data: SubmitQuizAttemptRequest,
   ): Promise<AxiosResponse<ApiResponse<SubmitQuizAttemptResponse>>> {
-    return api.post(`/quiz-attempts/${attemptId}/submit`, data);
+    return api.post(`/quiz-attempts/${attemptId}/submit`, data, {
+      headers: { "X-Device-Token": deviceToken },
+    });
   },
 
   getMyAttempts(params?: PaginationParams): Promise<AxiosResponse<ApiResponse<QuizAttemptBriefResponse[]>>> {
@@ -73,12 +83,14 @@ export const quizAttemptApi = {
   deleteAttempt(attemptId: number): Promise<AxiosResponse<ApiResponse<void>>> {
     return api.delete(`/quiz-attempts/${attemptId}`);
   },
-
   sendHeartbeat(
     attemptId: number,
+    deviceToken: string,
     data: QuizHeartbeatRequest,
   ): Promise<AxiosResponse<ApiResponse<QuizHeartbeatResponse>>> {
-    return api.post(`/quiz-attempts/${attemptId}/heartbeat`, data);
+    return api.post(`/quiz-attempts/${attemptId}/heartbeat`, data, {
+      headers: { "X-Device-Token": deviceToken },
+    });
   },
 };
 

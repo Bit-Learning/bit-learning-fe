@@ -8,11 +8,12 @@ import ReviewItem from "./ReviewItem";
 
 interface CourseReviewsProps {
   courseId: number;
+  hasAccess?: boolean;
 }
 
 const STAR_LABELS = ["", "Tệ", "Không tốt", "Bình thường", "Tốt", "Xuất sắc"];
 
-const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
+const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId, hasAccess }) => {
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [comment, setComment] = useState("");
@@ -58,10 +59,11 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
                   <button
                     key={i}
                     type="button"
-                    onClick={() => setRating(val)}
-                    onMouseEnter={() => setHoverRating(val)}
-                    onMouseLeave={() => setHoverRating(0)}
-                    className="rounded-md p-1 transition-transform hover:scale-110 focus:outline-none"
+                    onClick={() => (!hasAccess ? undefined : setRating(val))}
+                    onMouseEnter={() => (!hasAccess ? undefined : setHoverRating(val))}
+                    onMouseLeave={() => (!hasAccess ? undefined : setHoverRating(0))}
+                    disabled={!hasAccess}
+                    className="rounded-md p-1 transition-transform hover:scale-110 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
                   >
                     <Star
                       className={`h-9 w-9 transition-colors ${
@@ -81,14 +83,19 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
 
           <div>
             <label htmlFor="comment" className="px-2 mb-2 block text-md font-medium text-gray-700">
-              Nhận xét <span className="text-gray-400">(không bắt buộc)</span>
+              Nhận xét
             </label>
             <Textarea
               id="comment"
               value={comment}
               onChange={(e) => setComment(e.target.value)}
-              placeholder="Khóa học này có điểm gì nổi bật? Bạn học được gì? Có điều gì cần cải thiện không?"
-              className="min-h-28 resize-none rounded-xl border-gray-200 text-sm focus:border-blue-500 focus:ring-blue-500"
+              placeholder={
+                hasAccess
+                  ? "Khóa học này có điểm gì nổi bật? Bạn học được gì? Có điều gì cần cải thiện không?"
+                  : "Đăng ký khóa học để viết đánh giá"
+              }
+              disabled={!hasAccess}
+              className="min-h-28 resize-none rounded-xl border-gray-200 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
             />
             <p className="mt-1 text-right text-xs text-gray-400">{comment.length} ký tự</p>
           </div>
@@ -98,7 +105,7 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId }) => {
             <Button
               onClick={handleSubmitReview}
               size="lg"
-              isDisabled={rating === 0 || isPosting}
+              isDisabled={!hasAccess || rating === 0 || isPosting}
               className="gap-2 bg-blue-600 px-6 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {isPosting ? (

@@ -96,3 +96,10 @@ export interface MyCourse {
   status: CourseStatus;
   progressPercentage: number;
 }
+
+export interface VerifyCertificateResponse {
+  isValid: boolean;
+  studentName?: string;
+  courseName?: string;
+  completedAt?: string;
+}

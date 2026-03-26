@@ -10,11 +10,11 @@ import { useAddToCart } from "@/feature/order/queries/useCart";
 import { CourseHero } from "./CourseHero";
 import { CourseTabs } from "./CourseTabs";
 import { CoursePricingCard } from "./CoursePricingCard";
+import { CourseCertificate } from "./CourseCertificate";
 
 const CourseDetailContent: React.FC = () => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
-  const [activeTab, setActiveTab] = useState("overview");
 
   const { data: course, isLoading, error } = useCourseDetail();
 
@@ -29,33 +29,21 @@ const CourseDetailContent: React.FC = () => {
   };
 
   const handleAddToCart = () => {
-    if (course?.id) {
-      addToCart(course.id, {
-        onSuccess: () => {},
-      });
-    }
+    if (course?.id) addToCart(course.id, { onSuccess: () => {} });
   };
 
   const handleBuyNow = () => {
-    if (course?.id) {
-      navigate({ to: "/checkout", search: { courseId: course.id } });
-    }
+    if (course?.id) navigate({ to: "/checkout", search: { courseId: course.id } });
   };
 
   const handleLike = () => {
     setIsLiked(!isLiked);
-    toast.success({
-      title: isLiked ? "Đã bỏ yêu thích" : "Đã thêm vào yêu thích",
-    });
+    toast.success({ title: isLiked ? "Đã bỏ yêu thích" : "Đã thêm vào yêu thích" });
   };
 
   const handleShare = () => {
     if (navigator.share && course) {
-      navigator.share({
-        title: course.title,
-        text: course.description,
-        url: window.location.href,
-      });
+      navigator.share({ title: course.title, text: course.description, url: window.location.href });
     } else {
       navigator.clipboard.writeText(window.location.href);
       toast.success({ title: "Đã copy link khóa học" });
@@ -64,7 +52,7 @@ const CourseDetailContent: React.FC = () => {
 
   if (isLoading) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
+      <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto max-w-7xl px-4 py-8">
           <div className="flex h-96 items-center justify-center">
             <div className="text-center">
@@ -79,16 +67,13 @@ const CourseDetailContent: React.FC = () => {
 
   if (error || !course) {
     return (
-      <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
+      <div className="min-h-screen bg-gray-50">
         <div className="container mx-auto max-w-7xl px-4 py-8">
           <div className="py-12 text-center">
             <BookOpen className="mx-auto mb-4 h-20 w-20 text-gray-400" />
             <h3 className="mb-2 text-2xl font-bold text-gray-900">Không tìm thấy khóa học</h3>
             <p className="mb-6 text-gray-600">{error ? (error as Error).message : ""}</p>
-            <Button
-              className="bg-linear-to-r from-blue-600 to-indigo-600 text-white hover:from-blue-700 hover:to-indigo-700"
-              onClick={() => navigate({ to: "/courses" })}
-            >
+            <Button className="bg-blue-600 text-white hover:bg-blue-700" onClick={() => navigate({ to: "/courses" })}>
               Về trang khóa học
             </Button>
           </div>
@@ -98,7 +83,7 @@ const CourseDetailContent: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-br from-gray-50 via-blue-50 to-indigo-50">
+    <div className="min-h-screen bg-gray-50">
       <div className="container mx-auto max-w-7xl px-4 py-8">
         <button
           type="button"
@@ -109,7 +94,7 @@ const CourseDetailContent: React.FC = () => {
           <span className="font-medium">Danh sách khóa học</span>
         </button>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <CourseHero
               course={course}
@@ -119,14 +104,15 @@ const CourseDetailContent: React.FC = () => {
               onShare={handleShare}
             />
 
-            <CourseTabs
-              course={course}
-              activeTab={activeTab}
-              onTabChange={setActiveTab}
-              hasAccess={hasAccess}
-              onEnroll={handleEnroll}
-              enrollPending={enrollPending}
-            />
+            {hasAccess && (
+              <CourseCertificate
+                courseId={course.id}
+                courseName={course.title}
+                progressPercentage={course.progressPercentage ?? 0}
+              />
+            )}
+
+            <CourseTabs course={course} hasAccess={hasAccess} />
           </div>
 
           <div className="space-y-6">

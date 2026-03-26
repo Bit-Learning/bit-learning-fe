@@ -18,7 +18,13 @@ import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { Badge } from "@workspace/ui/components/Badge";
-import { useMyQuizAttempts, useMyQuizSessions, useStartQuizAttempt, useStartQuizSession } from "../queries/useQuiz";
+import {
+  useMyQuizAttempts,
+  useMyQuizSessions,
+  useStartQuizAttempt,
+  useResumeQuizAttempt,
+  useStartQuizSession,
+} from "../queries/useQuiz";
 import { useExam } from "@/feature/exam/queries/useExam";
 import { toast } from "@/shared/components/Sonner";
 import ExamModeModal from "./ExamModeModal";
@@ -28,13 +34,14 @@ const ExamDetailContent: React.FC = () => {
   const navigate = useNavigate();
   const { examId } = useParams({ from: "/_layout/exams/$examId" });
   const [showModeModal, setShowModeModal] = useState(false);
+  const [resumingAttemptId, setResumingAttemptId] = useState<number | null>(null);
 
   const { data: exam, isLoading: examLoading } = useExam(Number(examId), { enabled: !!examId });
-
   const { data: allAttemptsResponse } = useMyQuizAttempts({ page: 0, size: 100 });
   const { data: allSessionsResponse } = useMyQuizSessions({ page: 0, size: 100 });
 
   const startAttemptMutation = useStartQuizAttempt();
+  const resumeAttemptMutation = useResumeQuizAttempt();
   const startSessionMutation = useStartQuizSession();
 
   const attempts = Array.isArray(allAttemptsResponse)
@@ -94,6 +101,26 @@ const ExamDetailContent: React.FC = () => {
         description: "Không thể bắt đầu bài thi. Vui lòng thử lại.",
       });
       console.error("Failed to start attempt:", error);
+    }
+  };
+
+  const handleResumeAttempt = async (attemptId: number) => {
+    setResumingAttemptId(attemptId);
+
+    try {
+      await resumeAttemptMutation.mutateAsync({
+        examId: Number(examId),
+        deviceToken: undefined,
+      });
+
+      navigate({
+        to: "/quiz-attempts/$attemptId",
+        params: { attemptId: String(attemptId) },
+      });
+    } catch (error) {
+      console.error("Failed to resume attempt:", error);
+    } finally {
+      setResumingAttemptId(null);
     }
   };
 
@@ -174,6 +201,7 @@ const ExamDetailContent: React.FC = () => {
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           <div className="lg:col-span-2 space-y-6">
+            {/* Exam info card */}
             <Card className="border-2 p-0 border-blue-200 dark:border-blue-800 overflow-hidden">
               <div className="px-8 py-6 border-b border-blue-200 dark:border-slate-700">
                 <div className="flex items-start gap-4">
@@ -267,8 +295,9 @@ const ExamDetailContent: React.FC = () => {
                 {hasHistory ? (
                   <div className="space-y-3">
                     {attempts.map((attempt, index) => {
-                      const isSubmitted = attempt.status == "SUBMITTED";
+                      const isSubmitted = attempt.status === "SUBMITTED";
                       const isDoing = attempt.status === "DOING";
+                      const isResuming = resumingAttemptId === attempt.id;
 
                       return (
                         <div
@@ -323,15 +352,20 @@ const ExamDetailContent: React.FC = () => {
                                   variant="outline"
                                   size="sm"
                                   className="gap-1.5"
-                                  onClick={() =>
-                                    navigate({
-                                      to: "/quiz-attempts/$attemptId",
-                                      params: { attemptId: String(attempt.id) },
-                                    })
-                                  }
+                                  isDisabled={isResuming}
+                                  onClick={() => handleResumeAttempt(attempt.id)}
                                 >
-                                  <PlayCircle className="w-4 h-4" />
-                                  Tiếp tục
+                                  {isResuming ? (
+                                    <>
+                                      <div className="w-4 h-4 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                                      Đang tải...
+                                    </>
+                                  ) : (
+                                    <>
+                                      <PlayCircle className="w-4 h-4" />
+                                      Tiếp tục
+                                    </>
+                                  )}
                                 </Button>
                               )}
 
@@ -356,7 +390,6 @@ const ExamDetailContent: React.FC = () => {
                         </div>
                       );
                     })}
-
                     {sessions.map((session, index) => {
                       const isSubmitted = session.status === "SUBMITTED";
                       const isExpired = session.status === "EXPIRED";

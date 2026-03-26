@@ -66,7 +66,7 @@ const CourseCurriculum: React.FC<CourseCurriculumProps> = ({ courseId }) => {
   return (
     <div className="space-y-4">
       <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold text-gray-900">Nội dung khóa học</h3>
+        <h3 className="text-xl font-bold text-gray-900"></h3>
         <div className="flex gap-2">
           <Button variant="ghost" size="sm" onPress={expandAll}>
             Mở tất cả

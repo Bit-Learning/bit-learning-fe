@@ -5,9 +5,14 @@ const createTabId = () => Math.random().toString(36).slice(2) + Date.now().toStr
 const HEARTBEAT_INTERVAL = 5000;
 const HEARTBEAT_TIMEOUT = 15000;
 
-type LockStatus = "acquiring" | "granted" | "denied";
+export type LockStatus = "acquiring" | "granted" | "denied";
 
-export function useTabLock(attemptId: number) {
+interface TabLockResult {
+  status: LockStatus;
+  releaseLock: () => void;
+}
+
+export function useTabLock(attemptId: number): TabLockResult {
   const channelRef = useRef<BroadcastChannel | null>(null);
   const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [status, setStatus] = useState<LockStatus>("acquiring");
@@ -73,6 +78,24 @@ export function useTabLock(attemptId: number) {
       setStatus("denied");
     };
 
+    const tryAcquire = () => {
+      const lock = readLock();
+      if (lock && lock.tabId !== TAB_ID) {
+        const age = Date.now() - lock.ts;
+        if (age < HEARTBEAT_TIMEOUT) {
+          deny();
+          return;
+        }
+      }
+
+      channel.postMessage({ type: "PING", tabId: TAB_ID });
+
+      const jitter = Math.random() * 200;
+      setTimeout(() => {
+        if (!resolvedRef.current && mountedRef.current) grant();
+      }, 300 + jitter);
+    };
+
     channel.onmessage = (e) => {
       const { type, tabId } = e.data as { type: string; tabId: string };
 
@@ -96,24 +119,6 @@ export function useTabLock(attemptId: number) {
           }, 50);
         }
       }
-    };
-
-    const tryAcquire = () => {
-      const lock = readLock();
-      if (lock && lock.tabId !== TAB_ID) {
-        const age = Date.now() - lock.ts;
-        if (age < HEARTBEAT_TIMEOUT) {
-          deny();
-          return;
-        }
-      }
-
-      channel.postMessage({ type: "PING", tabId: TAB_ID });
-
-      const jitter = Math.random() * 200;
-      setTimeout(() => {
-        if (!resolvedRef.current && mountedRef.current) grant();
-      }, 300 + jitter);
     };
 
     tryAcquire();
