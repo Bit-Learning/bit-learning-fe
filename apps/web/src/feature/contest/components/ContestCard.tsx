@@ -62,7 +62,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
     <Card
       className={`group rounded-md p-6 border-2 transition-all hover:shadow-xl relative overflow-hidden flex flex-col  ${
         isEnded
-          ? "bg-gray-50 opacity-75 hover:opacity-100 border-gray-400"
+          ? "bg-gray-50 opacity-75 hover:opacity-100 border-gray-200"
           : isOngoing
             ? "bg-white border-green-500 shadow-md"
             : "bg-white border-gray-400"

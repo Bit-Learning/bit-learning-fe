@@ -5,6 +5,7 @@ import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useMyExams } from "../queries/useExam";
 import { Button } from "@workspace/ui/components/Button";
 import { Pagination } from "@/shared/components/Pagination";
+import { Input } from "@workspace/ui/components/Input";
 
 const MyExamsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -53,13 +54,12 @@ const MyExamsContent: React.FC = () => {
       </div>
 
       <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-        <input
-          className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-slate-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
-          placeholder="Tìm kiếm theo tên đề thi, mã đề hoặc ngôn ngữ..."
-          type="text"
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+        <Input
+          placeholder="Tìm kiếm nội dung câu hỏi..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="pl-10 py-5 border-2"
         />
       </div>
 
