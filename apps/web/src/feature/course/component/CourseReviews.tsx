@@ -83,7 +83,7 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId, hasAccess }) =>
 
           <div>
             <label htmlFor="comment" className="px-2 mb-2 block text-md font-medium text-gray-700">
-              Nhận xét <span className="text-gray-400">(không bắt buộc)</span>
+              Nhận xét
             </label>
             <Textarea
               id="comment"

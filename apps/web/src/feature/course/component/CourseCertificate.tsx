@@ -42,31 +42,7 @@ export const CourseCertificate: React.FC<CourseCertificateProps> = ({ courseId, 
   };
 
   if (!isCompleted) {
-    return (
-      <Card className="border-2 border-dashed border-slate-200 bg-slate-50">
-        <CardContent className="flex flex-col items-center gap-4 py-10 text-center">
-          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-slate-100">
-            <Award className="h-8 w-8 text-slate-400" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-slate-700">Chứng chỉ hoàn thành</h3>
-            <p className="mt-1 text-sm text-slate-500">Hoàn thành 100% khóa học để nhận chứng chỉ</p>
-          </div>
-          <div className="w-full max-w-xs">
-            <div className="mb-1 flex justify-between text-xs text-slate-500">
-              <span>Tiến độ</span>
-              <span className="font-semibold">{progressPercentage}%</span>
-            </div>
-            <div className="h-2 w-full overflow-hidden rounded-full bg-slate-200">
-              <div
-                className="h-full rounded-full bg-blue-500 transition-all duration-500"
-                style={{ width: `${progressPercentage}%` }}
-              />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return <></>;
   }
 
   return (

@@ -94,7 +94,7 @@ const CourseDetailContent: React.FC = () => {
           <span className="font-medium">Danh sách khóa học</span>
         </button>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
             <CourseHero
               course={course}
