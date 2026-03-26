@@ -50,6 +50,7 @@ export interface LikeResponse {
 export interface LeaderboardEntry {
 	userId: number;
 	username: string;
+	avatar: string | null;
 	totalScore: number;
 	gamesPlayed: number;
 }
@@ -186,6 +187,16 @@ const gameService = {
 			},
 		);
 		return response.data.data as Page<LeaderboardEntry>;
+	},
+
+	// Record score for authenticated user (no game entity required)
+	recordScore: async (
+		score: number = 0,
+		duration: number = 0,
+	): Promise<void> => {
+		await api.post("/games/record-score", null, {
+			params: { score, duration },
+		});
 	},
 };
 

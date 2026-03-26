@@ -16,17 +16,11 @@ function RootComponent() {
 	return (
 		<AudioProvider>
 			{isMatchingRoute ? (
-				<ThemeProvider>{content}</ThemeProvider>
-			) : (
 				<Providers>
-					{content}
-					{/* {import.meta.env.MODE === "development" && (
-            <>
-              <ReactQueryDevtools position="bottom" buttonPosition="bottom-left" theme="system" initialIsOpen={false} />
-              <TanStackRouterDevtools position="bottom-left" />
-            </>
-          )} */}
+					<ThemeProvider>{content}</ThemeProvider>
 				</Providers>
+			) : (
+				<Providers>{content}</Providers>
 			)}
 		</AudioProvider>
 	);

@@ -1,31 +1,34 @@
-import { loadPyodide as _loadPyodide, PyodideInterface } from "pyodide";
+import type { PyodideInterface } from "pyodide";
 
 let pyodide: PyodideInterface | null = null;
 
 async function init() {
-  if (pyodide) return pyodide;
+	if (pyodide) return pyodide;
 
-  pyodide = await _loadPyodide({
-    indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
-  });
+	const { loadPyodide } = await import("pyodide");
 
-  await pyodide.loadPackage(["micropip", "packaging"]);
+	pyodide = await loadPyodide({
+		indexURL: "https://cdn.jsdelivr.net/pyodide/v0.29.3/full/",
+	});
 
-  await pyodide.runPythonAsync(`
+	await pyodide.loadPackage(["micropip", "packaging"]);
+
+	await pyodide.runPythonAsync(`
 import micropip
 await micropip.install("black", keep_going=True)
   `);
 
-  return pyodide;
+	return pyodide;
 }
 
 self.onmessage = async (e: MessageEvent) => {
-  const { code, id } = e.data;
-  try {
-    const py = await init();
-    py.globals.set("code_to_format", code);
+	const { code, id } = e.data;
 
-    const result = await py.runPythonAsync(`
+	try {
+		const py = await init();
+		py.globals.set("code_to_format", code);
+
+		const result = await py.runPythonAsync(`
 import black
 
 def normalize_indent(source: str) -> str:
@@ -61,19 +64,24 @@ except Exception:
 output
     `);
 
-    const [status, formatted] = result.toJs() as [string, string];
+		const [status, formatted] = result.toJs() as [string, string];
 
-    if (status === "syntax_error") {
-      self.postMessage({
-        id,
-        result: formatted,
-        error: "Code có lỗi cú pháp, không thể format hoàn toàn. Đã chuẩn hóa indent.",
-        syntaxError: true,
-      });
-    } else {
-      self.postMessage({ id, result: formatted, error: null });
-    }
-  } catch (e: any) {
-    self.postMessage({ id, result: code, error: e.message });
-  }
+		if (status === "syntax_error") {
+			self.postMessage({
+				id,
+				result: formatted,
+				error:
+					"Code có lỗi cú pháp, không thể format hoàn toàn. Đã chuẩn hóa indent.",
+				syntaxError: true,
+			});
+		} else {
+			self.postMessage({ id, result: formatted, error: null });
+		}
+	} catch (e: any) {
+		self.postMessage({
+			id,
+			result: code,
+			error: e?.message ?? "Unknown error",
+		});
+	}
 };
