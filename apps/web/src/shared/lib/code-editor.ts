@@ -185,17 +185,46 @@ function normalizeIndent(line: string): string {
   return " ".repeat(normalized) + stripped;
 }
 
-export function formatPython(code: string): string {
+let ruffPromise: Promise<any> | null = null;
+
+function loadRuff(): Promise<any> {
+  if (ruffPromise) return ruffPromise;
+  ruffPromise = import("@astral-sh/ruff-wasm-web").catch((err) => {
+    ruffPromise = null;
+    throw err;
+  });
+  return ruffPromise;
+}
+
+async function formatPythonRuff(code: string): Promise<string> {
+  const { Workspace, defaultSettings } = await loadRuff();
+
+  const workspace = new Workspace({
+    ...defaultSettings,
+    format: {
+      indent_style: "space",
+      indent_width: 4,
+      line_ending: "lf",
+      magic_trailing_comma: true,
+      quote_style: "double",
+      skip_magic_trailing_comma: false,
+    },
+  });
+
+  const result = workspace.format({ source: code });
+  workspace.free();
+  return result.source;
+}
+
+function formatPythonLocal(code: string): string {
   const processed = code.split("\n").map((raw) => {
     let line = normalizeIndent(raw).trimEnd();
     const trimmed = line.trimStart();
-
     if (trimmed && !trimmed.startsWith("#")) {
       line = fixCommaSpacing(line);
       line = fixOperatorSpacing(line);
       line = fixCallSpacing(line);
     }
-
     return line;
   });
 
@@ -215,6 +244,14 @@ export function formatPython(code: string): string {
   while (clamped.length > 0 && clamped[clamped.length - 1] === "") clamped.pop();
 
   return clamped.join("\n") + "\n";
+}
+
+async function formatPython(code: string): Promise<string> {
+  try {
+    return await formatPythonRuff(code);
+  } catch {
+    return formatPythonLocal(code);
+  }
 }
 
 function formatCStyle(code: string): string {
@@ -246,16 +283,27 @@ async function formatJavaScript(code: string): Promise<string> {
   });
 }
 
+let javaPluginPromise: Promise<any> | null = null;
+
+function loadJavaPlugin(): Promise<any> {
+  if (javaPluginPromise) return javaPluginPromise;
+  javaPluginPromise = import("prettier-plugin-java").catch((err) => {
+    javaPluginPromise = null;
+    throw err;
+  });
+  return javaPluginPromise;
+}
+
 async function formatJava(code: string): Promise<string> {
   try {
-    const res = await fetch("/api/format/java", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ code }),
+    const javaPlugin = await loadJavaPlugin();
+    return await prettier.format(code, {
+      parser: "java",
+      plugins: [javaPlugin],
+      printWidth: 100,
+      tabWidth: 4,
+      useTabs: false,
     });
-    if (!res.ok) throw new Error("Server error");
-    const { formatted } = await res.json();
-    return formatted;
   } catch {
     return formatCStyle(code);
   }
@@ -303,7 +351,7 @@ export async function formatCode(code: string, language: Language): Promise<Form
   try {
     switch (language) {
       case Language.PYTHON:
-        return { formatted: formatPython(code) };
+        return { formatted: await formatPython(code) };
       case Language.JAVASCRIPT:
         return { formatted: await formatJavaScript(code) };
       case Language.CPP:
