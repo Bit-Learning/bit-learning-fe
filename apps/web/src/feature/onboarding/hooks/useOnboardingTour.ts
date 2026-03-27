@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import type { Step, EventData, Controls } from "react-joyride";
 
 const TOUR_STORAGE_KEY = "bitlearning_onboarding_completed";
@@ -59,6 +59,26 @@ export function useOnboardingTour() {
 		return !localStorage.getItem(TOUR_STORAGE_KEY);
 	});
 	const [stepIndex, setStepIndex] = useState(0);
+
+	// Safety net: if the tour is running but the current step's target element
+	// doesn't exist in the DOM after mount, stop the tour to prevent an invisible
+	// overlay from blocking all user interactions (especially the profile dropdown).
+	useEffect(() => {
+		if (!run) return;
+
+		const timer = setTimeout(() => {
+			const currentStep = steps[stepIndex];
+			if (
+				currentStep &&
+				!document.querySelector(currentStep.target as string)
+			) {
+				setRun(false);
+				localStorage.setItem(TOUR_STORAGE_KEY, "true");
+			}
+		}, 2000);
+
+		return () => clearTimeout(timer);
+	}, [run, stepIndex]);
 
 	const handleEvent = useCallback((data: EventData, _controls: Controls) => {
 		const { status, index, type } = data;

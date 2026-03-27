@@ -279,7 +279,7 @@ const AllCoursesContent: React.FC = () => {
 							{courses.map((course: CoursePreview) => (
 								<Card
 									key={course.id}
-									className="group cursor-pointer overflow-hidden p-4 transition-all duration-300 hover:shadow-xl border-2 border-blue-200 dark:border-slate-700"
+									className="group cursor-pointer overflow-hidden p-4 transition-all duration-300 hover:shadow-xl border-2 border-gray-200 dark:border-slate-700"
 									onMouseEnter={() => handleMouseEnter(course.id)}
 									onClick={() =>
 										navigate({

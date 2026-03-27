@@ -345,14 +345,13 @@ export default function InstructorsPage() {
         .card-avatar-wrap {
           position: relative;
           z-index: 10;
-          margin: -32px 0 0 20px;
+          margin: 5px 0 0 20px;
           width: fit-content;
         }
         .card-avatar {
           width: 64px !important;
           height: 64px !important;
           border: 3px solid #fff;
-          box-shadow: 0 4px 12px rgba(0,0,0,.15);
         }
         .avatar-fallback {
           background: linear-gradient(135deg, var(--accent), var(--accent2)) !important;
