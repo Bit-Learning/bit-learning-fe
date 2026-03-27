@@ -5,6 +5,7 @@ import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useMyExams } from "../queries/useExam";
 import { Button } from "@workspace/ui/components/Button";
 import { Pagination } from "@/shared/components/Pagination";
+import { Input } from "@workspace/ui/components/Input";
 
 const MyExamsContent: React.FC = () => {
 	const navigate = useNavigate();

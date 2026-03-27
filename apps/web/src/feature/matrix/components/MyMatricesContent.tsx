@@ -8,6 +8,7 @@ import MatrixCard from "./MatrixCard";
 import MatrixFormModal from "./MatrixFormModal";
 import type { TMatrixResponse } from "../types/matrix.type";
 import { Pagination } from "@/shared/components/Pagination";
+import { Input } from "@workspace/ui/components/Input";
 
 const MyMatricesContent: React.FC = () => {
 	const navigate = useNavigate();

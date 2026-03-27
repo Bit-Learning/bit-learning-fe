@@ -1,15 +1,5 @@
 import React, { useState } from "react";
-import {
-	Search,
-	Code2,
-	Hash,
-	Heart,
-	RefreshCw,
-	CheckCircle,
-	Send,
-	TrendingUp,
-	Users,
-} from "lucide-react";
+import { Search, Code2, Hash, Heart, RefreshCw, CheckCircle, Send, TrendingUp, Users } from "lucide-react";
 import { Input } from "@workspace/ui/components/Input";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
