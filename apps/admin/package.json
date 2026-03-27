@@ -76,7 +76,7 @@
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.2.1",
 		"@vitejs/plugin-react-swc": "^4.1.0",
-		"knip": "^5.64.2",
+		"knip": "^5.88.1",
 		"typescript": "~5.9.3",
 		"vite": "^7.1.9",
 		"vite-plugin-imagemin": "^0.6.1"
