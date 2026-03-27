@@ -82,17 +82,17 @@ const ExamListContent: React.FC = () => {
   const statusConfig = {
     OPEN: {
       label: "Đang mở",
-      color: "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-200 dark:border-blue-800",
+      color: "bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 border-blue-100 dark:border-blue-800",
     },
     UPCOMING: {
       label: "Sắp diễn ra",
       color:
-        "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-200 dark:border-amber-800",
+        "bg-amber-100 dark:bg-amber-900/50 text-amber-700 dark:text-amber-300 border-amber-100 dark:border-amber-800",
     },
     COMPLETED: {
       label: "Đã hoàn thành",
       color:
-        "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800",
+        "bg-emerald-100 dark:bg-emerald-900/50 text-emerald-700 dark:text-emerald-300 border-emerald-100 dark:border-emerald-800",
     },
   };
 
@@ -127,7 +127,7 @@ const ExamListContent: React.FC = () => {
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
                 placeholder="Tìm kiếm theo tên đề thi hoặc mã đề..."
-                className="pl-12 h-12 text-base shadow-sm border-slate-400 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20"
+                className="pl-12 h-12 text-base shadow-sm border-slate-200 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20"
               />
             </div>
           </div>

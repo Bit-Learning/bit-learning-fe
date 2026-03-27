@@ -97,46 +97,42 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </Button>
         </div>
 
-        <div className="bg-white px-6 py-4 mb-6 rounded-md border-2 border-slate-400 overflow-hidden">
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 py-5 border-2"
+              placeholder="Tìm kiếm bài tập..."
+            />
+          </div>
           <div>
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                <Input
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                  className="pl-10 py-5 border-2"
-                  placeholder="Tìm kiếm bài tập..."
-                />
-              </div>
-              <div>
-                <select
-                  value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="all">Độ khó: Tất cả</option>
-                  <option value="EASY">Dễ</option>
-                  <option value="MEDIUM">Trung bình</option>
-                  <option value="HARD">Khó</option>
-                </select>
-              </div>
-              <div>
-                <select
-                  value={visibility}
-                  onChange={(e) => setVisibility(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-                >
-                  <option value="all">Trạng thái: Tất cả</option>
-                  <option value="public">Công khai</option>
-                  <option value="private">Nháp</option>
-                </select>
-              </div>
-            </div>
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">Độ khó: Tất cả</option>
+              <option value="EASY">Dễ</option>
+              <option value="MEDIUM">Trung bình</option>
+              <option value="HARD">Khó</option>
+            </select>
+          </div>
+          <div>
+            <select
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value)}
+              className="px-4 py-2.5 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+            >
+              <option value="all">Trạng thái: Tất cả</option>
+              <option value="public">Công khai</option>
+              <option value="private">Nháp</option>
+            </select>
           </div>
         </div>
 
-        <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+        <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
           <div className="px-0">
             {isLoading ? (
               <div className="p-4">
@@ -146,7 +142,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
               <>
                 <table className="w-full text-left">
                   <thead>
-                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-400 dark:border-slate-800">
+                    <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
                       <th className="px-6 py-4 text-md font-semibold text-slate-800 dark:text-slate-400 uppercase tracking-wider">
                         Tiêu đề
                       </th>

@@ -210,7 +210,7 @@ const ExamDetailContent: React.FC = () => {
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md p-4 space-y-2">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4 space-y-2">
               <button
                 onClick={() => handleDownload("pdf")}
                 disabled={downloadExam.isPending}
@@ -237,7 +237,7 @@ const ExamDetailContent: React.FC = () => {
               </button>
             </div>
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4">
               <button
                 onClick={handleTogglePublish}
                 disabled={isPublishing}
@@ -269,7 +269,7 @@ const ExamDetailContent: React.FC = () => {
               </div>
             )}
 
-            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md p-4">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4">
               <h3 className="font-bold text-slate-900 dark:text-white mb-4">THÔNG SỐ ĐỀ THI</h3>
               <div className="space-y-3">
                 <div className="flex items-center justify-between">
@@ -300,7 +300,7 @@ const ExamDetailContent: React.FC = () => {
           </div>
 
           <div className="flex-1 min-w-0">
-            <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md overflow-hidden">
+            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden">
               <div className="border-b border-slate-200 dark:border-slate-800 flex">
                 <button
                   onClick={() => setActiveTab("questions")}

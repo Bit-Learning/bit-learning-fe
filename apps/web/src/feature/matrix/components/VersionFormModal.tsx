@@ -197,7 +197,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                   <button
                     type="button"
                     onClick={addGroup}
-                    className="cursor-pointer w-full py-2.5 border-2 border-dashed border-slate-400 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600 rounded-md text-md font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all flex items-center justify-center gap-2"
+                    className="cursor-pointer w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 dark:hover:border-blue-600 rounded-md text-md font-medium text-slate-600 dark:text-slate-400 hover:text-blue-600 dark:hover:text-blue-400 transition-all flex items-center justify-center gap-2"
                   >
                     <Plus className="h-4 w-4" />
                     Thêm chương

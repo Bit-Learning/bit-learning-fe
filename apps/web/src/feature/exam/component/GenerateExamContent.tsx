@@ -208,10 +208,10 @@ const GenerateExamFlow: React.FC = () => {
 
       {renderStepIndicator()}
 
-      <div className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-md overflow-hidden mb-6">
+      <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md overflow-hidden mb-6">
         <table className="w-full text-left border-collapse">
           <thead>
-            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-400 dark:border-slate-800">
+            <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
               <th className="px-6 py-4 text-md font-bold uppercase tracking-wider text-slate-800">Bài học / Chủ đề</th>
               <th className="px-6 py-4 text-md font-bold uppercase tracking-wider text-slate-800">Trạng thái</th>
               <th className="px-6 py-4 text-md font-bold uppercase tracking-wider text-slate-800">Chi tiết số lượng</th>

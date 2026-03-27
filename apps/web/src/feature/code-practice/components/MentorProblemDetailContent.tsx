@@ -64,7 +64,7 @@ const MentorProblemDetailContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <header className="bg-white dark:bg-slate-900 border-b border-slate-400 dark:border-slate-800 sticky top-0 z-10">
+      <header className="bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 sticky top-0 z-10">
         <div className="mx-auto px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <Button
@@ -102,7 +102,7 @@ const MentorProblemDetailContent: React.FC = () => {
         </div>
       </header>
 
-      <div className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-400 dark:border-slate-800">
+      <div className="bg-slate-50 dark:bg-slate-900/50 border-b border-slate-200 dark:border-slate-800">
         <div className="mx-auto px-8 py-3 flex items-center gap-6 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-slate-500 dark:text-slate-400 font-medium">Độ khó:</span>
@@ -208,9 +208,9 @@ const MentorProblemDetailContent: React.FC = () => {
                     {allTestCases?.map((testcase, index) => (
                       <Card
                         key={testcase.id}
-                        className="bg-white p-0 dark:bg-slate-900 border-slate-400 dark:border-slate-800 group"
+                        className="bg-white p-0 dark:bg-slate-900 border-slate-200 dark:border-slate-800 group"
                       >
-                        <div className="px-4 py-3 border-b border-slate-400 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
+                        <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 flex justify-between items-center">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-semibold">Test Case #{index + 1}</span>
 

@@ -580,7 +580,7 @@ const QuizAttemptContent: React.FC = () => {
                   </div>
                 </div>
 
-                <div className="pt-4 border-t-3 border-slate-400 dark:border-slate-700">
+                <div className="pt-4 border-t-3 border-slate-200 dark:border-slate-700">
                   <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3">Danh sách câu hỏi</h3>
 
                   <div className="grid grid-cols-5 gap-2 mb-4">

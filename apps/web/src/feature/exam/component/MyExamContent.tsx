@@ -5,6 +5,7 @@ import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useMyExams } from "../queries/useExam";
 import { Button } from "@workspace/ui/components/Button";
 import { Pagination } from "@/shared/components/Pagination";
+import { Input } from "@workspace/ui/components/Input";
 
 const MyExamsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -35,7 +36,7 @@ const MyExamsContent: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 p-8 bg-slate-50 dark:bg-slate-950">
+    <div className="flex-1 p-8 bg-slate-50 dark:bg-slate-950 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">Đề thi của tôi</h1>
@@ -53,17 +54,16 @@ const MyExamsContent: React.FC = () => {
       </div>
 
       <div className="relative mb-6">
-        <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-        <input
-          className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-400 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
-          placeholder="Tìm kiếm theo tên đề thi, mã đề hoặc ngôn ngữ..."
-          type="text"
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+        <Input
+          placeholder="Tìm kiếm nội dung câu hỏi..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
+          className="pl-10 py-5 border-2"
         />
       </div>
 
-      <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+      <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -96,7 +96,7 @@ const MyExamsContent: React.FC = () => {
             <div className="overflow-x-auto">
               <table className="w-full text-left border-collapse">
                 <thead>
-                  <tr className="border-b border-gray-400 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
+                  <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
                     <th className="px-6 py-4 text-xs font-bold text-slate-800 uppercase tracking-wider">
                       Thông tin đề thi
                     </th>

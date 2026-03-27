@@ -185,48 +185,46 @@ const MyQuestionsContent: React.FC = () => {
             </div>
           </div>
         </div>
-        <div className="bg-white px-6 py-4 rounded-md border-2 border-slate-400 overflow-hidden">
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
-              <Input
-                placeholder="Tìm kiếm nội dung câu hỏi..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-10 py-5 border-2"
-              />
-            </div>
-            <select
-              value={difficultyFilter}
-              onChange={(e) => setDifficultyFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">Độ khó: Tất cả</option>
-              <option value="EASY">Dễ</option>
-              <option value="MEDIUM">Trung bình</option>
-              <option value="HARD">Khó</option>
-            </select>
-            <select
-              value={typeFilter}
-              onChange={(e) => setTypeFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">Loại: Tất cả</option>
-              <option value="MCQ">Trắc nghiệm</option>
-              <option value="ESSAY">Tự luận</option>
-            </select>
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-            >
-              <option value="all">Trạng thái: Tất cả</option>
-              <option value="NONE">Chưa gửi</option>
-              <option value="PENDING">Chờ duyệt</option>
-              <option value="APPROVED">Đã duyệt</option>
-              <option value="REJECTED">Từ chối</option>
-            </select>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
+            <Input
+              placeholder="Tìm kiếm nội dung câu hỏi..."
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              className="pl-10 py-5 border-2"
+            />
           </div>
+          <select
+            value={difficultyFilter}
+            onChange={(e) => setDifficultyFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="all">Độ khó: Tất cả</option>
+            <option value="EASY">Dễ</option>
+            <option value="MEDIUM">Trung bình</option>
+            <option value="HARD">Khó</option>
+          </select>
+          <select
+            value={typeFilter}
+            onChange={(e) => setTypeFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="all">Loại: Tất cả</option>
+            <option value="MCQ">Trắc nghiệm</option>
+            <option value="ESSAY">Tự luận</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+          >
+            <option value="all">Trạng thái: Tất cả</option>
+            <option value="NONE">Chưa gửi</option>
+            <option value="PENDING">Chờ duyệt</option>
+            <option value="APPROVED">Đã duyệt</option>
+            <option value="REJECTED">Từ chối</option>
+          </select>
         </div>
 
         {isLoading ? (
@@ -247,7 +245,7 @@ const MyQuestionsContent: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white my-6 rounded-md border-2 border-slate-400 overflow-hidden">
+            <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-300 bg-gray-50">

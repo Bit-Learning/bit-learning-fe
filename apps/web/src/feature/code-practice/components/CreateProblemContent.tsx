@@ -281,7 +281,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
         <Button
           variant="outline"
           size="lg"
-          className="gap-2 mb-4 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          className="gap-2 mb-4 border-slate-200 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
           onClick={() => navigate({ to: isEditMode ? `/mentor/problem/${problemId}/` : "/mentor/problem" })}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
@@ -554,7 +554,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                   )}
                 </div>
 
-                <div className="bg-gray-50 border-2 border-gray-400 p-6 rounded-md">
+                <div className="bg-gray-50 border-2 border-slate-200 p-6 rounded-md">
                   <h3 className="text-base font-semibold text-gray-900 mb-4">Xem trước khai báo hàm</h3>
                   <div className="space-y-3">
                     <div>
