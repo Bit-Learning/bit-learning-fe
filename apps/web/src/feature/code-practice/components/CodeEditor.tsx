@@ -27,7 +27,13 @@ import {
   RunCodeResponse,
   DebugResponse,
 } from "../types/coding.type";
-import { formatCode, highlightCode, LANGUAGE_EXTENSIONS, validatePythonIndentation } from "@/shared/lib/code-editor";
+import {
+  formatCode,
+  highlightCode,
+  highlightCodeSync,
+  LANGUAGE_EXTENSIONS,
+  validatePythonIndentation,
+} from "@/shared/lib/code-editor";
 import { EditorFile, FileTab } from "./FileTab";
 import { cn } from "@workspace/ui/lib/utils";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
@@ -44,6 +50,7 @@ interface CodeEditorProps {
   isSubmitting: boolean;
   isRunning: boolean;
   isDebugging: boolean;
+  isTemplateLoading?: boolean;
   debugLines: string;
   debugVars: string;
   onLanguageChange: (language: Language) => void;
@@ -68,6 +75,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   isSubmitting,
   isRunning,
   isDebugging,
+  isTemplateLoading = false,
   debugLines,
   debugVars,
   onLanguageChange,
@@ -82,7 +90,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onCloseResult,
 }) => {
   const [files, setFiles] = useState<EditorFile[]>([
-    { id: "1", name: `main${LANGUAGE_EXTENSIONS[language]}`, content: code, language },
+    { id: "1", name: `main${LANGUAGE_EXTENSIONS[language]}`, content: "", language },
   ]);
   const [activeFileId, setActiveFileId] = useState("1");
   const [copied, setCopied] = useState(false);
@@ -118,12 +126,22 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     [activeFileId, onCodeChange, notifyFilesChange],
   );
 
+  const prevCodeRef = useRef(code);
+
   useEffect(() => {
+    if (prevCodeRef.current === code) return;
+    prevCodeRef.current = code;
+
     if (isInternalChange.current) {
       isInternalChange.current = false;
       return;
     }
-    setFiles((prev) => prev.map((f) => (f.id === activeFileId ? { ...f, content: code } : f)));
+
+    setFiles((prev) => {
+      const active = prev.find((f) => f.id === activeFileId);
+      if (active?.content === code) return prev;
+      return prev.map((f) => (f.id === activeFileId ? { ...f, content: code } : f));
+    });
   }, [code]); // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
@@ -170,10 +188,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     if (debugResult) setBottomTab("debug");
   }, [debugResult]);
 
-  const highlightedCode = useMemo(
-    () => highlightCode(activeFile?.content ?? "", activeFile?.language ?? language),
-    [activeFile?.content, activeFile?.language],
-  );
+  const [highlightedCode, setHighlightedCode] = useState<string>(() => highlightCodeSync(activeFile?.content ?? ""));
+
+  useEffect(() => {
+    let cancelled = false;
+    highlightCode(activeFile?.content ?? "", activeFile?.language ?? language).then((html) => {
+      if (!cancelled) setHighlightedCode(html);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [activeFile?.content, activeFile?.language, language]);
 
   const handleFormat = useCallback(async () => {
     setIsFormatting(true);
@@ -266,22 +291,24 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       return next;
     });
     setActiveFileId(newFile.id);
+    isInternalChange.current = true;
   }, [files.length, activeFile?.language, notifyFilesChange]);
 
   const handleDeleteFile = useCallback(
     (id: string) => {
       if (files.length === 1) return;
-      const newActiveId = activeFileId === id ? (files[0]?.id === id ? files[1]?.id! : files[0]?.id!) : activeFileId;
-      setFiles((prev) => {
-        const next = prev.filter((f) => f.id !== id);
-        notifyFilesChange(next, newActiveId);
-        return next;
-      });
+      const deletedIndex = files.findIndex((f) => f.id === id);
+      const remaining = files.filter((f) => f.id !== id);
+
+      const newActiveId =
+        activeFileId === id ? (remaining[deletedIndex]?.id ?? remaining[deletedIndex - 1]?.id!) : activeFileId;
+
+      setFiles(remaining);
+      notifyFilesChange(remaining, newActiveId);
       if (activeFileId === id) setActiveFileId(newActiveId);
     },
     [files, activeFileId, notifyFilesChange],
   );
-
   const handleRenameFile = useCallback(
     (id: string, newName: string) => {
       setFiles((prev) => {
@@ -329,7 +356,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         </div>
         <div className="flex flex-1 overflow-x-auto">
-          {files.map((file) => (
+          {files.map((file, index) => (
             <FileTab
               key={file.id}
               file={file}
@@ -337,7 +364,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               onClick={() => setActiveFileId(file.id)}
               onDelete={() => handleDeleteFile(file.id)}
               onRename={(newName) => handleRenameFile(file.id, newName)}
-              canDelete={files.length > 1}
+              canDelete={files.length > 1 && index !== 0}
+              canRename={index !== 0} // ← thêm
             />
           ))}
         </div>
@@ -419,6 +447,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           </div>
         </div>
         <div className="relative flex-1 h-full bg-gray-900 font-mono text-sm overflow-hidden">
+          {isTemplateLoading && (
+            <div className="absolute inset-0 p-4 z-10 bg-gray-900 space-y-3">
+              {[70, 50, 85, 40, 60, 75, 45].map((w, i) => (
+                <div
+                  key={i}
+                  className="h-4 rounded bg-gray-700 animate-pulse"
+                  style={{ width: `${w}%`, animationDelay: `${i * 60}ms` }}
+                />
+              ))}
+            </div>
+          )}
           <pre
             ref={highlightRef}
             className="absolute inset-0 p-4 pointer-events-none whitespace-pre overflow-auto m-0"

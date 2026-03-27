@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { Clock, HardDrive, Loader2, Terminal, FileText, Hash, History, ChevronLeft } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
@@ -31,6 +31,9 @@ const ProblemSolveContent: React.FC = () => {
 
   const [language, setLanguage] = useState<Language>(Language.PYTHON);
   const [code, setCode] = useState<string>("");
+  const [isTemplateLoading, setIsTemplateLoading] = useState(true);
+  // Cache templates per language — switching back is instant, no refetch needed
+  const templateCache = useRef<Partial<Record<Language, string>>>({});
   const [leftTab, setLeftTab] = useState<"description" | "submissions">("description");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [runResult, setRunResult] = useState<RunCodeResponse | null>(null);
@@ -58,9 +61,22 @@ const ProblemSolveContent: React.FC = () => {
 
   const submissions = submissionsData?.content || [];
 
+  const handleLanguageChange = (lang: Language) => {
+    const cached = templateCache.current[lang];
+    if (cached !== undefined) {
+      setCode(cached);
+      setLanguage(lang);
+    } else {
+      setIsTemplateLoading(true);
+      setLanguage(lang);
+    }
+  };
+
   useEffect(() => {
     if (problem?.codeTemplate) {
+      templateCache.current[language] = problem.codeTemplate;
       setCode(problem.codeTemplate);
+      setIsTemplateLoading(false);
     }
   }, [problem?.codeTemplate, language]);
 
@@ -335,6 +351,7 @@ const ProblemSolveContent: React.FC = () => {
           <CodeEditor
             language={language}
             code={code}
+            isTemplateLoading={isTemplateLoading}
             problem={{ timeLimitMs: problem.timeLimitMs, memoryLimitMb: problem.memoryLimitMb }}
             submissionResult={submissionResult ?? null}
             runResult={runResult}
@@ -344,7 +361,7 @@ const ProblemSolveContent: React.FC = () => {
             isDebugging={debugCode.isPending}
             debugLines={debugLines}
             debugVars={debugVars}
-            onLanguageChange={setLanguage}
+            onLanguageChange={handleLanguageChange}
             onCodeChange={setCode}
             onFilesChange={handleFilesChange}
             onDebugLinesChange={setDebugLines}
