@@ -94,7 +94,7 @@ const StudentProblemListContent: React.FC = () => {
 							value={search}
 							onChange={(e) => setSearch(e.target.value)}
 							placeholder="Tìm kiếm bài tập theo tên..."
-							className="pl-10 h-10 bg-white border-gray-400"
+							className="pl-10 h-10 bg-white border-gray-200"
 						/>
 					</div>
 
@@ -102,7 +102,7 @@ const StudentProblemListContent: React.FC = () => {
 						<select
 							value={difficulty}
 							onChange={(e) => setDifficulty(e.target.value)}
-							className="w-full h-10 px-3 text-sm rounded-md border border-gray-400 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
+							className="w-full h-10 px-3 text-sm rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
 						>
 							<option value="all">Tất cả độ khó</option>
 							<option value="EASY">Dễ</option>
@@ -121,12 +121,12 @@ const StudentProblemListContent: React.FC = () => {
 						</Button>
 					</div>
 				</div>
-				<Card className="bg-white p-0 border-2 border-gray-400 rounded-md">
+				<Card className="bg-white p-0 border-2 border-gray-200 rounded-md">
 					<CardContent className="px-0">
 						<div className="overflow-x-auto">
 							<table className="w-full text-left border-collapse">
 								<thead>
-									<tr className="bg-gray-50 border-b border-gray-400">
+									<tr className="bg-gray-50 border-b border-gray-200">
 										<th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider w-35">
 											Trạng thái
 										</th>
@@ -224,7 +224,7 @@ const StudentProblemListContent: React.FC = () => {
 							</table>
 						</div>
 
-						<div className="px-6 border-t border-gray-400 flex items-center justify-between">
+						<div className="px-6 border-t border-gray-200 flex items-center justify-between">
 							<p className="text-sm text-gray-800 py-4">
 								Hiển thị{" "}
 								<span className="font-medium text-gray-900">

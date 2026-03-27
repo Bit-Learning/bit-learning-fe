@@ -83,7 +83,7 @@ const Header: React.FC = () => {
 		<header
 			className={cn(
 				"sticky top-0 left-0 right-0 z-50 transition-all duration-300",
-				"bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-400 dark:border-gray-800/50",
+				"bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800/50",
 				isScrolled && "shadow-lg",
 			)}
 		>
