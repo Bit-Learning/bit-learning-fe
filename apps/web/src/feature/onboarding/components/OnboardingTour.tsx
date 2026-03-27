@@ -21,6 +21,7 @@ const OnboardingTour: React.FC = () => {
 				textColor: "#1e293b",
 				showProgress: true,
 				spotlightRadius: 16,
+				overlayColor: "rgba(0, 0, 0, 0.5)",
 				buttons: ["back", "close", "primary", "skip"],
 			}}
 			locale={{
