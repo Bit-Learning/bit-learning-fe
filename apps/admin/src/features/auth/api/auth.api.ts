@@ -5,17 +5,20 @@ import type {
 	TAdminLoginRequest,
 	TAdminLoginResponse,
 	TAdminUser,
-	TRefreshTokenRequest,
 } from "../types/auth.types";
 
 export const authApi = {
-  adminLogin: (requestBody: TAdminLoginRequest): Promise<AxiosResponse<{ data: TAdminLoginResponse }>> =>
-    api.post(`${endpoints.AUTH}/login-user`, requestBody),
+	adminLogin: (
+		requestBody: TAdminLoginRequest,
+	): Promise<AxiosResponse<{ data: TAdminLoginResponse }>> =>
+		api.post(`${endpoints.AUTH}/login-user`, requestBody),
 
-  refreshToken: (requestBody: TRefreshTokenRequest): Promise<AxiosResponse<{ data: TAdminLoginResponse }>> =>
-    api.post(`${endpoints.AUTH}/refresh-token`, requestBody),
+	refreshToken: (): Promise<AxiosResponse<{ data: TAdminLoginResponse }>> =>
+		api.post(`${endpoints.AUTH}/refresh-token`, {}),
 
-  getAdminProfile: (): Promise<AxiosResponse<{ data: TAdminUser }>> => api.get(`${endpoints.ACCOUNT}/profile`),
+	getAdminProfile: (): Promise<AxiosResponse<{ data: TAdminUser }>> =>
+		api.get(`${endpoints.ACCOUNT}/profile`),
 
-  logout: (): Promise<AxiosResponse<any>> => api.post(`${endpoints.AUTH}/logout`),
+	logout: (): Promise<AxiosResponse<any>> =>
+		api.post(`${endpoints.AUTH}/logout`),
 };

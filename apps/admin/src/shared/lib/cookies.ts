@@ -1,44 +1,29 @@
 import Cookies from "js-cookie";
-import { ACCESS_TOKEN, REFRESH_TOKEN } from "@/shared/constants/keys";
+import { ACCESS_TOKEN } from "@/shared/constants/keys";
+
+// Generic cookie helpers
+export const getCookie = (name: string): string | undefined =>
+	Cookies.get(name);
+
+export const setCookie = (name: string, value: string, maxAge?: number) => {
+	const isProduction = window.location.protocol === "https:";
+	Cookies.set(name, value, {
+		expires: maxAge ? maxAge / 86400 : undefined, // convert seconds to days
+		secure: isProduction,
+		sameSite: "Strict",
+	});
+};
+
+export const removeCookie = (name: string) => {
+	Cookies.remove(name);
+};
 
 /**
- * Cookie utility functions using manual document.cookie approach
- * Replaces js-cookie dependency for better consistency
+ * Sets the access token in a client-side cookie.
+ * Note: Refresh token is stored in an HttpOnly cookie by the backend,
+ * so we only manage the access token on the client side.
  */
-const DEFAULT_MAX_AGE = 60 * 60 * 24 * 7; // 7 days
-/**
- * Get a cookie value by name
- */
-export function getCookie(name: string): string | undefined {
-	if (typeof document === "undefined") return undefined;
-	const value = `; ${document.cookie}`;
-	const parts = value.split(`; ${name}=`);
-	if (parts.length === 2) {
-		const cookieValue = parts.pop()?.split(";").shift();
-		return cookieValue;
-	}
-	return undefined;
-}
-/**
- * Set a cookie with name, value, and optional max age
- */
-export function setCookie(
-	name: string,
-	value: string,
-	maxAge: number = DEFAULT_MAX_AGE,
-): void {
-	if (typeof document === "undefined") return;
-	document.cookie = `${name}=${value}; path=/; max-age=${maxAge}`;
-}
-/**
- * Remove a cookie by setting its max age to 0
- */
-export function removeCookie(name: string): void {
-	if (typeof document === "undefined") return;
-	document.cookie = `${name}=; path=/; max-age=0`;
-}
-
-export const setAuthTokens = (accessToken: string, refreshToken: string) => {
+export const setAccessToken = (accessToken: string) => {
 	// Only use secure cookies in production (HTTPS)
 	const isProduction = window.location.protocol === "https:";
 
@@ -48,27 +33,44 @@ export const setAuthTokens = (accessToken: string, refreshToken: string) => {
 		sameSite: "Strict",
 	});
 
-	Cookies.set(REFRESH_TOKEN, refreshToken, {
-		expires: 180, // 6 months (30 * 6 = 180 days)
-		secure: isProduction,
-		sameSite: "Strict",
-	});
-
-	// Debug log to verify cookies are set
-	console.log("[Cookies] Tokens stored:", {
+	console.log("[Cookies] Access token stored:", {
 		hasAccessToken: !!Cookies.get(ACCESS_TOKEN),
-		hasRefreshToken: !!Cookies.get(REFRESH_TOKEN),
 		isProduction,
 	});
+};
+
+/**
+ * Legacy function for backward compatibility. Now only sets access token.
+ * Refresh token is managed by backend as HttpOnly cookie.
+ * @deprecated Use setAccessToken instead
+ */
+export const setAuthTokens = (accessToken: string, _refreshToken?: string) => {
+	setAccessToken(accessToken);
+
+	if (_refreshToken) {
+		console.warn(
+			"[Cookies] Refresh token parameter ignored - now managed by backend as HttpOnly cookie",
+		);
+	}
 };
 
 export const getAccessToken = (): string | undefined =>
 	Cookies.get(ACCESS_TOKEN);
 
-export const getRefreshToken = (): string | undefined =>
-	Cookies.get(REFRESH_TOKEN);
+/**
+ * Cannot read refresh token from client side as it's HttpOnly.
+ * @deprecated Refresh token is now HttpOnly and managed by backend
+ */
+export const getRefreshToken = (): string | undefined => {
+	console.warn(
+		"[Cookies] getRefreshToken called but refresh token is HttpOnly - returning undefined",
+	);
+	return undefined;
+};
 
 export const clearAuthTokens = () => {
 	Cookies.remove(ACCESS_TOKEN);
-	Cookies.remove(REFRESH_TOKEN);
+	console.log(
+		"[Cookies] Access token cleared. Refresh token will be cleared by backend.",
+	);
 };
