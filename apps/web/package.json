@@ -22,14 +22,14 @@
 		"@stomp/stompjs": "^7.3.0",
 		"@tanstack/react-query": "^5.95.2",
 		"@tanstack/react-query-devtools": "^5.91.3",
-		"@tanstack/react-router": "^1.168.4",
+		"@tanstack/react-router": "^1.168.7",
 		"@tanstack/react-router-devtools": "^1.132.37",
 		"@tanstack/router-plugin": "^1.145.4",
 		"@types/prismjs": "^1.26.6",
 		"@types/qrcode": "^1.5.6",
 		"@workspace/lib": "workspace:*",
 		"@workspace/ui": "workspace:*",
-		"@xyflow/react": "^12.10.1",
+		"@xyflow/react": "^12.10.2",
 		"axios": "^1.13.6",
 		"clsx": "^2.1.1",
 		"date-fns": "^4.1.0",
@@ -93,6 +93,6 @@
 		"typescript": "^5.9.2",
 		"vite": "^7.1.7",
 		"vite-plugin-imagemin": "^0.6.1",
-		"vitest": "^4.1.1"
+		"vitest": "^4.1.2"
 	}
 }
