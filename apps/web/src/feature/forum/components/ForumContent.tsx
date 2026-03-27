@@ -207,7 +207,7 @@ const ForumContent: React.FC = () => {
             </div>
             {isFocused && (
               <div className="px-4 pb-4 pt-2 flex items-center justify-between border-t border-gray-100">
-                <p className="text-xs text-gray-400">Markdown được hỗ trợ</p>
+                <p className="text-xs text-gray-400"></p>
                 <div className="flex gap-2">
                   <button
                     className="text-xs text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 font-medium"
@@ -219,7 +219,7 @@ const ForumContent: React.FC = () => {
                     Hủy
                   </button>
                   <button
-                    className={`flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg font-semibold transition-all ${
+                    className={`cursor-pointer flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg font-semibold transition-all ${
                       newPost.trim()
                         ? "bg-blue-600 text-white hover:bg-blue-700"
                         : "bg-gray-100 text-gray-400 cursor-not-allowed"
@@ -233,59 +233,59 @@ const ForumContent: React.FC = () => {
                 </div>
               </div>
             )}
-          </div>
 
-          <div className="bg-white rounded-md border border-slate-200 shadow-sm px-4 py-2.5 flex flex-wrap items-center gap-3">
-            <div className="flex items-center gap-0.5 bg-gray-100 rounded-xl p-1">
-              <button
-                onClick={() => {
-                  setSort("newest");
-                  setPage(0);
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  sort === "newest" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <Sparkles className="w-3.5 h-3.5" />
-                Mới nhất
-              </button>
-              <button
-                onClick={() => {
-                  setSort("popular");
-                  setPage(0);
-                }}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                  sort === "popular" ? "bg-white text-orange-500 shadow-sm" : "text-gray-500 hover:text-gray-700"
-                }`}
-              >
-                <Flame className="w-3.5 h-3.5" />
-                Phổ biến
-              </button>
-            </div>
-
-            <div className="h-4 w-px bg-gray-200" />
-
-            <div className="flex items-center gap-1">
-              <Clock className="w-3.5 h-3.5 text-gray-400 mr-0.5" />
-              {TIME_OPTIONS.map(({ key, label }) => (
+            <div className="bg-white border-t border-slate-200 shadow-sm px-4 py-2.5 flex flex-wrap items-center gap-3">
+              <div className="flex items-center gap-0.5 bg-gray-100 rounded-xl p-1">
                 <button
-                  key={key}
                   onClick={() => {
-                    setTime(key);
+                    setSort("newest");
                     setPage(0);
                   }}
-                  className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
-                    time === key
-                      ? "bg-blue-50 text-blue-600 border border-blue-100"
-                      : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    sort === "newest" ? "bg-white text-blue-600 shadow-sm" : "text-gray-500 hover:text-gray-700"
                   }`}
                 >
-                  {label}
+                  <Sparkles className="w-3.5 h-3.5" />
+                  Mới nhất
                 </button>
-              ))}
-            </div>
+                <button
+                  onClick={() => {
+                    setSort("popular");
+                    setPage(0);
+                  }}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                    sort === "popular" ? "bg-white text-orange-500 shadow-sm" : "text-gray-500 hover:text-gray-700"
+                  }`}
+                >
+                  <Flame className="w-3.5 h-3.5" />
+                  Phổ biến
+                </button>
+              </div>
 
-            <span className="ml-auto text-xs text-gray-400">{displayPosts.length} bài viết</span>
+              <div className="h-4 w-px bg-gray-200" />
+
+              <div className="flex items-center gap-1">
+                <Clock className="w-3.5 h-3.5 text-gray-400 mr-0.5" />
+                {TIME_OPTIONS.map(({ key, label }) => (
+                  <button
+                    key={key}
+                    onClick={() => {
+                      setTime(key);
+                      setPage(0);
+                    }}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
+                      time === key
+                        ? "bg-blue-50 text-blue-600 border border-blue-100"
+                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+
+              <span className="ml-auto text-xs text-gray-400">{displayPosts.length} bài viết</span>
+            </div>
           </div>
 
           <div className="space-y-3">

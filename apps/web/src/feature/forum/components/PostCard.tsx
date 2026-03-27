@@ -36,7 +36,7 @@ export const PostCard: React.FC<PostCardProps> = ({
   const fileAttachments = post.attachments.filter((a) => a.type !== "IMAGE");
 
   return (
-    <div className="bg-white rounded-md border border-blue-400 hover:shadow-md transition-shadow overflow-hidden">
+    <div className="bg-white rounded-md border shadow-sm hover:shadow-md transition-shadow overflow-hidden">
       <div className="flex items-center justify-between px-4 pt-4 pb-2">
         <div className="flex items-center gap-3">
           <AuthorAvatar author={post.author} size="md" />

@@ -36,7 +36,7 @@ const MyExamsContent: React.FC = () => {
   };
 
   return (
-    <div className="flex-1 p-8 bg-slate-50 dark:bg-slate-950">
+    <div className="flex-1 p-8 bg-slate-50 dark:bg-slate-950 min-h-screen">
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">Đề thi của tôi</h1>

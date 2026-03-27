@@ -86,10 +86,10 @@ const PostDetailContent: React.FC = () => {
   const currentUser = { id: 1, firstName: "Bạn", lastName: "" };
 
   const BackBar = (
-    <div className="border-b border-slate-200 sticky top-0 z-30 bg-white">
+    <div className=" sticky top-0 z-30 bg-white">
       <div className="max-w-7xl mx-auto px-6 h-12 flex items-center">
         <button
-          className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
+          className="cursor-pointer flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
           onClick={() => navigate({ to: "/forum" })}
         >
           <ArrowLeft className="w-4 h-4" />
