@@ -18,9 +18,18 @@ interface FileTabProps {
   onDelete: () => void;
   onRename: (newName: string) => void;
   canDelete: boolean;
+  canRename: boolean;
 }
 
-export const FileTab: React.FC<FileTabProps> = ({ file, isActive, onClick, onDelete, onRename, canDelete }) => {
+export const FileTab: React.FC<FileTabProps> = ({
+  file,
+  isActive,
+  onClick,
+  onDelete,
+  onRename,
+  canDelete,
+  canRename,
+}) => {
   const ext = LANGUAGE_EXTENSIONS[file.language];
   const baseName = file.name.endsWith(ext) ? file.name.slice(0, -ext.length) : file.name;
 
@@ -46,6 +55,7 @@ export const FileTab: React.FC<FileTabProps> = ({ file, isActive, onClick, onDel
   };
 
   const handleDoubleClick = (e: React.MouseEvent) => {
+    if (!canRename) return;
     e.stopPropagation();
     setDraft(baseName);
     setIsEditing(true);
