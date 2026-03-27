@@ -10,7 +10,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { toast } from "@/shared/components/Sonner";
 import { Bell } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 export function NotificationBell() {
@@ -121,8 +121,29 @@ export function NotificationBell() {
 		}
 	};
 
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	// Close dropdown when clicking outside
+	const handleClickOutside = useCallback((e: MouseEvent) => {
+		if (
+			containerRef.current &&
+			!containerRef.current.contains(e.target as Node)
+		) {
+			setIsOpen(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (isOpen) {
+			document.addEventListener("mousedown", handleClickOutside);
+		}
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [isOpen, handleClickOutside]);
+
 	return (
-		<div className="relative">
+		<div className="relative" ref={containerRef}>
 			<button
 				type="button"
 				onClick={() => setIsOpen(!isOpen)}
@@ -142,12 +163,6 @@ export function NotificationBell() {
 
 			{isOpen && (
 				<>
-					{/* Backdrop */}
-					<div
-						className="fixed inset-0 z-40"
-						onClick={() => setIsOpen(false)}
-					/>
-
 					{/* Dropdown */}
 					<div className="absolute right-0 top-full mt-2 z-50 w-96 max-h-96 overflow-hidden rounded-2xl border border-white/40 dark:border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
 						{/* Header */}

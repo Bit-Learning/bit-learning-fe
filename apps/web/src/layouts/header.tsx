@@ -97,7 +97,11 @@ const Header: React.FC = () => {
 
 					<nav className="hidden lg:flex items-center gap-1">
 						{navItems.map((item) => (
-							<div key={item.title} className="relative group">
+							<div
+								key={item.title}
+								className="relative group"
+								onMouseLeave={() => setHoveredMenu(null)}
+							>
 								{item.items ? (
 									<>
 										<button
