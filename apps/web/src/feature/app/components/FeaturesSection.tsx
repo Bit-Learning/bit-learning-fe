@@ -81,7 +81,7 @@ const FeaturesSection: React.FC = () => {
 	];
 
 	return (
-		<section className="py-16">
+		<section id="tour-features" className="py-16">
 			<div className="text-center mb-12">
 				<h3 className="text-3xl font-extrabold text-slate-900 mb-4">
 					Mọi thứ bạn cần để trở thành Hacker nhí

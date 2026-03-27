@@ -40,7 +40,7 @@ const ForumSection: React.FC = () => {
 	];
 
 	return (
-		<section className="py-16">
+		<section id="tour-forum" className="py-16">
 			<div className="text-center mb-12">
 				<h3 className="text-3xl font-extrabold text-slate-900 mb-4">
 					Diễn Đàn Bitlearning

@@ -84,7 +84,11 @@ const Header: React.FC = () => {
 		>
 			<div className="container mx-auto px-4">
 				<div className="flex items-center justify-between h-20">
-					<Link to="/" className="flex items-center relative z-50">
+					<Link
+						to="/"
+						id="tour-logo"
+						className="flex items-center relative z-50"
+					>
 						<img
 							src="/Logo.png"
 							alt="Bit Learning"
@@ -95,7 +99,7 @@ const Header: React.FC = () => {
 						/>
 					</Link>
 
-					<nav className="hidden lg:flex items-center gap-1">
+					<nav id="tour-navbar" className="hidden lg:flex items-center gap-1">
 						{navItems.map((item) => (
 							<div
 								key={item.title}
@@ -157,7 +161,7 @@ const Header: React.FC = () => {
 						))}
 					</nav>
 
-					<div className="flex items-center gap-2">
+					<div id="tour-header-actions" className="flex items-center gap-2">
 						{isAuthenticated && (
 							<button
 								onClick={handleCartClick}

@@ -8,7 +8,7 @@ const AIAssistantSection: React.FC = () => {
 	const navigate = useNavigate();
 
 	return (
-		<section className="py-16">
+		<section id="tour-ai-assistant" className="py-16">
 			<div className="bg-[#137fec] rounded-4xl overflow-hidden relative p-8 lg:p-16 flex flex-col lg:flex-row items-center gap-12">
 				<div className="absolute top-0 right-0 w-1/2 h-full bg-white/5 skew-x-12 transform origin-top-right" />
 				<div className="relative w-48 h-48 lg:w-64 lg:h-64 shrink-0">
