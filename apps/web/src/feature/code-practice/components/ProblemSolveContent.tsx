@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 import { Clock, HardDrive, Loader2, Terminal, FileText, Hash, History, ChevronLeft } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
@@ -32,17 +32,48 @@ const ProblemSolveContent: React.FC = () => {
   const [language, setLanguage] = useState<Language>(Language.PYTHON);
   const [code, setCode] = useState<string>("");
   const [isTemplateLoading, setIsTemplateLoading] = useState(true);
-  // Cache templates per language — switching back is instant, no refetch needed
   const templateCache = useRef<Partial<Record<Language, string>>>({});
   const [leftTab, setLeftTab] = useState<"description" | "submissions">("description");
   const [submissionId, setSubmissionId] = useState<string | null>(null);
   const [runResult, setRunResult] = useState<RunCodeResponse | null>(null);
   const [debugResult, setDebugResult] = useState<DebugResponse | null>(null);
-  const [debugLines, setDebugLines] = useState<string>("1");
+  const [debugLines, setDebugLines] = useState<string>("");
   const [debugVars, setDebugVars] = useState<string>("");
 
   const [editorFiles, setEditorFiles] = useState<EditorFile[]>([]);
   const [activeFileId, setActiveFileId] = useState<string>("1");
+
+  const [leftPct, setLeftPct] = useState(40);
+  const isDragging = useRef(false);
+  const mainRef = useRef<HTMLDivElement>(null);
+
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.cursor = "col-resize";
+    document.body.style.userSelect = "none";
+  }, []);
+
+  useEffect(() => {
+    const onMove = (e: MouseEvent) => {
+      if (!isDragging.current || !mainRef.current) return;
+      const { left, width } = mainRef.current.getBoundingClientRect();
+      const pct = ((e.clientX - left) / width) * 100;
+      setLeftPct(Math.min(70, Math.max(15, pct)));
+    };
+    const onUp = () => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, []);
 
   const { data: problem, isLoading: problemLoading } = useProblemDetail(problemId || "", language, {
     enabled: !!problemId,
@@ -58,7 +89,6 @@ const ProblemSolveContent: React.FC = () => {
   const debugCode = useDebugCode();
 
   const { data: submissionResult } = useSubmissionResult(submissionId || "");
-
   const submissions = submissionsData?.content || [];
 
   const handleLanguageChange = (lang: Language) => {
@@ -67,6 +97,7 @@ const ProblemSolveContent: React.FC = () => {
       setCode(cached);
       setLanguage(lang);
     } else {
+      setCode("");
       setIsTemplateLoading(true);
       setLanguage(lang);
     }
@@ -81,11 +112,7 @@ const ProblemSolveContent: React.FC = () => {
   }, [problem?.codeTemplate, language]);
 
   const isMultiFile = editorFiles.length > 1;
-
-  const getActiveFileName = () => {
-    return editorFiles.find((f) => f.id === activeFileId)?.name ?? "main";
-  };
-
+  const getActiveFileName = () => editorFiles.find((f) => f.id === activeFileId)?.name ?? "main";
   const toCodeFiles = () => editorFiles.map((f) => ({ name: f.name, content: f.content }));
 
   const handleSubmit = async (): Promise<void> => {
@@ -125,21 +152,23 @@ const ProblemSolveContent: React.FC = () => {
   };
 
   const handleDebug = async (): Promise<void> => {
-    const parsedLines = debugLines
+    const lines = debugLines
       .split(",")
       .map((s) => parseInt(s.trim(), 10))
       .filter((n) => !isNaN(n) && n > 0);
+
+    if (lines.length === 0) return;
+
     const parsedVars = debugVars
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
 
-    if (parsedLines.length === 0) return;
     try {
       const request: DebugRequest = isMultiFile
         ? {
             language,
-            lines: parsedLines,
+            lines,
             variables: parsedVars.length > 0 ? parsedVars : undefined,
             files: toCodeFiles(),
             entryFile: getActiveFileName(),
@@ -147,7 +176,7 @@ const ProblemSolveContent: React.FC = () => {
         : {
             language,
             code,
-            lines: parsedLines,
+            lines,
             variables: parsedVars.length > 0 ? parsedVars : undefined,
           };
 
@@ -166,6 +195,8 @@ const ProblemSolveContent: React.FC = () => {
     if (problem?.codeTemplate) {
       setCode(problem.codeTemplate);
     }
+    // Clear breakpoints by resetting debugLines — CodeEditor watches this
+    setDebugLines("");
   };
 
   const handleCloseResult = (): void => {
@@ -177,8 +208,11 @@ const ProblemSolveContent: React.FC = () => {
   const handleFilesChange = (files: EditorFile[], newActiveFileId: string) => {
     setEditorFiles(files);
     setActiveFileId(newActiveFileId);
-    if (files.length === 1) {
-      setCode(files[0]?.content!);
+    if (files.length > 1) {
+      const active = files.find((f) => f.id === newActiveFileId);
+      if (active) setCode(active.content);
+    } else if (files[0]?.content) {
+      setCode(files[0].content);
     }
   };
 
@@ -205,9 +239,12 @@ const ProblemSolveContent: React.FC = () => {
   const totalCount = submissionResult?.totalTestcases || 0;
 
   return (
-    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
-      <main className="flex-1 flex overflow-hidden mx-auto w-full">
-        <section className="w-1/2 flex flex-col border-r border-gray-200 bg-white">
+    <div className="h-210 flex flex-col bg-gray-50 overflow-hidden">
+      <main ref={mainRef} className="flex-1 flex overflow-hidden mx-auto w-full">
+        <section
+          className="flex flex-col border-r border-gray-200 bg-white overflow-hidden"
+          style={{ width: `${leftPct}%` }}
+        >
           <div className="p-4 border-b border-gray-200 flex items-center gap-3">
             <button
               onClick={() => navigate({ to: "/problem" })}
@@ -217,6 +254,16 @@ const ProblemSolveContent: React.FC = () => {
             </button>
             <h1 className="text-xl font-bold text-gray-900">{problem.title}</h1>
             <DifficultyBadge difficulty={problem.difficulty} />
+            {problem.tags?.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {problem.tags.map((tag) => (
+                  <Badge key={tag} variant="secondary" className="text-sm bg-blue-100 text-blue-700">
+                    <Hash className="w-3 h-3 mr-1" />
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </div>
 
           <div className="h-10 border-b border-gray-200 flex items-center px-4 gap-2">
@@ -241,22 +288,11 @@ const ProblemSolveContent: React.FC = () => {
           <div className="flex-1 overflow-auto p-6 space-y-6 bg-white">
             {leftTab === "description" && (
               <>
-                {problem.tags?.length > 0 && (
-                  <div className="flex flex-wrap gap-2">
-                    {problem.tags.map((tag) => (
-                      <Badge key={tag} variant="secondary" className="text-xs bg-gray-100 text-gray-700">
-                        <Hash className="w-3 h-3 mr-1" />
-                        {tag}
-                      </Badge>
-                    ))}
-                  </div>
-                )}
-
                 <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{problem.description}</div>
 
                 {problem.constraints && (
                   <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
-                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Ràng buộc: </p>
+                    <p className="text-xs font-semibold text-gray-500 uppercase mb-1">Ràng buộc:</p>
                     <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
                       {problem.constraints}
                     </div>
@@ -269,29 +305,33 @@ const ProblemSolveContent: React.FC = () => {
                       <Terminal className="w-5 h-5 text-blue-600" />
                       <h3 className="font-bold text-gray-900">Test Cases</h3>
                     </div>
-                    {problem.sampleTestcases.map((tc, idx) => (
-                      <Card key={tc.id} className="border-gray-200">
-                        <CardHeader className="py-2 px-3 bg-gray-50">
-                          <CardTitle className="text-sm text-gray-900">Test Case {idx + 1}</CardTitle>
-                        </CardHeader>
-                        <CardContent className="p-3 space-y-3">
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Input:</label>
-                            <pre className="p-2 rounded bg-gray-50 border border-gray-200 font-mono text-sm whitespace-pre-wrap text-gray-900">
-                              {tc.input}
-                            </pre>
-                          </div>
-                          <div>
-                            <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">
-                              Expected Output:
-                            </label>
-                            <pre className="p-2 rounded bg-gray-50 border border-gray-200 font-mono text-sm whitespace-pre-wrap text-gray-900">
-                              {tc.expectedOutput}
-                            </pre>
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                    <div className="grid grid-cols-2 gap-4">
+                      {problem.sampleTestcases.map((tc, idx) => (
+                        <Card key={tc.id} className="p-0 border-gray-200 rounded-sm">
+                          <CardHeader className="py-2 px-3 bg-gray-50">
+                            <CardTitle className="text-sm text-gray-900">Test Case {idx + 1}</CardTitle>
+                          </CardHeader>
+
+                          <CardContent className="px-3 space-y-3 mb-3">
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Input:</label>
+                              <pre className="p-2 rounded bg-gray-50 border border-gray-200 font-mono text-sm whitespace-pre-wrap text-gray-900">
+                                {tc.input}
+                              </pre>
+                            </div>
+
+                            <div>
+                              <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">
+                                Expected Output:
+                              </label>
+                              <pre className="p-2 rounded bg-gray-50 border border-gray-200 font-mono text-sm whitespace-pre-wrap text-gray-900">
+                                {tc.expectedOutput}
+                              </pre>
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
                   </div>
                 )}
               </>
@@ -343,8 +383,11 @@ const ProblemSolveContent: React.FC = () => {
           </div>
         </section>
 
-        <div className="w-1.5 bg-gray-200 hover:bg-blue-200 cursor-col-resize transition-colors flex items-center justify-center">
-          <div className="h-8 w-0.5 bg-gray-300 rounded-full" />
+        <div
+          onMouseDown={handleDividerMouseDown}
+          className="w-1.5 shrink-0 bg-gray-200 hover:bg-blue-400 active:bg-blue-500 cursor-col-resize transition-colors flex items-center justify-center group"
+        >
+          <div className="h-8 w-0.5 bg-gray-400 group-hover:bg-blue-600 rounded-full transition-colors" />
         </div>
 
         <section className="flex-1 flex flex-col bg-gray-900 overflow-hidden">
@@ -352,7 +395,7 @@ const ProblemSolveContent: React.FC = () => {
             language={language}
             code={code}
             isTemplateLoading={isTemplateLoading}
-            problem={{ timeLimitMs: problem.timeLimitMs, memoryLimitMb: problem.memoryLimitMb }}
+            problem={problem}
             submissionResult={submissionResult ?? null}
             runResult={runResult}
             debugResult={debugResult}

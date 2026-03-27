@@ -17,7 +17,6 @@ import {
   Wand2,
   Play,
   Bug,
-  ChevronRight,
 } from "lucide-react";
 import {
   Language,
@@ -37,6 +36,7 @@ import {
 import { EditorFile, FileTab } from "./FileTab";
 import { cn } from "@workspace/ui/lib/utils";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
+import { DebugPanel } from "./DebugPanel";
 
 type BottomPanelTab = "submission" | "run" | "debug";
 
@@ -99,6 +99,25 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [formatMessage, setFormatMessage] = useState<string | null>(null);
   const [bottomTab, setBottomTab] = useState<BottomPanelTab>("submission");
 
+  const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
+
+  const toggleBreakpoint = useCallback((lineNum: number) => {
+    setBreakpoints((prev) => {
+      const next = new Set(prev);
+      next.has(lineNum) ? next.delete(lineNum) : next.add(lineNum);
+      return next;
+    });
+  }, []);
+
+  const bpKey = [...breakpoints].sort((a, b) => a - b).join(",");
+  useEffect(() => {
+    onDebugLinesChange(bpKey);
+  }, [bpKey]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  useEffect(() => {
+    if (debugLines === "") setBreakpoints(new Set());
+  }, [debugLines]);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const highlightRef = useRef<HTMLPreElement>(null);
   const lineNumbersRef = useRef<HTMLDivElement>(null);
@@ -127,16 +146,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   );
 
   const prevCodeRef = useRef(code);
-
   useEffect(() => {
     if (prevCodeRef.current === code) return;
     prevCodeRef.current = code;
-
     if (isInternalChange.current) {
       isInternalChange.current = false;
       return;
     }
-
     setFiles((prev) => {
       const active = prev.find((f) => f.id === activeFileId);
       if (active?.content === code) return prev;
@@ -171,11 +187,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (activeFile?.language === Language.PYTHON) {
-      setFormatErrors(validatePythonIndentation(activeFile.content));
-    } else {
-      setFormatErrors([]);
-    }
+    if (activeFile?.language === Language.PYTHON) setFormatErrors(validatePythonIndentation(activeFile.content));
+    else setFormatErrors([]);
   }, [activeFile?.content, activeFile?.language]);
 
   useEffect(() => {
@@ -189,7 +202,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [debugResult]);
 
   const [highlightedCode, setHighlightedCode] = useState<string>(() => highlightCodeSync(activeFile?.content ?? ""));
-
   useEffect(() => {
     let cancelled = false;
     highlightCode(activeFile?.content ?? "", activeFile?.language ?? language).then((html) => {
@@ -299,16 +311,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       if (files.length === 1) return;
       const deletedIndex = files.findIndex((f) => f.id === id);
       const remaining = files.filter((f) => f.id !== id);
-
       const newActiveId =
         activeFileId === id ? (remaining[deletedIndex]?.id ?? remaining[deletedIndex - 1]?.id!) : activeFileId;
-
       setFiles(remaining);
       notifyFilesChange(remaining, newActiveId);
       if (activeFileId === id) setActiveFileId(newActiveId);
     },
     [files, activeFileId, notifyFilesChange],
   );
+
   const handleRenameFile = useCallback(
     (id: string, newName: string) => {
       setFiles((prev) => {
@@ -344,6 +355,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     .split(",")
     .map((s) => parseInt(s.trim(), 10))
     .filter((n) => !isNaN(n) && n > 0);
+  const lineCount = activeFile.content.split("\n").length;
 
   return (
     <>
@@ -365,7 +377,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               onDelete={() => handleDeleteFile(file.id)}
               onRename={(newName) => handleRenameFile(file.id, newName)}
               canDelete={files.length > 1 && index !== 0}
-              canRename={index !== 0} // ← thêm
+              canRename={index !== 0}
             />
           ))}
         </div>
@@ -436,16 +448,39 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </button>
           </div>
         )}
+
         <div
           ref={lineNumbersRef}
           className="shrink-0 w-12 bg-gray-900 border-r border-gray-700 pt-4 pb-4 overflow-hidden select-none"
         >
-          <div className="font-mono text-sm text-gray-500 text-right pr-3" style={{ lineHeight: 1.6 }}>
-            {activeFile.content.split("\n").map((_, idx) => (
-              <div key={idx}>{idx + 1}</div>
-            ))}
+          <div className="font-mono text-sm text-right" style={{ lineHeight: 1.6 }}>
+            {Array.from({ length: lineCount }, (_, idx) => {
+              const lineNum = idx + 1;
+              const isBp = breakpoints.has(lineNum);
+              return (
+                <div
+                  key={lineNum}
+                  onClick={() => toggleBreakpoint(lineNum)}
+                  className="relative flex items-center justify-end pr-2 cursor-pointer group"
+                  style={{ height: "1.6em" }}
+                  title={isBp ? "Xóa breakpoint" : "Đặt breakpoint"}
+                >
+                  <span
+                    className={cn(
+                      "absolute left-1.5 w-2.5 h-2.5 rounded-full transition-all duration-100",
+                      isBp ? "bg-red-500 opacity-100" : "bg-red-500 opacity-0 group-hover:opacity-30",
+                    )}
+                    style={{ top: "50%", transform: "translateY(-50%)" }}
+                  />
+                  <span className={cn("text-xs", isBp ? "text-red-400" : "text-gray-500 group-hover:text-gray-300")}>
+                    {lineNum}
+                  </span>
+                </div>
+              );
+            })}
           </div>
         </div>
+
         <div className="relative flex-1 h-full bg-gray-900 font-mono text-sm overflow-hidden">
           {isTemplateLoading && (
             <div className="absolute inset-0 p-4 z-10 bg-gray-900 space-y-3">
@@ -458,6 +493,17 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               ))}
             </div>
           )}
+
+          <div className="absolute inset-0 pointer-events-none" style={{ paddingTop: "1rem", lineHeight: 1.6 }}>
+            {[...breakpoints].map((lineNum) => (
+              <div
+                key={lineNum}
+                className="absolute left-0 right-0 bg-red-500/10"
+                style={{ top: `calc(1rem + ${(lineNum - 1) * 1.6}em)`, height: "1.6em" }}
+              />
+            ))}
+          </div>
+
           <pre
             ref={highlightRef}
             className="absolute inset-0 p-4 pointer-events-none whitespace-pre overflow-auto m-0"
@@ -528,9 +574,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </button>
           </div>
 
-          <div className="flex-1 overflow-y-auto p-4 font-mono text-xs space-y-2">
+          <div className="flex-1 overflow-y-auto font-mono text-xs">
             {bottomTab === "submission" && submissionResult && (
-              <>
+              <div className="p-4 space-y-2">
                 <div className="flex items-center gap-2 mb-3">
                   <SubmissionStatusBadge status={submissionResult.status} showIcon />
                   <span className="text-gray-500">
@@ -560,11 +606,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     <div className="whitespace-pre-wrap">{submissionResult.errorMessage}</div>
                   </div>
                 )}
-              </>
+              </div>
             )}
 
             {bottomTab === "run" && runResult && (
-              <>
+              <div className="p-4 space-y-2">
                 <div className="flex items-center gap-2 mb-3">
                   <SubmissionStatusBadge status={runResult.overallStatus} showIcon />
                 </div>
@@ -611,47 +657,13 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     </div>
                   );
                 })}
-              </>
+              </div>
             )}
 
-            {bottomTab === "debug" && debugResult && (
-              <>
-                <div className="flex items-center gap-2 mb-3">
-                  <SubmissionStatusBadge status={debugResult.status} showIcon />
-                  {debugResult.output && <span className="text-gray-400">stdout: {debugResult.output}</span>}
-                </div>
-                {debugResult.error && (
-                  <div className="p-3 bg-red-900/20 border border-red-800 rounded text-red-400 mb-3">
-                    <div className="font-bold mb-1">Error:</div>
-                    <div className="whitespace-pre-wrap">{debugResult.error}</div>
-                  </div>
-                )}
-                {debugResult.steps.length === 0 && !debugResult.error && (
-                  <div className="text-gray-500">Không có bước debug nào được ghi lại.</div>
-                )}
-                {debugResult.steps.map((step, idx) => (
-                  <div key={idx} className="border border-gray-800 rounded p-3 space-y-1">
-                    <div className="flex items-center gap-2 text-yellow-400 font-bold">
-                      <ChevronRight className="w-3 h-3" />
-                      <span>Line {step.line}</span>
-                      {step.iteration > 0 && (
-                        <span className="text-gray-500 font-normal">iteration #{step.iteration}</span>
-                      )}
-                    </div>
-                    {Object.keys(step.variables).length > 0 && (
-                      <div className="grid grid-cols-2 gap-x-4 gap-y-0.5 pl-5 text-xs">
-                        {Object.entries(step.variables).map(([k, v]) => (
-                          <div key={k} className="flex gap-2">
-                            <span className="text-purple-400">{k}</span>
-                            <span className="text-gray-500">=</span>
-                            <span className="text-green-300">{v}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </>
+            {bottomTab === "debug" && (
+              <div className="h-full">
+                <DebugPanel result={debugResult} isDebugging={isDebugging} breakpointCount={breakpoints.size} />
+              </div>
             )}
           </div>
         </div>
@@ -692,6 +704,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <button
             onClick={onDebug}
             disabled={isDebugging || !activeFile.content.trim() || parsedDebugLines.length === 0}
+            title={parsedDebugLines.length === 0 ? "Click vào số dòng để đặt breakpoint" : ""}
             className={cn(
               "px-4 py-2 rounded text-sm font-semibold border transition-all flex items-center gap-2",
               isDebugging || !activeFile.content.trim() || parsedDebugLines.length === 0
@@ -708,6 +721,11 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <>
                 <Bug className="w-4 h-4" />
                 <span>Debug</span>
+                {breakpoints.size > 0 && (
+                  <span className="bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
+                    {breakpoints.size}
+                  </span>
+                )}
               </>
             )}
           </button>
@@ -738,17 +756,28 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       </div>
 
       <div className="px-6 py-2 bg-gray-900 border-t border-gray-800 flex items-center gap-4 shrink-0">
-        <div className="flex items-center gap-2">
-          <Bug className="w-3.5 h-3.5 text-yellow-500" />
-          <span className="text-xs text-gray-400">Debug lines:</span>
-          <input
-            value={debugLines}
-            onChange={(e) => onDebugLinesChange(e.target.value)}
-            placeholder="e.g. 3,7,12"
-            className="bg-gray-800 border border-gray-700 rounded px-2 py-0.5 text-xs text-gray-200 w-28 focus:outline-none focus:border-yellow-600"
-          />
+        <div className="flex items-center gap-2 flex-wrap min-w-0">
+          <Bug className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
+          <span className="text-xs text-gray-400 shrink-0">Breakpoints:</span>
+          {breakpoints.size === 0 ? (
+            <span className="text-xs text-gray-600 italic">Click vào số dòng để đặt breakpoint</span>
+          ) : (
+            [...breakpoints]
+              .sort((a, b) => a - b)
+              .map((ln) => (
+                <button
+                  key={ln}
+                  onClick={() => toggleBreakpoint(ln)}
+                  title="Click để xóa"
+                  className="flex items-center gap-0.5 bg-red-900/40 border border-red-800/60 text-red-300 text-[10px] px-1.5 py-0.5 rounded font-mono hover:bg-red-900/70 transition-colors"
+                >
+                  {ln}
+                  <X className="w-2 h-2 ml-0.5" />
+                </button>
+              ))
+          )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 ml-auto shrink-0">
           <span className="text-xs text-gray-400">Watch vars:</span>
           <input
             value={debugVars}
