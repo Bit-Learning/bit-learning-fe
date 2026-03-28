@@ -13,6 +13,7 @@ import {
   Users,
   Palette,
   Network,
+  MessageCircle,
 } from "lucide-react";
 import type { SidebarData } from "../types";
 
@@ -97,6 +98,11 @@ export const sidebarData: SidebarData = {
           title: "Mindmap Structure",
           url: "/mindmap/structure",
           icon: Network,
+        },
+        {
+          title: "System Prompt",
+          url: "/system-prompt",
+          icon: MessageCircle,
         },
       ],
     },
