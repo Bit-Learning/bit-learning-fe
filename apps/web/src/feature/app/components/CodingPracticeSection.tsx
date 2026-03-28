@@ -38,7 +38,10 @@ const CodingPracticeSection: React.FC = () => {
 						Chạy code trực tiếp trên trình duyệt
 					</li>
 				</ul>
-				<Button className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 shadow-xl">
+				<Button
+					size="xl"
+					className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 shadow-xl"
+				>
 					Mở AI Lab ngay
 				</Button>
 			</div>

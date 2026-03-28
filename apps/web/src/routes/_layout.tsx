@@ -1,35 +1,18 @@
+import Footer from "@/layouts/footer";
+import Header from "@/layouts/header";
+import ScrollToTop from "@/layouts/scroll-to-top";
+import BotStatusWidget from "@/shared/components/BotStatusWidget";
 import {
 	createFileRoute,
 	Outlet,
 	useLocation,
-	useMatches,
 	useNavigate,
 } from "@tanstack/react-router";
 import { AnimatePresence, motion } from "framer-motion";
-import Footer from "@/layouts/footer";
-import GameHeader from "@/layouts/game-header";
-import Header from "@/layouts/header";
-import ScrollToTop from "@/layouts/scroll-to-top";
-import { Bot } from "lucide-react";
-import BotStatusWidget from "@/shared/components/BotStatusWidget";
 
 function LayoutComponent() {
-	const matches = useMatches();
 	const location = useLocation();
-	// Get the last match (current active route) to extract staticData
-	const currentMatch = matches.at(-1);
-	const headerStyle = currentMatch?.staticData?.headerStyle || "default";
 	const navigate = useNavigate();
-
-	// Conditionally render header component based on style
-	const renderHeader = () => {
-		switch (headerStyle) {
-			case "game":
-				return <GameHeader />;
-			default:
-				return <Header />;
-		}
-	};
 
 	return (
 		<AnimatePresence mode="wait">
@@ -40,7 +23,7 @@ function LayoutComponent() {
 				exit={{ opacity: 0, y: -10 }}
 				transition={{ duration: 0.2 }}
 			>
-				{renderHeader()}
+				<Header />
 				<main className="flex-1">
 					<motion.div
 						initial={{ opacity: 0, y: 40 }}

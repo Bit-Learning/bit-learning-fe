@@ -31,6 +31,7 @@ const AIAssistantSection: React.FC = () => {
 					</p>
 					<div className="flex flex-wrap justify-center lg:justify-start gap-4">
 						<Button
+							size="xl"
 							onClick={() => {
 								navigate({ to: "/chat-ai" });
 							}}

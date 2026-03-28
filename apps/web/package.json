@@ -21,7 +21,7 @@
 		"@reduxjs/toolkit": "^2.9.1",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
-		"@tanstack/react-query": "^5.90.21",
+		"@tanstack/react-query": "^5.95.2",
 		"@tanstack/react-query-devtools": "^5.91.3",
 		"@tanstack/react-router": "^1.168.4",
 		"@tanstack/react-router-devtools": "^1.132.37",
@@ -75,7 +75,7 @@
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.2.5",
+		"@biomejs/biome": "^2.4.9",
 		"@codecov/vite-plugin": "^1.9.1",
 		"@tailwindcss/postcss": "^4.1.18",
 		"@testing-library/jest-dom": "^6.9.1",

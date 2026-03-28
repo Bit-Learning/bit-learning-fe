@@ -76,24 +76,26 @@ const MyCoursesContent: React.FC = () => {
 
 	if (courses.length === 0) {
 		return (
-			<div className="grow space-y-8">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-					<div className="flex min-h-96 flex-col items-center justify-center rounded-2xl bg-white dark:bg-slate-800 p-12 shadow-sm">
-						<BookOpen className="mb-6 h-24 w-24 text-gray-300" />
-						<h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
-							Chưa có khóa học nào
-						</h3>
-						<p className="mb-6 text-center text-gray-600 dark:text-gray-400">
-							Bạn chưa đăng ký khóa học nào. Hãy khám phá và bắt đầu học tập
-							ngay!
-						</p>
-						<Button
-							onClick={() => navigate({ to: "/courses" })}
-							className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
-						>
-							Khám phá khóa học
-						</Button>
-					</div>
+			<div className="mx-auto grow space-y-8 border-gray-200">
+				<div className="flex min-h-96 flex-col items-center justify-center rounded-2xl bg-white dark:bg-slate-800 p-12 shadow-sm">
+					<img
+						src="/sad-face-2691.svg"
+						alt="Không có khóa học nào"
+						className="mb-6 h-24 w-24 text-gray-300"
+					/>
+					<h3 className="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
+						Chưa có khóa học nào
+					</h3>
+					<p className="mb-6 text-center text-gray-600 dark:text-gray-400">
+						Bạn chưa đăng ký khóa học nào. Hãy khám phá và bắt đầu học tập ngay!
+					</p>
+					<Button
+						size="xl"
+						onClick={() => navigate({ to: "/courses" })}
+						className="bg-primary hover:bg-blue-700 text-white px-6 py-3 rounded-lg transition-colors"
+					>
+						Khám phá khóa học
+					</Button>
 				</div>
 			</div>
 		);

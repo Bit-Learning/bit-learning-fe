@@ -9,7 +9,7 @@
 		"check": "biome check --write ."
 	},
 	"dependencies": {
-		"@tanstack/react-query": "^5.90.21",
+		"@tanstack/react-query": "^5.95.2",
 		"axios": "^1.13.6",
 		"react-dom": "^19.1.1",
 		"zod": "^4.3.5"
@@ -17,7 +17,7 @@
 	"devDependencies": {
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.1.7",
-		"@biomejs/biome": "^2.2.5",
+		"@biomejs/biome": "^2.4.9",
 		"@workspace/typescript-config": "workspace:*",
 		"typescript": "^5.9.2"
 	},
