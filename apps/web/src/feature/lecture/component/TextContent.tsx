@@ -1,7 +1,7 @@
 import { Button } from "@workspace/ui/components/Button";
 import { CheckCircle } from "lucide-react";
 import type React from "react";
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useLectureText } from "../queries/useLecture";
 import { useMarkAsCompleted, useIsLectureCompleted } from "../queries/useLearning";
 
@@ -15,30 +15,7 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
   const { data: isCompleted } = useIsLectureCompleted(lectureId);
   const { mutate: markAsCompleted, isPending } = useMarkAsCompleted();
 
-  const [hasScrolledToBottom, setHasScrolledToBottom] = useState(false);
   const contentRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    const container = contentRef.current;
-    if (!container) return;
-
-    const handleScroll = () => {
-      const { scrollTop, scrollHeight, clientHeight } = container;
-      const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50;
-      if (isAtBottom && !hasScrolledToBottom) {
-        setHasScrolledToBottom(true);
-      }
-    };
-
-    container.addEventListener("scroll", handleScroll);
-    handleScroll();
-
-    return () => container.removeEventListener("scroll", handleScroll);
-  }, [data, hasScrolledToBottom]);
-
-  useEffect(() => {
-    setHasScrolledToBottom(false);
-  }, [lectureId]);
 
   const handleMarkComplete = () => {
     markAsCompleted(lectureId, {
@@ -99,7 +76,7 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
             {lecture.description && <p className="mt-2 text-gray-600">{lecture.description}</p>}
           </div>
 
-          <div className="p-8">
+          <div className="px-8">
             <style
               dangerouslySetInnerHTML={{
                 __html: `
@@ -228,7 +205,7 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
               <Button
                 onPress={handleMarkComplete}
                 size="xl"
-                isDisabled={!hasScrolledToBottom || isPending}
+                isDisabled={isPending}
                 className="w-full rounded-lg bg-linear-to-r from-green-600 to-emerald-600 py-4 text-lg font-semibold text-white shadow-lg transition-all hover:from-green-700 hover:to-emerald-700 disabled:from-gray-400 disabled:to-gray-500 disabled:opacity-60"
               >
                 {isPending ? (
@@ -236,30 +213,13 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
                     <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
                     Đang xử lý...
                   </span>
-                ) : hasScrolledToBottom ? (
+                ) : (
                   <span className="flex items-center justify-center gap-2">
                     <CheckCircle className="h-6 w-6" />
                     Đánh dấu hoàn thành
                   </span>
-                ) : (
-                  <span className="flex items-center justify-center gap-2">
-                    <svg className="h-6 w-6 animate-bounce" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        strokeWidth={2}
-                        d="M19 14l-7 7m0 0l-7-7m7 7V3"
-                      />
-                    </svg>
-                    Cuộn xuống để hoàn thành bài học
-                  </span>
                 )}
               </Button>
-              {!hasScrolledToBottom && (
-                <p className="mt-2 text-center text-sm text-gray-500">
-                  Bạn cần đọc hết nội dung bài học để có thể hoàn thành
-                </p>
-              )}
             </div>
           )}
         </div>
