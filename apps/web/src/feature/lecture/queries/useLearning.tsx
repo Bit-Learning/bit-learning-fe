@@ -17,6 +17,8 @@ export const useLectureProgress = (lectureId: number) => {
     },
     enabled: !!lectureId,
     staleTime: 0,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -28,7 +30,10 @@ export const useIsLectureCompleted = (lectureId: number) => {
       return response.data.data ?? false;
     },
     enabled: !!lectureId,
-    staleTime: 5 * 60 * 1000,
+    staleTime: 30 * 1000,
+    gcTime: 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
     select: (data) => (typeof data === "object" && data !== null ? (data as any).isCompleted : data) as boolean,
   });
 };
@@ -41,8 +46,10 @@ export const useMultipleLecturesCompleted = (lectureIds: number[]) => {
         const response = await learningApi.isLectureCompleted(id);
         return response.data.data ?? false;
       },
-      staleTime: 5 * 60 * 1000,
+      staleTime: 30 * 1000,
+      gcTime: 60 * 1000,
       enabled: !!id,
+      refetchOnMount: true,
     })),
   });
 
@@ -60,8 +67,15 @@ export const useMultipleLecturesCompleted = (lectureIds: number[]) => {
 };
 
 export const useSyncProgress = () => {
+  const queryClient = useQueryClient();
+
   return useMutation({
     mutationFn: (data: SyncProgressRequest) => learningApi.syncProgress(data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({
+        queryKey: LEARNING_KEYS.progress(variables.lectureId),
+      });
+    },
   });
 };
 
@@ -72,7 +86,16 @@ export const useMarkAsCompleted = () => {
     mutationFn: (lectureId: number) => learningApi.markAsCompleted(lectureId),
     onSuccess: (_, lectureId) => {
       queryClient.setQueryData(LEARNING_KEYS.isCompleted(lectureId), true);
-      queryClient.invalidateQueries({ queryKey: LEARNING_KEYS.progress(lectureId) });
+
+      queryClient.invalidateQueries({
+        queryKey: LEARNING_KEYS.progress(lectureId),
+      });
+      queryClient.invalidateQueries({
+        queryKey: ["course-progress"],
+      });
+      queryClient.refetchQueries({
+        queryKey: LEARNING_KEYS.progress(lectureId),
+      });
     },
   });
 };

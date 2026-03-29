@@ -20,7 +20,11 @@ export const courseKeys = {
   myPaginated: (page: number, size: number) => ["courses", "my", page, size] as const,
   byGrade: (grade: number, page: number, size: number) => ["courses", "grade", grade, page, size] as const,
   detail: (id: number) => ["courses", "detail", id] as const,
+  certificate: (courseId: number) => ["courses", "certificate", courseId] as const,
 };
+
+const STALE_TIME = 30 * 1000;
+const GC_TIME = 60 * 1000;
 
 export const useAllCourses = () => {
   const { pagination } = useSelector(selectCourseState);
@@ -31,8 +35,10 @@ export const useAllCourses = () => {
       const response = await courseApi.getAllCourses(pagination.page, pagination.size);
       return response.data;
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -45,8 +51,10 @@ export const useMyCourses = () => {
       const response = await courseApi.getMyCourses(pagination.page, pagination.size);
       return response.data;
     },
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -62,8 +70,10 @@ export const useCoursesByGrade = (grade?: number) => {
       return response.data;
     },
     enabled: !!targetGrade,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -79,24 +89,36 @@ export const useCourseDetail = (id?: number) => {
       return response.data.data;
     },
     enabled: !!targetId,
-    staleTime: 5 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
 export const useCourseActions = () => {
   const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
 
   const selectCourse = (id: number) => {
     dispatch(setSelectedCourseIdAction(id));
+    queryClient.invalidateQueries({
+      queryKey: courseKeys.detail(id),
+    });
   };
 
   const selectGrade = (grade: number | null) => {
     dispatch(setSelectedGradeAction(grade));
+    queryClient.invalidateQueries({
+      queryKey: courseKeys.all,
+    });
   };
 
   const selectLevel = (level: CourseLevel | null) => {
     dispatch(setSelectedLevelAction(level));
+    queryClient.invalidateQueries({
+      queryKey: courseKeys.all,
+    });
   };
 
   const setSortBy = (sort: SortType) => {
@@ -109,6 +131,9 @@ export const useCourseActions = () => {
 
   const resetFilters = () => {
     dispatch(resetCourseFiltersAction());
+    queryClient.invalidateQueries({
+      queryKey: courseKeys.all,
+    });
   };
 
   return {
@@ -131,7 +156,7 @@ export const usePrefetchCourse = () => {
         const response = await courseApi.getCourseById(id);
         return response.data.data;
       },
-      staleTime: 5 * 60 * 1000,
+      staleTime: STALE_TIME,
     });
   };
 
@@ -144,14 +169,15 @@ export const useCourseState = () => {
 
 export const useCertificate = (courseId: number, enabled = false) => {
   return useQuery({
-    queryKey: ["courses", "certificate", courseId],
+    queryKey: courseKeys.certificate(courseId),
     queryFn: async () => {
       const response = await courseApi.getCertificate(courseId);
       return URL.createObjectURL(response.data);
     },
     enabled: enabled && !!courseId,
-    staleTime: 10 * 60 * 1000,
-    gcTime: 15 * 60 * 1000,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
   });
 };
 

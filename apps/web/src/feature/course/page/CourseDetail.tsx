@@ -6,22 +6,22 @@ import CourseDetailContent from "../component/CourseDetailContent";
 import { useCourseActions } from "../queries/useCourse";
 
 const CourseDetailPage: React.FC = () => {
-	const { id } = useParams({ from: "/_headerOnly/courses/$id" });
-	const { selectCourse } = useCourseActions();
+  const { id } = useParams({ from: "/_headerOnly/courses/$id" });
+  const { selectCourse } = useCourseActions();
 
-	useEffect(() => {
-		selectCourse(Number(id));
-	}, [id, selectCourse]);
+  useEffect(() => {
+    selectCourse(Number(id));
+  }, [id, selectCourse]);
 
-	return (
-		<>
-			<PageMeta
-				title="Chi Tiết Khóa Học - Bit Learning"
-				description="Thông tin chi tiết về khóa học tin học tại Bit Learning"
-			/>
-			<CourseDetailContent />
-		</>
-	);
+  return (
+    <>
+      <PageMeta
+        title="Chi Tiết Khóa Học - Bit Learning"
+        description="Thông tin chi tiết về khóa học tin học tại Bit Learning"
+      />
+      <CourseDetailContent />
+    </>
+  );
 };
 
 export default CourseDetailPage;

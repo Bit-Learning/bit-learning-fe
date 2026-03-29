@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
 import { interactionApi } from "../api/interaction.api";
 import type { CommentRequest, ReviewRequest } from "../types/interaction.type";
+import { courseKeys } from "./useCourse";
 
 export const interactionKeys = {
   all: ["interactions"] as const,
@@ -9,6 +10,9 @@ export const interactionKeys = {
   replies: (parentId: number) => [...interactionKeys.all, "replies", parentId] as const,
   reviews: (courseId: number) => [...interactionKeys.all, "reviews", courseId] as const,
 };
+
+const STALE_TIME = 20 * 1000;
+const GC_TIME = 60 * 1000;
 
 export const useRootComments = (lectureId: number, page = 0, size = 10, sort = "upVotes", direction = "DESC") => {
   return useQuery({
@@ -28,6 +32,10 @@ export const useRootComments = (lectureId: number, page = 0, size = 10, sort = "
       };
     },
     enabled: !!lectureId,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -39,6 +47,9 @@ export const useReplies = (parentId: number, enabled = false) => {
       return response.data.data || [];
     },
     enabled: enabled && !!parentId,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
   });
 };
 
@@ -62,6 +73,10 @@ export const usePostComment = () => {
           queryKey: interactionKeys.replies(variables.parentId),
         });
       }
+
+      queryClient.refetchQueries({
+        queryKey: interactionKeys.comments(variables.lectureId),
+      });
     },
     onError: (error: any) => {
       toast.error({
@@ -79,6 +94,10 @@ export const useToggleVote = () => {
     mutationFn: (commentId: number) => interactionApi.toggleVote(commentId),
     onSuccess: () => {
       queryClient.invalidateQueries({
+        queryKey: interactionKeys.all,
+      });
+
+      queryClient.refetchQueries({
         queryKey: interactionKeys.all,
       });
     },
@@ -109,6 +128,10 @@ export const useCourseReviews = (courseId: number, page = 0, size = 5, sort = "c
       };
     },
     enabled: !!courseId,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -125,6 +148,18 @@ export const usePostReview = () => {
 
       queryClient.invalidateQueries({
         queryKey: interactionKeys.reviews(variables.courseId),
+      });
+
+      queryClient.invalidateQueries({
+        queryKey: courseKeys.detail(variables.courseId),
+      });
+
+      queryClient.refetchQueries({
+        queryKey: interactionKeys.reviews(variables.courseId),
+      });
+
+      queryClient.refetchQueries({
+        queryKey: courseKeys.detail(variables.courseId),
       });
     },
     onError: (error: any) => {
