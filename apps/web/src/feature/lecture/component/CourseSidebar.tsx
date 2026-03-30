@@ -1,5 +1,4 @@
-import { Badge } from "@workspace/ui/components/Badge";
-import { CheckCircle, ChevronDown, FileText, HelpCircle, Lock, PlayCircle, Video } from "lucide-react";
+import { CheckCircle2Icon, ChevronDown, FileText, HelpCircle, Lock, PlayCircle, Video } from "lucide-react";
 import type React from "react";
 import { useEffect, useState } from "react";
 import type { LectureDetail } from "../types/lecture.type";
@@ -8,7 +7,6 @@ import type { SectionDetail } from "../types/section.type";
 interface CourseSidebarProps {
   lectureId: number;
   sections?: SectionDetail[];
-  isOpen: boolean;
   onNavigate: (lectureId: number) => void;
   completedLectures?: number[];
   lectureProgress?: Record<number, number>;
@@ -17,10 +15,17 @@ interface CourseSidebarProps {
 
 const COMPLETION_THRESHOLD = 90;
 
+const formatDuration = (seconds?: number) => {
+  if (!seconds) return null;
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  if (h > 0) return `${h} giờ ${m} phút`;
+  return `${m} phút`;
+};
+
 const CourseSidebar: React.FC<CourseSidebarProps> = ({
   lectureId,
   sections,
-  isOpen,
   onNavigate,
   completedLectures = [],
   lectureProgress = {},
@@ -46,142 +51,136 @@ const CourseSidebar: React.FC<CourseSidebarProps> = ({
     }
   }, [lectureId, sections]);
 
-  const isLectureCompleted = (id: number) => {
-    return completedLectures.includes(id) || (lectureProgress[id] ?? 0) >= COMPLETION_THRESHOLD;
-  };
+  const isLectureCompleted = (id: number) =>
+    completedLectures.includes(id) || (lectureProgress[id] ?? 0) >= COMPLETION_THRESHOLD;
 
-  const getLectureProgress = (id: number) => {
-    return lectureProgress[id] ?? 0;
-  };
+  const getLectureTypeIcon = (lecture: LectureDetail, isActive: boolean, isCompleted: boolean, isLocked: boolean) => {
+    const baseClass = "h-4 w-4 shrink-0";
 
-  const getLectureIcon = (lecture: LectureDetail, isActive: boolean, isCompleted: boolean, isLocked: boolean) => {
-    if (isCompleted) return <CheckCircle className="h-5 w-5 text-green-600" />;
-    if (isLocked) return <Lock className="h-5 w-5" />;
-
-    const progress = getLectureProgress(lecture.id);
-    if (progress > 0 && progress < COMPLETION_THRESHOLD) {
-      return <CheckCircle className="h-5 w-5 text-gray-400" />;
+    if (isCompleted) {
+      return (
+        <span className="flex h-5 w-5 shrink-0 items-center justify-center rounded bg-green-500">
+          <CheckCircle2Icon className={`${baseClass} text-white`} />
+        </span>
+      );
     }
-
-    if (isActive) return <PlayCircle className="h-5 w-5 text-blue-600" />;
+    if (isLocked) return <Lock className={`${baseClass} text-gray-500`} />;
 
     switch (lecture.type) {
       case "VIDEO":
-        return <Video className="h-5 w-5" />;
+        return (
+          <span
+            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${isActive ? "bg-blue-500" : "bg-blue-900/60"}`}
+          >
+            <PlayCircle className={`${baseClass} ${isActive ? "text-white" : "text-blue-300"}`} />
+          </span>
+        );
       case "TEXT":
-        return <FileText className="h-5 w-5" />;
+        return (
+          <span
+            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${isActive ? "bg-green-500" : "bg-green-900/60"}`}
+          >
+            <FileText className={`${baseClass} ${isActive ? "text-white" : "text-green-300"}`} />
+          </span>
+        );
       case "QUIZ":
-        return <HelpCircle className="h-5 w-5" />;
+        return (
+          <span
+            className={`flex h-5 w-5 shrink-0 items-center justify-center rounded ${isActive ? "bg-yellow-500" : "bg-yellow-900/60"}`}
+          >
+            <HelpCircle className={`${baseClass} ${isActive ? "text-white" : "text-yellow-300"}`} />
+          </span>
+        );
       default:
-        return <PlayCircle className="h-5 w-5" />;
+        return <Video className={`${baseClass} text-gray-400`} />;
     }
   };
 
   return (
-    <div
-      className={`${isOpen ? "translate-x-0" : "translate-x-full"} absolute right-0 top-0 z-10 h-full w-full border-l border-gray-200 bg-white transition-transform duration-300 lg:relative lg:w-96 lg:translate-x-0`}
-    >
-      <div className="flex h-full flex-col">
-        <div className="border-b border-gray-200 p-4">
-          <h2 className="font-semibold text-gray-900">Nội dung khóa học</h2>
-          <p className="mt-1 text-sm text-gray-600">
-            {sections?.length || 0} chương • {sections?.reduce((acc, s) => acc + (s.lectures?.length || 0), 0) || 0} bài
-            học
-          </p>
-        </div>
+    <div className="flex h-full w-100 shrink-0 flex-col overflow-hidden border-r border-gray-800 bg-[#1a1f2e]">
+      <div className="flex-1 overflow-y-auto">
+        {sections?.map((section, sectionIndex) => {
+          const completedCount = section.lectures?.filter((l) => isLectureCompleted(l.id)).length || 0;
+          const totalCount = section.lectures?.length || 0;
+          const totalSeconds = section.totalDuration || 0;
+          const durationLabel = formatDuration(totalSeconds);
+          const isExpanded = expandedSections.includes(section.id);
 
-        <div className="flex-1 overflow-y-auto">
-          {sections?.map((section, sectionIndex) => {
-            const progress = Math.round(section.progressPercentage || 0);
-            const isExpanded = expandedSections.includes(section.id);
-
-            return (
-              <div key={section.id} className="border-b border-gray-200">
-                <button
-                  onClick={() => toggleSection(section.id)}
-                  className="flex w-full items-center justify-between p-4 text-left transition-colors hover:bg-gray-50"
-                >
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2">
-                      <h3 className="font-medium text-gray-900">
-                        {sectionIndex + 1}. {section.title}
-                      </h3>
-                      {progress === 100 && <CheckCircle className="h-4 w-4 text-green-600" />}
+          return (
+            <div key={sectionIndex} className="border-b border-gray-800/60">
+              <button
+                onClick={() => toggleSection(section.id)}
+                className="cursor-pointer flex w-full items-start justify-between px-4 py-3 text-left hover:bg-white/5"
+              >
+                <div className="flex-1 pr-2">
+                  <p className="text-sm font-semibold text-white">{section.title}</p>
+                  <p className="mt-0.5 text-xs text-gray-400">
+                    {completedCount}/{totalCount}
+                    {durationLabel && ` • ${durationLabel}`}
+                  </p>
+                  {totalCount > 0 && (
+                    <div className="mt-1.5 h-1 w-full overflow-hidden rounded-full bg-gray-700">
+                      <div
+                        className="h-full rounded-full bg-blue-500 transition-all duration-300"
+                        style={{ width: `${Math.round((completedCount / totalCount) * 100)}%` }}
+                      />
                     </div>
-                    <div className="mt-2 flex items-center gap-3">
-                      <span className="text-sm text-gray-600">{section.lectures?.length || 0} bài học</span>
-                      <div className="flex items-center gap-2">
-                        <div className="h-1.5 w-16 overflow-hidden rounded-full bg-gray-200">
-                          <div
-                            className="h-full rounded-full bg-green-600 transition-all"
-                            style={{ width: `${progress}%` }}
-                          />
-                        </div>
-                        <span className="text-xs text-gray-500">{progress}%</span>
-                      </div>
-                    </div>
-                  </div>
-                  <ChevronDown
-                    className={`h-5 w-5 shrink-0 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
-                  />
-                </button>
+                  )}
+                </div>
+                <ChevronDown
+                  className={`mt-0.5 h-4 w-4 shrink-0 text-gray-400 transition-transform ${isExpanded ? "rotate-180" : ""}`}
+                />
+              </button>
 
-                {isExpanded && (
-                  <div className="bg-gray-50/50">
-                    {section.lectures?.map((lecture, lectureIndex) => {
-                      const isActive = lecture.id === lectureId;
-                      const isLocked = !hasAccess && !lecture.isPreviewable;
-                      const isCompleted = isLectureCompleted(lecture.id);
-                      const lectureProgressValue = getLectureProgress(lecture.id);
+              {isExpanded && (
+                <div>
+                  {section.lectures?.map((lecture) => {
+                    const isActive = lecture.id === lectureId;
+                    const isLocked = !hasAccess && !lecture.isPreviewable;
+                    const isCompleted = isLectureCompleted(lecture.id);
+                    const duration = (lecture as any).duration;
 
-                      return (
-                        <button
-                          key={lecture.id}
-                          onClick={() => !isLocked && onNavigate(lecture.id)}
-                          disabled={isLocked}
-                          className={`relative flex w-full items-center gap-3 px-6 py-3 text-left transition-colors ${
-                            isActive
-                              ? "bg-blue-50 text-blue-600"
-                              : isLocked
-                                ? "cursor-not-allowed text-gray-400"
-                                : "text-gray-700 hover:bg-gray-100"
-                          }`}
-                        >
-                          {isActive && lectureProgressValue > 0 && lectureProgressValue < COMPLETION_THRESHOLD && (
-                            <div
-                              className="absolute inset-y-0 left-0 bg-blue-100 transition-all"
-                              style={{ width: `${lectureProgressValue}%` }}
-                            />
-                          )}
+                    return (
+                      <button
+                        key={lecture.id}
+                        onClick={() => !isLocked && onNavigate(lecture.id)}
+                        disabled={isLocked}
+                        className={`cursor-pointer flex w-full items-start gap-3 px-4 py-3 text-left transition-colors ${
+                          isActive
+                            ? "bg-blue-600/20 border-l-2 border-blue-500"
+                            : isLocked
+                              ? "cursor-not-allowed opacity-50"
+                              : "hover:bg-white/5"
+                        }`}
+                      >
+                        <div className="mt-0.5">{getLectureTypeIcon(lecture, isActive, isCompleted, isLocked)}</div>
 
-                          <div className="relative shrink-0">
-                            {getLectureIcon(lecture, isActive, isCompleted, isLocked)}
-                          </div>
-
-                          <div className="relative min-w-0 flex-1">
-                            <p className={`truncate text-sm font-medium ${isCompleted ? "text-green-600" : ""}`}>
-                              {lectureIndex + 1}. {lecture.title}
-                            </p>
-                            <div className="mt-0.5 flex items-center gap-2">
-                              {isCompleted && <span className="text-xs text-green-600">Hoàn thành</span>}
-                              {isLocked && <span className="text-xs text-gray-400">Cần đăng ký</span>}
-                            </div>
-                          </div>
-
-                          <div className="relative flex shrink-0 items-center gap-1">
-                            {lecture.isPreviewable && !isActive && !hasAccess && (
-                              <Badge className="bg-green-100 text-xs text-green-700">Preview</Badge>
+                        <div className="min-w-0 flex-1">
+                          <p
+                            className={`truncate text-sm leading-snug ${
+                              isActive ? "font-medium text-white" : isCompleted ? "text-green-400" : "text-gray-300"
+                            }`}
+                          >
+                            {lecture.title}
+                          </p>
+                          <div className="mt-0.5 flex items-center gap-2">
+                            {duration && <span className="text-xs text-gray-500">{formatDuration(duration)}</span>}
+                            {lecture.isPreviewable && !hasAccess && !isActive && (
+                              <span className="rounded bg-green-900/60 px-1.5 py-0.5 text-[10px] font-medium text-green-400">
+                                Xem trước
+                              </span>
                             )}
+                            {isLocked && <span className="text-xs text-gray-500">Cần đăng ký</span>}
                           </div>
-                        </button>
-                      );
-                    })}
-                  </div>
-                )}
-              </div>
-            );
-          })}
-        </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          );
+        })}
       </div>
     </div>
   );

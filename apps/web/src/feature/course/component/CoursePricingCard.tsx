@@ -1,13 +1,28 @@
-import BitCoinIcon from "@/shared/components/BitCoinIcon";
-import { Button } from "@workspace/ui/components/Button";
-import { Award, CheckCircle, Download, Loader2, MessageCircle, Play, ShoppingCart, Video, Zap } from "lucide-react";
+import {
+  Award,
+  CheckCircle,
+  Clock,
+  FileText,
+  HelpCircle,
+  Infinity,
+  Loader2,
+  Play,
+  Video,
+  Zap,
+  ShoppingCart,
+} from "lucide-react";
 import type React from "react";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 interface CoursePricingCardProps {
   price: number;
   hasAccess?: boolean;
   isPending: boolean;
   firstLectureId?: number;
+  totalHours?: number;
+  totalVideos?: number;
+  totalTexts?: number;
+  totalQuizzes?: number;
   onEnroll: () => void;
   onAddToCart: () => void;
   onBuyNow: () => void;
@@ -19,130 +34,99 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   hasAccess,
   isPending,
   firstLectureId,
+  totalHours,
+  totalVideos,
+  totalTexts,
+  totalQuizzes,
   onEnroll,
   onAddToCart,
   onBuyNow,
   onStartLearning,
 }) => {
-  const bitAmount = price;
+  const originalPrice = price > 0 ? Math.round(price / 0.77) : 0;
+  const discount = price > 0 ? Math.round((1 - price / originalPrice) * 100) : 0;
+
+  const infoItems = [
+    totalHours && { icon: <Clock className="h-4 w-4" />, label: `${totalHours} giờ học` },
+    totalTexts && { icon: <FileText className="h-4 w-4" />, label: `${totalTexts} bài đọc` },
+    totalVideos && { icon: <Video className="h-4 w-4" />, label: `${totalVideos} video` },
+    totalQuizzes && { icon: <HelpCircle className="h-4 w-4" />, label: `${totalQuizzes} bài kiểm tra` },
+    { icon: <Infinity className="h-4 w-4" />, label: "Truy cập trọn đời" },
+    { icon: <Award className="h-4 w-4" />, label: "Chứng chỉ khi hoàn thành khóa học" },
+  ].filter(Boolean) as { icon: React.ReactNode; label: string }[];
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-8 border-2 border-blue-200 dark:border-slate-800">
-      <div className="flex items-center gap-2 mb-4">
-        <Award className="w-6 h-6 text-blue-600" />
-        <h3 className="font-bold text-slate-800 dark:text-white text-xl">Đăng ký khóa học</h3>
-      </div>
-
-      <div className="text-center mb-8">
-        <p className="text-xs text-slate-500 uppercase tracking-widest mb-1 font-bold">Giá khóa học</p>
-        <p className="text-4xl font-bold text-blue-600">{price === 0 ? "Miễn phí" : `${price.toLocaleString()}đ`}</p>
-
+    <div className="rounded-xl overflow-hidden bg-[#1a2744] text-white">
+      <div className="px-6 pt-6 pb-4 border-b border-white/10">
+        <div className="flex items-baseline gap-3">
+          <span className="text-3xl font-bold text-white">
+            {price === 0 ? "Miễn phí" : `${price.toLocaleString("vi-VN")}đ`}
+          </span>
+        </div>
         {price > 0 && (
-          <div className="mt-2 inline-flex items-center gap-1.5 rounded-md px-3 pt-1">
-            <BitCoinIcon size={24} />
-            <span className="text-md font-semibold text-amber-700">= {bitAmount.toLocaleString("vi-VN")}</span>
-            <span className="text-md font-semibold text-amber-500">BIT</span>
+          <div className="mt-1.5 flex items-center gap-1.5">
+            <BitCoinIcon size={20} />
+            <span className="text-sm font-semibold text-amber-400">= {price.toLocaleString("vi-VN")}</span>
+            <span className="text-sm font-semibold text-amber-500">BIT</span>
           </div>
         )}
       </div>
 
-      <ul className="space-y-4 mb-8">
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-            <Video className="w-4 h-4" />
-          </div>
-          <span>Học trực tuyến mọi lúc, mọi nơi</span>
-        </li>
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600">
-            <Download className="w-4 h-4" />
-          </div>
-          <span>Tài liệu học tập đầy đủ</span>
-        </li>
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
-            <MessageCircle className="w-4 h-4" />
-          </div>
-          <span>Hỗ trợ 24/7 từ giảng viên</span>
-        </li>
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-            <Award className="w-4 h-4" />
-          </div>
-          <span>Chứng chỉ được công nhận</span>
-        </li>
-      </ul>
+      <div className="px-6 py-5 border-b border-white/10">
+        <h4 className="text-sm font-semibold text-gray-300 mb-3">Thông tin khóa học</h4>
+        <ul className="space-y-2">
+          {infoItems.map((item, i) => (
+            <li key={i} className="flex items-center gap-2.5 text-sm text-gray-300">
+              <span className="text-blue-400">{item.icon}</span>
+              {item.label}
+            </li>
+          ))}
+        </ul>
+      </div>
 
-      {firstLectureId && hasAccess && (
-        <Button
-          onClick={onStartLearning}
-          size="lg"
-          className="w-full mb-3 bg-green-500 text-white py-5 rounded-md font-bold shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-        >
-          <Play className="w-5 h-5" />
-          Vào học ngay
-        </Button>
-      )}
-
-      {hasAccess ? (
-        <Button
-          isDisabled
-          size="lg"
-          className="w-full bg-green-500 text-white py-5 rounded-md font-bold flex items-center justify-center gap-2 opacity-50"
-        >
-          <CheckCircle className="w-5 h-5" />
-          Đã đăng ký
-        </Button>
-      ) : price === 0 ? (
-        <Button
-          onClick={onEnroll}
-          size="lg"
-          isDisabled={isPending}
-          className="w-full bg-blue-600 text-white py-5 rounded-md font-bold shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Đang xử lý...
-            </>
-          ) : (
-            <>
-              <Zap className="w-5 h-5" />
-              Đăng ký miễn phí
-            </>
-          )}
-        </Button>
-      ) : (
-        <div className="space-y-3">
-          <Button
-            onClick={onBuyNow}
-            size="lg"
-            isDisabled={isPending}
-            className="w-full bg-blue-600 text-white py-5 rounded-md font-bold shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <Zap className="w-5 h-5" />
-                Mua ngay
-              </>
+      <div className="px-6 py-5 space-y-2.5">
+        {hasAccess ? (
+          <>
+            {firstLectureId && (
+              <button
+                onClick={onStartLearning}
+                className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700"
+              >
+                <Play className="h-4 w-4" />
+                Vào học ngay →
+              </button>
             )}
-          </Button>
-          <Button
-            onClick={onAddToCart}
-            size="lg"
-            isDisabled={isPending}
-            className="w-full bg-transparent border-2 border-blue-600 text-blue-600 py-5 rounded-md font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
+          </>
+        ) : price === 0 ? (
+          <button
+            onClick={onEnroll}
+            disabled={isPending}
+            className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-3 text-sm font-bold text-white transition-colors hover:bg-blue-700 disabled:opacity-60"
           >
-            <ShoppingCart className="w-5" />
-            Thêm vào giỏ hàng
-          </Button>
-        </div>
-      )}
+            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+            {isPending ? "Đang xử lý..." : "Đăng ký miễn phí"}
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={onBuyNow}
+              disabled={isPending}
+              className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg bg-red-500 py-3 text-sm font-bold text-white transition-colors hover:bg-red-600 disabled:opacity-60"
+            >
+              {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Zap className="h-4 w-4" />}
+              {isPending ? "Đang xử lý..." : "Mua ngay"}
+            </button>
+            <button
+              onClick={onAddToCart}
+              disabled={isPending}
+              className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-lg bg-green-500 py-3 text-sm font-bold text-white transition-colors hover:bg-green-600 disabled:opacity-60"
+            >
+              <ShoppingCart className="h-4 w-4" />
+              Thêm vào giỏ hàng
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 };

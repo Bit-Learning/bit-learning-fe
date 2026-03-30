@@ -98,10 +98,10 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
   const allAnswered = Object.keys(selectedAnswers).length === quizData.quizzes.length;
 
   return (
-    <div className="flex h-full flex-col bg-linear-to-br from-slate-900 via-slate-800 to-slate-900 p-8">
-      <div className="mx-auto w-full max-w-4xl flex-1">
-        <div className="mb-6 overflow-hidden rounded-xl bg-white shadow-2xl">
-          <div className="border-b border-gray-200 bg-linear-to-r from-purple-50 to-pink-50 p-6">
+    <div className="flex h-full flex-col bg-gray-200 p-8">
+      <div className="mx-auto w-full flex-1">
+        <div className="mb-6 overflow-hidden border rounded-xs bg-white">
+          <div className="border-b border-gray-200 p-8">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-gray-900">{quizData.lecture.title}</h2>
@@ -110,8 +110,8 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                 )}
               </div>
               {isCompleted && (
-                <span className="flex items-center gap-2 rounded-full bg-green-100 px-4 py-2 text-sm font-medium text-green-700">
-                  <CheckCircle className="h-5 w-5" />
+                <span className="flex shrink-0 items-center gap-1.5 bg-green-100 px-3 py-1.5 text-md font-bold text-green-800">
+                  <CheckCircle className="h-4 w-4" />
                   Đã hoàn thành
                 </span>
               )}
@@ -125,7 +125,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
           </div>
 
           {submitted && (
-            <div className={`border-b p-6 ${isPassed ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
+            <div className={`border-b p-8 ${isPassed ? "border-green-200 bg-green-50" : "border-red-200 bg-red-50"}`}>
               <div className="flex items-center gap-4">
                 {isPassed ? (
                   <div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100">
@@ -153,7 +153,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
             </div>
           )}
 
-          <div className="bg-gray-50 px-6 py-4">
+          <div className="px-8 py-4">
             <div className="flex items-center justify-between">
               <span className="text-sm font-medium text-gray-600">
                 Câu hỏi {currentQuestionIndex + 1} / {quizData.quizzes.length}
@@ -241,7 +241,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
             </div>
           </div>
 
-          <div className="border-t border-gray-200 bg-gray-50 p-6">
+          <div className="border-t border-gray-200 p-6">
             <div className="flex items-center justify-between">
               <Button
                 onPress={handlePrev}
@@ -255,7 +255,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
               {!submitted && currentQuestionIndex === quizData.quizzes.length - 1 && allAnswered ? (
                 <Button
                   onPress={handleSubmit}
-                  className="bg-linear-to-r from-green-600 to-emerald-600 px-8 text-white hover:from-green-700 hover:to-emerald-700"
+                  className="bg-emerald-600 px-8 text-white hover:from-green-700 hover:to-emerald-700"
                 >
                   ✅ Nộp bài
                 </Button>
@@ -270,12 +270,6 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                 </Button>
               )}
             </div>
-
-            {!submitted && (
-              <div className="mt-4 text-center text-sm text-gray-600">
-                Đã trả lời: <strong>{Object.keys(selectedAnswers).length}</strong> / {quizData.quizzes.length} câu
-              </div>
-            )}
           </div>
         </div>
       </div>

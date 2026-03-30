@@ -1,7 +1,6 @@
 import { useNavigate } from "@tanstack/react-router";
-import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
-import { ChevronDown, ChevronUp, PlayCircle } from "lucide-react";
+import { FileText, HelpCircle, Video } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useSectionsByCourse } from "../../lecture/queries/useSection";
@@ -10,124 +9,138 @@ interface CourseCurriculumProps {
   courseId: number;
 }
 
+const formatDuration = (seconds?: number) => {
+  if (!seconds) return "00:00";
+  const h = Math.floor(seconds / 3600);
+  const m = Math.floor((seconds % 3600) / 60);
+  const s = seconds % 60;
+  if (h > 0) return `${h} giờ ${m} phút`;
+  if (m > 0) return `${m} phút`;
+  return `${s} giây`;
+};
+
+const LectureIcon = ({ type }: { type: string }) => {
+  if (type === "VIDEO")
+    return (
+      <span className="flex h-5 w-5 items-center justify-center rounded bg-blue-100 text-blue-600">
+        <Video className="h-3 w-3" />
+      </span>
+    );
+  if (type === "QUIZ")
+    return (
+      <span className="flex h-5 w-5 items-center justify-center rounded bg-green-100 text-green-600">
+        <HelpCircle className="h-3 w-3" />
+      </span>
+    );
+  return (
+    <span className="flex h-5 w-5 items-center justify-center rounded bg-purple-100 text-purple-600">
+      <FileText className="h-3 w-3" />
+    </span>
+  );
+};
+
 const CourseCurriculum: React.FC<CourseCurriculumProps> = ({ courseId }) => {
-  const [expandedSections, setExpandedSections] = useState<number[]>([]);
+  const [expandedSection, setExpandedSection] = useState<number | null>(0);
   const { data: sections, isLoading, error } = useSectionsByCourse(courseId);
   const navigate = useNavigate();
 
-  const toggleSection = (sectionId: number) => {
-    setExpandedSections((prev) =>
-      prev.includes(sectionId) ? prev.filter((id) => id !== sectionId) : [...prev, sectionId],
-    );
-  };
-
   const handleLectureClick = (id: number) => {
-    navigate({
-      to: "/lectures/$id",
-      params: { id: String(id) },
-    });
-  };
-
-  const expandAll = () => {
-    if (sections) {
-      setExpandedSections(sections.map((s) => s.id));
-    }
-  };
-
-  const collapseAll = () => {
-    setExpandedSections([]);
-  };
-
-  const isSectionExpanded = (sectionId: number) => {
-    return expandedSections.includes(sectionId);
+    navigate({ to: "/lectures/$id", params: { id: String(id) } });
   };
 
   if (isLoading) {
     return (
       <div className="py-8 text-center">
-        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-700" />
-        <p className="mt-4 text-gray-600">Đang tải nội dung khóa học...</p>
+        <div className="mx-auto h-8 w-8 animate-spin rounded-full border-b-2 border-blue-600" />
+        <p className="mt-3 text-sm text-gray-500">Đang tải nội dung...</p>
       </div>
     );
   }
 
-  if (error) {
-    return (
-      <div className="rounded-lg bg-red-50 p-4 text-center">
-        <p className="text-red-600">Lỗi: {(error as Error).message}</p>
-      </div>
-    );
+  if (error || !sections?.length) {
+    return <p className="text-sm text-gray-500 py-4">Chưa có nội dung khóa học</p>;
   }
 
-  if (!sections || sections.length === 0) {
-    return <div className="py-8 text-center text-gray-500">Chưa có nội dung khóa học</div>;
-  }
+  const totalLectures = sections.reduce((acc, s) => acc + (s.lectures?.length || 0), 0);
+  const totalDuration = sections.reduce((acc, s) => acc + (s.totalDuration || 0), 0);
 
   return (
-    <div className="space-y-4">
-      <div className="flex items-center justify-between">
-        <h3 className="text-xl font-bold text-gray-900"></h3>
-        <div className="flex gap-2">
-          <Button variant="ghost" size="sm" onPress={expandAll}>
-            Mở tất cả
-          </Button>
-          <Button variant="ghost" size="sm" onPress={collapseAll}>
-            Thu gọn
-          </Button>
-        </div>
-      </div>
+    <div>
+      <p className="text-sm text-gray-500 mb-4">
+        {sections.length} Chương • {totalLectures} bài giảng
+        {totalDuration > 0 && ` • ${formatDuration(totalDuration)} tổng thời lượng`}
+      </p>
 
-      <div className="space-y-3">
-        {sections.map((section) => {
-          const isExpanded = isSectionExpanded(section.id);
-
-          return (
-            <div key={section.id} className="overflow-hidden rounded-lg border border-gray-200 bg-white shadow-sm">
+      <div className="overflow-hidden rounded-xl border border-gray-200">
+        <div className="flex">
+          <div className="w-40 shrink-0 border-r border-gray-200 bg-gray-50">
+            {sections.map((section, idx) => (
               <button
-                onClick={() => toggleSection(section.id)}
-                className="flex w-full items-center justify-between bg-gray-50 p-4 text-left transition-colors hover:bg-gray-100"
+                key={section.id}
+                onClick={() => setExpandedSection(expandedSection === idx ? null : idx)}
+                className={`cursor-pointer flex w-full flex-col items-start px-4 py-4 text-left transition-colors border-b border-gray-200 last:border-b-0 ${
+                  expandedSection === idx
+                    ? "border-l-2 border-l-blue-600 bg-white text-blue-600"
+                    : "text-gray-700 hover:bg-gray-100"
+                }`}
               >
-                <div className="flex items-center gap-3">
-                  {isExpanded ? (
-                    <ChevronUp className="h-5 w-5 shrink-0 text-gray-600" />
-                  ) : (
-                    <ChevronDown className="h-5 w-5 shrink-0 text-gray-600" />
-                  )}
-                  <h4 className="font-semibold text-gray-900">{section.title}</h4>
-                </div>
+                <span className="text-md text-gray-700 mb-0.5">Chương {idx + 1}</span>
+                <span className="mt-1 text-[10px] text-gray-400">{section.lectures?.length || 0} bài</span>
               </button>
+            ))}
+          </div>
 
-              {isExpanded && (
-                <div className="divide-y divide-gray-100 bg-white">
-                  {section.lectures && section.lectures.length > 0 ? (
-                    section.lectures.map((lecture, index) => (
-                      <div
-                        key={lecture.id}
-                        onClick={() => handleLectureClick(lecture.id)}
-                        className="flex items-center justify-between px-4 py-3 transition-colors hover:bg-gray-50"
-                      >
-                        <div className="flex items-center gap-3">
-                          <PlayCircle className="h-5 w-5 shrink-0 text-orange-500" />
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-gray-600">{index + 1}</span>
-                            <span className="text-sm font-medium text-gray-900">{lecture.title}</span>
-                          </div>
-                        </div>
+          <div className="flex-1 min-w-0">
+            {expandedSection !== null && sections[expandedSection] && (
+              <>
+                <div className="border-b border-gray-100 bg-blue-50 px-4 py-3">
+                  <p className="text-md font-semibold text-blue-800">{sections[expandedSection].title}</p>
+                  <div className="mt-1 flex gap-3 text-xs text-blue-600">
+                    {sections[expandedSection].lectures?.filter((l) => l.type === "VIDEO").length
+                      ? `${sections[expandedSection].lectures!.filter((l) => l.type === "VIDEO").length} video`
+                      : null}
+                    {sections[expandedSection].lectures?.filter((l) => l.type === "QUIZ").length
+                      ? ` • ${sections[expandedSection].lectures!.filter((l) => l.type === "QUIZ").length} bài kiểm tra`
+                      : null}
+                  </div>
+                </div>
 
-                        <div className="flex items-center gap-3">
-                          {lecture.isPreviewable && <Badge className="bg-blue-600 text-xs text-white">Học thử</Badge>}
-                          <span className="text-sm text-gray-600">00:00:00</span>
+                <div className="divide-y divide-gray-100">
+                  {sections[expandedSection].lectures?.map((lecture, lIdx) => (
+                    <div
+                      key={lIdx}
+                      onClick={() => handleLectureClick(lecture.id)}
+                      className="flex cursor-pointer items-center justify-between px-4 py-3 hover:bg-gray-50 transition-colors"
+                    >
+                      <div className="flex items-center gap-3 min-w-0">
+                        <LectureIcon type={lecture.type} />
+                        <div className="min-w-0">
+                          <p className="text-md text-blue-600 hover:underline truncate">{lecture.title}</p>
+                          {(lecture as any).duration && (
+                            <p className="text-xs text-gray-400 mt-0.5">{formatDuration((lecture as any).duration)}</p>
+                          )}
                         </div>
                       </div>
-                    ))
-                  ) : (
-                    <div className="p-4 text-center text-sm text-gray-500">Chưa có bài học</div>
-                  )}
+                      <div className="flex shrink-0 items-center gap-2 ml-3">
+                        {lecture.isPreviewable && (
+                          <span className="rounded bg-blue-600 px-2 py-0.5 text-[10px] font-medium text-white">
+                            Học thử
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              )}
-            </div>
-          );
-        })}
+              </>
+            )}
+
+            {expandedSection === null && (
+              <div className="flex h-full items-center justify-center p-8 text-sm text-gray-400">
+                Chọn chương để xem nội dung
+              </div>
+            )}
+          </div>
+        </div>
       </div>
     </div>
   );
