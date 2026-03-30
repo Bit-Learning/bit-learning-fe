@@ -18,16 +18,14 @@ const StudentDashboard: React.FC = () => {
         </div>
 
         <div className="mb-8">
-          <DashboardStats stats={data.stats} />
+          <DashboardStats />
         </div>
 
         <div className="grid gap-6 lg:grid-cols-3">
           <div className="space-y-6 lg:col-span-2">
-            <ContinueLearning data={data.continueLearning} />
+            <ContinueLearning />
 
-            <ProgressChart weeklyProgress={data.weeklyProgress} monthlyProgress={data.monthlyProgress} />
-
-            <MyCourses courses={data.enrolledCourses} />
+            <MyCourses />
           </div>
 
           <div className="space-y-6">
