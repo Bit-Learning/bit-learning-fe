@@ -16,16 +16,14 @@ import {
   Trash2,
   Video,
 } from "lucide-react";
-import { useForm } from "react-hook-form";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCourseDetail, useValidateCourse } from "../queries/useCourse";
 import { useDeleteLecture } from "../queries/useLecture";
 import { useSectionsByCourse, useDeleteSection } from "../queries/useSection";
-import { LectureDetail, SectionDetail } from "../types/course.type";
+import type { LectureDetail, SectionDetail } from "../types/course.type";
 import { LectureDetailModal } from "../components/LectureDetailModal";
-
 import { EditCourseModal } from "../components/EditCourseModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import LectureModal from "../components/LectureModal";
@@ -55,14 +53,10 @@ export const CourseDetailPage: React.FC = () => {
   const navigate = useNavigate();
 
   const { data: course, isLoading: courseLoading, refetch: refetchCourse } = useCourseDetail(courseId);
-  const { data: sections, isLoading: sectionsLoading, refetch: refetchSections } = useSectionsByCourse(courseId);
+  const { data: sections, isLoading: sectionsLoading } = useSectionsByCourse(courseId);
   const deleteSectionMutation = useDeleteSection();
   const deleteLectureMutation = useDeleteLecture();
   const validateCourseMutation = useValidateCourse();
-
-  const sectionForm = useForm<{ title: string; description: string }>({
-    defaultValues: { title: "", description: "" },
-  });
 
   const toggleSection = (sectionId: number) => {
     const newExpanded = new Set(expandedSections);
@@ -92,7 +86,6 @@ export const CourseDetailPage: React.FC = () => {
     } else if (deleteModal.type === "lecture") {
       try {
         await deleteLectureMutation.mutateAsync(deleteModal.id);
-        refetchSections();
         closeDeleteModal();
       } catch (error) {
         console.error("Failed to delete lecture:", error);
@@ -100,10 +93,7 @@ export const CourseDetailPage: React.FC = () => {
     }
   };
 
-  const closeModal = () => {
-    sectionForm.reset();
-    setModalState({ type: "none" });
-  };
+  const closeModal = () => setModalState({ type: "none" });
 
   const handleViewLecture = (lecture: LectureDetail) => setModalState({ type: "view-lecture", lecture });
 
@@ -149,20 +139,13 @@ export const CourseDetailPage: React.FC = () => {
 
   const handleTogglePublish = async () => {
     if (!course) return;
-
-    const isAccepted = course.status !== "PUBLISHED";
-
     try {
-      await validateCourseMutation.mutateAsync({ id: courseId, isAccepted });
+      await validateCourseMutation.mutateAsync({ id: courseId, isAccepted: course.status !== "PUBLISHED" });
       refetchCourse();
     } catch (error) {
       console.error("Failed to toggle publish status:", error);
     }
   };
-
-  const handleSectionUpdated = () => refetchSections();
-  const handleLectureUpdated = () => refetchSections();
-  const handleCourseUpdated = () => refetchCourse();
 
   if (courseLoading) {
     return (
@@ -191,7 +174,8 @@ export const CourseDetailPage: React.FC = () => {
         title: "Xóa chương",
         description: "Tất cả bài học trong chương này cũng sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác!",
       };
-    } else if (deleteModal.type === "lecture") {
+    }
+    if (deleteModal.type === "lecture") {
       return {
         title: "Xóa bài học",
         description: "Bài học này sẽ bị xóa vĩnh viễn khỏi khóa học. Hành động này không thể hoàn tác!",
@@ -201,7 +185,6 @@ export const CourseDetailPage: React.FC = () => {
   };
 
   const deleteModalProps = getDeleteModalProps();
-
   const isPublished = course.status === "PUBLISHED";
   const canTogglePublish = ["PUBLISHED", "PENDING"].includes(course.status || "");
 
@@ -224,27 +207,24 @@ export const CourseDetailPage: React.FC = () => {
             <p className="mt-1 text-gray-600">{course.subtitle}</p>
           </div>
           {course.status && (
-            <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"} className="h-fit">
-              {course.status === "PUBLISHED" ? "Đã xuất bản" : "Chưa xuất bản"}
+            <Badge variant={isPublished ? "default" : "secondary"} className="h-fit">
+              {isPublished ? "Đã xuất bản" : "Chưa xuất bản"}
             </Badge>
           )}
         </div>
         <div className="flex gap-2">
-          {canTogglePublish && (
+          {canTogglePublish && !isPublished && (
             <Button
               onClick={handleTogglePublish}
               size="lg"
               disabled={validateCourseMutation.isPending}
-              variant={isPublished ? "outline" : "default"}
-              className={isPublished ? "border-none" : "gap-2 bg-emerald-600 hover:from-green-700 hover:to-emerald-700"}
+              className="gap-2 bg-emerald-600 hover:bg-emerald-700"
             >
               {validateCourseMutation.isPending ? (
                 <>
                   <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
                   Đang xử lý...
                 </>
-              ) : isPublished ? (
-                <></>
               ) : (
                 <>
                   <CheckCircle className="h-4 w-4" />
@@ -256,7 +236,7 @@ export const CourseDetailPage: React.FC = () => {
           <Button
             onClick={() => setModalState({ type: "edit-course" })}
             size="lg"
-            className="gap-2 bg-blue-600 hover:from-blue-700 hover:to-indigo-700"
+            className="gap-2 bg-blue-600 hover:bg-blue-700"
           >
             <Settings className="h-4 w-4" />
             Chỉnh sửa khóa học
@@ -310,7 +290,7 @@ export const CourseDetailPage: React.FC = () => {
             </div>
           ) : (
             sections.map((section, index) => (
-              <Card key={section.id} className="overflow-hidden border-l-4 border-l-blue-500">
+              <Card key={section.id} className="overflow-hidden p-0 border-l-4 border-l-blue-500">
                 <div
                   className="flex cursor-pointer items-center justify-between bg-gray-50 p-4 transition-colors hover:bg-gray-100"
                   onClick={() => toggleSection(section.id)}
@@ -443,9 +423,7 @@ export const CourseDetailPage: React.FC = () => {
         </div>
       </Card>
 
-      {modalState.type === "add-section" && (
-        <SectionModal mode="create" courseId={courseId} onClose={closeModal} onSuccess={handleSectionUpdated} />
-      )}
+      {modalState.type === "add-section" && <SectionModal mode="create" courseId={courseId} onClose={closeModal} />}
 
       {modalState.type === "create-lecture" && (
         <LectureModal
@@ -454,20 +432,23 @@ export const CourseDetailPage: React.FC = () => {
           sectionId={modalState.sectionId}
           existingLectures={sections?.find((s) => s.id === modalState.sectionId)?.lectures || []}
           onClose={closeModal}
-          onSuccess={handleLectureUpdated}
         />
       )}
+
       {modalState.type === "view-lecture" && (
         <LectureDetailModal lecture={modalState.lecture} onClose={closeModal} onEdit={handleEditFromView} />
       )}
+
       {modalState.type === "edit-lecture" && (
-        <LectureModal mode="edit" lecture={modalState.lecture} onClose={closeModal} onSuccess={handleLectureUpdated} />
+        <LectureModal mode="edit" lecture={modalState.lecture} onClose={closeModal} />
       )}
+
       {modalState.type === "edit-section" && (
-        <SectionModal mode="edit" section={modalState.section} onClose={closeModal} onSuccess={handleSectionUpdated} />
+        <SectionModal mode="edit" section={modalState.section} courseId={courseId} onClose={closeModal} />
       )}
+
       {modalState.type === "edit-course" && (
-        <EditCourseModal course={course as any} onClose={closeModal} onSuccess={handleCourseUpdated} />
+        <EditCourseModal course={course} onClose={closeModal} onSuccess={refetchCourse} />
       )}
 
       <DeleteConfirmModal

@@ -31,7 +31,6 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
                 <div dangerouslySetInnerHTML={{ __html: lecture.description }} className="prose prose-sm max-w-none" />
               </div>
             )}
-            {/* Dùng HlsVideoPlayer thay cho <video src> trực tiếp */}
             <HlsVideoPlayer lectureId={lecture.id} />
           </div>
         );

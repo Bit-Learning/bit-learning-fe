@@ -14,11 +14,6 @@ export interface UpdateLectureRequest {
   orderIndex: number;
 }
 
-export interface CreateLectureVideoRequest {
-  lecture: CreateLectureRequest;
-  video: File;
-}
-
 export interface AnswerCreateRequest {
   answerText: string;
   isCorrect: boolean;
@@ -36,6 +31,7 @@ export interface CreateLectureQuizRequest {
   quizzes: QuizCreateRequest[];
   passPercent: number;
   maxAttempts: number;
+  duration?: number;
 }
 
 export interface AnswerUpdateRequest {
@@ -51,15 +47,24 @@ export interface QuizUpdateRequest {
   orderIndex: number;
   answers: AnswerUpdateRequest[];
 }
+export interface UpdateLectureQuizRequest {
+  passPercent?: number;
+  maxAttempts?: number;
+  duration?: number;
+  quizzes: QuizUpdateRequest[];
+}
 
 export interface CreateLectureTextRequest {
   lecture: CreateLectureRequest;
   content: string;
+  duration?: number;
 }
 
 export interface UpdateLectureTextRequest {
   content: string;
+  duration?: number;
 }
+
 export enum LectureType {
   VIDEO = "VIDEO",
   TEXT = "TEXT",
@@ -76,6 +81,7 @@ export interface LectureDetail {
   isPreviewable: boolean;
   orderIndex: number;
   isDeleted: boolean;
+  isCompleted: boolean;
 }
 
 export interface LectureTextDetail {

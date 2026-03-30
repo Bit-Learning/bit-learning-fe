@@ -355,7 +355,8 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
   return (
     <div
       ref={containerRef}
-      className="relative h-full w-full bg-black"
+      className="relative w-full bg-black"
+      style={{ aspectRatio: "16/9" }}
       onMouseMove={resetHideControlsTimer}
       onMouseLeave={() => isPlaying && setShowControls(false)}
       onClick={handlePlayPause}

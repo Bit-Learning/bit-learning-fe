@@ -23,10 +23,12 @@ export interface UpdateCourseRequest {
   level: CourseLevel;
   grade: number;
 }
+
 export interface CoursePreview {
   id: number;
   code: string;
   title: string;
+  description: string;
   thumbnailUrl: string;
   instructorId: number;
   instructorName: string;
@@ -36,7 +38,6 @@ export interface CoursePreview {
   grade: number;
   price: number;
   isDeleted: boolean;
-  isPublished?: boolean;
   status: CourseStatus;
 }
 
@@ -61,9 +62,10 @@ export interface CourseDetail {
   totalDuration: number;
   grade: number;
   price: number;
-  isPublished?: boolean;
   sections: SectionDetail[];
+  isDeleted: boolean;
   status: CourseStatus;
+  progressPercentage: number;
 }
 
 export interface SectionDetail {
@@ -76,6 +78,7 @@ export interface SectionDetail {
   totalDuration: number;
   isDeleted: boolean;
   lectures: LectureDetail[];
+  progressPercentage: number;
 }
 
 export interface LectureDetail {
@@ -87,6 +90,25 @@ export interface LectureDetail {
   isPreviewable: boolean;
   orderIndex: number;
   isDeleted: boolean;
+  isCompleted: boolean;
+}
+
+export interface MyCourse {
+  id: number;
+  code: string;
+  title: string;
+  description: string;
+  thumbnailUrl: string;
+  instructorId: number;
+  instructorName: string;
+  ratingStar: number;
+  ratingCount: number;
+  level: CourseLevel;
+  grade: number;
+  price: number;
+  isDeleted: boolean;
+  status: CourseStatus;
+  progressPercentage: number;
 }
 
 export enum CourseLevel {

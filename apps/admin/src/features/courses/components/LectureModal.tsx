@@ -20,8 +20,8 @@ import {
   useUpdateLectureText,
   useUpdateLectureVideo,
 } from "../queries/useLecture";
-import { LectureDetail } from "../types/course.type";
-import { UpdateLectureRequest, UpdateLectureTextRequest } from "../types/lecture.type";
+import type { LectureDetail } from "../types/course.type";
+import type { UpdateLectureRequest } from "../types/lecture.type";
 import { HtmlPasteButton } from "@/components/HtmlPasteButton";
 
 interface LectureModalProps {
@@ -61,9 +61,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const getInitialLectureType = (): LectureType | null => {
     if (mode === "edit" && lecture) {
       const type = lecture.type;
-      if (type === "VIDEO" || type === "TEXT" || type === "QUIZ") {
-        return type;
-      }
+      if (type === "VIDEO" || type === "TEXT" || type === "QUIZ") return type;
     }
     return null;
   };
@@ -71,11 +69,10 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const [lectureType, setLectureType] = useState<LectureType | null>(getInitialLectureType());
   const [videoFile, setVideoFile] = useState<File | null>(null);
   const navigate = useNavigate();
-
   const textContentRef = useRef<any>(null);
 
   const { data: textData, isLoading: textLoading } = useLectureText(
-    mode === "edit" && lecture && lecture.type === "TEXT" ? lecture.id : 0,
+    mode === "edit" && lecture?.type === "TEXT" ? lecture.id : 0,
   );
 
   const createVideoMutation = useCreateLectureVideo();
@@ -118,9 +115,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         ["link", "image", "video"],
         ["clean"],
       ],
-      clipboard: {
-        matchVisual: false,
-      },
+      clipboard: { matchVisual: false },
     }),
     [],
   );
@@ -153,7 +148,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         content: textData.content,
       });
     }
-  }, [textData, textForm]);
+  }, [textData]);
 
   const getNextOrderIndex = () => {
     if (existingLectures.length === 0) return 1;
@@ -167,8 +162,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
       if (range) {
         editor.clipboard.dangerouslyPasteHTML(range.index, html);
       } else {
-        const length = editor.getLength();
-        editor.clipboard.dangerouslyPasteHTML(length, html);
+        editor.clipboard.dangerouslyPasteHTML(editor.getLength(), html);
       }
       setValue(fieldName, editor.root.innerHTML);
     }
@@ -210,14 +204,16 @@ const LectureModal: React.FC<LectureModalProps> = ({
         }
       } else if (mode === "create" && sectionId) {
         if (!videoFile) return;
-        const request = JSON.stringify({
-          sectionId,
-          title: data.title,
-          description: data.description,
-          isPreviewable: data.isPreviewable,
-          orderIndex: getNextOrderIndex(),
+        await createVideoMutation.mutateAsync({
+          request: {
+            sectionId,
+            title: data.title,
+            description: data.description,
+            isPreviewable: data.isPreviewable,
+            orderIndex: getNextOrderIndex(),
+          },
+          video: videoFile,
         });
-        await createVideoMutation.mutateAsync({ request, video: videoFile });
       }
       onSuccess?.();
       onClose();
@@ -239,7 +235,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         await updateLectureMutation.mutateAsync({ id: lecture.id, data: updateData });
         await updateTextMutation.mutateAsync({
           id: lecture.id,
-          data: { content: data.content } as UpdateLectureTextRequest,
+          data: { content: data.content },
         });
       } else if (mode === "create" && sectionId) {
         await createTextMutation.mutateAsync({
@@ -317,9 +313,9 @@ const LectureModal: React.FC<LectureModalProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="title">Tên bài học *</Label>
+                <Label htmlFor="video-title">Tên bài học *</Label>
                 <Input
-                  id="title"
+                  id="video-title"
                   {...videoForm.register("title")}
                   placeholder="VD: Bài 1: Giới thiệu"
                   className={videoForm.formState.errors.title ? "border-red-500" : ""}
@@ -330,9 +326,9 @@ const LectureModal: React.FC<LectureModalProps> = ({
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="description">Mô tả</Label>
+                <Label htmlFor="video-description">Mô tả</Label>
                 <Textarea
-                  id="description"
+                  id="video-description"
                   {...videoForm.register("description")}
                   rows={3}
                   placeholder="Mô tả ngắn về bài học"
@@ -362,26 +358,24 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
               <div className="flex items-center space-x-2">
                 <Checkbox
-                  id="isPreviewable"
+                  id="video-previewable"
                   checked={videoIsPreviewable}
                   onCheckedChange={(checked) => videoForm.setValue("isPreviewable", !!checked)}
                 />
-                <Label htmlFor="isPreviewable" className="font-medium">
+                <Label htmlFor="video-previewable" className="font-medium">
                   Cho phép xem trước
                 </Label>
               </div>
 
               {mode === "edit" && (
-                <div className="flex justify-between border-t pt-4">
-                  <div className="flex gap-2">
-                    <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                      Hủy
-                    </Button>
-                    <Button type="submit" disabled={isLoading}>
-                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                      {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
-                    </Button>
-                  </div>
+                <div className="flex justify-end gap-2 border-t pt-4">
+                  <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                    Hủy
+                  </Button>
+                  <Button type="submit" disabled={isLoading}>
+                    {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                  </Button>
                 </div>
               )}
             </form>
@@ -403,9 +397,9 @@ const LectureModal: React.FC<LectureModalProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="title">Tên bài học *</Label>
+                  <Label htmlFor="text-title">Tên bài học *</Label>
                   <Input
-                    id="title"
+                    id="text-title"
                     {...textForm.register("title")}
                     placeholder="VD: Bài 1: Giới thiệu"
                     className={textForm.formState.errors.title ? "border-red-500" : ""}
@@ -416,9 +410,9 @@ const LectureModal: React.FC<LectureModalProps> = ({
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="description">Mô tả</Label>
+                  <Label htmlFor="text-description">Mô tả</Label>
                   <Textarea
-                    id="description"
+                    id="text-description"
                     {...textForm.register("description")}
                     rows={3}
                     placeholder="Mô tả ngắn về bài học"
@@ -455,26 +449,24 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
                 <div className="flex items-center space-x-2">
                   <Checkbox
-                    id="isPreviewable"
+                    id="text-previewable"
                     checked={textIsPreviewable}
                     onCheckedChange={(checked) => textForm.setValue("isPreviewable", !!checked)}
                   />
-                  <Label htmlFor="isPreviewable" className="font-medium">
+                  <Label htmlFor="text-previewable" className="font-medium">
                     Cho phép xem trước
                   </Label>
                 </div>
 
                 {mode === "edit" && (
-                  <div className="flex justify-between border-t pt-4">
-                    <div className="flex gap-2">
-                      <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
-                        Hủy
-                      </Button>
-                      <Button type="submit" disabled={isLoading}>
-                        {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                        {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
-                      </Button>
-                    </div>
+                  <div className="flex justify-end gap-2 border-t pt-4">
+                    <Button type="button" variant="outline" onClick={onClose} disabled={isLoading}>
+                      Hủy
+                    </Button>
+                    <Button type="submit" disabled={isLoading}>
+                      {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                      {isLoading ? "Đang lưu..." : "Lưu thay đổi"}
+                    </Button>
                   </div>
                 )}
               </form>

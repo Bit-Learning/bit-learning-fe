@@ -89,7 +89,7 @@ export const CourseCertificate: React.FC<CourseCertificateProps> = ({ courseId, 
           </Button>
         </div>
 
-        <div className="mt-4 border-t border-amber-200 pt-4">
+        <div className="mt-4 border-t border-amber-200 pt-4  text-right">
           <button
             className="text-sm text-amber-700 underline-offset-2 hover:underline cursor-pointer"
             onClick={() => setShowVerify(!showVerify)}

@@ -3,10 +3,11 @@ import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
 import type {
   CreateLectureQuizRequest,
+  CreateLectureRequest,
   CreateLectureTextRequest,
   LectureQuizDetail,
   LectureTextDetail,
-  QuizUpdateRequest,
+  UpdateLectureQuizRequest,
   UpdateLectureRequest,
   UpdateLectureTextRequest,
 } from "../types/lecture.type";
@@ -46,9 +47,10 @@ export const lectureApi = {
     return api.delete(`/lectures/${id}`, { params: { isHidden } });
   },
 
-  createLectureVideo(request: string, video: File): Promise<AxiosResponse<ApiResponse<void>>> {
+  createLectureVideo(request: CreateLectureRequest, video: File): Promise<AxiosResponse<ApiResponse<void>>> {
     const formData = new FormData();
-    formData.append("request", request);
+    const blob = new Blob([JSON.stringify(request)], { type: "application/json" });
+    formData.append("request", blob);
     formData.append("video", video);
     return api.post(`/lectures/lecture-videos`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
@@ -67,8 +69,8 @@ export const lectureApi = {
     return api.post(`/lectures/lecture-quizzes`, data);
   },
 
-  updateLectureQuiz(id: number, quizzes: QuizUpdateRequest[]): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.patch(`/lectures/lecture-quizzes/${id}`, quizzes);
+  updateLectureQuiz(id: number, data: UpdateLectureQuizRequest): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.patch(`/lectures/lecture-quizzes/${id}`, data);
   },
 
   createLectureText(data: CreateLectureTextRequest): Promise<AxiosResponse<ApiResponse<void>>> {

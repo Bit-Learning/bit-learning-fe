@@ -229,7 +229,6 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
                 </div>
               </TabsContent>
 
-              {/* Tab: Chi tiết */}
               <TabsContent value="detail" className="mt-0 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="outcome">Kết quả đạt được</Label>
@@ -292,11 +291,7 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
                 <X className="mr-2 h-4 w-4" />
                 Hủy
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="bg-blue-600 hover:from-blue-700 hover:to-indigo-700"
-              >
+              <Button type="submit" disabled={isLoading} className="bg-blue-600 hover:bg-blue-700">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

@@ -9,9 +9,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
-import { useUpdateSection, useCreateSection } from "../queries/useSection";
+import { useCreateSection, useSectionsByCourse, useUpdateSection } from "../queries/useSection";
 import type { SectionDetail, UpdateSectionRequest } from "../types/section.type";
-import { useSectionsByCourse } from "../queries/useCourse";
 
 interface SectionModalProps {
   mode: "create" | "edit";
@@ -71,7 +70,11 @@ const SectionModal: React.FC<SectionModalProps> = ({ mode, section, courseId, on
           isPublished: data.isPublished,
           orderIndex: section.orderIndex,
         };
-        await updateSectionMutation.mutateAsync({ id: section.id, data: updateData });
+        await updateSectionMutation.mutateAsync({
+          id: section.id,
+          courseId: courseId ?? 0,
+          data: updateData,
+        });
       } else if (mode === "create" && courseId) {
         await createSectionMutation.mutateAsync({
           courseId,

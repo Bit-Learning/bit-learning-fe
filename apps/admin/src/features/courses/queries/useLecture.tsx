@@ -3,8 +3,9 @@ import { lectureApi } from "../apis/lecture.api";
 import { toast } from "@/components/Sonner";
 import type {
   CreateLectureQuizRequest,
+  CreateLectureRequest,
   CreateLectureTextRequest,
-  QuizUpdateRequest,
+  UpdateLectureQuizRequest,
   UpdateLectureRequest,
   UpdateLectureTextRequest,
 } from "../types/lecture.type";
@@ -64,9 +65,7 @@ export const useVideoStream = (lectureId: number) => {
       });
 
       const blob = new Blob([rewritten], { type: "application/vnd.apple.mpegurl" });
-      const blobUrl = URL.createObjectURL(blob);
-
-      return blobUrl;
+      return URL.createObjectURL(blob);
     },
     enabled: !!lectureId,
     gcTime: 0,
@@ -135,7 +134,8 @@ export const useCreateLectureVideo = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ request, video }: { request: string; video: File }) => lectureApi.createLectureVideo(request, video),
+    mutationFn: ({ request, video }: { request: CreateLectureRequest; video: File }) =>
+      lectureApi.createLectureVideo(request, video),
     onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
@@ -192,8 +192,8 @@ export const useUpdateLectureQuiz = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, quizzes }: { id: number; quizzes: QuizUpdateRequest[] }) =>
-      lectureApi.updateLectureQuiz(id, quizzes),
+    mutationFn: ({ id, data }: { id: number; data: UpdateLectureQuizRequest }) =>
+      lectureApi.updateLectureQuiz(id, data),
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: lectureKeys.quiz(variables.id) });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
