@@ -99,3 +99,14 @@ export const useMarkAsCompleted = () => {
     },
   });
 };
+
+export const useMyLearningStatistics = () => {
+  return useQuery({
+    queryKey: [...LEARNING_KEYS.all, "statistics"] as const,
+    queryFn: async () => {
+      const response = await learningApi.getMyStatistics();
+      return response.data.data;
+    },
+    staleTime: 60 * 1000,
+  });
+};

@@ -1,6 +1,6 @@
 import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
-import type { SyncProgressRequest } from "../types/learning.type";
+import type { SyncProgressRequest, UserLearningStatistics } from "../types/learning.type";
 import { AxiosResponse } from "axios";
 
 export const learningApi = {
@@ -17,5 +17,9 @@ export const learningApi = {
   },
   isLectureCompleted: (lectureId: number) => {
     return api.get<AxiosResponse<ApiResponse<boolean>>>(`/learning/progress/lectures/${lectureId}/is-completed`);
+  },
+
+  getMyStatistics: () => {
+    return api.get<ApiResponse<UserLearningStatistics>>("/enrollments/my-statistics");
   },
 };

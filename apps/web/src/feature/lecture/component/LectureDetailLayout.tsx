@@ -109,6 +109,15 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
     return () => window.removeEventListener("keydown", handleKeydown);
   }, [previousLecture, nextLecture, goToLecture, hasAccess]);
 
+  const currentSection = useMemo(() => {
+    if (!sections || !currentLecture) return null;
+    return sections.find((s) => s.id === (currentLecture as any).sectionId) ?? null;
+  }, [sections, currentLecture]);
+
+  const sectionLectures = useMemo(() => currentSection?.lectures?.filter((l) => !l.isDeleted) ?? [], [currentSection]);
+
+  const currentSectionIndex = sectionLectures.findIndex((l) => l.id === lectureId);
+
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#1a1f2e]">
@@ -123,15 +132,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
   const isCompleted = completedLectures.includes(lectureId);
   const canAccessPrevious = previousLecture && (hasAccess || previousLecture.isPreviewable);
   const canAccessNext = nextLecture && (hasAccess || nextLecture.isPreviewable);
-
-  const currentSection = useMemo(() => {
-    if (!sections || !currentLecture) return null;
-    return sections.find((s) => s.id === (currentLecture as any).sectionId) ?? null;
-  }, [sections, currentLecture]);
-
-  const sectionLectures = useMemo(() => currentSection?.lectures?.filter((l) => !l.isDeleted) ?? [], [currentSection]);
-
-  const currentSectionIndex = sectionLectures.findIndex((l) => l.id === lectureId);
 
   return (
     <div className="flex h-screen flex-col bg-[#1a1f2e]">
@@ -230,9 +230,23 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                 </div>
               </div>
             ) : currentLecture?.type === LectureType.QUIZ ? (
-              <QuizPlayer lectureId={lectureId} onComplete={handleVideoComplete} />
+              <div>
+                <QuizPlayer lectureId={lectureId} onComplete={handleVideoComplete} />
+                <div className="p-6">
+                  <div className="mx-auto max-w-4xl">
+                    <LectureQA lectureId={lectureId} />
+                  </div>
+                </div>
+              </div>
             ) : currentLecture?.type === LectureType.TEXT ? (
-              <TextContent lectureId={lectureId} onComplete={handleVideoComplete} />
+              <div>
+                <TextContent lectureId={lectureId} onComplete={handleVideoComplete} />
+                <div className="border-t border-gray-200 p-6">
+                  <div className="mx-auto max-w-4xl">
+                    <LectureQA lectureId={lectureId} />
+                  </div>
+                </div>
+              </div>
             ) : (
               <div className="flex h-full items-center justify-center text-gray-400">
                 <p>Nội dung đang được cập nhật</p>

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Plus } from "lucide-react";
-import { useFieldArray, useForm, type Resolver } from "react-hook-form";
+import { Controller, useFieldArray, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -12,6 +12,7 @@ import { useCreateLectureQuiz, useLectureQuiz, useUpdateLecture, useUpdateLectur
 import type { CreateLectureQuizRequest, UpdateLectureQuizRequest } from "../types/lecture.type";
 import { cn } from "@/shared/lib/utils";
 import { QuestionCard } from "../components/QuestionCard";
+import DurationPicker from "@/components/DurationPicker";
 
 const answerSchema = z.object({
   id: z.coerce.number().optional(),
@@ -32,6 +33,7 @@ const quizSchema = z.object({
   description: z.string().optional(),
   passPercent: z.coerce.number().min(0, "Tối thiểu 0").max(1, "Tối đa 1"),
   maxAttempts: z.coerce.number().min(1, "Tối thiểu 1 lần"),
+  duration: z.number().min(1, "Thời lượng phải lớn hơn 0"),
   questions: z.array(questionSchema).min(1, "Cần ít nhất 1 câu hỏi"),
 });
 
@@ -69,7 +71,8 @@ export const QuizFormPage: React.FC = () => {
       title: "",
       description: "",
       passPercent: 0.8,
-      maxAttempts: 3,
+      maxAttempts: 999,
+      duration: 600,
       questions: [
         {
           questionText: "",
@@ -96,6 +99,7 @@ export const QuizFormPage: React.FC = () => {
         description: quizData.lecture?.description || "",
         passPercent: quizData.passPercent,
         maxAttempts: quizData.maxAttempts,
+        duration: 600,
         questions:
           quizData.quizzes?.map((q) => ({
             id: q.id,
@@ -138,6 +142,7 @@ export const QuizFormPage: React.FC = () => {
         const updatePayload: UpdateLectureQuizRequest = {
           passPercent: data.passPercent,
           maxAttempts: data.maxAttempts,
+          duration: data.duration,
           quizzes: data.questions.map((q) => ({
             id: q.id,
             questionText: q.questionText,
@@ -167,6 +172,7 @@ export const QuizFormPage: React.FC = () => {
           })),
           passPercent: data.passPercent,
           maxAttempts: data.maxAttempts,
+          duration: data.duration,
         };
         await createQuizMutation.mutateAsync(payload);
       }
@@ -246,16 +252,18 @@ export const QuizFormPage: React.FC = () => {
                   {errors.passPercent && <p className="text-sm text-red-500">{errors.passPercent.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxAttempts">Số lần làm tối đa *</Label>
-                  <Input
-                    id="maxAttempts"
-                    type="number"
-                    min="1"
-                    {...register("maxAttempts")}
-                    placeholder="3"
-                    className={cn("h-11 w-full text-base", errors.maxAttempts && "border-red-500")}
+                  <Controller
+                    control={control}
+                    name="duration"
+                    render={({ field }) => (
+                      <DurationPicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Thời lượng làm bài *"
+                        error={(errors as any).duration?.message}
+                      />
+                    )}
                   />
-                  {errors.maxAttempts && <p className="text-sm text-red-500">{errors.maxAttempts.message}</p>}
                 </div>
               </div>
             </div>
