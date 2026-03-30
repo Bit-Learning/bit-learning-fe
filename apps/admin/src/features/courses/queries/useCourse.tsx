@@ -7,9 +7,9 @@ export const courseKeys = {
   all: ["courses"] as const,
   list: (page: number, size: number) => [...courseKeys.all, "list", page, size] as const,
   detail: (id: number) => [...courseKeys.all, "detail", id] as const,
-  sections: (courseId: number) => [...courseKeys.all, "sections", courseId] as const,
   byInstructor: (instructorId: number, page: number, size: number) =>
     [...courseKeys.all, "instructor", instructorId, page, size] as const,
+  myCourses: (page: number, size: number) => [...courseKeys.all, "my-courses", page, size] as const,
 };
 
 export const useGetCourses = (page: number = 0, size: number = 10) => {
@@ -30,17 +30,6 @@ export const useCourseDetail = (id: number) => {
       return response.data.data;
     },
     enabled: !!id,
-  });
-};
-
-export const useSectionsByCourse = (courseId: number) => {
-  return useQuery({
-    queryKey: courseKeys.sections(courseId),
-    queryFn: async () => {
-      const response = await courseApi.getSectionsByCourseId(courseId);
-      return response.data.data;
-    },
-    enabled: !!courseId,
   });
 };
 

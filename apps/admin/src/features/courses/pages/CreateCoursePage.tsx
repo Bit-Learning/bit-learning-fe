@@ -10,7 +10,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { useCreateCourse } from "../queries/useCourse";
-import { CourseLevel, CreateCourseRequest, Language } from "../types/course.type";
+import { CourseLevel, type CreateCourseRequest, Language } from "../types/course.type";
 import { cn } from "@/shared/lib/utils";
 
 const createCourseSchema = z.object({

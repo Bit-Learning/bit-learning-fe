@@ -103,7 +103,7 @@ export const CourseListPage: React.FC = () => {
               <Card key={course.id} className="overflow-hidden p-0 transition-shadow hover:shadow-lg">
                 <div className="relative flex aspect-video items-center justify-center">
                   {course.thumbnailUrl ? (
-                    <img src={course.thumbnailUrl} alt={course.title} className="h-42 w-full object-cover" />
+                    <img src={course.thumbnailUrl} alt={course.title} className="h-50 w-full object-cover" />
                   ) : (
                     <BookOpen className="h-16 w-16 text-white/50" />
                   )}

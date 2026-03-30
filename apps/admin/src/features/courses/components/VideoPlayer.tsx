@@ -25,16 +25,12 @@ export const HlsVideoPlayer: React.FC<HlsVideoPlayerProps> = ({ lectureId, class
       const Hls = (await import("hls.js")).default;
 
       if (Hls.isSupported()) {
-        if (hlsRef.current) {
-          hlsRef.current.destroy();
-        }
+        if (hlsRef.current) hlsRef.current.destroy();
 
         const hls = new Hls({
           xhrSetup: (xhr: XMLHttpRequest) => {
             const token = getAccessToken();
-            if (token) {
-              xhr.setRequestHeader("Authorization", `Bearer ${token}`);
-            }
+            if (token) xhr.setRequestHeader("Authorization", `Bearer ${token}`);
           },
         });
 

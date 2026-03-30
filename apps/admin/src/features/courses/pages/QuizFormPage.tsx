@@ -9,7 +9,7 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateLectureQuiz, useLectureQuiz, useUpdateLecture, useUpdateLectureQuiz } from "../queries/useLecture";
-import { CreateLectureQuizRequest, QuizUpdateRequest } from "../types/lecture.type";
+import type { CreateLectureQuizRequest, UpdateLectureQuizRequest } from "../types/lecture.type";
 import { cn } from "@/shared/lib/utils";
 import { QuestionCard } from "../components/QuestionCard";
 
@@ -48,12 +48,10 @@ interface QuizSearchParams {
 export const QuizFormPage: React.FC = () => {
   const navigate = useNavigate();
   const searchParams = useSearch({ strict: false }) as QuizSearchParams;
-
   const { mode = "create", sectionId, courseId, lectureId, orderIndex } = searchParams;
   const isEditMode = mode === "edit" && !!lectureId;
 
   const { data: quizData, isLoading: quizLoading } = useLectureQuiz(isEditMode ? lectureId! : 0);
-
   const createQuizMutation = useCreateLectureQuiz();
   const updateLectureMutation = useUpdateLecture();
   const updateQuizMutation = useUpdateLectureQuiz();
@@ -137,18 +135,22 @@ export const QuizFormPage: React.FC = () => {
             orderIndex: orderIndex || 1,
           },
         });
-        const quizzes: QuizUpdateRequest[] = data.questions.map((q) => ({
-          id: q.id,
-          questionText: q.questionText,
-          orderIndex: q.orderIndex,
-          answers: q.answers.map((a) => ({
-            id: a.id,
-            answerText: a.answerText,
-            isCorrect: a.isCorrect,
-            orderIndex: a.orderIndex,
+        const updatePayload: UpdateLectureQuizRequest = {
+          passPercent: data.passPercent,
+          maxAttempts: data.maxAttempts,
+          quizzes: data.questions.map((q) => ({
+            id: q.id,
+            questionText: q.questionText,
+            orderIndex: q.orderIndex,
+            answers: q.answers.map((a) => ({
+              id: a.id,
+              answerText: a.answerText,
+              isCorrect: a.isCorrect,
+              orderIndex: a.orderIndex,
+            })),
           })),
-        }));
-        await updateQuizMutation.mutateAsync({ id: lectureId, quizzes });
+        };
+        await updateQuizMutation.mutateAsync({ id: lectureId, data: updatePayload });
       } else {
         const payload: CreateLectureQuizRequest = {
           lecture: {
@@ -230,7 +232,7 @@ export const QuizFormPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="passPercent">Điểm đạt (%) *</Label>
+                  <Label htmlFor="passPercent">Điểm đạt (0–1) *</Label>
                   <Input
                     id="passPercent"
                     type="number"
@@ -264,6 +266,7 @@ export const QuizFormPage: React.FC = () => {
               <h3 className="text-lg font-semibold">Câu hỏi ({questionFields.length})</h3>
               <Button
                 type="button"
+                size="lg"
                 onClick={() =>
                   appendQuestion({
                     questionText: "",
@@ -274,7 +277,6 @@ export const QuizFormPage: React.FC = () => {
                     ],
                   })
                 }
-                size="lg"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm câu hỏi
