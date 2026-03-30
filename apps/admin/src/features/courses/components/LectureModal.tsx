@@ -23,6 +23,7 @@ import {
 import type { LectureDetail } from "../types/course.type";
 import type { UpdateLectureRequest } from "../types/lecture.type";
 import { HtmlPasteButton } from "@/components/HtmlPasteButton";
+import DurationPicker from "@/components/DurationPicker";
 
 interface LectureModalProps {
   mode: "create" | "edit";
@@ -44,6 +45,7 @@ const lectureBaseSchema = z.object({
 
 const textLectureSchema = lectureBaseSchema.extend({
   content: z.string().min(1, "Nội dung là bắt buộc"),
+  duration: z.number().min(1, "Thời lượng phải lớn hơn 0"),
 });
 
 type VideoFormValues = z.infer<typeof lectureBaseSchema>;
@@ -97,6 +99,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
       description: lecture?.description || "",
       isPreviewable: lecture?.isPreviewable || false,
       content: "",
+      duration: 600,
     },
   });
 
@@ -146,6 +149,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         description: lecture?.description || "",
         isPreviewable: lecture?.isPreviewable || false,
         content: textData.content,
+        duration: 600,
       });
     }
   }, [textData]);
@@ -235,7 +239,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         await updateLectureMutation.mutateAsync({ id: lecture.id, data: updateData });
         await updateTextMutation.mutateAsync({
           id: lecture.id,
-          data: { content: data.content },
+          data: { content: data.content, duration: data.duration },
         });
       } else if (mode === "create" && sectionId) {
         await createTextMutation.mutateAsync({
@@ -247,6 +251,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
             orderIndex: getNextOrderIndex(),
           },
           content: data.content,
+          duration: data.duration,
         });
       }
       onSuccess?.();
@@ -418,6 +423,19 @@ const LectureModal: React.FC<LectureModalProps> = ({
                     placeholder="Mô tả ngắn về bài học"
                   />
                 </div>
+
+                <Controller
+                  control={textForm.control}
+                  name="duration"
+                  render={({ field }) => (
+                    <DurationPicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      label="Thời lượng đọc *"
+                      error={textForm.formState.errors.duration?.message}
+                    />
+                  )}
+                />
 
                 <div className="space-y-2">
                   <div className="flex items-center justify-between">
