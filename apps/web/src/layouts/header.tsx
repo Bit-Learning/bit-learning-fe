@@ -5,24 +5,20 @@ import { navItems } from "@/layouts/data/nav-items";
 import { NotificationBell } from "@/feature/notification/component/notification-bell";
 import { mergeName } from "@/shared/lib/string-utils";
 import { Link, useNavigate } from "@tanstack/react-router";
-import {
-	Sheet,
-	SheetContent,
-	SheetTrigger,
-} from "@workspace/ui/components/sheet";
+import { Sheet, SheetContent, SheetTrigger } from "@workspace/ui/components/sheet";
 import { cn } from "@workspace/ui/lib/utils";
 import {
-	Book,
-	ChevronDown,
-	LogOut,
-	Menu,
-	Settings,
-	User,
-	User2Icon,
-	ShoppingCart,
-	Coins,
-	MonitorPlay,
-	ArrowLeftRight,
+  Book,
+  ChevronDown,
+  LogOut,
+  Menu,
+  Settings,
+  User,
+  User2Icon,
+  ShoppingCart,
+  Coins,
+  MonitorPlay,
+  ArrowLeftRight,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -30,15 +26,15 @@ import { useCart } from "@/feature/order/queries/useCart";
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 const Header: React.FC = () => {
-	const navigate = useNavigate();
-	const [isNavOpen, setIsNavOpen] = useState(false);
-	const [isScrolled, setIsScrolled] = useState(false);
-	const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
-	const [isProfileOpen, setIsProfileOpen] = useState(false);
-	const profileRef = useRef<HTMLDivElement>(null);
-	const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
-	const cartItemCount = useSelector(selectCartItemCount);
-	const logout = useLogout();
+  const navigate = useNavigate();
+  const [isNavOpen, setIsNavOpen] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const profileRef = useRef<HTMLDivElement>(null);
+  const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
+  const cartItemCount = useSelector(selectCartItemCount);
+  const logout = useLogout();
 
   useCart();
 
@@ -66,43 +62,36 @@ const Header: React.FC = () => {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-	const handleClickOutside = useCallback((e: MouseEvent) => {
-		if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
-			setIsProfileOpen(false);
-		}
-	}, []);
+  const handleClickOutside = useCallback((e: MouseEvent) => {
+    if (profileRef.current && !profileRef.current.contains(e.target as Node)) {
+      setIsProfileOpen(false);
+    }
+  }, []);
 
-	useEffect(() => {
-		if (isProfileOpen) {
-			document.addEventListener("mousedown", handleClickOutside);
-		}
-		return () => document.removeEventListener("mousedown", handleClickOutside);
-	}, [isProfileOpen, handleClickOutside]);
+  useEffect(() => {
+    if (isProfileOpen) {
+      document.addEventListener("mousedown", handleClickOutside);
+    }
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, [isProfileOpen, handleClickOutside]);
 
-	return (
-		<header
-			className={cn(
-				"sticky top-0 left-0 right-0 z-50 transition-all duration-300",
-				"bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800/50",
-				isScrolled && "shadow-lg",
-			)}
-		>
-			<div className="container mx-auto px-4">
-				<div className="flex items-center justify-between h-20">
-					<Link
-						to="/"
-						id="tour-logo"
-						className="flex items-center relative z-50"
-					>
-						<img
-							src="/Logo.png"
-							alt="Bit Learning"
-							className={cn(
-								"object-contain transition-all duration-300",
-								isScrolled ? "h-8 w-28" : "h-10 w-36",
-							)}
-						/>
-					</Link>
+  return (
+    <header
+      className={cn(
+        "sticky top-0 left-0 right-0 z-50 transition-all duration-300",
+        "bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800/50",
+        isScrolled && "shadow-lg",
+      )}
+    >
+      <div className="container mx-auto px-4">
+        <div className="flex items-center justify-between h-20">
+          <Link to="/" id="tour-logo" className="flex items-center relative z-50">
+            <img
+              src="/Logo.png"
+              alt="Bit Learning"
+              className={cn("object-contain transition-all duration-300", isScrolled ? "h-8 w-28" : "h-10 w-36")}
+            />
+          </Link>
 
           <nav id="tour-navbar" className="hidden lg:flex items-center gap-1">
             {navItems.map((item) => (
@@ -179,140 +168,140 @@ const Header: React.FC = () => {
 
             {isAuthenticated && userInfo && <NotificationBell />}
 
-						{isAuthenticated && userInfo ? (
-							<div className="relative" ref={profileRef}>
-								<button
-									type="button"
-									onClick={() => setIsProfileOpen((prev) => !prev)}
-									className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200"
-								>
-									<div className="relative size-12 shrink-0 overflow-hidden rounded-full pointer-events-none">
-										{userInfo.avatar ? (
-											<img
-												src={userInfo.avatar}
-												alt={userInfo.username}
-												className="aspect-square size-full object-cover"
-											/>
-										) : (
-											<div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs">
-												{userInfo.username?.slice(0, 2).toUpperCase()}
-											</div>
-										)}
-									</div>
-									<div className="hidden md:flex flex-col items-start">
-										<span className="text-md font-bold text-gray-900 dark:text-gray-100">
-											{mergeName(userInfo.firstName, userInfo.lastName)}
-										</span>
-										<div className="flex items-center justify-center gap-2">
-											<span className="text-sm font-semibold text-gray-700 dark:text-gray-100">
-												{userInfo.wallet.balance.toLocaleString("vi-VN")}
-											</span>
-											<BitCoinIcon size={18} />
-										</div>
-									</div>
-								</button>
+            {isAuthenticated && userInfo ? (
+              <div className="relative" ref={profileRef}>
+                <button
+                  type="button"
+                  onClick={() => setIsProfileOpen((prev) => !prev)}
+                  className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200"
+                >
+                  <div className="relative size-12 shrink-0 overflow-hidden rounded-full pointer-events-none">
+                    {userInfo.avatar ? (
+                      <img
+                        src={userInfo.avatar}
+                        alt={userInfo.username}
+                        className="aspect-square size-full object-cover"
+                      />
+                    ) : (
+                      <div className="flex size-full items-center justify-center rounded-full bg-gradient-to-br from-blue-500 to-purple-500 text-white text-xs">
+                        {userInfo.username?.slice(0, 2).toUpperCase()}
+                      </div>
+                    )}
+                  </div>
+                  <div className="hidden md:flex flex-col items-start">
+                    <span className="text-md font-bold text-gray-900 dark:text-gray-100">
+                      {mergeName(userInfo.firstName, userInfo.lastName)}
+                    </span>
+                    <div className="flex items-center justify-center gap-2">
+                      <span className="text-sm font-semibold text-gray-700 dark:text-gray-100">
+                        {userInfo.wallet.balance.toLocaleString("vi-VN")}
+                      </span>
+                      <BitCoinIcon size={18} />
+                    </div>
+                  </div>
+                </button>
 
-								{isProfileOpen && (
-									<div className="absolute right-0 top-full mt-2 z-50 min-w-[200px] rounded-lg border bg-white dark:bg-gray-800/80 shadow-lg p-1.5">
-										<button
-											onClick={() => {
-												navigate({ to: "/profile" });
-												setIsProfileOpen(false);
-											}}
-											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-										>
-											<User className="h-4 w-4" />
-											<span>Hồ sơ cá nhân</span>
-										</button>
-										{userInfo.role === "MENTOR" && (
-											<button
-												onClick={() => {
-													navigate({ to: "/mentor/dashboard" });
-													setIsProfileOpen(false);
-												}}
-												className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-											>
-												<User2Icon className="h-4 w-4" />
-												<span>Mentor</span>
-											</button>
-										)}
-										<button
-											onClick={() => {
-												navigate({ to: "/dashboard" });
-												setIsProfileOpen(false);
-											}}
-											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-										>
-											<Book className="h-4 w-4" />
-											<span>Báo cáo học tập</span>
-										</button>
+                {isProfileOpen && (
+                  <div className="absolute right-0 top-full mt-2 z-50 min-w-[200px] rounded-lg border bg-white dark:bg-gray-800/80 shadow-lg p-1.5">
+                    <button
+                      onClick={() => {
+                        navigate({ to: "/profile" });
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                    >
+                      <User className="h-4 w-4" />
+                      <span>Hồ sơ cá nhân</span>
+                    </button>
+                    {userInfo.role === "MENTOR" && (
+                      <button
+                        onClick={() => {
+                          navigate({ to: "/mentor/dashboard" });
+                          setIsProfileOpen(false);
+                        }}
+                        className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                      >
+                        <User2Icon className="h-4 w-4" />
+                        <span>Mentor</span>
+                      </button>
+                    )}
+                    <button
+                      onClick={() => {
+                        navigate({ to: "/dashboard" });
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                    >
+                      <Book className="h-4 w-4" />
+                      <span>Báo cáo học tập</span>
+                    </button>
 
-										<button
-											onClick={() => {
-												navigate({ to: "/profile/top-up" });
-												setIsProfileOpen(false);
-											}}
-											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-										>
-											<Coins className="h-4 w-4" />
-											<span>Nạp xu BIT</span>
-										</button>
+                    <button
+                      onClick={() => {
+                        navigate({ to: "/profile/top-up" });
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                    >
+                      <Coins className="h-4 w-4" />
+                      <span>Nạp xu BIT</span>
+                    </button>
 
-										<button
-											onClick={() => {
-												navigate({ to: "/profile/my-course" });
-												setIsProfileOpen(false);
-											}}
-											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-										>
-											<MonitorPlay className="h-4 w-4" />
-											<span>Khóa học của tôi</span>
-										</button>
+                    <button
+                      onClick={() => {
+                        navigate({ to: "/profile/my-course" });
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                    >
+                      <MonitorPlay className="h-4 w-4" />
+                      <span>Khóa học của tôi</span>
+                    </button>
 
-										<button
-											onClick={() => {
-												navigate({ to: "/profile/history" });
-												setIsProfileOpen(false);
-											}}
-											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-										>
-											<ArrowLeftRight className="h-4 w-4" />
-											<span>Lịch sử giao dịch</span>
-										</button>
+                    <button
+                      onClick={() => {
+                        navigate({ to: "/profile/history" });
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                    >
+                      <ArrowLeftRight className="h-4 w-4" />
+                      <span>Lịch sử mua hàng</span>
+                    </button>
 
-										<button
-											onClick={() => {
-												navigate({ to: "/profile/password" });
-												setIsProfileOpen(false);
-											}}
-											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
-										>
-											<Settings className="h-4 w-4" />
-											<span>Đổi mật khẩu</span>
-										</button>
-										<div className="my-1 h-px bg-gray-200 dark:bg-gray-700" />
-										<button
-											onClick={() => {
-												handleLogout();
-												setIsProfileOpen(false);
-											}}
-											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-red-500 hover:text-white transition-colors"
-										>
-											<LogOut className="h-4 w-4" />
-											<span>Đăng xuất</span>
-										</button>
-									</div>
-								)}
-							</div>
-						) : (
-							<button
-								onClick={() => navigate({ to: "/signin-role" })}
-								className="cursor-pointer hidden md:flex items-center gap-2 px-6 py-2.5 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105"
-							>
-								<User className="h-4 w-4" />
-								Đăng nhập
-							</button>
-						)}
+                    <button
+                      onClick={() => {
+                        navigate({ to: "/profile/password" });
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
+                    >
+                      <Settings className="h-4 w-4" />
+                      <span>Đổi mật khẩu</span>
+                    </button>
+                    <div className="my-1 h-px bg-gray-200 dark:bg-gray-700" />
+                    <button
+                      onClick={() => {
+                        handleLogout();
+                        setIsProfileOpen(false);
+                      }}
+                      className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-red-500 hover:text-white transition-colors"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      <span>Đăng xuất</span>
+                    </button>
+                  </div>
+                )}
+              </div>
+            ) : (
+              <button
+                onClick={() => navigate({ to: "/signin-role" })}
+                className="cursor-pointer hidden md:flex items-center gap-2 px-6 py-2.5 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105"
+              >
+                <User className="h-4 w-4" />
+                Đăng nhập
+              </button>
+            )}
 
             <Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
               <SheetTrigger asChild className="lg:hidden">

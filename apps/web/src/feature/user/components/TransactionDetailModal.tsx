@@ -79,7 +79,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
   };
 
   const handleCancel = async () => {
-    await cancelOrder.mutateAsync(Number(transaction.code));
+    await cancelOrder.mutateAsync(transaction.id);
     setShowCancelConfirm(false);
     onClose();
   };
