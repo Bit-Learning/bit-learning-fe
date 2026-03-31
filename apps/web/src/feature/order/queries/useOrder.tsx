@@ -67,7 +67,7 @@ export const useCancelOrder = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: orderApi.cancelOrder,
+    mutationFn: (orderId: number) => orderApi.cancelOrder(orderId),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast.success({ title: "Đã hủy đơn hàng" });

@@ -1,7 +1,3 @@
-// ==========================================
-// IMPROVED: Add `enabled` flag to useCart
-// ==========================================
-
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
 import { useDispatch, useSelector } from "react-redux";
