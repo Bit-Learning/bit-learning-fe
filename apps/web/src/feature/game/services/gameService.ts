@@ -20,6 +20,7 @@ export interface Game {
 	views?: number;
 	thumbnailUrl?: string;
 	thumbnailFullUrl?: string;
+	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
 	category: GameCategory;
 	createdBy?: string;
 }

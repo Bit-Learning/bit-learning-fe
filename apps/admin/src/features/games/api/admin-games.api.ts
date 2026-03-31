@@ -11,7 +11,7 @@ export interface AdminGameDto {
 	description?: string;
 	minioObjectName?: string;
 	thumbnailUrl?: string;
-	status?: string;
+	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
 	difficulty?: string;
 	categoryId?: number | null;
 	views?: number;
@@ -98,5 +98,17 @@ export const adminGamesApi = {
 
 	deleteGame: (id: number): Promise<AxiosResponse<ApiResponse<void>>> => {
 		return api.delete(`${ADMIN_GAMES_ENDPOINT}/${id}`);
+	},
+
+	approveGame: (
+		id: number,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto>>> => {
+		return api.post(`${ADMIN_GAMES_ENDPOINT}/${id}/approve`);
+	},
+
+	rejectGame: (
+		id: number,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto>>> => {
+		return api.post(`${ADMIN_GAMES_ENDPOINT}/${id}/reject`);
 	},
 };

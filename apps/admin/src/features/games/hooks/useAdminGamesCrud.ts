@@ -89,3 +89,33 @@ export const useDeleteGame = () => {
 		},
 	});
 };
+
+export const useApproveGame = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (id: number) => {
+			const res = await adminGamesApi.approveGame(id);
+			return res.data.data as AdminGameDto;
+		},
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: ADMIN_GAMES_CRUD_KEYS.list(),
+			});
+		},
+	});
+};
+
+export const useRejectGame = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (id: number) => {
+			const res = await adminGamesApi.rejectGame(id);
+			return res.data.data as AdminGameDto;
+		},
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: ADMIN_GAMES_CRUD_KEYS.list(),
+			});
+		},
+	});
+};

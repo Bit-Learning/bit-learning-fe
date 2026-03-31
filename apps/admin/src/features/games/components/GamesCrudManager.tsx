@@ -4,6 +4,8 @@ import {
 	useDeleteGame,
 	useGameCategories,
 	useUpsertGame,
+	useApproveGame,
+	useRejectGame,
 	type GameCategoryOption,
 	type UpsertGamePayload,
 } from "../hooks/useAdminGamesCrud";
@@ -27,6 +29,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
 	Select,
 	SelectContent,
@@ -41,10 +44,15 @@ export const GamesCrudManager = () => {
 	const { data: categories = [] } = useGameCategories();
 	const upsertGame = useUpsertGame();
 	const deleteGame = useDeleteGame();
+	const approveGame = useApproveGame();
+	const rejectGame = useRejectGame();
 
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | undefined>(undefined);
 	const [form, setForm] = useState<UpsertGamePayload>({ title: "", desc: "" });
+	const [statusFilter, setStatusFilter] = useState<
+		"ALL" | "PUBLISHED" | "DRAFT" | "ARCHIVED"
+	>("ALL");
 
 	const getErrorMessage = (e: any, fallback: string) => {
 		return e?.response?.data?.message ?? e?.message ?? fallback;
@@ -98,6 +106,52 @@ export const GamesCrudManager = () => {
 		}
 	};
 
+	const handleApprove = async (id: number) => {
+		try {
+			await approveGame.mutateAsync(id);
+			toast.success("Game đã được duyệt và xuất bản");
+		} catch (e: any) {
+			toast.error(getErrorMessage(e, "Không thể duyệt game"));
+		}
+	};
+
+	const handleReject = async (id: number) => {
+		try {
+			await rejectGame.mutateAsync(id);
+			toast.success("Game đã được chuyển về trạng thái nháp");
+		} catch (e: any) {
+			toast.error(getErrorMessage(e, "Không thể chuyển trạng thái game"));
+		}
+	};
+
+	const getStatusLabel = (status?: string) => {
+		switch (status) {
+			case "PUBLISHED":
+				return "Đã xuất bản";
+			case "DRAFT":
+				return "Nháp";
+			case "ARCHIVED":
+				return "Đã lưu trữ";
+			default:
+				return "Không rõ";
+		}
+	};
+
+	const getStatusVariant = (
+		status?: string,
+	): "default" | "secondary" | "destructive" => {
+		switch (status) {
+			case "PUBLISHED":
+				return "default";
+			case "DRAFT":
+				return "secondary";
+			case "ARCHIVED":
+				return "destructive";
+			default:
+				return "secondary";
+		}
+	};
+
 	const onFileChange = (file?: File | null) => {
 		setForm((prev) => ({ ...prev, file: file ?? undefined }));
 	};
@@ -111,11 +165,39 @@ export const GamesCrudManager = () => {
 		return `http://localhost:9000/scratch-games/${minioObjectName}`;
 	};
 
+	const filteredGames = games.filter((g: any) => {
+		if (statusFilter === "ALL") return true;
+		return g.status === statusFilter;
+	});
+
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<h2 className="text-xl font-semibold">Danh sách game</h2>
-				<Button onClick={openCreate}>Thêm game</Button>
+				<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+					<div className="flex items-center gap-2">
+						<span className="text-sm text-muted-foreground">
+							Lọc theo trạng thái:
+						</span>
+						<Select
+							value={statusFilter}
+							onValueChange={(value) =>
+								setStatusFilter(value as typeof statusFilter)
+							}
+						>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Tất cả trạng thái" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="ALL">Tất cả</SelectItem>
+								<SelectItem value="DRAFT">Nháp</SelectItem>
+								<SelectItem value="PUBLISHED">Đã xuất bản</SelectItem>
+								<SelectItem value="ARCHIVED">Đã lưu trữ</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+					<Button onClick={openCreate}>Thêm game</Button>
+				</div>
 			</div>
 
 			{isLoading ? (
@@ -126,6 +208,7 @@ export const GamesCrudManager = () => {
 						<TableRow>
 							<TableHead>ID</TableHead>
 							<TableHead>Tiêu đề</TableHead>
+							<TableHead>Trạng thái</TableHead>
 							<TableHead>Danh mục</TableHead>
 							<TableHead>Mô tả</TableHead>
 							<TableHead>Lượt xem</TableHead>
@@ -134,10 +217,15 @@ export const GamesCrudManager = () => {
 						</TableRow>
 					</TableHeader>
 					<TableBody>
-						{games.map((g: any) => (
+						{filteredGames.map((g: any) => (
 							<TableRow key={g.id}>
 								<TableCell>{g.id}</TableCell>
 								<TableCell>{g.title}</TableCell>
+								<TableCell>
+									<Badge variant={getStatusVariant(g.status)}>
+										{getStatusLabel(g.status)}
+									</Badge>
+								</TableCell>
 								<TableCell>
 									{getCategoryName(g.categoryId, categories)}
 								</TableCell>
@@ -158,6 +246,24 @@ export const GamesCrudManager = () => {
 											</a>
 										</Button>
 									)}
+									{g.status === "DRAFT" && (
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => void handleApprove(g.id as number)}
+										>
+											Duyệt
+										</Button>
+									)}
+									{g.status === "PUBLISHED" && (
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => void handleReject(g.id as number)}
+										>
+											Chuyển về nháp
+										</Button>
+									)}
 									<Button
 										size="sm"
 										variant="outline"
@@ -168,6 +274,7 @@ export const GamesCrudManager = () => {
 									<Button
 										size="sm"
 										variant="outline"
+										disabled={g.status === "ARCHIVED"}
 										onClick={() => void handleDelete(g.id as number)}
 									>
 										Lưu trữ
@@ -175,10 +282,10 @@ export const GamesCrudManager = () => {
 								</TableCell>
 							</TableRow>
 						))}
-						{games.length === 0 && (
+						{filteredGames.length === 0 && (
 							<TableRow>
 								<TableCell
-									colSpan={7}
+									colSpan={8}
 									className="text-center text-muted-foreground"
 								>
 									Chưa có game nào.
