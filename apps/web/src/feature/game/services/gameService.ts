@@ -171,10 +171,10 @@ const gameService = {
 
 	// Get game categories with games (Netflix style)
 	getCategoriesWithGames: async (): Promise<GameCategory[]> => {
-		const response = await api.get<GameCategory[]>(
-			"/game-center/game-categories",
+		const response = await api.get<ApiResponse<GameCategory[]>>(
+			"/games/game-categories",
 		);
-		return response.data;
+		return response.data.data ?? [];
 	},
 
 	getLeaderboard: async (
