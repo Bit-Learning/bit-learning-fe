@@ -7,3 +7,7 @@ export const endpoints = {
 export const API_PATH = {
 	BASE_URL: import.meta.env.VITE_API_BASE_URL ?? "/api",
 };
+
+export const MINIO_GAME_URL =
+	import.meta.env.VITE_MINIO_GAME_URL ??
+	"https://bit-learning-minio.lch.id.vn/scratch-games";

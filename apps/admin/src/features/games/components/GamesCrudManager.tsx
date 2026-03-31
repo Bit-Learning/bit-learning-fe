@@ -38,6 +38,7 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
+import { MINIO_GAME_URL } from "@/shared/constants/endpoints";
 
 export const GamesCrudManager = () => {
 	const { data: games = [], isLoading } = useAdminGamesList();
@@ -162,7 +163,7 @@ export const GamesCrudManager = () => {
 
 	const getPlayUrl = (minioObjectName?: string) => {
 		if (!minioObjectName) return "#";
-		return `http://localhost:9000/scratch-games/${minioObjectName}`;
+		return `${MINIO_GAME_URL}/${minioObjectName}`;
 	};
 
 	const filteredGames = games.filter((g: any) => {

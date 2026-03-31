@@ -17,7 +17,6 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 	const [categoriesWithGames, setCategoriesWithGames] = useState<
 		GameCategory[]
 	>([]);
-	const [categories, setCategories] = useState<GameCategory[]>([]);
 	const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 	const [detailGame, setDetailGame] = useState<Game | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
@@ -36,7 +35,6 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 
 	useEffect(() => {
 		fetchCategoriesWithGames();
-		fetchCategories();
 
 		const handleFullscreenChange = () => {
 			setIsFullscreen(!!document.fullscreenElement);
@@ -62,15 +60,6 @@ export default function GameListNetflix({ username }: GameListNetflixProps) {
 		} catch (error) {
 			console.error("Failed to load categories with games", error);
 			setCategoriesWithGames([]);
-		}
-	};
-
-	const fetchCategories = async () => {
-		try {
-			const data = await gameService.getAllCategories();
-			setCategories(data);
-		} catch (error) {
-			console.error("Failed to load categories", error);
 		}
 	};
 

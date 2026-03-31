@@ -24,7 +24,7 @@ function GamesRoute() {
 						<Gamepad2 size={15} /> Game thông thường
 					</TabsTrigger>
 					<TabsTrigger value="matching" className="gap-2">
-						<LayoutGrid size={15} /> Matching Game
+						<LayoutGrid size={15} /> Game nối khái niệm
 					</TabsTrigger>
 				</TabsList>
 

@@ -621,7 +621,7 @@ export const MatchingGameManager = () => {
 		<div className="space-y-4">
 			<div className="flex items-center justify-between">
 				<div>
-					<h2 className="text-xl font-semibold">Matching Game</h2>
+					<h2 className="text-xl font-semibold">Game nối khái niệm</h2>
 					<p className="text-sm text-muted-foreground">
 						Quản lý nội dung trò chơi ghép đôi theo chương trình học
 					</p>
@@ -637,9 +637,9 @@ export const MatchingGameManager = () => {
 				<Table>
 					<TableHeader>
 						<TableRow>
+							<TableHead>Game ID</TableHead>
 							<TableHead>Lớp</TableHead>
 							<TableHead>Chủ đề</TableHead>
-							<TableHead>Game ID</TableHead>
 							<TableHead>Tiêu đề game</TableHead>
 							<TableHead className="text-right">Thao tác</TableHead>
 						</TableRow>
@@ -647,14 +647,14 @@ export const MatchingGameManager = () => {
 					<TableBody>
 						{mappings.map((m) => (
 							<TableRow key={`${m.grade}-${m.topicCode}`}>
+								<TableCell className="text-muted-foreground">
+									{m.gameId}
+								</TableCell>
 								<TableCell>
 									<Badge variant="secondary">Lớp {m.grade}</Badge>
 								</TableCell>
 								<TableCell>
 									<Badge variant="outline">{m.topicCode}</Badge>
-								</TableCell>
-								<TableCell className="text-muted-foreground">
-									{m.gameId}
 								</TableCell>
 								<TableCell className="font-medium">{m.gameTitle}</TableCell>
 								<TableCell className="text-right space-x-2">
@@ -697,7 +697,7 @@ export const MatchingGameManager = () => {
 				<DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
 					<DialogHeader>
 						<DialogTitle>
-							{isEditing ? "Cập nhật Matching Game" : "Tạo Matching Game mới"}
+							{isEditing ? "Cập nhật Game nối" : "Tạo Game nối mới"}
 						</DialogTitle>
 						<DialogDescription>
 							Nhập thông tin game và cấu hình các stage / cặp ghép đôi.

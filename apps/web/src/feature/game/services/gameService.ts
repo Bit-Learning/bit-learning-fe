@@ -73,13 +73,6 @@ const gameService = {
 		return (response.data.data ?? []) as Game[];
 	},
 
-	// Get all categories
-	getAllCategories: async (): Promise<GameCategory[]> => {
-		const response =
-			await api.get<ApiResponse<GameCategory[]>>("/games-categories");
-		return (response.data.data ?? []) as GameCategory[];
-	},
-
 	// Get game by ID (increments view count)
 	getGameById: async (id: number): Promise<Game> => {
 		const response = await api.get<ApiResponse<Game>>(`/games/${id}`);
