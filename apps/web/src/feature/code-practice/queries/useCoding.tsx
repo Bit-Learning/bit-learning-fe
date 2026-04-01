@@ -408,3 +408,27 @@ export const useDebugCode = () => {
     },
   });
 };
+
+export const useExportSubmission = () => {
+  return useMutation({
+    mutationFn: async ({ submissionId, format }: { submissionId: string; format?: "txt" | "xlsx" }) => {
+      const response = await submissionApi.exportSubmission(submissionId, format);
+      const contentDisposition = (response.headers as Record<string, string>)["content-disposition"] || "";
+      const fileNameMatch = contentDisposition.match(/filename[^;=\n]*=((['"]).*?\2|[^;\n]*)/);
+      const fileName = fileNameMatch
+        ? fileNameMatch[1]?.replace(/['"]/g, "")
+        : `submission_${submissionId}.${format ?? "txt"}`;
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement("a");
+      link.href = url;
+      link.setAttribute("download", fileName!);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể xuất kết quả submission" });
+    },
+  });
+};

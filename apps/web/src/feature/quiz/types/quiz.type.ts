@@ -1,8 +1,8 @@
 import { QuestionBriefResponse } from "@/feature/question/types/question.type";
 
-// Quiz Attempt Types
 export interface QuizAttemptRequest {
   examId: number;
+  enrollKey?: string;
 }
 
 export interface QuizAttemptAnswerRequest {

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
@@ -21,7 +21,12 @@ import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@/shared/components/Sonner";
 import { useSearchQuestions, useMyQuestions } from "@/feature/question/queries/useQuestion";
 import { useGenerateExamFromQuestions, useExam, useDownloadExam } from "../queries/useExam";
+import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import type { QuestionLevel } from "@/feature/question/types/question.type";
+import type { ExamType } from "../types/exam.type";
+
+const DEFAULT_DURATION = 30;
+const DEFAULT_SCORE = 10;
 
 const GenerateExamFromQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -29,12 +34,15 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const [questionSource, setQuestionSource] = useState<"system" | "user">("system");
   const [examName, setExamName] = useState("");
   const [examCode, setExamCode] = useState("");
-  const [durationInMinutes, setDurationInMinutes] = useState(30);
-  const [totalScore, setTotalScore] = useState(10);
+  const [durationInMinutes, setDurationInMinutes] = useState(DEFAULT_DURATION);
+  const [totalScore, setTotalScore] = useState(DEFAULT_SCORE);
   const [shuffleOptions, setShuffleOptions] = useState(true);
+  const [examType, setExamType] = useState<ExamType>("EXAM");
+  const [enrollKey, setEnrollKey] = useState("");
   const [generatedExamId, setGeneratedExamId] = useState<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
+  const [filterSubjectId, setFilterSubjectId] = useState<number | "">("");
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 20;
@@ -49,10 +57,16 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     { enabled: questionSource === "user" },
   );
 
-  const response = questionSource === "system" ? systemResponse : userResponse;
+  const { data: subjectsData } = useSubjectsList();
+
+  const rawQuestions = (questionSource === "system" ? systemResponse : userResponse)?.data || [];
+  const pagination = (questionSource === "system" ? systemResponse : userResponse)?.page;
   const isLoading = questionSource === "system" ? systemLoading : userLoading;
-  const questions = response?.data || [];
-  const pagination = response?.page;
+
+  const questions = useMemo(() => {
+    if (!filterSubjectId) return rawQuestions;
+    return rawQuestions.filter((q) => q.lesson?.id === filterSubjectId);
+  }, [rawQuestions, filterSubjectId]);
 
   const { data: examData } = useExam(generatedExamId!, { enabled: !!generatedExamId });
   const generateExam = useGenerateExamFromQuestions();
@@ -61,56 +75,53 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const isExamGenerated = !!generatedExamId && !!examData;
 
   const handleGenerate = () => {
-    if (!examName || !examCode) {
+    if (!examName.trim() || !examCode.trim()) {
       toast.error({ title: "Lỗi", description: "Vui lòng nhập tên và mã đề thi" });
       return;
     }
-
+    if (examType === "EXAM" && !enrollKey.trim()) {
+      toast.error({ title: "Lỗi", description: "Đề thi chính thức bắt buộc phải có mật khẩu vào thi" });
+      return;
+    }
     if (selectedQuestions.size === 0) {
       toast.error({ title: "Lỗi", description: "Vui lòng chọn ít nhất 1 câu hỏi" });
       return;
     }
-
     if (generateExam.isPending) return;
 
-    const payload = {
-      questionIds: Array.from(selectedQuestions),
-      name: examName,
-      code: examCode,
-      shuffleOptions,
-      durationInMinutes,
-      totalScore,
-    };
-
-    generateExam.mutate(payload, {
-      onSuccess: (response) => {
-        setGeneratedExamId(response.data.data!.id);
-        toast.success({
-          title: "Thành công",
-          description: "Đã tạo đề thi thành công!",
-        });
+    generateExam.mutate(
+      {
+        questionIds: Array.from(selectedQuestions),
+        name: examName,
+        code: examCode,
+        shuffleOptions,
+        durationInMinutes,
+        totalScore,
+        type: examType,
+        enrollKey: enrollKey.trim() || undefined,
       },
-    });
+      {
+        onSuccess: (response) => {
+          const id = response.data.data?.id;
+          if (id) setGeneratedExamId(id);
+        },
+      },
+    );
   };
 
   const handleToggleQuestion = (questionId: number) => {
     if (isExamGenerated) return;
-
     setSelectedQuestions((prev) => {
-      const newSet = new Set(prev);
-      if (newSet.has(questionId)) {
-        newSet.delete(questionId);
-      } else {
-        newSet.add(questionId);
-      }
-      return newSet;
+      const next = new Set(prev);
+      if (next.has(questionId)) next.delete(questionId);
+      else next.add(questionId);
+      return next;
     });
   };
 
   const handleSelectAll = () => {
     if (isExamGenerated) return;
-    const allIds = questions.map((q) => q.id);
-    setSelectedQuestions(new Set(allIds));
+    setSelectedQuestions(new Set(questions.map((q) => q.id)));
   };
 
   const handleDeselectAll = () => {
@@ -123,6 +134,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setQuestionSource(source);
     setSelectedQuestions(new Set());
     setCurrentPage(0);
+    setFilterSubjectId("");
+    setSearchTerm("");
   };
 
   const handleDownload = (format: "pdf" | "docx") => {
@@ -134,11 +147,14 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setGeneratedExamId(null);
     setExamName("");
     setExamCode("");
-    setDurationInMinutes(90);
-    setTotalScore(10);
+    setDurationInMinutes(DEFAULT_DURATION);
+    setTotalScore(DEFAULT_SCORE);
     setShuffleOptions(true);
+    setExamType("EXAM");
+    setEnrollKey("");
     setSelectedQuestions(new Set());
     setSearchTerm("");
+    setFilterSubjectId("");
     setCurrentPage(0);
   };
 
@@ -158,7 +174,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   };
 
   return (
-    <div className="mx-auto p-8 bg-slate-50 dark:bg-slate-950 ">
+    <div className="mx-auto p-8 bg-slate-50 dark:bg-slate-950">
       <div className="mb-6">
         <Button
           variant="outline"
@@ -204,128 +220,149 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-6">
-          <Card className={isExamGenerated ? "opacity-60" : ""}>
+          <Card>
             <CardHeader>
-              <h2 className="text-lg font-semibold">Nguồn câu hỏi</h2>
-            </CardHeader>
-            <CardContent className="flex gap-4">
-              <Button
-                variant={questionSource === "system" ? "default" : "outline"}
-                size="lg"
-                onClick={() => handleSourceChange("system")}
-                className="flex-1"
-                isDisabled={isExamGenerated}
-              >
-                Ngân hàng hệ thống
-              </Button>
-              <Button
-                variant={questionSource === "user" ? "default" : "outline"}
-                size="lg"
-                onClick={() => handleSourceChange("user")}
-                className="flex-1"
-                isDisabled={isExamGenerated}
-              >
-                Câu hỏi của tôi
-              </Button>
-            </CardContent>
-          </Card>
-
-          <Card className={isExamGenerated ? "opacity-60" : ""}>
-            <CardHeader>
-              <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-lg font-semibold">
-                    Danh sách câu hỏi ({questionSource === "system" ? "Hệ thống" : "Của tôi"})
-                  </h2>
-                  <p className="text-sm text-muted-foreground mt-1">Đã chọn: {selectedQuestions.size} câu hỏi</p>
-                </div>
+              <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex gap-2">
-                  <Button variant="outline" size="sm" onClick={handleSelectAll} isDisabled={isExamGenerated}>
-                    <CheckSquare className="h-4 w-4 mr-1" />
-                    Chọn tất cả
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={handleDeselectAll} isDisabled={isExamGenerated}>
-                    <Square className="h-4 w-4 mr-1" />
-                    Bỏ chọn
-                  </Button>
+                  <button
+                    onClick={() => handleSourceChange("system")}
+                    disabled={isExamGenerated}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      questionSource === "system"
+                        ? "bg-primary text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                    }`}
+                  >
+                    Ngân hàng hệ thống
+                  </button>
+                  <button
+                    onClick={() => handleSourceChange("user")}
+                    disabled={isExamGenerated}
+                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                      questionSource === "user"
+                        ? "bg-primary text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                    }`}
+                  >
+                    Câu hỏi của tôi
+                  </button>
                 </div>
-              </div>
-            </CardHeader>
-            <CardContent>
-              <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Tìm kiếm câu hỏi..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                  disabled={isExamGenerated}
-                />
+
+                {!isExamGenerated && (
+                  <div className="flex gap-2">
+                    <button
+                      onClick={handleSelectAll}
+                      className="flex items-center gap-1 text-sm text-primary hover:underline"
+                    >
+                      <CheckSquare className="h-4 w-4" />
+                      Chọn tất cả
+                    </button>
+                    <span className="text-slate-300">|</span>
+                    <button
+                      onClick={handleDeselectAll}
+                      className="flex items-center gap-1 text-sm text-slate-500 hover:underline"
+                    >
+                      <Square className="h-4 w-4" />
+                      Bỏ chọn
+                    </button>
+                  </div>
+                )}
               </div>
 
+              {!isExamGenerated && (
+                <div className="flex gap-2 mt-3">
+                  <div className="relative flex-1">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      placeholder="Tìm kiếm câu hỏi..."
+                      value={searchTerm}
+                      onChange={(e) => {
+                        setSearchTerm(e.target.value);
+                        setCurrentPage(0);
+                      }}
+                      className="pl-9"
+                    />
+                  </div>
+
+                  {subjectsData && subjectsData.length > 0 && (
+                    <select
+                      value={filterSubjectId}
+                      onChange={(e) => {
+                        setFilterSubjectId(e.target.value ? Number(e.target.value) : "");
+                        setSelectedQuestions(new Set());
+                      }}
+                      className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground outline-none focus:ring-2 focus:ring-primary min-w-37.5"
+                    >
+                      <option value="">Tất cả môn</option>
+                      {subjectsData.map((s) => (
+                        <option key={s.id} value={s.id}>
+                          {s.name}
+                        </option>
+                      ))}
+                    </select>
+                  )}
+                </div>
+              )}
+            </CardHeader>
+
+            <CardContent>
               {isLoading ? (
                 <div className="space-y-3">
-                  {[1, 2, 3].map((i) => (
-                    <Skeleton key={i} className="h-24 w-full" />
+                  {[1, 2, 3, 4, 5].map((i) => (
+                    <Skeleton key={i} className="h-16 w-full" />
                   ))}
                 </div>
-              ) : !questions.length ? (
-                <div className="py-12 text-center">
-                  <FileText className="h-12 w-12 text-muted-foreground mx-auto mb-3" />
-                  <p className="text-muted-foreground">Không tìm thấy câu hỏi nào</p>
+              ) : questions.length === 0 ? (
+                <div className="text-center py-12 text-slate-400">
+                  <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p>Không có câu hỏi nào</p>
                 </div>
               ) : (
-                <div className="space-y-3">
-                  {questions.map((question) => (
-                    <div
-                      key={question.id}
-                      className={`p-4 rounded-lg border-2 transition-all ${
-                        isExamGenerated
-                          ? "border-gray-200 dark:border-gray-800 cursor-not-allowed"
-                          : selectedQuestions.has(question.id)
-                            ? "border-primary bg-primary/5 cursor-pointer"
-                            : "border-gray-200 dark:border-gray-800 hover:border-gray-300 cursor-pointer"
-                      }`}
-                      onClick={() => !isExamGenerated && handleToggleQuestion(question.id)}
-                    >
-                      <div className="flex items-start gap-3">
-                        <Checkbox
-                          isSelected={selectedQuestions.has(question.id)}
-                          onChange={() => handleToggleQuestion(question.id)}
-                          className="mt-1"
-                          isDisabled={isExamGenerated}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-start justify-between gap-3 mb-2">
-                            <p className="text-sm font-medium line-clamp-2 flex-1">{question.content}</p>
-                            <div className="flex gap-2 shrink-0">
+                <div className="space-y-2">
+                  {questions.map((question) => {
+                    const isSelected = selectedQuestions.has(question.id);
+                    return (
+                      <div
+                        key={question.id}
+                        onClick={() => handleToggleQuestion(question.id)}
+                        className={`p-4 rounded-lg border-2 transition-all ${
+                          isExamGenerated ? "cursor-default opacity-60" : "cursor-pointer hover:border-primary/50"
+                        } ${isSelected ? "border-primary bg-primary/5" : "border-slate-200 dark:border-slate-700"}`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 shrink-0">
+                            {isSelected ? (
+                              <CheckSquare className="h-5 w-5 text-primary" />
+                            ) : (
+                              <Square className="h-5 w-5 text-slate-400" />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-slate-900 dark:text-white line-clamp-2">
+                              {question.content}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
                               <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getTypeColor(question.questionType)}`}
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${getTypeColor(question.questionType)}`}
                               >
-                                {question.questionType === "MCQ" ? "Trắc nghiệm" : "Tự luận"}
+                                {question.questionType}
                               </span>
                               <span
-                                className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${getLevelColor(question.questionLevel)}`}
+                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${getLevelColor(question.questionLevel)}`}
                               >
-                                {question.questionLevel === "EASY"
-                                  ? "Dễ"
-                                  : question.questionLevel === "MEDIUM"
-                                    ? "TB"
-                                    : "Khó"}
+                                {question.questionLevel}
                               </span>
+                              {question.lesson && (
+                                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                  {question.lesson.name}
+                                </span>
+                              )}
                             </div>
                           </div>
-                          {(question.subject || question.lesson) && (
-                            <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                              {question.subject && <span>{question.subject.name}</span>}
-                              {question.subject && question.lesson && <span>•</span>}
-                              {question.lesson && <span>{question.lesson.name}</span>}
-                            </div>
-                          )}
                         </div>
                       </div>
-                    </div>
-                  ))}
+                    );
+                  })}
                 </div>
               )}
 
@@ -421,7 +458,42 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                   />
                 </div>
 
-                <div className="flex items-center gap-2 border-t pt-4">
+                <div className="border-t pt-4 space-y-4">
+                  <div>
+                    <Label htmlFor="examType">Loại đề thi</Label>
+                    <select
+                      id="examType"
+                      value={examType}
+                      onChange={(e) => setExamType(e.target.value as ExamType)}
+                      className="w-full mt-1.5 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none"
+                    >
+                      <option value="EXAM">Đề thi chính thức</option>
+                      <option value="PRACTICE">Đề luyện tập</option>
+                    </select>
+                  </div>
+
+                  <div>
+                    <Label htmlFor="enrollKey">
+                      Mật khẩu vào thi{" "}
+                      {examType === "EXAM" ? (
+                        <span className="text-red-500">*</span>
+                      ) : (
+                        <span className="text-slate-400 text-xs font-normal">(tuỳ chọn)</span>
+                      )}
+                    </Label>
+                    <Input
+                      id="enrollKey"
+                      placeholder={
+                        examType === "EXAM" ? "Bắt buộc với đề chính thức" : "Để trống nếu không cần mật khẩu"
+                      }
+                      value={enrollKey}
+                      onChange={(e) => setEnrollKey(e.target.value)}
+                      className={`mt-1.5 ${examType === "EXAM" && !enrollKey.trim() ? "border-red-300 focus:ring-red-400" : ""}`}
+                    />
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-2">
                   <Checkbox
                     id="shuffleOptions"
                     isSelected={shuffleOptions}
@@ -434,7 +506,9 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
 
                 <Button
                   onClick={handleGenerate}
-                  isDisabled={generateExam.isPending || selectedQuestions.size === 0}
+                  isDisabled={
+                    generateExam.isPending || selectedQuestions.size === 0 || (examType === "EXAM" && !enrollKey.trim())
+                  }
                   size="lg"
                   className="w-full gap-2 mt-4"
                 >

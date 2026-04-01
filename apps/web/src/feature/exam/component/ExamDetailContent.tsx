@@ -20,6 +20,7 @@ import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useExam, useDownloadExam, usePublishExam } from "../queries/useExam";
+import type { ExamType } from "../types/exam.type";
 import { QuestionLevel, QuestionType } from "@/feature/question/types/question.type";
 import { useQuizAttemptsByExam } from "@/feature/quiz/queries/useQuiz";
 import { QuizAttemptStatus } from "@/feature/quiz/types/quiz.type";
@@ -295,6 +296,31 @@ const ExamDetailContent: React.FC = () => {
                     {exam.durationInMinutes} phút
                   </span>
                 </div>
+                {exam.type && (
+                  <div className="flex items-center justify-between pt-2 border-t border-slate-100 dark:border-slate-800">
+                    <span className="text-sm text-slate-600 dark:text-slate-400">Loại đề</span>
+                    <span
+                      className={`text-xs font-bold px-2.5 py-1 rounded-md ${
+                        exam.type === "EXAM"
+                          ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400"
+                          : "bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400"
+                      }`}
+                    >
+                      {exam.type === "EXAM" ? "Chính thức" : "Luyện tập"}
+                    </span>
+                  </div>
+                )}
+                {exam.enrollKey && (
+                  <div className="flex items-center justify-between">
+                    <span className="text-sm text-slate-600 dark:text-slate-400 flex items-center gap-2">
+                      <Lock className="h-4 w-4" />
+                      Mật khẩu
+                    </span>
+                    <span className="text-sm font-mono font-bold text-slate-900 dark:text-white bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded">
+                      {exam.enrollKey}
+                    </span>
+                  </div>
+                )}
               </div>
             </div>
           </div>

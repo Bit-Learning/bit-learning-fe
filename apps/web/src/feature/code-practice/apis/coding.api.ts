@@ -55,7 +55,7 @@ export const problemApi = {
   },
 
   getProblemDetail(problemId: string, language?: Language): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
-    return api.get(`/problems/${problemId}`, { params: { language: language || "CPP" } });
+    return api.get(`/problems/${problemId}`, { params: language ? { language } : undefined });
   },
 
   getProblemStatistics(problemId: string): Promise<AxiosResponse<ApiResponse<ProblemStatisticsResponse>>> {
@@ -162,6 +162,13 @@ export const submissionApi = {
 
   getUserSubmissionStats(): Promise<AxiosResponse<ApiResponse<UserSubmissionStatsResponse>>> {
     return api.get("/submissions/stats");
+  },
+
+  exportSubmission(submissionId: string, format: "txt" | "xlsx" = "txt"): Promise<AxiosResponse<Blob>> {
+    return api.get(`/submissions/${submissionId}/export`, {
+      params: { format },
+      responseType: "blob",
+    });
   },
 
   runCode(data: RunCodeRequest): Promise<AxiosResponse<ApiResponse<RunCodeResponse>>> {
