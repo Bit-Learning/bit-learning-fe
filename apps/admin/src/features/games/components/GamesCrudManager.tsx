@@ -1,14 +1,4 @@
-import { useState, useEffect } from "react";
-import {
-	flexRender,
-	getCoreRowModel,
-	getFilteredRowModel,
-	getPaginationRowModel,
-	getSortedRowModel,
-	type SortingState,
-	useReactTable,
-	type VisibilityState,
-} from "@tanstack/react-table";
+import { useState } from "react";
 import {
 	useAdminGamesList,
 	useDeleteGame,
@@ -16,6 +6,7 @@ import {
 	useUpsertGame,
 	useApproveGame,
 	useRejectGame,
+	type GameCategoryOption,
 	type UpsertGamePayload,
 } from "../hooks/useAdminGamesCrud";
 import { Button } from "@/components/ui/button";
@@ -38,6 +29,7 @@ import {
 	TableRow,
 } from "@/components/ui/table";
 import { Textarea } from "@/components/ui/textarea";
+import { Badge } from "@/components/ui/badge";
 import {
 	Select,
 	SelectContent,
@@ -45,242 +37,8 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "@/components/ui/select";
-import { DataTablePagination, DataTableToolbar } from "@/components/data-table";
-import {
-	useTableUrlState,
-	type NavigateFn,
-} from "@/shared/hooks/use-table-url-state";
 import { toast } from "sonner";
 import { MINIO_GAME_URL } from "@/shared/constants/endpoints";
-import { gamesColumns } from "./games-columns";
-import {
-	DropdownMenu,
-	DropdownMenuContent,
-	DropdownMenuItem,
-	DropdownMenuSeparator,
-	DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { DotsHorizontalIcon } from "@radix-ui/react-icons";
-
-export type GameRowData = {
-	id: number;
-	title: string;
-	status: string;
-	categoryName: string;
-	description: string;
-	views: number;
-	likes: number;
-	minioObjectName?: string;
-	categoryId?: number;
-	thumbnailUrl?: string;
-	difficulty?: string;
-};
-
-type DataTableProps = {
-	data: GameRowData[];
-	search: Record<string, unknown>;
-	navigate: NavigateFn;
-	onEdit: (game: GameRowData) => void;
-	onDelete: (id: number) => Promise<void>;
-	onApprove: (id: number) => Promise<void>;
-	onReject: (id: number) => Promise<void>;
-};
-
-function GamesDataTable({
-	data,
-	search,
-	navigate,
-	onEdit,
-	onDelete,
-	onApprove,
-	onReject,
-}: DataTableProps) {
-	const [rowSelection, setRowSelection] = useState({});
-	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
-	const [sorting, setSorting] = useState<SortingState>([]);
-
-	const {
-		columnFilters,
-		onColumnFiltersChange,
-		pagination,
-		onPaginationChange,
-		ensurePageInRange,
-	} = useTableUrlState({
-		search,
-		navigate,
-		pagination: { defaultPage: 1, defaultPageSize: 10 },
-		globalFilter: { enabled: false },
-		columnFilters: [{ columnId: "status", searchKey: "status", type: "array" }],
-	});
-
-	const table = useReactTable({
-		data,
-		columns: gamesColumns,
-		state: {
-			sorting,
-			pagination,
-			rowSelection,
-			columnFilters,
-			columnVisibility,
-		},
-		enableRowSelection: true,
-		onPaginationChange,
-		onColumnFiltersChange,
-		onRowSelectionChange: setRowSelection,
-		onSortingChange: setSorting,
-		onColumnVisibilityChange: setColumnVisibility,
-		getPaginationRowModel: getPaginationRowModel(),
-		getCoreRowModel: getCoreRowModel(),
-		getFilteredRowModel: getFilteredRowModel(),
-		getSortedRowModel: getSortedRowModel(),
-	});
-
-	useEffect(() => {
-		ensurePageInRange(table.getPageCount());
-	}, [table, ensurePageInRange]);
-
-	return (
-		<div className="w-full space-y-4">
-			<DataTableToolbar
-				table={table}
-				searchPlaceholder="Lọc game theo tiêu đề..."
-				searchKey="title"
-				filters={[
-					{
-						columnId: "status",
-						title: "Trạng thái",
-						options: [
-							{ label: "Nháp", value: "DRAFT" },
-							{ label: "Đã xuất bản", value: "PUBLISHED" },
-							{ label: "Đã lưu trữ", value: "ARCHIVED" },
-						],
-					},
-				]}
-			/>
-			<div className="overflow-hidden rounded-md border">
-				<Table>
-					<TableHeader>
-						{table.getHeaderGroups().map((headerGroup) => (
-							<TableRow key={headerGroup.id} className="group/row">
-								{headerGroup.headers.map((header) => {
-									return (
-										<TableHead
-											key={header.id}
-											colSpan={header.colSpan}
-											className="bg-background group-hover/row:bg-muted"
-										>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext(),
-													)}
-										</TableHead>
-									);
-								})}
-							</TableRow>
-						))}
-					</TableHeader>
-					<TableBody>
-						{table.getRowModel().rows?.length ? (
-							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									data-state={row.getIsSelected() && "selected"}
-									className="group/row"
-								>
-									{row.getVisibleCells().map((cell) => {
-										if (cell.column.id === "actions") {
-											const game = row.original as GameRowData;
-											return (
-												<TableCell key={cell.id} className="text-right">
-													<DropdownMenu modal={false}>
-														<DropdownMenuTrigger asChild>
-															<Button
-																variant="ghost"
-																className="data-[state=open]:bg-muted flex h-8 w-8 p-0"
-															>
-																<DotsHorizontalIcon className="h-4 w-4" />
-																<span className="sr-only">Open menu</span>
-															</Button>
-														</DropdownMenuTrigger>
-														<DropdownMenuContent align="end" className="w-50">
-															{game.minioObjectName && (
-																<>
-																	<DropdownMenuItem asChild>
-																		<a
-																			href={`${MINIO_GAME_URL}/${game.minioObjectName}`}
-																			target="_blank"
-																			rel="noreferrer"
-																		>
-																			Xem
-																		</a>
-																	</DropdownMenuItem>
-																	<DropdownMenuSeparator />
-																</>
-															)}
-															{game.status === "DRAFT" && (
-																<DropdownMenuItem
-																	onClick={() => void onApprove(game.id)}
-																>
-																	Duyệt
-																</DropdownMenuItem>
-															)}
-															{game.status === "PUBLISHED" && (
-																<DropdownMenuItem
-																	onClick={() => void onReject(game.id)}
-																>
-																	Chuyển về nháp
-																</DropdownMenuItem>
-															)}
-															<DropdownMenuItem onClick={() => onEdit(game)}>
-																Sửa
-															</DropdownMenuItem>
-															<DropdownMenuSeparator />
-															<DropdownMenuItem
-																disabled={game.status === "ARCHIVED"}
-																onClick={() => void onDelete(game.id)}
-																className="text-destructive"
-															>
-																Lưu trữ
-															</DropdownMenuItem>
-														</DropdownMenuContent>
-													</DropdownMenu>
-												</TableCell>
-											);
-										}
-
-										return (
-											<TableCell
-												key={cell.id}
-												className="bg-background group-hover/row:bg-muted"
-											>
-												{flexRender(
-													cell.column.columnDef.cell,
-													cell.getContext(),
-												)}
-											</TableCell>
-										);
-									})}
-								</TableRow>
-							))
-						) : (
-							<TableRow>
-								<TableCell
-									colSpan={gamesColumns.length}
-									className="h-24 text-center"
-								>
-									Chưa có game nào.
-								</TableCell>
-							</TableRow>
-						)}
-					</TableBody>
-				</Table>
-			</div>
-			<DataTablePagination table={table} className="mt-auto" />
-		</div>
-	);
-}
 
 export const GamesCrudManager = () => {
 	const { data: games = [], isLoading } = useAdminGamesList();
@@ -293,7 +51,9 @@ export const GamesCrudManager = () => {
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | undefined>(undefined);
 	const [form, setForm] = useState<UpsertGamePayload>({ title: "", desc: "" });
-	const [search, setSearch] = useState<Record<string, unknown>>({});
+	const [statusFilter, setStatusFilter] = useState<
+		"ALL" | "PUBLISHED" | "DRAFT" | "ARCHIVED"
+	>("ALL");
 
 	const getErrorMessage = (e: any, fallback: string) => {
 		return e?.response?.data?.message ?? e?.message ?? fallback;
@@ -305,14 +65,22 @@ export const GamesCrudManager = () => {
 		setDialogOpen(true);
 	};
 
-	const openEdit = (game: GameRowData) => {
-		setEditingId(game.id);
+	const getCategoryName = (
+		categoryId?: number,
+		cats?: GameCategoryOption[],
+	) => {
+		if (!categoryId || !cats || cats.length === 0) return "-";
+		return cats.find((c) => c.id === categoryId)?.name ?? "-";
+	};
+
+	const openEdit = (game: any) => {
+		setEditingId(game.id as number);
 		setForm({
 			id: game.id,
-			title: game.title,
-			desc: game.description,
+			title: game.title ?? "",
+			desc: game.description ?? "",
 			difficulty: game.difficulty ?? "MEDIUM",
-			categoryId: game.categoryId,
+			categoryId: game.categoryId ?? undefined,
 			thumbnailUrl: game.thumbnailUrl ?? "",
 		});
 		setDialogOpen(true);
@@ -357,6 +125,34 @@ export const GamesCrudManager = () => {
 		}
 	};
 
+	const getStatusLabel = (status?: string) => {
+		switch (status) {
+			case "PUBLISHED":
+				return "Đã xuất bản";
+			case "DRAFT":
+				return "Nháp";
+			case "ARCHIVED":
+				return "Đã lưu trữ";
+			default:
+				return "Không rõ";
+		}
+	};
+
+	const getStatusVariant = (
+		status?: string,
+	): "default" | "secondary" | "destructive" => {
+		switch (status) {
+			case "PUBLISHED":
+				return "default";
+			case "DRAFT":
+				return "secondary";
+			case "ARCHIVED":
+				return "destructive";
+			default:
+				return "secondary";
+		}
+	};
+
 	const onFileChange = (file?: File | null) => {
 		setForm((prev) => ({ ...prev, file: file ?? undefined }));
 	};
@@ -365,39 +161,140 @@ export const GamesCrudManager = () => {
 		setForm((prev) => ({ ...prev, thumbnail: file ?? undefined }));
 	};
 
-	const tableData: GameRowData[] = games.map((g: any) => ({
-		id: g.id,
-		title: g.title,
-		status: g.status,
-		categoryName: categories.find((c) => c.id === g.categoryId)?.name ?? "-",
-		description: g.description ?? "",
-		views: g.views ?? 0,
-		likes: g.likes ?? 0,
-		minioObjectName: g.minioObjectName,
-		categoryId: g.categoryId,
-		thumbnailUrl: g.thumbnailUrl,
-		difficulty: g.difficulty,
-	}));
+	const getPlayUrl = (minioObjectName?: string) => {
+		if (!minioObjectName) return "#";
+		return `${MINIO_GAME_URL}/${minioObjectName}`;
+	};
+
+	const filteredGames = games.filter((g: any) => {
+		if (statusFilter === "ALL") return true;
+		return g.status === statusFilter;
+	});
 
 	return (
 		<div className="space-y-4">
-			<div className="flex items-center justify-between">
+			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
 				<h2 className="text-xl font-semibold">Danh sách game</h2>
-				<Button onClick={openCreate}>Thêm game</Button>
+				<div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3">
+					<div className="flex items-center gap-2">
+						<span className="text-sm text-muted-foreground">
+							Lọc theo trạng thái:
+						</span>
+						<Select
+							value={statusFilter}
+							onValueChange={(value) =>
+								setStatusFilter(value as typeof statusFilter)
+							}
+						>
+							<SelectTrigger className="w-[180px]">
+								<SelectValue placeholder="Tất cả trạng thái" />
+							</SelectTrigger>
+							<SelectContent>
+								<SelectItem value="ALL">Tất cả</SelectItem>
+								<SelectItem value="DRAFT">Nháp</SelectItem>
+								<SelectItem value="PUBLISHED">Đã xuất bản</SelectItem>
+								<SelectItem value="ARCHIVED">Đã lưu trữ</SelectItem>
+							</SelectContent>
+						</Select>
+					</div>
+					<Button onClick={openCreate}>Thêm game</Button>
+				</div>
 			</div>
 
 			{isLoading ? (
-				<p className="text-muted-foreground">Đang tải danh sách game...</p>
+				<p>Đang tải danh sách game...</p>
 			) : (
-				<GamesDataTable
-					data={tableData}
-					search={search}
-					navigate={(to) => setSearch(to as Record<string, unknown>)}
-					onEdit={openEdit}
-					onDelete={handleDelete}
-					onApprove={handleApprove}
-					onReject={handleReject}
-				/>
+				<Table>
+					<TableHeader>
+						<TableRow>
+							<TableHead>ID</TableHead>
+							<TableHead>Tiêu đề</TableHead>
+							<TableHead>Trạng thái</TableHead>
+							<TableHead>Danh mục</TableHead>
+							<TableHead>Mô tả</TableHead>
+							<TableHead>Lượt xem</TableHead>
+							<TableHead>Lượt thích</TableHead>
+							<TableHead className="w-[220px] text-right">Thao tác</TableHead>
+						</TableRow>
+					</TableHeader>
+					<TableBody>
+						{filteredGames.map((g: any) => (
+							<TableRow key={g.id}>
+								<TableCell>{g.id}</TableCell>
+								<TableCell>{g.title}</TableCell>
+								<TableCell>
+									<Badge variant={getStatusVariant(g.status)}>
+										{getStatusLabel(g.status)}
+									</Badge>
+								</TableCell>
+								<TableCell>
+									{getCategoryName(g.categoryId, categories)}
+								</TableCell>
+								<TableCell className="max-w-xs truncate" title={g.description}>
+									{g.description}
+								</TableCell>
+								<TableCell>{g.views ?? 0}</TableCell>
+								<TableCell>{g.likes ?? 0}</TableCell>
+								<TableCell className="space-x-2 text-right">
+									{g.minioObjectName && (
+										<Button asChild size="sm" variant="ghost">
+											<a
+												href={getPlayUrl(g.minioObjectName)}
+												target="_blank"
+												rel="noreferrer"
+											>
+												Xem
+											</a>
+										</Button>
+									)}
+									{g.status === "DRAFT" && (
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => void handleApprove(g.id as number)}
+										>
+											Duyệt
+										</Button>
+									)}
+									{g.status === "PUBLISHED" && (
+										<Button
+											variant="outline"
+											size="sm"
+											onClick={() => void handleReject(g.id as number)}
+										>
+											Chuyển về nháp
+										</Button>
+									)}
+									<Button
+										size="sm"
+										variant="outline"
+										onClick={() => openEdit(g)}
+									>
+										Sửa
+									</Button>
+									<Button
+										size="sm"
+										variant="outline"
+										disabled={g.status === "ARCHIVED"}
+										onClick={() => void handleDelete(g.id as number)}
+									>
+										Lưu trữ
+									</Button>
+								</TableCell>
+							</TableRow>
+						))}
+						{filteredGames.length === 0 && (
+							<TableRow>
+								<TableCell
+									colSpan={8}
+									className="text-center text-muted-foreground"
+								>
+									Chưa có game nào.
+								</TableCell>
+							</TableRow>
+						)}
+					</TableBody>
+				</Table>
 			)}
 
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
