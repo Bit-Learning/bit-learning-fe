@@ -54,7 +54,7 @@
     # ── Capture deploy timestamp ─────────────────────────────────────────────
     - name: Get deploy timestamp
       ansible.builtin.set_fact:
-        deploy_time: "{{ ansible_date_time.iso8601 }}"
+        deploy_time: "{{ ansible_facts['date_time']['iso8601'] }}"
       tags: [deploy]
 
     # ── Deploy with block/rescue for error handling ──────────────────────────
