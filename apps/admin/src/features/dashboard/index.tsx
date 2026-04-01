@@ -1,5 +1,11 @@
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { Search } from "@/components/search";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/layout/header";
+import { Main } from "@/layout/main";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useCallback, useRef, useState } from "react";
 import {
 	Activity,
 	AlertTriangle,
@@ -10,44 +16,19 @@ import {
 	Settings,
 	ShoppingCart,
 	TrendingUp,
-	Users,
 	UserPlus,
+	Users,
 	X,
 } from "lucide-react";
-import {
-	Line,
-	LineChart,
-	ResponsiveContainer,
-	Tooltip,
-	XAxis,
-	YAxis,
-} from "recharts";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Header } from "@/layout/header";
-import { Main } from "@/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
+import { useCallback, useRef, useState } from "react";
 import {
 	getAllDashboardStats,
-	triggerManualRefresh,
 	getDashboardSettings,
+	triggerManualRefresh,
 	updateDashboardSettings,
 } from "./api/dashboard-api";
 import { PaymentRevenueChart } from "./components/payment-revenue-chart";
 import type { DashboardStats } from "./types/dashboard.types";
-import type {
-	MetricsHealth,
-	MetricsSummary,
-	MetricsTrends,
-	MetricPoint,
-} from "./types/system-metrics.types";
-import {
-	getSystemMetricsHealth,
-	getSystemMetricsSummary,
-	getSystemMetricsTrends,
-} from "./api/system-metrics-api";
 
 function fmt(n: number): string {
 	return n.toLocaleString("vi-VN");
@@ -258,332 +239,6 @@ function BreakdownBars({
 	);
 }
 
-// ── System Metrics Summary Cards ──
-function SystemSummaryCards({
-	data,
-	isLoading,
-	isError,
-}: {
-	data?: MetricsSummary;
-	isLoading: boolean;
-	isError: boolean;
-}) {
-	if (isLoading) {
-		return (
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-				{Array.from({ length: 5 }).map((_, i) => (
-					<Card key={i}>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<Skeleton className="h-4 w-24" />
-							<Skeleton className="h-8 w-8 rounded-lg" />
-						</CardHeader>
-						<CardContent>
-							<Skeleton className="mb-2 h-8 w-32" />
-							<Skeleton className="h-3 w-40" />
-						</CardContent>
-					</Card>
-				))}
-			</div>
-		);
-	}
-
-	if (isError) {
-		return (
-			<Card className="p-4">
-				<p className="text-muted-foreground text-sm">
-					Không thể tải số liệu kỹ thuật. Vui lòng thử lại sau.
-				</p>
-			</Card>
-		);
-	}
-
-	if (!data) return null;
-
-	const totalRequests = data.requests?.totalRequests ?? 0;
-	const cpuPercent = data.cpu?.usagePercent ?? 0;
-	const usedBytes = data.memory?.usedBytes ?? 0;
-	const maxBytes = data.memory?.maxBytes ?? 0;
-	const usedMb = usedBytes / (1024 * 1024);
-	const maxMb = maxBytes / (1024 * 1024);
-	const memPercent = maxMb > 0 ? (usedMb / maxMb) * 100 : 0;
-	const liveThreads = data.jvm?.liveThreads ?? 0;
-	const activeConns = data.db?.activeConnections ?? 0;
-	const maxConns = data.db?.maxConnections ?? 0;
-
-	const cards: StatCard[] = [
-		{
-			id: "total-requests",
-			title: "Tổng request",
-			value: fmt(totalRequests),
-			description: "Tổng số request HTTP kể từ khi khởi động",
-			icon: Activity,
-			iconColor: "text-sky-600",
-			bgColor: "bg-sky-100 dark:bg-sky-950",
-		},
-		{
-			id: "cpu-usage",
-			title: "CPU hiện tại",
-			value: `${cpuPercent.toFixed(1)}%`,
-			description: "Mức sử dụng CPU của hệ thống",
-			icon: Activity,
-			iconColor: "text-emerald-600",
-			bgColor: "bg-emerald-100 dark:bg-emerald-950",
-		},
-		{
-			id: "memory-usage",
-			title: "Bộ nhớ heap",
-			value: `${usedMb.toFixed(1)} / ${maxMb.toFixed(1)} MB`,
-			description: `Đang dùng ~${memPercent.toFixed(1)}% dung lượng`,
-			icon: Activity,
-			iconColor: "text-indigo-600",
-			bgColor: "bg-indigo-100 dark:bg-indigo-950",
-		},
-		{
-			id: "jvm-threads",
-			title: "JVM threads",
-			value: fmt(liveThreads),
-			description: "Số luồng JVM đang hoạt động",
-			icon: Activity,
-			iconColor: "text-purple-600",
-			bgColor: "bg-purple-100 dark:bg-purple-950",
-		},
-		{
-			id: "db-pool",
-			title: "Kết nối DB",
-			value: maxConns > 0 ? `${activeConns}/${maxConns}` : "Chưa có dữ liệu",
-			description: data.db?.poolName
-				? `Pool: ${data.db.poolName}`
-				: "HikariCP pool (nếu được cấu hình)",
-			icon: Activity,
-			iconColor: "text-rose-600",
-			bgColor: "bg-rose-100 dark:bg-rose-950",
-		},
-	];
-
-	return <DraggableStatsGrid stats={cards} />;
-}
-
-// ── System Health Panel ──
-function SystemHealthPanel({
-	data,
-	isLoading,
-	isError,
-}: {
-	data?: MetricsHealth;
-	isLoading: boolean;
-	isError: boolean;
-}) {
-	const statusColor = (status: string) => {
-		if (status === "UP") return "text-emerald-600";
-		if (status === "DOWN") return "text-red-600";
-		return "text-amber-600";
-	};
-
-	if (isLoading) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Tình trạng dịch vụ</CardTitle>
-				</CardHeader>
-				<CardContent className="space-y-3">
-					<Skeleton className="h-4 w-40" />
-					{Array.from({ length: 4 }).map((_, i) => (
-						<div key={i} className="flex items-center justify-between">
-							<Skeleton className="h-3 w-24" />
-							<Skeleton className="h-3 w-16" />
-						</div>
-					))}
-				</CardContent>
-			</Card>
-		);
-	}
-
-	if (isError) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Tình trạng dịch vụ</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<p className="text-muted-foreground text-sm">
-						Không thể tải thông tin health từ backend.
-					</p>
-				</CardContent>
-			</Card>
-		);
-	}
-
-	if (!data) return null;
-
-	const components = [...(data.components ?? [])].sort((a, b) => {
-		const weight = (name: string) => {
-			if (name === "db") return 0;
-			if (name === "redis") return 1;
-			return 10;
-		};
-		return weight(a.name) - weight(b.name);
-	});
-
-	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
-					<span>Tình trạng dịch vụ</span>
-					<span
-						className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
-							data.status === "UP"
-								? "border-emerald-500 text-emerald-600"
-								: "border-amber-500 text-amber-600"
-						}`}
-					>
-						{data.status}
-					</span>
-				</CardTitle>
-			</CardHeader>
-			<CardContent className="space-y-3 text-sm">
-				{components.map((c) => (
-					<div
-						key={c.name}
-						className="flex items-center justify-between gap-4 border-b last:border-b-0 pb-2 last:pb-0"
-					>
-						<div className="flex items-center gap-2 min-w-0">
-							<span
-								className={`h-2 w-2 rounded-full ${
-									c.status === "UP"
-										? "bg-emerald-500"
-										: c.status === "DOWN"
-											? "bg-red-500"
-											: "bg-amber-500"
-								}`}
-							/>
-							<span className="font-medium truncate">{c.name}</span>
-						</div>
-						<span className={`font-semibold ${statusColor(c.status)}`}>
-							{c.status}
-						</span>
-					</div>
-				))}
-				{components.length === 0 && (
-					<p className="text-muted-foreground text-xs">
-						Không có component health chi tiết từ Actuator.
-					</p>
-				)}
-			</CardContent>
-		</Card>
-	);
-}
-
-// ── System Trends Charts ──
-function SystemTrendsCharts({
-	data,
-	isLoading,
-}: {
-	data?: MetricsTrends;
-	isLoading: boolean;
-}) {
-	if (isLoading) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Xu hướng kỹ thuật</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<Skeleton className="h-48 w-full" />
-				</CardContent>
-			</Card>
-		);
-	}
-
-	if (!data) return null;
-
-	const toChartData = (points?: MetricPoint[]) => {
-		return (points ?? []).map((p) => ({
-			time: new Date(p.timestamp).toLocaleTimeString("vi-VN", {
-				minute: "2-digit",
-				second: "2-digit",
-			}),
-			value: p.value,
-		}));
-	};
-
-	const requestData = toChartData(data.requestCount);
-	const cpuData = toChartData(data.cpu);
-	const memoryData = toChartData(data.memory);
-
-	const renderLineChart = (
-		title: string,
-		unit: string,
-		chartData: { time: string; value: number }[],
-	) => (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-sm font-medium">{title}</CardTitle>
-			</CardHeader>
-			<CardContent className="h-56">
-				{chartData.length === 0 ? (
-					<div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-						Chưa có dữ liệu
-					</div>
-				) : (
-					<ResponsiveContainer width="100%" height="100%">
-						<LineChart data={chartData}>
-							<XAxis
-								dataKey="time"
-								stroke="#888888"
-								fontSize={12}
-								tickLine={false}
-								axisLine={false}
-							/>
-							<YAxis
-								stroke="#888888"
-								fontSize={12}
-								tickLine={false}
-								axisLine={false}
-								tickFormatter={(v) => `${v.toFixed(0)}${unit}`}
-							/>
-							<Tooltip
-								content={({ active, payload }) => {
-									if (active && payload && payload.length) {
-										return (
-											<div className="bg-background border rounded-md px-2 py-1 text-xs shadow-sm">
-												<div className="font-medium">
-													{payload[0].payload.time}
-												</div>
-												<div className="text-muted-foreground">
-													{payload[0].value?.toFixed(1)}
-													{unit}
-												</div>
-											</div>
-										);
-									}
-									return null;
-								}}
-							/>
-							<Line
-								type="monotone"
-								dataKey="value"
-								stroke="currentColor"
-								className="text-primary"
-								strokeWidth={2}
-								dot={false}
-								isAnimationActive={false}
-							/>
-						</LineChart>
-					</ResponsiveContainer>
-				)}
-			</CardContent>
-		</Card>
-	);
-
-	return (
-		<div className="grid gap-4 lg:grid-cols-3">
-			{renderLineChart("Request (tổng số)", "", requestData)}
-			{renderLineChart("CPU (%)", "%", cpuData)}
-			{renderLineChart("Heap đã dùng (MB)", "MB", memoryData)}
-		</div>
-	);
-}
-
 // ── Settings Panel ──
 function SettingsPanel({ onClose }: { onClose: () => void }) {
 	const qc = useQueryClient();
@@ -770,35 +425,6 @@ export function Dashboard() {
 		PURCHASE: "Mua hàng",
 	};
 
-	const {
-		data: sysSummary,
-		isLoading: isSysSummaryLoading,
-		isError: isSysSummaryError,
-	} = useQuery({
-		queryKey: ["admin-metrics-summary"],
-		queryFn: getSystemMetricsSummary,
-		refetchInterval: 15_000,
-		staleTime: 10_000,
-	});
-
-	const {
-		data: sysHealth,
-		isLoading: isSysHealthLoading,
-		isError: isSysHealthError,
-	} = useQuery({
-		queryKey: ["admin-metrics-health"],
-		queryFn: getSystemMetricsHealth,
-		refetchInterval: 30_000,
-		staleTime: 20_000,
-	});
-
-	const { data: sysTrends, isLoading: isSysTrendsLoading } = useQuery({
-		queryKey: ["admin-metrics-trends"],
-		queryFn: getSystemMetricsTrends,
-		refetchInterval: 15_000,
-		staleTime: 10_000,
-	});
-
 	return (
 		<>
 			<Header fixed>
@@ -812,9 +438,7 @@ export function Dashboard() {
 			<Main className="flex flex-1 flex-col gap-6">
 				<div className="flex items-end justify-between">
 					<div>
-						<h2 className="text-2xl font-bold tracking-tight">
-							Bảng điều khiển
-						</h2>
+						<h2 className="text-2xl font-bold tracking-tight">Bảng thống kê</h2>
 						<p className="text-muted-foreground">
 							Tổng quan hoạt động hệ thống Bit Learning
 							{data?.refreshedAt && (
@@ -919,35 +543,6 @@ export function Dashboard() {
 						</div>
 					</>
 				)}
-
-				<div className="space-y-4">
-					<div className="flex items-end justify-between">
-						<div>
-							<h3 className="text-lg font-semibold">Tình trạng hệ thống</h3>
-							<p className="text-muted-foreground text-sm">
-								Health & metrics kỹ thuật từ Spring Boot Actuator
-							</p>
-						</div>
-					</div>
-
-					<SystemSummaryCards
-						data={sysSummary}
-						isLoading={isSysSummaryLoading}
-						isError={isSysSummaryError}
-					/>
-
-					<div className="grid gap-4 lg:grid-cols-2">
-						<SystemHealthPanel
-							data={sysHealth}
-							isLoading={isSysHealthLoading}
-							isError={isSysHealthError}
-						/>
-						<SystemTrendsCharts
-							data={sysTrends}
-							isLoading={isSysTrendsLoading}
-						/>
-					</div>
-				</div>
 			</Main>
 
 			{showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
