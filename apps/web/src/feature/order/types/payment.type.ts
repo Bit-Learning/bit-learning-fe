@@ -29,9 +29,17 @@ export interface TransactionInfo {
   id: number;
   userId: number;
   amount: number;
+  code: string;
   type: TransactionType;
   status: TransactionStatus;
   orderId?: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface DepositHistoryParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+  direction?: "ASC" | "DESC";
 }
