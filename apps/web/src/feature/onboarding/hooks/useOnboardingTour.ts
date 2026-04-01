@@ -37,7 +37,7 @@ const steps: Step[] = [
 	{
 		target: "#tour-ai-assistant",
 		content:
-			"Gặp khó khăn? Bit Learning Bot luôn sẵn sàng hỗ trợ bạn giải bài tập và giải thích code 24/7!",
+			"Gặp khó khăn? Bit Bot luôn sẵn sàng hỗ trợ bạn giải bài tập và giải thích code 24/7!",
 		placement: "top",
 	},
 	{

@@ -400,9 +400,9 @@ const AllCoursesContent: React.FC = () => {
 				)}
 
 				<section className="mt-16">
-					<div className="bg-linear-to-br from-slate-900 to-slate-800 dark:from-slate-800 dark:to-slate-950 text-white p-8 lg:p-10 rounded-3xl shadow-xl relative overflow-hidden">
-						<div className="absolute -top-16 -right-16 w-48 h-48 bg-blue-500/20 rounded-full blur-3xl" />
-						<div className="absolute -bottom-16 -left-16 w-48 h-48 bg-blue-400/10 rounded-full blur-3xl" />
+					<div className="bg-linear-to-br from-sky-50 via-white to-slate-100 text-slate-900 p-8 lg:p-10 rounded-3xl shadow-md border border-slate-200 relative overflow-hidden">
+						<div className="absolute -top-16 -right-16 w-48 h-48 bg-blue-300/25 rounded-full blur-3xl" />
+						<div className="absolute -bottom-16 -left-16 w-48 h-48 bg-cyan-200/35 rounded-full blur-3xl" />
 
 						<div className="relative text-center mb-10">
 							<h2 className="text-2xl md:text-3xl font-extrabold mb-2">

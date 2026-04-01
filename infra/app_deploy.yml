@@ -4,10 +4,10 @@
 #   ansible-playbook app_deploy.yml -e "env=dev"  --tags deploy
 - name: Deploy Bitlearning FE Stack
   hosts: "{{ target_host | default('fpt') }}"
-  become: true
+  become: false
   vars:
     env: prod
-    project_dir: /home/hoang/Desktop/bitlearning/fe
+    project_dir: /home/devops/bitlearning/fe
     compose_file: "docker-compose-deploy-{{ env }}.yml"
     # ── SMTP Notification ───────────────────────────────────────────────────
     smtp_host: smtp.gmail.com
@@ -27,7 +27,7 @@
         apply:
           tags:
             - facts
-      tags: [ facts ]
+      tags: [facts]
 
     - name: Ensure project directory exists
       ansible.builtin.file:
@@ -54,7 +54,7 @@
     # ── Capture deploy timestamp ─────────────────────────────────────────────
     - name: Get deploy timestamp
       ansible.builtin.set_fact:
-        deploy_time: "{{ ansible_date_time.iso8601 }}"
+        deploy_time: "{{ ansible_facts['date_time']['iso8601'] }}"
       tags: [deploy]
 
     # ── Deploy with block/rescue for error handling ──────────────────────────

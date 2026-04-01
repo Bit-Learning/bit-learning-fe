@@ -9,6 +9,7 @@ import {
 import React from "react";
 import { FeatureCardProps } from "../types";
 import FeatureCard from "./FeatureCard";
+import AuroraView from "@workspace/ui/components/custom/aurora";
 
 const FeaturesSection: React.FC = () => {
 	const features: FeatureCardProps[] = [
@@ -39,7 +40,7 @@ const FeaturesSection: React.FC = () => {
 			icon: Bot,
 			title: "Trợ lý AI",
 			description:
-				"Bit Learning Bot - Người bạn đồng hành thông minh, giải đáp thắc mắc 24/7.",
+				"Bit Bot - Người bạn đồng hành thông minh, giải đáp thắc mắc 24/7.",
 			thumbnail:
 				"https://images.unsplash.com/photo-1659018966820-de07c94e0d01?auto=format&fit=crop&w=900&q=80",
 			link: "/chat-ai",
@@ -83,10 +84,8 @@ const FeaturesSection: React.FC = () => {
 	return (
 		<section id="tour-features" className="py-16">
 			<div className="text-center mb-12">
-				<h3 className="text-3xl font-extrabold text-slate-900 mb-4">
-					Mọi thứ bạn cần để trở thành Hacker nhí
-				</h3>
-				<p className="text-slate-600 max-w-2xl mx-auto">
+				<AuroraView />
+				<p className="text-slate-600 max-w-2xl mx-auto mt-3">
 					Nền tảng tích hợp đầy đủ công cụ giúp học sinh từ lớp 1 đến lớp 12
 					tiếp cận công nghệ một cách tự nhiên và vui vẻ nhất.
 				</p>

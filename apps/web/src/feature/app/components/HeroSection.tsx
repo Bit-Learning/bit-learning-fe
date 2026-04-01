@@ -2,8 +2,11 @@ import React from "react";
 import { Link } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
+import CodeProfile from "@workspace/ui/components/custom/codeprofile";
 import { ArrowRight } from "lucide-react";
-import CodeEditorPreview from "./CodeEditorPreview";
+import NumberTicker from "@workspace/ui/components/custom/ticker";
+
+import BlueButton from "../../../shared/components/button/BlueButton";
 
 const HeroSection: React.FC = () => {
 	return (
@@ -12,7 +15,7 @@ const HeroSection: React.FC = () => {
 			className="py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center"
 		>
 			<div className="space-y-8">
-				<Badge className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold uppercase tracking-wider border-0">
+				<Badge className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-lg font-bold uppercase tracking-wider border-0">
 					<span className="relative flex h-2 w-2">
 						<span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
 						<span className="relative inline-flex rounded-full h-2 w-2 bg-primary" />
@@ -29,13 +32,7 @@ const HeroSection: React.FC = () => {
 				</p>
 				<div className="flex flex-wrap gap-4">
 					<Link to="/courses">
-						<Button
-							size="xl"
-							className="px-8 py-4 bg-primary hover:bg-primary/90 text-white rounded-xl font-bold text-lg flex items-center gap-2 group transition-all transform hover:-translate-y-1"
-						>
-							Bắt đầu học ngay
-							<ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-						</Button>
+						<BlueButton />
 					</Link>
 				</div>
 				<div className="flex items-center gap-4 pt-4">
@@ -65,12 +62,19 @@ const HeroSection: React.FC = () => {
 							+10k
 						</div>
 					</div>
-					<p className="text-sm text-slate-500 font-medium">
-						Hơn 10,000 học sinh đang tham gia mỗi ngày
+					<p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+						Hơn
+						<NumberTicker
+							value={10000}
+							duration={2500}
+							className="font-semibold text-primary"
+							decimalPlaces={0}
+						/>
+						học sinh đang tham gia mỗi ngày
 					</p>
 				</div>
 			</div>
-			<CodeEditorPreview />
+			<CodeProfile />
 		</section>
 	);
 };

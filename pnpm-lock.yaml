@@ -223,9 +223,6 @@ importers:
       vite:
         specifier: ^7.1.9
         version: 7.3.1(@types/node@20.19.37)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3)
-      vite-plugin-imagemin:
-        specifier: ^0.6.1
-        version: 0.6.1(vite@7.3.1(@types/node@20.19.37)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))
 
   apps/web:
     dependencies:
@@ -400,6 +397,9 @@ importers:
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      styled-components:
+        specifier: ^6.3.12
+        version: 6.3.12(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
       tailwind-merge:
         specifier: ^3.5.0
         version: 3.5.0

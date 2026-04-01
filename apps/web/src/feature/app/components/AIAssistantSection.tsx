@@ -23,7 +23,7 @@ const AIAssistantSection: React.FC = () => {
 				</div>
 				<div className="relative z-10 flex-1 text-center lg:text-left">
 					<h3 className="text-3xl lg:text-4xl font-extrabold text-white mb-6">
-						Bạn gặp khó khăn? Hỏi Bit Learning Bot ngay!
+						Bạn gặp khó khăn? Bit Bot giúp bạn ngay!
 					</h3>
 					<p className="text-blue-100 text-lg mb-8 leading-relaxed max-w-xl">
 						Trợ lý AI thân thiện luôn sẵn sàng hỗ trợ bạn giải bài tập, giải
@@ -38,7 +38,7 @@ const AIAssistantSection: React.FC = () => {
 							className="px-8 py-3 bg-white text-[#137fec] rounded-xl font-extrabold flex items-center gap-2 hover:bg-slate-50 shadow-xl"
 						>
 							<MessageCircle className="w-5 h-5" />
-							Chat với Bit Learning Bot
+							Chat với Bit Bot
 						</Button>
 						<div className="flex items-center gap-3 text-white/80 text-sm italic font-medium">
 							<span className="flex gap-1">
