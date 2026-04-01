@@ -16,6 +16,7 @@ import {
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
+import NumberTicker from "@workspace/ui/components/custom/ticker";
 
 export const Route = createFileRoute("/_layout/about")({
 	component: AboutUsPage,
@@ -141,12 +142,19 @@ function AboutUsPage() {
 								}}
 							/>
 
-							<div className="absolute -bottom-6 -left-6 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-6 shadow-xl dark:border-slate-800 dark:bg-slate-900">
+							<div className="w-1/2 h-1/4 absolute -bottom-6 -left-6 flex items-center gap-4 rounded-2xl border border-slate-100 bg-white p-4 shadow-xl dark:border-slate-800 dark:bg-slate-900">
 								<div className="flex h-12 w-12 items-center justify-center rounded-full bg-green-100 text-green-600">
 									<CheckCircle className="h-6 w-6" />
 								</div>
 								<div>
-									<p className="text-2xl font-bold">10,000+</p>
+									<NumberTicker
+										value={10000}
+										duration={2500}
+										className="text-4xl font-bold"
+										prefix="+"
+										decimalPlaces={0}
+									/>
+
 									<p className="text-xs font-bold uppercase tracking-wider text-slate-500">
 										Học sinh tin dùng
 									</p>
