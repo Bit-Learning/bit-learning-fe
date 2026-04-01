@@ -101,8 +101,8 @@ const ForumContent: React.FC = () => {
 				<aside className="w-64 shrink-0 sticky top-8 self-start space-y-3">
 					<div className="bg-white rounded-md border border-gray-200 overflow-hidden">
 						<div className="px-3 py-3 space-y-0.5">
-							<button className="cursor-pointer w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-blue-600 bg-blue-50 transition-all text-left">
-								<span className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center shrink-0">
+							<button className="cursor-pointer w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-bold text-primary bg-blue-50 transition-all text-left">
+								<span className="w-7 h-7 rounded-lg bg-primary flex items-center justify-center shrink-0">
 									<Flame className="w-3.5 h-3.5 text-white" />
 								</span>
 								Bảng tin
@@ -122,7 +122,7 @@ const ForumContent: React.FC = () => {
 
 					<div className="bg-white rounded-md border border-gray-200 shadow-sm p-4">
 						<div className="flex items-center gap-2 mb-3">
-							<div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
+							<div className="w-8 h-8 rounded-lg bg-primary flex items-center justify-center">
 								<Sparkles className="w-4 h-4 text-white" />
 							</div>
 							<h3 className="text-sm font-bold uppercase tracking-widest  text-gray-900">
@@ -160,7 +160,7 @@ const ForumContent: React.FC = () => {
 
 						<button
 							onClick={() => navigate({ to: "/forum/create" })}
-							className="mt-4 w-full flex items-center justify-center gap-2 text-xs font-semibold bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition"
+							className="mt-4 w-full flex items-center justify-center gap-2 text-xs font-semibold bg-primary text-white py-2 rounded-lg hover:bg-blue-700 transition"
 						>
 							<PenLine className="w-3.5 h-3.5" />
 							Đăng bài ngay
@@ -179,12 +179,12 @@ const ForumContent: React.FC = () => {
 								{
 									label: "Tháng này",
 									value: filterByTime(allPosts, "month").length,
-									color: "text-blue-600",
+									color: "text-primary",
 								},
 								{
 									label: "Tuần này",
 									value: filterByTime(allPosts, "week").length,
-									color: "text-blue-600",
+									color: "text-primary",
 								},
 								{
 									label: "Hôm nay",
@@ -213,7 +213,7 @@ const ForumContent: React.FC = () => {
 									{trendingTags.map(({ name, count }) => (
 										<button
 											key={name}
-											className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#f0f2f5] text-gray-600 hover:bg-blue-50 hover:text-blue-600 transition-colors"
+											className="flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-[#f0f2f5] text-gray-600 hover:bg-blue-50 hover:text-primary transition-colors"
 										>
 											<Hash className="w-3 h-3" />
 											{name}
@@ -263,7 +263,7 @@ const ForumContent: React.FC = () => {
 									<button
 										className={`flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg font-semibold transition-all ${
 											newPost.trim()
-												? "bg-blue-600 text-white hover:bg-blue-700"
+												? "bg-primary text-white hover:bg-blue-700"
 												: "bg-gray-100 text-gray-400 cursor-not-allowed"
 										}`}
 										disabled={!newPost.trim()}
@@ -286,7 +286,7 @@ const ForumContent: React.FC = () => {
 								}}
 								className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
 									sort === "newest"
-										? "bg-white text-blue-600 shadow-sm"
+										? "bg-white text-primary shadow-sm"
 										: "text-gray-500 hover:text-gray-700"
 								}`}
 							>
@@ -322,7 +322,7 @@ const ForumContent: React.FC = () => {
 									}}
 									className={`px-3 py-1.5 rounded-lg text-xs font-semibold transition-all ${
 										time === key
-											? "bg-blue-50 text-blue-600 border border-blue-100"
+											? "bg-blue-50 text-primary border border-blue-100"
 											: "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
 									}`}
 								>

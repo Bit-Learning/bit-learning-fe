@@ -21,16 +21,43 @@ const GLOBAL_STYLES = `
   @keyframes role-dotPulse   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
   @keyframes role-ripple     { to { transform:scale(1); opacity:0; } }
 
-  .role-card-student:hover { box-shadow: 0 0 0 2px #3b82f6, 0 20px 48px -12px rgba(59,130,246,.22) !important; border-color: transparent !important; }
-  .role-card-mentor:hover  { box-shadow: 0 0 0 2px #8b5cf6, 0 20px 48px -12px rgba(139,92,246,.22) !important; border-color: transparent !important; }
-  .role-card-student:hover .role-card-title { color: #2563eb !important; }
-  .role-card-mentor:hover  .role-card-title { color: #7c3aed !important; }
-  .role-card-student:hover .role-card-blob { transform: scale(1.6) !important; opacity: .12 !important; }
-  .role-card-mentor:hover  .role-card-blob { transform: scale(1.6) !important; opacity: .12 !important; }
-  .role-card-student:hover .role-card-cta { background: #2563eb !important; color: #fff !important; border-color: #2563eb !important; gap: 10px !important; }
-  .role-card-mentor:hover  .role-card-cta { background: #7c3aed !important; color: #fff !important; border-color: #7c3aed !important; gap: 10px !important; }
-  .role-card:hover .role-cta-arrow { transform: translateX(2px) !important; }
-  .role-card:hover::after { transform: translateX(100%) !important; }
+  .role-card-student:hover {
+  box-shadow:
+    0 0 0 2px var(--primary),
+    0 20px 48px -12px color-mix(in srgb, var(--primary) 22%, transparent);
+  border-color: transparent !important;
+}
+
+.role-card-mentor:hover {
+  box-shadow:
+    0 0 0 2px var(--primary-orange),
+    0 20px 48px -12px color-mix(in srgb, var(--primary-orange) 22%, transparent);
+  border-color: transparent !important;
+}
+
+/* Title */
+.role-card-student:hover .role-card-title {
+  color: var(--primary) !important;
+}
+
+.role-card-mentor:hover .role-card-title {
+  color: var(--primary-orange) !important;
+}
+
+/* CTA */
+.role-card-student:hover .role-card-cta {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  gap: 10px !important;
+}
+
+.role-card-mentor:hover .role-card-cta {
+  background: var(--primary-orange) !important;
+  border-color: var(--primary-orange) !important;
+  color: #fff !important;
+  gap: 10px !important;
+}
 `;
 
 // ─── Mouse-tracking hook ───────────────────────────────────────────────────────

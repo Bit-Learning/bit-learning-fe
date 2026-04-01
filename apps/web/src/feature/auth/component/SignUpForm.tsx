@@ -21,6 +21,8 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { useRegister } from "../queries/useAuth";
+import { useGoogleOAuth2Config } from "../queries/useOAuth2";
+import { toast } from "@/shared/components/Sonner";
 
 const formSchema = z
 	.object({
@@ -56,6 +58,15 @@ const SignUpForm: React.FC = () => {
 	const navigate = useNavigate();
 	const [showPassword, setShowPassword] = React.useState(false);
 	const [showConfirmPassword, setShowConfirmPassword] = React.useState(false);
+
+	const {
+		data: googleOAuth2Config,
+		isError: isOAuth2Error,
+		error: oauthError,
+	} = useGoogleOAuth2Config();
+	const [hasShownOAuthError, setHasShownOAuthError] = React.useState(false);
+	const [hasShownGitHubOAuthError, setHasShownGitHubOAuthError] =
+		React.useState(false);
 
 	const {
 		mutate: register,
@@ -108,7 +119,7 @@ const SignUpForm: React.FC = () => {
 			<div className="shrink-0 p-6">
 				<Link
 					to="/"
-					className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-blue-700 dark:text-gray-400 dark:hover:text-blue-400"
+					className="inline-flex items-center text-sm text-gray-500 transition-colors hover:text-primary"
 				>
 					<ChevronLeftIcon className="size-5" />
 					Trang chủ
@@ -137,8 +148,31 @@ const SignUpForm: React.FC = () => {
 
 						<div className="mb-6 flex items-center justify-center">
 							<button
-								type="button"
 								className="inline-flex w-full cursor-pointer items-center justify-center gap-3 rounded-xl border-2 border-gray-200 bg-white px-7 py-2.5 text-sm font-medium text-gray-700 transition-colors hover:border-gray-300 hover:bg-gray-50"
+								type="button"
+								onClick={() => {
+									if (googleOAuth2Config?.authorizationUrl) {
+										window.location.href = googleOAuth2Config.authorizationUrl;
+									} else if (isOAuth2Error) {
+										toast.error({
+											title: "Lỗi kết nối",
+											description:
+												"Không thể kết nối đến dịch vụ Google OAuth2. Vui lòng thử lại sau hoặc đăng nhập bằng email.",
+										});
+									} else {
+										toast.warning({
+											title: "Đang tải",
+											description:
+												"Đang tải cấu hình Google. Vui lòng thử lại trong giây lát.",
+										});
+									}
+								}}
+								disabled={isOAuth2Error}
+								title={
+									isOAuth2Error
+										? "Dịch vụ Google OAuth2 không khả dụng"
+										: undefined
+								}
 							>
 								<svg width="20" height="20" viewBox="0 0 20 20" fill="none">
 									<path
@@ -158,7 +192,7 @@ const SignUpForm: React.FC = () => {
 										fill="#EB4335"
 									/>
 								</svg>
-								Đăng ký với Google
+								Tiếp tục với Google
 							</button>
 						</div>
 
@@ -326,7 +360,7 @@ const SignUpForm: React.FC = () => {
 								/>
 
 								<Button
-									className="bg-linear-to-r h-11 w-full rounded-xl from-orange-600 to-orange-700 font-semibold text-white shadow-lg transition-all duration-200 hover:from-orange-700 hover:to-orange-800 hover:shadow-xl"
+									className="bg-linear-to-r h-11 w-full rounded-xl bg-primary-orange font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl"
 									type="submit"
 									isDisabled={isRegistering}
 								>
@@ -340,7 +374,7 @@ const SignUpForm: React.FC = () => {
 								Đã có tài khoản?{" "}
 								<Link
 									to="/signin"
-									className="font-semibold text-blue-700 transition-colors hover:text-blue-800"
+									className="font-semibold text-primary transition-colors"
 								>
 									Đăng nhập ngay
 								</Link>

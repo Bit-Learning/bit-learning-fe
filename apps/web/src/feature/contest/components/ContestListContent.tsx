@@ -56,7 +56,7 @@ export const ContestListContent: React.FC<Props> = ({
 					<aside className="w-72 shrink-0 space-y-6">
 						<div className="bg-white rounded-md p-5 shadow-sm border border-gray-200">
 							<h3 className="text-lg font-bold mb-4 flex items-center gap-2">
-								<Trophy className="w-5 h-5 text-blue-600" />
+								<Trophy className="w-5 h-5 text-primary" />
 								KỲ THI
 							</h3>
 
@@ -65,7 +65,7 @@ export const ContestListContent: React.FC<Props> = ({
 									onClick={() => navigate({ to: "/contests" })}
 									className={`flex mb-2 items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition ${
 										isAll
-											? "bg-blue-600 text-white shadow"
+											? "bg-primary text-white shadow"
 											: "hover:bg-gray-50 text-gray-600 border border-gray-200"
 									}`}
 								>
@@ -79,7 +79,7 @@ export const ContestListContent: React.FC<Props> = ({
 									onClick={() => navigate({ to: "/contests/my" })}
 									className={`flex items-center justify-between px-4 py-3 rounded-lg cursor-pointer transition ${
 										isMine
-											? "bg-blue-600 text-white shadow"
+											? "bg-primary text-white shadow"
 											: "hover:bg-gray-50 text-gray-600 border border-gray-200"
 									}`}
 								>
@@ -115,7 +115,7 @@ export const ContestListContent: React.FC<Props> = ({
 										label: "Sắp tới",
 										value: ContestStatus.UPCOMING,
 										count: upcomingCount,
-										color: "text-blue-600",
+										color: "text-primary",
 									},
 									{
 										label: "Đã kết thúc",
@@ -132,7 +132,7 @@ export const ContestListContent: React.FC<Props> = ({
 											onClick={() => setStatusFilter(item.value as any)}
 											className={`flex items-center justify-between px-4 font-semibold py-2.5 rounded-lg cursor-pointer transition ${
 												isActive
-													? "bg-blue-50 text-blue-600 font-bold"
+													? "bg-blue-50 text-primary font-bold"
 													: "text-gray-600 hover:bg-gray-50"
 											}`}
 										>
@@ -143,7 +143,7 @@ export const ContestListContent: React.FC<Props> = ({
 											<span
 												className={`text-xs px-2 py-0.5 rounded-full ${
 													isActive
-														? "bg-blue-100 text-blue-600"
+														? "bg-blue-100 text-primary"
 														: "bg-gray-100 text-gray-500"
 												}`}
 											>
@@ -227,7 +227,7 @@ export const ContestListContent: React.FC<Props> = ({
 													onClick={() => onPageChange(page)}
 													className={
 														currentPage === page
-															? "bg-blue-600 text-white"
+															? "bg-primary text-white"
 															: "bg-white border"
 													}
 												>

@@ -13,6 +13,7 @@ import {
 	FileText,
 	Trophy,
 	ArrowRight,
+	Code2,
 } from "lucide-react";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Input } from "@workspace/ui/components/Input";
@@ -122,24 +123,24 @@ const ExamListContent: React.FC = () => {
 				<div className="mb-10">
 					<div className="flex flex-col gap-6">
 						<div>
-							<h1 className="text-4xl font-black text-slate-900 dark:text-slate-100 mb-3">
+							<h1 className="text-3xl font-bold text-gray-900">
 								Danh sách đề thi
 							</h1>
 							<p className="text-lg text-slate-600 dark:text-slate-400">
 								Chọn một đề thi để bắt đầu thử thách kiến thức của bạn
 							</p>
 						</div>
-
-						<div className="relative max-w-7xl">
-							<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
-							<Input
-								value={search}
-								onChange={(e) => setSearch(e.target.value)}
-								placeholder="Tìm kiếm theo tên đề thi hoặc mã đề..."
-								className="pl-12 h-12 text-base shadow-sm border-slate-400 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20"
-							/>
-						</div>
 					</div>
+				</div>
+
+				<div className="relative max-w-7xl">
+					<Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+					<Input
+						value={search}
+						onChange={(e) => setSearch(e.target.value)}
+						placeholder="Tìm kiếm theo tên đề thi hoặc mã đề..."
+						className="pl-12 h-12 text-base shadow-sm border-gray-300 dark:border-slate-700 focus:ring-2 focus:ring-blue-500/20"
+					/>
 				</div>
 
 				{isLoading ? (
@@ -177,12 +178,12 @@ const ExamListContent: React.FC = () => {
 								<Card
 									key={exam.id}
 									className={cn(
-										"group transition-all duration-300 py-0 border-2 rounded-md overflow-hidden",
+										"group transition-all duration-300 py-0 border-gray-200 border-2 rounded-xl overflow-hidden",
 										isCompleted &&
 											" border-emerald-600 dark:border-emerald-800",
-										isUpcoming && " border-amber-600 dark:border-amber-800",
+										isUpcoming && "hover:shadow-lg hover:shadow-amber-500/20",
 										isOpen &&
-											"border-blue-600 dark:border-blue-800 hover:border-blue-400 dark:hover:border-blue-600 hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer bg-white dark:bg-slate-800",
+											"hover:shadow-xl hover:shadow-blue-500/10 cursor-pointer bg-white dark:bg-slate-800",
 									)}
 									onClick={() => isOpen && handleExamClick(exam)}
 								>
@@ -280,7 +281,7 @@ const ExamListContent: React.FC = () => {
 															"flex-1 lg:flex-none gap-2 text-white shadow-lg group/btn",
 															isCompleted
 																? "bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 shadow-emerald-500/30"
-																: "bg-primary hover:bg-blue-600 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-blue-500/30",
+																: "bg-primary shadow-blue-500/30",
 														)}
 														onClick={(e) => {
 															e.stopPropagation();

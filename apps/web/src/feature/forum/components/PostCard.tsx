@@ -73,7 +73,7 @@ export const PostCard: React.FC<PostCardProps> = ({
 					{post.hashtags.slice(0, 4).map((tag) => (
 						<span
 							key={tag.id}
-							className="text-xs text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full font-medium"
+							className="text-xs text-primary bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full font-medium"
 						>
 							#{tag.name}
 						</span>
@@ -83,7 +83,7 @@ export const PostCard: React.FC<PostCardProps> = ({
 
 			<div className="px-4 pb-3">
 				<h2
-					className="text-[15px] font-bold text-gray-900 mb-1.5 hover:text-blue-600 cursor-pointer transition-colors leading-snug"
+					className="text-[15px] font-bold text-gray-900 mb-1.5 hover:text-primary cursor-pointer transition-colors leading-snug"
 					onClick={goDetail}
 				>
 					{post.title}
@@ -108,7 +108,7 @@ export const PostCard: React.FC<PostCardProps> = ({
 				<button
 					className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors ${
 						post.likes > 0
-							? "text-blue-600 hover:bg-blue-50"
+							? "text-primary hover:bg-blue-50"
 							: "text-gray-500 hover:bg-gray-50"
 					}`}
 					onClick={() => onLike(post.id)}
@@ -141,7 +141,7 @@ export const PostCard: React.FC<PostCardProps> = ({
 			{!showFullContent && onViewDetails && (
 				<div className="px-4 pb-3 border-t border-gray-50 pt-2">
 					<button
-						className="w-full text-sm text-blue-600 font-semibold hover:bg-blue-50 py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
+						className="w-full text-sm text-primary font-semibold hover:bg-blue-50 py-2 rounded-xl transition-colors flex items-center justify-center gap-1"
 						onClick={() => onViewDetails(post.id)}
 					>
 						Xem toàn bộ bài viết
