@@ -3,6 +3,7 @@ import { toast } from "@/shared/components/Sonner";
 import { orderApi } from "../apis/order.api";
 import { OrderCreateRequest, PaymentMethod } from "../types/order.type";
 import { useNavigate } from "@tanstack/react-router";
+import { DepositHistoryParams } from "../types/payment.type";
 
 export const useMyOrders = (params?: { page?: number; size?: number; sort?: string; direction?: "ASC" | "DESC" }) => {
   return useQuery({
@@ -77,6 +78,16 @@ export const useCancelOrder = () => {
         title: "Không thể hủy đơn hàng",
         description: error.message,
       });
+    },
+  });
+};
+
+export const useMyDepositHistory = (params?: DepositHistoryParams) => {
+  return useQuery({
+    queryKey: ["deposit-history", params],
+    queryFn: async () => {
+      const response = await orderApi.getMyDeposits(params);
+      return response.data;
     },
   });
 };

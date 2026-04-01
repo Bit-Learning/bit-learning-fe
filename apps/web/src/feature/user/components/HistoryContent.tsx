@@ -63,6 +63,9 @@ export const HistoryContent = () => {
     }
   };
 
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount);
+
   return (
     <>
       <div className="grow space-y-8">
@@ -73,7 +76,7 @@ export const HistoryContent = () => {
                 <Receipt className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Lịch sử giao dịch</h2>
+                <h2 className="text-xl font-bold text-slate-900">Lịch sử mua hàng</h2>
                 <p className="text-sm text-slate-500">Xem lại tất cả các đơn hàng và trạng thái thanh toán của bạn</p>
               </div>
             </div>
@@ -100,11 +103,11 @@ export const HistoryContent = () => {
                 <table className="w-full text-left border-collapse">
                   <thead>
                     <tr className="border-b border-slate-100">
-                      <th className="pb-4 pt-0 font-semibold text-slate-800 text-sm">Mã đơn hàng</th>
-                      <th className="pb-4 pt-0 font-semibold text-slate-800 text-sm">Khóa học</th>
-                      <th className="pb-4 pt-0 font-semibold text-slate-800 text-sm">Tổng tiền</th>
-                      <th className="pb-4 pt-0 font-semibold text-slate-800 text-sm">Trạng thái</th>
-                      <th className="pb-4 pt-0 font-semibold text-slate-800 text-sm"></th>
+                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Mã đơn hàng</th>
+                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Khóa học</th>
+                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Tổng tiền</th>
+                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Trạng thái</th>
+                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm"></th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-50">
@@ -134,7 +137,7 @@ export const HistoryContent = () => {
                             </div>
                           </td>
                           <td className="py-5 font-bold text-primary text-[14px]">
-                            {order.totalAmount.toLocaleString("vi-VN")}đ
+                            {formatCurrency(order.totalAmount)}
                           </td>
                           <td className="py-5">
                             <Badge className={`text-sm px-3 flex items-center gap-1.5 w-fit ${statusInfo.class}`}>
