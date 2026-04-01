@@ -1,12 +1,6 @@
 import React from "react";
-import { X, Download, CheckCircle, FileText, Calendar, ExternalLink, Layers } from "lucide-react";
-import { Worker, Viewer } from "@react-pdf-viewer/core";
-import { defaultLayoutPlugin } from "@react-pdf-viewer/default-layout";
-import "@react-pdf-viewer/core/lib/styles/index.css";
-import "@react-pdf-viewer/default-layout/lib/styles/index.css";
+import { X, Download, CheckCircle, FileText, Calendar, ExternalLink, Layers, AlertCircle } from "lucide-react";
 import type { SlideGenerationResponse } from "../types/slide.type";
-
-const PDFJS_WORKER_URL = "https://unpkg.com/pdfjs-dist@3.11.174/build/pdf.worker.min.js";
 
 interface DetailModalProps {
   slide: SlideGenerationResponse;
@@ -14,8 +8,6 @@ interface DetailModalProps {
 }
 
 export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
-  const defaultLayoutPluginInstance = defaultLayoutPlugin();
-
   const handleDownload = () => {
     if (slide.cloudinaryUrl) {
       window.open(slide.cloudinaryUrl, "_blank");
@@ -52,30 +44,14 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
           {/* PDF Viewer */}
           <div className="flex-1 overflow-hidden border-r border-slate-100">
             {slide.pdfCloudinaryUrl ? (
-              <Worker workerUrl={PDFJS_WORKER_URL}>
-                <div style={{ height: "100%" }}>
-                  <Viewer
-                    fileUrl={slide.pdfCloudinaryUrl}
-                    plugins={[defaultLayoutPluginInstance]}
-                    renderError={() => (
-                      <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
-                        <p className="text-sm">Không thể tải file xem trước.</p>
-                        <a
-                          href={slide.pdfCloudinaryUrl}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-sm text-primary hover:underline flex items-center gap-1"
-                        >
-                          <ExternalLink size={14} />
-                          Mở trực tiếp
-                        </a>
-                      </div>
-                    )}
-                  />
-                </div>
-              </Worker>
+              <iframe
+                src={slide.pdfCloudinaryUrl}
+                title={`Preview - ${slide.topic}`}
+                className="w-full h-full border-0"
+              />
             ) : (
-              <div className="flex items-center justify-center h-full text-slate-400">
+              <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
+                <AlertCircle size={40} className="opacity-40" />
                 <p className="text-sm">Không có file xem trước.</p>
               </div>
             )}
