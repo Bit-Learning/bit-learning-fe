@@ -14,10 +14,11 @@ import {
   PartyPopper,
 } from "lucide-react";
 import { useGenerateExam } from "../queries/useExam";
-import type { ExamGenerateRequest } from "../types/exam.type";
+import type { ExamGenerateRequest, ExamType } from "../types/exam.type";
 import { useMatrixDetail, useMatrixVersions } from "@/feature/matrix/queries/useMatrix";
 import { useSearchQuestions } from "@/feature/question/queries/useQuestion";
 import { QuestionLevel, QuestionType } from "@/feature/question/types/question.type";
+import { toast } from "@/shared/components/Sonner";
 
 type Step = "check" | "setup" | "complete";
 
@@ -44,6 +45,8 @@ const GenerateExamFlow: React.FC = () => {
   const [examCode, setExamCode] = useState("");
   const [shuffleAnswers, setShuffleAnswers] = useState(true);
   const [shuffleQuestions, setShuffleQuestions] = useState(true);
+  const [examType, setExamType] = useState<ExamType>("EXAM");
+  const [enrollKey, setEnrollKey] = useState("");
 
   const { data: matrix } = useMatrixDetail(matrixId);
   const { data: versions } = useMatrixVersions(matrixId);
@@ -393,6 +396,41 @@ const GenerateExamFlow: React.FC = () => {
               </label>
             </div>
           </div>
+
+          <div className="pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Loại đề thi</label>
+              <select
+                value={examType}
+                onChange={(e) => setExamType(e.target.value as ExamType)}
+                className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-900 dark:text-white outline-none"
+              >
+                <option value="EXAM">Đề thi chính thức</option>
+                <option value="PRACTICE">Đề luyện tập</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+                Mật khẩu vào thi{" "}
+                {examType === "EXAM" ? (
+                  <span className="text-red-500">*</span>
+                ) : (
+                  <span className="text-slate-400 text-xs font-normal">(tuỳ chọn)</span>
+                )}
+              </label>
+              <input
+                className={`w-full px-4 py-3 rounded-xl border focus:ring-2 focus:border-blue-500 transition-all text-slate-900 dark:text-white outline-none dark:bg-slate-800 ${
+                  examType === "EXAM" && !enrollKey.trim()
+                    ? "border-red-300 dark:border-red-700 focus:ring-red-400"
+                    : "border-slate-200 dark:border-slate-700 focus:ring-blue-500"
+                }`}
+                type="text"
+                placeholder={examType === "EXAM" ? "Bắt buộc với đề chính thức" : "Để trống nếu không cần mật khẩu"}
+                value={enrollKey}
+                onChange={(e) => setEnrollKey(e.target.value)}
+              />
+            </div>
+          </div>
         </div>
       </div>
 
@@ -415,6 +453,10 @@ const GenerateExamFlow: React.FC = () => {
         <button
           onClick={() => {
             if (!selectedVersion || !examName || !examCode) return;
+            if (examType === "EXAM" && !enrollKey.trim()) {
+              toast.error({ title: "Lỗi", description: "Đề thi chính thức bắt buộc phải có mật khẩu vào thi" });
+              return;
+            }
 
             const request: ExamGenerateRequest = {
               matrixVersionId: selectedVersion.id,
@@ -423,6 +465,8 @@ const GenerateExamFlow: React.FC = () => {
               shuffleOptions: shuffleAnswers,
               durationInMinutes: matrix?.duration,
               totalScore: matrix?.totalScore,
+              type: examType,
+              enrollKey: enrollKey.trim(),
             };
 
             setCurrentStep("complete");
@@ -435,7 +479,7 @@ const GenerateExamFlow: React.FC = () => {
               },
             });
           }}
-          disabled={!examName || !examCode || isGenerating}
+          disabled={!examName || !examCode || isGenerating || (examType === "EXAM" && !enrollKey.trim())}
           className="bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-10 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/25 hover:scale-[1.02] active:scale-95"
         >
           <Rocket className="h-5 w-5" /> Bắt đầu tạo đề thi

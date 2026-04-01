@@ -7,6 +7,7 @@ import type {
   ExamGenerateRequest,
   ExamGenerateFromUserQuestionsRequest,
   ExamGenerateFromQuestionsRequest,
+  ExamUpdateRequest,
 } from "../types/exam.type";
 
 export interface ExamSearchParams {
@@ -48,6 +49,10 @@ export const examApi = {
 
   getMyExams(params?: ExamSearchParams): Promise<AxiosResponse<ApiResponse<ExamBriefResponse[]>>> {
     return api.get("/exams/my-exams", { params });
+  },
+
+  updateExam(id: number, data: ExamUpdateRequest): Promise<AxiosResponse<ApiResponse<ExamResponse>>> {
+    return api.put(`/exams/${id}`, data);
   },
 
   publishExam(id: number, isPublished: boolean): Promise<AxiosResponse<ApiResponse<ExamResponse>>> {
