@@ -1,12 +1,13 @@
 import { useState, useMemo, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Plus, Search, Eye, Edit, Trash2, Clock, FileText, Filter } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, Clock, FileText, X, Loader2 } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { useMyExams, useDeleteExam } from "../queries/useExam";
+import { useMyExams, useDeleteExam, useUpdateExam } from "../queries/useExam";
+import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { Button } from "@workspace/ui/components/Button";
 import { Pagination } from "@/shared/components/Pagination";
-import type { ExamType } from "../types/exam.type";
-import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
+import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
+import type { ExamType, ExamBriefResponse, ExamUpdateRequest } from "../types/exam.type";
 
 const TYPE_LABELS: Record<ExamType, string> = {
   EXAM: "Chính thức",
@@ -22,36 +23,188 @@ function useDebounce<T>(value: T, delay: number): T {
   return debounced;
 }
 
+interface EditExamModalProps {
+  exam: ExamBriefResponse;
+  onClose: () => void;
+}
+
+const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
+  const { mutate: updateExam, isPending } = useUpdateExam();
+
+  const [name, setName] = useState(exam.name);
+  const [code, setCode] = useState(exam.code);
+  const [type, setType] = useState<ExamType>(exam.type ?? "EXAM");
+  const [durationInMinutes, setDurationInMinutes] = useState(exam.durationInMinutes);
+  const [totalScore, setTotalScore] = useState(exam.totalScore);
+  const [enrollKey, setEnrollKey] = useState(exam.enrollKey ?? "");
+
+  const handleSubmit = () => {
+    if (!name.trim() || !code.trim()) return;
+
+    const data: ExamUpdateRequest = {
+      name: name.trim(),
+      code: code.trim(),
+      type,
+      durationInMinutes,
+      totalScore,
+      enrollKey: enrollKey.trim() || undefined,
+    };
+
+    updateExam({ id: exam.id, data }, { onSuccess: onClose });
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+
+      <div className="relative bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700">
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
+          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Chỉnh sửa đề thi</h2>
+          <button
+            onClick={onClose}
+            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+          >
+            <X className="h-5 w-5 text-slate-500" />
+          </button>
+        </div>
+
+        {/* Body */}
+        <div className="px-6 py-5 space-y-4">
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Tên đề thi <span className="text-red-500">*</span>
+            </label>
+            <input
+              className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary transition-all"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Tên đề thi"
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Mã đề <span className="text-red-500">*</span>
+              </label>
+              <input
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm uppercase outline-none focus:ring-2 focus:ring-primary transition-all"
+                value={code}
+                onChange={(e) => setCode(e.target.value.toUpperCase())}
+                placeholder="Mã đề"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Loại đề thi
+              </label>
+              <select
+                value={type}
+                onChange={(e) => setType(e.target.value as ExamType)}
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary transition-all"
+              >
+                <option value="EXAM">Chính thức</option>
+                <option value="PRACTICE">Luyện tập</option>
+              </select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+                Thời gian (phút)
+              </label>
+              <input
+                type="number"
+                min={1}
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary transition-all"
+                value={durationInMinutes}
+                onChange={(e) => setDurationInMinutes(Number(e.target.value))}
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tổng điểm</label>
+              <input
+                type="number"
+                min={0}
+                step={0.5}
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary transition-all"
+                value={totalScore}
+                onChange={(e) => setTotalScore(Number(e.target.value))}
+              />
+            </div>
+          </div>
+
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Mật khẩu vào thi
+              {type === "EXAM" ? (
+                <span className="text-red-500 ml-1">*</span>
+              ) : (
+                <span className="text-slate-400 text-xs font-normal ml-1">(tuỳ chọn)</span>
+              )}
+            </label>
+            <input
+              className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-primary transition-all"
+              value={enrollKey}
+              onChange={(e) => setEnrollKey(e.target.value)}
+              placeholder={type === "EXAM" ? "Bắt buộc với đề chính thức" : "Để trống nếu không cần mật khẩu"}
+            />
+          </div>
+        </div>
+
+        {/* Footer */}
+        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700">
+          <button
+            onClick={onClose}
+            disabled={isPending}
+            className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50"
+          >
+            Hủy
+          </button>
+          <Button
+            onClick={handleSubmit}
+            isDisabled={isPending || !name.trim() || !code.trim() || (type === "EXAM" && !enrollKey.trim())}
+            className="gap-2 bg-primary hover:bg-blue-700 text-white"
+          >
+            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isPending ? "Đang lưu..." : "Lưu thay đổi"}
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+// ── Main Component ────────────────────────────────────────────────────────────
 const MyExamsContent: React.FC = () => {
   const navigate = useNavigate();
 
-  // UI state
   const [searchInput, setSearchInput] = useState("");
   const [filterType, setFilterType] = useState<ExamType | "">("");
   const [filterSubjectId, setFilterSubjectId] = useState<number | "">("");
   const [page, setPage] = useState(0);
   const [size] = useState(10);
 
-  // Debounce search 400ms trước khi gửi lên server
-  const debouncedSearch = useDebounce(searchInput, 400);
+  // Modal state
+  const [editingExam, setEditingExam] = useState<ExamBriefResponse | null>(null);
+  const [deletingExam, setDeletingExam] = useState<ExamBriefResponse | null>(null);
 
-  // Reset về page 0 khi search thay đổi
+  const debouncedSearch = useDebounce(searchInput, 400);
   useEffect(() => {
     setPage(0);
   }, [debouncedSearch]);
 
-  const { data: response, isLoading } = useMyExams({
-    page,
-    size,
-    search: debouncedSearch || undefined,
-  });
+  const { data: response, isLoading } = useMyExams({ page, size, search: debouncedSearch || undefined });
   const { mutate: deleteExam, isPending: isDeleting } = useDeleteExam();
   const { data: subjects } = useSubjectsList();
 
   const allExams = response?.data || [];
   const pagination = response?.page;
 
-  // Type và subject filter client-side trên trang hiện tại
   const exams = useMemo(() => {
     return allExams.filter((e) => {
       if (filterType && e.type !== filterType) return false;
@@ -62,10 +215,9 @@ const MyExamsContent: React.FC = () => {
 
   const hasActiveFilter = !!searchInput || !!filterType || !!filterSubjectId;
 
-  const handleDelete = (e: React.MouseEvent, id: number) => {
-    e.stopPropagation();
-    if (!window.confirm("Bạn có chắc muốn xóa đề thi này không?")) return;
-    deleteExam(id);
+  const handleConfirmDelete = () => {
+    if (!deletingExam) return;
+    deleteExam(deletingExam.id, { onSuccess: () => setDeletingExam(null) });
   };
 
   const getStatusBadge = (isPublished: boolean) => {
@@ -145,6 +297,7 @@ const MyExamsContent: React.FC = () => {
               ))}
             </select>
           )}
+
           <select
             value={filterType}
             onChange={(e) => setFilterType(e.target.value as ExamType | "")}
@@ -270,7 +423,7 @@ const MyExamsContent: React.FC = () => {
                           <button
                             onClick={(e) => {
                               e.stopPropagation();
-                              // TODO: mở modal edit exam
+                              setEditingExam(exam);
                             }}
                             className="p-2 text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors"
                             title="Sửa"
@@ -278,9 +431,11 @@ const MyExamsContent: React.FC = () => {
                             <Edit className="h-5 w-5" />
                           </button>
                           <button
-                            onClick={(e) => handleDelete(e, exam.id)}
-                            disabled={isDeleting}
-                            className="p-2 text-slate-400 hover:text-red-500 transition-colors disabled:opacity-50"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeletingExam(exam);
+                            }}
+                            className="p-2 text-slate-400 hover:text-red-500 transition-colors"
                             title="Xóa"
                           >
                             <Trash2 className="h-5 w-5" />
@@ -299,6 +454,16 @@ const MyExamsContent: React.FC = () => {
           </>
         )}
       </div>
+
+      {editingExam && <EditExamModal exam={editingExam} onClose={() => setEditingExam(null)} />}
+
+      <DeleteConfirmModal
+        open={!!deletingExam}
+        onClose={() => setDeletingExam(null)}
+        onConfirm={handleConfirmDelete}
+        itemName={deletingExam?.name}
+        isPending={isDeleting}
+      />
     </div>
   );
 };

@@ -5,9 +5,10 @@ import type {
   ExamGenerateRequest,
   ExamGenerateFromUserQuestionsRequest,
   ExamGenerateFromQuestionsRequest,
+  ExamUpdateRequest,
 } from "../types/exam.type";
 import type { ApiResponse } from "@/shared/api/api.type";
-import { examApi, ExamSearchParams } from "../api/exam.api";
+import { examApi, type ExamSearchParams } from "../api/exam.api";
 
 export const examKeys = {
   all: ["exams"] as const,
@@ -16,17 +17,18 @@ export const examKeys = {
   details: () => [...examKeys.all, "detail"] as const,
   detail: (id: number) => [...examKeys.details(), id] as const,
   myExams: (params?: ExamSearchParams) => [...examKeys.all, "my-exams", params] as const,
+  allMyExams: () => [...examKeys.all, "my-exams"] as const,
   matrixExams: (matrixId: number, params?: ExamSearchParams) => [...examKeys.all, "matrix", matrixId, params] as const,
 };
 
-export const useExam = (id: number, _p0: { enabled: boolean }) => {
+export const useExam = (id: number, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: examKeys.detail(id),
     queryFn: async () => {
       const response = await examApi.getExamById(id);
       return response.data.data;
     },
-    enabled: !!id,
+    enabled: (options?.enabled ?? true) && !!id,
   });
 };
 
@@ -70,7 +72,9 @@ export const useGenerateExam = () => {
   return useMutation({
     mutationFn: (data: ExamGenerateRequest) => examApi.generateExam(data),
     onSuccess: () => {
+      // Invalidate cả list và my-exams
       queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: examKeys.allMyExams() });
       toast.success({
         title: "Thành công",
         description: "Đề thi đã được tạo thành công",
@@ -92,6 +96,7 @@ export const useGenerateExamFromUserQuestions = () => {
     mutationFn: (data: ExamGenerateFromUserQuestionsRequest) => examApi.generateExamFromUserQuestions(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: examKeys.allMyExams() });
       toast.success({
         title: "Thành công",
         description: "Đề thi đã được tạo thành công",
@@ -113,6 +118,7 @@ export const useGenerateExamFromQuestions = () => {
     mutationFn: (data: ExamGenerateFromQuestionsRequest) => examApi.generateExamFromQuestions(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: examKeys.allMyExams() });
       toast.success({
         title: "Thành công",
         description: "Đề thi đã được tạo thành công",
@@ -127,14 +133,38 @@ export const useGenerateExamFromQuestions = () => {
   });
 };
 
+export const useUpdateExam = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, data }: { id: number; data: ExamUpdateRequest }) => examApi.updateExam(id, data),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: examKeys.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: examKeys.allMyExams() });
+      toast.success({
+        title: "Thành công",
+        description: "Cập nhật đề thi thành công",
+      });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể cập nhật đề thi",
+      });
+    },
+  });
+};
+
 export const usePublishExam = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn: ({ id, isPublished }: { id: number; isPublished: boolean }) => examApi.publishExam(id, isPublished),
     onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: examKeys.lists() });
       queryClient.invalidateQueries({ queryKey: examKeys.detail(variables.id) });
+      queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: examKeys.allMyExams() });
       toast.success({
         title: "Thành công",
         description: variables.isPublished ? "Đã công bố đề thi" : "Đã ẩn đề thi",
@@ -156,6 +186,7 @@ export const useDeleteExam = () => {
     mutationFn: (id: number) => examApi.deleteExam(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: examKeys.lists() });
+      queryClient.invalidateQueries({ queryKey: examKeys.allMyExams() });
       toast.success({
         title: "Thành công",
         description: "Xóa đề thi thành công",
