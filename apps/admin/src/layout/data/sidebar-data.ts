@@ -15,6 +15,7 @@ import {
 	Network,
 	MessageCircle,
 	Shield,
+	ToolboxIcon,
 } from "lucide-react";
 import type { SidebarData } from "../types";
 
@@ -109,6 +110,11 @@ export const sidebarData: SidebarData = {
 					title: "System Prompt",
 					url: "/system-prompt",
 					icon: MessageCircle,
+				},
+				{
+					title: "Công cụ giám sát nâng cao",
+					url: "/tools-metrics",
+					icon: ToolboxIcon,
 				},
 			],
 		},

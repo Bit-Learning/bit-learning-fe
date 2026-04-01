@@ -54,3 +54,9 @@ export interface MetricsTrends {
 	cpu: MetricPoint[];
 	memory: MetricPoint[];
 }
+
+export interface AdvancedMetricsLink {
+	title: string;
+	url: string;
+	purpose: string;
+}
