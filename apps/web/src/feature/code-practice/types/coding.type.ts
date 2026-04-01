@@ -325,6 +325,7 @@ export interface CodeTemplateResponse {
   language: Language;
   templateCode: string;
   driverCode?: string;
+  multifileEntryTemplate?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -357,6 +358,7 @@ export interface ProblemDetailResponse {
   tags: string[];
   sampleTestcases: TestCaseResponse[];
   codeTemplate: string;
+  multifileEntryTemplate?: string;
   createdAt: string;
   updatedAt: string;
 }

@@ -17,6 +17,8 @@ import {
   Wand2,
   Play,
   Bug,
+  ChevronDown,
+  FileCode2,
 } from "lucide-react";
 import {
   Language,
@@ -51,6 +53,9 @@ interface CodeEditorProps {
   isRunning: boolean;
   isDebugging: boolean;
   isTemplateLoading?: boolean;
+  isMultiFileMode?: boolean;
+  hasMultifileTemplate?: boolean;
+  onToggleMultiFileMode?: (multi: boolean) => void;
   debugLines: string;
   debugVars: string;
   onLanguageChange: (language: Language) => void;
@@ -76,6 +81,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   isRunning,
   isDebugging,
   isTemplateLoading = false,
+  isMultiFileMode = false,
+  hasMultifileTemplate = false,
+  onToggleMultiFileMode,
   debugLines,
   debugVars,
   onLanguageChange,
@@ -90,7 +98,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   onCloseResult,
 }) => {
   const [files, setFiles] = useState<EditorFile[]>([
-    { id: "1", name: `main${LANGUAGE_EXTENSIONS[language]}`, content: "", language },
+    { id: "1", name: `main${LANGUAGE_EXTENSIONS[language]}`, content: code, language },
   ]);
   const [activeFileId, setActiveFileId] = useState("1");
   const [copied, setCopied] = useState(false);
@@ -98,6 +106,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [isFormatting, setIsFormatting] = useState(false);
   const [formatMessage, setFormatMessage] = useState<string | null>(null);
   const [bottomTab, setBottomTab] = useState<BottomPanelTab>("submission");
+  const [settingsOpen, setSettingsOpen] = useState(false);
+  const settingsRef = useRef<HTMLDivElement>(null);
 
   const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
 
@@ -184,6 +194,16 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     };
     textarea.addEventListener("scroll", handleScroll, { passive: true });
     return () => textarea.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
+        setSettingsOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   useEffect(() => {
@@ -381,12 +401,15 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             />
           ))}
         </div>
-        <button
-          onClick={handleAddFile}
-          className="cursor-pointer px-4 py-2 hover:bg-gray-700 transition-colors border-l text-white border-gray-700"
-        >
-          <Plus className="w-4 h-4" />
-        </button>
+        {isMultiFileMode && (
+          <button
+            onClick={handleAddFile}
+            className="cursor-pointer px-4 py-2 hover:bg-gray-700 transition-colors border-l text-white border-gray-700"
+            title="Thêm file mới"
+          >
+            <Plus className="w-4 h-4" />
+          </button>
+        )}
       </div>
 
       <div className="h-12 flex items-center justify-between px-4 bg-gray-800 border-b border-gray-700">
@@ -420,19 +443,85 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             <span className="text-xs">{isFormatting ? "Formatting..." : "Format"}</span>
           </button>
           <div className="h-5 w-px bg-gray-600" />
-          <button onClick={handleDownload} className="hover:text-white transition-colors">
+          <button onClick={handleDownload} className="cursor-pointer hover:text-white transition-colors">
             <Download className="w-5 h-5" />
           </button>
-          <button onClick={handleCopyCode} className="hover:text-white transition-colors">
+          <button onClick={handleCopyCode} className="cursor-pointer hover:text-white transition-colors">
             {copied ? <Check className="w-5 h-5 text-green-400" /> : <Copy className="w-5 h-5" />}
           </button>
-          <button onClick={onReset} className="hover:text-white transition-colors">
+          <button onClick={onReset} className="cursor-pointer hover:text-white transition-colors">
             <RotateCcw className="w-5 h-5" />
           </button>
-          <button className="hover:text-white transition-colors">
-            <Settings className="w-5 h-5" />
-          </button>
-          <button className="hover:text-white transition-colors">
+          <div ref={settingsRef} className="relative inline-flex items-center">
+            <button
+              onClick={() => setSettingsOpen((v) => !v)}
+              className={cn("cursor-pointer hover:text-white transition-colors", settingsOpen && "text-white")}
+              title="Cài đặt editor"
+            >
+              <Settings className="w-5 h-5" />
+            </button>
+            {settingsOpen && (
+              <div className="absolute right-0 top-8 z-50 w-60 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 text-sm">
+                <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 font-semibold border-b border-gray-700">
+                  Cài đặt
+                </div>
+
+                {hasMultifileTemplate && (
+                  <>
+                    <div className="px-3 pt-2 pb-1 text-[10px] uppercase tracking-wider text-gray-600 font-semibold">
+                      Chế độ nộp bài
+                    </div>
+                    <div className="flex items-center gap-1 mx-3 mb-2 p-0.5 bg-gray-700 rounded-lg">
+                      <button
+                        onClick={() => {
+                          onToggleMultiFileMode?.(false);
+                          setSettingsOpen(false);
+                        }}
+                        className={cn(
+                          "cursor-pointer flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-semibold rounded-md transition-all",
+                          !isMultiFileMode ? "bg-gray-900 text-white shadow-sm" : "text-gray-400 hover:text-gray-200",
+                        )}
+                      >
+                        <FileCode2 className="w-3.5 h-3.5" />1 file
+                      </button>
+                      <button
+                        onClick={() => {
+                          onToggleMultiFileMode?.(true);
+                          setSettingsOpen(false);
+                        }}
+                        className={cn(
+                          "cursor-pointer flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-semibold rounded-md transition-all",
+                          isMultiFileMode ? "bg-gray-900 text-white shadow-sm" : "text-gray-400 hover:text-gray-200",
+                        )}
+                      >
+                        <Plus className="w-3.5 h-3.5" />
+                        Nhiều file
+                      </button>
+                    </div>
+                    <div className="border-t border-gray-700 my-1" />
+                  </>
+                )}
+
+                {isMultiFileMode && (
+                  <button
+                    onClick={() => {
+                      handleAddFile();
+                      setSettingsOpen(false);
+                    }}
+                    className="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
+                  >
+                    <Plus className="w-4 h-4 text-gray-400" />
+                    Thêm file mới
+                  </button>
+                )}
+
+                {!hasMultifileTemplate && (
+                  <div className="px-3 py-3 text-xs text-gray-600 text-center">Bài tập này chỉ hỗ trợ nộp 1 file.</div>
+                )}
+              </div>
+            )}
+          </div>
+          <button className="cursor-pointer hover:text-white transition-colors">
             <Maximize className="w-5 h-5" />
           </button>
         </div>
