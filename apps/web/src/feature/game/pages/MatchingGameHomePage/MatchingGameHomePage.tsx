@@ -1,12 +1,14 @@
-import { useNavigate } from "@tanstack/react-router";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { SymbolAnimationMode } from "../../data";
 import { SymbolBackground } from "../../components/SymbolBackground";
 import { BrandLogo } from "../../components/BrandLogo";
 import { ThemeToggle } from "../../components/ThemeToggle";
 import "../../styles/index.css";
+import { cn } from "@workspace/ui/lib/utils";
+import BlueButton from "@/shared/components/button/BlueButton";
 
-export default function HomePage() {
+export default function MatchingGameHomePage() {
 	const navigate = useNavigate();
 	const [symbolAnimation, setSymbolAnimation] = useState<SymbolAnimationMode>(
 		() => {
@@ -36,24 +38,25 @@ export default function HomePage() {
 			<div className="relative flex min-h-screen flex-col z-10">
 				{/* Header */}
 				<header className="flex items-center justify-between px-6 py-4 md:px-12 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-slate-200/50 dark:border-slate-800/50 sticky top-0 z-50">
-					<BrandLogo
-						icon="terminal"
-						className="group cursor-pointer"
-						onClick={() => {
-							navigate({ to: "/games" });
-						}}
-					/>
+					<Link to="/" className="flex items-center relative z-50">
+						<img
+							src="/Logo.png"
+							alt="Bit Learning"
+							className={cn("object-contain transition-all duration-300 h-10")}
+						/>
+					</Link>
+
 					<div className="flex items-center gap-4">
 						<nav className="hidden md:flex gap-8 mr-4">
 							<a
 								className="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
-								href="#"
+								href="/"
 							>
 								Trang chủ
 							</a>
 							<a
 								className="text-slate-600 dark:text-slate-400 hover:text-primary dark:hover:text-primary transition-colors font-medium"
-								href="#"
+								href="/about"
 							>
 								Giới thiệu
 							</a>
@@ -96,18 +99,9 @@ export default function HomePage() {
 
 						{/* CTA */}
 						<div className="flex flex-col items-center gap-6 w-full">
-							<button
-								onClick={() => navigate({ to: "/matching/loading" })}
-								className="group relative flex items-center justify-center min-w-[240px] px-8 py-5 bg-primary hover:bg-primary/90 text-white rounded-xl shadow-xl shadow-primary/20 hover:shadow-primary/30 transform hover:-translate-y-1 transition-all duration-300 overflow-hidden"
-							>
-								<span className="relative z-10 text-lg md:text-xl font-bold">
-									Bắt đầu học ngay
-								</span>
-								<span className="material-symbols-outlined ml-2 relative z-10 transition-transform group-hover:translate-x-1">
-									arrow_forward
-								</span>
-								<div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
-							</button>
+							<Link to="/matching/loading">
+								<BlueButton text="Bắt đầu ngay" />
+							</Link>
 							<div className="flex flex-wrap justify-center gap-6 text-slate-500 dark:text-slate-500 font-medium">
 								{["Miễn phí 100%", "Dễ hiểu", "Sáng tạo"].map((item) => (
 									<div key={item} className="flex items-center gap-2">
@@ -172,19 +166,19 @@ export default function HomePage() {
 					<div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-12 mb-6">
 						<a
 							className="text-slate-500 hover:text-primary transition-colors"
-							href="#"
+							href="/terms"
 						>
 							Điều khoản dịch vụ
 						</a>
 						<a
 							className="text-slate-500 hover:text-primary transition-colors"
-							href="#"
+							href="/privacy"
 						>
 							Chính sách bảo mật
 						</a>
 						<a
 							className="text-slate-500 hover:text-primary transition-colors"
-							href="#"
+							href="/about"
 						>
 							Liên hệ
 						</a>

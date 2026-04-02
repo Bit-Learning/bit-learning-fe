@@ -453,16 +453,7 @@ export default function BotStatusWidget({
 	const [panelOpen, setPanelOpen] = useState(false);
 	const [minimized, setMinimized] = useState(false);
 	const [unreadCount, setUnreadCount] = useState(1);
-	const [interacted, setInteracted] = useState(false);
 	const [showTooltip, setShowTooltip] = useState(false);
-
-	// Tooltip tự hiện sau 2s nếu user chưa click
-	useEffect(() => {
-		const t = setTimeout(() => {
-			if (!interacted) setShowTooltip(true);
-		}, 2000);
-		return () => clearTimeout(t);
-	}, [interacted]);
 
 	// Badge tăng khi bot reply trong khi panel đóng/minimized
 	const prevMsgCount = useRef(messages.length);
@@ -476,8 +467,15 @@ export default function BotStatusWidget({
 		prevMsgCount.current = messages.length;
 	}, [messages, panelOpen, minimized]);
 
+	const handleMouseEnter = () => {
+		if (!panelOpen) setShowTooltip(true);
+	};
+
+	const handleMouseLeave = () => {
+		setShowTooltip(false);
+	};
+
 	const handleWidgetClick = () => {
-		setInteracted(true);
 		setShowTooltip(false);
 		setUnreadCount(0);
 		if (minimized) {
@@ -600,7 +598,12 @@ export default function BotStatusWidget({
 
 			{/* Widget Button */}
 			<div style={{ position: "fixed", bottom: 16, left: 16, zIndex: 9998 }}>
-				<button className="bot-widget-btn" onClick={handleWidgetClick}>
+				<button
+					className="bot-widget-btn"
+					onClick={handleWidgetClick}
+					onMouseEnter={handleMouseEnter}
+					onMouseLeave={handleMouseLeave}
+				>
 					<div className="bot-inner">
 						<div className="bot-icon-wrap">
 							{!panelOpen && <div className="pulse-ring" />}

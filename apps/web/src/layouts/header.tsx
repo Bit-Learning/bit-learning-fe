@@ -28,12 +28,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import { useCart } from "@/feature/order/queries/useCart";
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
+import Button from "@/shared/components/button/LoginButton";
 
 const Header: React.FC = () => {
 	const navigate = useNavigate();
 	const [isNavOpen, setIsNavOpen] = useState(false);
 	const [isScrolled, setIsScrolled] = useState(false);
 	const [hoveredMenu, setHoveredMenu] = useState<string | null>(null);
+	const closeMenuTimeout = useRef<number | null>(null);
 	const [isProfileOpen, setIsProfileOpen] = useState(false);
 	const profileRef = useRef<HTMLDivElement>(null);
 	const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
@@ -55,6 +57,20 @@ const Header: React.FC = () => {
 
 	const handleCartClick = () => {
 		navigate({ to: "/cart" });
+	};
+
+	const cancelCloseMenu = () => {
+		if (closeMenuTimeout.current !== null) {
+			window.clearTimeout(closeMenuTimeout.current);
+			closeMenuTimeout.current = null;
+		}
+	};
+
+	const scheduleCloseMenu = () => {
+		cancelCloseMenu();
+		closeMenuTimeout.current = window.setTimeout(() => {
+			setHoveredMenu(null);
+		}, 120);
 	};
 
 	useEffect(() => {
@@ -108,14 +124,18 @@ const Header: React.FC = () => {
 						{navItems.map((item) => (
 							<div
 								key={item.title}
-								className="relative group"
-								onMouseLeave={() => setHoveredMenu(null)}
+								className="relative group rounded-2xl border-transparent border-t-4 hover:border-primary transition-all duration-200"
+								onMouseEnter={cancelCloseMenu}
+								onMouseLeave={scheduleCloseMenu}
 							>
 								{item.items ? (
 									<>
 										<button
-											onMouseEnter={() => setHoveredMenu(item.title)}
-											className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
+											onMouseEnter={() => {
+												cancelCloseMenu();
+												setHoveredMenu(item.title);
+											}}
+											className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
 										>
 											{item.title}
 											<ChevronDown
@@ -127,10 +147,13 @@ const Header: React.FC = () => {
 										</button>
 
 										<div
-											onMouseEnter={() => setHoveredMenu(item.title)}
-											onMouseLeave={() => setHoveredMenu(null)}
+											onMouseEnter={() => {
+												cancelCloseMenu();
+												setHoveredMenu(item.title);
+											}}
+											onMouseLeave={scheduleCloseMenu}
 											className={cn(
-												"absolute top-full left-0 w-72 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-800 shadow-xl transition-all duration-200 overflow-hidden z-100",
+												"absolute top-full mt-2 left-0 w-72 rounded-2xl border border-gray-200/50 dark:border-gray-700/50 bg-white dark:bg-gray-800 shadow-xl transition-all duration-200 overflow-hidden z-100",
 												hoveredMenu === item.title
 													? "opacity-100 translate-y-0 pointer-events-auto"
 													: "opacity-0 -translate-y-2 pointer-events-none",
@@ -143,7 +166,7 @@ const Header: React.FC = () => {
 														onClick={() => handleNavigate(subItem.to)}
 														className="w-full rounded-xl p-3 text-left transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 group/item cursor-pointer"
 													>
-														<div className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover/item:text-blue-600 dark:group-hover/item:text-blue-400 transition-colors">
+														<div className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover/item:text-primary dark:group-hover/item:text-blue-400 transition-colors">
 															{subItem.title}
 														</div>
 														<p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
@@ -157,7 +180,7 @@ const Header: React.FC = () => {
 								) : (
 									<button
 										onClick={() => handleNavigate(item.to!)}
-										className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-blue-600 dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
+										className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
 									>
 										{item.title}
 									</button>
@@ -172,7 +195,7 @@ const Header: React.FC = () => {
 								onClick={handleCartClick}
 								className="relative rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer"
 							>
-								<ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors" />
+								<ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors" />
 								{cartItemCount > 0 && (
 									<span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-r from-red-500 to-pink-500 text-[10px] font-bold text-white shadow-lg">
 										{cartItemCount > 9 ? "9+" : cartItemCount}
@@ -309,13 +332,7 @@ const Header: React.FC = () => {
 								)}
 							</div>
 						) : (
-							<button
-								onClick={() => navigate({ to: "/signin-role" })}
-								className="cursor-pointer hidden md:flex items-center gap-2 px-6 py-2.5 rounded-xl bg-primary text-white font-semibold shadow-lg shadow-blue-500/30 hover:shadow-xl hover:shadow-blue-500/40 transition-all duration-200 transform hover:scale-105"
-							>
-								<User className="h-4 w-4" />
-								Đăng nhập
-							</button>
+							<Button />
 						)}
 
 						<Sheet open={isNavOpen} onOpenChange={setIsNavOpen}>
@@ -370,15 +387,7 @@ const Header: React.FC = () => {
 										</div>
 									))}
 
-									{!isAuthenticated && (
-										<button
-											onClick={() => navigate({ to: "/signin-role" })}
-											className="cursor-pointer mt-4 w-full flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-linear-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white font-semibold shadow-lg shadow-blue-500/30 transition-all duration-200"
-										>
-											<User className="h-4 w-4" />
-											Đăng nhập
-										</button>
-									)}
+									{!isAuthenticated && <Button />}
 								</div>
 							</SheetContent>
 						</Sheet>

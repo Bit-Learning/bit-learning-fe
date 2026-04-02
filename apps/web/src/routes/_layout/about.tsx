@@ -1,4 +1,4 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import {
 	Rocket,
 	ArrowRight,
@@ -17,6 +17,7 @@ import {
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import NumberTicker from "@workspace/ui/components/custom/ticker";
+import BlueButton from "@/shared/components/button/BlueButton";
 
 export const Route = createFileRoute("/_layout/about")({
 	component: AboutUsPage,
@@ -119,16 +120,9 @@ function AboutUsPage() {
 								tiềm năng công nghệ thông qua lộ trình học thông minh.
 							</p>
 
-							<div className="flex flex-wrap gap-4">
-								<Button
-									onClick={() => navigate({ to: "/courses" })}
-									size="xl"
-									className="flex items-center gap-2 rounded-xl bg-primary px-8 py-4 text-lg font-bold text-white shadow-xl shadow-primary/30 transition-all hover:bg-primary/90"
-								>
-									Bắt đầu học ngay
-									<ArrowRight className="h-5 w-5" />
-								</Button>
-							</div>
+							<Link to="/courses">
+								<BlueButton text="Bắt đầu học ngay" />
+							</Link>
 						</div>
 
 						<div className="relative">

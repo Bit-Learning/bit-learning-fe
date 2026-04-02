@@ -1,10 +1,14 @@
 import React from "react";
 import styled from "styled-components";
 
-const BlueButton = () => {
+interface Props {
+	text?: string;
+}
+
+const BlueButton = (props: Props) => {
 	return (
 		<StyledWrapper>
-			<button className="button">Bắt đầu học ngay</button>
+			<button className="button">{props.text ?? "Bắt đầu học ngay"}</button>
 		</StyledWrapper>
 	);
 };
