@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { BookOpen, Edit, Eye, EyeOff, Plus, Search } from "lucide-react";
+import { BookOpen, Edit, Plus, Search, Trash2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -10,17 +10,14 @@ import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { CoursePreview } from "../types/course.type";
 import { Pagination } from "@/components/Pagination";
 
-type HideModalState =
-  | { type: "none" }
-  | { type: "hide"; id: number; name: string }
-  | { type: "show"; id: number; name: string };
+type DeleteModalState = { type: "none" } | { type: "delete"; id: number; name: string };
 
 export const CourseListPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [size] = useState(10);
-  const [hideModal, setHideModal] = useState<HideModalState>({ type: "none" });
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: "none" });
 
   const { data: coursesData, isLoading } = useGetCourses(page, size);
   const hideMutation = useHideOrShowCourse();
@@ -28,17 +25,17 @@ export const CourseListPage: React.FC = () => {
   const courses = Array.isArray(coursesData?.data) ? coursesData.data : [];
   const totalPages = coursesData?.page?.totalPages || 0;
 
-  const filteredCourses = courses.filter((course: { title: string }) =>
-    course.title.toLowerCase().includes(searchQuery.toLowerCase()),
-  );
+  const filteredCourses = courses
+    .filter((course: CoursePreview) => !course.isDeleted)
+    .filter((course: CoursePreview) => course.title.toLowerCase().includes(searchQuery.toLowerCase()));
 
   const handleConfirm = async () => {
-    if (hideModal.type === "none") return;
+    if (deleteModal.type === "none") return;
     try {
-      await hideMutation.mutateAsync({ id: hideModal.id, isHidden: hideModal.type === "hide" });
-      setHideModal({ type: "none" });
+      await hideMutation.mutateAsync({ id: deleteModal.id, isHidden: true });
+      setDeleteModal({ type: "none" });
     } catch (error) {
-      console.error("Failed to toggle course visibility:", error);
+      console.error("Failed to delete course:", error);
     }
   };
 
@@ -84,10 +81,7 @@ export const CourseListPage: React.FC = () => {
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {filteredCourses.map((course: CoursePreview) => (
-              <Card
-                key={course.id}
-                className={`overflow-hidden p-0 transition-shadow hover:shadow-lg ${course.isDeleted ? "opacity-60" : ""}`}
-              >
+              <Card key={course.id} className="overflow-hidden p-0 transition-shadow hover:shadow-lg">
                 <div className="relative flex aspect-video items-center justify-center">
                   {course.thumbnailUrl ? (
                     <img src={course.thumbnailUrl} alt={course.title} className="h-50 w-full object-cover" />
@@ -98,11 +92,6 @@ export const CourseListPage: React.FC = () => {
                     <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"}>
                       {course.status === "PUBLISHED" ? "Đã xuất bản" : "Chưa xuất bản"}
                     </Badge>
-                    {course.isDeleted && (
-                      <Badge variant="outline" className="bg-white/90 text-gray-500">
-                        Đang ẩn
-                      </Badge>
-                    )}
                   </div>
                 </div>
 
@@ -132,15 +121,9 @@ export const CourseListPage: React.FC = () => {
                       variant="outline"
                       size="icon"
                       disabled={hideMutation.isPending}
-                      onClick={() =>
-                        setHideModal(
-                          course.isDeleted
-                            ? { type: "show", id: course.id, name: course.title }
-                            : { type: "hide", id: course.id, name: course.title },
-                        )
-                      }
+                      onClick={() => setDeleteModal({ type: "delete", id: course.id, name: course.title })}
                     >
-                      {course.isDeleted ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
+                      <Trash2 className="h-4 w-4 text-red-500" />
                     </Button>
                   </div>
                 </div>
@@ -153,19 +136,17 @@ export const CourseListPage: React.FC = () => {
       )}
 
       <DeleteConfirmModal
-        open={hideModal.type !== "none"}
-        onClose={() => setHideModal({ type: "none" })}
+        open={deleteModal.type !== "none"}
+        onClose={() => setDeleteModal({ type: "none" })}
         onConfirm={handleConfirm}
-        title={hideModal.type === "show" ? "Hiện khóa học" : "Ẩn khóa học"}
+        title="Xóa khóa học"
         description={
-          hideModal.type === "show"
-            ? `Khóa học "${hideModal.name}" sẽ hiển thị trở lại với học viên.`
-            : hideModal.type === "hide"
-              ? `Khóa học "${hideModal.name}" sẽ bị ẩn khỏi học viên. Bạn có thể hiện lại bất cứ lúc nào.`
-              : undefined
+          deleteModal.type !== "none"
+            ? `Bạn có chắc chắn muốn xóa "${deleteModal.name}"? Hành động này không thể hoàn tác.`
+            : undefined
         }
         isPending={hideMutation.isPending}
-        confirmLabel={hideModal.type === "show" ? "Hiện" : "Ẩn"}
+        confirmLabel="Xóa"
       />
     </div>
   );

@@ -82,14 +82,14 @@ export const CourseDetailPage: React.FC = () => {
         await hideSectionMutation.mutateAsync({ id: deleteModal.id, isHidden: true });
         closeDeleteModal();
       } catch (error) {
-        console.error("Failed to hide section:", error);
+        console.error("Failed to delete section:", error);
       }
     } else if (deleteModal.type === "lecture") {
       try {
         await hideLectureMutation.mutateAsync({ courseId, id: deleteModal.id, isHidden: true });
         closeDeleteModal();
       } catch (error) {
-        console.error("Failed to hide lecture:", error);
+        console.error("Failed to delete lecture:", error);
       }
     }
   };
@@ -172,22 +172,29 @@ export const CourseDetailPage: React.FC = () => {
   const getDeleteModalProps = () => {
     if (deleteModal.type === "section") {
       return {
-        title: "Ẩn chương",
-        description: "Chương này sẽ bị ẩn khỏi học viên. Bạn có thể hiện lại bất cứ lúc nào.",
+        title: "Xóa chương",
+        description: `Bạn có chắc chắn muốn xóa chương "${deleteModal.name}"? Hành động này không thể hoàn tác.`,
       };
     }
     if (deleteModal.type === "lecture") {
       return {
-        title: "Ẩn bài học",
-        description: "Bài học này sẽ bị ẩn khỏi học viên. Bạn có thể hiện lại bất cứ lúc nào.",
+        title: "Xóa bài học",
+        description: `Bạn có chắc chắn muốn xóa bài học "${deleteModal.name}"? Hành động này không thể hoàn tác.`,
       };
     }
-    return { title: "Ẩn", description: "" };
+    return { title: "Xóa", description: "" };
   };
 
   const deleteModalProps = getDeleteModalProps();
   const isPublished = course.status === "PUBLISHED";
   const canTogglePublish = ["PUBLISHED", "PENDING"].includes(course.status || "");
+
+  const visibleSections = (sections || [])
+    .filter((section) => !section.isDeleted)
+    .map((section) => ({
+      ...section,
+      lectures: (section.lectures || []).filter((lecture: LectureDetail) => !lecture.isDeleted),
+    }));
 
   return (
     <div className="min-h-screen space-y-4 p-8">
@@ -283,14 +290,14 @@ export const CourseDetailPage: React.FC = () => {
         <div className="space-y-3">
           {sectionsLoading ? (
             <p className="py-8 text-center text-gray-600">Đang tải chương...</p>
-          ) : !sections || sections.length === 0 ? (
+          ) : visibleSections.length === 0 ? (
             <div className="py-8 text-center text-gray-600">
               <BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
               <p className="mb-2 text-lg font-medium">Chưa có chương nào</p>
               <p className="text-sm">Hãy thêm chương đầu tiên để bắt đầu!</p>
             </div>
           ) : (
-            sections.map((section, index) => (
+            visibleSections.map((section, index) => (
               <Card key={section.id} className="overflow-hidden p-0 border-l-4 border-l-blue-500">
                 <div
                   className="flex cursor-pointer items-center justify-between bg-gray-50 p-4 transition-colors hover:bg-gray-100"
@@ -312,46 +319,27 @@ export const CourseDetailPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {section.isDeleted ? (
-                      <>
-                        <span className="text-xs text-gray-400 italic">Đã ẩn</span>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            hideSectionMutation.mutate({ id: section.id, isHidden: false });
-                          }}
-                          disabled={hideSectionMutation.isPending}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </>
-                    ) : (
-                      <>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleEditSection(section as SectionDetail);
-                          }}
-                        >
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            openDeleteSectionModal(section.id, section.title);
-                          }}
-                          disabled={hideSectionMutation.isPending}
-                        >
-                          <Trash2 className="h-4 w-4 text-red-500" />
-                        </Button>
-                      </>
-                    )}
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleEditSection(section as SectionDetail);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        openDeleteSectionModal(section.id, section.title);
+                      }}
+                      disabled={hideSectionMutation.isPending}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
                     {expandedSections.has(section.id) ? (
                       <ChevronUp className="h-5 w-5 text-gray-600" />
                     ) : (
@@ -372,7 +360,7 @@ export const CourseDetailPage: React.FC = () => {
                       Thêm bài học
                     </Button>
 
-                    {!section.lectures || section.lectures.length === 0 ? (
+                    {section.lectures.length === 0 ? (
                       <p className="py-6 text-center text-sm text-gray-500">
                         Chưa có bài học nào. Click "Thêm bài học" để bắt đầu.
                       </p>
@@ -407,22 +395,7 @@ export const CourseDetailPage: React.FC = () => {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              {lecture.isDeleted ? (
-                                <>
-                                  <span className="text-xs text-gray-400 italic">Đã ẩn</span>
-                                  <Button
-                                    variant="outline"
-                                    size="sm"
-                                    onClick={() =>
-                                      hideLectureMutation.mutate({ courseId, id: lecture.id, isHidden: false })
-                                    }
-                                    disabled={hideLectureMutation.isPending}
-                                  >
-                                    <Eye className="mr-1 h-4 w-4" />
-                                    Hiện lại
-                                  </Button>
-                                </>
-                              ) : lecture.processStatus !== "DONE" ? (
+                              {lecture.processStatus !== "DONE" ? (
                                 <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-600 ring-1 ring-amber-200">
                                   <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
                                   Đang tải nội dung...
@@ -466,7 +439,7 @@ export const CourseDetailPage: React.FC = () => {
           mode="create"
           courseId={courseId}
           sectionId={modalState.sectionId}
-          existingLectures={sections?.find((s) => s.id === modalState.sectionId)?.lectures || []}
+          existingLectures={visibleSections.find((s) => s.id === modalState.sectionId)?.lectures || []}
           onClose={closeModal}
         />
       )}
@@ -493,9 +466,8 @@ export const CourseDetailPage: React.FC = () => {
         onConfirm={handleConfirmDelete}
         title={deleteModalProps.title}
         description={deleteModalProps.description}
-        itemName={deleteModal.type !== "none" ? deleteModal.name : undefined}
         isPending={hideSectionMutation.isPending || hideLectureMutation.isPending}
-        confirmLabel="Ẩn"
+        confirmLabel="Xóa"
       />
     </div>
   );
