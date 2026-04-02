@@ -111,7 +111,7 @@ export const CourseListPage: React.FC = () => {
                   <div className="flex items-center gap-2 border-t pt-3">
                     <Button
                       variant="outline"
-                      className="flex-1"
+                      className="flex-1 hover:bg-blue-600 hover:text-slate-100"
                       onClick={() => navigate({ to: "/courses/$id", params: { id: String(course.id) } })}
                     >
                       <Edit className="mr-2 h-4 w-4" />
@@ -120,6 +120,7 @@ export const CourseListPage: React.FC = () => {
                     <Button
                       variant="outline"
                       size="icon"
+                      className="hover:border-red-600 hover:text-slate-100"
                       disabled={hideMutation.isPending}
                       onClick={() => setDeleteModal({ type: "delete", id: course.id, name: course.title })}
                     >

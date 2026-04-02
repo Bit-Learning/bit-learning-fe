@@ -281,7 +281,11 @@ export const CourseDetailPage: React.FC = () => {
         </div>
 
         <div className="mb-4">
-          <Button onClick={() => setModalState({ type: "add-section" })} variant="outline" className="w-full">
+          <Button
+            onClick={() => setModalState({ type: "add-section" })}
+            variant="outline"
+            className="w-full hover:bg-blue-600 hover:text-slate-100"
+          >
             <Plus className="mr-2 h-4 w-4" />
             Thêm chương mới
           </Button>
@@ -298,7 +302,7 @@ export const CourseDetailPage: React.FC = () => {
             </div>
           ) : (
             visibleSections.map((section, index) => (
-              <Card key={section.id} className="overflow-hidden p-0 border-l-4 border-l-blue-500">
+              <Card key={section.id} className="overflow-hidden gap-0 p-0 border-l-4 border-l-blue-500">
                 <div
                   className="flex cursor-pointer items-center justify-between bg-gray-50 p-4 transition-colors hover:bg-gray-100"
                   onClick={() => toggleSection(section.id)}
@@ -322,6 +326,7 @@ export const CourseDetailPage: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      className="hover:bg-blue-600 hover:text-slate-100"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleEditSection(section as SectionDetail);
@@ -329,17 +334,23 @@ export const CourseDetailPage: React.FC = () => {
                     >
                       <Edit className="h-4 w-4" />
                     </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDeleteSectionModal(section.id, section.title);
-                      }}
-                      disabled={hideSectionMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                    {section.lectures?.length > 0 ? (
+                      <></>
+                    ) : (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="hover:border-red-600 hover:text-slate-100"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          openDeleteSectionModal(section.id, section.title);
+                        }}
+                        disabled={hideSectionMutation.isPending}
+                      >
+                        <Trash2 className="h-4 w-4 text-red-500" />
+                      </Button>
+                    )}
+
                     {expandedSections.has(section.id) ? (
                       <ChevronUp className="h-5 w-5 text-gray-600" />
                     ) : (
@@ -353,7 +364,7 @@ export const CourseDetailPage: React.FC = () => {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="w-full"
+                      className="w-full hover:bg-blue-600 hover:text-slate-100"
                       onClick={() => setModalState({ type: "create-lecture", sectionId: section.id })}
                     >
                       <Plus className="mr-2 h-4 w-4" />
@@ -402,16 +413,27 @@ export const CourseDetailPage: React.FC = () => {
                                 </span>
                               ) : (
                                 <>
-                                  <Button variant="outline" size="sm" onClick={() => handleViewLecture(lecture)}>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="hover:bg-blue-600 hover:text-slate-100"
+                                    onClick={() => handleViewLecture(lecture)}
+                                  >
                                     <Eye className="mr-1 h-4 w-4" />
                                     <span className="hidden sm:inline">Xem</span>
                                   </Button>
-                                  <Button variant="outline" size="sm" onClick={() => handleEditLecture(lecture)}>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    className="hover:bg-blue-600 hover:text-slate-100"
+                                    onClick={() => handleEditLecture(lecture)}
+                                  >
                                     <Edit className="h-4 w-4" />
                                   </Button>
                                   <Button
                                     variant="outline"
                                     size="sm"
+                                    className="hover:border-red-600 hover:text-white"
                                     onClick={() => openDeleteLectureModal(lecture.id, lecture.title)}
                                     disabled={hideLectureMutation.isPending}
                                   >
