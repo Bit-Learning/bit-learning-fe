@@ -18,6 +18,7 @@ import {
 import { ArrowLeft } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import TagMultiSelect from "../components/TagMultiSelect";
+import { useGetAllTags } from "../queries/useTag";
 
 const problemSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
@@ -71,6 +72,8 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
   const generateTemplatesMutation = useGenerateCodeTemplates();
   const bulkCreateTestCasesMutation = useBulkCreateTestCases();
 
+  const { data: allTags = [] } = useGetAllTags();
+
   const { data: problemData, isLoading: isProblemLoading } = useProblemDetail(problemId || "", undefined, {
     enabled: isEditMode,
   });
@@ -107,10 +110,16 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       combinedForm.setValue("timeLimitMs", problemData.timeLimitMs);
       combinedForm.setValue("memoryLimitMb", problemData.memoryLimitMb);
       combinedForm.setValue("isPublic", problemData.isPublic);
-      combinedForm.setValue("tags", problemData.tags);
+      combinedForm.setValue(
+        "tags",
+        (problemData.tags ?? []).map((t: any) => {
+          const name = typeof t === "string" ? t : t.name;
+          return allTags.find((tag) => tag.name === name)?.id ?? name;
+        }),
+      );
       combinedForm.setValue("constraints", problemData.constraints ?? "");
     }
-  }, [isEditMode, problemData, isProblemLoading, combinedForm]);
+  }, [isEditMode, problemData, isProblemLoading, combinedForm, allTags]);
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;

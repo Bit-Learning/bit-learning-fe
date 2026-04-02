@@ -5,8 +5,8 @@ import { useGetAllTags } from "../queries/useTag";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface TagMultiSelectProps {
-  value: string[];
-  onChange: (tags: string[]) => void;
+  value: string[]; // mảng tag IDs
+  onChange: (ids: string[]) => void;
   placeholder?: string;
   className?: string;
 }
@@ -32,18 +32,17 @@ const TagMultiSelect: React.FC<TagMultiSelectProps> = ({
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const toggle = (tagName: string) => {
-    if (value.includes(tagName)) {
-      onChange(value.filter((t) => t !== tagName));
-    } else {
-      onChange([...value, tagName]);
-    }
+  const toggle = (id: string) => {
+    onChange(value.includes(id) ? value.filter((v) => v !== id) : [...value, id]);
   };
 
-  const remove = (tagName: string, e: React.MouseEvent) => {
+  const remove = (id: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    onChange(value.filter((t) => t !== tagName));
+    onChange(value.filter((v) => v !== id));
   };
+
+  // Lấy name từ id để hiển thị
+  const getTagName = (id: string) => allTags.find((t) => t.id === id)?.name ?? id;
 
   return (
     <div ref={ref} className={cn("relative", className)}>
@@ -58,13 +57,13 @@ const TagMultiSelect: React.FC<TagMultiSelectProps> = ({
         {value.length === 0 ? (
           <span className="text-gray-400">{placeholder}</span>
         ) : (
-          value.map((tag) => (
+          value.map((id) => (
             <Badge
-              key={tag}
+              key={id}
               className="flex items-center gap-1 bg-blue-100 px-2 py-0.5 text-sm text-blue-700 hover:bg-blue-200"
             >
-              {tag}
-              <button type="button" onClick={(e) => remove(tag, e)} className="ml-0.5 rounded-full hover:text-red-600">
+              {getTagName(id)}
+              <button type="button" onClick={(e) => remove(id, e)} className="ml-0.5 rounded-full hover:text-red-600">
                 <X className="h-3 w-3" />
               </button>
             </Badge>
@@ -84,11 +83,11 @@ const TagMultiSelect: React.FC<TagMultiSelectProps> = ({
           ) : (
             <ul className="max-h-60 overflow-y-auto py-1">
               {allTags.map((tag) => {
-                const selected = value.includes(tag.name);
+                const selected = value.includes(tag.id);
                 return (
                   <li
                     key={tag.id}
-                    onClick={() => toggle(tag.name)}
+                    onClick={() => toggle(tag.id)}
                     className={cn(
                       "flex cursor-pointer items-center gap-2 px-4 py-2 text-sm transition-colors hover:bg-gray-50",
                       selected && "bg-blue-50 text-blue-700",

@@ -189,7 +189,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                               {problem.title}
                             </a>
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                              {problem.tags?.join(", ") || problem.slug}
+                              {problem.tags?.map((t) => t.name).join(", ") || problem.slug}
                             </p>
                           </td>
                           <td className="px-6 py-4 text-center">

@@ -293,9 +293,9 @@ const ProblemSolveContent: React.FC = () => {
             {problem.tags?.length > 0 && (
               <div className="flex flex-wrap gap-2">
                 {problem.tags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="text-sm bg-blue-100 text-blue-700">
+                  <Badge key={tag.id} variant="secondary" className="text-sm bg-blue-100 text-blue-700">
                     <Hash className="w-3 h-3 mr-1" />
-                    {tag}
+                    {tag.name}
                   </Badge>
                 ))}
               </div>
