@@ -1,13 +1,8 @@
 import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
-import {
-  CourseDetail,
-  CoursePreview,
-  CreateCourseRequest,
-  SectionDetail,
-  UpdateCourseRequest,
-} from "../types/course.type";
+import { CourseDetail, CoursePreview, CreateCourseRequest, UpdateCourseRequest } from "../types/course.type";
+import { SectionDetail } from "../types/section.type";
 
 export const courseApi = {
   getAllCourses(page: number = 0, size: number = 10): Promise<AxiosResponse<ApiResponse<CoursePreview[]>>> {

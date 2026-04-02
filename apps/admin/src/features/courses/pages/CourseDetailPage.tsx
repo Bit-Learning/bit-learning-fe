@@ -20,14 +20,15 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useCourseDetail, useValidateCourse } from "../queries/useCourse";
-import { useDeleteLecture } from "../queries/useLecture";
-import { useSectionsByCourse, useDeleteSection } from "../queries/useSection";
-import type { LectureDetail, SectionDetail } from "../types/course.type";
+import { useHideOrShowLecture } from "../queries/useLecture";
+import { useSectionsByCourse, useHideOrShowSection } from "../queries/useSection";
 import { LectureDetailModal } from "../components/LectureDetailModal";
 import { EditCourseModal } from "../components/EditCourseModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import LectureModal from "../components/LectureModal";
 import SectionModal from "../components/SectionModal";
+import { LectureDetail } from "../types/lecture.type";
+import { SectionDetail } from "../types/section.type";
 
 type ModalState =
   | { type: "none" }
@@ -54,8 +55,8 @@ export const CourseDetailPage: React.FC = () => {
 
   const { data: course, isLoading: courseLoading, refetch: refetchCourse } = useCourseDetail(courseId);
   const { data: sections, isLoading: sectionsLoading } = useSectionsByCourse(courseId);
-  const deleteSectionMutation = useDeleteSection();
-  const deleteLectureMutation = useDeleteLecture();
+  const hideSectionMutation = useHideOrShowSection();
+  const hideLectureMutation = useHideOrShowLecture();
   const validateCourseMutation = useValidateCourse();
 
   const toggleSection = (sectionId: number) => {
@@ -78,17 +79,17 @@ export const CourseDetailPage: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (deleteModal.type === "section") {
       try {
-        await deleteSectionMutation.mutateAsync(deleteModal.id);
+        await hideSectionMutation.mutateAsync({ id: deleteModal.id, isHidden: true });
         closeDeleteModal();
       } catch (error) {
-        console.error("Failed to delete section:", error);
+        console.error("Failed to hide section:", error);
       }
     } else if (deleteModal.type === "lecture") {
       try {
-        await deleteLectureMutation.mutateAsync(deleteModal.id);
+        await hideLectureMutation.mutateAsync({ courseId, id: deleteModal.id, isHidden: true });
         closeDeleteModal();
       } catch (error) {
-        console.error("Failed to delete lecture:", error);
+        console.error("Failed to hide lecture:", error);
       }
     }
   };
@@ -171,17 +172,17 @@ export const CourseDetailPage: React.FC = () => {
   const getDeleteModalProps = () => {
     if (deleteModal.type === "section") {
       return {
-        title: "Xóa chương",
-        description: "Tất cả bài học trong chương này cũng sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác!",
+        title: "Ẩn chương",
+        description: "Chương này sẽ bị ẩn khỏi học viên. Bạn có thể hiện lại bất cứ lúc nào.",
       };
     }
     if (deleteModal.type === "lecture") {
       return {
-        title: "Xóa bài học",
-        description: "Bài học này sẽ bị xóa vĩnh viễn khỏi khóa học. Hành động này không thể hoàn tác!",
+        title: "Ẩn bài học",
+        description: "Bài học này sẽ bị ẩn khỏi học viên. Bạn có thể hiện lại bất cứ lúc nào.",
       };
     }
-    return { title: "Xóa", description: "" };
+    return { title: "Ẩn", description: "" };
   };
 
   const deleteModalProps = getDeleteModalProps();
@@ -311,27 +312,46 @@ export const CourseDetailPage: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleEditSection(section as SectionDetail);
-                      }}
-                    >
-                      <Edit className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        openDeleteSectionModal(section.id, section.title);
-                      }}
-                      disabled={deleteSectionMutation.isPending}
-                    >
-                      <Trash2 className="h-4 w-4 text-red-500" />
-                    </Button>
+                    {section.isDeleted ? (
+                      <>
+                        <span className="text-xs text-gray-400 italic">Đã ẩn</span>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            hideSectionMutation.mutate({ id: section.id, isHidden: false });
+                          }}
+                          disabled={hideSectionMutation.isPending}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </>
+                    ) : (
+                      <>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleEditSection(section as SectionDetail);
+                          }}
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            openDeleteSectionModal(section.id, section.title);
+                          }}
+                          disabled={hideSectionMutation.isPending}
+                        >
+                          <Trash2 className="h-4 w-4 text-red-500" />
+                        </Button>
+                      </>
+                    )}
                     {expandedSections.has(section.id) ? (
                       <ChevronUp className="h-5 w-5 text-gray-600" />
                     ) : (
@@ -358,9 +378,9 @@ export const CourseDetailPage: React.FC = () => {
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {section.lectures.map((lecture, lIdx) => (
+                        {section.lectures.map((lecture: LectureDetail, lIdx: number) => (
                           <div
-                            key={lecture.id}
+                            key={lIdx}
                             className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-gray-100"
                           >
                             <div className="flex items-center gap-3">
@@ -387,29 +407,45 @@ export const CourseDetailPage: React.FC = () => {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewLecture(lecture as LectureDetail)}
-                              >
-                                <Eye className="mr-1 h-4 w-4" />
-                                <span className="hidden sm:inline">Xem</span>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditLecture(lecture as LectureDetail)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openDeleteLectureModal(lecture.id, lecture.title)}
-                                disabled={deleteLectureMutation.isPending}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
+                              {lecture.isDeleted ? (
+                                <>
+                                  <span className="text-xs text-gray-400 italic">Đã ẩn</span>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() =>
+                                      hideLectureMutation.mutate({ courseId, id: lecture.id, isHidden: false })
+                                    }
+                                    disabled={hideLectureMutation.isPending}
+                                  >
+                                    <Eye className="mr-1 h-4 w-4" />
+                                    Hiện lại
+                                  </Button>
+                                </>
+                              ) : lecture.processStatus !== "DONE" ? (
+                                <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-600 ring-1 ring-amber-200">
+                                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+                                  Đang tải nội dung...
+                                </span>
+                              ) : (
+                                <>
+                                  <Button variant="outline" size="sm" onClick={() => handleViewLecture(lecture)}>
+                                    <Eye className="mr-1 h-4 w-4" />
+                                    <span className="hidden sm:inline">Xem</span>
+                                  </Button>
+                                  <Button variant="outline" size="sm" onClick={() => handleEditLecture(lecture)}>
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openDeleteLectureModal(lecture.id, lecture.title)}
+                                    disabled={hideLectureMutation.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -440,7 +476,7 @@ export const CourseDetailPage: React.FC = () => {
       )}
 
       {modalState.type === "edit-lecture" && (
-        <LectureModal mode="edit" lecture={modalState.lecture} onClose={closeModal} />
+        <LectureModal mode="edit" lecture={modalState.lecture} courseId={courseId} onClose={closeModal} />
       )}
 
       {modalState.type === "edit-section" && (
@@ -458,7 +494,8 @@ export const CourseDetailPage: React.FC = () => {
         title={deleteModalProps.title}
         description={deleteModalProps.description}
         itemName={deleteModal.type !== "none" ? deleteModal.name : undefined}
-        isPending={deleteSectionMutation.isPending || deleteLectureMutation.isPending}
+        isPending={hideSectionMutation.isPending || hideLectureMutation.isPending}
+        confirmLabel="Ẩn"
       />
     </div>
   );

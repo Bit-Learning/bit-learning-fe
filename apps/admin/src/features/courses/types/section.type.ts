@@ -1,4 +1,4 @@
-import type { LectureDetail } from "./course.type";
+import { LectureDetail } from "./lecture.type";
 
 export interface CreateSectionRequest {
   courseId: number;

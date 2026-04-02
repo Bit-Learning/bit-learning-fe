@@ -1,3 +1,5 @@
+import { SectionDetail } from "./section.type";
+
 export interface CreateCourseRequest {
   title: string;
   subtitle: string;
@@ -66,31 +68,6 @@ export interface CourseDetail {
   isDeleted: boolean;
   status: CourseStatus;
   progressPercentage: number;
-}
-
-export interface SectionDetail {
-  id: number;
-  title: string;
-  description: string;
-  isPublished: boolean;
-  orderIndex: number;
-  totalLectures: number;
-  totalDuration: number;
-  isDeleted: boolean;
-  lectures: LectureDetail[];
-  progressPercentage: number;
-}
-
-export interface LectureDetail {
-  id: number;
-  sectionId: number;
-  title: string;
-  description: string;
-  type: LectureType;
-  isPreviewable: boolean;
-  orderIndex: number;
-  isDeleted: boolean;
-  isCompleted: boolean;
 }
 
 export interface MyCourse {

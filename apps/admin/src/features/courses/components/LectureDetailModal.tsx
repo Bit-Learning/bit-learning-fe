@@ -4,8 +4,8 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { useLectureQuiz, useLectureText } from "../queries/useLecture";
-import type { LectureDetail } from "../types/course.type";
 import HlsVideoPlayer from "./VideoPlayer";
+import { LectureDetail } from "../types/lecture.type";
 
 interface LectureDetailModalProps {
   lecture: LectureDetail;
