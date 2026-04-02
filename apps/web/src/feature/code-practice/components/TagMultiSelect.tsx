@@ -47,7 +47,6 @@ const TagMultiSelect: React.FC<TagMultiSelectProps> = ({
 
   return (
     <div ref={ref} className={cn("relative", className)}>
-      {/* Trigger */}
       <div
         onClick={() => setOpen(!open)}
         className={cn(
@@ -76,7 +75,6 @@ const TagMultiSelect: React.FC<TagMultiSelectProps> = ({
         />
       </div>
 
-      {/* Dropdown */}
       {open && (
         <div className="absolute z-50 mt-1 w-full rounded-md border border-gray-200 bg-white shadow-lg">
           {isLoading ? (

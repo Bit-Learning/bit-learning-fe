@@ -278,7 +278,6 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       <Card className="border-2 border-gray-200">
         <CardContent className="px-8">
           <form onSubmit={combinedForm.handleSubmit(onSubmitCombined)} className="space-y-10">
-            {/* Thông tin cơ bản */}
             <div className="space-y-6">
               <div className="border-b-2 border-gray-200 pb-4">
                 <h2 className="text-2xl font-bold text-gray-900">Thông tin cơ bản</h2>
@@ -393,7 +392,6 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                 </div>
               </div>
 
-              {/* Tags - TagMultiSelect thay thế input tự nhập */}
               <div>
                 <Label className="text-base font-semibold text-gray-900 mb-3 block">Thẻ tag</Label>
                 <TagMultiSelect
@@ -417,7 +415,6 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
               </div>
             </div>
 
-            {/* Code templates - chỉ khi create */}
             {!isEditMode && (
               <div className="space-y-6">
                 <div className="border-b-2 border-gray-200 pb-4">
