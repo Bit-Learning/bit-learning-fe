@@ -141,9 +141,8 @@ export const useHideOrShowCourse = () => {
       queryClient.invalidateQueries({ queryKey: courseKeys.all });
       queryClient.invalidateQueries({ queryKey: courseKeys.detail(variables.id) });
 
-      const action = variables.isHidden ? "ẩn" : "hiện";
       toast.success({
-        title: `Đã ${action} khóa học`,
+        title: `Đã xóa khóa học`,
         description: response.data.message,
       });
     },

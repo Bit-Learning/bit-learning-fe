@@ -10,6 +10,7 @@ import { TransactionInfo, TransactionStatus } from "@/feature/order/types/paymen
 import { PaymentMethod } from "@/feature/order/types/order.type";
 import { Pagination } from "@/shared/components/Pagination";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import { formatDateTime } from "@/shared/lib/date-time-utils";
 
 const PAGE_SIZE = 10;
 
@@ -87,6 +88,7 @@ export const DepositHistoryContent: React.FC = () => {
                     <tr className="border-b border-slate-100">
                       <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Mã Đơn Hàng</th>
                       <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Số tiền</th>
+                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Ngày tạo</th>
                       <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Trạng thái</th>
                       <th className="pb-4 pt-0" />
                     </tr>
@@ -99,6 +101,9 @@ export const DepositHistoryContent: React.FC = () => {
                         <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors">
                           <td className="py-5 font-bold text-slate-900 text-[14px]">#{tx.code}</td>
                           <td className="py-5 font-bold text-primary text-[14px]">{formatCurrency(tx.amount)}</td>
+                          <td className="py-5 text-slate-500 text-[13px]">
+                            {tx.createdAt ? formatDateTime(tx.createdAt) : "—"}
+                          </td>
                           <td className="py-5">
                             <Badge className={`text-sm px-3 flex items-center gap-1.5 w-fit ${status.cls}`}>
                               <StatusIcon className="w-3.5 h-3.5" />
@@ -157,6 +162,13 @@ export const DepositHistoryContent: React.FC = () => {
             <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
               <span className="text-sm text-slate-500">Số tiền nạp</span>
               <span className="text-xl font-black text-primary">{formatCurrency(selectedTx.amount)}</span>
+            </div>
+
+            <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+              <span className="text-sm text-slate-500">Ngày tạo</span>
+              <span className="text-sm font-medium text-slate-700">
+                {selectedTx.createdAt ? formatDateTime(selectedTx.createdAt) : "—"}
+              </span>
             </div>
 
             <div className="px-6 py-5 space-y-4">

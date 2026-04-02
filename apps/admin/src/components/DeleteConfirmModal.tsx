@@ -25,15 +25,15 @@ const DeleteConfirmModal: React.FC<Props> = ({
   open,
   onClose,
   onConfirm,
-  title = "Xác nhận ẩn",
+  title = "Xác nhận xóa",
   description,
   itemName,
   isPending = false,
-  confirmLabel = "Ẩn",
+  confirmLabel = "Xóa",
 }) => {
   const defaultDescription = itemName
-    ? `Bạn có chắc chắn muốn ẩn "${itemName}"? Bạn có thể hiện lại bất cứ lúc nào.`
-    : "Bạn có chắc chắn muốn ẩn? Bạn có thể hiện lại bất cứ lúc nào.";
+    ? `Bạn có chắc chắn muốn xóa "${itemName}"? Hành động này không thể hoàn tác.`
+    : "Bạn có chắc chắn muốn xóa? Hành động này không thể hoàn tác.";
 
   return (
     <AlertDialog open={open} onOpenChange={onClose}>

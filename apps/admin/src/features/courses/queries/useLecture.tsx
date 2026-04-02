@@ -99,8 +99,7 @@ export const useHideOrShowLecture = () => {
       lectureApi.hideOrShowLecture(id, isHidden),
     onSuccess: (response, variables) => {
       queryClient.invalidateQueries({ queryKey: sectionKeys.byCourse(variables.courseId) });
-      const action = variables.isHidden ? "ẩn" : "hiện";
-      toast.success({ title: `Đã ${action} bài học`, description: response.data.message });
+      toast.success({ title: `Đã xóa bài học`, description: response.data.message });
     },
     onError: (error: any) => {
       toast.error({

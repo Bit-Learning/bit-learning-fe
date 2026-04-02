@@ -91,13 +91,12 @@ export const useHideOrShowSection = () => {
 
   return useMutation({
     mutationFn: ({ id, isHidden }: { id: number; isHidden: boolean }) => msectionApi.hideOrShowSection(id, isHidden),
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: sectionKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
 
-      const action = variables.isHidden ? "ẩn" : "hiện";
       toast.success({
-        title: `Đã ${action} chương`,
+        title: `Đã xóa chương`,
         description: response.data.message,
       });
     },
