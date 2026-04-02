@@ -22,12 +22,13 @@ import { Card } from "@/components/ui/card";
 import { useCourseDetail, useValidateCourse } from "../queries/useCourse";
 import { useDeleteLecture } from "../queries/useLecture";
 import { useSectionsByCourse, useDeleteSection } from "../queries/useSection";
-import type { LectureDetail, SectionDetail } from "../types/course.type";
 import { LectureDetailModal } from "../components/LectureDetailModal";
 import { EditCourseModal } from "../components/EditCourseModal";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import LectureModal from "../components/LectureModal";
 import SectionModal from "../components/SectionModal";
+import { LectureDetail } from "../types/lecture.type";
+import { SectionDetail } from "../types/section.type";
 
 type ModalState =
   | { type: "none" }
@@ -358,9 +359,9 @@ export const CourseDetailPage: React.FC = () => {
                       </p>
                     ) : (
                       <div className="space-y-2">
-                        {section.lectures.map((lecture, lIdx) => (
+                        {section.lectures.map((lecture: LectureDetail, lIdx: number) => (
                           <div
-                            key={lecture.id}
+                            key={lIdx}
                             className="flex items-center justify-between rounded-lg border border-gray-200 bg-gray-50 p-3 transition-colors hover:bg-gray-100"
                           >
                             <div className="flex items-center gap-3">
@@ -387,29 +388,38 @@ export const CourseDetailPage: React.FC = () => {
                               </div>
                             </div>
                             <div className="flex items-center gap-2">
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleViewLecture(lecture as LectureDetail)}
-                              >
-                                <Eye className="mr-1 h-4 w-4" />
-                                <span className="hidden sm:inline">Xem</span>
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => handleEditLecture(lecture as LectureDetail)}
-                              >
-                                <Edit className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="outline"
-                                size="sm"
-                                onClick={() => openDeleteLectureModal(lecture.id, lecture.title)}
-                                disabled={deleteLectureMutation.isPending}
-                              >
-                                <Trash2 className="h-4 w-4 text-red-500" />
-                              </Button>
+                              {lecture.processStatus === "DONE" ? (
+                                <>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleViewLecture(lecture as LectureDetail)}
+                                  >
+                                    <Eye className="mr-1 h-4 w-4" />
+                                    <span className="hidden sm:inline">Xem</span>
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => handleEditLecture(lecture as LectureDetail)}
+                                  >
+                                    <Edit className="h-4 w-4" />
+                                  </Button>
+                                  <Button
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => openDeleteLectureModal(lecture.id, lecture.title)}
+                                    disabled={deleteLectureMutation.isPending}
+                                  >
+                                    <Trash2 className="h-4 w-4 text-red-500" />
+                                  </Button>
+                                </>
+                              ) : (
+                                <span className="flex items-center gap-1.5 rounded-full bg-amber-50 px-3 py-1 text-xs font-medium text-amber-600 ring-1 ring-amber-200">
+                                  <div className="h-3 w-3 animate-spin rounded-full border-2 border-amber-400 border-t-transparent" />
+                                  Đang tải nội dung...
+                                </span>
+                              )}
                             </div>
                           </div>
                         ))}
@@ -440,7 +450,7 @@ export const CourseDetailPage: React.FC = () => {
       )}
 
       {modalState.type === "edit-lecture" && (
-        <LectureModal mode="edit" lecture={modalState.lecture} onClose={closeModal} />
+        <LectureModal mode="edit" lecture={modalState.lecture} courseId={courseId} onClose={closeModal} />
       )}
 
       {modalState.type === "edit-section" && (

@@ -82,6 +82,7 @@ export interface LectureDetail {
   orderIndex: number;
   isDeleted: boolean;
   isCompleted: boolean;
+  processStatus: string;
 }
 
 export interface LectureTextDetail {

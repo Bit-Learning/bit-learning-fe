@@ -9,7 +9,6 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateLectureQuiz, useLectureQuiz, useUpdateLecture, useUpdateLectureQuiz } from "../queries/useLecture";
-import type { CreateLectureQuizRequest, UpdateLectureQuizRequest } from "../types/lecture.type";
 import { cn } from "@/shared/lib/utils";
 import { QuestionCard } from "../components/QuestionCard";
 import DurationPicker from "@/components/DurationPicker";
@@ -130,6 +129,7 @@ export const QuizFormPage: React.FC = () => {
     try {
       if (isEditMode && lectureId) {
         await updateLectureMutation.mutateAsync({
+          courseId: courseId!,
           id: lectureId,
           data: {
             sectionId,
@@ -139,49 +139,53 @@ export const QuizFormPage: React.FC = () => {
             orderIndex: orderIndex || 1,
           },
         });
-        const updatePayload: UpdateLectureQuizRequest = {
-          passPercent: data.passPercent,
-          maxAttempts: data.maxAttempts,
-          duration: data.duration,
-          quizzes: data.questions.map((q) => ({
-            id: q.id,
-            questionText: q.questionText,
-            orderIndex: q.orderIndex,
-            answers: q.answers.map((a) => ({
-              id: a.id,
-              answerText: a.answerText,
-              isCorrect: a.isCorrect,
-              orderIndex: a.orderIndex,
+        await updateQuizMutation.mutateAsync({
+          courseId: courseId!,
+          id: lectureId,
+          data: {
+            passPercent: data.passPercent,
+            maxAttempts: data.maxAttempts,
+            duration: data.duration,
+            quizzes: data.questions.map((q) => ({
+              id: q.id,
+              questionText: q.questionText,
+              orderIndex: q.orderIndex,
+              answers: q.answers.map((a) => ({
+                id: a.id,
+                answerText: a.answerText,
+                isCorrect: a.isCorrect,
+                orderIndex: a.orderIndex,
+              })),
             })),
-          })),
-        };
-        await updateQuizMutation.mutateAsync({ id: lectureId, data: updatePayload });
-      } else {
-        const payload: CreateLectureQuizRequest = {
-          lecture: {
-            sectionId,
-            title: data.title,
-            description: data.description,
-            isPreviewable: false,
-            orderIndex: orderIndex || 1,
           },
-          quizzes: data.questions.map((q) => ({
-            questionText: q.questionText,
-            orderIndex: q.orderIndex,
-            answers: q.answers,
-          })),
-          passPercent: data.passPercent,
-          maxAttempts: data.maxAttempts,
-          duration: data.duration,
-        };
-        await createQuizMutation.mutateAsync(payload);
+        });
+      } else {
+        await createQuizMutation.mutateAsync({
+          courseId: courseId!,
+          data: {
+            lecture: {
+              sectionId,
+              title: data.title,
+              description: data.description,
+              isPreviewable: false,
+              orderIndex: orderIndex || 1,
+            },
+            quizzes: data.questions.map((q) => ({
+              questionText: q.questionText,
+              orderIndex: q.orderIndex,
+              answers: q.answers,
+            })),
+            passPercent: data.passPercent,
+            maxAttempts: data.maxAttempts,
+            duration: data.duration,
+          },
+        });
       }
       navigate({ to: "/courses/$id", params: { id: String(courseId) } });
     } catch (error) {
       console.error("Failed to save quiz:", error);
     }
   };
-
   if (!sectionId) return null;
 
   if (isEditMode && quizLoading) {

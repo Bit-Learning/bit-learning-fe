@@ -20,8 +20,7 @@ import {
   useUpdateLectureText,
   useUpdateLectureVideo,
 } from "../queries/useLecture";
-import type { LectureDetail } from "../types/course.type";
-import type { UpdateLectureRequest } from "../types/lecture.type";
+import type { LectureDetail } from "../types/lecture.type";
 import { HtmlPasteButton } from "@/components/HtmlPasteButton";
 import DurationPicker from "@/components/DurationPicker";
 
@@ -195,20 +194,24 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const handleVideoSubmit = async (data: VideoFormValues) => {
     try {
       if (mode === "edit" && lecture) {
-        const updateData: UpdateLectureRequest = {
-          sectionId: lecture.sectionId,
-          title: data.title,
-          description: data.description || undefined,
-          isPreviewable: data.isPreviewable,
-          orderIndex: lecture.orderIndex,
-        };
-        await updateLectureMutation.mutateAsync({ id: lecture.id, data: updateData });
+        await updateLectureMutation.mutateAsync({
+          courseId: courseId!,
+          id: lecture.id,
+          data: {
+            sectionId: lecture.sectionId,
+            title: data.title,
+            description: data.description || undefined,
+            isPreviewable: data.isPreviewable,
+            orderIndex: lecture.orderIndex,
+          },
+        });
         if (videoFile) {
-          await updateVideoMutation.mutateAsync({ id: lecture.id, video: videoFile });
+          await updateVideoMutation.mutateAsync({ courseId: courseId!, id: lecture.id, video: videoFile });
         }
       } else if (mode === "create" && sectionId) {
         if (!videoFile) return;
         await createVideoMutation.mutateAsync({
+          courseId: courseId!,
           request: {
             sectionId,
             title: data.title,
@@ -229,29 +232,36 @@ const LectureModal: React.FC<LectureModalProps> = ({
   const handleTextSubmit = async (data: TextFormValues) => {
     try {
       if (mode === "edit" && lecture) {
-        const updateData: UpdateLectureRequest = {
-          sectionId: lecture.sectionId,
-          title: data.title,
-          description: data.description || undefined,
-          isPreviewable: data.isPreviewable,
-          orderIndex: lecture.orderIndex,
-        };
-        await updateLectureMutation.mutateAsync({ id: lecture.id, data: updateData });
+        await updateLectureMutation.mutateAsync({
+          courseId: courseId!,
+          id: lecture.id,
+          data: {
+            sectionId: lecture.sectionId,
+            title: data.title,
+            description: data.description || undefined,
+            isPreviewable: data.isPreviewable,
+            orderIndex: lecture.orderIndex,
+          },
+        });
         await updateTextMutation.mutateAsync({
+          courseId: courseId!,
           id: lecture.id,
           data: { content: data.content, duration: data.duration },
         });
       } else if (mode === "create" && sectionId) {
         await createTextMutation.mutateAsync({
-          lecture: {
-            sectionId,
-            title: data.title,
-            description: data.description,
-            isPreviewable: data.isPreviewable,
-            orderIndex: getNextOrderIndex(),
+          courseId: courseId!,
+          data: {
+            lecture: {
+              sectionId,
+              title: data.title,
+              description: data.description,
+              isPreviewable: data.isPreviewable,
+              orderIndex: getNextOrderIndex(),
+            },
+            content: data.content,
+            duration: data.duration,
           },
-          content: data.content,
-          duration: data.duration,
         });
       }
       onSuccess?.();
