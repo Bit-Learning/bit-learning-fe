@@ -1,58 +1,46 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { BookOpen, Edit, Eye, EyeOff, Plus, Search, Trash2 } from "lucide-react";
+import { BookOpen, Edit, Eye, EyeOff, Plus, Search } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { useDeleteCourse, useGetCourses, useHideOrShowCourse } from "../queries/useCourse";
+import { useGetCourses, useHideOrShowCourse } from "../queries/useCourse";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { CoursePreview } from "../types/course.type";
 import { Pagination } from "@/components/Pagination";
+
+type HideModalState =
+  | { type: "none" }
+  | { type: "hide"; id: number; name: string }
+  | { type: "show"; id: number; name: string };
 
 export const CourseListPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
   const [size] = useState(10);
-  const [deleteModal, setDeleteModal] = useState<{
-    isOpen: boolean;
-    id: number;
-    name: string;
-  }>({
-    isOpen: false,
-    id: 0,
-    name: "",
-  });
+  const [hideModal, setHideModal] = useState<HideModalState>({ type: "none" });
 
   const { data: coursesData, isLoading } = useGetCourses(page, size);
-  const deleteMutation = useDeleteCourse();
   const hideMutation = useHideOrShowCourse();
 
   const courses = Array.isArray(coursesData?.data) ? coursesData.data : [];
   const totalPages = coursesData?.page?.totalPages || 0;
 
-  const openDeleteModal = (id: number, name: string) => {
-    setDeleteModal({ isOpen: true, id, name });
-  };
-
-  const closeDeleteModal = () => {
-    setDeleteModal({ isOpen: false, id: 0, name: "" });
-  };
-
-  const handleConfirmDelete = () => {
-    deleteMutation.mutate(deleteModal.id, {
-      onSuccess: () => closeDeleteModal(),
-    });
-  };
-
-  const handleToggleHide = (id: number, isHidden: boolean) => {
-    hideMutation.mutate({ id, isHidden: !isHidden });
-  };
-
   const filteredCourses = courses.filter((course: { title: string }) =>
     course.title.toLowerCase().includes(searchQuery.toLowerCase()),
   );
+
+  const handleConfirm = async () => {
+    if (hideModal.type === "none") return;
+    try {
+      await hideMutation.mutateAsync({ id: hideModal.id, isHidden: hideModal.type === "hide" });
+      setHideModal({ type: "none" });
+    } catch (error) {
+      console.error("Failed to toggle course visibility:", error);
+    }
+  };
 
   return (
     <div className="min-h-screen space-y-6 p-8">
@@ -67,19 +55,15 @@ export const CourseListPage: React.FC = () => {
         </Button>
       </div>
 
-      <Card className="p-4">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
-            <Input
-              placeholder="Tìm kiếm khóa học..."
-              className="pl-10"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-        </div>
-      </Card>
+      <div className="relative flex-1">
+        <Search className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+        <Input
+          placeholder="Tìm kiếm khóa học..."
+          className="pl-10"
+          value={searchQuery}
+          onChange={(e) => setSearchQuery(e.target.value)}
+        />
+      </div>
 
       {isLoading ? (
         <div className="py-12 text-center">
@@ -100,27 +84,30 @@ export const CourseListPage: React.FC = () => {
         <>
           <div className="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-4">
             {filteredCourses.map((course: CoursePreview) => (
-              <Card key={course.id} className="overflow-hidden p-0 transition-shadow hover:shadow-lg">
+              <Card
+                key={course.id}
+                className={`overflow-hidden p-0 transition-shadow hover:shadow-lg ${course.isDeleted ? "opacity-60" : ""}`}
+              >
                 <div className="relative flex aspect-video items-center justify-center">
                   {course.thumbnailUrl ? (
                     <img src={course.thumbnailUrl} alt={course.title} className="h-50 w-full object-cover" />
                   ) : (
                     <BookOpen className="h-16 w-16 text-white/50" />
                   )}
-
-                  <div className="absolute right-3 top-3">
-                    <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"} className="shrink-0">
+                  <div className="absolute right-3 top-3 flex flex-col items-end gap-1">
+                    <Badge variant={course.status === "PUBLISHED" ? "default" : "secondary"}>
                       {course.status === "PUBLISHED" ? "Đã xuất bản" : "Chưa xuất bản"}
-                    </Badge>{" "}
+                    </Badge>
+                    {course.isDeleted && (
+                      <Badge variant="outline" className="bg-white/90 text-gray-500">
+                        Đang ẩn
+                      </Badge>
+                    )}
                   </div>
                 </div>
 
                 <div className="space-y-3 px-4 pb-3">
-                  <div className="flex items-start justify-between gap-2">
-                    <div className="flex-1">
-                      <h3 className="line-clamp-2 h-12 text-md font-semibold">{course.title}</h3>
-                    </div>
-                  </div>
+                  <h3 className="line-clamp-2 h-12 text-md font-semibold">{course.title}</h3>
 
                   <div className="flex items-center justify-between gap-4 text-sm text-gray-600">
                     <div className="flex items-center gap-1">
@@ -141,16 +128,19 @@ export const CourseListPage: React.FC = () => {
                       <Edit className="mr-2 h-4 w-4" />
                       Chi tiết
                     </Button>
-                    <Button variant="outline" size="icon" onClick={() => handleToggleHide(course.id, course.isDeleted)}>
-                      {course.isDeleted ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
-                    </Button>
                     <Button
                       variant="outline"
                       size="icon"
-                      onClick={() => openDeleteModal(course.id, course.title)}
-                      disabled={deleteMutation.isPending}
+                      disabled={hideMutation.isPending}
+                      onClick={() =>
+                        setHideModal(
+                          course.isDeleted
+                            ? { type: "show", id: course.id, name: course.title }
+                            : { type: "hide", id: course.id, name: course.title },
+                        )
+                      }
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      {course.isDeleted ? <Eye className="h-4 w-4" /> : <EyeOff className="h-4 w-4" />}
                     </Button>
                   </div>
                 </div>
@@ -163,13 +153,19 @@ export const CourseListPage: React.FC = () => {
       )}
 
       <DeleteConfirmModal
-        open={deleteModal.isOpen}
-        onClose={closeDeleteModal}
-        onConfirm={handleConfirmDelete}
-        title="Xóa khóa học"
-        description="Tất cả chương và bài học trong khóa học này cũng sẽ bị xóa vĩnh viễn. Hành động này không thể hoàn tác!"
-        itemName={deleteModal.name}
-        isPending={deleteMutation.isPending}
+        open={hideModal.type !== "none"}
+        onClose={() => setHideModal({ type: "none" })}
+        onConfirm={handleConfirm}
+        title={hideModal.type === "show" ? "Hiện khóa học" : "Ẩn khóa học"}
+        description={
+          hideModal.type === "show"
+            ? `Khóa học "${hideModal.name}" sẽ hiển thị trở lại với học viên.`
+            : hideModal.type === "hide"
+              ? `Khóa học "${hideModal.name}" sẽ bị ẩn khỏi học viên. Bạn có thể hiện lại bất cứ lúc nào.`
+              : undefined
+        }
+        isPending={hideMutation.isPending}
+        confirmLabel={hideModal.type === "show" ? "Hiện" : "Ẩn"}
       />
     </div>
   );
