@@ -9,7 +9,11 @@
       "Bash(find /f/Capstone/bit-learning-fe -type f \\\\\\(-name *.json -o -name *.ts -o -name *.tsx \\\\\\))",
       "Bash(xargs grep:*)",
       "WebSearch",
-      "WebFetch(domain:eclipse.dev)"
+      "WebFetch(domain:eclipse.dev)",
+      "Bash(ls F:/Capstone/bit-learning-fe/apps/web/vite.config.*)",
+      "Bash(head -30 F:/Capstone/bit-learning-fe/apps/web/vite.config.*)",
+      "Bash(npm uninstall:*)",
+      "Bash(pnpm --filter web remove @react-pdf-viewer/core @react-pdf-viewer/default-layout pdfjs-dist)"
     ],
     "deny": [],
     "ask": []
