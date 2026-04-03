@@ -111,7 +111,7 @@ jobs:
                 authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
                 tags: tag:ci
                 version: latest
-                ping: ${{ secrets.DEV_VPS_HOST }}
+                ping: ${{ secrets.PROD_VPS_HOST }}
 
             - name: Debug Tailscale
               run: |
