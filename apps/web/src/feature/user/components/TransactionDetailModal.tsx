@@ -1,10 +1,24 @@
 import React, { useState } from "react";
-import { X, CreditCard, Wallet, QrCode, AlertCircle, CheckCircle2, Clock, XCircle, ExternalLink } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import {
+  X,
+  CreditCard,
+  Wallet,
+  QrCode,
+  AlertCircle,
+  CheckCircle2,
+  Clock,
+  XCircle,
+  ExternalLink,
+  RefreshCw,
+} from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { OrderInfo, OrderStatus, PaymentMethod } from "@/feature/order/types/order.type";
 import { useCancelOrder } from "@/feature/order/queries/useOrder";
-import { useRegeneratePayOSUrl, useRegenerateVNPayUrl } from "@/feature/order/queries/usePayment";
+import { useRegeneratePayOSUrl, useRegenerateVNPayUrl, useReorderWithWallet } from "@/feature/order/queries/usePayment";
+import { useUserProfile } from "@/feature/user/queries/useUser";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 interface TransactionDetailModalProps {
   open: boolean;
@@ -50,31 +64,53 @@ const statusLabel: Record<string, { text: string; cls: string }> = {
     text: "Thành công",
     cls: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-400",
   },
-  PENDING: { text: "Đang xử lý", cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400" },
-  CANCELLED: { text: "Đã hủy", cls: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400" },
+  PENDING: {
+    text: "Đang xử lý",
+    cls: "bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400",
+  },
+  FAILED: {
+    text: "Thất bại",
+    cls: "bg-rose-100 text-rose-700 dark:bg-rose-900/30 dark:text-rose-400",
+  },
 };
 
 export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ open, onClose, transaction }) => {
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(PaymentMethod.VNPAY);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const navigate = useNavigate();
 
   const regenerateVNPay = useRegenerateVNPayUrl();
   const regeneratePayOS = useRegeneratePayOSUrl();
   const cancelOrder = useCancelOrder();
+  const reorderWithWallet = useReorderWithWallet();
+  const { data: userProfile } = useUserProfile();
+
+  const walletBalance = userProfile?.wallet?.balance ?? 0;
 
   if (!open || !transaction) return null;
 
-  const isPending = transaction.status === "PENDING";
-  const isCompleted = transaction.status === "COMPLETED";
+  const isPending = transaction.status === OrderStatus.PENDING;
+  const isCompleted = transaction.status === OrderStatus.COMPLETED;
+  const isCancelledOrFailed = transaction.status === OrderStatus.FAILED;
   const status = statusLabel[transaction.status] ?? { text: transaction.status, cls: "" };
 
+  const isWalletInsufficientForPending =
+    selectedMethod === PaymentMethod.WALLET && isPending && walletBalance < transaction.totalAmount;
+
+  const walletShortfallForPending =
+    selectedMethod === PaymentMethod.WALLET ? Math.max(0, transaction.totalAmount - walletBalance) : 0;
+
+  const isWalletInsufficientForReorder = walletBalance < transaction.totalAmount;
+  const walletShortfallForReorder = Math.max(0, transaction.totalAmount - walletBalance);
+
   const handleContinuePayment = async () => {
-    if (selectedMethod === PaymentMethod.VNPAY) {
+    if (selectedMethod === PaymentMethod.WALLET) {
+      await reorderWithWallet.mutateAsync(transaction.code);
+      onClose();
+    } else if (selectedMethod === PaymentMethod.VNPAY) {
       await regenerateVNPay.mutateAsync(transaction.code);
     } else if (selectedMethod === PaymentMethod.PAYOS) {
       await regeneratePayOS.mutateAsync(transaction.code);
-    } else {
-      await regenerateVNPay.mutateAsync(transaction.code);
     }
   };
 
@@ -84,7 +120,19 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
     onClose();
   };
 
-  const isProcessing = regenerateVNPay.isPending || regeneratePayOS.isPending || cancelOrder.isPending;
+  const handleReorder = async () => {
+    if (isWalletInsufficientForReorder) return;
+    await reorderWithWallet.mutateAsync(transaction.code);
+    onClose();
+  };
+
+  const handleNavigateToTopUp = () => {
+    onClose();
+    navigate({ to: "/profile/top-up" });
+  };
+
+  const isProcessing =
+    regenerateVNPay.isPending || regeneratePayOS.isPending || cancelOrder.isPending || reorderWithWallet.isPending;
 
   return (
     <div
@@ -184,6 +232,40 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
               </div>
             </div>
 
+            {selectedMethod === PaymentMethod.WALLET && (
+              <div className="space-y-2">
+                <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                  <div className="flex items-center gap-2">
+                    <BitCoinIcon size={18} />
+                    <span className="text-xs font-medium text-slate-700 dark:text-slate-300">Số dư ví</span>
+                  </div>
+                  <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                    {walletBalance.toLocaleString("vi-VN")} BIT
+                  </span>
+                </div>
+
+                {isWalletInsufficientForPending && (
+                  <div className="flex items-start gap-2 p-3 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
+                    <AlertCircle className="w-4 h-4 text-rose-600 dark:text-rose-400 shrink-0 mt-0.5" />
+                    <div className="flex-1 text-xs text-rose-700 dark:text-rose-400">
+                      <p className="font-semibold mb-1">Số dư không đủ</p>
+                      <p>
+                        Bạn cần thêm{" "}
+                        <span className="font-bold">{walletShortfallForPending.toLocaleString("vi-VN")} BIT</span>.{" "}
+                        <button
+                          type="button"
+                          onClick={handleNavigateToTopUp}
+                          className="underline font-semibold hover:text-rose-800 dark:hover:text-rose-300 cursor-pointer"
+                        >
+                          Nạp tiền ngay
+                        </button>
+                      </p>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="flex gap-3 pt-1">
               <Button
                 variant="outline"
@@ -197,7 +279,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
                 className="cursor-pointer flex-1 gap-2 bg-primary hover:bg-primary/90"
                 size="lg"
                 onClick={handleContinuePayment}
-                isDisabled={isProcessing}
+                isDisabled={isProcessing || isWalletInsufficientForPending}
               >
                 <ExternalLink className="w-4 h-4" />
                 {isProcessing ? "Đang xử lý..." : "Tiếp tục thanh toán"}
@@ -220,7 +302,7 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
             <div className="flex gap-3">
               <Button
                 variant="outline"
-                className="cursor-pointer  flex-1"
+                className="cursor-pointer flex-1"
                 onClick={() => setShowCancelConfirm(false)}
                 isDisabled={cancelOrder.isPending}
               >
@@ -251,15 +333,61 @@ export const TransactionDetailModal: React.FC<TransactionDetailModalProps> = ({ 
           </div>
         )}
 
-        {transaction.status === OrderStatus.FAILED && (
-          <div className="px-6 py-5">
+        {isCancelledOrFailed && (
+          <div className="px-6 py-5 space-y-4">
             <div className="flex items-center gap-3 p-4 bg-rose-50 dark:bg-rose-900/20 rounded-xl border border-rose-200 dark:border-rose-800">
               <XCircle className="w-5 h-5 text-rose-500 shrink-0" />
-              <p className="text-sm text-rose-700 dark:text-rose-400 font-medium">Đơn hàng này đã bị hủy.</p>
+              <p className="text-sm text-rose-700 dark:text-rose-400 font-medium">
+                {transaction.status === OrderStatus.FAILED ? "Đơn hàng đã bị hủy." : "Thanh toán thất bại."}
+              </p>
             </div>
-            <Button variant="outline" className="cursor-pointer w-full mt-4" onClick={onClose}>
-              Đóng
-            </Button>
+
+            <div className="space-y-3">
+              <div className="flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-800 rounded-lg">
+                <div className="flex items-center gap-2">
+                  <BitCoinIcon size={20} />
+                  <span className="text-sm font-medium text-slate-700 dark:text-slate-300">Số dư ví hiện tại</span>
+                </div>
+                <span className="text-sm font-bold text-slate-900 dark:text-slate-100">
+                  {walletBalance.toLocaleString("vi-VN")} BIT
+                </span>
+              </div>
+
+              {isWalletInsufficientForReorder && (
+                <div className="flex items-start gap-2 p-3 bg-amber-50 dark:bg-amber-900/20 rounded-xl border border-amber-200 dark:border-amber-800">
+                  <AlertCircle className="w-4 h-4 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
+                  <div className="flex-1 text-xs text-amber-700 dark:text-amber-400">
+                    <p className="font-semibold mb-1">Số dư không đủ</p>
+                    <p>
+                      Bạn cần thêm{" "}
+                      <span className="font-bold">{walletShortfallForReorder.toLocaleString("vi-VN")} BIT</span> để đặt
+                      lại đơn hàng.{" "}
+                      <button
+                        type="button"
+                        onClick={handleNavigateToTopUp}
+                        className="underline font-semibold hover:text-amber-800 dark:hover:text-amber-300 cursor-pointer"
+                      >
+                        Nạp thêm ngay
+                      </button>
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+
+            <div className="flex gap-3 pt-1">
+              <Button variant="outline" className="cursor-pointer flex-1" onClick={onClose}>
+                Đóng
+              </Button>
+              <Button
+                className="cursor-pointer flex-1 gap-2 bg-emerald-600 hover:bg-emerald-700 text-white disabled:opacity-50 disabled:cursor-not-allowed"
+                onClick={handleReorder}
+                isDisabled={isWalletInsufficientForReorder || reorderWithWallet.isPending}
+              >
+                <RefreshCw className="w-4 h-4" />
+                {reorderWithWallet.isPending ? "Đang xử lý..." : "Đặt lại đơn hàng"}
+              </Button>
+            </div>
           </div>
         )}
       </div>

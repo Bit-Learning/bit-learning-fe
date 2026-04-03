@@ -56,3 +56,31 @@ export const useAddBalanceToWallet = () => {
     },
   });
 };
+
+export const useReorderWithWallet = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (code: string) => {
+      const response = await paymentApi.reOrder(code);
+      return response.data.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
+      queryClient.invalidateQueries({ queryKey: ["myCourses"] });
+      queryClient.invalidateQueries({ queryKey: ["wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["enrollments"] });
+
+      toast.success({
+        title: "Mua khóa học thành công",
+        description: "Bạn đã mua khóa học bằng ví thành công",
+      });
+    },
+    onError: (error: Error) => {
+      toast.error({
+        title: "Không thể mua khóa học",
+        description: error.message,
+      });
+    },
+  });
+};
