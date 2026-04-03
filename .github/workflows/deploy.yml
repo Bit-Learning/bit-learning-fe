@@ -105,14 +105,31 @@ jobs:
                   pip install --upgrade ansible
                   ansible-galaxy collection install community.docker community.general --force
 
+            - name: Connect to Tailscale
+              uses: tailscale/github-action@v4
+              with:
+                authkey: ${{ secrets.TAILSCALE_AUTHKEY }}
+                tags: tag:ci
+                version: latest
+                ping: ${{ secrets.DEV_VPS_HOST }}
+
+            - name: Debug Tailscale
+              run: |
+                tailscale status
+                tailscale ping --timeout=20s ${{ secrets.PROD_VPS_HOST }}
+
             - name: Write SSH private key
               run: |
                   mkdir -p ~/.ssh
-                  echo "${{ secrets.PROD_VPS_SSH_KEY }}" > ~/.ssh/id_ed25519
-                  chmod 600 ~/.ssh/id_ed25519
+                  printf '%s\n' "${{ secrets.PROD_VPS_SSH_KEY }}" > ~/.ssh/bitlearningsshkey
+                  chmod 600 ~/.ssh/bitlearningsshkey
+
                   ssh-keyscan -p ${{ secrets.PROD_VPS_PORT || 22 }} \
                     ${{ secrets.PROD_VPS_HOST }} >> ~/.ssh/known_hosts
 
+                  ssh-keygen -R ${{ secrets.PROD_VPS_HOST }} || true
+                  ssh-keyscan -H -p ${{ secrets.PROD_VPS_PORT || 22 }} \
+                    ${{ secrets.PROD_VPS_HOST }} >> ~/.ssh/known_hosts
             - name: Write Ansible vault password
               run: echo "${{ secrets.ANSIBLE_VAULT_PASS }}" > infra/.vault_pass
 
@@ -125,7 +142,7 @@ jobs:
                         ansible_host: ${{ secrets.PROD_VPS_HOST }}
                         ansible_user: ${{ secrets.PROD_VPS_USER }}
                         ansible_port: ${{ secrets.PROD_VPS_PORT || 22 }}
-                        ansible_ssh_private_key_file: ~/.ssh/id_ed25519
+                        ansible_ssh_private_key_file: ~/.ssh/bitlearningsshkey
                         ansible_python_interpreter: auto_silent
                   EOF
 
