@@ -1,12 +1,11 @@
 import React, { useState } from "react";
 import { useGetPosts } from "../queries/usePost";
-import { PostCard } from "../components/PostCard";
-import { Button } from "@/components/ui/button";
+import { PostRow } from "../components/PostRow";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search, Filter } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { Pagination } from "@/components/Pagination";
 
 export const PostListPage: React.FC = () => {
   const [page, setPage] = useState(0);
@@ -54,7 +53,6 @@ export const PostListPage: React.FC = () => {
             className="pl-9"
           />
         </div>
-
         <Select value={statusFilter} onValueChange={setStatusFilter}>
           <SelectTrigger className="w-48">
             <Filter className="w-4 h-4 mr-2" />
@@ -68,46 +66,43 @@ export const PostListPage: React.FC = () => {
         </Select>
       </div>
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i}>
-              <Skeleton className="h-48 w-full" />
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {filteredPosts?.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
+      <div className="rounded-md border overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-muted/50 text-left">
+              <th className="px-4 py-3 font-semibold">Tiêu đề</th>
+              <th className="px-4 py-3 font-semibold whitespace-nowrap">Tác giả</th>
+              <th className="px-4 py-3 font-semibold whitespace-nowrap">Ngày đăng</th>
+              <th className="px-4 py-3 font-semibold">Trạng thái</th>
+              <th className="px-4 py-3 font-semibold">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            {isLoading ? (
+              [...Array(6)].map((_, i) => (
+                <tr key={i} className="border-b">
+                  {[...Array(7)].map((_, j) => (
+                    <td key={j} className="px-4 py-3">
+                      <Skeleton className="h-4 w-full" />
+                    </td>
+                  ))}
+                </tr>
+              ))
+            ) : filteredPosts?.length === 0 ? (
+              <tr>
+                <td colSpan={7} className="text-center py-12 text-muted-foreground">
+                  Không tìm thấy bài viết nào
+                </td>
+              </tr>
+            ) : (
+              filteredPosts?.map((post) => <PostRow key={post.id} post={post} />)
+            )}
+          </tbody>
+        </table>
+      </div>
 
-          {filteredPosts?.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Không tìm thấy bài viết nào</p>
-            </div>
-          )}
-
-          {data && data.page && data.page.totalPages > 1 && (
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" disabled={data.page.first} onClick={() => setPage(page - 1)}>
-                Trang trước
-              </Button>
-              <span className="flex items-center px-4">
-                Trang {data.page.page + 1} / {data.page.totalPages}
-              </span>
-              <Button variant="outline" disabled={data.page.last} onClick={() => setPage(page + 1)}>
-                Trang sau
-              </Button>
-            </div>
-          )}
-        </>
+      {data && data.page && data.page.totalPages > 1 && (
+        <Pagination currentPage={page} totalPages={data.page.totalPages} onPageChange={setPage} />
       )}
     </div>
   );
