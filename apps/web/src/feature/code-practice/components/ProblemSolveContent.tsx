@@ -41,7 +41,7 @@ const ProblemSolveContent: React.FC = () => {
   const [runResult, setRunResult] = useState<RunCodeResponse | null>(null);
   const [debugResult, setDebugResult] = useState<DebugResponse | null>(null);
   const [debugLines, setDebugLines] = useState<string>("");
-  const [debugVars, setDebugVars] = useState<string>("");
+  const [debugInput, setDebugInput] = useState<string>("");
 
   const [editorFiles, setEditorFiles] = useState<EditorFile[]>([]);
 
@@ -184,20 +184,21 @@ const ProblemSolveContent: React.FC = () => {
       .map((s) => parseInt(s.trim(), 10))
       .filter((n) => !isNaN(n) && n > 0);
     if (lines.length === 0) return;
-    const parsedVars = debugVars
-      .split(",")
-      .map((s) => s.trim())
-      .filter(Boolean);
     try {
       const request: DebugRequest = isMultiFile
         ? {
             language,
             lines,
-            variables: parsedVars.length > 0 ? parsedVars : undefined,
             files: toCodeFiles(),
             entryFile: getActiveFileName(),
+            input: debugInput || undefined,
           }
-        : { language, code, lines, variables: parsedVars.length > 0 ? parsedVars : undefined };
+        : {
+            language,
+            code,
+            lines,
+            input: debugInput || undefined,
+          };
       const response = await debugCode.mutateAsync(request);
       if (response.data.data) {
         setDebugResult(response.data.data);
@@ -256,8 +257,8 @@ const ProblemSolveContent: React.FC = () => {
   const totalCount = submissionResult?.totalTestcases || 0;
 
   return (
-    <div className="min-h-screen flex flex-col bg-gray-50 overflow-hidden">
-      <main ref={mainRef} className="flex-1 flex overflow-hidden mx-auto w-full">
+    <div className="h-screen flex flex-col bg-gray-50 overflow-hidden">
+      <main ref={mainRef} className="flex-1 flex overflow-hidden mx-auto w-full min-h-0">
         <section
           className="flex flex-col border-r border-gray-200 bg-white overflow-hidden"
           style={{ width: `${leftPct}%` }}
@@ -286,13 +287,13 @@ const ProblemSolveContent: React.FC = () => {
           <div className="h-10 border-b border-gray-200 flex items-center px-4 gap-2">
             {[
               { id: "description", icon: FileText, label: "Đề bài" },
-              { id: "submissions", icon: History, label: "Submissions" },
+              { id: "submissions", icon: History, label: "Bài nộp" },
             ].map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setLeftTab(tab.id as "description" | "submissions")}
                 className={cn(
-                  "flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-md transition-colors",
+                  "cursor-pointer flex items-center gap-1.5 px-3 py-2 text-md rounded-md transition-colors",
                   leftTab === tab.id ? "bg-gray-100 font-medium text-gray-900" : "text-gray-600 hover:text-gray-900",
                 )}
               >
@@ -452,12 +453,12 @@ const ProblemSolveContent: React.FC = () => {
             isRunning={runCode.isPending}
             isDebugging={debugCode.isPending}
             debugLines={debugLines}
-            debugVars={debugVars}
+            debugInput={debugInput}
             onLanguageChange={handleLanguageChange}
             onCodeChange={setCode}
             onFilesChange={handleFilesChange}
             onDebugLinesChange={setDebugLines}
-            onDebugVarsChange={setDebugVars}
+            onDebugInputChange={setDebugInput}
             onSubmit={handleSubmit}
             onRun={handleRun}
             onDebug={handleDebug}

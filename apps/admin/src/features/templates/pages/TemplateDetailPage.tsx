@@ -112,7 +112,7 @@ export const TemplateDetailPage: React.FC = () => {
           <div className="grid grid-cols-12 gap-8">
             <div className="col-span-12 lg:col-span-8">
               <Card className="overflow-hidden border-slate-200 shadow-sm" style={{ height: 680 }}>
-                {template.url ? (
+                {template.previewPdfUrl ? (
                   <Worker workerUrl={PDFJS_WORKER_URL}>
                     <div style={{ height: "100%" }}>
                       <Viewer
@@ -151,7 +151,6 @@ export const TemplateDetailPage: React.FC = () => {
               </Card>
             </div>
 
-            {/* Info sidebar */}
             <div className="col-span-12 lg:col-span-4 space-y-6">
               <Card className="border-slate-200 shadow-sm">
                 <CardContent className="p-8">
@@ -197,7 +196,7 @@ export const TemplateDetailPage: React.FC = () => {
               <Card className="border-slate-200 shadow-sm">
                 <CardContent className="p-6">
                   <a
-                    href={template.url}
+                    href={template.previewPdfUrl}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center gap-2 text-sm text-blue-600 hover:underline"
