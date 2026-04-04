@@ -44,7 +44,6 @@ const ProblemSolveContent: React.FC = () => {
   const [debugVars, setDebugVars] = useState<string>("");
 
   const [editorFiles, setEditorFiles] = useState<EditorFile[]>([]);
-  const [activeFileId, setActiveFileId] = useState<string>("1");
 
   const [leftPct, setLeftPct] = useState(40);
   const isDragging = useRef(false);
@@ -118,7 +117,6 @@ const ProblemSolveContent: React.FC = () => {
       const template = templateCache.current[language] ?? problem?.codeTemplate ?? "";
       setCode(template);
       setEditorFiles([]);
-      setActiveFileId("1");
     }
     setDebugLines("");
     setRunResult(null);
@@ -143,7 +141,7 @@ const ProblemSolveContent: React.FC = () => {
   }, [problem?.codeTemplate, problem?.multifileEntryTemplate, language, isMultiFileMode]);
 
   const isMultiFile = editorFiles.length > 1;
-  const getActiveFileName = () => editorFiles.find((f) => f.id === activeFileId)?.name ?? "main";
+  const getActiveFileName = () => editorFiles[0]?.name ?? "main";
   const toCodeFiles = () => editorFiles.map((f) => ({ name: f.name, content: f.content }));
 
   const handleSubmit = async (): Promise<void> => {
@@ -227,7 +225,6 @@ const ProblemSolveContent: React.FC = () => {
 
   const handleFilesChange = (files: EditorFile[], newActiveFileId: string) => {
     setEditorFiles(files);
-    setActiveFileId(newActiveFileId);
     if (files.length > 1) {
       const active = files.find((f) => f.id === newActiveFileId);
       if (active) setCode(active.content);
