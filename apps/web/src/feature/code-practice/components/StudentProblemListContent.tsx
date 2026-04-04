@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Star, Filter } from "lucide-react";
+import { Heart } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useProblems, useToggleFavorite } from "../queries/useCoding";
@@ -7,6 +7,7 @@ import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { DIFFICULTY_MAP, DifficultyBadge } from "./DifficultyBadge";
 import { Pagination } from "@/shared/components/Pagination";
 import { ProblemStatsCard } from "./ProblemStatsCard";
+import { toast } from "@/shared/components/Sonner";
 
 const Tag = ({ label }: { label: string }) => (
   <span className="bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-tight px-2 py-1 rounded">
@@ -44,9 +45,18 @@ const StudentProblemListContent: React.FC = () => {
   const solvedCount = problems.length;
   const progressPct = totalElements > 0 ? Math.round((solvedCount / totalElements) * 100) : 0;
 
-  const handleFavorite = (e: React.MouseEvent, problemId: string) => {
+  const handleFavorite = (e: React.MouseEvent, problem: { id: string; title: string; isFavorite?: boolean }) => {
     e.stopPropagation();
-    toggleFavorite.mutate(problemId);
+    const willFavorite = !problem.isFavorite;
+    toggleFavorite.mutate(problem.id, {
+      onSuccess: () => {
+        if (willFavorite) {
+          toast.success({ title: "Đã thêm vào yêu thích", description: problem.title });
+        } else {
+          toast.info({ title: "Đã xóa khỏi yêu thích", description: problem.title });
+        }
+      },
+    });
   };
 
   const handleProblemClick = (problemId: string) => {
@@ -140,13 +150,6 @@ const StudentProblemListContent: React.FC = () => {
               className="w-full h-9 px-4 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-slate-400"
             />
           </div>
-
-          <button
-            onClick={handleReset}
-            className="ml-auto flex items-center gap-2 text-slate-400 hover:text-blue-600 text-xs font-bold transition-colors"
-          >
-            <Filter className="w-3.5 h-3.5" /> Đặt lại bộ lọc
-          </button>
         </div>
 
         <div className="space-y-4">
@@ -168,18 +171,17 @@ const StudentProblemListContent: React.FC = () => {
                 <div className="flex-1 min-w-0">
                   <div className="flex flex-wrap items-center gap-3 mb-2">
                     <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
-                      {problem.title}
                       <button
-                        onClick={(e) => handleFavorite(e, problem.id)}
-                        className="text-slate-300 hover:text-amber-400 transition-colors"
+                        onClick={(e) => handleFavorite(e, problem)}
+                        className={cn(
+                          "transition-all active:scale-90",
+                          problem.isFavorite ? "text-red-500 hover:text-red-400" : "text-slate-300 hover:text-red-400",
+                        )}
+                        title={problem.isFavorite ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
                       >
-                        <Star
-                          className={cn(
-                            "w-5 h-5 transition-colors",
-                            problem.isFavorite ? "fill-amber-400 text-amber-400" : "",
-                          )}
-                        />
+                        <Heart className={cn("w-5 h-5 transition-all", problem.isFavorite ? "fill-red-500" : "")} />
                       </button>
+                      {problem.title}
                     </h3>
                     <DifficultyBadge difficulty={problem.difficulty} />
                   </div>
