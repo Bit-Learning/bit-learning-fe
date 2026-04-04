@@ -106,7 +106,6 @@ export const useResumeQuizAttempt = () => {
       quizAttemptApi.resumeAttempt(examId, deviceToken ?? ""),
     onSuccess: (response) => {
       const data = response.data.data!;
-      // Hydrate store with fresh attempt data + new deviceToken
       dispatch(setQuizAttemptAction(data));
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {

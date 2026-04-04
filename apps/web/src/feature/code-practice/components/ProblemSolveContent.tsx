@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Clock, HardDrive, Loader2, Terminal, FileText, Hash, History, ChevronLeft } from "lucide-react";
+import { Clock, HardDrive, Loader2, Terminal, FileText, Hash, History, ChevronLeft, Download } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
 import { cn } from "@workspace/ui/lib/utils";
@@ -11,6 +11,7 @@ import {
   useSubmissionResult,
   useRunCode,
   useDebugCode,
+  useExportSubmission,
 } from "../queries/useCoding";
 import { DifficultyBadge } from "./DifficultyBadge";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
@@ -89,6 +90,7 @@ const ProblemSolveContent: React.FC = () => {
   const submitCode = useSubmitCode();
   const runCode = useRunCode();
   const debugCode = useDebugCode();
+  const exportMutation = useExportSubmission();
 
   const { data: submissionResult } = useSubmissionResult(submissionId || "");
   const submissions = submissionsData?.content || [];
@@ -113,7 +115,6 @@ const ProblemSolveContent: React.FC = () => {
         multifileTemplateCache.current[language] ?? problem?.multifileEntryTemplate ?? problem?.codeTemplate ?? "";
       setCode(template);
     } else {
-      // Reset về 1 file duy nhất với code template
       const template = templateCache.current[language] ?? problem?.codeTemplate ?? "";
       setCode(template);
       setEditorFiles([]);
@@ -149,14 +150,8 @@ const ProblemSolveContent: React.FC = () => {
     if (!problem) return;
     try {
       const request: SubmitCodeRequest = isMultiFile
-        ? {
-            problemId: problem.id,
-            language,
-            files: toCodeFiles(),
-            entryFile: getActiveFileName(),
-          }
+        ? { problemId: problem.id, language, files: toCodeFiles(), entryFile: getActiveFileName() }
         : { problemId: problem.id, language, sourceCode: code };
-
       const response = await submitCode.mutateAsync(request);
       if (response.data.data?.submissionId) {
         setSubmissionId(response.data.data.submissionId);
@@ -174,7 +169,6 @@ const ProblemSolveContent: React.FC = () => {
       const request: RunCodeRequest = isMultiFile
         ? { language, files: toCodeFiles(), entryFile: getActiveFileName() }
         : { problemId: problem.id, language, sourceCode: code };
-
       const response = await runCode.mutateAsync(request);
       if (response.data.data) {
         setRunResult(response.data.data);
@@ -191,14 +185,11 @@ const ProblemSolveContent: React.FC = () => {
       .split(",")
       .map((s) => parseInt(s.trim(), 10))
       .filter((n) => !isNaN(n) && n > 0);
-
     if (lines.length === 0) return;
-
     const parsedVars = debugVars
       .split(",")
       .map((s) => s.trim())
       .filter(Boolean);
-
     try {
       const request: DebugRequest = isMultiFile
         ? {
@@ -208,13 +199,7 @@ const ProblemSolveContent: React.FC = () => {
             files: toCodeFiles(),
             entryFile: getActiveFileName(),
           }
-        : {
-            language,
-            code,
-            lines,
-            variables: parsedVars.length > 0 ? parsedVars : undefined,
-          };
-
+        : { language, code, lines, variables: parsedVars.length > 0 ? parsedVars : undefined };
       const response = await debugCode.mutateAsync(request);
       if (response.data.data) {
         setDebugResult(response.data.data);
@@ -231,7 +216,6 @@ const ProblemSolveContent: React.FC = () => {
       ? (multifileTemplateCache.current[language] ?? problem?.multifileEntryTemplate ?? problem?.codeTemplate ?? "")
       : (templateCache.current[language] ?? problem?.codeTemplate ?? "");
     setCode(template);
-    // Clear breakpoints by resetting debugLines — CodeEditor watches this
     setDebugLines("");
   };
 
@@ -321,10 +305,25 @@ const ProblemSolveContent: React.FC = () => {
             ))}
           </div>
 
-          <div className="flex-1 overflow-auto p-6 space-y-6 bg-white">
+          <div className="flex-1 overflow-auto p-6 space-y-4 bg-white">
             {leftTab === "description" && (
               <>
                 <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">{problem.description}</div>
+
+                <div className="flex items-center gap-3 flex-wrap">
+                  {problem.timeLimitMs !== undefined && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600">
+                      <Clock className="w-3.5 h-3.5 text-blue-500" />
+                      Thời gian: <span className="text-slate-800 font-bold">{problem.timeLimitMs} ms</span>
+                    </div>
+                  )}
+                  {problem.memoryLimitMb !== undefined && (
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-xs font-semibold text-slate-600">
+                      <HardDrive className="w-3.5 h-3.5 text-blue-500" />
+                      Bộ nhớ: <span className="text-slate-800 font-bold">{problem.memoryLimitMb} MB</span>
+                    </div>
+                  )}
+                </div>
 
                 {problem.constraints && (
                   <div className="p-3 bg-gray-50 border border-gray-200 rounded-md">
@@ -347,7 +346,6 @@ const ProblemSolveContent: React.FC = () => {
                           <CardHeader className="py-2 px-3 bg-gray-50">
                             <CardTitle className="text-sm text-gray-900">Test Case {idx + 1}</CardTitle>
                           </CardHeader>
-
                           <CardContent className="px-3 space-y-3 mb-3">
                             <div>
                               <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">Input:</label>
@@ -355,7 +353,6 @@ const ProblemSolveContent: React.FC = () => {
                                 {tc.input}
                               </pre>
                             </div>
-
                             <div>
                               <label className="block text-xs font-semibold text-gray-600 uppercase mb-1">
                                 Expected Output:
@@ -385,19 +382,34 @@ const ProblemSolveContent: React.FC = () => {
                       <CardContent className="p-4">
                         <div className="flex items-center justify-between mb-2">
                           <SubmissionStatusBadge status={sub.status} showIcon />
-                          <span className="text-xs text-gray-500">
-                            {new Date(sub.createdAt).toLocaleString("vi-VN")}
-                          </span>
+                          <div className="flex items-center gap-2">
+                            <span className="text-xs text-gray-500">
+                              {new Date(sub.createdAt).toLocaleString("vi-VN")}
+                            </span>
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                exportMutation.mutate({ submissionId: sub.submissionId, format: "txt" });
+                              }}
+                              disabled={exportMutation.isPending}
+                              className="p-1 rounded hover:bg-gray-200 text-gray-400 hover:text-gray-700 transition-colors disabled:opacity-40"
+                              title="Xuất kết quả"
+                            >
+                              {exportMutation.isPending ? (
+                                <div className="w-3.5 h-3.5 border-2 border-current border-t-transparent rounded-full animate-spin" />
+                              ) : (
+                                <Download className="w-3.5 h-3.5" />
+                              )}
+                            </button>
+                          </div>
                         </div>
                         <div className="flex items-center gap-4 text-sm text-gray-600">
                           <span className="px-2 py-1 bg-gray-100 text-gray-700 rounded text-xs">{sub.language}</span>
                           <span className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            {sub.totalTimeMs}ms
+                            <Clock className="w-3 h-3" /> {sub.totalTimeMs}ms
                           </span>
                           <span className="flex items-center gap-1">
-                            <HardDrive className="w-3 h-3" />
-                            {sub.maxMemoryMb}MB
+                            <HardDrive className="w-3 h-3" /> {sub.maxMemoryMb}MB
                           </span>
                           <span
                             className={cn(
