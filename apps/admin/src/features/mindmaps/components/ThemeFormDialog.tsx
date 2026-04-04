@@ -62,8 +62,12 @@ export function ThemeFormDialog({ open, editTarget, isPending, onSubmit, onClose
 
   const handleNodeStylesChange = (raw: string) => {
     setNodeStylesRaw(raw);
+    setNodeStylesError(undefined);
+  };
+
+  const handleNodeStylesBlur = () => {
     try {
-      setForm((f) => ({ ...f, node_styles: JSON.parse(raw) }));
+      setForm((f) => ({ ...f, node_styles: JSON.parse(nodeStylesRaw) }));
       setNodeStylesError(undefined);
     } catch {
       setNodeStylesError("JSON không hợp lệ");
@@ -72,8 +76,12 @@ export function ThemeFormDialog({ open, editTarget, isPending, onSubmit, onClose
 
   const handleEdgeStyleChange = (raw: string) => {
     setEdgeStyleRaw(raw);
+    setEdgeStyleError(undefined);
+  };
+
+  const handleEdgeStyleBlur = () => {
     try {
-      setForm((f) => ({ ...f, edge_style: JSON.parse(raw) }));
+      setForm((f) => ({ ...f, edge_style: JSON.parse(edgeStyleRaw) }));
       setEdgeStyleError(undefined);
     } catch {
       setEdgeStyleError("JSON không hợp lệ");
@@ -91,7 +99,27 @@ export function ThemeFormDialog({ open, editTarget, isPending, onSubmit, onClose
   };
 
   const handleSubmit = () => {
-    if (nodeStylesError || edgeStyleError) return;
+    let valid = true;
+
+    try {
+      const parsedNode = JSON.parse(nodeStylesRaw);
+      setForm((f) => ({ ...f, node_styles: parsedNode }));
+      setNodeStylesError(undefined);
+    } catch {
+      setNodeStylesError("JSON không hợp lệ");
+      valid = false;
+    }
+
+    try {
+      const parsedEdge = JSON.parse(edgeStyleRaw);
+      setForm((f) => ({ ...f, edge_style: parsedEdge }));
+      setEdgeStyleError(undefined);
+    } catch {
+      setEdgeStyleError("JSON không hợp lệ");
+      valid = false;
+    }
+
+    if (!valid) return;
     onSubmit(form, thumbnail);
   };
 
@@ -195,6 +223,7 @@ export function ThemeFormDialog({ open, editTarget, isPending, onSubmit, onClose
               className="font-mono text-xs"
               value={nodeStylesRaw}
               onChange={(e) => handleNodeStylesChange(e.target.value)}
+              onBlur={handleNodeStylesBlur}
               placeholder={`vd:\n{\n  "root": { "background": "#4f46e5", "color": "#fff", "borderRadius": "12px" },\n  "branch": { "background": "#6366f1", "color": "#fff", "borderRadius": "8px" },\n  "leaf": { "background": "#e0e7ff", "color": "#3730a3", "borderRadius": "6px" }\n}`}
             />
             {nodeStylesError && <p className="text-destructive text-xs">{nodeStylesError}</p>}
@@ -208,6 +237,7 @@ export function ThemeFormDialog({ open, editTarget, isPending, onSubmit, onClose
               className="font-mono text-xs"
               value={edgeStyleRaw}
               onChange={(e) => handleEdgeStyleChange(e.target.value)}
+              onBlur={handleEdgeStyleBlur}
               placeholder={`vd:\n{\n  "stroke": "#6366f1",\n  "strokeWidth": 2,\n  "animated": false\n}`}
             />
             {edgeStyleError && <p className="text-destructive text-xs">{edgeStyleError}</p>}
