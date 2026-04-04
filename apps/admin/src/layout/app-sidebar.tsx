@@ -129,11 +129,7 @@ const AppSidebar: React.FC = () => {
     <div className="flex h-full flex-col" style={{ background: BG }}>
       <div className="flex items-center justify-between px-4 py-3 border-b border-white/6">
         <Link to="/" onClick={closeMobile}>
-          {open ? (
-            <img src="/Logo.png" alt="Bit Learning" className="h-9 w-32 object-contain" />
-          ) : (
-            <div className="h-9 w-8" />
-          )}
+          {open ? <img src="/Logo.png" alt="Bit Learning" className="h-9 w-32 object-contain" /> : <div className="" />}
         </Link>
         <button
           onClick={() => setOpen((p) => !p)}
