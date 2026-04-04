@@ -35,11 +35,11 @@ export const PostListPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto p-8">
       <div className="mb-8 flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Quản lý bài viết</h1>
-          <p className="text-muted-foreground">Xem xét và kiểm duyệt các bài viết trong hệ thống</p>
+          <h1 className="text-2xl font-bold mb-2">Quản lý bài viết</h1>
+          <p className="text-muted-foreground text-sm">Xem xét và kiểm duyệt các bài viết trong hệ thống</p>
         </div>
       </div>
 

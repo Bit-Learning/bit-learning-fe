@@ -66,11 +66,11 @@ const CurriculumListPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-8">
       <div className="flex justify-between items-center mb-6">
         <div>
           <h1 className="text-2xl font-bold">Quản lý chương trình học</h1>
-          <p className="text-muted-foreground">Quản lý các chương trình học và môn học</p>
+          <p className="text-muted-foreground text-sm">Quản lý các chương trình học và môn học</p>
         </div>
         <Button onClick={() => setCurriculumModal({ open: true })}>
           <Plus className="h-4 w-4 mr-2" />

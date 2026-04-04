@@ -106,11 +106,13 @@ export function QuestionApprovalList() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto p-8">
       <div className="flex items-center justify-between mb-4">
         <div>
-          <h1 className="text-3xl font-bold mb-2">Danh sách câu hỏi chờ phê duyệt</h1>
-          <p className="text-muted-foreground">Xem xét và phê duyệt các câu hỏi được đề xuất đưa vào Question Bank</p>
+          <h1 className="text-2xl font-bold mb-2">Danh sách câu hỏi chờ phê duyệt</h1>
+          <p className="text-muted-foreground text-sm">
+            Xem xét và phê duyệt các câu hỏi được đề xuất đưa vào Question Bank
+          </p>
         </div>
         {selectedQuestions.length > 0 && (
           <div className="flex items-center gap-2">
