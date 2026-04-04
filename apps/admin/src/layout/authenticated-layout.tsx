@@ -1,11 +1,11 @@
 import { Outlet } from "@tanstack/react-router";
-import { AppSidebar } from "@/layout/app-sidebar";
 import { SkipToMain } from "@/components/skip-to-main";
 import { SidebarInset, SidebarProvider } from "@/components/ui/sidebar";
 import { LayoutProvider } from "@/shared/context/layout-provider";
 import { SearchProvider } from "@/shared/context/search-provider";
 import { getCookie } from "@/shared/lib/cookies";
 import { cn } from "@/shared/lib/utils";
+import AppSidebar from "./app-sidebar";
 
 type AuthenticatedLayoutProps = {
   children?: React.ReactNode;
