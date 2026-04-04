@@ -53,9 +53,12 @@ export function StructureFormDialog({ open, editTarget, isPending, onSubmit, onC
 
   const handleElkOptionsChange = (raw: string) => {
     setElkOptionsRaw(raw);
+    setElkOptionsError(undefined);
+  };
+
+  const handleElkOptionsBlur = () => {
     try {
-      const parsed = JSON.parse(raw);
-      setForm((f) => ({ ...f, elk_options: parsed }));
+      setForm((f) => ({ ...f, elk_options: JSON.parse(elkOptionsRaw) }));
       setElkOptionsError(undefined);
     } catch {
       setElkOptionsError("JSON không hợp lệ");
@@ -63,8 +66,14 @@ export function StructureFormDialog({ open, editTarget, isPending, onSubmit, onC
   };
 
   const handleSubmit = () => {
-    if (elkOptionsError) return;
-    onSubmit(form, thumbnail);
+    try {
+      const parsed = JSON.parse(elkOptionsRaw);
+      setForm((f) => ({ ...f, elk_options: parsed }));
+      setElkOptionsError(undefined);
+      onSubmit({ ...form, elk_options: parsed }, thumbnail);
+    } catch {
+      setElkOptionsError("JSON không hợp lệ");
+    }
   };
 
   return (
@@ -123,6 +132,7 @@ export function StructureFormDialog({ open, editTarget, isPending, onSubmit, onC
               className="font-mono text-xs"
               value={elkOptionsRaw}
               onChange={(e) => handleElkOptionsChange(e.target.value)}
+              onBlur={handleElkOptionsBlur}
               placeholder={`vd:\n{\n  "elk.direction": "RIGHT",\n  "elk.layered.spacing.nodeNodeBetweenLayers": "80",\n  "elk.spacing.nodeNode": "40"\n}`}
             />
             {elkOptionsError && <p className="text-destructive text-xs">{elkOptionsError}</p>}

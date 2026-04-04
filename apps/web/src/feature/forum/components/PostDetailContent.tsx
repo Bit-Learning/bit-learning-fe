@@ -85,19 +85,19 @@ const PostDetailContent: React.FC = () => {
 
   const currentUser = { id: 1, firstName: "Bạn", lastName: "" };
 
-	const BackBar = (
-		<div className="border-b border-gray-200 sticky top-0 z-30 bg-white">
-			<div className="max-w-7xl mx-auto px-6 h-12 flex items-center">
-				<button
-					className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
-					onClick={() => navigate({ to: "/forum" })}
-				>
-					<ArrowLeft className="w-4 h-4" />
-					Quay lại diễn đàn
-				</button>
-			</div>
-		</div>
-	);
+  const BackBar = (
+    <div className="sticky top-0 z-30 bg-white">
+      <div className="max-w-7xl mx-auto px-6 h-12 flex items-center">
+        <button
+          className="flex items-center gap-2 text-sm font-semibold text-gray-600 hover:text-blue-600 transition-colors"
+          onClick={() => navigate({ to: "/forum" })}
+        >
+          <ArrowLeft className="w-4 h-4" />
+          Quay lại diễn đàn
+        </button>
+      </div>
+    </div>
+  );
 
   if (isPostLoading) {
     return (
@@ -243,33 +243,31 @@ const PostDetailContent: React.FC = () => {
           </div>
         )}
 
-				{fileAttachments.length > 0 && (
-					<div className="mb-8 space-y-2">
-						<p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">
-							Tài liệu đính kèm
-						</p>
-						{fileAttachments.map((file) => (
-							<a
-								key={file.id}
-								href={file.url}
-								target="_blank"
-								rel="noopener noreferrer"
-								className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group shadow-sm"
-							>
-								<div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
-									<Paperclip className="w-4 h-4 text-blue-600" />
-								</div>
-								<div className="flex-1 min-w-0">
-									<p className="text-sm font-medium text-gray-700 group-hover:text-blue-700 truncate transition-colors">
-										Tài liệu
-									</p>
-									<p className="text-xs text-gray-400">{file.type}</p>
-								</div>
-								<Download className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors shrink-0" />
-							</a>
-						))}
-					</div>
-				)}
+        {fileAttachments.length > 0 && (
+          <div className="mb-8 space-y-2">
+            <p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">Tài liệu đính kèm</p>
+            {fileAttachments.map((file) => (
+              <a
+                key={file.id}
+                href={file.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group shadow-sm"
+              >
+                <div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+                  <Paperclip className="w-4 h-4 text-blue-600" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-700 group-hover:text-blue-700 truncate transition-colors">
+                    Tài liệu
+                  </p>
+                  <p className="text-xs text-gray-400">{file.type}</p>
+                </div>
+                <Download className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors shrink-0" />
+              </a>
+            ))}
+          </div>
+        )}
 
         {(selectedPost.likes > 0 || selectedPost.dislikes > 0) && (
           <div className="flex items-center justify-between text-md text-gray-600 pb-2 mb-1">
@@ -313,68 +311,68 @@ const PostDetailContent: React.FC = () => {
           </button>
         </div>
 
-				<div id="comment-box" className="mb-8">
-					<h5 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-						{replyingTo ? (
-							<>
-								Đang trả lời bình luận
-								<button
-									className="text-xs text-gray-400 hover:text-red-500 font-normal flex items-center gap-1 transition-colors"
-									onClick={() => setReplyingTo(null)}
-								>
-									<X className="w-3 h-3" /> Hủy
-								</button>
-							</>
-						) : (
-							"Viết bình luận"
-						)}
-					</h5>
-					<div className="flex gap-3">
-						<AuthorAvatar author={currentUser} size="md" />
-						<div className="flex-1 space-y-3">
-							<Textarea
-								className="min-h-24 bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-2 focus:ring-blue-100 resize-none text-sm transition-all shadow-sm"
-								placeholder="Chia sẻ ý kiến hoặc đặt câu hỏi..."
-								value={comment}
-								onChange={(e) => setComment(e.target.value)}
-							/>
-							<div className="flex items-center justify-between">
-								<div className="flex gap-0.5">
-									{[
-										{
-											icon: <ImageIcon className="w-4 h-4" />,
-											label: "Thêm ảnh",
-										},
-										{
-											icon: <Paperclip className="w-4 h-4" />,
-											label: "Đính kèm",
-										},
-										{ icon: <AtSign className="w-4 h-4" />, label: "Nhắc tên" },
-									].map(({ icon, label }) => (
-										<button
-											key={label}
-											aria-label={label}
-											className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-										>
-											{icon}
-										</button>
-									))}
-								</div>
-								<button
-									className={`px-5 py-3 rounded-md text-sm font-bold transition-all ${
-										comment.trim()
-											? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
-											: "bg-gray-100 text-gray-400 cursor-not-allowed"
-									}`}
-									onClick={handleSubmitComment}
-									disabled={!comment.trim()}
-								>
-									Đăng bình luận
-								</button>
-							</div>
-						</div>
-					</div>
-				</div>
+        <div id="comment-box" className="mb-8">
+          <h5 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
+            {replyingTo ? (
+              <>
+                Đang trả lời bình luận
+                <button
+                  className="text-xs text-gray-400 hover:text-red-500 font-normal flex items-center gap-1 transition-colors"
+                  onClick={() => setReplyingTo(null)}
+                >
+                  <X className="w-3 h-3" /> Hủy
+                </button>
+              </>
+            ) : (
+              "Viết bình luận"
+            )}
+          </h5>
+          <div className="flex gap-3">
+            <AuthorAvatar author={currentUser} size="md" />
+            <div className="flex-1 space-y-3">
+              <Textarea
+                className="min-h-24 bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-2 focus:ring-blue-100 resize-none text-sm transition-all shadow-sm"
+                placeholder="Chia sẻ ý kiến hoặc đặt câu hỏi..."
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+              />
+              <div className="flex items-center justify-between">
+                <div className="flex gap-0.5">
+                  {[
+                    {
+                      icon: <ImageIcon className="w-4 h-4" />,
+                      label: "Thêm ảnh",
+                    },
+                    {
+                      icon: <Paperclip className="w-4 h-4" />,
+                      label: "Đính kèm",
+                    },
+                    { icon: <AtSign className="w-4 h-4" />, label: "Nhắc tên" },
+                  ].map(({ icon, label }) => (
+                    <button
+                      key={label}
+                      aria-label={label}
+                      className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                    >
+                      {icon}
+                    </button>
+                  ))}
+                </div>
+                <button
+                  className={`px-5 py-3 rounded-md text-sm font-bold transition-all ${
+                    comment.trim()
+                      ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
+                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
+                  }`}
+                  onClick={handleSubmitComment}
+                  disabled={!comment.trim()}
+                >
+                  Đăng bình luận
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
 
         <div className="flex items-center justify-between mb-4">
           <h5 className="text-sm font-bold text-gray-900">
