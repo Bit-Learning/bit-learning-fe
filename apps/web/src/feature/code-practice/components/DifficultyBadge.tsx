@@ -1,44 +1,28 @@
-import React from "react";
 import { Badge } from "@workspace/ui/components/Badge";
-import { Difficulty } from "../types/coding.type";
 import { cn } from "@workspace/ui/lib/utils";
 
-interface DifficultyBadgeProps {
-  difficulty: Difficulty;
-  className?: string;
-}
+export const DIFFICULTY_MAP: Record<string, { label: string; badge: string; bar: string; border: string }> = {
+  HARD: { label: "KHÓ", badge: "text-red-600 bg-red-50", bar: "bg-red-500", border: "border-l-red-500" },
+  MEDIUM: {
+    label: "TRUNG BÌNH",
+    badge: "text-orange-500 bg-orange-50",
+    bar: "bg-orange-500",
+    border: "border-l-orange-500",
+  },
+  EASY: { label: "DỄ", badge: "text-green-600 bg-green-50", bar: "bg-green-500", border: "border-l-green-500" },
+};
 
-export const DifficultyBadge: React.FC<DifficultyBadgeProps> = ({ difficulty, className }) => {
-  const getConfig = () => {
-    switch (difficulty) {
-      case Difficulty.EASY:
-        return {
-          label: "Dễ",
-          className: "bg-green-100 text-green-700 border-green-200",
-        };
-      case Difficulty.MEDIUM:
-        return {
-          label: "Trung bình",
-          className: "bg-orange-100 text-orange-700 border-orange-200",
-        };
-      case Difficulty.HARD:
-        return {
-          label: "Khó",
-          className: "bg-red-100 text-red-700 border-red-200",
-        };
-      default:
-        return {
-          label: difficulty,
-          className: "bg-gray-100 text-gray-700 border-gray-200",
-        };
-    }
+export const DifficultyBadge = ({ difficulty }: { difficulty: string }) => {
+  const cfg = DIFFICULTY_MAP[difficulty] ?? {
+    label: difficulty,
+    badge: "text-gray-600 bg-gray-50",
+    bar: "bg-gray-400",
+    border: "",
   };
-
-  const config = getConfig();
-
   return (
-    <Badge variant="outline" className={cn("font-medium border", config.className, className)}>
-      {config.label}
+    <Badge className={cn("inline-flex items-center gap-1.5 text-[11px] font-bold px-2 py-0.5 rounded-sm", cfg.badge)}>
+      <span className={cn("w-1 h-3 rounded-sm", cfg.bar)} />
+      {cfg.label}
     </Badge>
   );
 };

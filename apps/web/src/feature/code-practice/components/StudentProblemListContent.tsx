@@ -1,21 +1,23 @@
 import React, { useState } from "react";
-import { Search, Code2, Hash, Heart, RefreshCw, CheckCircle, Send, TrendingUp, Users } from "lucide-react";
-import { Input } from "@workspace/ui/components/Input";
-import { Button } from "@workspace/ui/components/Button";
-import { Badge } from "@workspace/ui/components/Badge";
-import { Card, CardContent } from "@workspace/ui/components/Card";
+import { Star, Filter } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
-import { Pagination } from "@/shared/components/Pagination";
 import { useProblems, useToggleFavorite } from "../queries/useCoding";
-import { DifficultyBadge } from "../components/DifficultyBadge";
-import { ProblemStatisticsCell } from "./ProblemStatisticsCell";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import { DIFFICULTY_MAP, DifficultyBadge } from "./DifficultyBadge";
+import { Pagination } from "@/shared/components/Pagination";
+import { ProblemStatsCard } from "./ProblemStatsCard";
+
+const Tag = ({ label }: { label: string }) => (
+  <span className="bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-tight px-2 py-1 rounded">
+    {label}
+  </span>
+);
 
 const StudentProblemListContent: React.FC = () => {
-  const [search, setSearch] = useState<string>("");
-  const [difficulty, setDifficulty] = useState<string>("all");
-  const [page, setPage] = useState<number>(0);
+  const [search, setSearch] = useState("");
+  const [difficulty, setDifficulty] = useState("all");
+  const [page, setPage] = useState(0);
   const size = 10;
 
   const navigate = useNavigate();
@@ -39,6 +41,9 @@ const StudentProblemListContent: React.FC = () => {
     return matchSearch && matchDifficulty;
   });
 
+  const solvedCount = problems.length;
+  const progressPct = totalElements > 0 ? Math.round((solvedCount / totalElements) * 100) : 0;
+
   const handleFavorite = (e: React.MouseEvent, problemId: string) => {
     e.stopPropagation();
     toggleFavorite.mutate(problemId);
@@ -54,159 +59,164 @@ const StudentProblemListContent: React.FC = () => {
     setPage(0);
   };
 
-  if (isLoading) {
-    return <Loader />;
-  }
+  if (isLoading) return <Loader />;
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
-        <div className="mb-6">
-          <div className="flex items-center gap-4 mb-2">
-            <div className="p-3 rounded-lg bg-blue-600">
-              <Code2 className="w-7 h-7 text-white" />
+    <div className="min-h-screen bg-slate-50">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+        <div className="flex flex-col md:flex-row md:items-end justify-between gap-6">
+          <div>
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-2">Không gian Luyện tập</h1>
+            <p className="text-slate-500 text-base max-w-xl">
+              Rèn luyện tư duy kiến trúc thông qua các thử thách logic. Giải quyết, tối ưu hóa và làm chủ nghệ thuật mã
+              hóa.
+            </p>
+          </div>
+
+          <div className="flex items-center gap-4 bg-white/80 backdrop-blur border border-slate-200 rounded-2xl px-5 py-3 shadow-sm">
+            <div className="text-right">
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Bài tập đã giải</p>
+              <p className="text-2xl font-black text-blue-600 leading-none">
+                {solvedCount} <span className="text-slate-400 font-semibold text-lg">/ {totalElements}</span>
+              </p>
             </div>
-            <div>
-              <h1 className="text-3xl font-bold text-gray-900">Danh sách bài tập lập trình</h1>
-              <nav className="flex text-sm text-gray-500 mt-1">
-                <span className="text-gray-900 font-medium">Luyện tập</span>
-              </nav>
+            <div className="relative w-12 h-12 shrink-0">
+              <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
+                <circle cx="24" cy="24" r="20" fill="none" stroke="#e2e8f0" strokeWidth="4" />
+                <circle
+                  cx="24"
+                  cy="24"
+                  r="20"
+                  fill="none"
+                  stroke="#2563eb"
+                  strokeWidth="4"
+                  strokeDasharray={`${2 * Math.PI * 20}`}
+                  strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPct / 100)}`}
+                  strokeLinecap="round"
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-700">
+                {progressPct}%
+              </span>
             </div>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-12 gap-4">
-          <div className="md:col-span-8 relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <Input
+        <div className="bg-white/80 backdrop-blur border border-slate-200/60 rounded-2xl px-5 py-4 shadow-sm flex flex-wrap items-center gap-6">
+          <div className="flex items-center gap-3">
+            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Độ khó:</span>
+            <div className="flex bg-slate-100 p-1 rounded-xl gap-0.5">
+              {[
+                { value: "all", label: "Tất cả" },
+                { value: "EASY", label: "Dễ" },
+                { value: "MEDIUM", label: "Trung bình" },
+                { value: "HARD", label: "Khó" },
+              ].map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => {
+                    setDifficulty(opt.value);
+                    setPage(0);
+                  }}
+                  className={cn(
+                    "cursor-pointer px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
+                    difficulty === opt.value ? "bg-white shadow text-blue-600" : "text-slate-500 hover:text-slate-700",
+                  )}
+                >
+                  {opt.label}
+                </button>
+              ))}
+            </div>
+          </div>
+
+          <div className="flex-1 min-w-45">
+            <input
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
-              placeholder="Tìm kiếm bài tập theo tên..."
-              className="pl-10 h-10 bg-white border-gray-200"
+              onChange={(e) => {
+                setSearch(e.target.value);
+                setPage(0);
+              }}
+              placeholder="Tìm kiếm bài tập..."
+              className="w-full h-9 px-4 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-slate-400"
             />
           </div>
 
-          <div className="md:col-span-3">
-            <select
-              value={difficulty}
-              onChange={(e) => setDifficulty(e.target.value)}
-              className="w-full h-10 px-3 text-sm rounded-md border border-gray-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              <option value="all">Tất cả độ khó</option>
-              <option value="EASY">Dễ</option>
-              <option value="MEDIUM">Trung bình</option>
-              <option value="HARD">Khó</option>
-            </select>
-          </div>
-
-          <div className="md:col-span-1">
-            <Button variant="outline" className="w-full h-10 border-gray-300" onClick={handleReset}>
-              <RefreshCw className="w-4 h-4" />
-            </Button>
-          </div>
+          <button
+            onClick={handleReset}
+            className="ml-auto flex items-center gap-2 text-slate-400 hover:text-blue-600 text-xs font-bold transition-colors"
+          >
+            <Filter className="w-3.5 h-3.5" /> Đặt lại bộ lọc
+          </button>
         </div>
-        <Card className="bg-white p-0 border-2 border-gray-200 rounded-md">
-          <CardContent className="px-0">
-            <div className="overflow-x-auto">
-              <table className="w-full text-left border-collapse">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-200">
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider w-35">
-                      Trạng thái
-                    </th>
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">
-                      Tên bài tập
-                    </th>
+        <div className="space-y-4">
+          {filteredProblems.length === 0 && (
+            <div className="text-center py-16 text-slate-400 text-sm">Không tìm thấy bài tập nào.</div>
+          )}
 
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">Độ khó</th>
-
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <Users className="w-3 h-3" />
-                        Người đã giải
-                      </div>
-                    </th>
-
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">
-                      <div className="flex items-center gap-1">
-                        <TrendingUp className="w-3 h-3" />
-                        Tỷ lệ đúng
-                      </div>
-                    </th>
-
-                    <th className="px-6 py-4 text-sm font-semibold text-gray-800 uppercase tracking-wider">Chủ đề</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-200">
-                  {filteredProblems.map((problem, index) => (
-                    <tr
-                      key={problem.id}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer group"
-                      onClick={() => handleProblemClick(problem.id)}
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <button
-                            onClick={(e) => handleFavorite(e, problem.id)}
-                            className="p-1 rounded hover:bg-gray-100 transition-colors"
-                          >
-                            <Heart
-                              className={cn(
-                                "w-4 h-4 transition-colors",
-                                problem.isFavorite ? "fill-red-500 text-red-500" : "text-gray-400",
-                              )}
-                            />
-                          </button>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span className="text-gray-500 text-sm">{page * size + index + 1}.</span>
-                          <span className="font-medium text-gray-900 group-hover:text-blue-600 transition-colors">
-                            {problem.title}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <DifficultyBadge difficulty={problem.difficulty} />
-                      </td>
-                      <ProblemStatisticsCell problemId={problem.id} />
-                      <td className="px-6 py-4">
-                        <div className="flex flex-wrap gap-1">
-                          {problem.tags?.slice(0, 3).map((tag) => (
-                            <Badge
-                              key={tag.id}
-                              variant="secondary"
-                              className="text-xs bg-gray-100 text-gray-700 border-gray-200"
-                            >
-                              <Hash className="w-2.5 h-2.5 mr-0.5" />
-                              {tag.name}
-                            </Badge>
-                          ))}
-                          {problem.tags && problem.tags.length > 3 && (
-                            <Badge variant="secondary" className="text-xs bg-gray-100 text-gray-700 border-gray-200">
-                              +{problem.tags.length - 3}
-                            </Badge>
+          {filteredProblems.map((problem, index) => {
+            const diffCfg = DIFFICULTY_MAP[problem.difficulty] ?? { border: "border-l-slate-300" };
+            return (
+              <div
+                key={index}
+                onClick={() => handleProblemClick(problem.id)}
+                className={cn(
+                  "group bg-white border border-slate-200/60 border-l-4 rounded-xl px-6 py-5 flex flex-col md:flex-row items-start md:items-center gap-6 shadow-sm hover:shadow-md transition-all cursor-pointer",
+                  diffCfg.border,
+                )}
+              >
+                <div className="flex-1 min-w-0">
+                  <div className="flex flex-wrap items-center gap-3 mb-2">
+                    <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
+                      {problem.title}
+                      <button
+                        onClick={(e) => handleFavorite(e, problem.id)}
+                        className="text-slate-300 hover:text-amber-400 transition-colors"
+                      >
+                        <Star
+                          className={cn(
+                            "w-5 h-5 transition-colors",
+                            problem.isFavorite ? "fill-amber-400 text-amber-400" : "",
                           )}
-                        </div>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
+                        />
+                      </button>
+                    </h3>
+                    <DifficultyBadge difficulty={problem.difficulty} />
+                  </div>
 
-            <div className="px-6 border-t border-gray-200 flex items-center justify-between">
-              <p className="text-sm text-gray-800 py-4">
-                Hiển thị <span className="font-medium text-gray-900">{page * size + 1}</span> –{" "}
-                <span className="font-medium text-gray-900">{Math.min((page + 1) * size, totalElements)}</span> trong
-                tổng số <span className="font-medium text-gray-900">{totalElements}</span> bài tập
-              </p>
-              {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
-            </div>
-          </CardContent>
-        </Card>
+                  {problem.description && (
+                    <p className="text-slate-500 text-sm mb-3 line-clamp-1">{problem.description}</p>
+                  )}
+
+                  <div className="flex flex-wrap gap-1.5">
+                    {problem.tags?.map((tag) => (
+                      <Tag key={tag.id} label={tag.name} />
+                    ))}
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-8 shrink-0">
+                  <ProblemStatsCard problemId={problem.id} />
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleProblemClick(problem.id);
+                    }}
+                    className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-4 py-2.5 rounded-md font-bold text-sm shadow transition-all"
+                  >
+                    Giải ngay
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center pt-4">
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+          </div>
+        )}
       </main>
     </div>
   );
