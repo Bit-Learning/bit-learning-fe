@@ -32,6 +32,7 @@ export interface TemplateResponse {
   description?: string;
   url: string;
   thumbnailUrl?: string;
+  previewPdfUrl: string;
   createdAt: string;
   updatedAt: string;
 }
