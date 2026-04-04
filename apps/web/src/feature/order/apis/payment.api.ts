@@ -16,6 +16,12 @@ export const paymentApi = {
     });
   },
 
+  reOrder(code: string): Promise<AxiosResponse<ApiResponse<string>>> {
+    return api.post("/payments/wallet/reorder", null, {
+      params: { code },
+    });
+  },
+
   addBalanceToWallet(request: AddBalanceToWalletRequest): Promise<AxiosResponse<ApiResponse<string>>> {
     return api.post("/payments/wallet/top-up", request);
   },

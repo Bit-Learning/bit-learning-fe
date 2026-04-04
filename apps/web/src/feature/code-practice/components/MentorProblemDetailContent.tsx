@@ -378,13 +378,13 @@ const MentorProblemDetailContent: React.FC = () => {
                   Gắn thẻ
                 </h4>
                 <div className="flex flex-wrap gap-2">
-                  {problem.tags.map((tag) => (
+                  {problem.tags.map((tag, index) => (
                     <Badge
-                      key={tag}
+                      key={index}
                       variant="outline"
                       className="px-3 py-1 bg-blue-100 dark:bg-slate-800 text-blue-600 dark:text-slate-200 text-xs font-semibold border-blue-400 dark:border-slate-700 hover:border-blue-500/50 cursor-pointer"
                     >
-                      {tag}
+                      {tag.name}
                     </Badge>
                   ))}
                 </div>

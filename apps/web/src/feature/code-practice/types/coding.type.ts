@@ -1,3 +1,5 @@
+import type { TagResponse } from "./tag.type";
+
 export enum Difficulty {
   EASY = "EASY",
   MEDIUM = "MEDIUM",
@@ -339,7 +341,7 @@ export interface ProblemBriefResponse {
   timeLimitMs: number;
   memoryLimitMb: number;
   isPublic: boolean;
-  tags: string[];
+  tags: TagResponse[];
   isFavorite: boolean;
   createdAt: string;
   updatedAt: string;
@@ -355,7 +357,7 @@ export interface ProblemDetailResponse {
   timeLimitMs: number;
   memoryLimitMb: number;
   isPublic: boolean;
-  tags: string[];
+  tags: TagResponse[];
   sampleTestcases: TestCaseResponse[];
   codeTemplate: string;
   multifileEntryTemplate?: string;
