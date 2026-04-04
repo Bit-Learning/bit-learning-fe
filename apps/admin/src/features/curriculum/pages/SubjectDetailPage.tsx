@@ -80,7 +80,7 @@ const SubjectDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto p-6">
+    <div className="container mx-auto p-8">
       <div className="mb-6">
         <Button variant="ghost" size="sm" className="mb-4" onClick={() => navigate({ to: "/curriculum" })}>
           <ArrowLeft className="h-4 w-4 mr-2" />

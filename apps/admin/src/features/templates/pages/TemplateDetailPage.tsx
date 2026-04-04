@@ -110,18 +110,17 @@ export const TemplateDetailPage: React.FC = () => {
           </div>
 
           <div className="grid grid-cols-12 gap-8">
-            {/* PDF Viewer */}
             <div className="col-span-12 lg:col-span-8">
               <Card className="overflow-hidden border-slate-200 shadow-sm" style={{ height: 680 }}>
                 {template.url ? (
                   <Worker workerUrl={PDFJS_WORKER_URL}>
                     <div style={{ height: "100%" }}>
                       <Viewer
-                        fileUrl={template.url}
+                        fileUrl={template.previewPdfUrl}
                         plugins={[defaultLayoutPluginInstance]}
                         renderLoader={(percentages) => (
                           <div className="flex flex-col items-center justify-center h-full gap-3">
-                            <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
+                            <Loader2 className="w-8 h-8 animate-spin text-primary" />
                             <p className="text-sm text-slate-500">Đang tải... {Math.round(percentages)}%</p>
                           </div>
                         )}
@@ -130,10 +129,10 @@ export const TemplateDetailPage: React.FC = () => {
                             <BookOpen size={40} className="opacity-30" />
                             <p className="text-sm">Không thể tải file xem trước.</p>
                             <a
-                              href={template.url}
+                              href={template.previewPdfUrl}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-sm text-blue-600 hover:underline flex items-center gap-1"
+                              className="text-sm text-primary hover:underline flex items-center gap-1"
                             >
                               <ExternalLink size={14} />
                               Mở trực tiếp

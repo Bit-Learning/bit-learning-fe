@@ -14,7 +14,6 @@ import {
   Shield,
   ToolboxIcon,
   Tag,
-  Code2,
 } from "lucide-react";
 import type { NavGroup } from "../types";
 
@@ -32,7 +31,6 @@ export const navGroups: NavGroup[] = [
       { title: "Quản lí bài viết", url: "/posts", icon: MessageSquareText },
       { title: "Quản lí câu hỏi", url: "/questions", icon: FileQuestion },
       { title: "Quản lí cuộc thi", url: "/contests", icon: Trophy },
-      { title: "Quản lí bài tập", url: "/problems", icon: Code2 },
       { title: "Quản lí template", url: "/templates", icon: PresentationIcon },
       { title: "Quản lí game học tập", url: "/apps/games", icon: Gamepad2 },
       { title: "Quản lý tags", url: "/tags", icon: Tag },

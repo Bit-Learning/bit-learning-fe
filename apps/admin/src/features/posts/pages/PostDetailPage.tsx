@@ -67,7 +67,7 @@ export const PostDetailPage: React.FC = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-8">
+    <div className="container mx-auto px-8">
       <Button variant="ghost" className="mb-6" onClick={() => navigate({ to: "/posts" })}>
         <ArrowLeft className="w-4 h-4 mr-2" />
         Quay lại danh sách

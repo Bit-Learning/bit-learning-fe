@@ -25,35 +25,29 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
     onPageChange(page);
   };
 
-  // Generate page numbers to display
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
-    const maxVisible = 5; // Maximum number of page buttons to show
+    const maxVisible = 5;
 
     if (totalPages <= maxVisible) {
-      // Show all pages if total is less than max
       for (let i = 0; i < totalPages; i++) {
         pages.push(i);
       }
     } else {
-      // Always show first page
       pages.push(0);
 
       if (currentPage <= 2) {
-        // Near the start
         for (let i = 1; i < maxVisible - 1; i++) {
           pages.push(i);
         }
         pages.push("...");
         pages.push(totalPages - 1);
       } else if (currentPage >= totalPages - 3) {
-        // Near the end
         pages.push("...");
         for (let i = totalPages - maxVisible + 1; i < totalPages; i++) {
           pages.push(i);
         }
       } else {
-        // In the middle
         pages.push("...");
         pages.push(currentPage - 1);
         pages.push(currentPage);
@@ -71,7 +65,7 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-center gap-2">
+    <div className="flex items-center justify-center gap-2 py-3">
       <Button variant="outline" size="icon" onClick={handlePrevious} disabled={currentPage === 0} className="h-9 w-9">
         <ChevronLeft className="h-4 w-4" />
       </Button>
