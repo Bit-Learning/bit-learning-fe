@@ -165,7 +165,7 @@ const ProblemSolveContent: React.FC = () => {
     if (!problem) return;
     try {
       const request: RunCodeRequest = isMultiFile
-        ? { language, files: toCodeFiles(), entryFile: getActiveFileName() }
+        ? { problemId: problem.id, language, files: toCodeFiles(), entryFile: getActiveFileName() }
         : { problemId: problem.id, language, sourceCode: code };
       const response = await runCode.mutateAsync(request);
       if (response.data.data) {
