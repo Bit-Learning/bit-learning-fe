@@ -191,6 +191,7 @@ const ProblemSolveContent: React.FC = () => {
   };
 
   const handleDebug = async (): Promise<void> => {
+    if (!problem) return;
     const lines = debugLines
       .split(",")
       .map((s) => parseInt(s.trim(), 10))
@@ -199,6 +200,7 @@ const ProblemSolveContent: React.FC = () => {
     try {
       const request: DebugRequest = isMultiFile
         ? {
+            problemId: problem.id,
             language,
             lines,
             files: toCodeFiles(),
@@ -206,6 +208,7 @@ const ProblemSolveContent: React.FC = () => {
             input: debugInput || undefined,
           }
         : {
+            problemId: problem.id,
             language,
             code,
             lines,

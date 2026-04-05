@@ -104,23 +104,86 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
-  const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
+  // resizable bottom panel
+  const [bottomPanelHeight, setBottomPanelHeight] = useState<number>(280);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const isDragging = useRef(false);
 
-  const toggleBreakpoint = useCallback((lineNum: number) => {
-    setBreakpoints((prev) => {
-      const next = new Set(prev);
-      next.has(lineNum) ? next.delete(lineNum) : next.add(lineNum);
-      return next;
-    });
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    isDragging.current = true;
+    document.body.style.cursor = "row-resize";
+    document.body.style.userSelect = "none";
   }, []);
 
-  const bpKey = [...breakpoints].sort((a, b) => a - b).join(",");
+  useEffect(() => {
+    let rafId: number | null = null;
+    let prevY = 0;
+
+    const onMouseMove = (e: MouseEvent) => {
+      if (!isDragging.current) return;
+      const delta = prevY - e.clientY; // moving up = positive = increase height
+      prevY = e.clientY;
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        rafId = null;
+        if (!isDragging.current || !containerRef.current) return;
+        const containerH = containerRef.current.getBoundingClientRect().height;
+        setBottomPanelHeight((prev) => Math.min(Math.max(prev + delta, 120), containerH - 100));
+      });
+    };
+
+    const onMouseDown = (e: MouseEvent) => {
+      prevY = e.clientY;
+    };
+
+    const onMouseUp = () => {
+      if (!isDragging.current) return;
+      isDragging.current = false;
+      if (rafId !== null) {
+        cancelAnimationFrame(rafId);
+        rafId = null;
+      }
+      document.body.style.cursor = "";
+      document.body.style.userSelect = "";
+    };
+
+    document.addEventListener("mousedown", onMouseDown);
+    document.addEventListener("mousemove", onMouseMove);
+    document.addEventListener("mouseup", onMouseUp);
+    return () => {
+      document.removeEventListener("mousedown", onMouseDown);
+      document.removeEventListener("mousemove", onMouseMove);
+      document.removeEventListener("mouseup", onMouseUp);
+      if (rafId !== null) cancelAnimationFrame(rafId);
+    };
+  }, []);
+
+  // breakpoints per file: Map<fileId, Set<lineNum>>
+  const [breakpointMap, setBreakpointMap] = useState<Map<string, Set<number>>>(new Map());
+
+  const activeBreakpoints: Set<number> = breakpointMap.get(activeFileId) ?? new Set();
+
+  const toggleBreakpoint = useCallback(
+    (lineNum: number) => {
+      setBreakpointMap((prev) => {
+        const next = new Map(prev);
+        const fileSet = new Set(next.get(activeFileId) ?? []);
+        fileSet.has(lineNum) ? fileSet.delete(lineNum) : fileSet.add(lineNum);
+        next.set(activeFileId, fileSet);
+        return next;
+      });
+    },
+    [activeFileId],
+  );
+
+  const bpKey = [...activeBreakpoints].sort((a, b) => a - b).join(",");
   useEffect(() => {
     onDebugLinesChange(bpKey);
   }, [bpKey]);
 
   useEffect(() => {
-    if (debugLines === "") setBreakpoints(new Set());
+    if (debugLines === "") setBreakpointMap(new Map());
   }, [debugLines]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -373,7 +436,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const lineCount = activeFile.content.split("\n").length;
 
   return (
-    <div className="flex flex-col h-full overflow-hidden">
+    <div ref={containerRef} className="flex flex-col h-full overflow-hidden">
       <div className="h-12 flex items-center bg-gray-800 border-b border-gray-700">
         <div className="flex items-center px-4">
           <div className="flex gap-1.5">
@@ -522,7 +585,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         </div>
       </div>
 
-      <div className={cn("relative overflow-hidden flex min-h-0", hasBottomPanel ? "h-[55%]" : "flex-1")}>
+      <div className={cn("relative overflow-hidden flex min-h-0", hasBottomPanel ? "flex-1" : "flex-1")}>
         {formatMessage && (
           <div className="absolute bottom-0 left-0 right-0 bg-orange-900/30 border-b border-orange-700 px-4 py-2 flex items-center gap-3 z-10">
             <AlertCircle className="w-4 h-4 text-orange-400 shrink-0" />
@@ -540,7 +603,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <div className="font-mono text-sm text-right" style={{ lineHeight: 1.6 }}>
             {Array.from({ length: lineCount }, (_, idx) => {
               const lineNum = idx + 1;
-              const isBp = breakpoints.has(lineNum);
+              const isBp = activeBreakpoints.has(lineNum);
               return (
                 <div
                   key={lineNum}
@@ -579,7 +642,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           )}
 
           <div className="absolute inset-0 pointer-events-none" style={{ paddingTop: "1rem", lineHeight: 1.6 }}>
-            {[...breakpoints].map((lineNum) => (
+            {[...activeBreakpoints].map((lineNum) => (
               <div
                 key={lineNum}
                 className="absolute left-0 right-0 bg-red-500/10"
@@ -607,7 +670,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       </div>
 
       {hasBottomPanel && (
-        <div className="flex-1 min-h-0 bg-gray-950 border-t border-gray-800 flex flex-col">
+        <div
+          onMouseDown={handleDividerMouseDown}
+          className="shrink-0 h-1.5 bg-gray-800 hover:bg-blue-500/40 active:bg-blue-500/60 cursor-row-resize transition-colors flex items-center justify-center group"
+        >
+          <div className="w-8 h-0.5 rounded-full bg-gray-600 group-hover:bg-blue-400 transition-colors" />
+        </div>
+      )}
+
+      {hasBottomPanel && (
+        <div
+          className="shrink-0 bg-gray-950 border-t border-gray-800 flex flex-col overflow-hidden"
+          style={{ height: bottomPanelHeight }}
+        >
           <div className="px-4 py-0 border-b border-gray-800 flex items-center justify-between bg-gray-900">
             <div className="flex items-center gap-1">
               {submissionResult && (
@@ -746,7 +821,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
             {bottomTab === "debug" && (
               <div className="h-full">
-                <DebugPanel result={debugResult} isDebugging={isDebugging} breakpointCount={breakpoints.size} />
+                <DebugPanel result={debugResult} isDebugging={isDebugging} breakpointCount={activeBreakpoints.size} />
               </div>
             )}
           </div>
@@ -805,9 +880,9 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <>
                 <Bug className="w-4 h-4" />
                 <span>Debug</span>
-                {breakpoints.size > 0 && (
+                {activeBreakpoints.size > 0 && (
                   <span className="bg-red-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                    {breakpoints.size}
+                    {activeBreakpoints.size}
                   </span>
                 )}
               </>
@@ -843,10 +918,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
         <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
           <Bug className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
           <span className="text-xs text-gray-400 shrink-0">Breakpoints:</span>
-          {breakpoints.size === 0 ? (
+          {activeBreakpoints.size === 0 ? (
             <span className="text-xs text-gray-600 italic">Click vào số dòng để đặt breakpoint</span>
           ) : (
-            [...breakpoints]
+            [...activeBreakpoints]
               .sort((a, b) => a - b)
               .map((ln) => (
                 <button
