@@ -478,6 +478,7 @@ export interface DebugRequest {
 export interface DebugStep {
   line: number;
   iteration: number;
+  file?: string;
   variables: Record<string, string>;
 }
 
