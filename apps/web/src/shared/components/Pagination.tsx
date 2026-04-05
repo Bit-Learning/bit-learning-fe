@@ -6,9 +6,10 @@ interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  darkMode?: boolean;
 }
 
-export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange, darkMode = false }) => {
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
@@ -39,14 +40,23 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
       <button
         onClick={() => onPageChange(Math.max(0, currentPage - 1))}
         disabled={currentPage === 0}
-        className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className={cn(
+          "w-9 h-9 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30",
+          darkMode ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100",
+        )}
       >
         <ChevronLeft className="w-4 h-4" />
       </button>
 
       {pageNumbers.map((p, i) =>
         p === "..." ? (
-          <span key={`ellipsis-${i}`} className="w-9 h-9 flex items-center justify-center text-gray-400 text-sm">
+          <span
+            key={`ellipsis-${i}`}
+            className={cn(
+              "w-9 h-9 flex items-center justify-center text-sm",
+              darkMode ? "text-gray-500" : "text-gray-400",
+            )}
+          >
             ...
           </span>
         ) : (
@@ -55,7 +65,13 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
             onClick={() => onPageChange(p as number)}
             className={cn(
               "w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold transition-colors",
-              currentPage === p ? "bg-blue-600 text-white shadow" : "text-gray-600 hover:bg-gray-100",
+              currentPage === p
+                ? darkMode
+                  ? "bg-blue-500 text-white shadow"
+                  : "bg-blue-600 text-white shadow"
+                : darkMode
+                  ? "text-gray-300 hover:bg-white/10"
+                  : "text-gray-600 hover:bg-gray-100",
             )}
           >
             {(p as number) + 1}
@@ -66,7 +82,10 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
       <button
         onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
         disabled={currentPage === totalPages - 1}
-        className="w-9 h-9 rounded-lg flex items-center justify-center text-gray-500 hover:bg-gray-100 disabled:opacity-30 transition-colors"
+        className={cn(
+          "w-9 h-9 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30",
+          darkMode ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100",
+        )}
       >
         <ChevronRight className="w-4 h-4" />
       </button>
