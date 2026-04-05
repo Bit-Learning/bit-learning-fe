@@ -42,13 +42,14 @@ export const submissionKeys = {
   stats: () => [...submissionKeys.all, "stats"] as const,
 };
 
-export const useProblems = (filters?: ProblemFilters) => {
+export const useProblems = (filters?: ProblemFilters, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: problemKeys.list(filters),
     queryFn: async () => {
       const response = await problemApi.getProblems(filters);
       return response.data;
     },
+    enabled: options?.enabled ?? true,
   });
 };
 
