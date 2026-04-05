@@ -1,42 +1,27 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import {
-	Clock,
-	HardDrive,
-	Loader2,
-	Terminal,
-	FileText,
-	Hash,
-	History,
-	ChevronLeft,
-	Download,
-} from "lucide-react";
+import { Clock, HardDrive, Loader2, Terminal, FileText, Hash, History, ChevronLeft, Download } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@workspace/ui/components/Card";
+import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
-	useProblemDetail,
-	useProblemSubmissions,
-	useSubmitCode,
-	useSubmissionResult,
-	useRunCode,
-	useDebugCode,
-	useExportSubmission,
+  useProblemDetail,
+  useProblemSubmissions,
+  useSubmitCode,
+  useSubmissionResult,
+  useRunCode,
+  useDebugCode,
+  useExportSubmission,
 } from "../queries/useCoding";
 import { DifficultyBadge } from "./DifficultyBadge";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
 import {
-	Language,
-	RunCodeResponse,
-	DebugResponse,
-	SubmitCodeRequest,
-	RunCodeRequest,
-	DebugRequest,
+  Language,
+  RunCodeResponse,
+  DebugResponse,
+  SubmitCodeRequest,
+  RunCodeRequest,
+  DebugRequest,
 } from "../types/coding.type";
 import { CodeEditor } from "./CodeEditor";
 import { EditorFile } from "./FileTab";
@@ -109,6 +94,12 @@ const ProblemSolveContent: React.FC = () => {
   const { data: submissionResult } = useSubmissionResult(submissionId || "");
   const submissions = submissionsData?.content || [];
 
+  useEffect(() => {
+    if (problem?.sampleTestcases && problem.sampleTestcases.length > 0) {
+      setDebugInput(problem.sampleTestcases[0]?.input || "");
+    }
+  }, [problem?.id]);
+
   const handleLanguageChange = (lang: Language) => {
     const cache = isMultiFileMode ? multifileTemplateCache.current : templateCache.current;
     const cached = cache[lang];
@@ -180,8 +171,14 @@ const ProblemSolveContent: React.FC = () => {
     if (!problem) return;
     try {
       const request: RunCodeRequest = isMultiFile
-        ? { problemId: problem.id, language, files: toCodeFiles(), entryFile: getActiveFileName() }
-        : { problemId: problem.id, language, sourceCode: code };
+        ? {
+            problemId: problem.id,
+            language,
+            files: toCodeFiles(),
+            entryFile: getActiveFileName(),
+            input: debugInput || undefined,
+          }
+        : { problemId: problem.id, language, sourceCode: code, input: debugInput || undefined };
       const response = await runCode.mutateAsync(request);
       if (response.data.data) {
         setRunResult(response.data.data);
@@ -468,12 +465,10 @@ const ProblemSolveContent: React.FC = () => {
             isRunning={runCode.isPending}
             isDebugging={debugCode.isPending}
             debugLines={debugLines}
-            debugInput={debugInput}
             onLanguageChange={handleLanguageChange}
             onCodeChange={setCode}
             onFilesChange={handleFilesChange}
             onDebugLinesChange={setDebugLines}
-            onDebugInputChange={setDebugInput}
             onSubmit={handleSubmit}
             onRun={handleRun}
             onDebug={handleDebug}

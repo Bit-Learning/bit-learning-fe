@@ -518,11 +518,6 @@ export interface GenerateCodeTemplatesResponse {
   templates: CodeTemplateResponse[];
 }
 
-export interface Problem {
-  timeLimitMs: number;
-  memoryLimitMb: number;
-}
-
 export interface FormatError {
   line: number;
   message: string;
