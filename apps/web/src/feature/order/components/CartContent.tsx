@@ -1,274 +1,270 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
-import {
-	Card,
-	CardContent,
-	CardHeader,
-	CardTitle,
-} from "@workspace/ui/components/Card";
-import {
-	ShoppingCart,
-	Trash2,
-	ArrowRight,
-	Star,
-	Lock,
-	CheckCircle,
-	AlertCircle,
-	Loader2,
-} from "lucide-react";
+import { ShoppingCart, Trash2, ArrowRight, Star, Lock, CheckCircle, Loader2 } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useCart, useRemoveFromCart } from "../queries/useCart";
 
+const COURSE_LEVEL_LABEL: Record<string, string> = {
+  BEGINNING: "Cơ bản",
+  INTERMEDIATE: "Trung cấp",
+  ADVANCED: "Nâng cao",
+};
+
 const CartContent: React.FC = () => {
-	const navigate = useNavigate();
-	const { data: courses, isLoading } = useCart();
-	const { mutate: removeFromCart, isPending: removePending } =
-		useRemoveFromCart();
-	const [removingIds, setRemovingIds] = useState<Set<number>>(new Set());
+  const navigate = useNavigate();
+  const { data: courses, isLoading } = useCart();
+  const { mutate: removeFromCart } = useRemoveFromCart();
+  const [removingIds, setRemovingIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
 
-	const handleRemoveItem = (courseId: number) => {
-		setRemovingIds((prev) => new Set(prev).add(courseId));
-		removeFromCart(courseId, {
-			onSettled: () => {
-				setRemovingIds((prev) => {
-					const newSet = new Set(prev);
-					newSet.delete(courseId);
-					return newSet;
-				});
-			},
-		});
-	};
+  const allIds = useMemo(() => new Set((courses ?? []).map((c) => c.id)), [courses]);
 
-	const handleCheckout = () => {
-		navigate({ to: "/checkout" });
-	};
+  const isAllSelected = allIds.size > 0 && [...allIds].every((id) => selectedIds.has(id));
 
-	const summary = useMemo(() => {
-		if (!courses || courses.length === 0) {
-			return { itemCount: 0, total: 0 };
-		}
+  const toggleAll = () => {
+    if (isAllSelected) setSelectedIds(new Set());
+    else setSelectedIds(new Set(allIds));
+  };
 
-		const total = courses.reduce((sum, course) => sum + course.price, 0);
+  const toggleOne = (id: number) => {
+    setSelectedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  };
 
-		return {
-			itemCount: courses.length,
-			total,
-		};
-	}, [courses]);
+  const handleRemoveItem = (courseId: number) => {
+    setRemovingIds((prev) => new Set(prev).add(courseId));
+    removeFromCart(courseId, {
+      onSettled: () => {
+        setRemovingIds((prev) => {
+          const next = new Set(prev);
+          next.delete(courseId);
+          return next;
+        });
+        setSelectedIds((prev) => {
+          const next = new Set(prev);
+          next.delete(courseId);
+          return next;
+        });
+      },
+    });
+  };
 
-	if (isLoading) {
-		return (
-			<div className="min-h-screen bg-slate-50 p-4 md:p-8">
-				<div className="mx-auto max-w-7xl">
-					<div className="flex min-h-125 items-center justify-center">
-						<div className="text-center">
-							<Loader2 className="mx-auto mb-4 h-16 w-16 animate-spin text-blue-600" />
-							<p className="text-lg font-medium text-gray-700">
-								Đang tải giỏ hàng...
-							</p>
-						</div>
-					</div>
-				</div>
-			</div>
-		);
-	}
+  const handleCheckout = () => {
+    const ids = [...selectedIds].join(",");
+    navigate({ to: "/checkout", search: { ids } });
+  };
 
-	if (!courses || courses.length === 0) {
-		return (
-			<div className="min-h-screen bg-slate-50 p-4 md:p-8">
-				<div className="mx-auto max-w-7xl">
-					<div className="flex min-h-200 flex-col items-center justify-center rounded-md bg-white p-12 ">
-						<ShoppingCart className="mb-6 h-32 w-32 text-gray-300" />
-						<h2 className="mb-3 text-3xl font-bold text-gray-900">
-							Giỏ hàng trống
-						</h2>
-						<p className="mb-8 text-center text-lg text-gray-600">
-							Hãy thêm khóa học vào giỏ hàng để bắt đầu học tập!
-						</p>
-						<Button
-							onClick={() => navigate({ to: "/courses" })}
-							className="rounded-xl bg-blue-600 px-8 py-5 font-semibold text-white hover:bg-blue-700 transition-colors"
-						>
-							Khám phá khóa học
-						</Button>
-					</div>
-				</div>
-			</div>
-		);
-	}
+  const summary = useMemo(() => {
+    if (!courses || courses.length === 0) return { itemCount: 0, total: 0 };
+    const selected = courses.filter((c) => selectedIds.has(c.id));
+    return { itemCount: selected.length, total: selected.reduce((sum, c) => sum + c.price, 0) };
+  }, [courses, selectedIds]);
 
-	return (
-		<div className="min-h-screen bg-slate-50 p-4 md:p-8">
-			<div className="mx-auto max-w-7xl">
-				<div className="mb-8 text-center">
-					<h1 className="mb-3 text-4xl font-black text-gray-900 md:text-5xl">
-						Giỏ hàng của bạn
-					</h1>
-					<p className="text-lg text-gray-600">
-						{courses.length} khóa học đang chờ bạn
-					</p>
-				</div>
+  if (isLoading) {
+    return (
+      <div className="flex min-h-screen items-center justify-center bg-gray-50">
+        <div className="text-center">
+          <Loader2 className="mx-auto mb-4 h-12 w-12 animate-spin text-blue-600" />
+          <p className="text-gray-600">Đang tải giỏ hàng...</p>
+        </div>
+      </div>
+    );
+  }
 
-				<div className="grid gap-6 lg:grid-cols-3">
-					<div className="space-y-6 lg:col-span-2">
-						<Card className="overflow-hidden p-0 border-gray-200 rounded-md">
-							<CardHeader className="bg-blue-600 p-6">
-								<CardTitle className="flex items-center gap-3 text-white">
-									<ShoppingCart className="h-7 w-7" />
-									<span className="text-2xl">Khóa học ({courses.length})</span>
-								</CardTitle>
-							</CardHeader>
-							<CardContent className="space-y-4 p-6">
-								{courses.map((course, index) => (
-									<div
-										key={course.id}
-										className="group overflow-hidden rounded-xl border-2 border-gray-200 bg-white p-5 transition-all hover:border-blue-300 hover:shadow-md"
-										style={{
-											animation: "fadeIn 0.5s ease-out",
-											animationDelay: `${index * 100}ms`,
-											animationFillMode: "backwards",
-										}}
-									>
-										<div className="flex gap-4">
-											<img
-												src={course.thumbnailUrl}
-												alt={course.title}
-												className="h-28 w-40 shrink-0 rounded-xl object-cover"
-											/>
+  if (!courses || courses.length === 0) {
+    return (
+      <div className="flex min-h-screen flex-col items-center justify-center bg-gray-50 p-8">
+        <ShoppingCart className="mb-4 h-24 w-24 text-gray-300" />
+        <h2 className="mb-2 text-2xl font-bold text-gray-800">Giỏ hàng trống</h2>
+        <p className="mb-6 text-gray-500">Hãy thêm khóa học vào giỏ hàng để bắt đầu học tập!</p>
+        <button
+          onClick={() => navigate({ to: "/courses" })}
+          className="rounded-lg bg-blue-600 px-6 py-2.5 font-medium text-white hover:bg-blue-700 transition-colors"
+        >
+          Khám phá khóa học
+        </button>
+      </div>
+    );
+  }
 
-											<div className="min-w-0 flex-1">
-												<h3 className="mb-2 text-lg font-bold text-gray-900 line-clamp-2">
-													{course.title}
-												</h3>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="mx-auto max-w-7xl px-4 py-8 md:px-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-black text-gray-900">Giỏ hàng của bạn</h1>
+          <p className="mt-1 text-gray-500">{courses.length} khóa học đang chờ bạn</p>
+        </div>
 
-												<div className="flex items-center gap-2">
-													<div className="flex items-center gap-1">
-														<Star className="h-4 w-4 fill-yellow-400 text-yellow-400" />
-														<span className="font-semibold">
-															{course.ratingStar}
-														</span>
-													</div>
-													<span className="rounded-full bg-blue-100 px-3 py-1 text-xs font-semibold text-blue-700">
-														Lớp {course.grade}
-													</span>
-													<span className="rounded-full bg-orange-100 px-3 py-1 text-xs font-semibold text-orange-700">
-														{course.level}
-													</span>
-												</div>
-											</div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
+          <div className="lg:col-span-2">
+            <div className="">
+              <div className="flex items-center justify-between border-b border-gray-100 py-4">
+                <div className="flex items-center gap-2">
+                  <span className="h-6 w-2 rounded-full bg-blue-600" />
+                  <h2 className="font-bold text-lg text-gray-900">Khóa học ({courses.length})</h2>
+                </div>
+                <button
+                  type="button"
+                  onClick={toggleAll}
+                  className={`cursor-pointer flex items-center gap-2 rounded-md border bg-white px-3 py-1.5 text-md font-medium text-gray-700 hover:bg-blue-50 hover:border-blue-600 transition-colors ${
+                    isAllSelected ? " border-blue-600" : "border-gray-200"
+                  }`}
+                >
+                  <div
+                    className={`h-4 w-4 rounded border-2 flex items-center justify-center transition-colors ${
+                      isAllSelected ? "bg-blue-600 border-blue-600" : "border-gray-300"
+                    }`}
+                  >
+                    {isAllSelected && (
+                      <svg viewBox="0 0 10 10" className="h-2.5 w-2.5">
+                        <polyline
+                          points="1.5,5 4,7.5 8.5,2.5"
+                          fill="none"
+                          stroke="white"
+                          strokeWidth="1.8"
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                        />
+                      </svg>
+                    )}
+                  </div>
+                  Chọn tất cả
+                </button>
+              </div>
 
-											<div className="flex shrink-0 flex-col items-end justify-between">
-												<div className="text-right">
-													<span className="text-2xl font-black text-blue-600">
-														{course.price.toLocaleString()}đ
-													</span>
-												</div>
+              <div className="divide-y divide-gray-50 space-y-3">
+                {courses.map((course) => {
+                  const isSelected = selectedIds.has(course.id);
+                  return (
+                    <div
+                      key={course.id}
+                      className={`group flex items-center gap-4 rounded-xl border border-gray-100 bg-[#f2f3fd] px-4
+                 transition-all hover:shadow-md hover:border-gray-200 py-5  ${isSelected ? "bg-blue-100 shadow-md " : ""}`}
+                    >
+                      <button type="button" onClick={() => toggleOne(course.id)} className="shrink-0 self-center">
+                        <div
+                          className={`h-5 w-5 rounded border-2 flex items-center justify-center transition-colors cursor-pointer ${
+                            isSelected ? "bg-blue-600 border-blue-600" : "border-gray-300 hover:border-blue-400"
+                          }`}
+                        >
+                          {isSelected && (
+                            <svg viewBox="0 0 10 10" className="h-3 w-3">
+                              <polyline
+                                points="1.5,5 4,7.5 8.5,2.5"
+                                fill="none"
+                                stroke="white"
+                                strokeWidth="1.8"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
+                            </svg>
+                          )}
+                        </div>
+                      </button>
 
-												<Button
-													onClick={() => handleRemoveItem(course.id)}
-													isDisabled={removingIds.has(course.id)}
-													className="flex items-center gap-2 rounded-lg bg-red-50 px-4 py-2 text-sm font-semibold text-red-600 hover:bg-red-100 disabled:opacity-50 transition-colors"
-												>
-													{removingIds.has(course.id) ? (
-														<>
-															<Loader2 className="h-4 w-4 animate-spin" />
-															Đang xóa...
-														</>
-													) : (
-														<>
-															<Trash2 className="h-4 w-4" />
-															Xóa
-														</>
-													)}
-												</Button>
-											</div>
-										</div>
-									</div>
-								))}
-							</CardContent>
-						</Card>
-					</div>
+                      <img
+                        src={course.thumbnailUrl}
+                        alt={course.title}
+                        onClick={() => toggleOne(course.id)}
+                        className="h-20 w-28 shrink-0 rounded-lg object-cover cursor-pointer"
+                      />
 
-					<div className="lg:col-span-1">
-						<div className="sticky top-8 overflow-hidden border-gray-200 rounded-md bg-white border">
-							<div className="bg-orange-500 p-6">
-								<h2 className="flex items-center gap-3 text-2xl font-bold text-white">
-									<ShoppingCart className="h-6 w-6" />
-									Tổng quan đơn hàng
-								</h2>
-							</div>
+                      <div className="min-w-0 flex-1">
+                        <h3 className="mb-1 font-semibold text-gray-900 line-clamp-2 leading-snug">{course.title}</h3>
+                        <p className="text-xs text-gray-500">
+                          🎓 Lớp: {course.grade}
+                          {course.level && ` · ${COURSE_LEVEL_LABEL[course.level] ?? course.level}`}
+                        </p>
+                        <div className="mt-1 flex items-center gap-1">
+                          <span className="text-xs font-medium text-gray-600">{course.ratingStar}</span>
+                        </div>
+                        <p className="mt-1.5 text-lg font-bold text-blue-600">{course.price.toLocaleString()}đ</p>
+                      </div>
 
-							<div className="space-y-6 p-6">
-								<div className="space-y-4 rounded-md bg-slate-50 p-5">
-									<div className="flex justify-between text-sm">
-										<span className="text-gray-600">Số lượng khóa học</span>
-										<span className="font-semibold text-gray-900">
-											{summary.itemCount}
-										</span>
-									</div>
+                      <button
+                        onClick={() => handleRemoveItem(course.id)}
+                        disabled={removingIds.has(course.id)}
+                        className="cursor-pointer flex shrink-0 items-center gap-1 rounded-md px-2.5 py-1.5 font-medium text-red-500 hover:bg-red-100 disabled:opacity-50 transition-colors"
+                      >
+                        {removingIds.has(course.id) ? (
+                          <Loader2 className="h-5 w-5 animate-spin" />
+                        ) : (
+                          <Trash2 className="h-5 w-5" />
+                        )}
+                      </button>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
 
-									<div className="flex justify-between border-t-2 border-gray-200 pt-4">
-										<span className="text-xl font-bold text-gray-900">
-											Tổng cộng
-										</span>
-										<span className="text-3xl font-black text-blue-600">
-											{summary.total.toLocaleString()}đ
-										</span>
-									</div>
-								</div>
+          <div className="lg:col-span-1">
+            <div className="sticky top-6 rounded-xl bg-white shadow-sm border border-gray-100">
+              <div className="border-b border-gray-100 px-6 py-4">
+                <h2 className="font-bold text-lg text-gray-900">Tổng quan đơn hàng</h2>
+              </div>
 
-								<Button
-									onClick={handleCheckout}
-									className="group flex w-full items-center justify-center gap-3 rounded-xl bg-blue-600 py-6 text-lg font-bold text-white hover:bg-blue-700  transition-all"
-								>
-									Tiến hành thanh toán
-									<ArrowRight className="h-5 w-5 transition-transform group-hover:translate-x-1" />
-								</Button>
+              <div className="space-y-3 px-6 py-5">
+                <div className="flex justify-between text-sm text-gray-600">
+                  <span>Khóa học đã chọn</span>
+                  <span className="font-medium text-gray-900">
+                    {summary.itemCount} / {courses.length}
+                  </span>
+                </div>
 
-								<div className="space-y-3 rounded-xl border-2 border-blue-200 bg-blue-50 p-4">
-									<div className="flex items-center gap-2 text-blue-900">
-										<Lock className="h-5 w-5" />
-										<span className="font-semibold">Thanh toán an toàn</span>
-									</div>
-									<ul className="space-y-2 text-sm text-blue-800">
-										<li className="flex items-center gap-2">
-											<CheckCircle className="h-4 w-4 shrink-0" />
-											Truy cập khóa học trọn đời
-										</li>
+                <div className="border-t border-gray-100 pt-3">
+                  <div className="flex items-baseline justify-between">
+                    <span className="font-bold text-gray-900">Tổng cộng</span>
+                    <div className="text-right">
+                      <p className="text-2xl font-black text-blue-600">{summary.total.toLocaleString()}đ</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
 
-										<li className="flex items-center gap-2">
-											<CheckCircle className="h-4 w-4 shrink-0" />
-											Chứng chỉ sau khi hoàn thành
-										</li>
+              <div className="px-6 pb-5">
+                <Button
+                  onClick={handleCheckout}
+                  isDisabled={summary.itemCount === 0}
+                  className="flex w-full items-center justify-center gap-2 rounded-lg bg-blue-600 py-6 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-60 disabled:cursor-not-allowed transition-colors"
+                >
+                  Tiến hành thanh toán
+                  <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-1" />
+                </Button>
+              </div>
 
-										<li className="flex items-center gap-2">
-											<CheckCircle className="h-4 w-4 shrink-0" />
-											Thanh toán đa dạng: Ví điện tử, thẻ ngân hàng, chuyển
-											khoản
-										</li>
-									</ul>
-								</div>
-							</div>
-						</div>
-					</div>
-				</div>
-			</div>
-
-			<style>{`
-        @keyframes fadeIn {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-      `}</style>
-		</div>
-	);
+              <div className="mx-6 mb-5 rounded-lg border border-blue-100 bg-blue-50 p-4">
+                <div className="flex items-center gap-2 text-blue-900 mb-2">
+                  <Lock className="h-4 w-4" />
+                  <span className="text-sm font-semibold">Thanh toán an toàn</span>
+                </div>
+                <ul className="space-y-1.5 text-xs text-blue-700">
+                  <li className="flex items-center gap-1.5">
+                    <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                    Truy cập khóa học trọn đời
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                    Chứng chỉ sau khi hoàn thành
+                  </li>
+                  <li className="flex items-center gap-1.5">
+                    <CheckCircle className="h-3.5 w-3.5 shrink-0" />
+                    Thanh toán đa dạng: Ví điện tử, thẻ ngân hàng, chuyển khoản
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CartContent;
