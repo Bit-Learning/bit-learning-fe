@@ -5,7 +5,6 @@ import {
   RotateCcw,
   Settings,
   Maximize,
-  Terminal,
   X,
   Clock,
   HardDrive,
@@ -18,14 +17,15 @@ import {
   Play,
   Bug,
   FileCode2,
+  Terminal,
 } from "lucide-react";
 import {
   Language,
-  Problem,
   SubmissionResultResponse,
   SubmissionStatus,
   RunCodeResponse,
   DebugResponse,
+  ProblemDetailResponse,
 } from "../types/coding.type";
 import {
   formatCode,
@@ -44,7 +44,7 @@ type BottomPanelTab = "submission" | "run" | "debug";
 interface CodeEditorProps {
   language: Language;
   code: string;
-  problem: Problem;
+  problem: ProblemDetailResponse;
   submissionResult: SubmissionResultResponse | null;
   runResult: RunCodeResponse | null;
   debugResult: DebugResponse | null;
@@ -56,12 +56,10 @@ interface CodeEditorProps {
   hasMultifileTemplate?: boolean;
   onToggleMultiFileMode?: (multi: boolean) => void;
   debugLines: string;
-  debugInput: string;
   onLanguageChange: (language: Language) => void;
   onCodeChange: (code: string) => void;
   onFilesChange: (files: EditorFile[], activeFileId: string) => void;
   onDebugLinesChange: (v: string) => void;
-  onDebugInputChange: (v: string) => void;
   onSubmit: () => void;
   onRun: () => void;
   onDebug: () => void;
@@ -84,12 +82,10 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   hasMultifileTemplate = false,
   onToggleMultiFileMode,
   debugLines,
-  debugInput,
   onLanguageChange,
   onCodeChange,
   onFilesChange,
   onDebugLinesChange,
-  onDebugInputChange,
   onSubmit,
   onRun,
   onDebug,
@@ -106,9 +102,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [formatMessage, setFormatMessage] = useState<string | null>(null);
   const [bottomTab, setBottomTab] = useState<BottomPanelTab>("submission");
   const [settingsOpen, setSettingsOpen] = useState(false);
-  const [inputOpen, setInputOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
-  const inputRef = useRef<HTMLDivElement>(null);
 
   const [breakpoints, setBreakpoints] = useState<Set<number>>(new Set());
 
@@ -201,9 +195,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     const handleClickOutside = (e: MouseEvent) => {
       if (settingsRef.current && !settingsRef.current.contains(e.target as Node)) {
         setSettingsOpen(false);
-      }
-      if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
-        setInputOpen(false);
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
@@ -771,70 +762,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
           <span className="text-sm">{problem.memoryLimitMb}MB</span>
         </div>
         <div className="flex items-center gap-3">
-          <div ref={inputRef} className="relative">
-            <button
-              onClick={() => setInputOpen((v) => !v)}
-              className={cn(
-                "px-4 py-2 rounded text-sm font-semibold border transition-all flex items-center gap-2 cursor-pointer",
-                inputOpen
-                  ? "bg-gray-700 text-gray-200 border-gray-500"
-                  : debugInput.trim()
-                    ? "bg-gray-800 text-blue-400 border-blue-700 hover:bg-blue-900/30"
-                    : "bg-gray-800 text-gray-400 border-gray-700 hover:text-gray-200 hover:border-gray-500",
-              )}
-              title="Nhập dữ liệu đầu vào cho debug/chạy thử"
-            >
-              <Terminal className="w-4 h-4" />
-              <span>Input</span>
-              {debugInput.trim() && (
-                <span className="bg-blue-500 text-white text-[10px] w-4 h-4 rounded-full flex items-center justify-center font-bold">
-                  ✓
-                </span>
-              )}
-            </button>
-
-            {inputOpen && (
-              <div className="absolute bottom-full mb-2 right-0 w-120 bg-gray-800 border border-gray-600 rounded-lg shadow-2xl overflow-hidden z-50">
-                <div className="flex items-center justify-between px-3 py-2 border-b border-gray-700 bg-gray-750">
-                  <div className="flex items-center gap-2">
-                    <Terminal className="w-4 h-4 text-blue-400" />
-                    <span className="text-xs font-semibold text-gray-300 uppercase tracking-wider">
-                      Dữ liệu đầu vào
-                    </span>
-                  </div>
-                  <button
-                    onClick={() => setInputOpen(false)}
-                    className="cursor-pointer text-gray-500 hover:text-white transition-colors"
-                  >
-                    <X className="w-4 h-4" />
-                  </button>
-                </div>
-                <div className="p-3">
-                  <textarea
-                    value={debugInput}
-                    onChange={(e) => onDebugInputChange(e.target.value)}
-                    placeholder={"Nhập stdin...\nVí dụ:\n5\n1 2 3 4 5"}
-                    rows={6}
-                    autoFocus
-                    className="w-full bg-gray-900 border border-gray-700 rounded px-3 py-2 text-xs text-gray-200 font-mono focus:outline-none focus:border-blue-500 resize-none leading-relaxed placeholder-gray-600"
-                  />
-                  <div className="flex items-center justify-between mt-2">
-                    <span className="text-[10px] text-gray-600">
-                      {debugInput.trim() ? `${debugInput.split("\n").length} dòng` : "Chưa có dữ liệu"}
-                    </span>
-                    {debugInput.trim() && (
-                      <button
-                        onClick={() => onDebugInputChange("")}
-                        className="cursor-pointer text-[10px] text-gray-600 hover:text-red-400 transition-colors"
-                      >
-                        Xóa
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
           <button
             onClick={onRun}
             disabled={isRunning || !activeFile.content.trim()}

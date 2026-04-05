@@ -14,7 +14,6 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
 
   const handleSignOut = () => {
     auth.reset();
-    // Preserve current location for redirect after sign-in
     const currentPath = location.href;
     navigate({
       to: "/sign-in",
@@ -27,9 +26,9 @@ export function SignOutDialog({ open, onOpenChange }: SignOutDialogProps) {
     <ConfirmDialog
       open={open}
       onOpenChange={onOpenChange}
-      title="Sign out"
-      desc="Are you sure you want to sign out? You will need to sign in again to access your account."
-      confirmText="Sign out"
+      title="Đăng xuất"
+      desc="Bạn có chắc chắn muốn đăng xuất không? Bạn sẽ cần đăng nhập lại để truy cập tài khoản."
+      confirmText="Đăng xuất"
       handleConfirm={handleSignOut}
       className="sm:max-w-sm"
     />

@@ -1,41 +1,40 @@
-export interface DashboardStats {
-	totalCourses: number;
-	totalStudents: number;
-	totalEarnings: number;
-	monthlyGrowth: number;
+export interface MentorDashboardStats {
+  totalQuestions: number;
+  pendingQuestions: number;
+  rejectedQuestions: number;
+  totalExams: number;
+  newExamsThisMonth: number;
+  totalPractices: number;
+  newPracticesThisMonth: number;
+  totalSlides: number;
+  newSlidesThisMonth: number;
+  totalMindMaps: number;
+  newMindMapsThisMonth: number;
+  totalDeposited: number;
 }
 
-export interface RevenueData {
-	month: string;
-	revenue: number;
-	students: number;
+export interface MonthlyCount {
+  month: string;
+  count: number;
 }
 
-export interface CoursePerformance {
-	name: string;
-	students: number;
-	rating: number;
-	completion: number;
+export interface QuestionStatusData {
+  approved: number;
+  pending: number;
+  rejected: number;
 }
 
-export interface StudentDistribution {
-	name: string;
-	value: number;
-	color: string;
+export interface ContentMonthlyData {
+  month: string;
+  slides: number;
+  mindmaps: number;
 }
 
 export interface RecentQuestion {
-	id: number;
-	student: string;
-	course: string;
-	question: string;
-	time: string;
-	status: "pending" | "answered";
-}
-
-export interface QuickAction {
-	icon: React.ComponentType<{ className?: string }>;
-	label: string;
-	href: string;
-	color: string;
+  id: number;
+  student: string;
+  course: string;
+  question: string;
+  time: string;
+  status: "pending" | "answered";
 }

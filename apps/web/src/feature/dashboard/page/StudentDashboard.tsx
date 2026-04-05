@@ -1,14 +1,10 @@
 import React from "react";
-import { mockDashboardData } from "../data/data";
 import DashboardStats from "../component/DashboardStats";
 import ContinueLearning from "../component/ContinueLearning";
 import MyCourses from "../component/MyCourses";
 import LearningStreak from "../component/LearningStreak";
-import ProgressChart from "../component/ProgressChart";
 
 const StudentDashboard: React.FC = () => {
-  const data = mockDashboardData;
-
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -29,7 +25,7 @@ const StudentDashboard: React.FC = () => {
           </div>
 
           <div className="space-y-6">
-            <LearningStreak streak={data.streak} />
+            <LearningStreak />
           </div>
         </div>
       </div>
