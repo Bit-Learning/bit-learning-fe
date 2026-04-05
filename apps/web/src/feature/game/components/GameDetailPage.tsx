@@ -7,8 +7,9 @@ import type { Comment, Game } from "../services/gameService";
 import gameService from "../services/gameService";
 import styles from "./GameDetailPage.module.css";
 import { Link } from "@tanstack/react-router";
-import { Navbar } from "./Navbar";
+import { Navbar } from "./Navbar/Navbar";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import Footer from "./Footer";
 
 interface GameDetailPageProps {
 	id: number;
@@ -193,12 +194,13 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 				href="https://fonts.googleapis.com/icon?family=Material+Icons"
 				rel="stylesheet"
 			/>
+			<title>Bit Learning Game Center</title>
 			<Navbar />
 
-			<div className="max-w-7xl mx-auto px-6 py-16">
+			<div className="min-h-screen max-w-7xl mx-auto px-6 py-16 mt-10">
 				<button
 					onClick={() => navigate({ to: "/games" })}
-					className="mb-6 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
+					className="mb-10 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
 				>
 					← Quay lại
 				</button>
@@ -253,7 +255,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 						</div>
 
 						{/* Developer Card */}
-						<section className={styles.devCard}>
+						{/* <section className={styles.devCard}>
 							<div className={styles.devAvatarWrap}>
 								<img
 									src={
@@ -276,7 +278,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 								</p>
 							</div>
 							<button className={styles.followBtn}>THEO DÕI</button>
-						</section>
+						</section> */}
 
 						{/* Comments Section */}
 						<div className="mt-8  rounded-lg p-6">
@@ -466,68 +468,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 				</div>
 			</div>
 
-			<footer className={styles.footer}>
-				<div className={styles.footerGrid}>
-					<div>
-						<div className={styles.footerLogo}>
-							<span
-								className="material-icons"
-								style={{ color: "#ec1337", fontSize: 22 }}
-							>
-								keyboard
-							</span>
-							<span className={styles.footerLogoText}>BIT LEARNING</span>
-						</div>
-						<p className={styles.footerDesc}>
-							The #1 platform for educational typing games and competitive
-							keyboarding challenges worldwide.
-						</p>
-					</div>
-					{[
-						{
-							heading: "Platform",
-							links: ["All Games", "Tournaments", "Rankings", "Store"],
-						},
-						{
-							heading: "Support",
-							links: [
-								"Help Center",
-								"Privacy Policy",
-								"Terms of Service",
-								"Cookie Settings",
-							],
-						},
-					].map(({ heading, links }) => (
-						<div key={heading}>
-							<h4 className={styles.footerHeading}>{heading}</h4>
-							<ul className={styles.footerLinks}>
-								{links.map((l) => (
-									<li key={l}>
-										<a href="#" className={styles.footerLink}>
-											{l}
-										</a>
-									</li>
-								))}
-							</ul>
-						</div>
-					))}
-					<div>
-						<h4 className={styles.footerHeading}>Follow Us</h4>
-						<div className={styles.socialRow}>
-							{["facebook", "alternate_email", "movie"].map((icon) => (
-								<a key={icon} href="#" className={styles.socialBtn}>
-									<span className="material-icons" style={{ fontSize: 20 }}>
-										{icon}
-									</span>
-								</a>
-							))}
-						</div>
-					</div>
-				</div>
-				<div className={styles.footerCopy}>
-					© 2024 BIT LEARNING Gaming. All rights reserved.
-				</div>
-			</footer>
+			<Footer />
 		</div>
 	);
 }

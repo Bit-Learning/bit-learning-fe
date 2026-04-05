@@ -1,6 +1,7 @@
 import { NotFoundErrorPage } from "@/feature/app/pages/NotFound";
-import { AudioProvider } from "@/feature/game/components/AudioProvider";
-import { ThemeProvider } from "@/feature/game/components/ThemeProvider";
+import { AudioProvider } from "@/feature/game/contexts/AudioProvider";
+import { ThemeProvider } from "@/feature/game/contexts/ThemeProvider";
+import { ErrorBoundary } from "@/feature/errors/ErrorBoundary";
 import { Providers } from "@/shared/components/Providers";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRoute, Outlet, useRouter } from "@tanstack/react-router";
@@ -14,15 +15,17 @@ function RootComponent() {
 	const content = <Outlet />;
 
 	return (
-		<AudioProvider>
-			{isMatchingRoute ? (
-				<Providers>
-					<ThemeProvider>{content}</ThemeProvider>
-				</Providers>
-			) : (
-				<Providers>{content}</Providers>
-			)}
-		</AudioProvider>
+		<ErrorBoundary>
+			<AudioProvider>
+				{isMatchingRoute ? (
+					<Providers>
+						<ThemeProvider>{content}</ThemeProvider>
+					</Providers>
+				) : (
+					<Providers>{content}</Providers>
+				)}
+			</AudioProvider>
+		</ErrorBoundary>
 	);
 }
 

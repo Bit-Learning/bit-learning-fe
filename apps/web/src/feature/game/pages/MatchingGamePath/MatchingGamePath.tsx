@@ -4,6 +4,8 @@ import { CURRICULUM_DATA } from "@/feature/game/data";
 import matchingGameService from "@/feature/game/services/matchingGameService";
 import ScrollToTop from "@/layouts/scroll-to-top";
 import { useNavigate } from "@tanstack/react-router";
+import { cn } from "@workspace/ui/lib/utils";
+import GameCard from "@/feature/game/components/GameCard";
 
 const topicVisualMap: Record<string, { icon: string; gradient: string }> = {
 	A: {
@@ -60,16 +62,17 @@ export default function PathPage() {
 					<div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 						<div className="flex items-center gap-3">
 							<div
-								className="bg-primary/10 p-2 rounded-lg cursor-pointer"
+								className="cursor-pointer"
 								onClick={() => navigate({ to: "/matching" })}
 							>
-								<span className="material-symbols-outlined text-primary text-2xl">
-									auto_stories
-								</span>
+								<img
+									src="/Logo.png"
+									alt="Bit Learning"
+									className={cn(
+										"object-contain transition-all duration-300 h-10",
+									)}
+								/>
 							</div>
-							<h1 className="text-xl font-bold tracking-tight">
-								Chọn bài học theo lớp (3–12)
-							</h1>
 						</div>
 						<ThemeToggle />
 					</div>
@@ -161,9 +164,12 @@ export default function PathPage() {
 															topicVisualMap.A)!;
 
 														return (
-															<button
+															<GameCard
 																key={topic.code}
-																type="button"
+																className="snap-start shrink-0"
+																topicCode={topic.code}
+																title={displayTitle}
+																isPlayable={isPlayable}
 																onClick={() => {
 																	if (isPlayable) {
 																		navigate({
@@ -175,61 +181,7 @@ export default function PathPage() {
 																		});
 																	}
 																}}
-																disabled={!isPlayable}
-																className={`snap-start flex-shrink-0 w-[180px] sm:w-[210px] md:w-[230px] rounded-xl overflow-hidden border shadow-sm transition-transform transition-colors duration-200 text-left group
-                              ${
-																isPlayable
-																	? "border-slate-200 dark:border-slate-700 bg-slate-900/90 dark:bg-slate-900 hover:-translate-y-1 hover:border-primary/60"
-																	: "border-slate-200/70 dark:border-slate-800 bg-slate-900/60 dark:bg-slate-950 cursor-not-allowed opacity-80"
-															}
-                            `}
-															>
-																{/* Thumbnail */}
-																<div
-																	className={`relative aspect-[16/9] w-full bg-gradient-to-br ${visual.gradient} flex items-center justify-center`}
-																>
-																	<span className="absolute left-2 top-2 inline-flex items-center justify-center rounded-md bg-black/40 text-white text-[11px] px-1.5 py-0.5 font-semibold">
-																		{topic.code}
-																	</span>
-																	<span className="material-symbols-outlined text-4xl md:text-5xl text-white/90 drop-shadow-lg">
-																		{visual.icon}
-																	</span>
-																	{isPlayable && (
-																		<span className="absolute right-2 bottom-2 inline-flex items-center justify-center rounded-full bg-white/90 text-primary shadow-md p-1.5 group-hover:scale-110 transition-transform">
-																			<span className="material-symbols-outlined text-base">
-																				play_arrow
-																			</span>
-																		</span>
-																	)}
-																</div>
-
-																{/* Content */}
-																<div className="p-3 bg-slate-950/90 text-slate-50 flex flex-col gap-1">
-																	<p className="text-[13px] font-semibold line-clamp-2 min-h-[2.5rem]">
-																		{displayTitle}
-																	</p>
-																	<p className="text-[11px] text-slate-400 line-clamp-2 min-h-[2.25rem]">
-																		{topic.description}
-																	</p>
-																	<div className="mt-1 flex items-center justify-between text-[11px]">
-																		<span
-																			className={`inline-flex items-center gap-1 font-medium ${
-																				isPlayable
-																					? "text-emerald-400"
-																					: "text-slate-500"
-																			}`}
-																		>
-																			<span className="material-symbols-outlined text-[14px]">
-																				{isPlayable ? "play_circle" : "lock"}
-																			</span>
-																			{isPlayable ? "Làm bài" : "Sắp ra mắt"}
-																		</span>
-																		<span className="text-slate-500 text-[10px] uppercase tracking-widest">
-																			Chủ đề {topic.code}
-																		</span>
-																	</div>
-																</div>
-															</button>
+															/>
 														);
 													})}
 												</div>

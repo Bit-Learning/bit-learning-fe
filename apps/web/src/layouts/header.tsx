@@ -195,7 +195,7 @@ const Header: React.FC = () => {
 								onClick={handleCartClick}
 								className="relative rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer"
 							>
-								<ShoppingCart className="h-5 w-5 text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors" />
+								<ShoppingCart className="h-7 w-7 text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors" />
 								{cartItemCount > 0 && (
 									<span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-r from-red-500 to-pink-500 text-[10px] font-bold text-white shadow-lg">
 										{cartItemCount > 9 ? "9+" : cartItemCount}

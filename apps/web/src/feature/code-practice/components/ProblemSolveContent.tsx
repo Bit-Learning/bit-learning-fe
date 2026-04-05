@@ -1,27 +1,42 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Clock, HardDrive, Loader2, Terminal, FileText, Hash, History, ChevronLeft, Download } from "lucide-react";
+import {
+	Clock,
+	HardDrive,
+	Loader2,
+	Terminal,
+	FileText,
+	Hash,
+	History,
+	ChevronLeft,
+	Download,
+} from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
-import { Card, CardContent, CardHeader, CardTitle } from "@workspace/ui/components/Card";
+import {
+	Card,
+	CardContent,
+	CardHeader,
+	CardTitle,
+} from "@workspace/ui/components/Card";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import {
-  useProblemDetail,
-  useProblemSubmissions,
-  useSubmitCode,
-  useSubmissionResult,
-  useRunCode,
-  useDebugCode,
-  useExportSubmission,
+	useProblemDetail,
+	useProblemSubmissions,
+	useSubmitCode,
+	useSubmissionResult,
+	useRunCode,
+	useDebugCode,
+	useExportSubmission,
 } from "../queries/useCoding";
 import { DifficultyBadge } from "./DifficultyBadge";
 import { SubmissionStatusBadge } from "./SubmissionStatusBadge";
 import {
-  Language,
-  RunCodeResponse,
-  DebugResponse,
-  SubmitCodeRequest,
-  RunCodeRequest,
-  DebugRequest,
+	Language,
+	RunCodeResponse,
+	DebugResponse,
+	SubmitCodeRequest,
+	RunCodeRequest,
+	DebugRequest,
 } from "../types/coding.type";
 import { CodeEditor } from "./CodeEditor";
 import { EditorFile } from "./FileTab";
