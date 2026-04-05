@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { GeneralError } from "@/feature/errors/general-error";
-import GameListNetflix from "@/feature/game/components/GameListNetflix";
+import GameList from "@/feature/game/components/GameList";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 
@@ -13,7 +13,7 @@ export const Route = createFileRoute("/games/")({
 		const auth = useSelector((state: RootState) => state.auth);
 		const username = auth.userInfo?.username ?? null;
 		const role = auth.userInfo?.role ?? null;
-		return <GameListNetflix username={username} />;
+		return <GameList username={username} />;
 	},
 	errorComponent: () => <GeneralError />,
 	staticData: {

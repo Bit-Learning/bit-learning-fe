@@ -6,7 +6,7 @@ import {
 	Item,
 	TopicCode,
 } from "@/feature/game/data";
-import { useAudio } from "@/feature/game/components/AudioProvider";
+import { useAudio } from "@/feature/game/contexts/AudioProvider";
 import { AudioToggle } from "@/feature/game/components/AudioToggle";
 import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
 import matchingGameService from "@/feature/game/services/matchingGameService";

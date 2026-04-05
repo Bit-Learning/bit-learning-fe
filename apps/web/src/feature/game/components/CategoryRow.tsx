@@ -2,7 +2,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import type { Game } from "../services/gameService";
-import { useAudio } from "./AudioProvider";
+import { useAudio } from "../contexts/AudioProvider";
 import GameCard from "./GameRow";
 import styles from "./GameRow.module.css";
 

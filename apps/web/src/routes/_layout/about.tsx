@@ -129,8 +129,7 @@ function AboutUsPage() {
 							<div
 								className="aspect-video overflow-hidden rounded-3xl bg-slate-200 shadow-2xl dark:bg-slate-800 lg:aspect-square"
 								style={{
-									backgroundImage:
-										"url('https://lh3.googleusercontent.com/aida-public/AB6AXuAMyns7gACaDv_dvTPvdJtfdRK0Of32XR8ZBYIt0_VlP3LVzkXRbIljeLrMw3nD809bj9_rWBBg7PW5NsbCWn3fgFyVHyD7xMNVK2--vQ6Idmai7WSNg_1NU9nVQC4DlIzkVqsY-z2fvvoSycTG9lLzxETy9LUNxsLdqy5K9KMksO8vTxeOdm1YukaOiRgr5p4uDJ1IT-v3scAc49-wLTXLC6jolopxocvH2SSnotTy97MsN6SjVSU2KoTTDtgVmIWPfmgEtQA-BRRj')",
+									backgroundImage: "url('/about.png')",
 									backgroundSize: "cover",
 									backgroundPosition: "center",
 								}}

@@ -153,9 +153,9 @@ export function NotificationBell() {
 					isOpen && "bg-white/50 dark:bg-white/10",
 				)}
 			>
-				<Bell className="h-5 w-5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer" />
+				<Bell className="h-7 w-7 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer" />
 				{localUnreadCount > 0 && (
-					<span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+					<span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-inter text-white">
 						{localUnreadCount > 99 ? "99+" : localUnreadCount}
 					</span>
 				)}

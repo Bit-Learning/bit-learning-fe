@@ -2,12 +2,18 @@ import { Link, useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import styles from "./Navbar.module.css";
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect, type ChangeEvent } from "react";
 
-export function Navbar() {
+interface NavbarProps {
+	searchTerm?: string;
+	onSearchChange?: (value: string) => void;
+}
+
+export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 	const { isAuthenticated, userInfo } = useSelector(selectAuthStateInfo);
 	const navigate = useNavigate();
 	const [showProfileMenu, setShowProfileMenu] = useState(false);
+	const [internalSearch, setInternalSearch] = useState("");
 	const menuRef = useRef<HTMLDivElement>(null);
 
 	useEffect(() => {
@@ -19,6 +25,15 @@ export function Navbar() {
 		document.addEventListener("mousedown", handler);
 		return () => document.removeEventListener("mousedown", handler);
 	}, []);
+
+	const handleSearchChange = (event: ChangeEvent<HTMLInputElement>) => {
+		const value = event.target.value;
+		if (onSearchChange) {
+			onSearchChange(value);
+		} else {
+			setInternalSearch(value);
+		}
+	};
 
 	return (
 		<nav className={styles.nav}>
@@ -72,6 +87,8 @@ export function Navbar() {
 							className={styles.search}
 							type="text"
 							placeholder="Tìm kiếm game..."
+							value={searchTerm ?? internalSearch}
+							onChange={handleSearchChange}
 						/>
 					</div>
 					<button

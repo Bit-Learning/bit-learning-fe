@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import gameService, {
 	type LeaderboardEntry,
 	type Page,
-} from "../services/gameService";
+} from "../../services/gameService";
 import {
 	ChevronLeft,
 	ChevronRight,
@@ -215,7 +215,7 @@ function PodiumCard({
 }
 
 // ─── Main Leaderboard ───────────────────────────────────────────────────────
-export default function Leaderboard() {
+export default function LeaderboardPage() {
 	const navigate = useNavigate();
 	const [leaderboard, setLeaderboard] = useState<Page<LeaderboardEntry> | null>(
 		null,
