@@ -46,19 +46,9 @@ export const CourseCertificate: React.FC<CourseCertificateProps> = ({ courseId, 
   }
 
   return (
-    <Card className="overflow-hidden border-2 border-amber-200 bg-amber-50 ">
-      <CardContent className="p-6">
-        <div className="mb-4 flex items-center gap-3">
-          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-amber-100">
-            <Award className="h-6 w-6 text-amber-600" />
-          </div>
-          <div>
-            <h3 className="text-lg font-bold text-amber-900">Chứng chỉ hoàn thành</h3>
-            <p className="text-sm text-amber-700">Bạn đã hoàn thành khóa học này</p>
-          </div>
-        </div>
-
-        <div className="mb-5 overflow-hidden rounded-xl border-2 border-amber-200 bg-white shadow-md">
+    <Card className="overflow-hidden border-0 p-0">
+      <CardContent className="border-0">
+        <div className="mb-5 overflow-hidden rounded-lg border-2 border-amber-200 bg-white shadow-xs">
           {certLoading ? (
             <div className="flex h-48 items-center justify-center">
               <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
@@ -72,24 +62,16 @@ export const CourseCertificate: React.FC<CourseCertificateProps> = ({ courseId, 
 
         <div className="flex gap-2">
           <Button
-            className="flex-1 bg-amber-600 hover:bg-amber-700 text-white gap-2"
+            className="flex-1 bg-amber-600 hover:bg-amber-700 text-white gap-2 py-5"
             onClick={() => download(courseId)}
             isDisabled={downloading}
           >
             {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}
             Tải xuống
           </Button>
-          <Button
-            variant="outline"
-            className="gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"
-            onClick={handleShare}
-          >
-            <Share2 className="h-4 w-4" />
-            Chia sẻ
-          </Button>
         </div>
 
-        <div className="mt-4 border-t border-amber-200 pt-4  text-right">
+        {/* <div className="mt-4 border-t border-amber-200 pt-4  text-right">
           <button
             className="text-sm text-amber-700 underline-offset-2 hover:underline cursor-pointer"
             onClick={() => setShowVerify(!showVerify)}
@@ -157,7 +139,7 @@ export const CourseCertificate: React.FC<CourseCertificateProps> = ({ courseId, 
               )}
             </div>
           )}
-        </div>
+        </div> */}
       </CardContent>
     </Card>
   );
