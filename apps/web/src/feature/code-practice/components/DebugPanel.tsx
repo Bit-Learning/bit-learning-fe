@@ -14,6 +14,7 @@ import { DebugResponse, DebugStep } from "../types/coding.type";
 
 interface LineGroup {
   line: number;
+  file?: string;
   iterations: DebugStep[];
 }
 
@@ -24,16 +25,20 @@ export interface DebugPanelProps {
 }
 
 function groupByLine(steps: DebugStep[]): LineGroup[] {
-  const map = new Map<number, DebugStep[]>();
-  const order: number[] = [];
+  const map = new Map<string, DebugStep[]>();
+  const order: string[] = [];
   for (const step of steps) {
-    if (!map.has(step.line)) {
-      map.set(step.line, []);
-      order.push(step.line);
+    const key = `${step.file ?? ""}::${step.line}`;
+    if (!map.has(key)) {
+      map.set(key, []);
+      order.push(key);
     }
-    map.get(step.line)!.push(step);
+    map.get(key)!.push(step);
   }
-  return order.map((line) => ({ line, iterations: map.get(line)! }));
+  return order.map((key) => {
+    const [file, lineStr = "0"] = key.split("::");
+    return { line: parseInt(lineStr), file: file || undefined, iterations: map.get(key)! };
+  });
 }
 
 function statusMeta(status: string) {
@@ -106,8 +111,9 @@ function IterCard({ step, defaultOpen }: { step: DebugStep; defaultOpen: boolean
           <ChevronRight className="w-3 h-3 text-gray-600 shrink-0" />
         )}
         <span className="text-xs font-mono text-gray-400">
-          iter <span className="text-yellow-400 font-bold">#{step.iteration}</span>
+          iter <span className="text-yellow-400 font-bold">#{step.iteration + 1}</span>
         </span>
+        {step.iteration > 0 && <span className="text-[10px] text-orange-400/70 font-mono">🔁 loop</span>}
         {/* collapsed preview */}
         {!open && varEntries.length > 0 && (
           <span className="ml-auto flex items-center gap-2 overflow-hidden">
@@ -150,6 +156,7 @@ function LineGroupBlock({ group }: { group: LineGroup }) {
         )}
         <span className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
         <span className="text-xs font-mono text-gray-300">
+          {group.file && <span className="text-gray-500">{group.file} · </span>}
           Line <span className="text-white font-bold">{group.line}</span>
         </span>
         <span className="ml-auto text-[11px] font-mono text-gray-600">
@@ -159,7 +166,7 @@ function LineGroupBlock({ group }: { group: LineGroup }) {
       {open && (
         <div className="p-2 space-y-1.5 bg-gray-950/40">
           {group.iterations.map((step, i) => (
-            <IterCard key={`${step.line}-${step.iteration}`} step={step} defaultOpen={i === 0} />
+            <IterCard key={`${step.file}-${step.line}-${step.iteration}`} step={step} defaultOpen={i === 0} />
           ))}
         </div>
       )}
