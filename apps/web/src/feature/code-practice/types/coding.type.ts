@@ -470,10 +470,9 @@ export interface DebugRequest {
   code?: string;
   language: Language;
   lines: number[];
-  variables?: string[];
-  input?: string;
   files?: CodeFile[];
   entryFile?: string;
+  input?: string;
 }
 
 export interface DebugStep {

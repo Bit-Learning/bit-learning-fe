@@ -1,13 +1,15 @@
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle2 } from "lucide-react";
 
 interface PaymentMethodCardProps {
   selected: boolean;
   onClick: () => void;
-  icon: React.ReactNode;
+  logoSrc?: string;
+  logoAlt?: string;
+  logoFallback?: React.ReactNode;
   title: string;
   description: string;
-  color: "blue" | "orange";
+  detailRows?: { label: string; value: string }[];
   walletBalance?: number;
   totalAmount?: number;
 }
@@ -15,61 +17,45 @@ interface PaymentMethodCardProps {
 export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
   selected,
   onClick,
-  icon,
+  logoSrc,
+  logoAlt,
+  logoFallback,
   title,
   description,
-  color,
+  detailRows,
   walletBalance,
   totalAmount,
 }) => {
-  const colorStyles = {
-    blue: {
-      border: "border-blue-600",
-      bg: "bg-blue-50",
-      iconBg: "bg-blue-600",
-      checkColor: "text-blue-600",
-    },
-    orange: {
-      border: "border-orange-600",
-      bg: "bg-orange-50",
-      iconBg: "bg-orange-500",
-      checkColor: "text-orange-600",
-    },
-  };
-
-  const styles = colorStyles[color];
-
   const isWallet = walletBalance !== undefined;
   const insufficient = isWallet && totalAmount !== undefined && walletBalance < totalAmount;
 
   return (
-    <div
+    <button
+      type="button"
       onClick={insufficient ? undefined : onClick}
-      className={`group overflow-hidden rounded-2xl border-2 transition-all ${
-        insufficient
-          ? "border-gray-200 bg-gray-50 opacity-60 cursor-not-allowed"
-          : selected
-            ? `${styles.border} ${styles.bg} cursor-pointer`
-            : "border-gray-200 hover:border-blue-300 hover:bg-gray-50 cursor-pointer"
-      }`}
+      disabled={insufficient}
+      className={`group w-full rounded-xl border-2 flex flex-col items-stretch overflow-hidden transition-all text-left
+        ${
+          insufficient
+            ? "border-gray-200 bg-[#f2f3fd] opacity-60 cursor-not-allowed"
+            : selected
+              ? "border-blue-600 bg-blue-100 cursor-pointer"
+              : "border-gray-200 hover:border-blue-300 cursor-pointer"
+        }`}
     >
-      <div className="flex items-center gap-4 p-6">
-        <div
-          className={`flex h-20 w-20 shrink-0 items-center justify-center rounded-2xl ${styles.iconBg} transition-transform ${
-            !insufficient ? "group-hover:scale-105" : ""
-          }`}
-        >
-          {icon}
+      <div className="flex items-center gap-4 p-4">
+        <div className="shrink-0 w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-gray-200 overflow-hidden">
+          {logoSrc ? <img src={logoSrc} alt={logoAlt ?? title} className="w-8 h-8 object-contain" /> : logoFallback}
         </div>
 
-        <div className="flex-1">
-          <div className="text-xl font-bold text-gray-900">{title}</div>
+        <div className="flex-1 min-w-0">
+          <div className="font-semibold text-gray-900">{title}</div>
           <div className="text-sm text-gray-600">{description}</div>
 
           {isWallet && (
-            <div className="mt-2 flex items-center gap-1.5">
-              <BitCoinIcon size={18} />
-              <span className={`text-sm font-semibold ${insufficient ? "text-red-500" : "text-amber-600"}`}>
+            <div className="mt-1.5 flex items-center gap-1.5">
+              <BitCoinIcon size={16} />
+              <span className={`text-xs font-semibold ${insufficient ? "text-red-500" : "text-amber-600"}`}>
                 Số dư: {walletBalance.toLocaleString("vi-VN")} BIT
               </span>
             </div>
@@ -77,13 +63,29 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
 
           {insufficient && (
             <p className="mt-1 text-xs font-medium text-red-500">
-              ⚠ Không đủ số dư. Cần thêm {(totalAmount! - walletBalance).toLocaleString("vi-VN")} BIT
+              ⚠ Cần thêm {(totalAmount! - walletBalance).toLocaleString("vi-VN")} BIT
             </p>
           )}
         </div>
 
-        {selected && !insufficient && <CheckCircle className={`h-8 w-8 shrink-0 ${styles.checkColor}`} />}
+        {selected && !insufficient && <CheckCircle2 className="w-6 h-6 text-blue-600 shrink-0" />}
       </div>
-    </div>
+
+      {detailRows && detailRows.length > 0 && (
+        <div
+          className={`grid grid-cols-2 gap-x-3 gap-y-1 px-4 text-xs text-gray-600 overflow-hidden rounded-b-lg border-t border-blue-100 bg-white/70
+            max-h-0 opacity-0 py-0 transition-all duration-300
+            ${selected || !insufficient ? "group-hover:max-h-24 group-hover:py-2 group-hover:opacity-100" : ""}
+            ${selected ? "max-h-24 py-2 opacity-100" : ""}
+          `}
+        >
+          {detailRows.map((row) => (
+            <div key={row.label}>
+              <span className="font-medium text-gray-800">{row.label}:</span> {row.value}
+            </div>
+          ))}
+        </div>
+      )}
+    </button>
   );
 };
