@@ -467,6 +467,7 @@ export interface RunCodeResponse {
 }
 
 export interface DebugRequest {
+  problemId: string;
   code?: string;
   language: Language;
   lines: number[];
