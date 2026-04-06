@@ -64,7 +64,7 @@ const MatrixDetailContent: React.FC = () => {
 	};
 	if (isLoading) {
 		return (
-			<main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
+			<main className="flex-1 p-8 min-h-screen bg-white dark:bg-slate-950">
 				<div className="mx-auto max-w-7xl">
 					<Skeleton className="mb-4 h-8 w-32" />
 					<Skeleton className="mb-8 h-48 w-full" />
@@ -76,7 +76,7 @@ const MatrixDetailContent: React.FC = () => {
 
 	if (!matrix) {
 		return (
-			<main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
+			<main className="flex-1 p-8 min-h-screen bg-white dark:bg-slate-950">
 				<div className="mx-auto max-w-7xl">
 					<Card>
 						<CardContent className="flex flex-col items-center justify-center py-16">
@@ -103,7 +103,7 @@ const MatrixDetailContent: React.FC = () => {
 	const latestVersion = sortedVersions[0];
 
 	return (
-		<main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
+		<main className="flex-1 p-8 min-h-screen bg-white dark:bg-slate-950">
 			<div className="mx-auto">
 				<div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
 					<div>

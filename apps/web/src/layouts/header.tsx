@@ -124,7 +124,7 @@ const Header: React.FC = () => {
 						{navItems.map((item) => (
 							<div
 								key={item.title}
-								className="relative group rounded-2xl border-transparent border-t-4 hover:border-primary transition-all duration-200"
+								className="relative group rounded-2xl border-transparent transition-all duration-200"
 								onMouseEnter={cancelCloseMenu}
 								onMouseLeave={scheduleCloseMenu}
 							>

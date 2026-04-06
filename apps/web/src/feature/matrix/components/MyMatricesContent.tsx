@@ -32,7 +32,7 @@ const MyMatricesContent: React.FC = () => {
 	);
 
 	return (
-		<main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
+		<main className="flex-1 p-8 min-h-screen bg-white dark:bg-slate-950">
 			<div className="max-w-8xl mx-auto">
 				<div className="flex items-center justify-between mb-8">
 					<div>
