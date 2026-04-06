@@ -25,8 +25,8 @@
   --chart-5: oklch(0.769 0.188 70.08);
 
   /* Bit Learning */
-  --bit-learning-secondary: oklch(64.61% 0.194 41.12);
-  --bit-learning-primary: oklch(42.44% 0.181 265.64);
+  --bit-learning-secondary: #fd721d;
+  --bit-learning-primary: #137fec;
 
   --sidebar: var(--background);
   --sidebar-foreground: var(--foreground);

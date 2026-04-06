@@ -42,7 +42,7 @@ const MatrixDetailContent: React.FC = () => {
 
 	const handleDelete = () => {
 		deleteMatrix(matrixId, {
-			onSuccess: () => navigate({ to: "/mentor/matrix" }),
+			onSuccess: () => navigate({ to: "/mentor/matrix/my" }),
 		});
 	};
 
@@ -85,7 +85,7 @@ const MatrixDetailContent: React.FC = () => {
 							</p>
 							<Button
 								variant="outline"
-								onClick={() => navigate({ to: "/mentor/matrix" })}
+								onClick={() => navigate({ to: "/mentor/matrix/my" })}
 							>
 								<ArrowLeft className="mr-2 h-4 w-4" />
 								Quay lại

@@ -15,8 +15,7 @@ export default function AuthLayout({ children, showBackGround = true }: Props) {
 					<div
 						className="hidden h-full w-full items-center lg:grid lg:w-1/2 dark:bg-white/5"
 						style={{
-							backgroundImage:
-								"url('https://eccommonstorage.blob.core.windows.net/codered/uploads/EAS6DoeQg3SWYqxcytORUj831DFxSibNCJpbiRqq.jpg')",
+							backgroundImage: "url('auth.jpg')",
 							backgroundSize: "cover, cover",
 							backgroundPosition: "center, center",
 							backgroundRepeat: "no-repeat, no-repeat",
