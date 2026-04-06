@@ -28,9 +28,7 @@ export const questionApi = {
     const formData = new FormData();
     formData.append("file", file);
     return api.post("/questions/import", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
   },
 
@@ -78,5 +76,17 @@ export const questionApi = {
 
   rejectQuestions(data: ApproveRejectDTO): Promise<AxiosResponse<ApiResponse<void>>> {
     return api.put("/questions/reject", data);
+  },
+
+  uploadQuestionMedia(id: number, file: File): Promise<AxiosResponse<ApiResponse<QuestionResponse>>> {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post(`/questions/${id}/media`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  deleteQuestionMedia(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.delete(`/questions/${id}/media`);
   },
 };

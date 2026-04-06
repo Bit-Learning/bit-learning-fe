@@ -13,6 +13,7 @@ import { QuestionRequest, QuestionType, QuestionLevel } from "../types/question.
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { useChaptersBySubject } from "@/feature/matrix/queries/useChapter";
 import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
+import MediaUploadPanel from "./MediaUploadPanel";
 
 const optionSchema = z.object({
   label: z.string(),
@@ -72,6 +73,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   const questionId = mode === "edit" && (params as any).id ? Number((params as any).id) : undefined;
 
   const [chapterId, setChapterId] = useState<number | undefined>(undefined);
+  const [createdQuestionId, setCreatedQuestionId] = useState<number | null>(null);
 
   const createQuestion = useCreateQuestion();
   const updateQuestion = useUpdateQuestion();
@@ -170,13 +172,60 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
       );
     } else {
       createQuestion.mutate(requestData, {
-        onSuccess: () => navigate({ to: "/mentor/question/my" }),
+        onSuccess: (response) => {
+          const newId = response.data.data?.id;
+          if (newId) {
+            setCreatedQuestionId(newId);
+          } else {
+            navigate({ to: "/mentor/question/my" });
+          }
+        },
       });
     }
   });
 
   const backTo = mode === "edit" ? `/mentor/question/${questionId}` : "/mentor/question/my";
   const isSubmitting = mode === "edit" ? updateQuestion.isPending : createQuestion.isPending;
+
+  if (createdQuestionId !== null) {
+    return (
+      <div className="container mx-auto p-6 max-w-6xl">
+        <div className="mb-8">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900">
+              <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
+            </div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Câu hỏi đã được tạo!</h1>
+          </div>
+          <p className="text-slate-500 dark:text-slate-400 text-base">
+            Bạn có thể đính kèm ảnh hoặc video minh họa cho câu hỏi, hoặc bỏ qua để hoàn thành.
+          </p>
+        </div>
+
+        <MediaUploadPanel questionId={createdQuestionId} currentMediaUrl={null} currentMediaType={null} />
+
+        <div className="flex justify-end gap-3 pt-6">
+          <Button
+            type="button"
+            size="lg"
+            variant="outline"
+            onClick={() => navigate({ to: "/mentor/question/my" })}
+            className="px-6 border-slate-400"
+          >
+            Bỏ qua
+          </Button>
+          <Button
+            type="button"
+            size="lg"
+            className="px-8 gap-2 bg-blue-600 hover:bg-blue-700 text-white"
+            onClick={() => navigate({ to: `/mentor/question/${createdQuestionId}` })}
+          >
+            Xem câu hỏi
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   if (mode === "edit" && loadingQuestion) {
     return (
@@ -370,14 +419,12 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                 Đáp án / Hướng dẫn giải
                 {form.watch("questionType") === "ESSAY" && <span className="text-red-500"> *</span>}
               </label>
-
               <textarea
                 rows={5}
                 placeholder="Nhập đáp án chi tiết hoặc hướng dẫn giải..."
                 {...form.register("canonicalAnswer")}
                 className={textarea}
               />
-
               {form.formState.errors.canonicalAnswer && (
                 <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
@@ -468,13 +515,21 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
           </Card>
         )}
 
+        {mode === "edit" && questionId && existingQuestion && (
+          <MediaUploadPanel
+            questionId={questionId}
+            currentMediaUrl={existingQuestion.mediaUrl ?? null}
+            currentMediaType={existingQuestion.mediaType ?? null}
+          />
+        )}
+
         <div className="flex justify-end gap-3 pt-2 pb-8">
           <Button
             type="button"
             size="lg"
             variant="outline"
             onClick={() => navigate({ to: backTo })}
-            className="px-6 py-5  border-slate-400"
+            className="px-6 py-5 border-slate-400"
           >
             Hủy
           </Button>

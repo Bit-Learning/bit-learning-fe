@@ -169,6 +169,50 @@ export const useDeleteQuestion = () => {
   });
 };
 
+export const useUploadQuestionMedia = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, file }: { id: number; file: File }) => questionApi.uploadQuestionMedia(id, file),
+    onSuccess: (response, variables) => {
+      queryClient.setQueryData(questionKeys.detail(variables.id), response.data.data);
+      toast.success({
+        title: "Thành công",
+        description: "Upload media thành công",
+      });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể upload media",
+      });
+    },
+  });
+};
+
+export const useDeleteQuestionMedia = () => {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => questionApi.deleteQuestionMedia(id),
+    onSuccess: (_, id) => {
+      queryClient.setQueryData(questionKeys.detail(id), (old: any) =>
+        old ? { ...old, mediaUrl: null, mediaType: null } : old,
+      );
+      toast.success({
+        title: "Thành công",
+        description: "Đã xóa media",
+      });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({
+        title: "Lỗi",
+        description: error.response?.data?.message || "Không thể xóa media",
+      });
+    },
+  });
+};
+
 export const useRequestPublish = () => {
   const queryClient = useQueryClient();
 
