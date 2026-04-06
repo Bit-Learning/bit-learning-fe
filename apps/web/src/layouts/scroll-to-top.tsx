@@ -5,26 +5,38 @@ const ScrollToTop: React.FC = () => {
 	const [visible, setVisible] = useState(false);
 
 	useEffect(() => {
+		let ticking = false;
+
 		const toggleVisibility = () => {
-			setVisible(window.scrollY > 300);
+			if (!ticking) {
+				window.requestAnimationFrame(() => {
+					setVisible((prev) => {
+						const next = window.scrollY > 300;
+						return prev === next ? prev : next;
+					});
+					ticking = false;
+				});
+				ticking = true;
+			}
 		};
+
 		window.addEventListener("scroll", toggleVisibility);
 		return () => window.removeEventListener("scroll", toggleVisibility);
 	}, []);
 
 	const scrollToTop = () => {
-		window.scrollTo({ top: 0, behavior: "smooth" });
+		window.scrollTo({ top: 0 }); // test bỏ smooth
 	};
 
-	return visible ? (
+	return (
 		<button
 			onClick={scrollToTop}
-			className="fixed right-4 bottom-20 z-50 cursor-pointer rounded-full bg-[#222] p-3 text-white shadow-lg transition hover:bg-red-600"
-			aria-label="Scroll to top"
+			className={`fixed right-4 bottom-20 z-50 rounded-full bg-[#222] p-3 text-white shadow-lg transition-all duration-200
+			${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
 		>
 			<ChevronUp className="h-6 w-6" />
 		</button>
-	) : null;
+	);
 };
 
 export default ScrollToTop;

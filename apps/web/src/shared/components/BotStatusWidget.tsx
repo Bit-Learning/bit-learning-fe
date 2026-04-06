@@ -48,7 +48,6 @@ function MiniChatPanel({
 	};
 
 	const displayMessages = messages.length === 0 ? [welcomeMessage] : messages;
-
 	const quickQuestions = ["HTML là gì?", "CSS Flexbox?", "JavaScript cơ bản"];
 
 	useEffect(() => {
@@ -452,8 +451,22 @@ export default function BotStatusWidget({
 
 	const [panelOpen, setPanelOpen] = useState(false);
 	const [minimized, setMinimized] = useState(false);
+	const [widgetClosed, setWidgetClosed] = useState(false);
 	const [unreadCount, setUnreadCount] = useState(1);
 	const [showTooltip, setShowTooltip] = useState(false);
+
+	// Khôi phục trạng thái ẩn widget từ localStorage
+	useEffect(() => {
+		if (typeof window === "undefined") return;
+		try {
+			const stored = window.localStorage.getItem("botWidgetClosed");
+			if (stored === "1") {
+				setWidgetClosed(true);
+			}
+		} catch {
+			// ignore
+		}
+	}, []);
 
 	// Badge tăng khi bot reply trong khi panel đóng/minimized
 	const prevMsgCount = useRef(messages.length);
@@ -466,6 +479,10 @@ export default function BotStatusWidget({
 		}
 		prevMsgCount.current = messages.length;
 	}, [messages, panelOpen, minimized]);
+
+	if (widgetClosed) {
+		return null;
+	}
 
 	const handleMouseEnter = () => {
 		if (!panelOpen) setShowTooltip(true);
@@ -496,6 +513,20 @@ export default function BotStatusWidget({
 		setPanelOpen(false);
 		onNavigateToFull();
 		// Không clear để ChatAIContent kế thừa conversation đang chat
+	};
+
+	const handleHideWidget = () => {
+		setPanelOpen(false);
+		setMinimized(false);
+		setShowTooltip(false);
+		setWidgetClosed(true);
+		if (typeof window !== "undefined") {
+			try {
+				window.localStorage.setItem("botWidgetClosed", "1");
+			} catch {
+				// ignore
+			}
+		}
 	};
 
 	return (
@@ -532,18 +563,18 @@ export default function BotStatusWidget({
           animation-play-state:paused;
         }
         .bot-widget-btn:active { transform:scale(0.94) !important; }
-        .bot-inner {
+		.bot-inner {
           display:flex; align-items:center; gap:12px;
           padding:10px 16px 10px 10px; border-radius:18px;
           border:1px solid rgba(19,127,236,0.12); background:white;
         }
-        .bot-icon-wrap {
-          width:46px; height:46px;
-          background:linear-gradient(135deg,#dbeafe,#bfdbfe);
-          border-radius:13px;
-          display:flex; align-items:center; justify-content:center;
-          flex-shrink:0; position:relative; transition:background 0.2s;
-        }
+		.bot-icon-wrap {
+		  width:46px; height:46px;
+		  background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+		  border-radius:13px;
+		  display:flex; align-items:center; justify-content:center;
+		  flex-shrink:0; position:relative; transition:background 0.2s;
+		}
         .bot-widget-btn:hover .bot-icon-wrap {
           background:linear-gradient(135deg,#137fec,#0a5cbf);
         }
@@ -579,12 +610,12 @@ export default function BotStatusWidget({
           transform:translateY(-50%);
           border:6px solid transparent; border-right-color:#1e293b;
         }
-        /* Mobile: chỉ hiện icon */
-        @media (max-width:480px) {
-          .bot-text-block { display:none !important; }
-          .bot-inner { padding:8px; border-radius:14px; }
-          .bot-icon-wrap { width:40px; height:40px; border-radius:11px; }
-        }
+		/* Mobile: chỉ hiện icon */
+		@media (max-width:480px) {
+		  .bot-text-block { display:none !important; }
+		  .bot-inner { padding:8px; border-radius:14px; }
+		  .bot-icon-wrap { width:40px; height:40px; border-radius:11px; }
+		}
       `}</style>
 
 			{/* Mini Chat Panel */}
@@ -671,6 +702,32 @@ export default function BotStatusWidget({
 						<div className="tooltip-bubble">💡 Hỏi mình về Tin học nhé!</div>
 					)}
 				</button>
+
+				{/* Close widget button (persists closed state) */}
+				{(!panelOpen || minimized) && (
+					<button
+						onClick={handleHideWidget}
+						style={{
+							position: "absolute",
+							top: -10,
+							right: -10,
+							width: 22,
+							height: 22,
+							borderRadius: "999px",
+							border: "none",
+							background: "#e2e8f0",
+							boxShadow: "0 2px 6px rgba(15,23,42,0.25)",
+							cursor: "pointer",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 1,
+						}}
+						aria-label="Ẩn trợ lý Tin học"
+					>
+						<X size={12} color="#0f172a" />
+					</button>
+				)}
 
 				{/* Minimized label */}
 				{minimized && (

@@ -27,7 +27,7 @@ export function GeneralError({
 						<Button variant="outline" onClick={() => history.go(-1)}>
 							Quay lại trang trước
 						</Button>
-						<Button onClick={() => navigate({ to: "/" })}>Back to Home</Button>
+						<Button onClick={() => navigate({ to: "/" })}>Về trang chủ</Button>
 					</div>
 				)}
 			</div>
