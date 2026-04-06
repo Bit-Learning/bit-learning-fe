@@ -1,152 +1,264 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
+import { Input } from "@workspace/ui/components/Input";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { useMyMatrices } from "../queries/useMatrix";
-import MatrixCard from "./MatrixCard";
+import { useMyMatrices, useDeleteMatrix } from "../queries/useMatrix";
 import MatrixFormModal from "./MatrixFormModal";
 import type { TMatrixResponse } from "../types/matrix.type";
 import { Pagination } from "@/shared/components/Pagination";
-import { Input } from "@workspace/ui/components/Input";
+import { cn } from "@workspace/ui/lib/utils";
+
+const PAGE_SIZE = 20;
+
+const normalize = (str: string) =>
+  str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
 
 const MyMatricesContent: React.FC = () => {
-	const navigate = useNavigate();
-	const [search, setSearch] = useState("");
-	const [page, setPage] = useState(0);
-	const [gradeFilter, setGradeFilter] = useState("all");
-	const [modal, setModal] = useState<{
-		open: boolean;
-		data?: TMatrixResponse | null;
-	}>({ open: false });
+  const navigate = useNavigate();
+  const [search, setSearch] = useState("");
+  const [page, setPage] = useState(0);
+  const [activeFilter, setActiveFilter] = useState("all");
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
+  const [modal, setModal] = useState<{ open: boolean; data?: TMatrixResponse | null }>({ open: false });
 
-	const { data: response, isLoading } = useMyMatrices(page, 12);
+  const { data: response, isLoading } = useMyMatrices(0, 99999);
+  const deleteMatrix = useDeleteMatrix();
 
-	const matrices = response?.data || [];
-	const pagination = response?.page;
+  const allMatrices = response?.data || [];
 
-	const filtered = matrices.filter(
-		(m) =>
-			m.name.toLowerCase().includes(search.toLowerCase()) ||
-			m.code.toLowerCase().includes(search.toLowerCase()),
-	);
+  const subjects = useMemo(() => {
+    const seen = new Map<number, { id: number; name: string }>();
+    allMatrices.forEach((m) => {
+      if (m.subject && !seen.has(m.subject.id)) {
+        seen.set(m.subject.id, { id: m.subject.id, name: m.subject.name });
+      }
+    });
+    return Array.from(seen.values());
+  }, [allMatrices]);
 
-	return (
-		<main className="flex-1 p-8 min-h-screen bg-white dark:bg-slate-950">
-			<div className="max-w-8xl mx-auto">
-				<div className="flex items-center justify-between mb-8">
-					<div>
-						<h1 className="text-3xl font-bold text-slate-900 dark:text-white">
-							Quản lý Ma trận đề thi
-						</h1>
-						<p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
-							Ngân hàng ma trận đề thi
-						</p>
-					</div>
-					<Button
-						onClick={() => setModal({ open: true })}
-						className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
-					>
-						<Plus className="h-5 w-5" />
-						Tạo ma trận mới
-					</Button>
-				</div>
+  const filteredMatrices = useMemo(() => {
+    return allMatrices.filter((m) => {
+      const matchSearch =
+        !search || normalize(m.name).includes(normalize(search)) || normalize(m.code).includes(normalize(search));
+      const matchSubject = !selectedSubjectId || m.subject?.id === selectedSubjectId;
+      const matchActive =
+        activeFilter === "all" ||
+        (activeFilter === "active" && m.isActive) ||
+        (activeFilter === "inactive" && !m.isActive);
+      return matchSearch && matchSubject && matchActive;
+    });
+  }, [allMatrices, search, selectedSubjectId, activeFilter]);
 
-				<div className="mb-6 flex gap-4">
-					<div className="relative flex-1">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
-						<input
-							className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
-							placeholder="Tìm kiếm ma trận..."
-							type="text"
-							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-						/>
-					</div>
-					<select
-						className="bg-white dark:bg-slate-900 border border-slate-400 dark:border-slate-800 rounded-lg px-4 py-2 text-sm outline-none focus:ring-2 focus:ring-primary"
-						value={gradeFilter}
-						onChange={(e) => setGradeFilter(e.target.value)}
-					>
-						<option value="all">Tất cả lớp học</option>
-						<option value="tin3">Tin học 3</option>
-						<option value="tin6">Tin học 6</option>
-						<option value="tin12">Tin học 12</option>
-					</select>
-				</div>
+  const totalPages = Math.ceil(filteredMatrices.length / PAGE_SIZE);
+  const pagedMatrices = filteredMatrices.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
 
-				{isLoading ? (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{[1, 2, 3].map((i) => (
-							<Skeleton key={i} className="h-96 w-full rounded-xl" />
-						))}
-					</div>
-				) : !filtered.length ? (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						<div
-							onClick={() => setModal({ open: true })}
-							className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center p-8 text-center hover:border-primary hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all cursor-pointer group"
-						>
-							<div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-								<Plus className="h-6 w-6" />
-							</div>
-							<h4 className="font-bold text-slate-700 dark:text-slate-200">
-								Tạo ma trận mới
-							</h4>
-							<p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-50">
-								Xây dựng cấu trúc ma trận đề thi cho khối lớp mới
-							</p>
-						</div>
-					</div>
-				) : (
-					<div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-						{filtered.map((matrix) => (
-							<MatrixCard
-								key={matrix.id}
-								matrix={matrix}
-								onEdit={() => setModal({ open: true, data: matrix })}
-								onViewDetail={() =>
-									navigate({
-										to: "/mentor/matrix/$id",
-										params: { id: matrix.id.toString() },
-									})
-								}
-							/>
-						))}
+  const resetPage = () => setPage(0);
 
-						<div
-							onClick={() => setModal({ open: true })}
-							className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center p-8 text-center hover:border-primary hover:bg-blue-50/30 dark:hover:bg-blue-500/5 transition-all cursor-pointer group"
-						>
-							<div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
-								<Plus className="h-6 w-6" />
-							</div>
-							<h4 className="font-bold text-slate-700 dark:text-slate-200">
-								Tạo ma trận mới
-							</h4>
-							<p className="text-sm text-slate-500 dark:text-slate-400 mt-1 max-w-50">
-								Xây dựng cấu trúc ma trận đề thi cho khối lớp mới
-							</p>
-						</div>
-					</div>
-				)}
+  const handleSubjectSelect = (id: number | undefined) => {
+    setSelectedSubjectId(id);
+    resetPage();
+  };
 
-				{pagination && pagination.totalPages > 1 && (
-					<Pagination
-						currentPage={page}
-						totalPages={pagination.totalPages}
-						onPageChange={setPage}
-					/>
-				)}
-			</div>
+  const handleFilterChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setter(e.target.value);
+    resetPage();
+  };
 
-			<MatrixFormModal
-				isOpen={modal.open}
-				onClose={() => setModal({ open: false })}
-				data={modal.data}
-			/>
-		</main>
-	);
+  const handleDelete = (m: TMatrixResponse) => {
+    if (confirm(`Bạn có chắc chắn muốn xóa ma trận "${m.name}"?`)) {
+      deleteMatrix.mutate(m.id);
+    }
+  };
+
+  return (
+    <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="max-w-8xl mx-auto">
+        <div className="flex items-center justify-between mb-8">
+          <div>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Quản lý Ma trận đề thi</h1>
+            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Ngân hàng ma trận đề thi</p>
+          </div>
+          <Button
+            onClick={() => setModal({ open: true })}
+            className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+          >
+            <Plus className="h-5 w-5" />
+            Tạo ma trận mới
+          </Button>
+        </div>
+
+        <div className="mb-6 flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+              type="text"
+              placeholder="Tìm kiếm theo tên hoặc mã ma trận..."
+              value={search}
+              onChange={(e) => {
+                setSearch(e.target.value);
+                resetPage();
+              }}
+            />
+          </div>
+          <select
+            value={activeFilter}
+            onChange={handleFilterChange(setActiveFilter)}
+            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+          >
+            <option value="all">Trạng thái: Tất cả</option>
+            <option value="active">Đang hoạt động</option>
+            <option value="inactive">Không hoạt động</option>
+          </select>
+          <select
+            value={selectedSubjectId?.toString() ?? "all"}
+            onChange={(e) => handleSubjectSelect(e.target.value === "all" ? undefined : Number(e.target.value))}
+            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-37.5"
+          >
+            <option value="all">Tất cả môn học</option>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        {isLoading ? (
+          <div className="space-y-2">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <Skeleton key={i} className="h-16 w-full rounded-lg" />
+            ))}
+          </div>
+        ) : !filteredMatrices.length ? (
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <div
+              onClick={() => setModal({ open: true })}
+              className="border-2 border-dashed border-slate-200 dark:border-slate-800 rounded-xl flex flex-col items-center justify-center p-8 cursor-pointer hover:border-primary hover:bg-blue-50/30 transition-all group w-80"
+            >
+              <div className="w-12 h-12 bg-slate-100 dark:bg-slate-800 rounded-full flex items-center justify-center mb-4 group-hover:bg-primary group-hover:text-white transition-colors">
+                <Plus className="h-6 w-6" />
+              </div>
+              <h4 className="font-bold text-slate-700 dark:text-slate-200">Tạo ma trận mới</h4>
+              <p className="text-sm text-slate-500 dark:text-slate-400 mt-1">
+                {search || selectedSubjectId || activeFilter !== "all"
+                  ? "Không tìm thấy ma trận phù hợp"
+                  : "Xây dựng cấu trúc ma trận đề thi"}
+              </p>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div className="bg-white rounded-md border-2 border-slate-200 overflow-hidden">
+              <table className="w-full">
+                <thead>
+                  <tr className="border-b border-gray-300 bg-gray-50">
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
+                      TÊN MA TRẬN
+                    </th>
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-36">
+                      MÃ
+                    </th>
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-80">
+                      MÔN HỌC
+                    </th>
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-28">
+                      THỜI GIAN
+                    </th>
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-28">
+                      TỔNG ĐIỂM
+                    </th>
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-36">
+                      TRẠNG THÁI
+                    </th>
+                    <th className="text-center p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-36">
+                      THAO TÁC
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white">
+                  {pagedMatrices.map((matrix: TMatrixResponse) => (
+                    <tr
+                      key={matrix.id}
+                      className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
+                    >
+                      <td className="p-4">
+                        <div className="font-medium text-gray-900">{matrix.name}</div>
+                        {matrix.description && (
+                          <div className="text-xs text-gray-500 mt-0.5 line-clamp-1">{matrix.description}</div>
+                        )}
+                      </td>
+                      <td className="p-4">
+                        <span className="font-mono text-sm text-gray-700 bg-gray-100 px-2 py-0.5 rounded">
+                          {matrix.code}
+                        </span>
+                      </td>
+                      <td className="p-4 text-sm text-gray-700">{matrix.subject?.name}</td>
+                      <td className="p-4 text-sm text-gray-700">{matrix.duration} phút</td>
+                      <td className="p-4 text-sm text-gray-700">{matrix.totalScore} điểm</td>
+                      <td className="p-4">
+                        <span
+                          className={cn(
+                            "px-2 py-1 rounded text-xs font-medium",
+                            matrix.isActive ? "bg-green-100 text-green-700" : "bg-gray-100 text-gray-600",
+                          )}
+                        >
+                          {matrix.isActive ? "Hoạt động" : "Không hoạt động"}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
+                            title="Xem chi tiết"
+                            onClick={() => navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } })}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </button>
+                          <button
+                            className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
+                            title="Chỉnh sửa"
+                            onClick={() => setModal({ open: true, data: matrix })}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </button>
+                          <button
+                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                            title="Xóa"
+                            onClick={() => handleDelete(matrix)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="mt-4 flex items-center justify-between">
+              <p className="text-sm text-gray-600">
+                Hiển thị{" "}
+                <span className="font-semibold text-gray-900">
+                  {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filteredMatrices.length)}
+                </span>{" "}
+                trong <span className="font-semibold text-gray-900">{filteredMatrices.length}</span> ma trận
+              </p>
+              {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
+            </div>
+          </>
+        )}
+      </div>
+
+      <MatrixFormModal isOpen={modal.open} onClose={() => setModal({ open: false })} data={modal.data} />
+    </main>
+  );
 };
 
 export default MyMatricesContent;

@@ -15,6 +15,12 @@ export enum ApprovalStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
+
+export enum QuestionMediaType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+}
+
 export interface OptionRequest {
   label?: string;
   content: string;
@@ -92,6 +98,8 @@ export interface QuestionResponse {
   isActive: boolean;
   isPublic: boolean;
   approvalStatus: ApprovalStatus;
+  mediaUrl: string | null;
+  mediaType: QuestionMediaType | null;
   createdAt: string;
   updatedAt: string;
 }

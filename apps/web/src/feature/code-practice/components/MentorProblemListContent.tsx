@@ -113,40 +113,41 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({
 					</Button>
 				</div>
 
-				<div className="flex flex-col md:flex-row gap-4">
-					<div className="relative flex-1">
-						<Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-						<Input
-							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-							className="pl-10 py-5 border-2"
-							placeholder="Tìm kiếm bài tập..."
-						/>
-					</div>
-					<div>
-						<select
-							value={difficulty}
-							onChange={(e) => setDifficulty(e.target.value)}
-							className="px-4 py-2.5 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-						>
-							<option value="all">Độ khó: Tất cả</option>
-							<option value="EASY">Dễ</option>
-							<option value="MEDIUM">Trung bình</option>
-							<option value="HARD">Khó</option>
-						</select>
-					</div>
-					<div>
-						<select
-							value={visibility}
-							onChange={(e) => setVisibility(e.target.value)}
-							className="px-4 py-2.5 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
-						>
-							<option value="all">Trạng thái: Tất cả</option>
-							<option value="public">Công khai</option>
-							<option value="private">Nháp</option>
-						</select>
-					</div>
-				</div>
+        <div className="flex flex-col md:flex-row gap-4">
+          <div className="relative flex-1">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+              placeholder="Tìm kiếm bài tập..."
+              type="text"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+            />
+          </div>
+          <div>
+            <select
+              value={difficulty}
+              onChange={(e) => setDifficulty(e.target.value)}
+              className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+            >
+              <option value="all">Độ khó: Tất cả</option>
+              <option value="EASY">Dễ</option>
+              <option value="MEDIUM">Trung bình</option>
+              <option value="HARD">Khó</option>
+            </select>
+          </div>
+          <div>
+            <select
+              value={visibility}
+              onChange={(e) => setVisibility(e.target.value)}
+              className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+            >
+              <option value="all">Trạng thái: Tất cả</option>
+              <option value="public">Công khai</option>
+              <option value="private">Nháp</option>
+            </select>
+          </div>
+        </div>
 
 				<div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
 					<div className="px-0">
