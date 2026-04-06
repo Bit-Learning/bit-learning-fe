@@ -228,18 +228,19 @@ const MyQuestionsContent: React.FC = () => {
 
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
-            <Input
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+            <input
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
               placeholder="Tìm kiếm nội dung câu hỏi..."
+              type="text"
               value={search}
               onChange={(e) => handleSearchChange(e.target.value)}
-              className="pl-10 py-5 border-2"
             />
           </div>
           <select
             value={difficultyFilter}
             onChange={handleFilterChange(setDifficultyFilter)}
-            className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
           >
             <option value="all">Độ khó: Tất cả</option>
             <option value="EASY">Dễ</option>
@@ -249,7 +250,7 @@ const MyQuestionsContent: React.FC = () => {
           <select
             value={typeFilter}
             onChange={handleFilterChange(setTypeFilter)}
-            className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
           >
             <option value="all">Loại: Tất cả</option>
             <option value="MCQ">Trắc nghiệm</option>
@@ -258,7 +259,7 @@ const MyQuestionsContent: React.FC = () => {
           <select
             value={selectedSubjectId?.toString() ?? "all"}
             onChange={(e) => handleSubjectSelect(e.target.value === "all" ? undefined : Number(e.target.value))}
-            className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
+            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
           >
             <option value="all">Tất cả môn học</option>
             {subjects.map((s) => (
@@ -324,7 +325,7 @@ const MyQuestionsContent: React.FC = () => {
                     <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
                       MÔN HỌC
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-30">
                       TRẠNG THÁI
                     </th>
                     <th className="text-center p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">

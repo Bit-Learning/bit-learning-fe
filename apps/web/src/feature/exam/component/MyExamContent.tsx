@@ -58,7 +58,6 @@ const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
       <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
 
       <div className="relative bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700">
-        {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
           <h2 className="text-lg font-bold text-slate-900 dark:text-white">Chỉnh sửa đề thi</h2>
           <button
@@ -69,7 +68,6 @@ const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
           </button>
         </div>
 
-        {/* Body */}
         <div className="px-6 py-5 space-y-4">
           <div>
             <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
@@ -156,7 +154,6 @@ const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
           </div>
         </div>
 
-        {/* Footer */}
         <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700">
           <button
             onClick={onClose}
@@ -179,7 +176,6 @@ const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
   );
 };
 
-// ── Main Component ────────────────────────────────────────────────────────────
 const MyExamsContent: React.FC = () => {
   const navigate = useNavigate();
 
@@ -272,7 +268,7 @@ const MyExamsContent: React.FC = () => {
 
       <div className="flex flex-col sm:flex-row gap-3 mb-6">
         <div className="relative flex-1">
-          <Search className="absolute left-4 top-1/2 -translate-y-1/2 h-5 w-5 text-slate-400" />
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
             className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
             placeholder="Tìm kiếm theo tên hoặc mã đề..."

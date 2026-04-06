@@ -95,20 +95,21 @@ const MyMatricesContent: React.FC = () => {
         <div className="mb-6 flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-            <Input
+            <input
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+              type="text"
               placeholder="Tìm kiếm theo tên hoặc mã ma trận..."
               value={search}
               onChange={(e) => {
                 setSearch(e.target.value);
                 resetPage();
               }}
-              className="pl-10 py-5 border-2"
             />
           </div>
           <select
             value={activeFilter}
             onChange={handleFilterChange(setActiveFilter)}
-            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-37.5"
+            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
           >
             <option value="all">Trạng thái: Tất cả</option>
             <option value="active">Đang hoạt động</option>
