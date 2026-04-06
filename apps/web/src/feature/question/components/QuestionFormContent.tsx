@@ -304,9 +304,9 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                     onChange={(e) => form.setValue("questionLevel", e.target.value as QuestionLevel)}
                     className={select}
                   >
-                    <option value="EASY">🟢 Dễ</option>
-                    <option value="MEDIUM">🟡 Trung bình</option>
-                    <option value="HARD">🔴 Khó</option>
+                    <option value="EASY">Dễ</option>
+                    <option value="MEDIUM">Trung bình</option>
+                    <option value="HARD">Khó</option>
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 </div>

@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
@@ -14,44 +14,78 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
-import { useMyQuestions, useDeleteQuestion, useRequestPublish } from "../queries/useQuestion";
+import { useMyQuestionsAll, useDeleteQuestion, useRequestPublish } from "../queries/useQuestion";
 import { ApprovalStatus, QuestionLevel, QuestionType, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
 import { useNavigate } from "@tanstack/react-router";
 
+const PAGE_SIZE = 20;
+
+const normalize = (str: string) =>
+  str
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toLowerCase();
+
 const MyQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
-  const [size] = useState(20);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [statusFilter, setStatusFilter] = useState("all");
 
-  const { data: response, isLoading } = useMyQuestions({
-    keyword: search,
-    page,
-    size,
-  });
+  const { data: allQuestionsData, isLoading } = useMyQuestionsAll();
+  const allQuestions = allQuestionsData ?? [];
 
   const deleteQuestion = useDeleteQuestion();
   const requestPublish = useRequestPublish();
 
-  const questions = response?.data || [];
-  const pagination = response?.page;
+  const subjects = useMemo(() => {
+    const seen = new Map<number, { id: number; name: string }>();
+    allQuestions.forEach((q) => {
+      if (q.subject && !seen.has(q.subject.id)) {
+        seen.set(q.subject.id, { id: q.subject.id, name: q.subject.name });
+      }
+    });
+    return Array.from(seen.values());
+  }, [allQuestions]);
 
-  const filteredQuestions = questions.filter((q) => {
-    const matchDifficulty = difficultyFilter === "all" || q.questionLevel === difficultyFilter;
-    const matchType = typeFilter === "all" || q.questionType === typeFilter;
-    const matchStatus = statusFilter === "all" || q.approvalStatus === statusFilter;
-    return matchDifficulty && matchType && matchStatus;
-  });
+  const filteredQuestions = useMemo(() => {
+    return allQuestions.filter((q) => {
+      const matchSearch = !search || normalize(q.content).includes(normalize(search));
+      const matchSubject = !selectedSubjectId || q.subject?.id === selectedSubjectId;
+      const matchDifficulty = difficultyFilter === "all" || q.questionLevel === difficultyFilter;
+      const matchType = typeFilter === "all" || q.questionType === typeFilter;
+      return matchSearch && matchSubject && matchDifficulty && matchType;
+    });
+  }, [allQuestions, search, selectedSubjectId, difficultyFilter, typeFilter]);
+
+  const totalPages = Math.ceil(filteredQuestions.length / PAGE_SIZE);
+  const pagedQuestions = filteredQuestions.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const resetPage = () => setPage(0);
+
+  const handleSubjectSelect = (id: number | undefined) => {
+    setSelectedSubjectId(id);
+    resetPage();
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearch(value);
+    resetPage();
+  };
+
+  const handleFilterChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
+    setter(e.target.value);
+    resetPage();
+  };
 
   const handleSelectQuestion = (id: number) => {
-    const question = questions.find((q) => q.id === id);
+    const question = allQuestions.find((q) => q.id === id);
     if (
       question &&
       (question.approvalStatus === ApprovalStatus.NONE || question.approvalStatus === ApprovalStatus.REJECTED)
@@ -61,14 +95,14 @@ const MyQuestionsContent: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    const selectableQuestions = filteredQuestions.filter(
+    const selectable = pagedQuestions.filter(
       (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
     );
-
-    if (selectedQuestions.length === selectableQuestions.length) {
-      setSelectedQuestions([]);
+    const allSelected = selectable.every((q) => selectedQuestions.includes(q.id));
+    if (allSelected) {
+      setSelectedQuestions((prev) => prev.filter((id) => !selectable.map((q) => q.id).includes(id)));
     } else {
-      setSelectedQuestions(selectableQuestions.map((q) => q.id));
+      setSelectedQuestions((prev) => [...new Set([...prev, ...selectable.map((q) => q.id)])]);
     }
   };
 
@@ -112,13 +146,16 @@ const MyQuestionsContent: React.FC = () => {
     return <span className={`px-2 py-1 rounded text-xs font-medium ${config.className}`}>{config.label}</span>;
   };
 
-  const getTypeBadge = (type: QuestionType) => {
-    const labels: Record<QuestionType, string> = {
-      [QuestionType.MCQ]: "Trắc nghiệm",
-      [QuestionType.ESSAY]: "Tự luận",
-    };
-    return labels[type];
-  };
+  const getTypeBadge = (type: QuestionType) =>
+    ({ [QuestionType.MCQ]: "Trắc nghiệm", [QuestionType.ESSAY]: "Tự luận" })[type];
+
+  const selectedSubject = subjects.find((s) => s.id === selectedSubjectId);
+
+  const selectableOnPage = pagedQuestions.filter(
+    (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
+  );
+  const allPageSelected =
+    selectableOnPage.length > 0 && selectableOnPage.every((q) => selectedQuestions.includes(q.id));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -133,7 +170,10 @@ const MyQuestionsContent: React.FC = () => {
               {selectedQuestions.length > 0 && (
                 <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                   <AlertDialogTrigger asChild>
-                    <Button className="gap-2">
+                    <Button
+                      size="lg"
+                      className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+                    >
                       <Send className="h-4 w-4" />
                       Gửi phê duyệt ({selectedQuestions.length})
                     </Button>
@@ -185,19 +225,20 @@ const MyQuestionsContent: React.FC = () => {
             </div>
           </div>
         </div>
+
         <div className="flex flex-col md:flex-row gap-4">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
             <Input
               placeholder="Tìm kiếm nội dung câu hỏi..."
               value={search}
-              onChange={(e) => setSearch(e.target.value)}
+              onChange={(e) => handleSearchChange(e.target.value)}
               className="pl-10 py-5 border-2"
             />
           </div>
           <select
             value={difficultyFilter}
-            onChange={(e) => setDifficultyFilter(e.target.value)}
+            onChange={handleFilterChange(setDifficultyFilter)}
             className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">Độ khó: Tất cả</option>
@@ -207,7 +248,7 @@ const MyQuestionsContent: React.FC = () => {
           </select>
           <select
             value={typeFilter}
-            onChange={(e) => setTypeFilter(e.target.value)}
+            onChange={handleFilterChange(setTypeFilter)}
             className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
           >
             <option value="all">Loại: Tất cả</option>
@@ -215,17 +256,30 @@ const MyQuestionsContent: React.FC = () => {
             <option value="ESSAY">Tự luận</option>
           </select>
           <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
+            value={selectedSubjectId?.toString() ?? "all"}
+            onChange={(e) => handleSubjectSelect(e.target.value === "all" ? undefined : Number(e.target.value))}
             className="px-4 py-2 border border-gray-300 rounded-md bg-white text-gray-900 focus:outline-none focus:ring-2 focus:ring-primary"
           >
-            <option value="all">Trạng thái: Tất cả</option>
-            <option value="NONE">Chưa gửi</option>
-            <option value="PENDING">Chờ duyệt</option>
-            <option value="APPROVED">Đã duyệt</option>
-            <option value="REJECTED">Từ chối</option>
+            <option value="all">Tất cả môn học</option>
+            {subjects.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
           </select>
         </div>
+
+        {selectedSubject && (
+          <div className="flex items-center gap-2 mt-3 flex-wrap">
+            <span className="text-xs text-gray-500">Đang lọc:</span>
+            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+              {selectedSubject.name}
+              <button onClick={() => handleSubjectSelect(undefined)} className="ml-0.5 hover:text-blue-600">
+                <X className="h-3 w-3" />
+              </button>
+            </span>
+          </div>
+        )}
 
         {isLoading ? (
           <div className="p-6 space-y-2">
@@ -239,7 +293,9 @@ const MyQuestionsContent: React.FC = () => {
               <Send className="h-16 w-16 text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Không tìm thấy câu hỏi</h3>
               <p className="text-gray-600 mb-6">
-                {search ? "Thử tìm kiếm với từ khóa khác" : "Bạn chưa có câu hỏi nào"}
+                {search || selectedSubjectId || difficultyFilter !== "all" || typeFilter !== "all"
+                  ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác"
+                  : "Bạn chưa có câu hỏi nào"}
               </p>
             </div>
           </div>
@@ -252,11 +308,12 @@ const MyQuestionsContent: React.FC = () => {
                     <th className="text-left p-4 w-12">
                       <input
                         type="checkbox"
-                        checked={selectedQuestions.length === filteredQuestions.length && filteredQuestions.length > 0}
+                        checked={allPageSelected}
                         onChange={handleSelectAll}
                         className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                       />
                     </th>
+                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">STT</th>
                     <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
                       NỘI DUNG CÂU HỎI
                     </th>
@@ -276,7 +333,7 @@ const MyQuestionsContent: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {filteredQuestions.map((question: QuestionResponse, index: number) => (
+                  {pagedQuestions.map((question: QuestionResponse, index: number) => (
                     <tr
                       key={question.id}
                       className={cn(
@@ -293,14 +350,16 @@ const MyQuestionsContent: React.FC = () => {
                             question.approvalStatus === ApprovalStatus.PENDING ||
                             question.approvalStatus === ApprovalStatus.APPROVED
                           }
-                          className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                          className="w-4 h-4 rounded mt-1.5 border-gray-300 text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </td>
                       <td className="p-4">
-                        <div className="flex items-start gap-3">
-                          <span className="text-primary font-semibold whitespace-nowrap">
-                            Câu {index + 1 + page * size}:
-                          </span>
+                        <span className="text-primary text-lg font-semibold text-center">
+                          {index + 1 + page * PAGE_SIZE}
+                        </span>
+                      </td>
+                      <td className="p-4">
+                        <div className="flex items-start">
                           <div className="flex-1 min-w-0">
                             <p className="line-clamp-2 text-gray-900">{question.content}</p>
                             <p className="text-xs text-gray-500 mt-1">
@@ -313,17 +372,13 @@ const MyQuestionsContent: React.FC = () => {
                       <td className="p-4 text-sm text-gray-700">{getTypeBadge(question.questionType)}</td>
                       <td className="p-4 text-sm text-gray-700">{question.subject?.name}</td>
                       <td className="p-4">{getStatusBadge(question.approvalStatus)}</td>
-
                       <td className="p-4">
                         <div className="flex items-center justify-center gap-1">
                           <button
                             className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
                             title="Xem"
                             onClick={() =>
-                              navigate({
-                                to: "/mentor/question/$id",
-                                params: { id: question.id.toString() },
-                              })
+                              navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } })
                             }
                           >
                             <Eye className="h-4 w-4" />
@@ -332,10 +387,7 @@ const MyQuestionsContent: React.FC = () => {
                             className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
                             title="Chỉnh sửa"
                             onClick={() =>
-                              navigate({
-                                to: "/mentor/question/$id/edit",
-                                params: { id: question.id.toString() },
-                              })
+                              navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } })
                             }
                           >
                             <Edit className="h-4 w-4" />
@@ -357,17 +409,14 @@ const MyQuestionsContent: React.FC = () => {
 
             <div className="p-4 border-t border-gray-200 flex items-center justify-between">
               <p className="text-sm text-gray-600">
-                Hiển thị <span className="font-semibold text-gray-900">1</span> đến{" "}
-                <span className="font-semibold text-gray-900">4</span> trong{" "}
+                Hiển thị{" "}
                 <span className="font-semibold text-gray-900">
-                  {pagination?.totalElements || filteredQuestions.length}
+                  {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filteredQuestions.length)}
                 </span>{" "}
-                câu hỏi
+                trong <span className="font-semibold text-gray-900">{filteredQuestions.length}</span> câu hỏi
               </p>
 
-              {pagination && pagination.totalPages > 1 && (
-                <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={setPage} />
-              )}
+              {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
             </div>
           </>
         )}

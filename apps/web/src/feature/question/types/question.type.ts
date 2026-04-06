@@ -16,7 +16,6 @@ export enum ApprovalStatus {
   REJECTED = "REJECTED",
 }
 
-// NEW: Media type enum matching backend QuestionMediaType
 export enum QuestionMediaType {
   IMAGE = "IMAGE",
   VIDEO = "VIDEO",

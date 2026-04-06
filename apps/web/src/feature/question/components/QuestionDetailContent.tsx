@@ -12,41 +12,29 @@ const QuestionDetailContent: React.FC = () => {
   const params = useParams({ strict: false });
   const questionId = (params as any).id ? Number((params as any).id) : undefined;
 
-  const { data: question, isLoading } = useQuestion(questionId!, {
-    enabled: !!questionId,
-  });
+  const { data: question, isLoading } = useQuestion(questionId!, { enabled: !!questionId });
   const deleteQuestion = useDeleteQuestion();
 
-  const getQuestionTypeLabel = (type: QuestionType) => {
-    return type === "MCQ" ? "Trắc nghiệm" : "Tự luận";
-  };
+  const getQuestionTypeLabel = (type: QuestionType) => (type === "MCQ" ? "Trắc nghiệm" : "Tự luận");
 
-  const getQuestionTypeColor = (type: QuestionType) => {
-    return type === "MCQ"
+  const getQuestionTypeColor = (type: QuestionType) =>
+    type === "MCQ"
       ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
       : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
-  };
 
-  const getLevelLabel = (level: QuestionLevel) => {
-    const labels = { EASY: "Dễ", MEDIUM: "Trung bình", HARD: "Khó" };
-    return labels[level];
-  };
+  const getLevelLabel = (level: QuestionLevel) => ({ EASY: "Dễ", MEDIUM: "Trung bình", HARD: "Khó" })[level];
 
-  const getLevelColor = (level: QuestionLevel) => {
-    const colors = {
+  const getLevelColor = (level: QuestionLevel) =>
+    ({
       EASY: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
       MEDIUM: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
       HARD: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-    };
-    return colors[level];
-  };
+    })[level];
 
   const handleDelete = () => {
     if (confirm(`Bạn có chắc chắn muốn xóa câu hỏi:\n"${question?.content.substring(0, 50)}..."?`)) {
       deleteQuestion.mutate(questionId!, {
-        onSuccess: () => {
-          navigate({ to: "/mentor/question" });
-        },
+        onSuccess: () => navigate({ to: "/mentor/question" }),
       });
     }
   };
@@ -142,6 +130,15 @@ const QuestionDetailContent: React.FC = () => {
               <p className="text-lg leading-relaxed">{question.content}</p>
             </div>
 
+            {/* Media inline — ngay dưới nội dung, không card */}
+            <MediaUploadPanel
+              questionId={questionId!}
+              currentMediaUrl={question.mediaUrl ?? null}
+              currentMediaType={question.mediaType ?? null}
+              variant="inline"
+              onDeleteConfirm={() => confirm("Bạn có chắc chắn muốn xóa media đính kèm?")}
+            />
+
             {question.questionType === "MCQ" && question.options && question.options.length > 0 && (
               <div>
                 <h3 className="text-sm font-medium text-muted-foreground mb-3">Các đáp án</h3>
@@ -181,13 +178,6 @@ const QuestionDetailContent: React.FC = () => {
           </CardContent>
         </Card>
 
-        <MediaUploadPanel
-          questionId={questionId!}
-          currentMediaUrl={question.mediaUrl ?? null}
-          currentMediaType={question.mediaType ?? null}
-          onDeleteConfirm={() => confirm("Bạn có chắc chắn muốn xóa media đính kèm?")}
-        />
-
         <Card className="border border-gray-200">
           <CardHeader>
             <h2 className="text-lg font-semibold">Thông tin bổ sung</h2>
@@ -205,7 +195,6 @@ const QuestionDetailContent: React.FC = () => {
                   </div>
                 </div>
               )}
-
               {question.lesson && (
                 <div className="flex items-start gap-3">
                   <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900">
@@ -217,7 +206,6 @@ const QuestionDetailContent: React.FC = () => {
                   </div>
                 </div>
               )}
-
               {question.chapter && (
                 <div className="flex items-start gap-3">
                   <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900">
@@ -229,7 +217,6 @@ const QuestionDetailContent: React.FC = () => {
                   </div>
                 </div>
               )}
-
               <div className="flex items-start gap-3">
                 <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
                   <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />

@@ -12,9 +12,12 @@ export const questionKeys = {
   details: () => [...questionKeys.all, "detail"] as const,
   detail: (id: number) => [...questionKeys.details(), id] as const,
   myQuestions: (params?: QuestionSearchParams) => [...questionKeys.all, "my-questions", params] as const,
+  myQuestionsAll: () => [...questionKeys.all, "my-questions-all"] as const,
   myPublishRequests: (params?: QuestionApprovalParams) => [...questionKeys.all, "my-publish-requests", params] as const,
+  myPublishRequestsAll: () => [...questionKeys.all, "my-publish-requests-all"] as const,
   pendingApproval: (params?: Omit<QuestionApprovalParams, "status">) =>
     [...questionKeys.all, "pending-approval", params] as const,
+  pendingApprovalAll: () => [...questionKeys.all, "pending-approval-all"] as const,
 };
 
 export const useSearchQuestions = (params?: QuestionSearchParams, options?: { enabled?: boolean }) => {
@@ -52,6 +55,18 @@ export const useMyQuestions = (params?: QuestionSearchParams, options?: { enable
   });
 };
 
+// Fetch toàn bộ câu hỏi của user (không paginate) — dùng để derive subject list
+export const useMyQuestionsAll = () => {
+  return useQuery({
+    queryKey: questionKeys.myQuestionsAll(),
+    queryFn: async () => {
+      const response = await questionApi.getMyQuestions({ size: 9999 });
+      return response.data.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
 export const useMyPublishRequests = (params?: QuestionApprovalParams, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: questionKeys.myPublishRequests(params),
@@ -75,6 +90,28 @@ export const usePendingApproval = (
       return response.data;
     },
     enabled: options?.enabled,
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useMyPublishRequestsAll = () => {
+  return useQuery({
+    queryKey: questionKeys.myPublishRequestsAll(),
+    queryFn: async () => {
+      const response = await questionApi.getMyPublishRequests({ size: 9999 });
+      return response.data.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const usePendingApprovalAll = () => {
+  return useQuery({
+    queryKey: questionKeys.pendingApprovalAll(),
+    queryFn: async () => {
+      const response = await questionApi.getPendingApproval({ size: 9999 });
+      return response.data.data ?? [];
+    },
     staleTime: 5 * 60 * 1000,
   });
 };
@@ -108,6 +145,7 @@ export const useCreateQuestion = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
+      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
       toast.success({
         title: "Thành công",
         description: "Tạo câu hỏi thành công",
@@ -129,10 +167,9 @@ export const useUpdateQuestion = () => {
     mutationFn: ({ id, data }: { id: number; data: QuestionRequest }) => questionApi.updateQuestion(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      queryClient.invalidateQueries({
-        queryKey: questionKeys.detail(variables.id),
-      });
+      queryClient.invalidateQueries({ queryKey: questionKeys.detail(variables.id) });
       queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
+      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
       toast.success({
         title: "Thành công",
         description: "Cập nhật câu hỏi thành công",
@@ -155,6 +192,7 @@ export const useDeleteQuestion = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
+      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
       toast.success({
         title: "Thành công",
         description: "Xóa câu hỏi thành công",
@@ -220,9 +258,7 @@ export const useRequestPublish = () => {
     mutationFn: (data: RequestPublishDTO) => questionApi.requestPublish(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
-      queryClient.invalidateQueries({
-        queryKey: questionKeys.myPublishRequests(),
-      });
+      queryClient.invalidateQueries({ queryKey: questionKeys.myPublishRequests() });
       toast.success({
         title: "Thành công",
         description: "Đã gửi yêu cầu đưa câu hỏi vào Question Bank",
@@ -243,9 +279,7 @@ export const useApproveQuestions = () => {
   return useMutation({
     mutationFn: (data: ApproveRejectDTO) => questionApi.approveQuestions(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: questionKeys.pendingApproval(),
-      });
+      queryClient.invalidateQueries({ queryKey: questionKeys.pendingApproval() });
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
       toast.success({
         title: "Thành công",
@@ -267,9 +301,7 @@ export const useRejectQuestions = () => {
   return useMutation({
     mutationFn: (data: ApproveRejectDTO) => questionApi.rejectQuestions(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: questionKeys.pendingApproval(),
-      });
+      queryClient.invalidateQueries({ queryKey: questionKeys.pendingApproval() });
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
       toast.success({
         title: "Thành công",
