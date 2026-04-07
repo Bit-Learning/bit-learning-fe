@@ -7,10 +7,10 @@ import {
 	getPaginationRowModel,
 	getSortedRowModel,
 	type SortingState,
-	useReactTable,
 	type VisibilityState,
+	useReactTable,
 } from "@tanstack/react-table";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { DataTablePagination, DataTableToolbar } from "@/components/data-table";
 import {
 	Table,
@@ -25,34 +25,34 @@ import {
 	useTableUrlState,
 } from "@/shared/hooks/use-table-url-state";
 import { cn } from "@/shared/lib/utils";
-import { roles } from "../data/data";
-import type { User } from "../data/schema";
-import { DataTableBulkActions } from "./data-table-bulk-actions";
-import { usersColumns as columns } from "./users-columns";
+import type { CoursePreview } from "../types/course.type";
+import { createCoursesColumns } from "./courses-columns";
 
-type DataTableProps = {
-	data: User[];
+export type CoursesTableProps = {
+	data: CoursePreview[];
 	totalPages?: number;
 	search: Record<string, unknown>;
 	navigate: NavigateFn;
+	onEdit: (course: CoursePreview) => void;
+	onDelete: (course: CoursePreview) => void;
 };
 
-export function UsersTable({
+export function CoursesTable({
 	data,
 	totalPages,
 	search,
 	navigate,
-}: DataTableProps) {
-	// Local UI-only states
-	const [rowSelection, setRowSelection] = useState({});
+	onEdit,
+	onDelete,
+}: CoursesTableProps) {
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
 	const [sorting, setSorting] = useState<SortingState>([]);
 
-	// Local state management for table (uncomment to use local-only state, not synced with URL)
-	// const [columnFilters, onColumnFiltersChange] = useState<ColumnFiltersState>([])
-	// const [pagination, onPaginationChange] = useState<PaginationState>({ pageIndex: 0, pageSize: 10 })
+	const columns = useMemo(
+		() => createCoursesColumns({ onEdit, onDelete }),
+		[onEdit, onDelete],
+	);
 
-	// Synced with URL states (keys/defaults mirror users route search schema)
 	const {
 		columnFilters,
 		onColumnFiltersChange,
@@ -65,10 +65,8 @@ export function UsersTable({
 		pagination: { defaultPage: 1, defaultPageSize: 10 },
 		globalFilter: { enabled: false },
 		columnFilters: [
-			// email per-column text filter
-			{ columnId: "email", searchKey: "email", type: "string" },
-			{ columnId: "activated", searchKey: "activated", type: "array" },
-			{ columnId: "role", searchKey: "role", type: "array" },
+			{ columnId: "title", searchKey: "title", type: "string" },
+			{ columnId: "status", searchKey: "status", type: "array" },
 		],
 	});
 
@@ -81,23 +79,18 @@ export function UsersTable({
 		state: {
 			sorting,
 			pagination,
-			rowSelection,
 			columnFilters,
 			columnVisibility,
 		},
-		enableRowSelection: true,
+		onSortingChange: setSorting,
 		onPaginationChange,
 		onColumnFiltersChange,
-		onRowSelectionChange: setRowSelection,
-		onSortingChange: setSorting,
 		onColumnVisibilityChange: setColumnVisibility,
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFacetedRowModel: getFacetedRowModel(),
 		getFacetedUniqueValues: getFacetedUniqueValues(),
-		// When totalPages is provided, use manual server-side pagination so that
-		// next/previous controls are based on API metadata instead of local data length.
 		...(isServerPaginated
 			? {
 					manualPagination: true as const,
@@ -115,27 +108,23 @@ export function UsersTable({
 	return (
 		<div
 			className={cn(
-				'max-sm:has-[div[role="toolbar"]]:mb-16', // Add margin bottom to the table on mobile when the toolbar is visible
+				'max-sm:has-[div[role="toolbar"]]:mb-16',
 				"flex flex-1 flex-col gap-4",
 			)}
 		>
 			<DataTableToolbar
 				table={table}
-				searchPlaceholder="Lọc người dùng theo email..."
-				searchKey="email"
+				searchPlaceholder="Tìm kiếm khóa học theo tiêu đề..."
+				searchKey="title"
 				filters={[
 					{
-						columnId: "activated",
+						columnId: "status",
 						title: "Trạng thái",
 						options: [
-							{ label: "Hoạt động", value: "true" },
-							{ label: "Không hoạt động", value: "false" },
+							{ label: "Chờ duyệt", value: "PENDING" },
+							{ label: "Đã xuất bản", value: "PUBLISHED" },
+							{ label: "Từ chối", value: "REJECTED" },
 						],
-					},
-					{
-						columnId: "role",
-						title: "Vai trò",
-						options: roles.map((role) => ({ ...role })),
 					},
 				]}
 			/>
@@ -144,37 +133,31 @@ export function UsersTable({
 					<TableHeader>
 						{table.getHeaderGroups().map((headerGroup) => (
 							<TableRow key={headerGroup.id} className="group/row">
-								{headerGroup.headers.map((header) => {
-									return (
-										<TableHead
-											key={header.id}
-											colSpan={header.colSpan}
-											className={cn(
-												"bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted",
-												header.column.columnDef.meta?.className,
-												header.column.columnDef.meta?.thClassName,
-											)}
-										>
-											{header.isPlaceholder
-												? null
-												: flexRender(
-														header.column.columnDef.header,
-														header.getContext(),
-													)}
-										</TableHead>
-									);
-								})}
+								{headerGroup.headers.map((header) => (
+									<TableHead
+										key={header.id}
+										colSpan={header.colSpan}
+										className={cn(
+											"bg-background group-hover/row:bg-muted group-data-[state=selected]/row:bg-muted",
+											header.column.columnDef.meta?.className,
+											header.column.columnDef.meta?.thClassName,
+										)}
+									>
+										{header.isPlaceholder
+											? null
+											: flexRender(
+													header.column.columnDef.header,
+													header.getContext(),
+												)}
+									</TableHead>
+								))}
 							</TableRow>
 						))}
 					</TableHeader>
 					<TableBody>
 						{table.getRowModel().rows?.length ? (
 							table.getRowModel().rows.map((row) => (
-								<TableRow
-									key={row.id}
-									data-state={row.getIsSelected() && "selected"}
-									className="group/row"
-								>
+								<TableRow key={row.id} className="group/row">
 									{row.getVisibleCells().map((cell) => (
 										<TableCell
 											key={cell.id}
@@ -206,7 +189,6 @@ export function UsersTable({
 				</Table>
 			</div>
 			<DataTablePagination table={table} className="mt-auto" />
-			<DataTableBulkActions table={table} />
 		</div>
 	);
 }
