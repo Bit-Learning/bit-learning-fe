@@ -141,7 +141,7 @@ export function QuestionApprovalList() {
 				</div>
 			</Header>
 
-			<Main className="container mx-auto p-8">
+			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex items-center justify-between mb-4">
 					<div>
 						<h1 className="text-2xl font-bold mb-2">

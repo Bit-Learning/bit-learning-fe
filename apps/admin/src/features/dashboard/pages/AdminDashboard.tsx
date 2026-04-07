@@ -1,21 +1,18 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Main } from "@/layout/main";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { Pie, PieChart, Cell, ResponsiveContainer, Tooltip } from "recharts";
 import {
-	Activity,
 	AlertTriangle,
 	DollarSign,
-	GripVertical,
 	RefreshCw,
 	Settings,
 	ShoppingCart,
-	TrendingUp,
 	UserPlus,
 	Users,
 	X,
 } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
+import { useState } from "react";
 import {
 	getAllDashboardStats,
 	getDashboardSettings,
@@ -23,12 +20,12 @@ import {
 	updateDashboardSettings,
 } from "../api/dashboard-api";
 import { PaymentRevenueChart } from "../components/payment-revenue-chart";
-import type { DashboardStats } from "../types/dashboard.types";
 import { ProfileDropdown } from "@/components/profile-dropdown";
 import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
+import { cn } from "@/shared/lib/utils";
 
 function fmt(n: number): string {
 	return n.toLocaleString("vi-VN");
@@ -37,216 +34,339 @@ function fmtCurrency(n: number): string {
 	return n.toLocaleString("vi-VN", { style: "currency", currency: "VND" });
 }
 
-interface StatCard {
-	id: string;
-	title: string;
+function KpiCard({
+	label,
+	value,
+	description,
+	icon: Icon,
+	tone,
+}: {
+	label: string;
 	value: string;
-	description: string;
+	description?: string;
 	icon: React.ElementType;
-	iconColor: string;
-	iconBg: string;
-	cardBg: string;
-	cardBorder: string;
-	valueColor: string;
-}
+	tone: "users" | "users-secondary" | "orders" | "revenue";
+}) {
+	let cardBg = "bg-white";
+	let border = "border-slate-200";
+	let iconBg = "bg-slate-100";
+	let iconColor = "text-slate-700";
+	let valueColor = "text-slate-900";
 
-function buildStats(d: DashboardStats): StatCard[] {
-	return [
-		{
-			id: "users",
-			title: "Tổng người dùng",
-			value: fmt(d.users.totalUsers),
-			description: `Hoạt động: ${fmt(d.users.activeUsers)}`,
-			icon: Users,
-			iconColor: "text-purple-600",
-			iconBg: "bg-purple-100 dark:bg-purple-950",
-			cardBg: "bg-white",
-			cardBorder: "border-slate-200",
-			valueColor: "text-black",
-		},
-		{
-			id: "new-users",
-			title: "Người dùng mới",
-			value: `+${fmt(d.users.newUsersThisMonth)}`,
-			description: `Tuần: +${fmt(d.users.newUsersThisWeek)} · Hôm nay: +${fmt(d.users.newUsersToday)}`,
-			icon: UserPlus,
-			iconColor: "text-orange-600",
-			iconBg: "bg-orange-100 dark:bg-orange-950",
-			cardBg: "bg-white",
-			cardBorder: "border-slate-200",
-			valueColor: "text-black",
-		},
-		{
-			id: "orders",
-			title: "Tổng đơn hàng",
-			value: fmt(d.orders.totalOrders),
-			description: `Doanh thu: ${fmtCurrency(d.orders.totalRevenue)}`,
-			icon: ShoppingCart,
-			iconColor: "text-blue-600",
-			iconBg: "bg-blue-100 dark:bg-blue-950",
-			cardBg: "bg-white",
-			cardBorder: "border-slate-200",
-			valueColor: "text-black",
-		},
-		{
-			id: "revenue",
-			title: "Doanh thu tháng",
-			value: fmtCurrency(d.orders.revenueThisMonth),
-			description: `Tổng: ${fmtCurrency(d.orders.totalRevenue)}`,
-			icon: DollarSign,
-			iconColor: "text-green-600",
-			iconBg: "bg-green-100 dark:bg-green-950",
-			cardBg: "bg-white",
-			cardBorder: "border-slate-200",
-			valueColor: "text-black",
-		},
-		{
-			id: "pay-rev",
-			title: "Doanh thu thanh toán",
-			value: fmtCurrency(d.payments.totalRevenue),
-			description: `Tháng này: ${fmtCurrency(d.payments.revenueThisMonth)}`,
-			icon: Activity,
-			iconColor: "text-pink-600",
-			iconBg: "bg-pink-100 dark:bg-pink-950",
-			cardBg: "bg-white",
-			cardBorder: "border-slate-200",
-			valueColor: "text-black",
-		},
-		{
-			id: "deposit",
-			title: "Nạp tiền",
-			value: fmt(d.payments.depositTransactions),
-			description: `AI: ${fmt(d.payments.aiRequestTransactions)} · Mua: ${fmt(d.payments.purchaseTransactions)}`,
-			icon: TrendingUp,
-			iconColor: "text-emerald-600",
-			iconBg: "bg-emerald-100 dark:bg-emerald-950",
-			cardBg: "bg-white",
-			cardBorder: "border-slate-200",
-			valueColor: "text-black",
-		},
-	];
-}
-
-// ── Draggable Grid ──
-function DraggableStatsGrid({ stats }: { stats: StatCard[] }) {
-	const [order, setOrder] = useState(() => stats.map((s) => s.id));
-	const dragItem = useRef<string | null>(null);
-	const dragOver = useRef<string | null>(null);
-
-	const onDragEnd = useCallback(() => {
-		if (
-			dragItem.current &&
-			dragOver.current &&
-			dragItem.current !== dragOver.current
-		) {
-			setOrder((prev) => {
-				const c = [...prev];
-				const f = c.indexOf(dragItem.current!);
-				const t = c.indexOf(dragOver.current!);
-				c.splice(f, 1);
-				c.splice(t, 0, dragItem.current!);
-				return c;
-			});
+	switch (tone) {
+		case "users": {
+			iconBg = "bg-indigo-50";
+			iconColor = "text-indigo-600";
+			break;
 		}
-		dragItem.current = null;
-		dragOver.current = null;
-	}, []);
-
-	const ordered = order
-		.map((id) => stats.find((s) => s.id === id)!)
-		.filter(Boolean);
+		case "users-secondary": {
+			iconBg = "bg-sky-50";
+			iconColor = "text-sky-600";
+			break;
+		}
+		case "orders": {
+			iconBg = "bg-blue-50";
+			iconColor = "text-blue-600";
+			break;
+		}
+		case "revenue": {
+			cardBg = "bg-emerald-50";
+			border = "border-emerald-100";
+			iconBg = "bg-emerald-100";
+			iconColor = "text-emerald-600";
+			valueColor = "text-emerald-900";
+			break;
+		}
+	}
 
 	return (
-		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3">
-			{ordered.map((s) => {
-				const Icon = s.icon;
-				return (
-					<Card
-						key={s.id}
-						draggable
-						onDragStart={() => {
-							dragItem.current = s.id;
-						}}
-						onDragEnter={() => {
-							dragOver.current = s.id;
-						}}
-						onDragEnd={onDragEnd}
-						onDragOver={(e) => e.preventDefault()}
-						className={`cursor-grab active:cursor-grabbing hover:shadow-lg transition-shadow select-none ${s.cardBg} ${s.cardBorder}`}
-					>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-							<CardTitle className="text-sm font-medium">{s.title}</CardTitle>
-							<div className="flex items-center gap-1">
-								<GripVertical className="h-3.5 w-3.5 text-muted-foreground/40" />
-								<div className={`rounded-lg p-2 ${s.iconBg}`}>
-									<Icon className={`h-4 w-4 ${s.iconColor}`} />
-								</div>
-							</div>
-						</CardHeader>
-						<CardContent className="pt-0">
-							<div className={`text-2xl font-bold ${s.valueColor}`}>
-								{s.value}
-							</div>
-							<p className="text-muted-foreground text-xs mt-1">
-								{s.description}
-							</p>
-						</CardContent>
-					</Card>
-				);
-			})}
-		</div>
+		<Card className={`h-full border ${border} ${cardBg} shadow-sm`}>
+			<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-2">
+				<div>
+					<p className="text-xs font-medium text-muted-foreground">{label}</p>
+				</div>
+				<div className={`rounded-lg p-2 ${iconBg}`}>
+					<Icon className={`h-4 w-4 ${iconColor}`} />
+				</div>
+			</CardHeader>
+			<CardContent className="pt-0">
+				<div className={`text-2xl font-semibold ${valueColor}`}>{value}</div>
+				{description && (
+					<p className="mt-1 text-xs text-muted-foreground">{description}</p>
+				)}
+			</CardContent>
+		</Card>
 	);
 }
 
-// ── Breakdown Bars ──
-function BreakdownBars({
+function BreakdownPie({
 	data,
 	labels,
 	title,
+	className,
 }: {
 	data: Record<string, number>;
 	labels: Record<string, string>;
 	title: string;
+	className?: string;
 }) {
-	const total = Object.values(data).reduce((a, b) => a + b, 0) || 1;
-	const colors = [
-		"bg-blue-500",
-		"bg-green-500",
-		"bg-amber-500",
-		"bg-red-500",
-		"bg-purple-500",
+	const entries = Object.entries(data ?? {});
+	const total = entries.reduce((sum, [, value]) => sum + value, 0);
+
+	const DEFAULT_COLORS = [
+		"#6366f1",
+		"#22c55e",
+		"#f97316",
+		"#eab308",
+		"#ec4899",
 	];
-	const entries = Object.entries(data);
+
+	const roleColorMap: Record<string, string> = {
+		STUDENT: "#4f46e5",
+		MENTOR: "#6366f1",
+		MANAGER: "#0ea5e9",
+		ADMIN: "#0f172a",
+	};
+
+	const statusColorMap: Record<string, string> = {
+		COMPLETED: "#10b981",
+		PENDING: "#f97316",
+		FAILED: "#ef4444",
+	};
+
+	const txColorMap: Record<string, string> = {
+		DEPOSIT: "#10b981",
+		AI_REQUEST: "#4f46e5",
+		PURCHASE: "#0ea5e9",
+	};
+
+	const isOrderCard = title.includes("Trạng thái đơn hàng");
+
+	let unitLabel = "người";
+	const titleLower = title.toLowerCase();
+
+	if (titleLower.includes("đơn hàng")) {
+		unitLabel = "đơn";
+	} else if (titleLower.includes("giao dịch")) {
+		unitLabel = "giao dịch";
+	}
+
+	const chartData = entries.map(([key, value], index) => {
+		let color = DEFAULT_COLORS[index % DEFAULT_COLORS.length];
+
+		if (title.includes("vai trò người dùng") && roleColorMap[key]) {
+			color = roleColorMap[key];
+		} else if (title.includes("Trạng thái đơn hàng") && statusColorMap[key]) {
+			color = statusColorMap[key];
+		} else if (title.includes("loại giao dịch") && txColorMap[key]) {
+			color = txColorMap[key];
+		}
+
+		return {
+			key,
+			name: labels[key] || key,
+			value,
+			percent: total > 0 ? Math.round((value / total) * 100) : 0,
+			color,
+		};
+	});
+
+	const innerRadius = isOrderCard ? 78 : 55;
+	const outerRadius = isOrderCard ? 128 : 85;
+	const chartHeight = isOrderCard ? "h-[300px]" : "h-[220px]";
+	const chartWidth = isOrderCard ? "max-w-[300px]" : "max-w-[220px]";
+
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-base">{title}</CardTitle>
+		<Card
+			className={cn(
+				"flex h-full flex-col border bg-white/60 shadow-sm",
+				isOrderCard && "bg-white",
+				className,
+			)}
+		>
+			<CardHeader className={cn("pb-2", isOrderCard && "pb-4")}>
+				<CardTitle
+					className={cn("text-base font-semibold", isOrderCard && "text-lg")}
+				>
+					{title}
+				</CardTitle>
 			</CardHeader>
-			<CardContent className="space-y-3">
-				{entries.length === 0 ? (
-					<p className="text-muted-foreground text-sm text-center py-8">
+
+			<CardContent className="p-2 flex flex-1">
+				{chartData.length === 0 ? (
+					<div className="flex w-full items-center justify-center py-8 text-sm text-muted-foreground">
 						Chưa có dữ liệu
-					</p>
-				) : (
-					entries.map(([key, count], i) => {
-						const pct = Math.round((count / total) * 100);
-						return (
-							<div key={key}>
-								<div className="flex justify-between text-sm mb-1">
-									<span className="font-medium">{labels[key] || key}</span>
-									<span className="text-muted-foreground">
-										{fmt(count)} ({pct}%)
-									</span>
-								</div>
-								<div className="h-2 rounded-full bg-muted overflow-hidden">
-									<div
-										className={`h-full rounded-full ${colors[i % colors.length]} transition-all duration-700`}
-										style={{ width: `${pct}%` }}
+					</div>
+				) : isOrderCard ? (
+					<div className="flex h-full w-full flex-col items-center justify-center gap-6">
+						<div className={cn("w-full", chartHeight, chartWidth)}>
+							<ResponsiveContainer width="100%" height="100%">
+								<PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+									<Pie
+										data={chartData}
+										dataKey="value"
+										nameKey="name"
+										cx="50%"
+										cy="50%"
+										innerRadius={innerRadius}
+										outerRadius={outerRadius}
+										paddingAngle={4}
+										stroke="white"
+										strokeWidth={4}
+									>
+										{chartData.map((entry) => (
+											<Cell key={entry.key} fill={entry.color} />
+										))}
+									</Pie>
+
+									<Tooltip
+										formatter={(value: any, name: any, props: any) => {
+											const percent = props?.payload?.percent;
+											const formatted = Number(value || 0).toLocaleString(
+												"vi-VN",
+											);
+											return [
+												`${formatted} ${unitLabel} (${percent ?? 0}%)`,
+												name,
+											];
+										}}
 									/>
+
+									<text
+										x="50%"
+										y="47%"
+										textAnchor="middle"
+										dominantBaseline="middle"
+										className="fill-slate-900 text-[3em] font-semibold"
+									>
+										{total.toLocaleString("vi-VN")}
+									</text>
+									<text
+										x="50%"
+										y="58%"
+										textAnchor="middle"
+										dominantBaseline="middle"
+										className="fill-slate-500 text-[12px] font-medium"
+									>
+										Tổng đơn
+									</text>
+								</PieChart>
+							</ResponsiveContainer>
+						</div>
+
+						<div className="flex w-full max-w-[340px] flex-col gap-3">
+							{chartData.map((entry) => (
+								<div
+									key={entry.key}
+									className="flex items-start justify-between px-4 py-3"
+								>
+									<div className="flex items-center gap-3">
+										<span
+											className="h-3.5 w-3.5 rounded-full"
+											style={{ backgroundColor: entry.color }}
+										/>
+										<span className="text-sm font-medium text-slate-800">
+											{entry.name}
+										</span>
+									</div>
+
+									<div className="text-right">
+										<div className="text-sm font-semibold text-slate-900">
+											{entry.value.toLocaleString("vi-VN")} {unitLabel}
+										</div>
+										<div className="text-xs text-muted-foreground">
+											{entry.percent}%
+										</div>
+									</div>
 								</div>
+							))}
+						</div>
+					</div>
+				) : (
+					<div className="grid h-full w-full items-center gap-6 md:grid-cols-[1fr_1fr]">
+						<div className="flex items-center justify-center">
+							<div className={cn("w-full", chartHeight, chartWidth)}>
+								<ResponsiveContainer width="100%" height="100%">
+									<PieChart margin={{ top: 8, right: 8, bottom: 8, left: 8 }}>
+										<Pie
+											data={chartData}
+											dataKey="value"
+											nameKey="name"
+											cx="50%"
+											cy="50%"
+											innerRadius={innerRadius}
+											outerRadius={outerRadius}
+											paddingAngle={4}
+											stroke="white"
+											strokeWidth={4}
+										>
+											{chartData.map((entry) => (
+												<Cell key={entry.key} fill={entry.color} />
+											))}
+										</Pie>
+
+										<Tooltip
+											formatter={(value: any, name: any, props: any) => {
+												const percent = props?.payload?.percent;
+												const formatted = Number(value || 0).toLocaleString(
+													"vi-VN",
+												);
+												return [
+													`${formatted} ${unitLabel} (${percent ?? 0}%)`,
+													name,
+												];
+											}}
+										/>
+
+										<text
+											x="50%"
+											y="47%"
+											textAnchor="middle"
+											dominantBaseline="middle"
+											className="fill-slate-900 text-[22px] font-semibold"
+										>
+											{total.toLocaleString("vi-VN")}
+										</text>
+										<text
+											x="50%"
+											y="58%"
+											textAnchor="middle"
+											dominantBaseline="middle"
+											className="fill-slate-500 text-[12px] font-medium"
+										>
+											Tổng {unitLabel}
+										</text>
+									</PieChart>
+								</ResponsiveContainer>
 							</div>
-						);
-					})
+						</div>
+
+						<div className="flex flex-col justify-center gap-3">
+							{chartData.map((entry) => (
+								<div
+									key={entry.key}
+									className="flex items-start justify-between px-3 py-2.5"
+								>
+									<div className="flex min-w-0 items-center gap-3">
+										<span
+											className="h-3 w-3 rounded-full"
+											style={{ backgroundColor: entry.color }}
+										/>
+										<span className="truncate text-sm font-medium text-slate-800">
+											{entry.name}
+										</span>
+									</div>
+
+									<div className="text-right text-xs text-muted-foreground">
+										<div className="font-semibold text-slate-900">
+											{entry.value.toLocaleString("vi-VN")} {unitLabel}
+										</div>
+										<div>{entry.percent}%</div>
+									</div>
+								</div>
+							))}
+						</div>
+					</div>
 				)}
 			</CardContent>
 		</Card>
@@ -404,6 +524,7 @@ function StaleBanner({
 export function Dashboard() {
 	const qc = useQueryClient();
 	const [showSettings, setShowSettings] = useState(false);
+	const [timeRange, setTimeRange] = useState<"7d" | "30d" | "90d">("30d");
 
 	const { data, isLoading, isError } = useQuery({
 		queryKey: ["dashboard-stats"],
@@ -438,6 +559,35 @@ export function Dashboard() {
 		PURCHASE: "Mua hàng",
 	};
 
+	let revenueDeltaPct: number | null = null;
+	let isRevenueUp = false;
+	let isRecordMonth = false;
+	let bestMonthRevenue: number | null = null;
+
+	const revenueSeries = data?.payments.monthlyRevenue ?? [];
+
+	if (revenueSeries.length > 0) {
+		const maxRevenue = Math.max(...revenueSeries.map((m) => m.revenue));
+		const latest = revenueSeries[revenueSeries.length - 1];
+
+		if (latest && maxRevenue > 0) {
+			isRecordMonth = latest.revenue === maxRevenue;
+			bestMonthRevenue = maxRevenue;
+		}
+	}
+
+	if (revenueSeries.length >= 2) {
+		const lastIndex = revenueSeries.length - 1;
+		const latest = revenueSeries[lastIndex];
+		const prev = revenueSeries[lastIndex - 1];
+
+		if (latest && prev && prev.revenue > 0) {
+			const delta = ((latest.revenue - prev.revenue) / prev.revenue) * 100;
+			revenueDeltaPct = delta;
+			isRevenueUp = delta >= 0;
+		}
+	}
+
 	return (
 		<>
 			<Header fixed>
@@ -449,115 +599,245 @@ export function Dashboard() {
 				</div>
 			</Header>
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
-				<div className="flex items-end justify-between">
-					<div>
-						<h2 className="text-2xl font-bold tracking-tight">Bảng thống kê</h2>
-						<p className="text-muted-foreground text-sm">
-							Tổng quan hoạt động hệ thống Bit Learning
-							{data?.refreshedAt && (
-								<span className="ml-2 text-xs opacity-60">
-									· Cập nhật lúc{" "}
-									{new Date(data.refreshedAt).toLocaleTimeString("vi-VN")}
-								</span>
-							)}
-						</p>
+			<div className="container mx-auto p-0">
+				<div className="flex flex-1 flex-col gap-6">
+					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+						<div>
+							<h2 className="mt-3 text-2xl font-semibold tracking-tight">
+								Bảng thống kê
+							</h2>
+							<p className="mt-1 text-xs text-muted-foreground">
+								{data?.refreshedAt && (
+									<span className="ml-1 text-[11px] opacity-60">
+										Cập nhật lúc{" "}
+										{new Date(data.refreshedAt).toLocaleTimeString("vi-VN")}
+									</span>
+								)}
+							</p>
+						</div>
+						<div className="flex flex-col items-start gap-3 sm:flex-row sm:items-center sm:justify-end">
+							<div className="inline-flex rounded-full border bg-white p-1 text-xs shadow-sm">
+								{[
+									{ id: "7d", label: "7 ngày" },
+									{ id: "30d", label: "30 ngày" },
+									{ id: "90d", label: "90 ngày" },
+								].map((range) => (
+									<button
+										key={range.id}
+										type="button"
+										onClick={() =>
+											setTimeRange(range.id as "7d" | "30d" | "90d")
+										}
+										className={`rounded-full px-3 py-1.5 transition-colors ${
+											timeRange === range.id
+												? "bg-slate-900 text-white"
+												: "text-slate-600 hover:bg-slate-100"
+										}`}
+									>
+										{range.label}
+									</button>
+								))}
+							</div>
+							<div className="flex items-center gap-2">
+								<button
+									onClick={() => refreshMutation.mutate()}
+									disabled={refreshMutation.isPending}
+									className="flex items-center gap-1.5 rounded-lg border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:text-foreground disabled:opacity-50"
+								>
+									<RefreshCw
+										className={`h-3.5 w-3.5 ${refreshMutation.isPending ? "animate-spin" : ""}`}
+									/>
+									{refreshMutation.isPending ? "Đang đồng bộ..." : "Đồng bộ"}
+								</button>
+								<button
+									onClick={() => setShowSettings(true)}
+									className="flex items-center gap-1.5 rounded-lg border bg-white px-3 py-1.5 text-xs font-medium text-muted-foreground shadow-sm transition-colors hover:text-foreground"
+								>
+									<Settings className="h-3.5 w-3.5" />
+									Cài đặt
+								</button>
+							</div>
+						</div>
 					</div>
-					<div className="flex items-center gap-2">
-						<button
-							onClick={() => refreshMutation.mutate()}
-							disabled={refreshMutation.isPending}
-							className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors disabled:opacity-50 border rounded-lg px-3 py-1.5"
-						>
-							<RefreshCw
-								className={`h-3.5 w-3.5 ${refreshMutation.isPending ? "animate-spin" : ""}`}
-							/>
-							{refreshMutation.isPending ? "Đang đồng bộ..." : "Đồng bộ"}
-						</button>
-						<button
-							onClick={() => setShowSettings(true)}
-							className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors border rounded-lg px-3 py-1.5"
-						>
-							<Settings className="h-3.5 w-3.5" />
-							Cài đặt
-						</button>
-					</div>
-				</div>
 
-				{data && (
-					<StaleBanner
-						refreshedAt={data.refreshedAt}
-						onRefresh={() => refreshMutation.mutate()}
-						isRefreshing={refreshMutation.isPending}
-					/>
-				)}
+					{data && (
+						<StaleBanner
+							refreshedAt={data.refreshedAt}
+							onRefresh={() => refreshMutation.mutate()}
+							isRefreshing={refreshMutation.isPending}
+						/>
+					)}
 
-				{isLoading && (
-					<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-						{Array.from({ length: 7 }).map((_, i) => (
-							<Card key={i}>
-								<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
-									<Skeleton className="h-4 w-24" />
-									<Skeleton className="h-8 w-8 rounded-lg" />
-								</CardHeader>
-								<CardContent className="pt-0">
-									<Skeleton className="mb-2 h-8 w-32" />
-									<Skeleton className="h-3 w-40" />
-								</CardContent>
-							</Card>
-						))}
-					</div>
-				)}
+					{isLoading && (
+						<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+							{Array.from({ length: 4 }).map((_, i) => (
+								<Card key={i}>
+									<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-1">
+										<Skeleton className="h-4 w-24" />
+										<Skeleton className="h-8 w-8 rounded-lg" />
+									</CardHeader>
+									<CardContent className="pt-0">
+										<Skeleton className="mb-2 h-8 w-32" />
+										<Skeleton className="h-3 w-40" />
+									</CardContent>
+								</Card>
+							))}
+						</div>
+					)}
 
-				{isError && (
-					<Card className="p-8 text-center">
-						<p className="text-muted-foreground">
-							Không thể tải dữ liệu. Vui lòng thử lại sau.
-						</p>
-					</Card>
-				)}
+					{isError && (
+						<Card className="p-8 text-center">
+							<p className="text-muted-foreground">
+								Không thể tải dữ liệu. Vui lòng thử lại sau.
+							</p>
+						</Card>
+					)}
 
-				{data && (
-					<>
-						<DraggableStatsGrid stats={buildStats(data)} />
+					{data && !isLoading && !isError && (
+						<div className="space-y-6">
+							<div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+								<KpiCard
+									label="Tổng người dùng"
+									value={fmt(data.users.totalUsers)}
+									description={`Hoạt động: ${fmt(data.users.activeUsers)}`}
+									icon={Users}
+									tone="users"
+								/>
+								<KpiCard
+									label="Người dùng mới"
+									value={`+${fmt(data.users.newUsersThisMonth)}`}
+									description={`Tuần: +${fmt(data.users.newUsersThisWeek)} · Hôm nay: +${fmt(data.users.newUsersToday)}`}
+									icon={UserPlus}
+									tone="users-secondary"
+								/>
+								<KpiCard
+									label="Tổng đơn hàng"
+									value={fmt(data.orders.totalOrders)}
+									description={`Doanh thu: ${fmtCurrency(data.orders.totalRevenue)}`}
+									icon={ShoppingCart}
+									tone="orders"
+								/>
+								<KpiCard
+									label="Doanh thu tháng"
+									value={fmtCurrency(data.orders.revenueThisMonth)}
+									description={`Tổng: ${fmtCurrency(data.orders.totalRevenue)}`}
+									icon={DollarSign}
+									tone="revenue"
+								/>
+							</div>
 
-						<div className="grid gap-4 lg:grid-cols-2">
-							<Card>
-								<CardHeader>
-									<CardTitle>Doanh thu theo tháng</CardTitle>
-								</CardHeader>
-								<CardContent className="pt-0">
-									{data.payments.monthlyRevenue?.length > 0 ? (
-										<PaymentRevenueChart data={data.payments.monthlyRevenue} />
-									) : (
-										<div className="flex h-87.5 items-center justify-center text-muted-foreground">
-											Chưa có dữ liệu
+							{revenueSeries.length > 0 && bestMonthRevenue !== null && (
+								<div className="relative overflow-hidden rounded-xl border border-emerald-200 bg-gradient-to-r from-emerald-50 via-white to-emerald-50 px-5 py-4 shadow-sm">
+									{/* subtle glow */}
+									<div className="pointer-events-none absolute -top-10 -right-10 h-32 w-32 rounded-full bg-emerald-200/30 blur-2xl" />
+
+									<div className="relative flex items-start gap-3">
+										<div className="mt-0.5 flex h-9 w-9 items-center justify-center rounded-lg bg-emerald-100">
+											<DollarSign className="h-5 w-5 text-emerald-600" />
 										</div>
-									)}
-								</CardContent>
-							</Card>
-							<BreakdownBars
-								data={data.users.roleBreakdown || {}}
-								labels={roleLabels}
-								title="Phân bổ vai trò người dùng"
-							/>
-						</div>
 
-						<div className="grid gap-4 lg:grid-cols-2">
-							<BreakdownBars
-								data={data.orders.statusBreakdown || {}}
-								labels={orderStatusLabels}
-								title="Trạng thái đơn hàng"
-							/>
-							<BreakdownBars
-								data={data.payments.typeBreakdown || {}}
-								labels={txTypeLabels}
-								title="Phân bổ loại giao dịch"
-							/>
+										<div className="flex-1">
+											<p className="text-sm font-semibold text-emerald-900">
+												{isRecordMonth
+													? "🚀 Tháng này đang đạt đỉnh doanh thu"
+													: "📈 Doanh thu cao nhất trong 12 tháng"}
+											</p>
+
+											<p className="mt-1 text-sm text-emerald-800">
+												{isRecordMonth ? (
+													<>
+														Doanh thu hiện tại đang là mức cao nhất trong 12
+														tháng gần đây.
+													</>
+												) : (
+													<>
+														Mức cao nhất đạt{" "}
+														<span className="font-semibold text-emerald-900">
+															{fmtCurrency(bestMonthRevenue)}
+														</span>
+													</>
+												)}
+											</p>
+										</div>
+									</div>
+								</div>
+							)}
+
+							<div className="grid gap-4 lg:grid-cols-3 lg:items-stretch">
+								<div className="lg:col-span-1 min-h-[640px]">
+									<div className="h-full">
+										<BreakdownPie
+											data={data.orders.statusBreakdown || {}}
+											labels={orderStatusLabels}
+											title="Trạng thái đơn hàng"
+											className="h-full"
+										/>
+									</div>
+								</div>
+
+								<div className="lg:col-span-2 flex min-h-[640px] h-full flex-col gap-4">
+									<div className="flex-1">
+										<Card className="h-full border-emerald-100 bg-white/60 shadow-sm">
+											<CardHeader className="flex flex-col gap-1 sm:flex-row sm:items-baseline sm:justify-between">
+												<div>
+													<CardTitle className="text-base font-semibold">
+														Doanh thu theo tháng
+													</CardTitle>
+													<p className="text-xs text-muted-foreground">
+														Diễn biến doanh thu theo từng tháng
+													</p>
+												</div>
+											</CardHeader>
+
+											<CardContent className="pt-2">
+												{data.payments.monthlyRevenue?.length > 0 ? (
+													<>
+														<PaymentRevenueChart
+															data={data.payments.monthlyRevenue}
+														/>
+														{revenueDeltaPct !== null && (
+															<p className="mt-3 text-xs text-emerald-700">
+																Doanh thu tháng này{" "}
+																{isRevenueUp ? "tăng" : "giảm"}{" "}
+																{Math.abs(revenueDeltaPct).toFixed(1)}% so với
+																tháng trước.
+															</p>
+														)}
+													</>
+												) : (
+													<div className="flex h-60 items-center justify-center text-xs text-muted-foreground">
+														Chưa có dữ liệu
+													</div>
+												)}
+											</CardContent>
+										</Card>
+									</div>
+
+									<div className="grid flex-1 gap-4 md:grid-cols-2">
+										<div className="h-full">
+											<BreakdownPie
+												data={data.users.roleBreakdown || {}}
+												labels={roleLabels}
+												title="Phân bổ vai trò người dùng"
+												className="h-full"
+											/>
+										</div>
+
+										<div className="h-full">
+											<BreakdownPie
+												data={data.payments.typeBreakdown || {}}
+												labels={txTypeLabels}
+												title="Phân bổ loại giao dịch"
+												className="h-full"
+											/>
+										</div>
+									</div>
+								</div>
+							</div>
 						</div>
-					</>
-				)}
-			</Main>
+					)}
+				</div>
+			</div>
 
 			{showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
 		</>
