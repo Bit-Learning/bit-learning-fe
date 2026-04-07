@@ -24,6 +24,11 @@ import {
 } from "../api/dashboard-api";
 import { PaymentRevenueChart } from "../components/payment-revenue-chart";
 import type { DashboardStats } from "../types/dashboard.types";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { Search } from "@/components/search";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { ConfigDrawer } from "@/components/config-drawer";
+import { Header } from "@/layout/header";
 
 function fmt(n: number): string {
 	return n.toLocaleString("vi-VN");
@@ -435,6 +440,15 @@ export function Dashboard() {
 
 	return (
 		<>
+			<Header fixed>
+				<Search />
+				<div className="ms-auto flex items-center space-x-4">
+					<ThemeSwitch />
+					<ConfigDrawer />
+					<ProfileDropdown />
+				</div>
+			</Header>
+
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex items-end justify-between">
 					<div>
