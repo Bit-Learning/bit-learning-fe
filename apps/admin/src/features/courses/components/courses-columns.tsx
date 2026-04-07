@@ -125,8 +125,9 @@ export function createCoursesColumns({
 			},
 			cell: ({ row }) => {
 				const course = row.original;
+				const isPublished = course.status === "PUBLISHED";
 				return (
-					<div className="flex justify-end gap-2">
+					<div className="flex justify-start gap-2">
 						<Button
 							variant="outline"
 							size="sm"
@@ -136,14 +137,16 @@ export function createCoursesColumns({
 							<Edit className="mr-1 h-4 w-4" />
 							Chi tiết
 						</Button>
-						<Button
-							variant="outline"
-							size="icon"
-							onClick={() => onDelete(course)}
-							className="h-8 w-8 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-						>
-							<Trash2 className="h-4 w-4" />
-						</Button>
+						{!isPublished && (
+							<Button
+								variant="outline"
+								size="icon"
+								onClick={() => onDelete(course)}
+								className="h-8 w-8 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+							>
+								<Trash2 className="h-4 w-4" />
+							</Button>
+						)}
 					</div>
 				);
 			},

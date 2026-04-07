@@ -53,6 +53,19 @@ type DeleteModalState =
 	| { type: "section"; id: number; name: string }
 	| { type: "lecture"; id: number; name: string };
 
+const convertLevelToVietnamese = (level: string) => {
+	switch (level) {
+		case "BEGINNING":
+			return "Cơ bản";
+		case "INTERMEDIATE":
+			return "Trung cấp";
+		case "ADVANCED":
+			return "Nâng cao";
+		default:
+			return level;
+	}
+};
+
 export const CourseDetailPage: React.FC = () => {
 	const { id } = useParams({ from: "/_authenticated/courses/$id" });
 	const courseId = Number(id);
@@ -245,7 +258,7 @@ export const CourseDetailPage: React.FC = () => {
 				<Button
 					variant="link"
 					size="lg"
-					className="w-4 gap-2 transition-all hover:border-blue-400 hover:text-blue-600"
+					className="w-4 gap-2 transition-all hover:border-blue-400 hover:text-blue-600 ml-12"
 					onClick={() => navigate({ to: "/courses" })}
 				>
 					<ArrowLeft className="h-4 w-4" />
@@ -311,7 +324,9 @@ export const CourseDetailPage: React.FC = () => {
 						</div>
 						<div>
 							<p className="text-sm text-gray-600">Cấp độ</p>
-							<p className="font-semibold">{course.level}</p>
+							<p className="font-semibold">
+								{convertLevelToVietnamese(course.level)}
+							</p>
 						</div>
 						<div>
 							<p className="text-sm text-gray-600">Khối lớp</p>
@@ -319,7 +334,9 @@ export const CourseDetailPage: React.FC = () => {
 						</div>
 						<div>
 							<p className="text-sm text-gray-600">Ngôn ngữ</p>
-							<p className="font-semibold">{course.language}</p>
+							<p className="font-semibold">
+								{course.language === "VIETNAMESE" ? "Tiếng Việt" : "Tiếng Anh"}
+							</p>
 						</div>
 					</div>
 				</Card>
