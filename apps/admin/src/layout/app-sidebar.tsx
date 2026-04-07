@@ -187,13 +187,13 @@ const AppSidebar: React.FC = () => {
 
 	const sidebarContent = (
 		<div className="flex h-full flex-col" style={{ background: BG }}>
-			<div className="flex items-center justify-between px-4 py-3 border-b border-white/6">
+			<div className="flex items-center justify-between px-4 py-3 border-b border-slate-200">
 				<Link to="/" onClick={closeMobile}>
 					{open ? (
 						<img
 							src="/Logo.png"
 							alt="Bit Learning"
-							className="h-9 w-32 object-contain"
+							className="h-9.5 w-32 object-contain"
 						/>
 					) : (
 						<div className="" />
@@ -213,7 +213,7 @@ const AppSidebar: React.FC = () => {
 				</button>
 			</div>
 
-			<div className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-white/10">
+			<div className="flex-1 overflow-y-auto py-3 px-2 space-y-0.5 scrollbar-thin scrollbar-track-transparent scrollbar-thumb-slate-200/80">
 				{navGroups.map((group) => (
 					<div key={group.title} className="mb-3">
 						{open && (
@@ -247,7 +247,7 @@ const AppSidebar: React.FC = () => {
 				))}
 			</div>
 
-			<div className="border-t border-white/6 px-3 py-3">
+			<div className="border-t border-slate-200 px-3 py-3">
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
 						<button className="group w-full flex items-center gap-3 rounded-xl px-2.5 py-2 hover:bg-white/5 transition-all outline-none">
@@ -340,17 +340,16 @@ const AppSidebar: React.FC = () => {
 		<>
 			<aside
 				className={cn(
-					"hidden md:flex flex-col h-screen sticky top-0 shrink-0 transition-all duration-300 border-r border-white/6",
+					"hidden md:flex flex-col h-screen sticky top-0 shrink-0 transition-all duration-300 border-r border-slate-200 bg-white",
 					open ? "w-72" : "w-16",
 				)}
-				style={{ background: BG }}
 			>
 				{sidebarContent}
 			</aside>
 
 			<button
 				onClick={() => setMobileOpen(true)}
-				className="md:hidden fixed top-4 left-4 z-50 h-9 w-9 flex items-center justify-center rounded-lg bg-[#0d1117] border border-white/10 text-slate-400 shadow-lg"
+				className="md:hidden fixed top-4 left-4 z-50 h-9 w-9 flex items-center justify-center rounded-lg bg-white border border-slate-200 text-slate-700 shadow-lg"
 			>
 				<Menu className="size-4" />
 			</button>
@@ -361,10 +360,7 @@ const AppSidebar: React.FC = () => {
 						className="fixed inset-0 bg-black/60 backdrop-blur-sm"
 						onClick={closeMobile}
 					/>
-					<aside
-						className="relative z-10 w-64 h-full flex flex-col"
-						style={{ background: BG }}
-					>
+					<aside className="relative z-10 w-64 h-full flex flex-col bg-white">
 						{sidebarContent}
 					</aside>
 				</div>

@@ -32,11 +32,17 @@ import { usersColumns as columns } from "./users-columns";
 
 type DataTableProps = {
 	data: User[];
+	totalPages?: number;
 	search: Record<string, unknown>;
 	navigate: NavigateFn;
 };
 
-export function UsersTable({ data, search, navigate }: DataTableProps) {
+export function UsersTable({
+	data,
+	totalPages,
+	search,
+	navigate,
+}: DataTableProps) {
 	// Local UI-only states
 	const [rowSelection, setRowSelection] = useState({});
 	const [columnVisibility, setColumnVisibility] = useState<VisibilityState>({});
@@ -56,7 +62,7 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
 	} = useTableUrlState({
 		search,
 		navigate,
-		pagination: { defaultPage: 1, defaultPageSize: 30 },
+		pagination: { defaultPage: 1, defaultPageSize: 10 },
 		globalFilter: { enabled: false },
 		columnFilters: [
 			// email per-column text filter
@@ -65,6 +71,8 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
 			{ columnId: "role", searchKey: "role", type: "array" },
 		],
 	});
+
+	const isServerPaginated = typeof totalPages === "number" && totalPages > 0;
 
 	// eslint-disable-next-line react-hooks/incompatible-library
 	const table = useReactTable({
@@ -83,12 +91,21 @@ export function UsersTable({ data, search, navigate }: DataTableProps) {
 		onRowSelectionChange: setRowSelection,
 		onSortingChange: setSorting,
 		onColumnVisibilityChange: setColumnVisibility,
-		getPaginationRowModel: getPaginationRowModel(),
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getFacetedRowModel: getFacetedRowModel(),
 		getFacetedUniqueValues: getFacetedUniqueValues(),
+		// When totalPages is provided, use manual server-side pagination so that
+		// next/previous controls are based on API metadata instead of local data length.
+		...(isServerPaginated
+			? {
+					manualPagination: true as const,
+					pageCount: totalPages,
+				}
+			: {
+					getPaginationRowModel: getPaginationRowModel(),
+				}),
 	});
 
 	useEffect(() => {

@@ -5,7 +5,7 @@ import { roles } from "@/features/users/data/data";
 
 const usersSearchSchema = z.object({
 	page: z.number().optional().catch(1),
-	pageSize: z.number().optional().catch(30),
+	pageSize: z.number().optional().catch(10),
 	// Facet filters
 	activated: z
 		.array(z.union([z.literal("true"), z.literal("false")]))

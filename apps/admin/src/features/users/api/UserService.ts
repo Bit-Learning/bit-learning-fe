@@ -12,7 +12,7 @@ interface GetPagedUsersParams {
 export function GetPagedUsers(
 	params: GetPagedUsersParams = {},
 ): Promise<AxiosResponse<PagedUsers>> {
-	const { page = 0, size = 30, sort = ["id,desc"] } = params;
+	const { page = 0, size = 10, sort = ["id,desc"] } = params;
 
 	const queryParams = new URLSearchParams();
 	queryParams.append("page", page.toString());
