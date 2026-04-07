@@ -23,7 +23,7 @@ export function Users() {
 	const navigate = route.useNavigate();
 
 	const page = (search.page || 1) - 1;
-	const pageSize = search.pageSize || 10;
+	const pageSize = search.pageSize || 30;
 
 	const { data, isLoading, isError, error } = useQuery({
 		queryKey: ["users", page, pageSize],
@@ -31,7 +31,6 @@ export function Users() {
 	});
 
 	const users = data?.data?.content || [];
-	const totalElements = data?.data?.totalElements || 0;
 
 	const {
 		data: dashboardStats,
