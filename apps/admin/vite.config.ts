@@ -22,6 +22,9 @@ export default defineConfig({
 			"@": path.resolve(__dirname, "./src"),
 		},
 	},
+	define: {
+		global: "globalThis",
+	},
 	build: {
 		sourcemap: false,
 		minify: "esbuild", // Enable esbuild for minification

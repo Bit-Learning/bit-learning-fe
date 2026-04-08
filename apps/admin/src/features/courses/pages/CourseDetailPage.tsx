@@ -33,10 +33,6 @@ import SectionModal from "../components/SectionModal";
 import { LectureDetail } from "../types/lecture.type";
 import { SectionDetail } from "../types/section.type";
 import { Main } from "@/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
 
 type ModalState =
@@ -245,14 +241,7 @@ export const CourseDetailPage: React.FC = () => {
 
 	return (
 		<>
-			<Header fixed>
-				<Search />
-				<div className="ms-auto flex items-center space-x-4">
-					<ThemeSwitch />
-					<ConfigDrawer />
-					<ProfileDropdown />
-				</div>
-			</Header>
+			<Header fixed />
 
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<Button

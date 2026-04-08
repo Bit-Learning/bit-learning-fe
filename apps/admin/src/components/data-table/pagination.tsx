@@ -38,7 +38,7 @@ export function DataTablePagination<TData>({
 			style={{ overflowClipMargin: 1 }}
 		>
 			<div className="flex w-full items-center justify-between">
-				<div className="flex w-25 items-center justify-center text-sm font-medium @2xl/content:hidden">
+				<div className="flex w-25 items-center justify-center text-sm font-normal @2xl/content:hidden">
 					Trang {currentPage} trên {totalPages}
 				</div>
 				<div className="flex items-center gap-2 @max-2xl/content:flex-row-reverse">
@@ -59,12 +59,12 @@ export function DataTablePagination<TData>({
 							))}
 						</SelectContent>
 					</Select>
-					<p className="hidden text-sm font-medium sm:block">Hàng mỗi trang</p>
+					<p className="hidden text-sm font-normal sm:block">Hàng mỗi trang</p>
 				</div>
 			</div>
 
 			<div className="flex items-center sm:space-x-6 lg:space-x-8">
-				<div className="flex w-25 items-center justify-center text-sm font-medium @max-3xl/content:hidden">
+				<div className="flex w-25 items-center justify-center text-sm font-normal @max-3xl/content:hidden">
 					Trang {currentPage} trên {totalPages}
 				</div>
 				<div className="flex items-center space-x-2">

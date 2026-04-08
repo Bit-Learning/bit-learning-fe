@@ -99,6 +99,9 @@ importers:
       '@react-pdf-viewer/default-layout':
         specifier: ^3.12.0
         version: 3.12.0(pdfjs-dist@5.5.207)(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
+      '@stomp/stompjs':
+        specifier: ^7.3.0
+        version: 7.3.0
       '@tailwindcss/vite':
         specifier: ^4.1.14
         version: 4.1.18(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))
@@ -165,6 +168,9 @@ importers:
       recharts:
         specifier: ^3.2.1
         version: 3.7.0(@types/react@19.2.14)(react-dom@19.2.4(react@19.2.4))(react-is@17.0.2)(react@19.2.4)(redux@5.0.1)
+      sockjs-client:
+        specifier: ^1.6.1
+        version: 1.6.1
       sonner:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.4(react@19.2.4))(react@19.2.4)
@@ -211,6 +217,9 @@ importers:
       '@types/react-dom':
         specifier: ^19.2.1
         version: 19.2.3(@types/react@19.2.14)
+      '@types/sockjs-client':
+        specifier: ^1.5.4
+        version: 1.5.4
       '@vitejs/plugin-react-swc':
         specifier: ^4.3.0
         version: 4.3.0(@swc/helpers@0.5.19)(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.30.2)(tsx@4.21.0)(yaml@2.8.3))

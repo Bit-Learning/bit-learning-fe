@@ -1,37 +1,40 @@
 import { SearchIcon } from "lucide-react";
 import { useSearch } from "@/shared/context/search-provider";
 import { cn } from "@/shared/lib/utils";
-import { Button } from "./ui/button";
 
 type SearchProps = {
 	className?: string;
-	type?: React.HTMLInputTypeAttribute;
 	placeholder?: string;
 };
 
 export function Search({
-	className = "",
-	placeholder = "Tìm kiếm",
+	className,
+	placeholder = "Tìm kiếm...",
 }: SearchProps) {
 	const { setOpen } = useSearch();
+
 	return (
-		<Button
-			variant="outline"
+		<button
+			type="button"
+			onClick={() => setOpen(true)}
 			className={cn(
-				"bg-muted/25 text-muted-foreground hover:bg-accent group relative h-8 w-full flex-1 justify-start rounded-md text-sm font-normal shadow-none sm:w-40 sm:pe-12 md:flex-none lg:w-52 xl:w-64",
+				"group relative w-full flex items-center rounded-2xl border border-slate-200 bg-slate-50/80 px-4 transition-all",
+				"h-11 md:h-12", // 🔥 size lớn hơn
+				"hover:bg-white hover:border-sky-300",
+				"focus:ring-4 focus:ring-sky-100 focus:border-sky-400",
 				className,
 			)}
-			onClick={() => setOpen(true)}
 		>
-			<SearchIcon
-				aria-hidden="true"
-				className="absolute start-1.5 top-1/2 -translate-y-1/2"
-				size={16}
-			/>
-			<span className="ms-4">{placeholder}</span>
-			<kbd className="bg-muted group-hover:bg-accent pointer-events-none absolute end-[0.3rem] top-[0.3rem] hidden h-5 items-center gap-1 rounded border px-1.5 font-mono text-[10px] font-medium opacity-100 select-none sm:flex">
-				<span className="text-xs">⌘</span>K
+			{/* icon */}
+			<SearchIcon className="mr-3 size-4 text-slate-400 group-hover:text-slate-600" />
+
+			{/* placeholder */}
+			<span className="text-sm md:text-base text-slate-500">{placeholder}</span>
+
+			{/* shortcut */}
+			<kbd className="ml-auto hidden items-center gap-1 rounded-lg border border-slate-200 bg-white px-2 py-1 text-[11px] font-medium text-slate-400 sm:flex">
+				<span>⌘</span>K
 			</kbd>
-		</Button>
+		</button>
 	);
 }

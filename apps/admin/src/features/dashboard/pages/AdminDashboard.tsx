@@ -20,10 +20,6 @@ import {
 	updateDashboardSettings,
 } from "../api/dashboard-api";
 import { PaymentRevenueChart } from "../components/payment-revenue-chart";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
 import { cn } from "@/shared/lib/utils";
 
@@ -590,16 +586,9 @@ export function Dashboard() {
 
 	return (
 		<>
-			<Header fixed>
-				<Search />
-				<div className="ms-auto flex items-center space-x-4">
-					<ThemeSwitch />
-					<ConfigDrawer />
-					<ProfileDropdown />
-				</div>
-			</Header>
+			<Header fixed></Header>
 
-			<div className="container mx-auto p-0">
+			<div className="container mx-auto p-8">
 				<div className="flex flex-1 flex-col gap-6">
 					<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 						<div>

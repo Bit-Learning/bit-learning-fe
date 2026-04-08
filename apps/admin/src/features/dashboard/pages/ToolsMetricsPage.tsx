@@ -4,10 +4,6 @@ import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { advancedMetricsLinks } from "../data/metrics-links";
 import { AdvancedMetricsLink } from "../types/system-metrics.types";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
 
 // ── Icon config ──
@@ -169,14 +165,7 @@ function AdvancedMetricsLinksPanel({
 export function ToolsMetricsPage() {
 	return (
 		<>
-			<Header fixed>
-				<Search />
-				<div className="ms-auto flex items-center space-x-4">
-					<ThemeSwitch />
-					<ConfigDrawer />
-					<ProfileDropdown />
-				</div>
-			</Header>
+			<Header fixed />
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<AdvancedMetricsLinksPanel links={advancedMetricsLinks} />
 			</Main>

@@ -27,10 +27,6 @@ import {
 	MetricsSummary,
 	MetricsTrends,
 } from "../types/system-metrics.types";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
 
 function fmt(n: number): string {
@@ -205,17 +201,17 @@ function SystemSummaryCards({
 			iconColor: "text-purple-600",
 			bgColor: "bg-purple-100 dark:bg-purple-950",
 		},
-		{
-			id: "db-pool",
-			title: "Kết nối DB",
-			value: maxConns > 0 ? `${activeConns}/${maxConns}` : "Chưa có dữ liệu",
-			description: data.db?.poolName
-				? `Pool: ${data.db.poolName}`
-				: "HikariCP pool (nếu được cấu hình)",
-			icon: Activity,
-			iconColor: "text-rose-600",
-			bgColor: "bg-rose-100 dark:bg-rose-950",
-		},
+		// {
+		// 	id: "db-pool",
+		// 	title: "Kết nối DB",
+		// 	value: maxConns > 0 ? `${activeConns}/${maxConns}` : "Chưa có dữ liệu",
+		// 	description: data.db?.poolName
+		// 		? `Pool: ${data.db.poolName}`
+		// 		: "HikariCP pool (nếu được cấu hình)",
+		// 	icon: Activity,
+		// 	iconColor: "text-rose-600",
+		// 	bgColor: "bg-rose-100 dark:bg-rose-950",
+		// },
 	];
 
 	return <DraggableStatsGrid stats={cards} />;
@@ -435,9 +431,9 @@ function SystemTrendsCharts({
 
 	return (
 		<div className="grid gap-4 lg:grid-cols-1">
-			{renderLineChart("Request (tổng số)", "", requestData)}
 			{renderLineChart("CPU (%)", "%", cpuData)}
 			{renderLineChart("Heap đã dùng (MB)", "MB", memoryData)}
+			{renderLineChart("Request (tổng số)", "", requestData)}
 		</div>
 	);
 }
@@ -579,14 +575,7 @@ export function Dashboard() {
 
 	return (
 		<>
-			<Header fixed>
-				<Search />
-				<div className="ms-auto flex items-center space-x-4">
-					<ThemeSwitch />
-					<ConfigDrawer />
-					<ProfileDropdown />
-				</div>
-			</Header>
+			<Header fixed />
 
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<div className="space-y-4">

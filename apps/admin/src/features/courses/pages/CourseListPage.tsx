@@ -6,10 +6,6 @@ import { useGetCourses, useHideOrShowCourse } from "../queries/useCourse";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { CoursePreview } from "../types/course.type";
 import { Main } from "@/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
 import { CoursesTable } from "../components/courses-table";
 
@@ -69,14 +65,7 @@ export const CourseListPage: React.FC = () => {
 
 	return (
 		<>
-			<Header fixed>
-				<Search />
-				<div className="ms-auto flex items-center space-x-4">
-					<ThemeSwitch />
-					<ConfigDrawer />
-					<ProfileDropdown />
-				</div>
-			</Header>
+			<Header fixed />
 
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex flex-wrap items-end justify-between gap-2">
@@ -86,8 +75,8 @@ export const CourseListPage: React.FC = () => {
 							Quản lý và chỉnh sửa các khóa học
 						</p>
 					</div>
-					<Button size="lg" onClick={() => navigate({ to: "/courses/create" })}>
-						<Plus className="mr-2 h-4 w-4" />
+					<Button size="sm" onClick={() => navigate({ to: "/courses/create" })}>
+						<Plus className="mr-0 h-4 w-4" />
 						Tạo khóa học mới
 					</Button>
 				</div>
