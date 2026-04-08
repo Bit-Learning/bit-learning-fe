@@ -1,5 +1,5 @@
 import { Link, useLocation } from "@tanstack/react-router";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo } from "react";
 import {
 	BadgeCheck,
 	Bell,
@@ -26,6 +26,7 @@ import { cn } from "@/shared/lib/utils";
 import { getNavGroupsForRole } from "./data/sidebar-data";
 import type { NavCollapsible, NavItem, NavLink } from "./types";
 import { useAdminProfile } from "@/features/auth/queries/useAuth";
+import { useSidebar } from "@/components/ui/sidebar";
 
 const SIDEBAR_EXPANDED = "w-72";
 const SIDEBAR_COLLAPSED = "w-[88px]";
@@ -402,9 +403,9 @@ function SidebarFooter({
 
 const AppSidebar: React.FC = () => {
 	const href = useLocation({ select: (l) => l.href });
-	const [collapsed, setCollapsed] = useState(false);
-	const [mobileOpen, setMobileOpen] = useState(false);
 	const [signOutOpen, setSignOutOpen] = useDialogState();
+	const { open, setOpen, openMobile, setOpenMobile } = useSidebar();
+	const collapsed = !open;
 
 	const { data: profile } = useAdminProfile();
 
@@ -428,7 +429,7 @@ const AppSidebar: React.FC = () => {
 			.join("")
 			.toUpperCase() || "?";
 
-	const closeMobile = () => setMobileOpen(false);
+	const closeMobile = () => setOpenMobile(false);
 
 	const sidebarContent = (
 		<div className="flex h-full flex-col bg-slate-950">
@@ -440,7 +441,7 @@ const AppSidebar: React.FC = () => {
 			<div className="relative z-10 flex h-full flex-col">
 				<SidebarHeader
 					collapsed={collapsed}
-					onToggle={() => setCollapsed((prev) => !prev)}
+					onToggle={() => setOpen((prev) => !prev)}
 					onCloseMobile={closeMobile}
 				/>
 
@@ -510,14 +511,14 @@ const AppSidebar: React.FC = () => {
 
 			<button
 				type="button"
-				onClick={() => setMobileOpen(true)}
+				onClick={() => setOpenMobile(true)}
 				className="fixed left-4 top-4 z-50 flex size-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg md:hidden"
 				aria-label="Open sidebar"
 			>
 				<Menu className="size-4" />
 			</button>
 
-			{mobileOpen && (
+			{openMobile && (
 				<div className="fixed inset-0 z-50 flex md:hidden">
 					<div
 						className="absolute inset-0 bg-black/60 backdrop-blur-sm"
