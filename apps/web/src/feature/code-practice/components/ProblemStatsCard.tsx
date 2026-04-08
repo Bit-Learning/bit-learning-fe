@@ -16,9 +16,6 @@ export const ProblemStatsCard: React.FC<ProblemStatsCardProps> = ({ problemId })
         <div className="flex flex-col items-center">
           <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
         </div>
-        <div className="flex flex-col items-center">
-          <Loader2 className="w-4 h-4 animate-spin text-slate-300" />
-        </div>
       </>
     );
   }
@@ -26,18 +23,7 @@ export const ProblemStatsCard: React.FC<ProblemStatsCardProps> = ({ problemId })
   if (!stats) {
     return (
       <>
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1">
-            <Users className="w-3 h-3" /> Người giải
-          </span>
-          <span className="font-bold text-slate-400 text-sm">—</span>
-        </div>
-        <div className="flex flex-col items-center">
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1">
-            <TrendingUp className="w-3 h-3" /> Tỷ lệ đúng
-          </span>
-          <span className="font-bold text-slate-400 text-sm">—</span>
-        </div>
+        <span className="text-sm text-slate-400 text-right">—</span>
       </>
     );
   }
@@ -47,18 +33,7 @@ export const ProblemStatsCard: React.FC<ProblemStatsCardProps> = ({ problemId })
 
   return (
     <>
-      <div className="flex flex-col items-center">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1">
-          <Users className="w-3 h-3" /> Người giải
-        </span>
-        <span className="font-bold text-slate-800 text-sm">{stats.solvedUsers.toLocaleString()}</span>
-      </div>
-      <div className="flex flex-col items-center">
-        <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-1 flex items-center gap-1">
-          <TrendingUp className="w-3 h-3" /> Tỷ lệ đúng
-        </span>
-        <span className={cn("font-bold text-sm", rateColor)}>{rate.toFixed(1)}%</span>
-      </div>
+      <span className={cn("font-bold text-lg text-right", rateColor)}>{rate.toFixed(1)}%</span>
     </>
   );
 };

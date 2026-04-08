@@ -91,3 +91,39 @@ export type TMatrixDetailResponse = {
   createdAt: string;
   updatedAt: string;
 };
+
+export type TLessonWeight = {
+  lessonId: number;
+  weight: number;
+};
+
+export type TDistribution = {
+  difficulty: {
+    EASY: number;
+    MEDIUM: number;
+    HARD: number;
+  };
+  type: {
+    MCQ: number;
+    ESSAY: number;
+  };
+};
+
+export type TScoring = {
+  mode: "UNIFORM" | "WEIGHTED";
+  weights?: {
+    EASY: number;
+    MEDIUM: number;
+    HARD: number;
+  };
+};
+
+export type TGenerateRequest = {
+  matrixId: number;
+  name?: string;
+  notes?: string;
+  totalQuestionCount: number;
+  lessons: TLessonWeight[];
+  distribution: TDistribution;
+  scoring?: TScoring;
+};

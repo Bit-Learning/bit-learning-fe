@@ -1,0 +1,429 @@
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { Loader2, Plus, Trash2, AlertCircle, Info } from "lucide-react";
+import { Button } from "@workspace/ui/components/Button";
+import { useGenerateVersion } from "../queries/useMatrix";
+import { useChaptersBySubject } from "../queries/useChapter";
+import { useLessonsByChapter } from "../queries/useLesson";
+
+const formSchema = z.object({
+  name: z.string().min(1, "Vui lòng nhập tên phiên bản"),
+  notes: z.string().optional(),
+  totalQuestionCount: z.number().int().positive("Số câu phải lớn hơn 0"),
+  difficultyEasy: z.number().min(0).max(1),
+  difficultyMedium: z.number().min(0).max(1),
+  difficultyHard: z.number().min(0).max(1),
+  typeMCQ: z.number().min(0).max(1),
+  typeEssay: z.number().min(0).max(1),
+  scoringMode: z.enum(["UNIFORM", "WEIGHTED"]),
+  weightEasy: z.number().positive().optional(),
+  weightMedium: z.number().positive().optional(),
+  weightHard: z.number().positive().optional(),
+});
+
+type FormValues = z.infer<typeof formSchema>;
+
+type TLessonRow = { lessonId: number; chapterId: number; weight: number };
+
+interface LessonSelectorProps {
+  subjectId: number;
+  value: TLessonRow;
+  onChange: (val: TLessonRow) => void;
+  onRemove: () => void;
+  index: number;
+}
+
+const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onChange, onRemove, index }) => {
+  const { data: chapters } = useChaptersBySubject(subjectId);
+  const { data: lessons } = useLessonsByChapter(value.chapterId || undefined);
+
+  return (
+    <div className="grid grid-cols-12 gap-3 items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
+      <div className="col-span-1 text-center text-sm font-bold text-slate-400">{index + 1}</div>
+      <div className="col-span-4">
+        <select
+          value={value.chapterId}
+          onChange={(e) => onChange({ ...value, chapterId: Number(e.target.value), lessonId: 0 })}
+          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+        >
+          <option value={0}>-- Chọn chương --</option>
+          {chapters?.map((ch: any, i: number) => (
+            <option key={ch.id} value={ch.id}>
+              Chương {i + 1}: {ch.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="col-span-4">
+        <select
+          value={value.lessonId}
+          onChange={(e) => onChange({ ...value, lessonId: Number(e.target.value) })}
+          disabled={!value.chapterId}
+          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+        >
+          <option value={0}>-- Chọn bài học --</option>
+          {lessons?.map((l: any) => (
+            <option key={l.id} value={l.id}>
+              {l.name}
+            </option>
+          ))}
+        </select>
+      </div>
+      <div className="col-span-2">
+        <div className="relative">
+          <input
+            type="number"
+            min={0.01}
+            max={1}
+            step={0.01}
+            value={value.weight}
+            onChange={(e) => onChange({ ...value, weight: parseFloat(e.target.value) || 0 })}
+            className="w-full px-3 py-2 pr-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 text-center"
+          />
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+        </div>
+      </div>
+      <div className="col-span-1 flex justify-center">
+        <button type="button" onClick={onRemove} className="text-red-500 hover:text-red-700 transition-colors p-1">
+          <Trash2 className="h-4 w-4" />
+        </button>
+      </div>
+    </div>
+  );
+};
+
+interface Props {
+  matrixId: number;
+  totalScore: number;
+  subjectId: number;
+  onClose: () => void;
+}
+
+const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => {
+  const [lessons, setLessons] = useState<TLessonRow[]>([{ lessonId: 0, chapterId: 0, weight: 1.0 }]);
+
+  const {
+    register,
+    handleSubmit,
+    watch,
+    formState: { errors },
+  } = useForm<FormValues>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      name: "",
+      notes: "",
+      totalQuestionCount: 10,
+      difficultyEasy: 0.4,
+      difficultyMedium: 0.4,
+      difficultyHard: 0.2,
+      typeMCQ: 0.7,
+      typeEssay: 0.3,
+      scoringMode: "UNIFORM",
+      weightEasy: 1,
+      weightMedium: 2,
+      weightHard: 3,
+    },
+  });
+
+  const scoringMode = watch("scoringMode");
+  const diffEasy = watch("difficultyEasy") || 0;
+  const diffMedium = watch("difficultyMedium") || 0;
+  const diffHard = watch("difficultyHard") || 0;
+  const typeMCQ = watch("typeMCQ") || 0;
+  const typeEssay = watch("typeEssay") || 0;
+
+  const diffSum = parseFloat((diffEasy + diffMedium + diffHard).toFixed(3));
+  const typeSum = parseFloat((typeMCQ + typeEssay).toFixed(3));
+  const weightSum = parseFloat(lessons.reduce((s, l) => s + (l.weight || 0), 0).toFixed(3));
+
+  const isDiffValid = Math.abs(diffSum - 1.0) < 0.001;
+  const isTypeValid = Math.abs(typeSum - 1.0) < 0.001;
+  const isWeightValid = Math.abs(weightSum - 1.0) < 0.001;
+  const hasValidLessons = lessons.length > 0 && lessons.every((l) => l.lessonId > 0);
+
+  const canSubmit = isDiffValid && isTypeValid && isWeightValid && hasValidLessons;
+
+  const { mutate: generateVersion, isPending } = useGenerateVersion();
+
+  const addLesson = () => setLessons((prev) => [...prev, { lessonId: 0, chapterId: 0, weight: 0 }]);
+  const removeLesson = (idx: number) => setLessons((prev) => prev.filter((_, i) => i !== idx));
+  const updateLesson = (idx: number, val: TLessonRow) =>
+    setLessons((prev) => prev.map((l, i) => (i === idx ? val : l)));
+
+  const onSubmit = (values: FormValues) => {
+    if (!canSubmit) return;
+
+    generateVersion(
+      {
+        matrixId,
+        name: values.name,
+        notes: values.notes,
+        totalQuestionCount: values.totalQuestionCount,
+        lessons: lessons.map((l) => ({ lessonId: l.lessonId, weight: l.weight })),
+        distribution: {
+          difficulty: {
+            EASY: values.difficultyEasy,
+            MEDIUM: values.difficultyMedium,
+            HARD: values.difficultyHard,
+          },
+          type: {
+            MCQ: values.typeMCQ,
+            ESSAY: values.typeEssay,
+          },
+        },
+        ...(values.scoringMode === "WEIGHTED" && {
+          scoring: {
+            mode: "WEIGHTED" as const,
+            weights: {
+              EASY: values.weightEasy || 1,
+              MEDIUM: values.weightMedium || 2,
+              HARD: values.weightHard || 3,
+            },
+          },
+        }),
+      },
+      { onSuccess: onClose },
+    );
+  };
+
+  const SumBadge = ({ sum, valid }: { sum: number; valid: boolean }) => (
+    <span
+      className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+        valid
+          ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
+          : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
+      }`}
+    >
+      {valid ? "✓" : "✗"} Tổng: {sum.toFixed(2)}
+    </span>
+  );
+
+  return (
+    <div className="p-6">
+      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div>
+            <label className="block text-md font-medium text-slate-700 dark:text-slate-300 mb-2">
+              Tên phiên bản <span className="text-red-500">*</span>
+            </label>
+            <input
+              {...register("name")}
+              placeholder="Phiên bản tự động v1"
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+            />
+            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+          </div>
+          <div>
+            <label className="block text-md font-medium text-slate-700 dark:text-slate-300 mb-2">Ghi chú</label>
+            <input
+              {...register("notes")}
+              placeholder="Sinh từ ngân hàng câu hỏi HK1..."
+              className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
+            />
+          </div>
+        </div>
+
+        <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800/50">
+          <div className="flex-1">
+            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+              Tổng số câu hỏi <span className="text-red-500">*</span>
+            </label>
+            <p className="text-xs text-slate-500 dark:text-slate-400">
+              Hệ thống sẽ phân bổ tự động theo tỷ lệ đã cấu hình
+            </p>
+          </div>
+          <input
+            {...register("totalQuestionCount", { valueAsNumber: true })}
+            type="number"
+            min={1}
+            className="w-24 px-4 py-3 text-center text-xl font-bold bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          />
+          {errors.totalQuestionCount && <p className="text-xs text-red-500">{errors.totalQuestionCount.message}</p>}
+        </div>
+
+        <div>
+          <div className="flex items-center justify-between mb-3">
+            <div>
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Bài học & trọng số</h3>
+              <p className="text-xs text-slate-500 mt-0.5">Trọng số (weight) là tỷ lệ phân bổ câu hỏi cho bài học đó</p>
+            </div>
+            <SumBadge sum={weightSum} valid={isWeightValid} />
+          </div>
+
+          <div className="space-y-2">
+            <div className="grid grid-cols-12 gap-3 px-3 mb-1">
+              <div className="col-span-1" />
+              <div className="col-span-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Chương</div>
+              <div className="col-span-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Bài học</div>
+              <div className="col-span-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+                Trọng số
+              </div>
+              <div className="col-span-1" />
+            </div>
+
+            {lessons.map((lesson, idx) => (
+              <LessonSelector
+                key={idx}
+                index={idx}
+                subjectId={subjectId}
+                value={lesson}
+                onChange={(val) => updateLesson(idx, val)}
+                onRemove={() => removeLesson(idx)}
+              />
+            ))}
+
+            <button
+              type="button"
+              onClick={addLesson}
+              className="cursor-pointer w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 rounded-lg text-sm font-medium text-slate-500 hover:text-blue-600 transition-all flex items-center justify-center gap-2"
+            >
+              <Plus className="h-4 w-4" />
+              Thêm bài học
+            </button>
+          </div>
+
+          {!isWeightValid && lessons.length > 0 && (
+            <div className="flex items-center gap-2 mt-2 text-xs text-amber-600 dark:text-amber-400">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              Tổng trọng số phải bằng 1.0 (hiện tại: {weightSum.toFixed(3)})
+            </div>
+          )}
+
+          {!hasValidLessons && lessons.some((l) => l.chapterId > 0) && (
+            <div className="flex items-center gap-2 mt-2 text-xs text-red-500 dark:text-red-400">
+              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
+              Vui lòng chọn bài học cho tất cả các dòng
+            </div>
+          )}
+        </div>
+
+        <div className="grid grid-cols-2 gap-4">
+          <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Phân bổ độ khó</h3>
+              <SumBadge sum={diffSum} valid={isDiffValid} />
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: "Dễ (Easy)", key: "difficultyEasy", color: "text-green-600" },
+                { label: "Trung bình", key: "difficultyMedium", color: "text-amber-600" },
+                { label: "Khó (Hard)", key: "difficultyHard", color: "text-red-600" },
+              ].map(({ label, key, color }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <span className={`text-xs font-medium w-24 ${color}`}>{label}</span>
+                  <input
+                    {...register(key as any, { valueAsNumber: true })}
+                    type="number"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+            <div className="flex items-center justify-between mb-3">
+              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Phân bổ loại câu</h3>
+              <SumBadge sum={typeSum} valid={isTypeValid} />
+            </div>
+            <div className="space-y-3">
+              {[
+                { label: "MCQ (Trắc nghiệm)", key: "typeMCQ", color: "text-blue-600" },
+                { label: "Essay (Tự luận)", key: "typeEssay", color: "text-orange-600" },
+              ].map(({ label, key, color }) => (
+                <div key={key} className="flex items-center gap-3">
+                  <span className={`text-xs font-medium w-24 ${color}`}>{label}</span>
+                  <input
+                    {...register(key as any, { valueAsNumber: true })}
+                    type="number"
+                    min={0}
+                    max={1}
+                    step={0.01}
+                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
+          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Chiến lược tính điểm</h3>
+          <div className="flex gap-3 mb-4">
+            {(["UNIFORM", "WEIGHTED"] as const).map((m) => (
+              <label
+                key={m}
+                className={`flex-1 flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
+                  scoringMode === m
+                    ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
+                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300"
+                }`}
+              >
+                <input {...register("scoringMode")} type="radio" value={m} className="accent-blue-600" />
+                <div>
+                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
+                    {m === "UNIFORM" ? "Đồng đều (Uniform)" : "Có trọng số (Weighted)"}
+                  </p>
+                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                    {m === "UNIFORM" ? "Mọi câu cùng điểm số" : "Câu khó > câu dễ theo tỷ lệ"}
+                  </p>
+                </div>
+              </label>
+            ))}
+          </div>
+
+          {scoringMode === "WEIGHTED" && (
+            <div>
+              <p className="text-xs text-slate-500 mb-3 flex items-center gap-1.5">
+                <Info className="h-3.5 w-3.5" />
+                Tỷ lệ điểm theo độ khó (mặc định: Dễ=1, TB=2, Khó=3)
+              </p>
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: "Dễ", key: "weightEasy", color: "text-green-600" },
+                  { label: "TB", key: "weightMedium", color: "text-amber-600" },
+                  { label: "Khó", key: "weightHard", color: "text-red-600" },
+                ].map(({ label, key, color }) => (
+                  <div key={key}>
+                    <label className={`block text-xs font-medium mb-1 ${color}`}>{label}</label>
+                    <input
+                      {...register(key as any, { valueAsNumber: true })}
+                      type="number"
+                      min={1}
+                      className="w-full px-3 py-2 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    />
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+
+        <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
+          <Button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition-all"
+          >
+            Hủy
+          </Button>
+          <Button
+            type="submit"
+            isDisabled={isPending || !canSubmit}
+            className="px-6 py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/30"
+          >
+            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            <span>Tạo tự động →</span>
+          </Button>
+        </div>
+      </form>
+    </div>
+  );
+};
+
+export default AutoGenerateForm;

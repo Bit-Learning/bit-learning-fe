@@ -8,6 +8,7 @@ import type {
   TMatrixVersionResponse,
   TMatrixDetailRequest,
   TMatrixDetailResponse,
+  TGenerateRequest,
 } from "../types/matrix.type";
 
 export const matrixApi = {
@@ -33,7 +34,7 @@ export const matrixApi = {
 
   getBySubject(
     subjectId: number,
-    params?: { page?: number; size?: number }
+    params?: { page?: number; size?: number },
   ): Promise<AxiosResponse<ApiResponse<TMatrixResponse[]>>> {
     return api.get(`/matrices/subject/${subjectId}`, { params });
   },
@@ -58,6 +59,10 @@ export const matrixApi = {
 export const matrixVersionApi = {
   create(data: TMatrixVersionRequest): Promise<AxiosResponse<ApiResponse<TMatrixVersionResponse>>> {
     return api.post("/matrix-versions", data);
+  },
+
+  generate(data: TGenerateRequest): Promise<AxiosResponse<ApiResponse<TMatrixVersionResponse>>> {
+    return api.post("/matrix-versions/generate", data);
   },
 
   getById(versionId: number): Promise<AxiosResponse<ApiResponse<TMatrixVersionResponse>>> {

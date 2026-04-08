@@ -80,12 +80,12 @@ const CourseCurriculum: React.FC<CourseCurriculumProps> = ({ courseId }) => {
                 onClick={() => setExpandedSection(expandedSection === idx ? null : idx)}
                 className={`cursor-pointer flex w-full flex-col items-start px-4 py-4 text-left transition-colors border-b border-gray-200 last:border-b-0 ${
                   expandedSection === idx
-                    ? "border-l-2 border-l-blue-600 bg-white text-blue-600"
+                    ? "border-l-4 border-l-blue-600 bg-white text-blue-600"
                     : "text-gray-700 hover:bg-gray-100"
                 }`}
               >
-                <span className="text-md text-gray-700 mb-0.5">Chương {idx + 1}</span>
-                <span className="mt-1 text-[10px] text-gray-400">{section.lectures?.length || 0} bài</span>
+                <span className="text-lg text-gray-700 mb-0.5">Chương {idx + 1}</span>
+                <span className="mt-1 text-sm text-gray-400">{section.lectures?.length || 0} bài</span>
               </button>
             ))}
           </div>

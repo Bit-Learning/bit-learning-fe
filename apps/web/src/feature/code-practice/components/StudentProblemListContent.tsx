@@ -1,189 +1,142 @@
-import React, { useState } from "react";
-import { Heart } from "lucide-react";
+import React, { useState, useMemo } from "react";
+import { Heart, ChevronDown, Search } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useNavigate } from "@tanstack/react-router";
 import { useProblems, useToggleFavorite } from "../queries/useCoding";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
-import { DIFFICULTY_MAP, DifficultyBadge } from "./DifficultyBadge";
 import { Pagination } from "@/shared/components/Pagination";
-import { ProblemStatsCard } from "./ProblemStatsCard";
 import { toast } from "@/shared/components/Sonner";
-import HttpServerCard from "./HttpServer";
-import Card from "./JSConsole";
+import type { ProblemBriefResponse } from "../types/coding.type";
+import { ProblemStatsCard } from "./ProblemStatsCard";
 
-const Tag = ({ label }: { label: string }) => (
-  <span className="bg-blue-50 text-blue-700 text-[10px] font-black uppercase tracking-tight px-2 py-1 rounded">
+const DIFF_LABEL: Record<string, string> = {
+  EASY: "Dễ",
+  MEDIUM: "Vừa",
+  HARD: "Khó",
+};
+const DIFF_COLOR: Record<string, string> = {
+  EASY: "text-emerald-600",
+  MEDIUM: "text-amber-500",
+  HARD: "text-rose-500",
+};
+
+const TagPill: React.FC<{
+  name: string;
+  count: number;
+  active: boolean;
+  onClick: () => void;
+}> = ({ name, count, active, onClick }) => (
+  <button
+    onClick={onClick}
+    className={cn(
+      "inline-flex items-center gap-2 px-2 py-1 text-lg font-medium whitespace-nowrap transition-colors cursor-pointer ",
+      active ? "text-blue-500" : "text-slate-500 hover:text-blue-500",
+    )}
+  >
+    {name}
+    <span
+      className={cn(
+        "px-2.5 py-0.5 text-sm rounded-sm",
+        active ? "bg-blue-100 text-blue-500" : "bg-slate-200 hover:text-blue-500",
+      )}
+    >
+      {count}
+    </span>
+  </button>
+);
+
+const InlineTag: React.FC<{ label: string }> = ({ label }) => (
+  <span className="px-2 py-0.5 text-sm rounded bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap">
     {label}
   </span>
 );
 
 const StudentProblemListContent: React.FC = () => {
   const [search, setSearch] = useState("");
-  const [difficulty, setDifficulty] = useState("all");
+  const [difficulty, setDifficulty] = useState<"all" | "EASY" | "MEDIUM" | "HARD">("all");
+  const [activeTag, setActiveTag] = useState<string | null>(null);
   const [page, setPage] = useState(0);
-  const size = 10;
+  const [showAllTags, setShowAllTags] = useState(false);
+  const size = 20;
 
   const navigate = useNavigate();
 
-  const { data: problemsData, isLoading } = useProblems({
-    page,
-    size,
-    sort: "createdAt,desc",
-  });
-
+  const { data: problemsData, isLoading } = useProblems({ page, size, sort: "createdAt,desc" });
   const toggleFavorite = useToggleFavorite();
 
-  const problems = problemsData?.data || [];
+  const problems: ProblemBriefResponse[] = problemsData?.data || [];
   const pageInfo = problemsData?.page;
   const totalPages = pageInfo?.totalPages || 0;
   const totalElements = pageInfo?.totalElements || 0;
 
-  const filteredProblems = problems.filter((p) => {
-    const matchSearch = p.title.toLowerCase().includes(search.toLowerCase());
-    const matchDifficulty = difficulty === "all" || p.difficulty === difficulty;
-    return matchSearch && matchDifficulty;
-  });
+  const tagMap = useMemo(() => {
+    const map: Record<string, number> = {};
+    problems.forEach((p) => p.tags?.forEach((t) => (map[t.name] = (map[t.name] || 0) + 1)));
+    return map;
+  }, [problems]);
 
-  const solvedCount = problems.length;
-  const progressPct = totalElements > 0 ? Math.round((solvedCount / totalElements) * 100) : 0;
+  const sortedTags = useMemo(() => Object.entries(tagMap).sort((a, b) => b[1] - a[1]), [tagMap]);
 
-  const handleFavorite = (e: React.MouseEvent, problem: { id: string; title: string; isFavorite?: boolean }) => {
+  const VISIBLE_TAGS = 8;
+  const visibleTags = showAllTags ? sortedTags : sortedTags.slice(0, VISIBLE_TAGS);
+
+  const filtered = useMemo(
+    () =>
+      problems.filter((p) => {
+        if (difficulty !== "all" && p.difficulty !== difficulty) return false;
+        if (activeTag && !p.tags?.some((t) => t.name === activeTag)) return false;
+        if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+        return true;
+      }),
+    [problems, difficulty, activeTag, search],
+  );
+
+  const handleFavorite = (e: React.MouseEvent, problem: ProblemBriefResponse) => {
     e.stopPropagation();
     const willFavorite = !problem.isFavorite;
     toggleFavorite.mutate(problem.id, {
       onSuccess: () => {
-        if (willFavorite) {
-          toast.success({
-            title: "Đã thêm vào yêu thích",
-            description: problem.title,
-          });
-        } else {
-          toast.info({
-            title: "Đã xóa khỏi yêu thích",
-            description: problem.title,
-          });
-        }
+        toast[willFavorite ? "success" : "info"]({
+          title: willFavorite ? "Đã thêm vào yêu thích" : "Đã xóa khỏi yêu thích",
+          description: problem.title,
+        });
       },
     });
   };
 
-  const handleProblemClick = (problemId: string) => {
-    navigate({ to: `/problem/${problemId}` });
-  };
-
-  const handleReset = () => {
-    setSearch("");
-    setDifficulty("all");
-    setPage(0);
-  };
+  const handleRowClick = (id: string) => navigate({ to: `/problem/${id}` });
 
   if (isLoading) return <Loader />;
 
   return (
-    <div
-      className="min-h-screen relative overflow-hidden bg-slate-900"
-      style={{
-        backgroundImage:
-          "url('https://images.unsplash.com/photo-1555099962-4199c345e5dd?auto=format&fit=crop&w=1600&q=80')",
-        backgroundSize: "cover",
-        backgroundPosition: "center",
-        backgroundAttachment: "fixed",
-      }}
-    >
-      <div className="pointer-events-none absolute inset-0 bg-slate-950/50" />
-
-      <main className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10 space-y-8">
-        <div className="flex md:flex-row flex-col md:items-center justify-between gap-6">
-          <div className="flex flex-col md:flex-col md:items-start justify-between gap-6">
-            <div>
-              <h1 className="text-4xl font-black text-slate-200 tracking-tight mb-2">Không gian Luyện tập</h1>
-              <p className="text-slate-200 text-base max-w-xl">
-                Rèn luyện tư duy kiến trúc thông qua các thử thách logic. Giải quyết, tối ưu hóa và làm chủ nghệ thuật
-                mã hóa.
-              </p>
-            </div>
-
-            <div className="flex items-center gap-4 bg-white/80 backdrop-blur border border-slate-200 rounded-2xl px-5 py-3 shadow-sm">
-              <div className="text-right">
-                <p className="text-[10px] font-bold text-slate-500 uppercase tracking-widest">Bài tập đã giải</p>
-                <p className="text-2xl font-black text-blue-600 leading-none">
-                  {solvedCount} <span className="text-slate-500 font-semibold text-lg">/ {totalElements}</span>
-                </p>
-              </div>
-              <div className="relative w-12 h-12 shrink-0">
-                <svg className="w-full h-full -rotate-90" viewBox="0 0 48 48">
-                  <circle cx="24" cy="24" r="20" fill="none" stroke="#e2e8f0" strokeWidth="4" />
-                  <circle
-                    cx="24"
-                    cy="24"
-                    r="20"
-                    fill="none"
-                    stroke="#2563eb"
-                    strokeWidth="4"
-                    strokeDasharray={`${2 * Math.PI * 20}`}
-                    strokeDashoffset={`${2 * Math.PI * 20 * (1 - progressPct / 100)}`}
-                    strokeLinecap="round"
-                  />
-                </svg>
-                <span className="absolute inset-0 flex items-center justify-center text-[10px] font-black text-slate-700">
-                  {progressPct}%
-                </span>
-              </div>
-            </div>
+    <div className="min-h-screen bg-slate-50">
+      <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+        {sortedTags.length > 0 && (
+          <div className="flex items-center gap-2 flex-wrap">
+            {visibleTags.map(([name, count]) => (
+              <TagPill
+                key={name}
+                name={name}
+                count={count}
+                active={activeTag === name}
+                onClick={() => setActiveTag((prev) => (prev === name ? null : name))}
+              />
+            ))}
+            {sortedTags.length > VISIBLE_TAGS && (
+              <button
+                onClick={() => setShowAllTags((v) => !v)}
+                className="inline-flex items-center gap-1 px-2 py-1 text-md text-slate-600 hover:text-slate-800 transition-colors cursor-pointer"
+              >
+                {showAllTags ? "Thu gọn" : `+${sortedTags.length - VISIBLE_TAGS} nữa`}
+                <ChevronDown className={cn("w-3 h-3 transition-transform", showAllTags && "rotate-180")} />
+              </button>
+            )}
           </div>
+        )}
 
-          <Card />
-        </div>
-
-        <div className="bg-white/80 backdrop-blur border border-slate-200/60 rounded-2xl px-5 py-4 shadow-sm flex flex-wrap items-center gap-6">
-          <div className="flex items-center gap-3">
-            <span className="text-[11px] font-bold text-slate-400 uppercase tracking-widest">Độ khó:</span>
-            <div className="flex bg-slate-100 p-1 rounded-xl gap-0.5">
-              {[
-                { value: "all", label: "Tất cả" },
-                { value: "EASY", label: "Dễ" },
-                { value: "MEDIUM", label: "Trung bình" },
-                { value: "HARD", label: "Khó" },
-              ].map((opt) => {
-                const isActive = difficulty === opt.value;
-
-                const colorClasses =
-                  opt.value === "EASY"
-                    ? isActive
-                      ? "bg-emerald-500 text-white shadow"
-                      : "text-emerald-600 hover:bg-emerald-500/10"
-                    : opt.value === "MEDIUM"
-                      ? isActive
-                        ? "bg-amber-400 text-slate-900 shadow"
-                        : "text-amber-600 hover:bg-amber-400/10"
-                      : opt.value === "HARD"
-                        ? isActive
-                          ? "bg-rose-500 text-white shadow"
-                          : "text-rose-600 hover:bg-rose-500/10"
-                        : isActive
-                          ? "bg-white text-blue-600 shadow"
-                          : "text-slate-500 hover:text-slate-700";
-
-                return (
-                  <button
-                    key={opt.value}
-                    onClick={() => {
-                      setDifficulty(opt.value);
-                      setPage(0);
-                    }}
-                    className={cn(
-                      "cursor-pointer px-4 py-1.5 rounded-lg text-xs font-bold transition-all",
-                      colorClasses,
-                    )}
-                  >
-                    {opt.label}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-
-          <div className="flex-1 min-w-45">
+        <div className="flex items-center gap-2 flex-wrap">
+          <div className="relative flex-1 min-w-50">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
               value={search}
               onChange={(e) => {
@@ -191,81 +144,128 @@ const StudentProblemListContent: React.FC = () => {
                 setPage(0);
               }}
               placeholder="Tìm kiếm bài tập..."
-              className="w-full h-9 px-4 text-sm rounded-xl border border-slate-200 bg-slate-50 focus:outline-none focus:ring-2 focus:ring-blue-400 placeholder:text-slate-400"
+              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
             />
           </div>
+
+          <div className="flex bg-white border-2 rounded-md border-slate-200 overflow-hidden">
+            {(
+              [
+                { value: "all", label: "Tất cả" },
+                { value: "EASY", label: "Dễ" },
+                { value: "MEDIUM", label: "Vừa" },
+                { value: "HARD", label: "Khó" },
+              ] as const
+            ).map(({ value, label }) => {
+              const active = difficulty === value;
+              return (
+                <button
+                  key={value}
+                  onClick={() => {
+                    setDifficulty(value);
+                    setPage(0);
+                  }}
+                  className={cn(
+                    "px-3 py-3 text-md font-medium transition-colors cursor-pointer whitespace-nowrap border-r border-slate-200 last:border-r-0",
+                    active
+                      ? value === "EASY"
+                        ? "bg-emerald-50 text-emerald-600"
+                        : value === "MEDIUM"
+                          ? "bg-amber-50 text-amber-500"
+                          : value === "HARD"
+                            ? "bg-rose-50 text-rose-500"
+                            : "bg-slate-100 text-slate-700"
+                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-50",
+                  )}
+                >
+                  {label}
+                </button>
+              );
+            })}
+          </div>
+
+          <span className="ml-auto text-lg text-slate-500 whitespace-nowrap">
+            <span className="text-slate-700 font-bold">{filtered.length}</span>
+            <span className="mx-1 text-slate-400">/</span>
+            <span className="text-slate-700 font-bold">{totalElements}</span>
+            <span className="ml-2">bài tập</span>
+          </span>
         </div>
 
-        <div className="space-y-4">
-          {filteredProblems.length === 0 && (
-            <div className="text-center py-16 text-slate-400 text-sm">Không tìm thấy bài tập nào.</div>
-          )}
+        <div className="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+          <div className="grid grid-cols-[40px_1fr_110px_100px_50px] items-center px-5 py-2.5 bg-slate-50 border-b border-slate-200 text-lg uppercase tracking-wider text-slate-600 font-medium">
+            <span>#</span>
+            <span>Bài tập</span>
+            <span className="text-center">Tỉ lệ đúng</span>
+            <span className="text-right">Độ khó</span>
+            <span />
+          </div>
 
-          {filteredProblems.map((problem, index) => {
-            const diffCfg = DIFFICULTY_MAP[problem.difficulty] ?? {
-              border: "border-l-slate-300",
-            };
-            return (
+          {filtered.length === 0 ? (
+            <div className="text-center py-16 text-slate-400 text-sm">Không tìm thấy bài tập nào.</div>
+          ) : (
+            filtered.map((problem, idx) => (
               <div
-                key={index}
-                onClick={() => handleProblemClick(problem.id)}
+                key={problem.id}
+                onClick={() => handleRowClick(problem.id)}
                 className={cn(
-                  "group bg-white border border-slate-200/60 border-l-4 rounded-xl px-6 py-5 flex flex-col md:flex-row items-start md:items-center gap-6 shadow-sm hover:shadow-md transition-all cursor-pointer",
-                  diffCfg.border,
+                  "grid grid-cols-[40px_1fr_110px_100px_60px] items-center px-5 py-3.5 border-b border-slate-100 last:border-b-0 cursor-pointer transition-colors hover:bg-blue-50 group",
+                  idx % 2 === 0 ? "bg-white" : "bg-slate-50/50",
                 )}
               >
-                <div className="flex-1 min-w-0">
-                  <div className="flex flex-wrap items-center gap-3 mb-2">
-                    <h3 className="font-bold text-lg text-slate-900 group-hover:text-blue-600 transition-colors flex items-center gap-2">
-                      <button
-                        onClick={(e) => handleFavorite(e, problem)}
-                        className={cn(
-                          "transition-all active:scale-90",
-                          problem.isFavorite ? "text-red-500 hover:text-red-400" : "text-slate-300 hover:text-red-400",
-                        )}
-                        title={problem.isFavorite ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
-                      >
-                        <Heart className={cn("w-5 h-5 transition-all", problem.isFavorite ? "fill-red-500" : "")} />
-                      </button>
-                      {problem.title}
-                    </h3>
-                    <DifficultyBadge difficulty={problem.difficulty} />
-                  </div>
+                <span className="text-lg text-slate-600">{idx + 1 + page * size}</span>
 
-                  {problem.description && (
-                    <p className="text-slate-500 text-sm mb-3 line-clamp-1">{problem.description}</p>
+                <div className="flex flex-col gap-1.5 min-w-0 pr-4">
+                  <span className="text-lg font-bold text-slate-800 group-hover:text-blue-500 transition-colors truncate">
+                    {problem.title}
+                  </span>
+                  {problem.tags && problem.tags.length > 0 && (
+                    <div className="flex gap-1 flex-wrap">
+                      {problem.tags.map((tag) => (
+                        <InlineTag key={tag.id} label={tag.name} />
+                      ))}
+                    </div>
                   )}
-
-                  <div className="flex flex-wrap gap-1.5">
-                    {problem.tags?.map((tag) => (
-                      <Tag key={tag.id} label={tag.name} />
-                    ))}
-                  </div>
                 </div>
 
-                <div className="flex items-center gap-8 shrink-0">
-                  <ProblemStatsCard problemId={problem.id} />
+                <ProblemStatsCard problemId={problem.id} />
+                <span className={cn("text-lg font-medium text-right", DIFF_COLOR[problem.difficulty])}>
+                  {DIFF_LABEL[problem.difficulty] ?? problem.difficulty}
+                </span>
+
+                <div className="relative group">
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleProblemClick(problem.id);
-                    }}
-                    className="bg-orange-500 hover:bg-orange-600 active:scale-95 text-white px-4 py-2.5 rounded-md font-bold text-sm shadow transition-all"
+                    onClick={(e) => handleFavorite(e, problem)}
+                    className={cn(
+                      "cursor-pointer flex items-center justify-center w-10 h-10 ms-3 rounded transition-all",
+                      problem.isFavorite
+                        ? "text-rose-400 hover:text-rose-500"
+                        : "text-slate-300 hover:text-slate-400 opacity-0 group-hover:opacity-100",
+                    )}
                   >
-                    Giải ngay
+                    <Heart className={cn("w-6 h-6", problem.isFavorite && "fill-rose-400")} />
                   </button>
+
+                  <div
+                    className="absolute top-full mb-2 left-2 -translate-x-1/2
+                  whitespace-nowrap rounded bg-slate-800 text-white
+                  text-sm px-2 py-1 opacity-0 group-hover:opacity-100
+                  transition pointer-events-none"
+                  >
+                    {problem.isFavorite ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
+                  </div>
                 </div>
               </div>
-            );
-          })}
+            ))
+          )}
         </div>
 
         {totalPages > 1 && (
-          <div className="flex justify-center pt-4">
-            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} darkMode />
+          <div className="flex justify-center pt-2">
+            <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
           </div>
         )}
-      </main>
+      </div>
     </div>
   );
 };
