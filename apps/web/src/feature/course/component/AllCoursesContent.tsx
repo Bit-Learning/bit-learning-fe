@@ -1,9 +1,9 @@
 import { useAppDispatch } from "@/shared/redux/store";
 import { useNavigate } from "@tanstack/react-router";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
-import { BookOpen, ChevronRight } from "lucide-react";
+import { BookOpen, ChevronLeft, ChevronRight } from "lucide-react";
 import type React from "react";
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useRef } from "react";
 import { useAllCourses, useCourseActions, useCourseState, usePrefetchCourse } from "../queries/useCourse";
 import { setPageSizeAction } from "../store/course.store";
 import type { CoursePreview } from "../types/course.type";
@@ -17,19 +17,62 @@ const GradeSection: React.FC<{
   onCourseClick: (id: number) => void;
   onCourseHover: (id: number) => void;
 }> = ({ grade, courses, onCourseClick, onCourseHover }) => {
+  const scrollRef = useRef<HTMLDivElement>(null);
+
   if (courses.length === 0) return null;
 
+  const scroll = (dir: "left" | "right") => {
+    if (!scrollRef.current) return;
+    const width = scrollRef.current.clientWidth;
+
+    scrollRef.current.scrollBy({
+      left: dir === "right" ? width : -width,
+      behavior: "smooth",
+    });
+  };
+
   return (
-    <div className="mb-12">
-      <div className="flex items-center gap-3 mb-5">
+    <div className="mb-10">
+      <div className="flex items-center gap-3 mb-4">
         <h2 className="text-xl font-bold text-slate-800 dark:text-slate-100">Lớp {grade}</h2>
-        <span className="text-sm text-slate-400 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
+
+        <span className="text-sm text-slate-500 dark:text-slate-500 bg-slate-100 dark:bg-slate-800 px-2.5 py-1 rounded-full">
           {courses.length} khóa học
         </span>
-        <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
-      </div>
 
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 xl:grid-cols-4 gap-4">
+        <div className="flex-1 h-px bg-slate-100 dark:bg-slate-800" />
+
+        <div className="flex gap-1">
+          <button
+            onClick={() => scroll("left")}
+            className="cursor-pointer w-7 h-7 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+          >
+            <ChevronLeft className="w-6 h-6" />
+          </button>
+
+          <button
+            onClick={() => scroll("right")}
+            className="cursor-pointer w-7 h-7 rounded-full flex items-center justify-center text-slate-500 hover:text-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-200 transition-colors"
+          >
+            <ChevronRight className="w-6 h-6" />
+          </button>
+        </div>
+      </div>
+      <div
+        ref={scrollRef}
+        className="
+          grid
+          grid-flow-col
+          auto-cols-[48%]
+          sm:auto-cols-[31%]
+          xl:auto-cols-[23%]
+          gap-4
+          overflow-x-auto
+          pb-2
+          scrollbar-hide
+        "
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+      >
         {courses.map((course) => (
           <CourseCard
             key={course.id}
@@ -42,7 +85,6 @@ const GradeSection: React.FC<{
     </div>
   );
 };
-
 const AllCoursesContent: React.FC = () => {
   const navigate = useNavigate();
   const dispatch = useAppDispatch();
@@ -113,7 +155,7 @@ const AllCoursesContent: React.FC = () => {
       />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <section className="relative overflow-hidden rounded-2xl mb-10 h-56 md:h-64 flex items-end">
+        <section className="relative overflow-hidden rounded-md mb-10 h-56 md:h-64 flex items-end">
           <img
             src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1920&q=80"
             alt="hero"
@@ -146,7 +188,7 @@ const AllCoursesContent: React.FC = () => {
             <button
               key={String(opt.value)}
               onClick={() => selectLevel(opt.value as any)}
-              className={`text-sm px-3.5 py-1.5 rounded-full border font-medium transition-all ${
+              className={`cursor-pointer text-sm px-3.5 py-1.5 rounded-full border font-medium transition-all ${
                 selectedLevel === opt.value
                   ? "bg-blue-600 text-white border-blue-600"
                   : "border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300 hover:border-slate-400 bg-white dark:bg-slate-900"
@@ -175,13 +217,13 @@ const AllCoursesContent: React.FC = () => {
           {hasActiveFilter && (
             <button
               onClick={resetFilters}
-              className="text-sm px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-400 transition-all bg-white dark:bg-slate-900"
+              className="cursor-pointer text-sm px-3.5 py-1.5 rounded-full border border-slate-300 dark:border-slate-700 text-slate-500 hover:text-slate-800 dark:hover:text-slate-200 hover:border-slate-400 transition-all bg-white dark:bg-slate-900"
             >
               ✕ Xóa bộ lọc
             </button>
           )}
 
-          <span className="ml-auto text-sm text-slate-400 dark:text-slate-500">
+          <span className="ml-auto text-md text-slate-400 dark:text-slate-500">
             {totalVisible} / {totalElements} khóa học
           </span>
         </div>

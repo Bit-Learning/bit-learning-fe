@@ -337,8 +337,9 @@ const MyQuestionsContent: React.FC = () => {
                   {pagedQuestions.map((question: QuestionResponse, index: number) => (
                     <tr
                       key={question.id}
+                      onClick={() => navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } })}
                       className={cn(
-                        "border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors",
+                        "cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors",
                         selectedQuestions.includes(question.id) && "bg-blue-50",
                       )}
                     >
@@ -384,22 +385,27 @@ const MyQuestionsContent: React.FC = () => {
                           >
                             <Eye className="h-4 w-4" />
                           </button>
-                          <button
-                            className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
-                            title="Chỉnh sửa"
-                            onClick={() =>
-                              navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } })
-                            }
-                          >
-                            <Edit className="h-4 w-4" />
-                          </button>
-                          <button
-                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
-                            onClick={() => handleDelete(question.id, question.content)}
-                            title="Xóa"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </button>
+
+                          {question.approvalStatus == "NONE" && (
+                            <>
+                              <button
+                                className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
+                                title="Chỉnh sửa"
+                                onClick={() =>
+                                  navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } })
+                                }
+                              >
+                                <Edit className="h-4 w-4" />
+                              </button>
+                              <button
+                                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                onClick={() => handleDelete(question.id, question.content)}
+                                title="Xóa"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            </>
+                          )}
                         </div>
                       </td>
                     </tr>

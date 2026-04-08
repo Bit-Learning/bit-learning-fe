@@ -16,12 +16,6 @@ interface ContestCardProps {
   };
 }
 
-const borderByStatus: Record<string, string> = {
-  [ContestStatus.RUNNING]: "border-l-green-500",
-  [ContestStatus.UPCOMING]: "border-l-blue-500",
-  [ContestStatus.ENDED]: "border-l-slate-300",
-};
-
 const StatusBadge = ({ status }: { status: ContestStatus }) => {
   if (status === ContestStatus.RUNNING)
     return (
@@ -63,15 +57,13 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
   return (
     <div
       className={cn(
-        "bg-white border border-slate-200 border-l-4 rounded-xl p-6 group transition-all hover:shadow-md flex flex-col gap-4",
-        borderByStatus[contest.status],
-        isEnded && "opacity-80 hover:opacity-100",
+        "bg-white border rounded-md p-6 group transition-all shadow-sm hover:shadow-md flex flex-col gap-4",
       )}
     >
       <div className="flex items-center gap-2 flex-wrap">
         <StatusBadge status={contest.status} />
         {contest.isRegistered && (
-          <span className="inline-flex items-center gap-1 bg-amber-100 text-amber-700 px-2 py-0.5 rounded text-xs font-semibold">
+          <span className="inline-flex items-center gap-1 bg-blue-100 text-blue-700 px-2 py-0.5 rounded text-xs font-semibold">
             <Star className="w-3 h-3 fill-current" /> Đã đăng ký
           </span>
         )}
@@ -89,7 +81,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
       </Link>
 
       <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-        {!!contest.problemCount && (
+        {!!contest.problemCount && (isRunning || isEnded) && (
           <div className="flex items-center gap-2 text-sm text-slate-600">
             <FileText className={cn("w-4 h-4 shrink-0", iconColor)} />
             <span>
@@ -173,7 +165,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
       <div className="mt-auto pt-2">
         {isRunning && contest.isRegistered && (
           <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
-            <button className="w-full py-2.5 rounded-xl font-bold text-sm text-white bg-green-600 hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow">
+            <button className="cursor-pointer w-full py-2.5 rounded-xl font-bold text-sm text-white bg-green-600 hover:bg-green-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow">
               Vào phòng thi <LogIn className="w-4 h-4" />
             </button>
           </Link>
@@ -188,7 +180,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
         )}
         {isUpcoming && contest.isRegistered && (
           <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
-            <button className="w-full py-2.5 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow">
+            <button className="cursor-pointer w-full py-2.5 rounded-xl font-bold text-sm text-white bg-blue-600 hover:bg-blue-700 active:scale-95 transition-all flex items-center justify-center gap-2 shadow">
               Xem chi tiết <LogIn className="w-4 h-4" />
             </button>
           </Link>
@@ -197,7 +189,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
           <button
             onClick={() => registerMutation.mutate(contest.contestId)}
             disabled={registerMutation.isPending}
-            className="w-full py-2.5 rounded-xl font-bold text-sm text-white bg-orange-500 hover:bg-orange-600 active:scale-95 transition-all flex items-center justify-center gap-2 shadow disabled:opacity-50"
+            className="cursor-pointer w-full py-2.5 rounded-xl font-bold text-sm text-white bg-orange-500 hover:bg-orange-600 active:scale-95 transition-all flex items-center justify-center gap-2 shadow disabled:opacity-50"
           >
             {registerMutation.isPending ? (
               <>
@@ -210,7 +202,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
         )}
         {isEnded && (
           <Link to="/contests/$id/problems" params={{ id: contest.contestId }}>
-            <button className="w-full py-2.5 rounded-xl font-bold text-sm text-blue-600 border-2 border-blue-600 hover:bg-blue-50 active:scale-95 transition-all flex items-center justify-center gap-2">
+            <button className="cursor-pointer w-full py-2.5 rounded-xl font-bold text-sm text-blue-600 border-2 border-blue-600 hover:bg-blue-50 active:scale-95 transition-all flex items-center justify-center gap-2">
               Xem kết quả <LogIn className="w-4 h-4" />
             </button>
           </Link>

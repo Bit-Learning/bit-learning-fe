@@ -527,14 +527,14 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
 
           {examData && (
             <Card className="border-primary shadow-lg">
-              <CardHeader className="bg-linear-to-r from-primary/10 to-primary/5 border-b">
+              <CardHeader className="border-b">
                 <div className="flex items-center gap-2 mb-2">
                   <div className="rounded-full bg-primary/20 p-1.5">
                     <FileText className="h-5 w-5 text-primary" />
                   </div>
-                  <h2 className="text-lg font-semibold">Đề thi đã tạo</h2>
+                  <h2 className="text-xl font-semibold">Đề thi đã tạo</h2>
                 </div>
-                <p className="text-sm font-medium text-foreground">{examData.name}</p>
+                <p className="text-lg font-bold text-foreground">{examData.name}</p>
               </CardHeader>
               <CardContent className="pt-6">
                 <div className="space-y-3 mb-6">

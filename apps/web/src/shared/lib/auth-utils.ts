@@ -26,11 +26,11 @@ import { clearAuthTokens, getAccessToken } from "./cookies";
 // }
 
 export function isLoggedIn(): boolean {
-	const accessToken = getAccessToken();
-	const authState = store.getState().auth;
+  const accessToken = getAccessToken();
+  const authState = store.getState().auth;
 
-	// Check both cookie token and Redux state
-	return !!(accessToken && authState.isAuthenticated && authState.userInfo);
+  // Check both cookie token and Redux state
+  return !!(accessToken && authState.isAuthenticated && authState.userInfo);
 }
 
 /**
@@ -39,12 +39,12 @@ export function isLoggedIn(): boolean {
  * @param location - Optional location to redirect back to after login
  */
 export function requireAuth(location?: { href: string }) {
-	if (!isLoggedIn()) {
-		throw redirect({
-			to: "/signin",
-			search: location ? { redirect: location.href } : undefined,
-		});
-	}
+  if (!isLoggedIn()) {
+    throw redirect({
+      to: "/signin-role",
+      search: location ? { redirect: location.href } : undefined,
+    });
+  }
 }
 
 /**
@@ -76,23 +76,23 @@ export function requireAuth(location?: { href: string }) {
 // }
 
 export function requireRole(requiredRole: string, location?: { href: string }) {
-	if (!isLoggedIn()) {
-		throw redirect({
-			to: "/signin",
-			search: location ? { redirect: location.href } : undefined,
-		});
-	}
+  if (!isLoggedIn()) {
+    throw redirect({
+      to: "/signin-role",
+      search: location ? { redirect: location.href } : undefined,
+    });
+  }
 
-	const authState = store.getState().auth;
-	const user = authState.userInfo;
+  const authState = store.getState().auth;
+  const user = authState.userInfo;
 
-	if (!user || user.role !== requiredRole) {
-		if (!user) {
-			clearAuthTokens();
-			throw redirect({ to: "/signin" });
-		}
-		throw redirect({ to: "/" }); // Redirect to home if role doesn't match
-	}
+  if (!user || user.role !== requiredRole) {
+    if (!user) {
+      clearAuthTokens();
+      throw redirect({ to: "/signin-role" });
+    }
+    throw redirect({ to: "/" }); // Redirect to home if role doesn't match
+  }
 }
 
 /**
@@ -100,10 +100,10 @@ export function requireRole(requiredRole: string, location?: { href: string }) {
  * Use this for login/signup pages
  */
 export function redirectIfAuthenticated() {
-	const loggedIn = isLoggedIn();
-	console.log("redirectIfAuthenticated: isLoggedIn =", loggedIn);
-	if (loggedIn) {
-		console.log("redirectIfAuthenticated: Throwing redirect to /profile");
-		throw redirect({ to: "/profile" });
-	}
+  const loggedIn = isLoggedIn();
+  console.log("redirectIfAuthenticated: isLoggedIn =", loggedIn);
+  if (loggedIn) {
+    console.log("redirectIfAuthenticated: Throwing redirect to /profile");
+    throw redirect({ to: "/profile" });
+  }
 }

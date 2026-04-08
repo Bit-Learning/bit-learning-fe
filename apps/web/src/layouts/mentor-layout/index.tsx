@@ -26,7 +26,7 @@ export default function MentorLayout({ children }: MentorLayoutProps) {
 
   const handleLogout = () => {
     logout();
-    navigate({ to: "/signin" });
+    navigate({ to: "/signin-role" });
   };
 
   return (

@@ -110,7 +110,26 @@ const StudentProblemListContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 py-8 space-y-4">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-16 space-y-8">
+        <div className="relative overflow-hidden rounded-md bg-white border border-slate-200 p-10 shadow-sm">
+          <div className="relative z-10 max-w-2xl">
+            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Không gian luyện tập</h1>
+            <p className="text-slate-500 text-base leading-relaxed">
+              Thực hành mỗi ngày với kho bài tập đa dạng, hỗ trợ bạn tiến bộ từng bước theo từng cấp độ.
+            </p>
+          </div>
+
+          <div className="absolute top-4 right-8 opacity-[0.07] pointer-events-none select-none">
+            <svg viewBox="0 0 120 120" className="w-36 h-36 text-blue-600 fill-current">
+              <rect x="20" y="25" width="80" height="50" rx="6" />
+              <rect x="15" y="75" width="90" height="8" rx="3" />
+
+              <path d="M45 45 L35 50 L45 55" stroke="currentColor" strokeWidth="3" fill="none" />
+              <path d="M75 45 L85 50 L75 55" stroke="currentColor" strokeWidth="3" fill="none" />
+              <rect x="57" y="43" width="6" height="14" rx="2" />
+            </svg>
+          </div>
+        </div>
         {sortedTags.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
             {visibleTags.map(([name, count]) => (
@@ -192,7 +211,7 @@ const StudentProblemListContent: React.FC = () => {
           </span>
         </div>
 
-        <div className="rounded-xl border border-slate-200 overflow-hidden bg-white shadow-sm">
+        <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
           <div className="grid grid-cols-[40px_1fr_110px_100px_50px] items-center px-5 py-2.5 bg-slate-50 border-b border-slate-200 text-lg uppercase tracking-wider text-slate-600 font-medium">
             <span>#</span>
             <span>Bài tập</span>
