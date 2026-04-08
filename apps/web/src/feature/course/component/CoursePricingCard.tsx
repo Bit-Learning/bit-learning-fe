@@ -56,7 +56,7 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   ].filter(Boolean) as { icon: React.ReactNode; label: string }[];
 
   return (
-    <div className="rounded-xl overflow-hidden bg-[#1a2744] text-white">
+    <div className="rounded-md overflow-hidden bg-[#0d315d] text-white">
       <div className="px-6 pt-6 pb-4 border-b border-white/10">
         <div className="flex items-baseline gap-3">
           <span className="text-3xl font-bold text-white">

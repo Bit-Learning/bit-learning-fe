@@ -12,145 +12,137 @@ import { CourseTabs } from "./CourseTabs";
 import { CoursePricingCard } from "./CoursePricingCard";
 
 const CourseDetailContent: React.FC = () => {
-	const navigate = useNavigate();
-	const [isLiked, setIsLiked] = useState(false);
+  const navigate = useNavigate();
+  const [isLiked, setIsLiked] = useState(false);
 
-	const { data: course, isLoading, error } = useCourseDetail();
-	const { data: enrollAccess } = useCourseAccess(course?.id || 0);
-	const hasAccess = enrollAccess;
+  const { data: course, isLoading, error } = useCourseDetail();
+  const { data: enrollAccess } = useCourseAccess(course?.id || 0);
+  const hasAccess = enrollAccess;
 
-	const { mutate: enroll, isPending: enrollPending } = useEnrollCourse();
-	const { mutate: addToCart, isPending: cartPending } = useAddToCart();
+  const { mutate: enroll, isPending: enrollPending } = useEnrollCourse();
+  const { mutate: addToCart, isPending: cartPending } = useAddToCart();
 
-	const handleEnroll = () => {
-		if (course?.id) enroll(course.id);
-	};
-	const handleAddToCart = () => {
-		if (course?.id) addToCart(course.id, { onSuccess: () => {} });
-	};
-	const handleBuyNow = () => {
-		if (course?.id)
-			navigate({ to: "/checkout", search: { courseId: course.id } });
-	};
+  const handleEnroll = () => {
+    if (course?.id) enroll(course.id);
+  };
+  const handleAddToCart = () => {
+    if (course?.id) addToCart(course.id, { onSuccess: () => {} });
+  };
+  const handleBuyNow = () => {
+    if (course?.id) navigate({ to: "/checkout", search: { courseId: course.id } });
+  };
 
-	const handleLike = () => {
-		setIsLiked(!isLiked);
-		toast.success({
-			title: isLiked ? "Đã bỏ yêu thích" : "Đã thêm vào yêu thích",
-		});
-	};
+  const handleLike = () => {
+    setIsLiked(!isLiked);
+    toast.success({
+      title: isLiked ? "Đã bỏ yêu thích" : "Đã thêm vào yêu thích",
+    });
+  };
 
-	const handleShare = () => {
-		if (navigator.share && course) {
-			navigator.share({
-				title: course.title,
-				text: course.description,
-				url: window.location.href,
-			});
-		} else {
-			navigator.clipboard.writeText(window.location.href);
-			toast.success({ title: "Đã copy link khóa học" });
-		}
-	};
+  const handleShare = () => {
+    if (navigator.share && course) {
+      navigator.share({
+        title: course.title,
+        text: course.description,
+        url: window.location.href,
+      });
+    } else {
+      navigator.clipboard.writeText(window.location.href);
+      toast.success({ title: "Đã copy link khóa học" });
+    }
+  };
 
-	if (isLoading) {
-		return (
-			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
-				<div className="text-center">
-					<div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
-					<p className="text-gray-600">Đang tải thông tin khóa học...</p>
-				</div>
-			</div>
-		);
-	}
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-blue-200 border-t-blue-600" />
+          <p className="text-gray-600">Đang tải thông tin khóa học...</p>
+        </div>
+      </div>
+    );
+  }
 
-	if (error || !course) {
-		return (
-			<div className="min-h-screen bg-gray-50 flex items-center justify-center">
-				<div className="text-center">
-					<BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-					<h3 className="mb-2 text-xl font-bold text-gray-900">
-						Không tìm thấy khóa học
-					</h3>
-					<Button
-						className="mt-4 bg-blue-600 text-white"
-						onClick={() => navigate({ to: "/courses" })}
-					>
-						Về trang khóa học
-					</Button>
-				</div>
-			</div>
-		);
-	}
+  if (error || !course) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <BookOpen className="mx-auto mb-4 h-16 w-16 text-gray-400" />
+          <h3 className="mb-2 text-xl font-bold text-gray-900">Không tìm thấy khóa học</h3>
+          <Button className="mt-4 bg-blue-600 text-white" onClick={() => navigate({ to: "/courses" })}>
+            Về trang khóa học
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
-	const totalHours = course.totalDuration
-		? Math.round(course.totalDuration / 3600)
-		: undefined;
+  const totalHours = course.totalDuration ? Math.round(course.totalDuration / 3600) : undefined;
 
-	return (
-		<div className="min-h-screen bg-white">
-			<div className="mx-auto max-w-7xl px-4 py-6">
-				<button
-					type="button"
-					onClick={() => navigate({ to: "/courses" })}
-					className="mb-4 inline-flex cursor-pointer items-center text-sm text-gray-600 transition-colors hover:text-blue-600"
-				>
-					<ChevronLeft className="mr-1 h-4 w-4" />
-					Danh sách khóa học
-				</button>
+  return (
+    <div className="min-h-screen bg-slate-50">
+      <div className="mx-auto max-w-7xl px-4 py-6">
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/courses" })}
+          className="mb-4 inline-flex cursor-pointer items-center text-sm text-gray-600 transition-colors hover:text-blue-600"
+        >
+          <ChevronLeft className="mr-1 h-4 w-4" />
+          Danh sách khóa học
+        </button>
 
-				<div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
-					<div className="space-y-4 lg:col-span-3">
-						<CourseHero
-							course={course}
-							hasAccess={hasAccess}
-							isLiked={isLiked}
-							onLike={handleLike}
-							onShare={handleShare}
-						/>
-						<CourseTabs
-							course={{
-								id: course.id,
-								description: course.description,
-								outcome: course.outcome,
-								requirement: course.requirement,
-								audience: course.audience,
-								instructorName: course.instructorName,
-								instructorId: course.instructorId,
-								progressPercentage: course.progressPercentage,
-								title: course.title,
-							}}
-							hasAccess={hasAccess}
-						/>
-					</div>
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
+          <div className="space-y-4 lg:col-span-3">
+            <CourseHero
+              course={course}
+              hasAccess={hasAccess}
+              isLiked={isLiked}
+              onLike={handleLike}
+              onShare={handleShare}
+            />
+            <CourseTabs
+              course={{
+                id: course.id,
+                description: course.description,
+                outcome: course.outcome,
+                requirement: course.requirement,
+                audience: course.audience,
+                instructorName: course.instructorName,
+                instructorId: course.instructorId,
+                progressPercentage: course.progressPercentage,
+                title: course.title,
+              }}
+              hasAccess={hasAccess}
+            />
+          </div>
 
-					<div className="space-y-4">
-						<div className="lg:sticky lg:top-4">
-							<CoursePricingCard
-								price={course.price}
-								hasAccess={hasAccess}
-								isPending={cartPending || enrollPending}
-								firstLectureId={course.sections?.[0]?.lectures?.[0]?.id}
-								totalHours={totalHours}
-								totalVideos={course.totalLectures}
-								onEnroll={handleEnroll}
-								onAddToCart={handleAddToCart}
-								onBuyNow={handleBuyNow}
-								onStartLearning={() => {
-									const firstId = course.sections?.[0]?.lectures?.[0]?.id;
-									if (firstId)
-										navigate({
-											to: "/lectures/$id",
-											params: { id: String(firstId) },
-										});
-								}}
-							/>
-						</div>
-					</div>
-				</div>
-			</div>
-		</div>
-	);
+          <div className="space-y-4">
+            <div className="lg:sticky lg:top-4">
+              <CoursePricingCard
+                price={course.price}
+                hasAccess={hasAccess}
+                isPending={cartPending || enrollPending}
+                firstLectureId={course.sections?.[0]?.lectures?.[0]?.id}
+                totalHours={totalHours}
+                totalVideos={course.totalLectures}
+                onEnroll={handleEnroll}
+                onAddToCart={handleAddToCart}
+                onBuyNow={handleBuyNow}
+                onStartLearning={() => {
+                  const firstId = course.sections?.[0]?.lectures?.[0]?.id;
+                  if (firstId)
+                    navigate({
+                      to: "/lectures/$id",
+                      params: { id: String(firstId) },
+                    });
+                }}
+              />
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
 };
 
 export default CourseDetailContent;
