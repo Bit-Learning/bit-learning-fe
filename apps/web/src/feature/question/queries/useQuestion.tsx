@@ -55,12 +55,11 @@ export const useMyQuestions = (params?: QuestionSearchParams, options?: { enable
   });
 };
 
-// Fetch toàn bộ câu hỏi của user (không paginate) — dùng để derive subject list
 export const useMyQuestionsAll = () => {
   return useQuery({
     queryKey: questionKeys.myQuestionsAll(),
     queryFn: async () => {
-      const response = await questionApi.getMyQuestions({ size: 9999 });
+      const response = await questionApi.getMyQuestions({ size: 99999 });
       return response.data.data ?? [];
     },
     staleTime: 5 * 60 * 1000,

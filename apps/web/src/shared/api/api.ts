@@ -87,7 +87,7 @@ function handleRefreshToken(): Promise<string> {
       store.dispatch(setUserInfoAction(null));
 
       console.log("[Token Refresh] User logged out, redirecting to signin");
-      window.location.href = "/signin";
+      window.location.href = "/signin-role";
       throw error;
     })
     .finally(() => {

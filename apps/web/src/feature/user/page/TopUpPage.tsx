@@ -7,7 +7,9 @@ export const TopUpPage: React.FC = () => {
     <>
       <PageMeta title="Nạp tiền - Bit Learning" description="Nạp tiền vào ví của bạn để sử dụng các dịch vụ" />
       <UserProfileLayout>
-        <TopUpContent />
+        <div className="container mx-auto">
+          <TopUpContent />
+        </div>
       </UserProfileLayout>
     </>
   );

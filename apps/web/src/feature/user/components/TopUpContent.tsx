@@ -5,6 +5,7 @@ import { useUserProfile } from "../queries/useUser";
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
 import CardTransaction from "../../../shared/components/button/CardTransaction";
 import { FcMoneyTransfer } from "react-icons/fc";
+import { Button } from "@workspace/ui/components/Button";
 
 export enum PaymentMethod {
   VNPAY = "VNPAY",
@@ -12,12 +13,12 @@ export enum PaymentMethod {
 }
 
 const PRESET_AMOUNTS = [
-  { value: 10000, label: "10.000đ" },
-  { value: 20000, label: "20.000đ" },
-  { value: 50000, label: "50.000đ" },
-  { value: 100000, label: "100.000đ" },
-  { value: 200000, label: "200.000đ" },
-  { value: 500000, label: "500.000đ" },
+  { value: 10000, label: 10000 },
+  { value: 20000, label: 20000 },
+  { value: 50000, label: 50000 },
+  { value: 100000, label: 100000 },
+  { value: 200000, label: 200.0 },
+  { value: 500000, label: 500.0 },
 ];
 
 const toBIT = (vnd: number) => vnd;
@@ -90,7 +91,7 @@ export const TopUpContent: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-6" aria-busy={showLoadingOverlay}>
+      <div className="max-w-7xl mx-auto p-6 bg-slate-50" aria-busy={showLoadingOverlay}>
         <div className="mb-8">
           <div className="flex items-center gap-3 mb-2">
             <FcMoneyTransfer className="w-6 h-6" />
@@ -98,33 +99,20 @@ export const TopUpContent: React.FC = () => {
           </div>
           <p className="text-gray-600">Chọn số tiền bạn muốn nạp vào ví của mình</p>
 
-          <div className="mt-6 bg-[#137fec] rounded-md p-6 shadow-lg">
+          <div className="mt-6 rounded-md p-6 bg-white shadow-sm border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-100 text-lg font-medium mb-1">Số dư hiện tại</p>
+                <p className="text-blue-600 text-lg font-bold mb-1">Số dư hiện tại</p>
 
                 <div className="flex items-center gap-1.5 mt-2">
                   <BitCoinIcon size={32} />
-                  <span className="text-slate-100 text-3xl font-bold">{formatBIT(currentBIT)}</span>
-                  <span className="text-3xl font-semibold text-amber-300">BIT</span>
+                  <span className="text-amber-600 text-3xl font-bold">{formatBIT(currentBIT)}</span>
                 </div>
               </div>
               <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                 <img src="/icons/trending-up.png" alt="trending" className="w-16 h-16 object-contain" />
               </div>
             </div>
-
-            {finalAmount ? (
-              <div className="mt-4 pt-4 border-t border-blue-500/30 space-y-1">
-                <div className="flex items-center justify-between text-sm">
-                  <span className="text-blue-100 flex items-center gap-1">
-                    <BitCoinIcon size={18} />
-                    BIT sau khi nạp
-                  </span>
-                  <span className="text-amber-300 font-semibold">{formatBIT(currentBIT + earnedBIT)} BIT</span>
-                </div>
-              </div>
-            ) : null}
           </div>
         </div>
 
@@ -149,12 +137,12 @@ export const TopUpContent: React.FC = () => {
                       }
                     `}
                     >
-                      <div className="text-sm font-semibold">{preset.label}</div>
-                      <div className={`flex items-center gap-1 mt-1 ${isSelected ? "opacity-100" : "opacity-60"}`}>
-                        <BitCoinIcon size={14} />
-                        <span className="text-xs font-medium text-amber-600">
-                          +{toBIT(preset.value).toLocaleString("vi-VN")} BIT
+                      <div className="text-md font-semibold">{formatCurrency(preset.label)}</div>
+                      <div className={`flex items-center gap-1 mt-1 ${isSelected ? "opacity-100" : "opacity-80"}`}>
+                        <span className="text-sm font-medium text-amber-600">
+                          +{toBIT(preset.value).toLocaleString("vi-VN")}
                         </span>
+                        <BitCoinIcon size={18} />
                       </div>
                     </button>
                   );
@@ -162,7 +150,7 @@ export const TopUpContent: React.FC = () => {
               </div>
 
               <div className="relative">
-                <label className="block text-sm font-medium text-gray-700 mb-2">Hoặc nhập số tiền khác</label>
+                <label className="block text-md font-medium text-gray-700 mb-2">Hoặc nhập số tiền khác</label>
                 <div className="relative">
                   <input
                     type="text"
@@ -174,7 +162,7 @@ export const TopUpContent: React.FC = () => {
                   <span className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 font-medium">đ</span>
                 </div>
                 <div className="flex items-center justify-between mt-2">
-                  <p className="text-xs text-gray-500">Số tiền tối thiểu: 10.000đ</p>
+                  <p className="text-md text-gray-700">Số tiền tối thiểu: {formatCurrency(10000)}</p>
                   {earnedBIT > 0 && customAmount && (
                     <div className="flex items-center gap-1 text-xs font-medium text-amber-600">
                       <BitCoinIcon size={14} />
@@ -184,11 +172,11 @@ export const TopUpContent: React.FC = () => {
                 </div>
               </div>
 
-              <div className="mt-4 flex items-center gap-2 bg-amber-50 rounded-lg px-4 py-2.5 border border-amber-100">
-                <BitCoinIcon size={22} />
-                <p className="text-xs text-amber-700 font-medium">
-                  Tỷ lệ quy đổi: <span className="font-bold">1.000đ = 1.000 BIT</span>
+              <div className="mt-4 flex items-center gap-1 bg-amber-50 rounded-lg px-4 py-2.5 border border-amber-100">
+                <p className="text-md text-amber-700 font-medium">
+                  Tỷ lệ quy đổi: <span className="font-bold">1.000đ = 1.000</span>
                 </p>
+                <BitCoinIcon size={24} />
               </div>
             </div>
 
@@ -276,47 +264,46 @@ export const TopUpContent: React.FC = () => {
           </div>
 
           <div className="md:col-span-1">
-            <div className="bg-[#137fec] rounded-xl shadow-lg p-6 text-white sticky top-6">
+            <div className="bg-white border border-slate-200 rounded-md shadow-md p-6 text-black sticky top-6">
               <h3 className="text-2xl font-semibold mb-4 border-b-3 pb-3 border-white/30">Đơn hàng</h3>
 
               <div className="space-y-3 mb-6">
                 <div className="flex justify-between items-center pb-3 border-b border-blue-500">
-                  <span className="text-blue-100">Số tiền nạp</span>
+                  <span className="text-black">Số tiền nạp</span>
                   <span className="text-xl font-bold">{finalAmount ? formatCurrency(finalAmount) : "0đ"}</span>
                 </div>
 
                 <div className="flex justify-between items-center pb-3 border-b border-blue-500">
-                  <span className="text-blue-100 flex items-center gap-1">
+                  <span className="text-black flex items-center gap-1">
                     <BitCoinIcon size={18} />
-                    <span className=" font-semibold text-amber-300">BIT</span>
                     nhận được
                   </span>
-                  <span className="font-bold text-amber-300">
+                  <span className="font-bold text-amber-500 text-lg">
                     {earnedBIT > 0 ? `+${formatBIT(earnedBIT)}` : "0 BIT"}
                   </span>
                 </div>
 
                 <div className="flex justify-between items-center pb-3 border-b-3 border-white/30">
-                  <span className="text-blue-100">Phí giao dịch</span>
+                  <span className="text-black">Phí giao dịch</span>
                   <span className="font-semibold">0đ</span>
                 </div>
 
                 <div className="flex justify-between items-center pt-2">
-                  <span className=" text-blue-100">Tổng tiền </span>
-                  <span className="text-xl font-bold text-yellow-400">
+                  <span className=" text-black">Tổng tiền </span>
+                  <span className="text-2xl font-bold text-amber-600">
                     {finalAmount ? formatCurrency(finalAmount) : "0đ"}
                   </span>
                 </div>
               </div>
 
-              <CardTransaction
+              <Button
                 onClick={handleSubmit}
-                disabled={!finalAmount || finalAmount < 10000 || isPending}
-                loading={isPending}
-                label="Thanh toán"
-              />
-
-              <p className="text-sx text-blue-100 mt-4 text-center">Bạn sẽ được chuyển đến trang thanh toán an toàn</p>
+                isDisabled={!finalAmount || finalAmount < 10000 || isPending}
+                className="cursor-pointer text-md px-2 py-6 w-full text-white bg-blue-600 hover:text-blue-600 hover:border-blue-600 rounded-md font-semibold
+                       hover:bg-blue-50 transition-colors disabled:opacity-50"
+              >
+                {isPending ? "Đang xử lý..." : <>Tiếp tục thanh toán</>}
+              </Button>
             </div>
           </div>
         </div>

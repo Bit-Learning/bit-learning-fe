@@ -60,14 +60,13 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
       <div className="px-6 pt-6 pb-4 border-b border-white/10">
         <div className="flex items-baseline gap-3">
           <span className="text-3xl font-bold text-white">
-            {price === 0 ? "Miễn phí" : `${price.toLocaleString("vi-VN")}đ`}
+            {price === 0 ? "Miễn phí" : `${price.toLocaleString("vi-VN")} đ`}
           </span>
         </div>
         {price > 0 && (
           <div className="mt-1.5 flex items-center gap-1.5">
-            <BitCoinIcon size={20} />
-            <span className="text-sm font-semibold text-amber-400">= {price.toLocaleString("vi-VN")}</span>
-            <span className="text-sm font-semibold text-amber-500">BIT</span>
+            <span className="text-md font-semibold text-amber-400">~ {price.toLocaleString("vi-VN")}</span>
+            <BitCoinIcon size={24} />
           </div>
         )}
       </div>
