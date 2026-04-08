@@ -1,10 +1,10 @@
-import React, { useState } from "react";
+import React, { useMemo, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
-import { Plus } from "lucide-react";
+import { BookOpen, CheckCircle2, Plus, XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useGetCourses, useHideOrShowCourse } from "../queries/useCourse";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
-import { CoursePreview } from "../types/course.type";
+import { CoursePreview, CourseStatus } from "../types/course.type";
 import { Main } from "@/layout/main";
 import { Header } from "@/layout/header";
 import { CoursesTable } from "../components/courses-table";
@@ -38,6 +38,21 @@ export const CourseListPage: React.FC = () => {
 		: [];
 	const totalPages = coursesData?.page?.totalPages || 0;
 
+	const stats = useMemo(() => {
+		const total = courses.length;
+		const published = courses.filter(
+			(course) => course.status === CourseStatus.PUBLISHED,
+		).length;
+		const pending = courses.filter(
+			(course) => course.status === CourseStatus.PENDING,
+		).length;
+		const rejected = courses.filter(
+			(course) => course.status === CourseStatus.REJECTED,
+		).length;
+
+		return { total, published, pending, rejected };
+	}, [courses]);
+
 	const handleConfirm = async () => {
 		if (deleteModal.type === "none") return;
 		try {
@@ -68,7 +83,7 @@ export const CourseListPage: React.FC = () => {
 			<Header fixed />
 
 			<Main className="flex flex-1 flex-col gap-6 p-8">
-				<div className="flex flex-wrap items-end justify-between gap-2">
+				<div className="flex flex-wrap items-end justify-between gap-2 mb-6">
 					<div>
 						<h1 className="text-2xl font-bold">Khóa học của tôi</h1>
 						<p className="text-muted-foreground text-sm">
@@ -79,6 +94,72 @@ export const CourseListPage: React.FC = () => {
 						<Plus className="mr-0 h-4 w-4" />
 						Tạo khóa học mới
 					</Button>
+				</div>
+
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+						<div className="flex items-start justify-between">
+							<div>
+								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+									Tổng số khóa học
+								</p>
+								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+									{stats.total}
+								</p>
+							</div>
+							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
+								<BookOpen className="h-5 w-5" />
+							</div>
+						</div>
+					</div>
+
+					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+						<div className="flex items-start justify-between">
+							<div>
+								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+									Đã xuất bản
+								</p>
+								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+									{stats.published}
+								</p>
+							</div>
+							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
+								<CheckCircle2 className="h-5 w-5" />
+							</div>
+						</div>
+					</div>
+
+					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+						<div className="flex items-start justify-between">
+							<div>
+								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+									Chờ duyệt
+								</p>
+								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+									{stats.pending}
+								</p>
+							</div>
+							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20">
+								<BookOpen className="h-5 w-5" />
+							</div>
+						</div>
+					</div>
+
+					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
+						<div className="flex items-start justify-between">
+							<div>
+								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
+									Bị từ chối
+								</p>
+								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+									{stats.rejected}
+								</p>
+							</div>
+							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/20">
+								<XCircle className="h-5 w-5" />
+							</div>
+						</div>
+					</div>
 				</div>
 
 				{isLoading && (

@@ -6,6 +6,11 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import type { CoursePreview, CourseStatus } from "../types/course.type";
 
+export const publishedStatuses = new Map<boolean, string>([
+	[true, "bg-green-100 text-green-800"],
+	[false, "bg-yellow-100 text-yellow-800"],
+]);
+
 export type CoursesColumnsParams = {
 	onEdit: (course: CoursePreview) => void;
 	onDelete: (course: CoursePreview) => void;
@@ -104,8 +109,9 @@ export function createCoursesColumns({
 			cell: ({ row }) => {
 				const status = row.original.status as CourseStatus;
 				const isPublished = status === "PUBLISHED";
+				const badgeColor = publishedStatuses.get(isPublished);
 				return (
-					<Badge variant={isPublished ? "default" : "secondary"}>
+					<Badge variant="outline" className={cn("capitalize", badgeColor)}>
 						{isPublished ? "Đã xuất bản" : "Chưa xuất bản"}
 					</Badge>
 				);

@@ -15,6 +15,7 @@ import { UsersDialogs } from "./components/users-dialogs";
 import { UsersPrimaryButtons } from "./components/users-primary-buttons";
 import { UsersProvider } from "./components/users-provider";
 import { UsersTable } from "./components/users-table";
+import Loader from "@/shared/components/Loader";
 
 const route = getRouteApi("/_authenticated/users/");
 
@@ -147,7 +148,7 @@ export function Users() {
 
 				{isLoading && (
 					<div className="flex h-100 items-center justify-center">
-						<div className="text-muted-foreground">Loading users...</div>
+						<Loader />
 					</div>
 				)}
 
