@@ -130,7 +130,6 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
                     {String.fromCharCode(65 + idx)}
                   </th>
                 ))}
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-600 text-right">Admin</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-200">
@@ -161,9 +160,6 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
                     <span className="text-sm font-medium text-gray-600">{entry.totalPenaltyMinutes}m</span>
                   </td>
                   {entry.problemResults.map((result) => getProblemCell(result))}
-                  <td className="px-6 py-4 text-right">
-                    <button className="text-xs font-bold text-blue-600 hover:underline">Xem bài nộp</button>
-                  </td>
                 </tr>
               ))}
             </tbody>
