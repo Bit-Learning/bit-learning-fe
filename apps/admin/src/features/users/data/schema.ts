@@ -1,11 +1,19 @@
 import { z } from "zod";
 
 const userRoleSchema = z.union([
-	z.literal("USER"),
-	z.literal("STAFF"),
+	z.literal("STUDENT"),
+	z.literal("MENTOR"),
+	z.literal("MANAGER"),
 	z.literal("ADMIN"),
 ]);
 export type UserRole = z.infer<typeof userRoleSchema>;
+
+const mentorApprovalStatusSchema = z.union([
+	z.literal("PENDING"),
+	z.literal("APPROVED"),
+	z.literal("REJECTED"),
+]);
+export type MentorApprovalStatus = z.infer<typeof mentorApprovalStatusSchema>;
 
 const walletSchema = z.object({
 	id: z.number(),
@@ -21,6 +29,9 @@ const userSchema = z.object({
 	email: z.string(),
 	activated: z.boolean(),
 	role: userRoleSchema,
+	mentorApprovalStatus: mentorApprovalStatusSchema.nullable().optional(),
+	isExternalMentor: z.boolean().nullable().optional(),
+	mentorRejectionReason: z.string().nullable().optional(),
 	activationKey: z.string().nullable(),
 	resetKey: z.string().nullable(),
 	langKey: z.string(),

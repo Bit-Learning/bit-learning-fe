@@ -53,7 +53,7 @@
 		"react": "^19.2.1",
 		"react-day-picker": "9.13.0",
 		"react-dom": "^19.2.1",
-		"react-hook-form": "^7.71.2",
+		"react-hook-form": "^7.72.1",
 		"react-quill": "^2.0.0",
 		"react-quill-new": "^3.8.3",
 		"react-top-loading-bar": "^3.0.2",
@@ -65,11 +65,12 @@
 		"zod": "^4.3.5",
 		"zustand": "^5.0.12",
 		"@stomp/stompjs": "^7.3.0",
-		"sockjs-client": "^1.6.1"
+		"sockjs-client": "^1.6.1",
+		"styled-components": "^6.3.12"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.10",
-		"@faker-js/faker": "^10.2.0",
+		"@faker-js/faker": "^10.4.0",
 		"@tanstack/react-query-devtools": "^5.91.3",
 		"@tanstack/react-router-devtools": "^1.132.51",
 		"@tanstack/router-plugin": "^1.145.4",

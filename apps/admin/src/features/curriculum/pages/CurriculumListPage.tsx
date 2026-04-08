@@ -1,15 +1,20 @@
-import { useState } from "react";
-import { useNavigate } from "@tanstack/react-router";
-import { Plus, GraduationCap, BookOpen, Layers } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { getRouteApi, useNavigate } from "@tanstack/react-router";
+import {
+	Plus,
+	GraduationCap,
+	BookOpen,
+	Layers,
+	Book,
+	Pencil,
+	Trash2,
+	ArrowRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
-import {
-	useCurriculumsList,
-	useDeleteCurriculum,
-} from "../queries/useCurriculum";
+import { useCurriculums, useDeleteCurriculum } from "../queries/useCurriculum";
 import { useSubjectsList, useDeleteSubject } from "../queries/useSubject";
-import CurriculumItem from "../components/CurriculumItem";
 import CurriculumFormModal from "../components/CurriculumFormModal";
 import SubjectFormModal from "../components/SubjectFormModal";
 import DeleteConfirmModal from "../../../components/DeleteConfirmModal";
@@ -21,11 +26,14 @@ import { Search } from "@/components/search";
 import { ThemeSwitch } from "@/components/theme-switch";
 import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
+import { CurriculumTable } from "../components/curriculum-table";
+const route = getRouteApi("/_authenticated/curriculum/");
 
 const CurriculumListPage: React.FC = () => {
-	const navigate = useNavigate();
+	const search = route.useSearch();
+	const tableNavigate = route.useNavigate();
+	const appNavigate = useNavigate();
 
-	const [expandedIds, setExpandedIds] = useState<number[]>([]);
 	const [curriculumModal, setCurriculumModal] = useState<{
 		open: boolean;
 		data?: TCurriculumResponse | null;
@@ -40,23 +48,38 @@ const CurriculumListPage: React.FC = () => {
 		type: "curriculum" | "subject";
 		item: any;
 	}>({ open: false, type: "curriculum", item: null });
+	const [selectedCurriculum, setSelectedCurriculum] =
+		useState<TCurriculumResponse | null>(null);
 
-	const { data: curriculums, isLoading: loadingCurriculums } =
-		useCurriculumsList();
+	const page = (search.page || 1) - 1;
+	const size = search.pageSize || 10;
+
+	const {
+		data: curriculaResponse,
+		isLoading: loadingCurriculums,
+		isError,
+		error,
+	} = useCurriculums(page, size);
 	const { data: subjects, isLoading: loadingSubjects } = useSubjectsList();
 	const { mutate: deleteCurriculum, isPending: deletingCurriculum } =
 		useDeleteCurriculum();
 	const { mutate: deleteSubject, isPending: deletingSubject } =
 		useDeleteSubject();
 
-	const getSubjectsByCurriculum = (curriculumId: number) =>
-		subjects?.filter((s) => s.curriculum?.id === curriculumId) || [];
+	const curriculums = curriculaResponse?.data ?? [];
+	const totalPages = curriculaResponse?.page?.totalPages || 0;
+	const totalCurriculums = curriculaResponse?.page?.totalElements ?? 0;
 
-	const toggleExpand = (id: number) => {
-		setExpandedIds((prev) =>
-			prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
-		);
-	};
+	const subjectCounts = useMemo(() => {
+		const map = new Map<number, number>();
+		if (!subjects) return map;
+		for (const s of subjects) {
+			const curriculumId = s.curriculum?.id;
+			if (!curriculumId) continue;
+			map.set(curriculumId, (map.get(curriculumId) ?? 0) + 1);
+		}
+		return map;
+	}, [subjects]);
 
 	const handleDelete = () => {
 		if (deleteModal.type === "curriculum") {
@@ -71,7 +94,19 @@ const CurriculumListPage: React.FC = () => {
 	};
 
 	const totalSubjects = subjects?.length ?? 0;
-	const totalCurriculums = curriculums?.length ?? 0;
+
+	const selectedSubjects = useMemo(() => {
+		if (!selectedCurriculum || !subjects) return [];
+		return subjects.filter(
+			(subject) => subject.curriculum?.id === selectedCurriculum.id,
+		);
+	}, [selectedCurriculum, subjects]);
+
+	useEffect(() => {
+		if (!selectedCurriculum && curriculums.length > 0) {
+			setSelectedCurriculum(curriculums[0] ?? null);
+		}
+	}, [curriculums, selectedCurriculum]);
 
 	// Full-page skeleton
 	if (loadingCurriculums) {
@@ -125,6 +160,7 @@ const CurriculumListPage: React.FC = () => {
 						</p>
 					</div>
 					<Button
+						size="sm"
 						onClick={() => setCurriculumModal({ open: true })}
 						className="shrink-0"
 					>
@@ -168,7 +204,16 @@ const CurriculumListPage: React.FC = () => {
 				)}
 
 				{/* ── Content ── */}
-				{!curriculums?.length ? (
+				{isError ? (
+					<Card className="border-dashed border-2">
+						<CardContent className="flex flex-col items-center justify-center py-12 text-sm text-destructive">
+							Không thể tải danh sách chương trình học:{" "}
+							{error instanceof Error
+								? error.message
+								: "Đã xảy ra lỗi không xác định"}
+						</CardContent>
+					</Card>
+				) : !curriculums.length ? (
 					<Card className="border-dashed border-2">
 						<CardContent className="flex flex-col items-center justify-center py-16">
 							<div className="h-16 w-16 rounded-2xl bg-muted flex items-center justify-center mb-4">
@@ -188,48 +233,155 @@ const CurriculumListPage: React.FC = () => {
 						</CardContent>
 					</Card>
 				) : (
-					<div className="space-y-3">
-						{curriculums.map((curriculum, idx) => (
-							<CurriculumItem
-								key={curriculum.id}
-								curriculum={curriculum}
-								subjects={getSubjectsByCurriculum(curriculum.id)}
-								isExpanded={expandedIds.includes(curriculum.id)}
-								isLoading={loadingSubjects}
-								colorIndex={idx}
-								onToggle={() => toggleExpand(curriculum.id)}
-								onEdit={() =>
-									setCurriculumModal({ open: true, data: curriculum })
-								}
-								onDelete={() =>
-									setDeleteModal({
-										open: true,
-										type: "curriculum",
-										item: curriculum,
-									})
-								}
-								onAddSubject={() =>
-									setSubjectModal({ open: true, curriculumId: curriculum.id })
-								}
-								onEditSubject={(subject) =>
-									setSubjectModal({
-										open: true,
-										data: subject,
-										curriculumId: curriculum.id,
-									})
-								}
-								onDeleteSubject={(subject) =>
-									setDeleteModal({ open: true, type: "subject", item: subject })
-								}
-								onSubjectClick={(subject) =>
-									navigate({
-										to: "/subject/$id",
-										params: { id: subject.id.toString() },
-									})
-								}
-							/>
-						))}
-					</div>
+					<CurriculumTable
+						data={curriculums}
+						totalPages={totalPages}
+						search={search}
+						navigate={tableNavigate}
+						subjectCounts={subjectCounts}
+						onEdit={(curriculum) =>
+							setCurriculumModal({ open: true, data: curriculum })
+						}
+						onDelete={(curriculum) =>
+							setDeleteModal({
+								open: true,
+								type: "curriculum",
+								item: curriculum,
+							})
+						}
+						onAddSubject={(curriculum) =>
+							setSubjectModal({
+								open: true,
+								curriculumId: curriculum.id,
+							})
+						}
+						onCurriculumSelect={(curriculum) =>
+							setSelectedCurriculum(curriculum)
+						}
+					/>
+				)}
+
+				{selectedCurriculum && (
+					<Card className="mt-4 border border-dashed">
+						<CardContent className="p-4 sm:p-6">
+							<div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+								<div className="flex items-center gap-3">
+									<div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10">
+										<GraduationCap className="h-5 w-5 text-primary" />
+									</div>
+									<div>
+										<p className="text-xs font-medium text-muted-foreground">
+											Môn học trong chương trình
+										</p>
+										<h2 className="text-base font-semibold leading-tight">
+											{selectedCurriculum.name}
+										</h2>
+									</div>
+								</div>
+								<Button
+									variant="outline"
+									size="sm"
+									onClick={() =>
+										setSubjectModal({
+											open: true,
+											curriculumId: selectedCurriculum.id,
+										})
+									}
+								>
+									<Plus className="mr-1 h-3.5 w-3.5" />
+									Thêm môn
+								</Button>
+							</div>
+
+							<div className="border-t border-border/60 pt-4">
+								{loadingSubjects ? (
+									<div className="space-y-2">
+										{[1, 2].map((i) => (
+											<Skeleton key={i} className="h-12 w-full rounded-lg" />
+										))}
+									</div>
+								) : !selectedSubjects.length ? (
+									<div className="flex flex-col items-center justify-center py-8 text-muted-foreground">
+										<Book className="mb-2 h-8 w-8 opacity-30" />
+										<p className="text-sm">Chưa có môn học nào</p>
+										<Button
+											variant="outline"
+											size="sm"
+											className="mt-3"
+											onClick={() =>
+												setSubjectModal({
+													open: true,
+													curriculumId: selectedCurriculum.id,
+												})
+											}
+										>
+											<Plus className="mr-1 h-3.5 w-3.5" />
+											Thêm môn học đầu tiên
+										</Button>
+									</div>
+								) : (
+									<div className="divide-y divide-border/60">
+										{selectedSubjects.map((subject, idx) => (
+											<div
+												key={subject.id}
+												className="group flex cursor-pointer items-center justify-between px-1 py-3 hover:bg-muted/40 sm:px-2"
+												onClick={() =>
+													appNavigate({
+														to: "/subject/$id",
+														params: { id: subject.id.toString() },
+													})
+												}
+											>
+												<div className="flex min-w-0 items-center gap-3">
+													<div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-semibold text-primary">
+														{idx + 1}
+													</div>
+													<div className="min-w-0">
+														<span className="block truncate text-sm font-medium">
+															{subject.name}
+														</span>
+													</div>
+												</div>
+												<div className="ml-4 flex shrink-0 items-center gap-1">
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-7 w-7 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-foreground"
+														onClick={(e) => {
+															e.stopPropagation();
+															setSubjectModal({
+																open: true,
+																data: subject,
+																curriculumId: selectedCurriculum.id,
+															});
+														}}
+													>
+														<Pencil className="h-3 w-3" />
+													</Button>
+													<Button
+														variant="ghost"
+														size="icon"
+														className="h-7 w-7 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 hover:text-destructive"
+														onClick={(e) => {
+															e.stopPropagation();
+															setDeleteModal({
+																open: true,
+																type: "subject",
+																item: subject,
+															});
+														}}
+													>
+														<Trash2 className="h-3 w-3" />
+													</Button>
+													<ArrowRight className="h-3.5 w-3.5 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" />
+												</div>
+											</div>
+										))}
+									</div>
+								)}
+							</div>
+						</CardContent>
+					</Card>
 				)}
 
 				{/* ── Modals ── */}

@@ -17,7 +17,7 @@ type HeaderProps = React.HTMLAttributes<HTMLElement> & {
 export function Header({
 	className,
 	fixed = true,
-	title = "Dashboard",
+	title = "",
 	subtitle,
 	actions,
 	...props
@@ -71,6 +71,15 @@ export function Header({
 						<h1 className="text-lg font-semibold tracking-tight text-slate-900">
 							{title}
 						</h1>
+						<div className="space-y-1 text-center">
+							<div className="flex items-center justify-center gap-2">
+								<img
+									src="./Logo.png"
+									alt="Bit Learning Logo"
+									className="h-10 w-full object-contain"
+								/>
+							</div>
+						</div>
 						{subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
 					</div>
 				</div>
