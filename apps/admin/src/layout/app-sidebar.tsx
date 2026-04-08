@@ -17,7 +17,6 @@ import { cn } from "@/shared/lib/utils";
 import { getNavGroupsForRole } from "./data/sidebar-data";
 import type { NavCollapsible, NavItem, NavLink } from "./types";
 import { useAdminProfile } from "@/features/auth/queries/useAuth";
-import { useSidebar } from "@/components/ui/sidebar";
 
 const SIDEBAR_EXPANDED = "w-60";
 const SIDEBAR_COLLAPSED = "w-[88px]";
