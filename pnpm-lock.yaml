@@ -658,8 +658,8 @@ importers:
         specifier: ^0.5.16
         version: 0.5.19(tailwindcss@4.2.2)
       '@turbo/gen':
-        specifier: ^2.8.20
-        version: 2.8.20(@types/node@20.19.39)
+        specifier: ^2.9.5
+        version: 2.9.5(@types/node@20.19.39)
       '@types/lodash':
         specifier: ^4.17.24
         version: 4.17.24
@@ -4001,8 +4001,8 @@ packages:
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/gen@2.8.20':
-    resolution: {integrity: sha512-SazKn5Pc9mitpc3uc6Pmf+QhkNtvF5t6Ro0V1cuc0QFhblbfw4KwWqFnnfTEmGzgDtb2CZJB3BK8LFMBX52eLg==}
+  '@turbo/gen@2.9.5':
+    resolution: {integrity: sha512-dkfWf//oF2+hWQiMdMQtj2E4UHlW9WpTSVj0M9ugQrZt7dBR1MIPxAnzDrG5QGFbNb7t/ka/v72BIA+39+8Tow==}
     hasBin: true
 
   '@turbo/linux-64@2.8.20':
@@ -11533,7 +11533,7 @@ snapshots:
   '@turbo/darwin-arm64@2.8.20':
     optional: true
 
-  '@turbo/gen@2.8.20(@types/node@20.19.39)':
+  '@turbo/gen@2.9.5(@types/node@20.19.39)':
     dependencies:
       '@inquirer/prompts': 7.10.1(@types/node@20.19.39)
       esbuild: 0.25.12
