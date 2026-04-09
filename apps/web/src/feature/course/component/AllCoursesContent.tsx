@@ -153,25 +153,32 @@ const AllCoursesContent: React.FC = () => {
           backgroundSize: "28px 28px",
         }}
       />
-
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <section className="relative overflow-hidden rounded-md mb-10 h-56 md:h-64 flex items-end">
-          <img
-            src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1920&q=80"
-            alt="hero"
-            className="absolute inset-0 w-full h-full object-cover"
-          />
-          <div className="absolute inset-0 bg-linear-to-r from-slate-900/85 via-slate-900/50 to-transparent" />
-          <div className="relative z-10 px-8 pb-8">
-            <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-1.5">
-              Thúc đẩy sự nghiệp của bạn
-            </h1>
-            <p className="text-sm text-slate-300 max-w-lg">
-              Chương trình chuẩn BGD&ĐT, cập nhật xu hướng công nghệ mới nhất.
-            </p>
-          </div>
-        </section>
-
+      <section className="relative overflow-hidden h-60 md:h-72 flex items-end">
+        <img
+          src="https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&w=1920&q=80"
+          alt="hero"
+          className="absolute inset-0 w-full h-full object-cover"
+        />
+        <div className="absolute inset-0 bg-linear-to-r from-slate-900/85 via-slate-900/50 to-transparent" />
+        <div className="relative z-10 px-8 pb-8">
+          <h1 className="text-2xl md:text-3xl font-bold text-white leading-tight mb-1.5">Thúc đẩy sự nghiệp của bạn</h1>
+          <p className="text-sm text-slate-300 max-w-lg">
+            Chương trình chuẩn BGD&ĐT, cập nhật xu hướng công nghệ mới nhất.
+          </p>
+        </div>
+      </section>
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="text-md text-gray-500 flex items-center">
+            <span onClick={() => navigate({ to: "/" })} className="hover:text-blue-600 cursor-pointer">
+              Trang chủ
+            </span>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-blue-600 font-medium">Danh sách khóa học</span>
+          </nav>
+        </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
         <div className="flex flex-wrap items-center gap-2.5 mb-8 py-3 border-y border-slate-200 dark:border-slate-800">
           <span className="text-sm font-semibold text-slate-400 dark:text-slate-500 uppercase tracking-wider mr-1">
             Lọc

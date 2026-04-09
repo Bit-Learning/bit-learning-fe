@@ -95,7 +95,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike, onDislike, sho
           onClick={() => setLightbox(null)}
         >
           <button
-            className="absolute top-4 right-4 text-white/60 hover:text-white p-2 hover:bg-white/10 rounded-full transition-colors"
+            className="absolute top-4 right-4 text-white/60 hover:text-white p-2 hover:bg-white/10 rounded-md transition-colors"
             onClick={() => setLightbox(null)}
           >
             <X className="w-5 h-5" />
@@ -114,16 +114,16 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike, onDislike, sho
           <div className="flex items-center gap-3">
             <AuthorAvatar author={post.author} size="md" />
             <div>
-              <p className="text-sm font-semibold text-gray-900 leading-none">
+              <p className="text-md font-semibold text-gray-900 leading-none">
                 {post.author.firstName} {post.author.lastName}
               </p>
               <div className="flex items-center gap-1.5 mt-1">
-                <span className="text-xs text-gray-400">{formatDate(post.createdAt)}</span>
-                {post.isEdited && <span className="text-xs text-gray-400">· đã chỉnh sửa</span>}
+                <span className="text-sm text-gray-400">{formatDate(post.createdAt)}</span>
+                {post.isEdited && <span className="text-sm text-gray-400">· đã chỉnh sửa</span>}
               </div>
             </div>
           </div>
-          <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+          <button className="p-1.5 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-md transition-colors">
             <MoreHorizontal className="w-5 h-5" />
           </button>
         </div>
@@ -133,7 +133,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike, onDislike, sho
             {post.hashtags.slice(0, 4).map((tag) => (
               <span
                 key={tag.id}
-                className="text-xs text-primary bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full font-medium"
+                className="text-sm text-primary bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-md font-medium"
               >
                 #{tag.name}
               </span>
@@ -148,12 +148,12 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike, onDislike, sho
           >
             {post.title}
           </h2>
-          <p className={`text-sm text-gray-600 leading-relaxed ${!showFullContent ? "line-clamp-3" : ""}`}>
+          <p className={`text-md text-gray-600 leading-relaxed ${!showFullContent ? "line-clamp-3" : ""}`}>
             {post.content}
           </p>
           {!showFullContent && post.content.length > 200 && (
             <button
-              className="cursor-pointer text-xs text-primary font-semibold mt-1 hover:underline"
+              className="cursor-pointer text-sm text-primary font-semibold mt-1 hover:underline"
               onClick={goDetail}
             >
               Xem thêm
@@ -238,7 +238,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike, onDislike, sho
                   {getFileIcon(file.url)}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-xs font-medium text-gray-700 truncate">{getFileName(file.url)}</p>
+                  <p className="text-sm font-medium text-gray-700 truncate">{getFileName(file.url)}</p>
                 </div>
                 <Download className="w-3.5 h-3.5 text-gray-400 group-hover:text-gray-600 shrink-0 transition-colors" />
               </a>
@@ -247,7 +247,7 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike, onDislike, sho
         )}
 
         {(likeCount > 0 || dislikeCount > 0) && (
-          <div className="px-4 py-2 flex items-center gap-4 text-sm border-t border-gray-100 mt-2">
+          <div className="px-4 py-2 flex items-center gap-4 text-md border-t border-gray-100 mt-2">
             {likeCount > 0 && (
               <span className="flex items-center gap-1.5">
                 <ThumbsUp className="w-3.5 h-3.5 fill-blue-500 text-blue-500" />
@@ -268,21 +268,21 @@ export const PostCard: React.FC<PostCardProps> = ({ post, onLike, onDislike, sho
           className={`flex items-center border-t border-gray-200 ${likeCount > 0 || dislikeCount > 0 ? "" : "mt-2"}`}
         >
           <button
-            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors ${liked ? "text-primary hover:bg-blue-50" : "text-gray-500 hover:bg-gray-50"}`}
+            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-md font-semibold transition-colors ${liked ? "text-primary hover:bg-blue-50" : "text-gray-500 hover:bg-gray-50"}`}
             onClick={handleLike}
           >
             <ThumbsUp className={`w-4 h-4 ${liked ? "fill-blue-600 text-primary" : ""}`} />
             Thích
           </button>
           <button
-            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold transition-colors ${disliked ? "text-red-500 hover:bg-red-50" : "text-gray-500 hover:bg-gray-50"}`}
+            className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-md font-semibold transition-colors ${disliked ? "text-red-500 hover:bg-red-50" : "text-gray-500 hover:bg-gray-50"}`}
             onClick={handleDislike}
           >
             <ThumbsDown className={`w-4 h-4 ${disliked ? "fill-red-500 text-red-500" : ""}`} />
             Không thích
           </button>
           <button
-            className="cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
+            className="cursor-pointer flex-1 flex items-center justify-center gap-2 py-2.5 text-md font-semibold text-gray-500 hover:bg-gray-50 transition-colors"
             onClick={goDetail}
           >
             <MessageCircle className="w-4 h-4" />

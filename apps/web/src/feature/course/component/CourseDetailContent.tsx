@@ -81,16 +81,22 @@ const CourseDetailContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="mx-auto max-w-7xl px-4 py-6">
-        <button
-          type="button"
-          onClick={() => navigate({ to: "/courses" })}
-          className="mb-4 inline-flex cursor-pointer items-center text-sm text-gray-600 transition-colors hover:text-blue-600"
-        >
-          <ChevronLeft className="mr-1 h-4 w-4" />
-          Danh sách khóa học
-        </button>
-
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="text-md text-gray-500 flex items-center">
+            <span onClick={() => navigate({ to: "/" })} className="hover:text-blue-600 cursor-pointer">
+              Trang chủ
+            </span>
+            <span className="mx-2 text-gray-400">/</span>
+            <span onClick={() => navigate({ to: "/courses" })} className="hover:text-blue-600 cursor-pointer">
+              Danh sách khóa học
+            </span>{" "}
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-blue-600 font-medium">{course.title}</span>
+          </nav>
+        </div>
+      </div>
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-6">
         <div className="grid grid-cols-1 gap-6 lg:grid-cols-4">
           <div className="space-y-4 lg:col-span-3">
             <CourseHero

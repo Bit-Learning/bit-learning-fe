@@ -21,7 +21,7 @@ export const PostRow: React.FC<PostRowProps> = ({ post, formatDate, canEdit, onE
       }`}
     >
       <div className="flex">
-        <div className="w-36 shrink-0 hidden sm:block">
+        <div className="w-64 shrink-0 hidden sm:block">
           {imageAttachment ? (
             <img src={imageAttachment.url} alt={post.title} className="w-full h-full object-cover" />
           ) : (
