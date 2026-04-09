@@ -15,6 +15,7 @@ import {
 import { useMySlides, useDeleteSlide } from "../queries/useSlide";
 import type { SlideGenerationResponse } from "../types/slide.type";
 import { Input } from "@workspace/ui/components/Input";
+import { Button } from "@workspace/ui/components/Button";
 
 interface MySlidesTabProps {
   onViewDetail: (slide: SlideGenerationResponse) => void;
@@ -82,39 +83,39 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
     <div>
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
         <div className="relative w-full md:w-full">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-600" />
-          <Input
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+          <input
             placeholder="Tìm kiếm nội dung câu hỏi..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 py-5 border-2"
+            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
           />
         </div>
         <div className="flex gap-3 w-full md:w-36">
-          <button
-            className="flex items-center gap-2 px-4 py-3 bg-primary text-white text-sm font-medium rounded-lg hover:bg-blue-700 transition-colors"
+          <Button
+            className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-6 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
             onClick={onSwitchToCreate}
           >
             <Plus size={20} />
             Tạo mới
-          </button>
+          </Button>
         </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
+      <div className="bg-white shadow-sm rounded-md border border-slate-300 overflow-hidden">
         <div className="overflow-x-auto">
           <table className="w-full text-left border-collapse">
             <thead>
               <tr className="bg-slate-50 border-b border-slate-200">
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Chủ đề</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">
+                <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800">Chủ đề</th>
+                <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800 text-center">
                   Template
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-center">
+                <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800 text-center">
                   Số Slide
                 </th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500">Ngày tạo</th>
-                <th className="px-6 py-4 text-xs font-semibold uppercase tracking-wider text-slate-500 text-right">
+                <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800">Ngày tạo</th>
+                <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800 text-right">
                   Hành động
                 </th>
               </tr>
@@ -132,7 +133,7 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
                 </tr>
               ) : (
                 filteredSlides.map((slide: SlideGenerationResponse) => (
-                  <tr key={slide.id} className="hover:bg-slate-50/50 transition-colors">
+                  <tr key={slide.id} className="cursor-pointer hover:bg-slate-50/50 transition-colors">
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 rounded flex items-center justify-center bg-blue-100 text-blue-600">
@@ -163,21 +164,21 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
                     <td className="px-6 py-4 text-right">
                       <div className="flex items-center justify-end gap-2">
                         <button
-                          className="p-2 text-slate-500 hover:text-primary hover:bg-slate-100 rounded-lg transition-all"
+                          className="cursor-pointer p-2 text-slate-800 hover:text-primary hover:bg-slate-100 rounded-lg transition-all"
                           title="Download PPTX"
                           onClick={() => handleDownload(slide)}
                         >
                           <Download size={20} />
                         </button>
                         <button
-                          className="p-2 text-slate-500 hover:text-primary hover:bg-slate-100 rounded-lg transition-all"
+                          className="cursor-pointer p-2 text-slate-800 hover:text-primary hover:bg-slate-100 rounded-lg transition-all"
                           title="Xem chi tiết"
                           onClick={() => onViewDetail(slide)}
                         >
                           <Eye size={20} />
                         </button>
                         <button
-                          className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
+                          className="cursor-pointer p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                           title="Xóa"
                           onClick={() => handleDelete(slide.id, slide.topic)}
                           disabled={deleteSlide.isPending}
@@ -197,7 +198,7 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
       {filteredSlides.length > 0 && pageInfo && pageInfo.totalPages > 1 && (
         <div className="mt-8 flex items-center justify-center gap-2">
           <button
-            className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => setPage((p) => Math.max(0, p - 1))}
             disabled={page === 0}
           >
@@ -205,7 +206,6 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
           </button>
 
           {[...Array(Math.min(pageInfo.totalPages, 10))].map((_, idx) => {
-            // Show first 3, last 3, and current page neighbors
             const shouldShow = idx < 3 || idx >= pageInfo.totalPages - 3 || Math.abs(idx - page) <= 1;
 
             if (!shouldShow) {
@@ -235,7 +235,7 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
           })}
 
           <button
-            className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-500 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => setPage((p) => Math.min(pageInfo.totalPages - 1, p + 1))}
             disabled={page === pageInfo.totalPages - 1}
           >

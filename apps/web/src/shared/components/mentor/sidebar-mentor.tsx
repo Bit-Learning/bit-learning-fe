@@ -137,7 +137,7 @@ export function SidebarMentor({
               </div>
             )}
           </div>
-          <nav className="flex-1 px-4 space-y-1 mt-4 overflow-y-auto">
+          <nav className="flex-1 px-4 space-y-1 overflow-y-auto">
             {menuItems.map((item) => {
               const Icon = item.icon;
               const isActive = currentPath === item.path || currentPath.startsWith(item.path + "/");
@@ -169,16 +169,10 @@ export function SidebarMentor({
           <div className="border-t border-slate-200 p-4 dark:border-gray-700 ">
             {isOpen ? (
               <div className="space-y-3">
-                <Button variant="ghost" size="icon" className="relative w-full justify-start">
-                  <Bell className="h-5 w-5 text-slate-600 dark:text-gray-400" />
-                  <span className="ml-3 font-medium text-slate-600 dark:text-gray-400">Thông báo</span>
-                  <span className="absolute right-3 top-3 h-2 w-2 rounded-full bg-red-500" />
-                </Button>
-
                 <MenuTrigger>
                   <Button
                     variant="ghost"
-                    className="flex h-auto w-full items-center space-x-3 px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-800"
+                    className="flex h-auto w-full items-center space-x-3 px-2 py-2 hover:bg-slate-50 dark:hover:bg-slate-800"
                   >
                     <Avatar className="h-10 w-10">
                       <AvatarImage src={userInfo?.avatar} alt={userInfo?.username} />
@@ -208,11 +202,6 @@ export function SidebarMentor({
               </div>
             ) : (
               <div className="space-y-3">
-                <Button variant="ghost" size="icon" className="relative mx-auto flex">
-                  <Bell className="h-5 w-5 text-slate-600 dark:text-gray-400" />
-                  <span className="absolute right-1 top-1 h-2 w-2 rounded-full bg-red-500" />
-                </Button>
-
                 <MenuTrigger>
                   <Button variant="ghost" className="mx-auto flex h-auto p-0 hover:bg-transparent">
                     <Avatar className="h-10 w-10">

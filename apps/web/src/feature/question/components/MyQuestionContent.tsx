@@ -132,7 +132,7 @@ const MyQuestionsContent: React.FC = () => {
       [QuestionLevel.HARD]: { className: "bg-red-100 text-red-700", label: "Khó" },
     };
     const config = variants[level];
-    return <span className={`px-2 py-1 rounded text-xs font-medium ${config.className}`}>{config.label}</span>;
+    return <span className={`px-2 py-1 rounded text-sm font-medium ${config.className}`}>{config.label}</span>;
   };
 
   const getStatusBadge = (status: ApprovalStatus) => {
@@ -143,7 +143,7 @@ const MyQuestionsContent: React.FC = () => {
       [ApprovalStatus.REJECTED]: { className: "bg-red-100 text-red-700", label: "Từ chối" },
     };
     const config = variants[status];
-    return <span className={`px-2 py-1 rounded text-xs font-medium ${config.className}`}>{config.label}</span>;
+    return <span className={`px-2 py-1 rounded text-sm font-medium ${config.className}`}>{config.label}</span>;
   };
 
   const getTypeBadge = (type: QuestionType) =>
@@ -164,7 +164,7 @@ const MyQuestionsContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Danh sách câu hỏi của tôi</h1>
-              <p className="text-gray-600 text-sm mt-1">Chọn các câu hỏi để gửi yêu cầu đưa vào Question Bank</p>
+              <p className="text-gray-600 text-lg mt-1">Chọn các câu hỏi để gửi yêu cầu đưa vào Question Bank</p>
             </div>
             <div className="flex gap-3">
               {selectedQuestions.length > 0 && (
@@ -201,7 +201,7 @@ const MyQuestionsContent: React.FC = () => {
                 onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
                 variant="outline"
                 size="lg"
-                className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+                className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
               >
                 <FileText className="h-4 w-4" />
                 Tạo đề thi
@@ -209,7 +209,7 @@ const MyQuestionsContent: React.FC = () => {
               <Button
                 size="lg"
                 onClick={() => navigate({ to: "/mentor/matrix/import" })}
-                className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+                className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
               >
                 <Upload className="h-4 w-4" />
                 Import
@@ -217,7 +217,7 @@ const MyQuestionsContent: React.FC = () => {
               <Button
                 size="lg"
                 onClick={() => navigate({ to: "/mentor/question/create" })}
-                className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+                className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
               >
                 <Plus className="h-4 w-4" />
                 Tạo câu hỏi
@@ -302,7 +302,7 @@ const MyQuestionsContent: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white my-6 rounded-md border-2 border-slate-200 overflow-hidden">
+            <div className="bg-white my-6 rounded-md border border-slate-300 overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-300 bg-gray-50">
@@ -314,23 +314,21 @@ const MyQuestionsContent: React.FC = () => {
                         className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                       />
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">STT</th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">STT</th>
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                       NỘI DUNG CÂU HỎI
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-30">
                       MỨC ĐỘ
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">LOẠI</th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">LOẠI</th>
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                       MÔN HỌC
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-30">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
                       TRẠNG THÁI
                     </th>
-                    <th className="text-center p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
-                      THAO TÁC
-                    </th>
+                    <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider"></th>
                   </tr>
                 </thead>
                 <tbody className="bg-white">
@@ -363,33 +361,33 @@ const MyQuestionsContent: React.FC = () => {
                       <td className="p-4">
                         <div className="flex items-start">
                           <div className="flex-1 min-w-0">
-                            <p className="line-clamp-2 text-gray-900">{question.content}</p>
-                            <p className="text-xs text-gray-500 mt-1">
+                            <p className="line-clamp-2 text-gray-900 text-md">{question.content}</p>
+                            <p className="text-sm text-gray-500 mt-1">
                               Cập nhật {new Date(question.updatedAt || question.createdAt).toLocaleDateString("vi-VN")}
                             </p>
                           </div>
                         </div>
                       </td>
-                      <td className="p-4">{getDifficultyBadge(question.questionLevel)}</td>
+                      <td className="p-4 text-sm">{getDifficultyBadge(question.questionLevel)}</td>
                       <td className="p-4 text-sm text-gray-700">{getTypeBadge(question.questionType)}</td>
                       <td className="p-4 text-sm text-gray-700">{question.subject?.name}</td>
-                      <td className="p-4">{getStatusBadge(question.approvalStatus)}</td>
+                      <td className="p-4 text-sm">{getStatusBadge(question.approvalStatus)}</td>
                       <td className="p-4">
                         <div className="flex items-center justify-center gap-1">
                           <button
-                            className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
+                            className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-blue-600 transition-colors"
                             title="Xem"
                             onClick={() =>
                               navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } })
                             }
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-5 w-5" />
                           </button>
 
                           {question.approvalStatus == "NONE" && (
                             <>
                               <button
-                                className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
+                                className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-blue-600 transition-colors"
                                 title="Chỉnh sửa"
                                 onClick={() =>
                                   navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } })
@@ -398,11 +396,11 @@ const MyQuestionsContent: React.FC = () => {
                                 <Edit className="h-4 w-4" />
                               </button>
                               <button
-                                className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                                className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-red-600 transition-colors"
                                 onClick={() => handleDelete(question.id, question.content)}
                                 title="Xóa"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-5 w-5" />
                               </button>
                             </>
                           )}

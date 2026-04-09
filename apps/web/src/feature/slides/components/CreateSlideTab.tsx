@@ -90,13 +90,13 @@ export const CreateSlideTab: React.FC = () => {
 
   return (
     <>
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 space-y-8">
-          <section className="bg-white p-6 rounded-xl border border-slate-200 shadow-md">
+          <section className="bg-white p-6 rounded-md border border-slate-200 shadow-md">
             <div className="space-y-6">
               <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                 <div className="md:col-span-2">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Chủ đề bài giảng</label>
+                  <label className="block text-md font-medium text-slate-700 mb-2">Chủ đề bài giảng</label>
                   <input
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none disabled:opacity-50"
                     placeholder="Ví dụ: Lập trình Pascal, Thuật toán sắp xếp..."
@@ -107,7 +107,7 @@ export const CreateSlideTab: React.FC = () => {
                   />
                 </div>
                 <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Lớp học</label>
+                  <label className="block text-md font-medium text-slate-700 mb-2">Lớp học</label>
                   <select
                     className="w-full bg-slate-50 border border-slate-200 rounded-lg px-4 py-2.5 text-slate-900 focus:ring-2 focus:ring-primary focus:border-transparent transition-all outline-none disabled:opacity-50"
                     value={grade}
@@ -125,7 +125,7 @@ export const CreateSlideTab: React.FC = () => {
 
               <div className="relative">
                 <div className="flex items-center justify-between mb-3">
-                  <label className="block text-sm font-medium text-slate-700">Chọn mẫu bài giảng (Template)</label>
+                  <label className="block text-md font-medium text-slate-700">Chọn mẫu bài giảng (Template)</label>
                 </div>
                 <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                   {templates.map((tpl) => (
@@ -148,7 +148,7 @@ export const CreateSlideTab: React.FC = () => {
                             <img src={tpl.thumbnailUrl} alt={tpl.name} className="w-full h-full object-cover" />
                             <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                               <button
-                                className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-slate-100 transition-colors shadow-lg"
+                                className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-slate-100 transition-colors shadow-lg"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   openPreviewModal(tpl.id);
@@ -169,7 +169,7 @@ export const CreateSlideTab: React.FC = () => {
                             </div>
                             <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity duration-300">
                               <button
-                                className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-xs font-bold flex items-center gap-1.5 hover:bg-slate-100 transition-colors shadow-lg"
+                                className="bg-white text-slate-900 px-3 py-1.5 rounded-lg text-sm font-bold flex items-center gap-1.5 hover:bg-slate-100 transition-colors shadow-lg"
                                 onClick={(e) => {
                                   e.preventDefault();
                                   openPreviewModal(tpl.id);
@@ -183,9 +183,9 @@ export const CreateSlideTab: React.FC = () => {
                           </div>
                         )}
                         <div className="p-3 bg-white">
-                          <h4 className="text-xs font-bold text-slate-900 truncate">{tpl.name}</h4>
+                          <h4 className="text-sm font-bold text-slate-900 truncate">{tpl.name}</h4>
                           {tpl.description && (
-                            <p className="text-xs text-slate-500 mt-0.5 truncate">{tpl.description}</p>
+                            <p className="text-sm text-slate-500 mt-0.5 truncate">{tpl.description}</p>
                           )}
                         </div>
                       </label>
@@ -195,8 +195,8 @@ export const CreateSlideTab: React.FC = () => {
               </div>
 
               <div className="space-y-6 pt-4 border-t border-slate-100">
-                <div className="max-w-xs">
-                  <label className="block text-sm font-medium text-slate-700 mb-2">Số lượng slide mong muốn</label>
+                <div className="max-w-full">
+                  <label className="block text-md font-medium text-slate-700 mb-2">Số lượng slide mong muốn</label>
                   <div className="relative flex items-center">
                     <List className="absolute left-3 text-slate-400" size={20} />
                     <input
@@ -209,16 +209,13 @@ export const CreateSlideTab: React.FC = () => {
                       disabled={generateSlide.isPending}
                     />
                   </div>
-                  <p className="text-xs text-slate-400 mt-1.5 italic">
-                    * Đề xuất: 5 - 15 slides để đạt hiệu quả tốt nhất.
-                  </p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 transition-all">
                     <div className="flex items-center gap-3">
                       <Lightbulb className="text-primary" size={20} />
-                      <span className="text-sm font-medium text-slate-700">Thêm ví dụ minh họa</span>
+                      <span className="text-md font-medium text-slate-700">Thêm ví dụ minh họa</span>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -234,7 +231,7 @@ export const CreateSlideTab: React.FC = () => {
                   <div className="flex items-center justify-between p-4 bg-slate-50 rounded-lg border border-transparent hover:border-slate-200 transition-all">
                     <div className="flex items-center gap-3">
                       <FileEdit className="text-primary" size={20} />
-                      <span className="text-sm font-medium text-slate-700">Thêm bài tập</span>
+                      <span className="text-md font-medium text-slate-700">Thêm bài tập</span>
                     </div>
                     <label className="relative inline-flex items-center cursor-pointer">
                       <input
@@ -251,7 +248,7 @@ export const CreateSlideTab: React.FC = () => {
               </div>
 
               <button
-                className="w-full bg-primary hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-xl flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] shadow-xl shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+                className="cursor-pointer w-full bg-primary hover:bg-blue-700 text-white font-bold py-4 px-6 rounded-md flex items-center justify-center gap-2 transition-all transform hover:scale-[1.01] shadow-xl shadow-primary/30 disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
                 onClick={handleGenerate}
                 disabled={generateSlide.isPending || !topic.trim() || !selectedTemplateId}
               >
@@ -261,10 +258,7 @@ export const CreateSlideTab: React.FC = () => {
                     Đang tạo slide...
                   </>
                 ) : (
-                  <>
-                    <Sparkles size={20} />
-                    Tạo Slide với AI
-                  </>
+                  <>Tạo Slide với AI</>
                 )}
               </button>
             </div>
@@ -273,16 +267,16 @@ export const CreateSlideTab: React.FC = () => {
 
         <div className="lg:col-span-1">
           <div className="bg-white border border-slate-200 rounded-xl p-6 h-full flex flex-col shadow-sm sticky top-8">
-            <h3 className="font-bold text-slate-900 mb-6 flex items-center gap-2">
-              <Eye className="text-slate-400" size={20} />
+            <h1 className="font-bold text-slate-900 mb-6 flex items-center gap-2 text-lg">
+              <Eye className="text-slate-600" size={24} />
               Xem trước bản phác thảo
-            </h3>
+            </h1>
             <div className="flex-1 flex flex-col items-center justify-center text-center p-8 border-2 border-dashed border-slate-200 rounded-xl bg-slate-50/50">
               <div className="bg-white w-16 h-16 rounded-full flex items-center justify-center mb-4 shadow-sm">
                 <BookOpen className="text-slate-300" size={40} />
               </div>
-              <p className="text-sm text-slate-500 mb-2">Chưa có nội dung để hiển thị</p>
-              <p className="text-xs text-slate-400 max-w-50 mx-auto">
+              <p className="text-md text-slate-500 mb-2">Chưa có nội dung để hiển thị</p>
+              <p className="text-sm text-slate-400 max-w-50 mx-auto">
                 Nhập chủ đề và nhấn "Tạo Slide với AI" để bắt đầu thiết kế bài giảng.
               </p>
             </div>
@@ -309,7 +303,7 @@ export const CreateSlideTab: React.FC = () => {
                 <div>
                   <h2 className="text-base font-bold text-slate-900">{currentTemplate.name}</h2>
                   {currentTemplate.description && (
-                    <p className="text-xs text-slate-500 mt-0.5">{currentTemplate.description}</p>
+                    <p className="text-sm text-slate-500 mt-0.5">{currentTemplate.description}</p>
                   )}
                 </div>
               </div>
@@ -332,7 +326,7 @@ export const CreateSlideTab: React.FC = () => {
               ) : (
                 <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 gap-3">
                   <AlertCircle size={40} className="opacity-40" />
-                  <p className="text-sm">Không có file xem trước cho template này.</p>
+                  <p className="text-md">Không có file xem trước cho template này.</p>
                 </div>
               )}
             </div>
@@ -343,20 +337,20 @@ export const CreateSlideTab: React.FC = () => {
                 href={currentTemplate.previewPdfUrl || currentTemplate.url}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center gap-1.5 text-sm text-slate-400 hover:text-primary transition-colors"
+                className="flex items-center gap-1.5 text-md text-slate-400 hover:text-primary transition-colors"
               >
                 <ExternalLink size={15} />
                 Mở trong tab mới
               </a>
               <div className="flex gap-3">
                 <button
-                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-sm font-medium hover:bg-slate-50 transition-all"
+                  className="px-5 py-2.5 rounded-xl border border-slate-200 text-slate-600 text-md font-medium hover:bg-slate-50 transition-all"
                   onClick={closePreviewModal}
                 >
                   Đóng
                 </button>
                 <button
-                  className="px-6 py-2.5 rounded-xl bg-primary text-white text-sm font-semibold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
+                  className="px-6 py-2.5 rounded-xl bg-primary text-white text-md font-semibold shadow-md hover:bg-blue-700 transition-all flex items-center gap-2"
                   onClick={() => {
                     setSelectedTemplateId(previewTemplateId);
                     closePreviewModal();
