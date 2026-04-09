@@ -57,7 +57,7 @@
 		"react-quill": "^2.0.0",
 		"react-quill-new": "^3.8.3",
 		"react-top-loading-bar": "^3.0.2",
-		"recharts": "^3.2.1",
+		"recharts": "^3.8.1",
 		"sonner": "^2.0.7",
 		"tailwind-merge": "^3.5.0",
 		"tailwindcss": "^4.2.2",
