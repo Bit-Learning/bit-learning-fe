@@ -31,6 +31,8 @@ import { selectAuthStateInfo } from "../store/auth.selectors";
 import { setErrorAction } from "../store";
 import { useLoginUser, useRegister } from "../queries/useAuth";
 import TwoFactorVerificationForm from "./TwoFactorVerificationForm";
+import Logo from "./Logo";
+import { cn } from "@workspace/ui/lib/utils";
 
 const formSchema = z.object({
 	email: z
@@ -123,9 +125,6 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 	return (
 		<>
 			<div className="mb-6 text-left">
-				<div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
-					<LogInIcon className="h-6 w-6" />
-				</div>
 				<h1 className="mb-2 text-xl font-bold text-gray-900">
 					Đăng ký tài khoản
 				</h1>
@@ -376,15 +375,7 @@ const MentorSigninForm: React.FC = () => {
 
 			<div className="flex flex-1 items-center justify-center px-6 pb-6">
 				<div className="w-full max-w-md">
-					<div className="mb-8 flex items-center justify-center">
-						<div className="flex items-center space-x-2">
-							<img
-								src="/Logo.png"
-								alt="Bit Learning Logo"
-								className="h-10 w-36 object-contain"
-							/>
-						</div>
-					</div>
+					<Logo />
 
 					<div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
 						{show2FAForm ? (
@@ -400,15 +391,13 @@ const MentorSigninForm: React.FC = () => {
 						) : (
 							<>
 								<div className="mb-6 text-left">
-									<div className="mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-gray-100">
-										<LogInIcon className="h-6 w-6" />
-									</div>
-									<h1 className="mb-2 text-xl font-bold text-gray-900">
-										Chào mừng bạn đến với Bit Learning
+									<h1 className="text-[32px] font-bold tracking-[-0.03em] text-slate-900 dark:text-white">
+										Chào mừng bạn đến với <br /> Bit Learning!
 									</h1>
-									<h3 className="text-sm text-gray-600">
-										Sử dụng tài khoản Mentor để tiếp tục
-									</h3>
+									<p className="max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
+										Cùng nhau chia sẻ kiến thức và kinh nghiệm để phát triển
+										cộng đồng học tập trực tuyến tốt hơn.
+									</p>
 								</div>
 
 								{errorMsg && (
@@ -537,7 +526,10 @@ const MentorSigninForm: React.FC = () => {
 										</div>
 
 										<Button
-											className="bg-linear-to-r h-11 w-full rounded-xl bg-primary-orange font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl"
+											className={cn(
+												"h-13 w-full rounded-2xl text-sm font-semibold text-white bg-primary-orange shadow-[0_10px_24px_rgba(37,99,235,0.22)] transition-all duration-200",
+												"hover:translate-y-px active:translate-y-0",
+											)}
 											type="submit"
 											isDisabled={isLoading}
 										>

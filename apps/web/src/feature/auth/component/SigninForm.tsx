@@ -48,6 +48,8 @@ const formSchema = z.object({
 import QRCodeLogin from "./QRCodeLogin";
 import TwoFactorVerificationForm from "./TwoFactorVerificationForm";
 import AuthCallbackPageContent from "./AuthCallbackPageContent";
+import Logo from "./Logo";
+import { cn } from "@workspace/ui/lib/utils";
 
 const SignInForm: React.FC = () => {
 	const { isAuthenticated, errorMsg } = useSelector(selectAuthStateInfo);
@@ -163,19 +165,11 @@ const SignInForm: React.FC = () => {
 				</Link>
 			</div>
 
-			<div className="flex flex-1 items-center justify-center px-6 pb-6">
+			<div className="flex flex-1 items-center justify-center px-4 pb-6 sm:px-6">
 				<div className="w-full max-w-md">
-					<div className="mb-8 flex items-center justify-center">
-						<div className="flex items-center space-x-2">
-							<img
-								src="./Logo.png"
-								alt="Bit Learning Logo"
-								className="h-10 w-36 object-contain"
-							/>
-						</div>
-					</div>
+					<Logo />
 
-					<div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
+					<div className="rounded-2xl border border-gray-100 bg-white p-6 shadow-xl sm:p-8">
 						{show2FAForm ? (
 							<TwoFactorVerificationForm
 								email={userEmail}
@@ -187,17 +181,17 @@ const SignInForm: React.FC = () => {
 							/>
 						) : (
 							<>
-								<div className="mb-6 text-center">
-									<h1 className="mb-2 text-xl font-bold text-gray-900">
+								<div className="mb-5 text-left sm:mb-6">
+									<h1 className="text-2xl font-bold tracking-[-0.03em] text-slate-900 dark:text-white sm:text-[32px]">
 										Chào mừng trở lại!
 									</h1>
-									<p className="text-sm text-gray-600">
+									<p className="max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
 										Đăng nhập để truy cập tài khoản của bạn
 									</p>
 								</div>
 
 								{/* Login Method Tabs */}
-								<div className="mb-6 flex rounded-lg border border-gray-200 bg-gray-50 p-1">
+								<div className="mb-5 flex rounded-lg border border-gray-200 bg-gray-50 p-1 text-xs sm:mb-6 sm:text-sm">
 									<button
 										type="button"
 										onClick={() => setActiveTab("email")}
@@ -250,7 +244,7 @@ const SignInForm: React.FC = () => {
 											</div>
 										)}
 
-										<div className="mb-6 grid grid-cols-2 gap-3">
+										<div className="mb-6 grid grid-cols-1 gap-3 sm:grid-cols-2">
 											<button
 												type="button"
 												onClick={() => {
@@ -303,7 +297,7 @@ const SignInForm: React.FC = () => {
 														fill="#EB4335"
 													/>
 												</svg>
-												<span className="hidden sm:inline">Google</span>
+												<span>Google</span>
 											</button>
 											<button
 												type="button"
@@ -346,7 +340,7 @@ const SignInForm: React.FC = () => {
 														d="M10 0C4.477 0 0 4.477 0 10c0 4.42 2.865 8.17 6.839 9.49.5.092.682-.217.682-.482 0-.237-.008-.866-.013-1.7-2.782.603-3.369-1.34-3.369-1.34-.454-1.156-1.11-1.463-1.11-1.463-.908-.62.069-.608.069-.608 1.003.07 1.531 1.03 1.531 1.03.892 1.529 2.341 1.087 2.91.831.092-.646.35-1.086.636-1.336-2.22-.253-4.555-1.11-4.555-4.943 0-1.091.39-1.984 1.029-2.683-.103-.253-.446-1.27.098-2.647 0 0 .84-.269 2.75 1.025A9.578 9.578 0 0110 4.836c.85.004 1.705.114 2.504.336 1.909-1.294 2.747-1.025 2.747-1.025.546 1.377.203 2.394.1 2.647.64.699 1.028 1.592 1.028 2.683 0 3.842-2.339 4.687-4.566 4.935.359.309.678.919.678 1.852 0 1.336-.012 2.415-.012 2.743 0 .267.18.578.688.48C17.137 18.165 20 14.418 20 10c0-5.523-4.477-10-10-10z"
 													/>
 												</svg>
-												<span className="hidden sm:inline">GitHub</span>
+												<span>GitHub</span>
 											</button>
 										</div>
 
@@ -450,7 +444,11 @@ const SignInForm: React.FC = () => {
 												</div>
 
 												<Button
-													className="bg-linear-to-r h-11 w-full rounded-xl bg-primary font-semibold text-white shadow-lg transition-all duration-200 hover:shadow-xl"
+													size="lg"
+													className={cn(
+														"h-13 w-full rounded-2xl text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.22)] transition-all duration-200",
+														"hover:translate-y-px active:translate-y-0",
+													)}
 													type="submit"
 													isDisabled={isLoading}
 												>

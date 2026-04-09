@@ -9,7 +9,7 @@ const MentorSignInPage: React.FC = () => {
 				title="Đăng Nhập Mentor - Bit Learning"
 				description="Đăng nhập vào tài khoản Mentor để quản lý khóa học và học viên"
 			/>
-			<AuthLayout>
+			<AuthLayout backgroundImageUrl="/auth-mentor.jpg">
 				<MentorSigninForm />
 			</AuthLayout>
 		</>

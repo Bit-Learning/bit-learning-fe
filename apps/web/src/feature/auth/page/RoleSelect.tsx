@@ -58,6 +58,35 @@ const GLOBAL_STYLES = `
   color: #fff !important;
   gap: 10px !important;
 }
+
+	/* Mobile tweaks */
+	@media (max-width: 640px) {
+		.role-select-wrapper {
+			padding-left: 1.25rem;
+			padding-right: 1.25rem;
+			padding-top: 1rem;
+			padding-bottom: 1rem;
+		}
+
+		.role-select-title {
+			font-size: 22px !important;
+		}
+
+		.role-select-subtitle {
+			font-size: 14px !important;
+		}
+
+		.role-card {
+			padding: 24px 20px 22px !important;
+		}
+
+		.role-card-blob {
+			width: 96px;
+			height: 96px;
+			top: -28px;
+			right: -28px;
+		}
+	}
 `;
 
 // ─── Mouse-tracking hook ───────────────────────────────────────────────────────
@@ -286,18 +315,20 @@ const RoleSelectPage: React.FC = () => {
 				description="Chọn vai trò của bạn để tiếp tục đăng nhập vào Bit Learning"
 			/>
 			<AuthLayout showBackGround={false}>
-				<div className="flex h-full w-full items-center justify-center px-6">
+				<div className="flex h-full w-full items-center justify-center px-4 sm:px-6">
 					<div className="w-full max-w-3xl">
 						{/* Header */}
 						<div
+							className="role-select-wrapper"
 							style={{
 								textAlign: "center",
-								marginBottom: "52px",
+								marginBottom: "40px",
 								animation:
 									"role-fadeDown .5s .08s cubic-bezier(.22,1,.36,1) both",
 							}}
 						>
 							<h1
+								className="role-select-title"
 								style={{
 									fontSize: "28px",
 									fontWeight: 800,
@@ -309,6 +340,7 @@ const RoleSelectPage: React.FC = () => {
 								Bạn muốn bắt đầu với vai trò nào?
 							</h1>
 							<p
+								className="role-select-subtitle"
 								style={{ fontSize: "15px", color: "#64748b", fontWeight: 500 }}
 							>
 								Tôi là...
@@ -316,14 +348,7 @@ const RoleSelectPage: React.FC = () => {
 						</div>
 
 						{/* Cards */}
-						<div
-							style={{
-								display: "grid",
-								gridTemplateColumns: "1fr 1fr",
-								gap: "24px",
-							}}
-							className="grid-cols-1 md:grid-cols-2"
-						>
+						<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<RoleCard
 								variant="student"
 								title="Học viên"
