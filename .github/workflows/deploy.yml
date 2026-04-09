@@ -113,10 +113,10 @@ jobs:
                 version: latest
                 ping: ${{ secrets.PROD_VPS_HOST }}
 
-            - name: Debug Tailscale
-              run: |
-                tailscale status
-                tailscale ping --timeout=20s ${{ secrets.PROD_VPS_HOST }}
+            # - name: Debug Tailscale
+            #   run: |
+            #     tailscale status
+            #     tailscale ping --timeout=20s ${{ secrets.PROD_VPS_HOST }}
 
             - name: Write SSH private key
               run: |
