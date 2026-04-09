@@ -11,6 +11,7 @@ import { PaymentMethod } from "@/feature/order/types/order.type";
 import { Pagination } from "@/shared/components/Pagination";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { formatDateTime } from "@/shared/lib/date-time-utils";
+import { formatCurrency } from "@/shared/lib/currency";
 
 const PAGE_SIZE = 10;
 
@@ -20,16 +21,13 @@ const STATUS_CONFIG = {
   [TransactionStatus.FAILED]: { text: "Thất bại", cls: "bg-rose-100 text-rose-700", icon: XCircle },
 };
 
-const formatCurrency = (amount: number) =>
-  new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(amount);
-
 export const DepositHistoryContent: React.FC = () => {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [selectedTx, setSelectedTx] = useState<TransactionInfo | null>(null);
   const [selectedMethod, setSelectedMethod] = useState<PaymentMethod>(PaymentMethod.VNPAY);
 
   const { data, isLoading } = useMyDepositHistory({
-    page: page - 1,
+    page: page,
     size: PAGE_SIZE,
     sort: "createdAt",
     direction: "DESC",
@@ -58,18 +56,18 @@ export const DepositHistoryContent: React.FC = () => {
   return (
     <>
       <div className="grow space-y-8">
-        <Card className="p-8 min-h-screen">
+        <Card className="px-6 py-8 min-h-screen">
           <div className="flex items-center justify-between mb-8">
             <div className="flex items-center gap-3">
               <div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
                 <Wallet className="w-6 h-6 text-primary" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-slate-900">Lịch sử nạp tiền</h2>
-                <p className="text-sm text-slate-500">Xem lại tất cả các giao dịch nạp tiền của bạn</p>
+                <h2 className="text-2xl font-bold text-slate-900">Lịch sử nạp tiền</h2>
+                <p className="text-md text-slate-500">Xem lại tất cả các giao dịch nạp tiền của bạn</p>
               </div>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 mb-2">
               <CreditCard className="w-5 h-5 text-emerald-600" />
               <span className="text-md font-bold text-emerald-900">Tổng đã nạp:</span>
               <span className="text-xl font-bold text-emerald-700">{formatCurrency(totalDeposited)}</span>
@@ -82,46 +80,64 @@ export const DepositHistoryContent: React.FC = () => {
             <div className="text-center py-12 text-slate-500">Chưa có giao dịch nào</div>
           ) : (
             <>
-              <div className="overflow-x-auto px-6">
-                <table className="w-full text-left border-collapse">
+              <div className="overflow-x-auto">
+                <table className="w-full text-left border border-slate-200 rounded-lg overflow-hidden">
                   <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Mã Đơn Hàng</th>
-                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Số tiền</th>
-                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Ngày tạo</th>
-                      <th className="pb-4 pt-0 font-semibold uppercase text-slate-800 text-sm">Trạng thái</th>
-                      <th className="pb-4 pt-0" />
+                    <tr className="bg-slate-50">
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
+                        Mã Đơn Hàng
+                      </th>
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
+                        Số tiền
+                      </th>
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
+                        Ngày tạo
+                      </th>
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
+                        Trạng thái
+                      </th>
+                      <th className="px-4 py-3 border border-slate-200" />
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
+
+                  <tbody>
                     {transactions.map((tx) => {
                       const status = STATUS_CONFIG[tx.status];
                       const StatusIcon = status.icon;
+
                       return (
-                        <tr key={tx.id} className="hover:bg-slate-50/50 transition-colors">
-                          <td className="py-5 font-bold text-slate-900 text-[14px]">#{tx.code}</td>
-                          <td className="py-5 font-bold text-primary text-[14px]">{formatCurrency(tx.amount)}</td>
-                          <td className="py-5 text-slate-500 text-[13px]">
+                        <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="px-4 py-4 border border-slate-200 font-bold text-slate-900 text-[14px]">
+                            #{tx.code}
+                          </td>
+
+                          <td className="px-4 py-4 border border-slate-200 font-bold text-primary text-[16px]">
+                            {formatCurrency(tx.amount)}
+                          </td>
+
+                          <td className="px-4 py-4 border border-slate-200 text-slate-500 text-[13px]">
                             {tx.createdAt ? formatDateTime(tx.createdAt) : "—"}
                           </td>
-                          <td className="py-5">
+
+                          <td className="px-4 py-4 border border-slate-200">
                             <Badge className={`text-sm px-3 flex items-center gap-1.5 w-fit ${status.cls}`}>
                               <StatusIcon className="w-3.5 h-3.5" />
                               {status.text}
                             </Badge>
                           </td>
-                          <td className="text-center">
+
+                          <td className="px-4 py-4 border border-slate-200 text-center">
                             {tx.status === TransactionStatus.PENDING && (
                               <Button
                                 size="lg"
-                                className="cursor-pointer gap-1.5 bg-primary hover:bg-primary/90 text-xs"
+                                className="cursor-pointer gap-1.5 bg-primary hover:bg-primary/90 text-md"
                                 onClick={() => {
                                   setSelectedTx(tx);
                                   setSelectedMethod(PaymentMethod.VNPAY);
                                 }}
                               >
                                 <ExternalLink className="w-3.5 h-3.5" />
-                                Thanh toán tiếp
+                                Thanh toán
                               </Button>
                             )}
                           </td>
@@ -131,8 +147,11 @@ export const DepositHistoryContent: React.FC = () => {
                   </tbody>
                 </table>
               </div>
-
-              {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
+              {totalPages > 1 && (
+                <div className="flex justify-center">
+                  <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+                </div>
+              )}
             </>
           )}
         </Card>
@@ -145,41 +164,34 @@ export const DepositHistoryContent: React.FC = () => {
             if (e.target === e.currentTarget) setSelectedTx(null);
           }}
         >
-          <div className="w-full max-w-md bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
+          <div className="w-full max-w-lg bg-white rounded-2xl shadow-2xl border border-slate-200 overflow-hidden">
             <div className="flex items-center justify-between px-6 py-5 border-b border-slate-100">
               <div>
-                <h2 className="text-base font-bold text-slate-900">Tiếp tục thanh toán</h2>
+                <h2 className="text-lg font-bold text-slate-900">Tiếp tục thanh toán</h2>
                 <p className="text-xs text-slate-500 mt-0.5">#{selectedTx.code}</p>
               </div>
               <button
                 onClick={() => setSelectedTx(null)}
                 className="cursor-pointer w-9 h-9 rounded-lg flex items-center justify-center text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
               >
-                <X className="w-5 h-5" />
+                <X className="w-6 h-6" />
               </button>
             </div>
 
             <div className="px-6 py-4 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-              <span className="text-sm text-slate-500">Số tiền nạp</span>
+              <span className="text-md text-slate-600">Số tiền nạp</span>
               <span className="text-xl font-black text-primary">{formatCurrency(selectedTx.amount)}</span>
             </div>
 
             <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
-              <span className="text-sm text-slate-500">Ngày tạo</span>
-              <span className="text-sm font-medium text-slate-700">
+              <span className="text-md text-slate-600">Ngày tạo</span>
+              <span className="text-md font-medium text-slate-700">
                 {selectedTx.createdAt ? formatDateTime(selectedTx.createdAt) : "—"}
               </span>
             </div>
 
             <div className="px-6 py-5 space-y-4">
-              <div className="flex items-start gap-2 p-3 bg-amber-50 rounded-xl border border-amber-200">
-                <AlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <p className="text-xs text-amber-700 leading-relaxed">
-                  Giao dịch chưa hoàn tất. Chọn phương thức và tiếp tục thanh toán.
-                </p>
-              </div>
-
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              <p className="text-md font-semibold text-slate-500 uppercase tracking-wider">
                 Chọn phương thức thanh toán
               </p>
 
@@ -189,7 +201,11 @@ export const DepositHistoryContent: React.FC = () => {
                     value: PaymentMethod.VNPAY,
                     label: "VNPay",
                     desc: "Thẻ ATM, Visa, MasterCard",
-                    Icon: CreditCard,
+                    renderIcon: () => (
+                      <div className="shrink-0 w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+                        <img src="/vendors/vnpay_logo.png" alt="VNPAY logo" className="w-8 h-8 object-contain" />
+                      </div>
+                    ),
                     active: "border-blue-500 bg-blue-50",
                     idle: "border-blue-200 hover:border-blue-400",
                   },
@@ -197,11 +213,15 @@ export const DepositHistoryContent: React.FC = () => {
                     value: PaymentMethod.PAYOS,
                     label: "PayOS",
                     desc: "Quét mã QR qua app ngân hàng",
-                    Icon: QrCode,
-                    active: "border-violet-500 bg-violet-50",
-                    idle: "border-violet-200 hover:border-violet-400",
+                    renderIcon: () => (
+                      <div className="shrink-0 w-12 h-12 bg-white rounded-lg flex items-center justify-center border border-gray-200">
+                        <img src="/vendors/payos_logo.png" alt="PayOS logo" className="w-8 h-8 object-contain" />
+                      </div>
+                    ),
+                    active: "border-blue-500 bg-blue-50",
+                    idle: "border-blue-200 hover:border-blue-400",
                   },
-                ].map(({ value, label, desc, Icon, active, idle }) => {
+                ].map(({ value, label, desc, renderIcon, active, idle }) => {
                   const isActive = selectedMethod === value;
                   return (
                     <button
@@ -212,14 +232,7 @@ export const DepositHistoryContent: React.FC = () => {
                         isActive ? active : idle,
                       )}
                     >
-                      <div
-                        className={cn(
-                          "w-9 h-9 rounded-lg flex items-center justify-center shrink-0",
-                          isActive ? "bg-white shadow-sm" : "bg-slate-100",
-                        )}
-                      >
-                        <Icon className="w-4 h-4 text-slate-600" />
-                      </div>
+                      {renderIcon()}
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-semibold text-slate-800">{label}</p>
                         <p className="text-xs text-slate-500">{desc}</p>
@@ -235,12 +248,11 @@ export const DepositHistoryContent: React.FC = () => {
               </div>
 
               <Button
-                className="cursor-pointer w-full gap-2 bg-primary hover:bg-primary/90"
+                className="cursor-pointer w-full gap-2 bg-primary hover:bg-primary/90 py-5 text-md"
                 size="lg"
                 onClick={handleContinue}
                 isDisabled={isProcessing}
               >
-                <ExternalLink className="w-4 h-4" />
                 {isProcessing ? "Đang xử lý..." : "Tiếp tục thanh toán"}
               </Button>
             </div>

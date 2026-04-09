@@ -1,9 +1,8 @@
 import { useState } from "react";
-import { Wallet, CheckCircle2, TrendingUp, Loader2 } from "lucide-react";
+import { CheckCircle2, Loader2 } from "lucide-react";
 import { useAddBalanceToWallet } from "@/feature/order/queries/usePayment";
 import { useUserProfile } from "../queries/useUser";
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
-import CardTransaction from "../../../shared/components/button/CardTransaction";
 import { FcMoneyTransfer } from "react-icons/fc";
 import { Button } from "@workspace/ui/components/Button";
 
@@ -91,18 +90,18 @@ export const TopUpContent: React.FC = () => {
 
   return (
     <>
-      <div className="max-w-7xl mx-auto p-6 bg-slate-50" aria-busy={showLoadingOverlay}>
-        <div className="mb-8">
+      <div className="max-w-full mx-auto py-6 bg-slate-50" aria-busy={showLoadingOverlay}>
+        <div className="mb-4">
           <div className="flex items-center gap-3 mb-2">
             <FcMoneyTransfer className="w-6 h-6" />
             <h1 className="text-3xl font-bold text-gray-900">Nạp tiền vào ví</h1>
           </div>
           <p className="text-gray-600">Chọn số tiền bạn muốn nạp vào ví của mình</p>
 
-          <div className="mt-6 rounded-md p-6 bg-white shadow-sm border border-slate-200">
+          <div className="mt-6 rounded-md px-6 py-4 bg-white shadow-sm border border-slate-200">
             <div className="flex items-center justify-between">
               <div>
-                <p className="text-blue-600 text-lg font-bold mb-1">Số dư hiện tại</p>
+                <p className="text-black text-lg font-bold mb-1">Số dư hiện tại</p>
 
                 <div className="flex items-center gap-1.5 mt-2">
                   <BitCoinIcon size={32} />
@@ -117,7 +116,7 @@ export const TopUpContent: React.FC = () => {
         </div>
 
         <div className="grid md:grid-cols-3 gap-6">
-          <div className="md:col-span-2 space-y-6">
+          <div className="md:col-span-2 space-y-4">
             <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
               <h2 className="text-lg font-semibold text-gray-900 mb-4">Chọn số tiền</h2>
 
