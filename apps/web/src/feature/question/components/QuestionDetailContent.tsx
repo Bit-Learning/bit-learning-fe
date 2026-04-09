@@ -130,7 +130,6 @@ const QuestionDetailContent: React.FC = () => {
               <p className="text-lg leading-relaxed">{question.content}</p>
             </div>
 
-            {/* Media inline — ngay dưới nội dung, không card */}
             <MediaUploadPanel
               questionId={questionId!}
               currentMediaUrl={question.mediaUrl ?? null}

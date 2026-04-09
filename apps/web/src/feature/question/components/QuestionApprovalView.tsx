@@ -38,11 +38,16 @@ const statusConfig: Record<ApprovalStatus, { color: string; label: string; bgCol
   [ApprovalStatus.REJECTED]: { color: "text-red-700", label: "Từ chối", bgColor: "bg-red-100" },
 };
 
-const menus = [
-  { id: "my-requests", label: "Yêu cầu của tôi" },
-  { id: "pending", label: "Chờ phê duyệt" },
-];
-
+const getStatusBadge = (status: ApprovalStatus) => {
+  const variants: Record<ApprovalStatus, { className: string; label: string }> = {
+    [ApprovalStatus.NONE]: { className: "bg-gray-100 text-gray-700", label: "Chưa gửi" },
+    [ApprovalStatus.PENDING]: { className: "bg-blue-100 text-blue-700", label: "Chờ duyệt" },
+    [ApprovalStatus.APPROVED]: { className: "bg-green-100 text-green-700", label: "Đã duyệt" },
+    [ApprovalStatus.REJECTED]: { className: "bg-red-100 text-red-700", label: "Từ chối" },
+  };
+  const config = variants[status];
+  return <span className={`px-2 py-1 rounded text-sm font-medium ${config.className}`}>{config.label}</span>;
+};
 export default function QuestionApprovalTableView() {
   const [activeMenu, setActiveMenu] = useState("my-requests");
   const [page, setPage] = useState(0);
@@ -97,12 +102,15 @@ export default function QuestionApprovalTableView() {
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 
+  const getTypeBadge = (type: QuestionType) =>
+    ({ [QuestionType.MCQ]: "Trắc nghiệm", [QuestionType.ESSAY]: "Tự luận" })[type];
+
   return (
     <div className="bg-slate-50 mx-auto p-8">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-3xl font-bold">Yêu cầu phê duyệt</h1>
-          <p className="text-sm text-slate-500 mt-1">Theo dõi trạng thái phê duyệt các câu hỏi.</p>
+          <p className="text-lg text-slate-500 mt-1">Theo dõi trạng thái phê duyệt các câu hỏi.</p>
         </div>
       </div>
 
@@ -172,101 +180,74 @@ export default function QuestionApprovalTableView() {
         </div>
       ) : (
         <>
-          <div className="bg-white rounded-md border-2 border-slate-200 overflow-hidden">
+          <div className="bg-white rounded-md border border-slate-300 overflow-hidden">
             <table className="w-full">
-              <thead className="bg-slate-50 border-b border-slate-400">
+              <thead className="bg-slate-50 border-b border-slate-300">
                 <tr>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-32">
+                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-32">
                     ID
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider">
+                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider">
                     Nội dung câu hỏi
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-36">
+                  <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">LOẠI</th>
+                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-36">
                     Ngày gửi
                   </th>
-                  <th className="px-6 py-4 text-left text-sm font-semibold text-slate-800 uppercase tracking-wider w-40">
+                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-40">
                     Trạng thái
                   </th>
-                  <th className="px-6 py-4 text-center text-sm font-semibold text-slate-800 uppercase tracking-wider w-52">
-                    Thao tác
-                  </th>
+                  <th className="px-6 py-4 text-center text-md font-semibold text-slate-800 uppercase tracking-wider w-52"></th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
                 {pagedQuestions.map((question: QuestionResponse) => (
-                  <tr key={question.id} className="hover:bg-slate-50 transition-colors">
+                  <tr
+                    key={question.id}
+                    onClick={() => setSelectedQuestion(question)}
+                    className="hover:bg-slate-50 transition-colors cursor-pointer"
+                  >
                     <td className="px-6 py-4">
-                      <div className="text-sm font-medium text-slate-900">{question.id}</div>
+                      <div className="text-md font-medium text-slate-900">{question.id}</div>
                     </td>
                     <td className="px-6 py-4">
                       <div className="max-w-xl">
                         <div className="text-md font-medium text-slate-900 mb-2 line-clamp-2">{question.content}</div>
                         <div className="flex flex-wrap items-center gap-2">
-                          <span className="text-sm text-blue-600 font-bold">
-                            {question.questionType === QuestionType.MCQ ? "Trắc nghiệm" : "Tự luận"}
-                          </span>
                           {question.subject && (
                             <>
-                              <span className="text-xs text-slate-500">•</span>
-                              <span className="text-xs text-slate-800">{question.subject.name}</span>
+                              <span className="text-sm text-slate-800">{question.subject.name}</span>
                             </>
                           )}
                         </div>
                       </div>
                     </td>
+                    <td className="px-6 py-4 text-md font-bold text-blue-700">{getTypeBadge(question.questionType)}</td>
                     <td className="px-6 py-4">
                       <div className="text-sm text-slate-800">{formatDate(question.createdAt)}</div>
                     </td>
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-2">
-                        <div
-                          className={cn(
-                            "w-2 h-2 rounded-full",
-                            question.approvalStatus === ApprovalStatus.PENDING && "bg-yellow-500",
-                            question.approvalStatus === ApprovalStatus.APPROVED && "bg-green-500",
-                            question.approvalStatus === ApprovalStatus.REJECTED && "bg-red-500",
-                            question.approvalStatus === ApprovalStatus.NONE && "bg-slate-400",
-                          )}
-                        />
-                        <Badge
-                          className={cn(
-                            "text-xs font-medium",
-                            statusConfig[question.approvalStatus].bgColor,
-                            statusConfig[question.approvalStatus].color,
-                          )}
-                        >
-                          {statusConfig[question.approvalStatus].label}
-                        </Badge>
-                      </div>
-                    </td>
+                    <td className="px-6 py-4 text-sm">{getStatusBadge(question.approvalStatus)}</td>
                     <td className="px-2 py-4">
                       <div className="flex items-center justify-center gap-3">
                         {question.approvalStatus === ApprovalStatus.REJECTED && (
                           <>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 hover:bg-red-50 hover:text-red-600"
+                            <button
+                              className="cursor-pointer p-2 text-slate-600 hover:text-red-600 dark:hover:text-red-600 transition-colors"
                               onClick={() => setSelectedQuestion(question)}
                             >
                               <XCircle className="w-4 h-4" />
-                            </Button>
-                            <Button variant="ghost" size="sm" className="h-8 hover:bg-blue-50 hover:text-blue-600">
-                              Sửa & Gửi lại
-                            </Button>
+                            </button>
+                            <button className="h-8 hover:bg-blue-50 hover:text-blue-600">Sửa & Gửi lại</button>
                           </>
                         )}
                         {(question.approvalStatus === ApprovalStatus.APPROVED ||
                           question.approvalStatus === ApprovalStatus.PENDING) && (
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            className="h-8 w-8 hover:bg-blue-50 hover:text-blue-600"
+                          <button
+                            className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-blue-600 transition-colors"
                             onClick={() => setSelectedQuestion(question)}
                           >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                            <Eye className="w-5 h-5" />
+                          </button>
                         )}
                       </div>
                     </td>
@@ -298,19 +279,19 @@ export default function QuestionApprovalTableView() {
             <CardHeader className="border-b border-slate-200">
               <div className="flex items-start justify-between gap-4">
                 <div className="flex-1">
-                  <CardTitle className="text-xl mb-3">Chi tiết câu hỏi</CardTitle>
+                  <CardTitle className="text-2xl mb-3">Chi tiết câu hỏi</CardTitle>
                   <div className="flex flex-wrap items-center gap-2">
-                    <Badge className={cn("text-xs font-medium", levelColors[selectedQuestion.questionLevel])}>
+                    <Badge className={cn("text-md font-medium", levelColors[selectedQuestion.questionLevel])}>
                       {selectedQuestion.questionLevel === QuestionLevel.EASY && "Dễ"}
                       {selectedQuestion.questionLevel === QuestionLevel.MEDIUM && "Trung bình"}
                       {selectedQuestion.questionLevel === QuestionLevel.HARD && "Khó"}
                     </Badge>
-                    <Badge variant="outline" className="text-xs">
+                    <Badge variant="outline" className="text-md ">
                       {selectedQuestion.questionType === QuestionType.MCQ ? "Trắc nghiệm" : "Tự luận"}
                     </Badge>
                     <Badge
                       className={cn(
-                        "text-xs",
+                        "text-md ",
                         statusConfig[selectedQuestion.approvalStatus].bgColor,
                         statusConfig[selectedQuestion.approvalStatus].color,
                       )}
@@ -319,33 +300,36 @@ export default function QuestionApprovalTableView() {
                     </Badge>
                   </div>
                 </div>
-                <Button variant="ghost" size="icon" onClick={() => setSelectedQuestion(null)}>
-                  <XCircle className="w-5 h-5" />
-                </Button>
+                <button
+                  className="cursor-pointer p-2 text-slate-600 hover:text-red-600 dark:hover:text-red-600 transition-colors"
+                  onClick={() => setSelectedQuestion(null)}
+                >
+                  <XCircle className="w-7 h-7" />
+                </button>
               </div>
             </CardHeader>
 
             <CardContent className="px-6 space-y-6">
               <div className="grid grid-cols-2 gap-4 pb-4 border-b border-slate-200">
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-1">Môn học</h3>
+                  <h3 className="text-md  font-bold text-slate-700 mb-1">Môn học</h3>
                   <p className="text-sm text-slate-900">{selectedQuestion.subject?.name || "Chưa có"}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-1">Bài học</h3>
+                  <h3 className="text-md  font-bold text-slate-700 mb-1">Bài học</h3>
                   <p className="text-sm text-slate-900">{selectedQuestion.lesson?.name || "Chưa có"}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-1">Ngày tạo</h3>
+                  <h3 className="text-md font-bold text-slate-700 mb-1">Ngày tạo</h3>
                   <p className="text-sm text-slate-900">{formatDate(selectedQuestion.createdAt)}</p>
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-1">Cập nhật</h3>
+                  <h3 className="text-md font-bold text-slate-700 mb-1">Cập nhật</h3>
                   <p className="text-sm text-slate-900">{formatDate(selectedQuestion.updatedAt)}</p>
                 </div>
               </div>
               <div>
-                <h3 className="text-sm font-bold text-slate-700 mb-2">Nội dung câu hỏi</h3>
+                <h3 className="text-md font-bold text-slate-700 mb-2">Nội dung câu hỏi</h3>
                 <p className="text-slate-900">{selectedQuestion.content}</p>
               </div>
               {selectedQuestion.mediaUrl && (
@@ -358,13 +342,13 @@ export default function QuestionApprovalTableView() {
               )}
               {selectedQuestion.canonicalAnswer && (
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-2">Đáp án mẫu</h3>
+                  <h3 className="text-md font-bold text-slate-700 mb-2">Đáp án mẫu</h3>
                   <p className="text-slate-900">{selectedQuestion.canonicalAnswer}</p>
                 </div>
               )}
               {selectedQuestion.options && selectedQuestion.options.length > 0 && (
                 <div>
-                  <h3 className="text-sm font-bold text-slate-700 mb-3">Các lựa chọn</h3>
+                  <h3 className="text-md font-bold text-slate-700 mb-3">Các lựa chọn</h3>
                   <div className="space-y-2">
                     {selectedQuestion.options.map((option) => (
                       <div
@@ -374,13 +358,13 @@ export default function QuestionApprovalTableView() {
                           option.isCorrect ? "bg-green-50 border-green-200" : "bg-slate-50 border-slate-200",
                         )}
                       >
-                        <div className="flex items-start gap-3">
-                          <span className="font-semibold min-w-6">{option.label}</span>
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold min-w-6 text-lg">{option.label}</span>
                           <div className="flex-1 flex items-center justify-between gap-2">
-                            <p>{option.content}</p>
+                            <p className="text-lg">{option.content}</p>
 
                             {option.isCorrect && (
-                              <Badge variant="outline" className="font-bold">
+                              <Badge variant="outline" className="font-bold text-sm">
                                 <CheckCircle className="w-3 h-3 mr-1" />
                                 Đáp án đúng
                               </Badge>

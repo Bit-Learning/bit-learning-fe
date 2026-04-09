@@ -22,7 +22,7 @@ export const SlideManagementView: React.FC = () => {
   };
 
   return (
-    <div className="bg-background-light text-slate-900 min-h-screen">
+    <div className="bg-slate-50 text-slate-900 min-h-screen">
       <div className="p-8 mx-auto">
         <div className="mb-8 border-b border-slate-200">
           <div className="flex items-center justify-between mb-6">
@@ -30,7 +30,7 @@ export const SlideManagementView: React.FC = () => {
           </div>
           <div className="flex gap-8">
             <button
-              className={`pb-4 border-b-2 font-semibold text-sm transition-colors ${
+              className={`cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors ${
                 activeTab === "my-slides"
                   ? "border-primary text-primary"
                   : "border-transparent text-slate-500 hover:text-slate-700"
@@ -40,7 +40,7 @@ export const SlideManagementView: React.FC = () => {
               Slide của tôi
             </button>
             <button
-              className={`pb-4 border-b-2 font-semibold text-sm transition-colors ${
+              className={`cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors ${
                 activeTab === "create"
                   ? "border-primary text-primary"
                   : "border-transparent text-slate-500 hover:text-slate-700"

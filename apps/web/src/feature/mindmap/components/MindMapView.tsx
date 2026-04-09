@@ -520,11 +520,11 @@ export default function MindMapView() {
       <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
         <div>
           <h1 className="text-3xl font-bold text-slate-900 dark:text-white">{t("mindmap.title")}</h1>
-          <p className="mt-1 text-sm text-slate-500 dark:text-slate-400">{t("mindmap.subtitle")}</p>
+          <p className="mt-1 text-lg text-slate-500 dark:text-slate-400">{t("mindmap.subtitle")}</p>
         </div>
 
         {activeTab === "generate" && metadata && (
-          <div className="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400">
+          <div className="flex items-center gap-3 text-sm text-slate-500 dark:text-slate-400">
             <span>{t("mindmap.metadata.nodes", { count: metadata.total_nodes })}</span>
             <span>•</span>
             <span>{t("mindmap.metadata.edges", { count: metadata.total_edges })}</span>
@@ -548,8 +548,8 @@ export default function MindMapView() {
                           key={name}
                           className="rounded-md border border-slate-200 bg-slate-50 p-2 dark:border-slate-700 dark:bg-slate-800/60"
                         >
-                          <p className="text-xs font-medium text-slate-800 dark:text-slate-200">{name}</p>
-                          <p className="mt-1 text-xs text-slate-600 dark:text-slate-300">{detail}</p>
+                          <p className="text-sm font-medium text-slate-800 dark:text-slate-200">{name}</p>
+                          <p className="mt-1 text-sm text-slate-600 dark:text-slate-300">{detail}</p>
                         </div>
                       ))}
                     </div>
@@ -561,13 +561,13 @@ export default function MindMapView() {
         )}
       </div>
 
-      <div className="flex gap-1 border-b border-slate-200 dark:border-slate-700">
+      <div className="flex gap-8 border-b border-slate-200 dark:border-slate-700">
         <button
           onClick={() => setActiveTab("generate")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${
             activeTab === "generate"
-              ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "border-primary text-primary"
+              : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
           <Sparkles className="h-4 w-4" />
@@ -575,10 +575,10 @@ export default function MindMapView() {
         </button>
         <button
           onClick={() => setActiveTab("saved")}
-          className={`flex items-center gap-2 border-b-2 px-4 py-2 text-sm font-medium transition-colors ${
+          className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${
             activeTab === "saved"
-              ? "border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400"
-              : "border-transparent text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200"
+              ? "border-primary text-primary"
+              : "border-transparent text-slate-500 hover:text-slate-700"
           }`}
         >
           <BookMarked className="h-4 w-4" />
@@ -587,11 +587,11 @@ export default function MindMapView() {
       </div>
 
       {activeTab === "generate" && (
-        <div className="flex flex-1 flex-col gap-3 overflow-hidden">
+        <div className="flex flex-1 flex-col gap-3 overflow-hidden p-2">
           <div className="flex flex-col gap-3">
             <div className="flex flex-wrap gap-2">
-              <Input
-                className="min-w-0 flex-1"
+              <input
+                className="flex-1 pl-3 pr-4 py-2 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-1 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
                 placeholder={t("mindmap.topicPlaceholder")}
                 value={topic}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTopic(e.target.value)}
@@ -617,7 +617,11 @@ export default function MindMapView() {
 
               <ShapePicker value={nodeShape} onChange={setNodeShape} disabled={isPending} />
 
-              <Button variant="outline" onPress={() => setShowSettings(!showSettings)} className="shrink-0">
+              <Button
+                variant="outline"
+                onPress={() => setShowSettings(!showSettings)}
+                className="shrink-0 py-5 border-blue-600"
+              >
                 <Settings2 className="h-4 w-4" />
               </Button>
 
@@ -625,7 +629,7 @@ export default function MindMapView() {
                 variant="outline"
                 onPress={handleExportImage}
                 isDisabled={!hasResult || isPending}
-                className="shrink-0 gap-2"
+                className="cursor-pointer shrink-0 gap-2 py-5 border-blue-600"
               >
                 <ImageDown className="h-4 w-4" />
                 {t("mindmap.button.export")}
@@ -636,7 +640,7 @@ export default function MindMapView() {
                   variant="outline"
                   onPress={handleSaveTree}
                   isDisabled={isSaving || isPending}
-                  className="shrink-0 gap-2"
+                  className="cursor-pointer shrink-0 gap-2 py-5"
                 >
                   {isSaving ? <Loader2 className="h-4 w-4 animate-spin" /> : <Save className="h-4 w-4" />}
                   Lưu
@@ -647,14 +651,18 @@ export default function MindMapView() {
                 <Button
                   variant="outline"
                   onPress={() => setShowVersionSidebar((v) => !v)}
-                  className={`shrink-0 gap-2 ${showVersionSidebar ? "border-indigo-400 text-indigo-600 dark:border-indigo-500 dark:text-indigo-400" : ""}`}
+                  className={`cursor-pointer shrink-0 gap-2 py-5 ${showVersionSidebar ? "border-indigo-400 text-indigo-600 dark:border-indigo-500 dark:text-indigo-400" : ""}`}
                 >
                   <History className="h-4 w-4" />
                   Lịch sử
                 </Button>
               )}
 
-              <Button onPress={handleGenerate} isDisabled={isPending || !topic.trim()} className="shrink-0 gap-2">
+              <Button
+                onPress={handleGenerate}
+                isDisabled={isPending || !topic.trim()}
+                className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+              >
                 {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : <Sparkles className="h-4 w-4" />}
                 {isPending ? t("mindmap.button.generating") : t("mindmap.button.generate")}
               </Button>
@@ -729,10 +737,10 @@ export default function MindMapView() {
                   </div>
                   <div className="flex items-center gap-2">
                     <AlertTriangle className="h-3.5 w-3.5 text-amber-600" />
-                    <span className="text-xs text-amber-600 dark:text-amber-400">Chế độ xem — chưa khôi phục</span>
+                    <span className="text-sm text-amber-600 dark:text-amber-400">Chế độ xem — chưa khôi phục</span>
                     <button
                       onClick={handleCancelPreview}
-                      className="ml-2 rounded-md px-2 py-1 text-xs font-medium text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900"
+                      className="ml-2 rounded-md px-2 py-1 text-sm font-medium text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900"
                     >
                       Quay lại
                     </button>
@@ -816,17 +824,17 @@ export default function MindMapView() {
           </div>
 
           {hasResult && (
-            <p className="flex items-center gap-1.5 text-xs text-slate-400 dark:text-slate-500">
-              <Pencil className="h-3 w-3" />
+            <p className="flex items-center gap-1.5 text-md text-slate-400 dark:text-slate-500">
+              <Pencil className="h-4 w-4" />
               Double-click vào node bất kỳ để chỉnh sửa nội dung
             </p>
           )}
 
           {currentMindMapId && hasResult && (
-            <div className="flex items-center gap-3 rounded-xl border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
+            <div className="flex items-center gap-3 rounded-md border border-slate-300 bg-white p-3 dark:border-slate-700 dark:bg-slate-800/50">
               <Wand2 className="h-4 w-4 shrink-0 text-indigo-500" />
-              <Input
-                className="flex-1"
+              <input
+                className="flex-1 pl-3 pr-4 py-2 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-1 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
                 placeholder="Nhập yêu cầu tinh chỉnh, ví dụ: Thêm nhánh về lập trình Java..."
                 value={refineInstruction}
                 onChange={(e: React.ChangeEvent<HTMLInputElement>) => setRefineInstruction(e.target.value)}
@@ -840,7 +848,7 @@ export default function MindMapView() {
               <Button
                 onPress={handleRefine}
                 isDisabled={!refineInstruction.trim() || isRefining}
-                className="shrink-0 gap-2"
+                className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
               >
                 {isRefining ? <Loader2 className="h-4 w-4 animate-spin" /> : <Wand2 className="h-4 w-4" />}
                 Tinh chỉnh Mindmap
@@ -861,7 +869,7 @@ export default function MindMapView() {
             </h2>
             <div className="mt-4 flex flex-col gap-3">
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Tiêu đề</label>
+                <label className="mb-1 block text-md font-medium text-slate-700 dark:text-slate-300">Tiêu đề</label>
                 <Input
                   value={editingNode.label}
                   onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
@@ -874,7 +882,7 @@ export default function MindMapView() {
                 />
               </div>
               <div>
-                <label className="mb-1 block text-sm font-medium text-slate-700 dark:text-slate-300">Mô tả</label>
+                <label className="mb-1 block text-md font-medium text-slate-700 dark:text-slate-300">Mô tả</label>
                 <textarea
                   value={editingNode.description}
                   onChange={(e) => setEditingNode({ ...editingNode, description: e.target.value })}
@@ -885,14 +893,14 @@ export default function MindMapView() {
                   rows={3}
                   className="w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm text-slate-700 outline-none focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
                 />
-                <p className="mt-1 text-xs text-slate-400">Ctrl+Enter để lưu</p>
+                <p className="mt-1 text-md text-slate-400">Ctrl+Enter để lưu</p>
               </div>
             </div>
             <div className="mt-5 flex justify-end gap-2">
-              <Button variant="outline" onPress={() => setEditingNode(null)}>
+              <Button variant="outline" onPress={() => setEditingNode(null)} className="p-5 border-blue-600">
                 Hủy
               </Button>
-              <Button onPress={handleSaveNodeEdit} isDisabled={!editingNode.label.trim()} className="gap-2">
+              <Button onPress={handleSaveNodeEdit} isDisabled={!editingNode.label.trim()} className="gap-2 py-5">
                 <Pencil className="h-4 w-4" />
                 Lưu thay đổi
               </Button>

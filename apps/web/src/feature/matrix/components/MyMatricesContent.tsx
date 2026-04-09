@@ -81,11 +81,11 @@ const MyMatricesContent: React.FC = () => {
         <div className="flex items-center justify-between mb-8">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Quản lý Ma trận đề thi</h1>
-            <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">Ngân hàng ma trận đề thi</p>
+            <p className="text-slate-500 dark:text-slate-400 text-lg mt-1">Ngân hàng ma trận đề thi</p>
           </div>
           <Button
             onClick={() => setModal({ open: true })}
-            className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+            className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
           >
             <Plus className="h-5 w-5" />
             Tạo ma trận mới
@@ -154,29 +154,29 @@ const MyMatricesContent: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white rounded-md border-2 border-slate-200 overflow-hidden">
+            <div className="bg-white rounded-md border border-slate-300 overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-300 bg-gray-50">
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                       TÊN MA TRẬN
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-36">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-36">
                       MÃ
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-80">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-80">
                       MÔN HỌC
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-28">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
                       THỜI GIAN
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-28">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
                       TỔNG ĐIỂM
                     </th>
-                    <th className="text-left p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-36">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-36">
                       TRẠNG THÁI
                     </th>
-                    <th className="text-center p-4 font-semibold text-xs text-gray-800 uppercase tracking-wider w-36">
+                    <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-36">
                       THAO TÁC
                     </th>
                   </tr>
@@ -185,7 +185,8 @@ const MyMatricesContent: React.FC = () => {
                   {pagedMatrices.map((matrix: TMatrixResponse) => (
                     <tr
                       key={matrix.id}
-                      className="border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
+                      onClick={() => navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } })}
+                      className="cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors"
                     >
                       <td className="p-4">
                         <div className="font-medium text-gray-900">{matrix.name}</div>
@@ -214,25 +215,25 @@ const MyMatricesContent: React.FC = () => {
                       <td className="p-4">
                         <div className="flex items-center justify-center gap-1">
                           <button
-                            className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
+                            className="cursor-pointer p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors"
                             title="Xem chi tiết"
                             onClick={() => navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } })}
                           >
-                            <Eye className="h-4 w-4" />
+                            <Eye className="h-5 w-5" />
                           </button>
                           <button
-                            className="p-2 text-gray-600 hover:text-primary hover:bg-gray-100 rounded transition-colors"
+                            className="cursor-pointer p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors"
                             title="Chỉnh sửa"
                             onClick={() => setModal({ open: true, data: matrix })}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="h-5 w-5" />
                           </button>
                           <button
-                            className="p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
+                            className="cursor-pointer p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                             title="Xóa"
                             onClick={() => handleDelete(matrix)}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-5 w-5" />
                           </button>
                         </div>
                       </td>

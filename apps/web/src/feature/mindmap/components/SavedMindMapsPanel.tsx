@@ -94,7 +94,7 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
 
   return (
     <div className="flex flex-1 flex-col gap-4 overflow-hidden">
-      <div className="grid flex-1 auto-rows-max grid-cols-1 gap-4 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+      <div className="grid flex-1 auto-rows-max grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
         {items.map((item) => {
           const isConfirmingDelete = confirmDeleteId === item.id;
           const isLoadingThis = loadingId === item.id;
@@ -102,32 +102,27 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
           return (
             <div
               key={item.id}
-              className="flex flex-col rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
+              className="flex flex-col rounded-md border border-slate-300 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
             >
-              {/* Name */}
-              <p className="truncate text-base font-semibold text-slate-900 dark:text-white">{item.name}</p>
+              <p className="truncate text-md font-semibold text-slate-900 dark:text-white">{item.name}</p>
 
-              {/* Title */}
               <p className="mt-0.5 truncate text-sm text-slate-500 dark:text-slate-400">{item.title}</p>
 
-              {/* Chips */}
               <div className="mt-3 flex flex-wrap gap-1.5">
-                <span className="rounded-full bg-indigo-50 px-2.5 py-0.5 text-xs font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
+                <span className="rounded-md bg-indigo-50 px-2.5 py-0.5 text-sm font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
                   {item.topic}
                 </span>
               </div>
 
-              {/* Date */}
-              <p className="mt-2 text-xs text-slate-400 dark:text-slate-500">{formatDate(item.createdAt)}</p>
+              <p className="mt-2 text-sm text-slate-600 dark:text-slate-500">{formatDate(item.createdAt)}</p>
 
-              {/* Actions */}
               <div className="mt-4 flex gap-2">
                 {isConfirmingDelete ? (
                   <>
                     <Button
                       variant="outline"
                       onPress={() => setConfirmDeleteId(null)}
-                      className="flex-1 text-xs"
+                      className=" cursor-pointer sm py-5"
                       isDisabled={isDeleting}
                     >
                       Hủy
@@ -135,7 +130,7 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
                     <Button
                       onPress={() => handleDelete(item.id)}
                       isDisabled={isDeleting}
-                      className="flex-1 gap-1 bg-red-600 text-xs text-white hover:bg-red-700"
+                      className="cursor-pointer flex-1 gap-1 bg-red-600 text-sm text-white hover:bg-red-700 py-5"
                     >
                       {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                       Xác nhận xóa
@@ -146,17 +141,17 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
                     <Button
                       variant="outline"
                       onPress={() => setConfirmDeleteId(item.id)}
-                      className="shrink-0"
+                      className="cursor-pointer shrink-0 py-5"
                       isDisabled={isLoadingThis}
                     >
-                      <Trash2 className="h-4 w-4 text-red-500" />
+                      <Trash2 className="h-5 w-5 text-red-500" />
                     </Button>
                     <Button
                       onPress={() => handleLoad(item.id)}
                       isDisabled={isLoadingThis}
-                      className="flex flex-1 items-center justify-center gap-1.5 text-sm"
+                      className="flex-1 justify-center text-md  cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
                     >
-                      {isLoadingThis ? <Loader2 className="h-4 w-4 animate-spin" /> : <Upload className="h-4 w-4" />}
+                      {isLoadingThis ? <Loader2 className="h-5 w-5 animate-spin" /> : <Upload className="h-5 w-5" />}
                       Sử dụng
                     </Button>
                   </>
@@ -167,7 +162,6 @@ export default function SavedMindMapsPanel({ onLoad }: SavedMindMapsPanelProps) 
         })}
       </div>
 
-      {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-center gap-3">
           <Button

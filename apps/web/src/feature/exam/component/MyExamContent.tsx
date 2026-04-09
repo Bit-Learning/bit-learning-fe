@@ -142,7 +142,7 @@ const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
               {type === "EXAM" ? (
                 <span className="text-red-500 ml-1">*</span>
               ) : (
-                <span className="text-slate-400 text-xs font-normal ml-1">(tuỳ chọn)</span>
+                <span className="text-slate-400 text-sm font-normal ml-1">(tuỳ chọn)</span>
               )}
             </label>
             <input
@@ -185,7 +185,6 @@ const MyExamsContent: React.FC = () => {
   const [page, setPage] = useState(0);
   const [size] = useState(10);
 
-  // Modal state
   const [editingExam, setEditingExam] = useState<ExamBriefResponse | null>(null);
   const [deletingExam, setDeletingExam] = useState<ExamBriefResponse | null>(null);
 
@@ -219,14 +218,14 @@ const MyExamsContent: React.FC = () => {
   const getStatusBadge = (isPublished: boolean) => {
     if (isPublished) {
       return (
-        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50">
+        <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-semibold bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-800/50">
           <span className="w-1.5 h-1.5 rounded-full bg-emerald-500" />
           Đã xuất bản
         </span>
       );
     }
     return (
-      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-xs font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
+      <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-md text-sm font-semibold bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 border border-slate-200 dark:border-slate-700">
         <span className="w-1.5 h-1.5 rounded-full bg-slate-400" />
         Nháp
       </span>
@@ -253,13 +252,13 @@ const MyExamsContent: React.FC = () => {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold dark:text-white">Đề thi của tôi</h1>
-          <p className="text-slate-500 dark:text-slate-400 text-sm mt-1">
+          <p className="text-slate-500 dark:text-slate-400 text-lg mt-1">
             Quản lý các đề thi bạn đã tạo cho học sinh của mình.
           </p>
         </div>
         <Button
           onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
-          className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+          className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
         >
           <Plus className="h-5 w-5" />
           Tạo đề thi mới
@@ -311,7 +310,7 @@ const MyExamsContent: React.FC = () => {
                 setFilterType("");
                 setFilterSubjectId("");
               }}
-              className="text-xs text-slate-500 hover:text-red-500 transition-colors whitespace-nowrap underline"
+              className="text-sm text-slate-500 hover:text-red-500 transition-colors whitespace-nowrap underline"
             >
               Xóa bộ lọc
             </button>
@@ -319,7 +318,7 @@ const MyExamsContent: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-white my-6 rounded-md border border-slate-200 overflow-hidden">
+      <div className="bg-white my-6 rounded-md border border-slate-300 overflow-hidden">
         {isLoading ? (
           <div className="p-6 space-y-2">
             {[1, 2, 3, 4, 5].map((i) => (
@@ -353,22 +352,22 @@ const MyExamsContent: React.FC = () => {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="border-b border-gray-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-                    <th className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-md font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
                       Thông tin đề thi
                     </th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-md font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
                       Mã đề
                     </th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-md font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
                       Thời gian
                     </th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider text-center">
+                    <th className="px-6 py-4 text-md font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider text-center">
                       Thang điểm
                     </th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
+                    <th className="px-6 py-4 text-md font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider">
                       Trạng thái
                     </th>
-                    <th className="px-6 py-4 text-xs font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider text-center">
+                    <th className="px-6 py-4 text-md font-bold text-slate-800 dark:text-slate-300 uppercase tracking-wider text-center">
                       Thao tác
                     </th>
                   </tr>
@@ -385,12 +384,12 @@ const MyExamsContent: React.FC = () => {
                         <div className="flex items-center gap-2 flex-wrap">
                           {getTypeBadge(exam.type)}
                           {exam.subject && (
-                            <span className="text-xs text-slate-400 dark:text-slate-500">{exam.subject.name}</span>
+                            <span className="text-sm text-slate-400 dark:text-slate-500">{exam.subject.name}</span>
                           )}
                         </div>
                       </td>
                       <td className="px-6 py-4">
-                        <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-xs font-semibold">
+                        <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-sm font-semibold">
                           {exam.code}
                         </span>
                       </td>
@@ -411,7 +410,7 @@ const MyExamsContent: React.FC = () => {
                               e.stopPropagation();
                               navigate({ to: `/mentor/exam/${exam.id}` });
                             }}
-                            className="p-2 text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors"
+                            className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-blue-600 transition-colors"
                             title="Xem"
                           >
                             <Eye className="h-5 w-5" />
@@ -421,7 +420,7 @@ const MyExamsContent: React.FC = () => {
                               e.stopPropagation();
                               setEditingExam(exam);
                             }}
-                            className="p-2 text-slate-400 hover:text-primary dark:hover:text-blue-400 transition-colors"
+                            className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-blue-600 transition-colors"
                             title="Sửa"
                           >
                             <Edit className="h-5 w-5" />
@@ -431,7 +430,7 @@ const MyExamsContent: React.FC = () => {
                               e.stopPropagation();
                               setDeletingExam(exam);
                             }}
-                            className="p-2 text-slate-400 hover:text-red-500 transition-colors"
+                            className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-red-600 transition-colors"
                             title="Xóa"
                           >
                             <Trash2 className="h-5 w-5" />

@@ -20,7 +20,6 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
         className="bg-white w-full max-w-6xl rounded-2xl shadow-2xl border border-slate-200 flex flex-col overflow-hidden"
         style={{ height: "90vh" }}
       >
-        {/* Header */}
         <div className="px-6 py-4 border-b border-slate-200 flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center">
@@ -28,20 +27,20 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
             </div>
             <div>
               <h2 className="text-base font-bold text-slate-900 line-clamp-1">{slide.topic}</h2>
-              <p className="text-xs text-slate-500">{slide.templateName} · {slide.slideCount} slides</p>
+              <p className="text-md text-slate-500">
+                {slide.templateName} · {slide.slideCount} slides
+              </p>
             </div>
           </div>
           <button
-            className="w-9 h-9 flex items-center justify-center hover:bg-slate-100 rounded-full text-slate-400 transition-all group"
+            className="cursor-pointer w-9 h-9 flex items-center justify-center hover:bg-slate-100 rounded-full text-slate-600  hover:text-red-600 transition-all group"
             onClick={onClose}
           >
-            <X className="group-hover:rotate-90 transition-transform" size={18} />
+            <X className="group-hover:rotate-90 transition-transform" size={24} />
           </button>
         </div>
 
-        {/* Body */}
         <div className="flex-1 flex overflow-hidden">
-          {/* PDF Viewer */}
           <div className="flex-1 overflow-hidden border-r border-slate-100">
             {slide.pdfCloudinaryUrl ? (
               <iframe
@@ -52,39 +51,36 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
             ) : (
               <div className="flex flex-col items-center justify-center h-full gap-3 text-slate-400">
                 <AlertCircle size={40} className="opacity-40" />
-                <p className="text-sm">Không có file xem trước.</p>
+                <p className="text-md">Không có file xem trước.</p>
               </div>
             )}
           </div>
 
-          {/* Info Panel */}
           <div className="w-72 shrink-0 flex flex-col overflow-y-auto p-5 gap-5">
             <div>
-              <h3 className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-3">
-                Thông tin
-              </h3>
+              <h3 className="text-md font-semibold uppercase tracking-wider text-slate-400 mb-3">Thông tin</h3>
               <ul className="space-y-3">
                 <li className="flex flex-col gap-0.5">
-                  <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <span className="text-md text-slate-400 flex items-center gap-1.5">
                     <FileText size={12} />
                     Chủ đề
                   </span>
-                  <span className="text-sm font-medium text-slate-900">{slide.topic}</span>
+                  <span className="text-md font-medium text-slate-900">{slide.topic}</span>
                 </li>
                 <li className="flex flex-col gap-0.5">
-                  <span className="text-xs text-slate-400">Số lượng slide</span>
-                  <span className="text-sm font-medium text-slate-900">{slide.slideCount} slides</span>
+                  <span className="text-md text-slate-400">Số lượng slide</span>
+                  <span className="text-md font-medium text-slate-900">{slide.slideCount} slides</span>
                 </li>
                 <li className="flex flex-col gap-0.5">
-                  <span className="text-xs text-slate-400">Template</span>
-                  <span className="text-sm font-medium text-primary">{slide.templateName}</span>
+                  <span className="text-md text-slate-400">Template</span>
+                  <span className="text-md font-medium text-primary">{slide.templateName}</span>
                 </li>
                 <li className="flex flex-col gap-0.5">
-                  <span className="text-xs text-slate-400 flex items-center gap-1.5">
+                  <span className="text-md text-slate-400 flex items-center gap-1.5">
                     <Calendar size={12} />
                     Ngày tạo
                   </span>
-                  <span className="text-sm font-medium text-slate-900">
+                  <span className="text-md font-medium text-slate-900">
                     {new Date(slide.generatedAt).toLocaleDateString("vi-VN", {
                       year: "numeric",
                       month: "long",
@@ -95,8 +91,8 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
                   </span>
                 </li>
                 <li className="flex flex-col gap-0.5">
-                  <span className="text-xs text-slate-400">Tên file</span>
-                  <span className="text-xs text-slate-600 break-all">{slide.filename}</span>
+                  <span className="text-md text-slate-400">Tên file</span>
+                  <span className="text-md text-slate-600 break-all">{slide.filename}</span>
                 </li>
               </ul>
             </div>
@@ -105,8 +101,8 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
               <div className="flex items-center gap-2 px-3 py-2 bg-amber-50 border border-amber-100 rounded-lg">
                 <CheckCircle className="text-amber-500 shrink-0" size={14} />
                 <div>
-                  <span className="text-xs font-medium text-amber-700 block">Tạo từ cache</span>
-                  <span className="text-xs text-amber-600">Thời gian xử lý nhanh hơn</span>
+                  <span className="text-md font-medium text-amber-700 block">Tạo từ cache</span>
+                  <span className="text-md text-amber-600">Thời gian xử lý nhanh hơn</span>
                 </div>
               </div>
             )}
@@ -117,14 +113,14 @@ export const DetailModal: React.FC<DetailModalProps> = ({ slide, onClose }) => {
                   href={slide.pdfCloudinaryUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
+                  className="cursor-pointer flex items-center justify-center gap-2 px-4 py-3 rounded-md border border-blue-600 text-md font-medium text-slate-600 hover:bg-slate-50 transition-all"
                 >
                   <ExternalLink size={15} />
                   Mở PDF trong tab mới
                 </a>
               )}
               <button
-                className="flex items-center justify-center gap-2 px-4 py-2 bg-primary text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="cursor-pointer flex items-center justify-center gap-2 px-4 py-3 bg-primary text-white text-md font-semibold rounded-md hover:bg-blue-700 transition-all shadow-md shadow-blue-500/20 disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleDownload}
                 disabled={!slide.cloudinaryUrl}
               >
