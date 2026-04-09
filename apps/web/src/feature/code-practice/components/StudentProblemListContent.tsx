@@ -110,26 +110,21 @@ const StudentProblemListContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-16 space-y-8">
-        <div className="relative overflow-hidden rounded-md bg-white border border-slate-200 p-10 shadow-sm">
-          <div className="relative z-10 max-w-2xl">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Không gian luyện tập</h1>
-            <p className="text-slate-500 text-base leading-relaxed">
-              Thực hành mỗi ngày với kho bài tập đa dạng, hỗ trợ bạn tiến bộ từng bước theo từng cấp độ.
-            </p>
-          </div>
-
-          <div className="absolute top-4 right-8 opacity-[0.07] pointer-events-none select-none">
-            <svg viewBox="0 0 120 120" className="w-36 h-36 text-blue-600 fill-current">
-              <rect x="20" y="25" width="80" height="50" rx="6" />
-              <rect x="15" y="75" width="90" height="8" rx="3" />
-
-              <path d="M45 45 L35 50 L45 55" stroke="currentColor" strokeWidth="3" fill="none" />
-              <path d="M75 45 L85 50 L75 55" stroke="currentColor" strokeWidth="3" fill="none" />
-              <rect x="57" y="43" width="6" height="14" rx="2" />
-            </svg>
-          </div>
+      <div className="relative overflow-hidden h-60 md:h-72 flex items-end">
+        <img src="problem.png" alt="hero" className="absolute inset-0 w-full h-full object-cover" />
+      </div>
+      <div className="bg-white border-b border-gray-200 shadow-sm mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="text-md text-gray-500 flex items-center">
+            <span onClick={() => navigate({ to: "/" })} className="hover:text-blue-600 cursor-pointer">
+              Trang chủ
+            </span>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-blue-600 font-medium">Danh sách bài tập</span>
+          </nav>
         </div>
+      </div>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-8">
         {sortedTags.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
             {visibleTags.map(([name, count]) => (

@@ -81,25 +81,21 @@ const ExamListContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-16 space-y-8">
-        <div className="relative overflow-hidden rounded-md bg-white border border-slate-200 p-10 shadow-sm">
-          <div className="relative z-10 max-w-2xl">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Danh sách Kỳ thi</h1>
-            <p className="text-slate-500 text-base leading-relaxed">
-              Khám phá và tham gia các kỳ thi đánh giá năng lực hoặc luyện tập kiến thức hàng ngày với kho đề thi đa
-              dạng.
-            </p>
-          </div>
-          <div className="absolute top-4 right-8 opacity-[0.07] pointer-events-none select-none">
-            <svg viewBox="0 0 120 120" className="w-36 h-36 text-blue-600 fill-current">
-              <path d="M60 10 L110 35 L60 60 L10 35 Z" />
-              <path d="M20 42 L20 75 Q60 95 100 75 L100 42 L60 67 Z" />
-              <rect x="108" y="35" width="4" height="30" rx="2" />
-              <circle cx="110" cy="67" r="5" />
-            </svg>
-          </div>
+      <div className="relative overflow-hidden h-60 md:h-72 flex items-end -mx-5">
+        <img src="exam.png" alt="hero" className="absolute inset-0 w-full h-full object-cover" />
+      </div>
+      <div className="bg-white border-b border-gray-200 shadow-sm mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="text-md text-gray-500 flex items-center">
+            <span onClick={() => navigate({ to: "/" })} className="hover:text-blue-600 cursor-pointer">
+              Trang chủ
+            </span>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-blue-600 font-medium">Danh sách đề thi</span>
+          </nav>
         </div>
-
+      </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-5 pb-16 space-y-8">
         <div className="flex gap-6 items-end w-full">
           <div className="flex flex-col gap-2 shrink-0">
             <span className="text-sm font-bold uppercase tracking-wider text-slate-400">Loại hình</span>

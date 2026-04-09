@@ -57,30 +57,12 @@ export const ContestListContent: React.FC<Props> = ({ contests, currentPage, tot
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-5">
-        <div className="relative overflow-hidden rounded-md bg-white border border-slate-200 p-10 shadow-sm mb-5">
-          <div className="relative z-10 max-w-2xl">
-            <h1 className="text-4xl font-black text-slate-900 tracking-tight mb-3">Danh sách cuộc thi lập trình</h1>
-            <p className="text-slate-500 text-base leading-relaxed">
-              Tham gia các cuộc thi lập trình hấp dẫn, thử thách kỹ năng và nâng cao tư duy thuật toán của bạn.
-            </p>
-          </div>
-
-          <div className="absolute top-4 right-8 opacity-[0.07] pointer-events-none select-none">
-            <svg viewBox="0 0 120 120" className="w-36 h-36 text-blue-600 fill-current">
-              <path d="M35 30 h50 v10 c0 15 -10 25 -25 25 s-25 -10 -25 -25 z" />
-              <path d="M35 35 h-10 a10 10 0 0 0 10 10" fill="none" stroke="currentColor" strokeWidth="4" />
-              <path d="M85 35 h10 a10 10 0 0 1 -10 10" fill="none" stroke="currentColor" strokeWidth="4" />
-              <rect x="52" y="65" width="16" height="10" rx="2" />
-              <rect x="40" y="75" width="40" height="8" rx="3" />
-            </svg>
-          </div>
-        </div>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-5">
         <div className="flex gap-8 items-start">
           <aside className="w-64 shrink-0 space-y-4 sticky top-6">
             <div className="bg-white border border-slate-200 rounded-xl p-5 shadow-sm">
               <h3 className="text-md font-black uppercase tracking-wider text-slate-700 mb-4 flex items-center gap-2">
-                Kỳ thi
+                Cuộc thi
               </h3>
               <div className="space-y-1.5">
                 <div
@@ -92,7 +74,7 @@ export const ContestListContent: React.FC<Props> = ({ contests, currentPage, tot
                       : "text-slate-600 hover:bg-slate-50 border border-slate-200",
                   )}
                 >
-                  <LayoutDashboard className="w-4 h-4" /> Danh sách kỳ thi
+                  <LayoutDashboard className="w-4 h-4" /> Danh sách cuộc thi
                 </div>
                 <div
                   onClick={() => navigate({ to: "/contests/my" })}
@@ -103,7 +85,7 @@ export const ContestListContent: React.FC<Props> = ({ contests, currentPage, tot
                       : "text-slate-600 hover:bg-slate-50 border border-slate-200",
                   )}
                 >
-                  <Star className={cn("w-4 h-4", isMine ? "text-white" : "text-amber-400")} /> Kỳ thi của tôi
+                  <Star className={cn("w-4 h-4", isMine ? "text-white" : "text-amber-400")} /> Cuộc thi của tôi
                 </div>
               </div>
             </div>

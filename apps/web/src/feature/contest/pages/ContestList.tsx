@@ -5,9 +5,11 @@ import { ContestListContent } from "../components/ContestListContent";
 import { ContestStatus } from "../types/contest.type";
 import { useContestList } from "../queries/useContest";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import { useNavigate } from "@tanstack/react-router";
 
 export const ContestListPage: React.FC = () => {
   const [currentPage, setCurrentPage] = useState<number>(0);
+  const navigate = useNavigate();
 
   const { data: contestsData, isLoading, error } = useContestList();
 
@@ -89,6 +91,20 @@ export const ContestListPage: React.FC = () => {
   return (
     <>
       <PageMeta title="Kỳ thi Tin học - Bitlearning" description="Danh sách các kỳ thi lập trình" />
+      <div className="relative overflow-hidden h-60 md:h-72 flex items-end">
+        <img src="./contest.png" alt="hero" className="absolute inset-0 w-full h-full object-cover" />
+      </div>
+      <div className="bg-white border-b border-gray-200 shadow-sm mb-6">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="text-md text-gray-500 flex items-center">
+            <span onClick={() => navigate({ to: "/" })} className="hover:text-blue-600 cursor-pointer">
+              Trang chủ
+            </span>
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-blue-600 font-medium">Danh sách cuộc thi</span>
+          </nav>
+        </div>
+      </div>
       <ContestListContent
         contests={contests}
         currentPage={currentPage}

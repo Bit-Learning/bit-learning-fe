@@ -215,15 +215,22 @@ const ExamDetailContent: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-white">
+      <div className="bg-white border-b border-gray-200 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <nav className="text-md text-gray-500 flex items-center">
+            <span onClick={() => navigate({ to: "/" })} className="hover:text-blue-600 cursor-pointer">
+              Trang chủ
+            </span>
+            <span className="mx-2 text-gray-400">/</span>
+            <span onClick={() => navigate({ to: "/courses" })} className="hover:text-blue-600 cursor-pointer">
+              Danh sách đề thi
+            </span>{" "}
+            <span className="mx-2 text-gray-400">/</span>
+            <span className="text-blue-600 font-medium">{exam.name}</span>
+          </nav>
+        </div>
+      </div>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <nav className="flex items-center gap-2 mb-8 text-sm font-medium text-slate-500">
-          <button onClick={() => navigate({ to: "/exams" })} className="hover:text-blue-600 transition-colors">
-            Danh sách đề thi
-          </button>
-          <ChevronRight className="w-4 h-4" />
-          <span className="text-slate-900 font-semibold">Chi tiết đề thi</span>
-        </nav>
-
         <header className="mb-10">
           <div className="flex flex-wrap items-baseline gap-4 mb-2">
             <h1 className="text-4xl font-black text-slate-900 tracking-tight leading-tight">{exam.name}</h1>
