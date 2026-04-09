@@ -1,14 +1,16 @@
 import React from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { Loader2, LogIn, Shield, Users } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { useForm } from "react-hook-form";
 import { toast } from "sonner";
 import { z } from "zod";
+
 import { PasswordInput } from "@/components/password-input";
 import { Button } from "@/components/ui/button";
 import {
 	Form,
 	FormControl,
+	FormDescription,
 	FormField,
 	FormItem,
 	FormLabel,
@@ -30,11 +32,13 @@ const formSchema = z.object({
 
 interface UserAuthFormProps extends React.HTMLAttributes<HTMLFormElement> {
 	redirectTo?: string;
+	onRoleChange?: (role: "ADMIN" | "MANAGER") => void;
 }
 
 export const UserAuthForm: React.FC<UserAuthFormProps> = ({
 	className,
 	redirectTo,
+	onRoleChange,
 	...props
 }) => {
 	const { mutate: login, isPending: isLoading } = useLogin({
@@ -46,10 +50,23 @@ export const UserAuthForm: React.FC<UserAuthFormProps> = ({
 
 	const form = useForm<z.infer<typeof formSchema>>({
 		resolver: zodResolver(formSchema),
-		defaultValues: { email: "", password: "", role: "ADMIN" },
+		defaultValues: {
+			email: "",
+			password: "",
+			role: "ADMIN",
+		},
 	});
 
 	const selectedRole = form.watch("role");
+	const isAdmin = selectedRole === "ADMIN";
+
+	function handleRoleChange(role: "ADMIN" | "MANAGER") {
+		form.setValue("role", role, {
+			shouldValidate: true,
+			shouldDirty: true,
+		});
+		onRoleChange?.(role);
+	}
 
 	function onSubmit(data: z.infer<typeof formSchema>) {
 		login({
@@ -58,72 +75,106 @@ export const UserAuthForm: React.FC<UserAuthFormProps> = ({
 			role: data.role,
 		} as TAdminLoginRequest);
 	}
+
 	return (
 		<Form {...form}>
 			<form
 				onSubmit={form.handleSubmit(onSubmit)}
-				className={cn("grid gap-5", className)}
+				className={cn(
+					"rounded-[28px] border border-slate-200/80 bg-white p-7 shadow-[0_20px_60px_rgba(15,23,42,0.08)]",
+					"space-y-6",
+					"dark:border-slate-800 dark:bg-slate-950",
+					className,
+				)}
 				{...props}
 			>
+				{/* Header */}
+				<div className="space-y-2">
+					<h2 className="text-[32px] font-bold tracking-[-0.03em] text-slate-900 dark:text-white">
+						Đăng nhập hệ thống
+					</h2>
+					<p className="max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
+						Truy cập khu vực quản trị với quyền phù hợp cho tài khoản của bạn.
+					</p>
+				</div>
+
+				{/* Role */}
 				<FormField
 					control={form.control}
 					name="role"
 					render={({ field }) => (
-						<FormItem>
-							<FormLabel className="text-sm font-semibold text-slate-600">
+						<FormItem className="space-y-3">
+							<FormLabel className="text-sm font-semibold text-slate-800 dark:text-slate-200">
 								Vai trò đăng nhập
 							</FormLabel>
+
 							<FormControl>
-								<div className="grid grid-cols-2 gap-2">
-									<button
-										type="button"
-										onClick={() => field.onChange("ADMIN")}
-										className={cn(
-											"flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-semibold transition-all duration-200",
-											field.value === "ADMIN"
-												? "border-blue-600 bg-primary text-white shadow-md"
-												: "border-slate-200 bg-white text-slate-600 hover:border-blue-300 hover:bg-blue-50",
-										)}
-									>
-										<Shield className="h-4 w-4" />
-										Admin
-									</button>
-									<button
-										type="button"
-										onClick={() => field.onChange("MANAGER")}
-										className={cn(
-											"flex items-center justify-center gap-2 rounded-lg border-2 px-4 py-3 text-sm font-semibold transition-all duration-200",
-											field.value === "MANAGER"
-												? "border-orange-500 bg-orange-500 text-white shadow-md"
-												: "border-slate-200 bg-white text-slate-600 hover:border-orange-300 hover:bg-orange-50",
-										)}
-									>
-										<Users className="h-4 w-4" />
-										Manager
-									</button>
+								<div className="space-y-2">
+									<div className="relative grid grid-cols-2 rounded-2xl bg-slate-100 p-1 dark:bg-slate-900">
+										<div
+											className={cn(
+												"absolute left-1 top-1 h-[calc(100%-8px)] w-[calc(50%-4px)] rounded-[14px] bg-white shadow-[0_2px_10px_rgba(15,23,42,0.08)] transition-transform duration-300 ease-out dark:bg-slate-800",
+												field.value === "MANAGER" && "translate-x-full",
+											)}
+										/>
+
+										<button
+											type="button"
+											onClick={() => handleRoleChange("ADMIN")}
+											className={cn(
+												"relative z-10 rounded-[14px] px-4 py-3 text-sm font-semibold transition-colors duration-200",
+												field.value === "ADMIN"
+													? "text-slate-900 dark:text-white"
+													: "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
+											)}
+										>
+											Admin
+										</button>
+
+										<button
+											type="button"
+											onClick={() => handleRoleChange("MANAGER")}
+											className={cn(
+												"relative z-10 rounded-[14px] px-4 py-3 text-sm font-semibold transition-colors duration-200",
+												field.value === "MANAGER"
+													? "text-slate-900 dark:text-white"
+													: "text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200",
+											)}
+										>
+											Manager
+										</button>
+									</div>
+
+									<FormDescription className="text-xs text-slate-500 dark:text-slate-400">
+										Chọn đúng quyền để vào đúng khu vực quản trị.
+									</FormDescription>
 								</div>
 							</FormControl>
+
 							<FormMessage />
 						</FormItem>
 					)}
 				/>
 
+				{/* Email */}
 				<FormField
 					control={form.control}
 					name="email"
 					render={({ field }) => (
-						<FormItem>
-							<FormLabel className="text-sm font-semibold text-slate-600">
+						<FormItem className="space-y-2.5">
+							<FormLabel className="text-sm font-semibold text-slate-800 dark:text-slate-200">
 								Email
 							</FormLabel>
 							<FormControl>
 								<Input
 									placeholder="ten@example.com"
 									className={cn(
-										"h-11 rounded-lg transition-all duration-200",
-										selectedRole === "ADMIN"
-											? "focus:border-blue-500 focus:ring-blue-100"
-											: "focus:border-orange-500 focus:ring-orange-100",
+										"h-13 rounded-2xl border bg-white px-4 text-[15px] shadow-none transition-all",
+										"border-slate-200 placeholder:text-slate-400",
+										"dark:border-slate-800 dark:bg-slate-900",
+										isAdmin
+											? "focus-visible:ring-4 focus-visible:ring-blue-500/10"
+											: "focus-visible:ring-4 focus-visible:ring-orange-500/10",
 									)}
 									{...field}
 								/>
@@ -133,22 +184,25 @@ export const UserAuthForm: React.FC<UserAuthFormProps> = ({
 					)}
 				/>
 
+				{/* Password */}
 				<FormField
 					control={form.control}
 					name="password"
 					render={({ field }) => (
-						<FormItem>
-							<FormLabel className="text-sm font-semibold text-slate-600">
+						<FormItem className="space-y-2.5">
+							<FormLabel className="text-sm font-semibold text-slate-800 dark:text-slate-200">
 								Mật khẩu
 							</FormLabel>
 							<FormControl>
 								<PasswordInput
 									placeholder="••••••••"
 									className={cn(
-										"h-11 rounded-lg transition-all duration-200",
-										selectedRole === "ADMIN"
-											? "focus:border-blue-500 focus:ring-blue-100"
-											: "focus:border-orange-500 focus:ring-orange-100",
+										"h-13 rounded-2xl border bg-white px-4 text-[15px] shadow-none transition-all",
+										"border-slate-200 placeholder:text-slate-400",
+										"dark:border-slate-800 dark:bg-slate-900",
+										isAdmin
+											? "focus-visible:ring-4 focus-visible:ring-blue-500/10"
+											: "focus-visible:ring-4 focus-visible:ring-orange-500/10",
 									)}
 									{...field}
 								/>
@@ -158,23 +212,35 @@ export const UserAuthForm: React.FC<UserAuthFormProps> = ({
 					)}
 				/>
 
-				<Button
-					size="lg"
-					className={cn(
-						"w-full rounded-lg font-semibold text-white transition-all duration-200",
-						selectedRole === "ADMIN"
-							? "bg-primary hover:bg-blue-700"
-							: "bg-orange-500 hover:bg-orange-600",
-					)}
-					disabled={isLoading}
-				>
-					{isLoading ? (
-						<Loader2 className="h-4 w-4 animate-spin" />
-					) : (
-						<LogIn className="h-4 w-4" />
-					)}
-					Đăng nhập
-				</Button>
+				{/* Submit */}
+				<div className="space-y-3 pt-1">
+					<Button
+						type="submit"
+						size="lg"
+						disabled={isLoading}
+						className={cn(
+							"h-13 w-full rounded-2xl text-sm font-semibold text-white shadow-[0_10px_24px_rgba(37,99,235,0.22)] transition-all duration-200",
+							"hover:translate-y-[-1px] active:translate-y-0",
+							isAdmin
+								? "bg-blue-600 hover:bg-blue-700"
+								: "bg-orange-500 hover:bg-orange-600",
+						)}
+					>
+						{isLoading ? (
+							<>
+								<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								Đang đăng nhập...
+							</>
+						) : (
+							"Đăng nhập"
+						)}
+					</Button>
+
+					<p className="text-center text-xs leading-6 text-slate-500 dark:text-slate-400">
+						Bằng cách đăng nhập, bạn xác nhận đang sử dụng đúng tài khoản được
+						cấp quyền.
+					</p>
+				</div>
 			</form>
 		</Form>
 	);
