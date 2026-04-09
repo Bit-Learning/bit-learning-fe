@@ -19,6 +19,7 @@ import {
   Coins,
   MonitorPlay,
   ArrowLeftRight,
+  LayoutDashboard,
 } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useSelector } from "react-redux";
@@ -124,7 +125,7 @@ const Header: React.FC = () => {
                         cancelCloseMenu();
                         setHoveredMenu(item.title);
                       }}
-                      className="flex items-center gap-1 px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
+                      className="flex items-center gap-1 px-4 py-2 rounded-lg text-md font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
                     >
                       {item.title}
                       <ChevronDown
@@ -155,10 +156,10 @@ const Header: React.FC = () => {
                             onClick={() => handleNavigate(subItem.to)}
                             className="w-full rounded-xl p-3 text-left transition-all duration-200 hover:bg-blue-50 dark:hover:bg-blue-900/30 group/item cursor-pointer"
                           >
-                            <div className="text-sm font-semibold text-gray-900 dark:text-gray-100 group-hover/item:text-primary dark:group-hover/item:text-blue-400 transition-colors">
+                            <div className="text-md font-semibold text-gray-900 dark:text-gray-100 group-hover/item:text-primary dark:group-hover/item:text-blue-400 transition-colors">
                               {subItem.title}
                             </div>
-                            <p className="mt-1 text-xs text-gray-500 dark:text-gray-400 line-clamp-2">
+                            <p className="mt-1 text-sm text-gray-500 dark:text-gray-400 line-clamp-2">
                               {subItem.description}
                             </p>
                           </button>
@@ -169,7 +170,7 @@ const Header: React.FC = () => {
                 ) : (
                   <button
                     onClick={() => handleNavigate(item.to!)}
-                    className="px-4 py-2 rounded-lg text-sm font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
+                    className="px-4 py-2 rounded-lg text-md font-medium text-gray-700 dark:text-gray-300 hover:text-primary dark:hover:text-blue-400 hover:bg-blue-50/50 dark:hover:bg-blue-900/20 transition-all duration-200 cursor-pointer"
                   >
                     {item.title}
                   </button>
@@ -179,6 +180,36 @@ const Header: React.FC = () => {
           </nav>
 
           <div id="tour-header-actions" className="flex items-center gap-2">
+            {userInfo?.role === "MENTOR" && (
+              <button
+                onClick={() => navigate({ to: "/mentor/dashboard" })}
+                className="relative rounded-xl p-2
+               hover:bg-gray-100 dark:hover:bg-gray-800
+               transition-all duration-200
+               group cursor-pointer"
+              >
+                <LayoutDashboard
+                  className="h-7 w-7
+                 text-gray-600 dark:text-gray-300
+                 group-hover:text-primary
+                 dark:group-hover:text-blue-400
+                 transition-colors"
+                />
+
+                <span
+                  className="absolute left-1/2 -translate-x-1/2 top-full mt-2
+                 whitespace-nowrap
+                 px-3 py-1.5
+                 text-sm font-semibold
+                 text-white bg-gray-900
+                 rounded-lg shadow-lg
+                 opacity-0 group-hover:opacity-100
+                 transition-all duration-200"
+                >
+                  Trang Mentor
+                </span>
+              </button>
+            )}
             {isAuthenticated && (
               <button
                 onClick={handleCartClick}
