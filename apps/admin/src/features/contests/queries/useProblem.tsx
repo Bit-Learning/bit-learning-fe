@@ -36,6 +36,10 @@ export const submissionKeys = {
   stats: () => [...submissionKeys.all, "stats"] as const,
 };
 
+export const tagKeys = {
+  all: ["coding-tags"] as const,
+};
+
 export const useProblems = (filters?: ProblemFilters, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: problemKeys.list(filters),
@@ -151,5 +155,16 @@ export const useGenerateCodeTemplates = () => {
     onError: (error: AxiosError<ApiResponse<null>>) => {
       toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể tạo code templates" });
     },
+  });
+};
+
+export const useGetAllTags = () => {
+  return useQuery({
+    queryKey: tagKeys.all,
+    queryFn: async () => {
+      const response = await problemApi.getAllTags();
+      return response.data.data;
+    },
+    staleTime: 5 * 60 * 1000,
   });
 };

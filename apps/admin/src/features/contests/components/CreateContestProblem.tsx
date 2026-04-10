@@ -18,6 +18,7 @@ import {
   useImportTestCasesFromFile,
 } from "../queries/useProblem";
 import { useAddProblem, useContestProblems } from "../queries/useContest";
+import TagMultiSelect from "./TagMultiSelect";
 
 const schema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
@@ -36,6 +37,7 @@ const schema = z.object({
     .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, "Tên hàm không hợp lệ"),
   returnType: z.nativeEnum(ParamType),
   parameters: z.array(z.object({ name: z.string().min(1, "Bắt buộc"), type: z.nativeEnum(ParamType) })).min(1),
+  isPublic: z.boolean().default(false),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -55,6 +57,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [replaceExisting, setReplaceExisting] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
+  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const createProblem = useCreateProblem();
@@ -76,6 +79,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
       memoryLimitMb: 256,
       functionName: "solution",
       returnType: ParamType.INT,
+      isPublic: false,
       parameters: [{ name: "nums", type: ParamType.INT }],
     },
   });
@@ -168,6 +172,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
         timeLimitMs: data.timeLimitMs,
         memoryLimitMb: data.memoryLimitMb,
         isPublic: false,
+        tags: selectedTagIds,
       });
 
       const newProblemId = createRes.data.data?.id;
@@ -296,6 +301,15 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
                 rows={3}
                 placeholder="Ví dụ: 1 ≤ n ≤ 10^5, -10^9 ≤ nums[i] ≤ 10^9"
                 className="border-gray-300 focus:border-primary font-mono text-sm"
+              />
+            </FieldGroup>
+
+            <FieldGroup label="Thẻ tag">
+              <TagMultiSelect
+                value={selectedTagIds}
+                onChange={setSelectedTagIds}
+                placeholder="Chọn thẻ tag..."
+                className="w-full"
               />
             </FieldGroup>
 

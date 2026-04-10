@@ -54,6 +54,10 @@ export const problemApi = {
     return api.get("/problems", { params: filters });
   },
 
+  getMyProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
+    return api.get("/problems/me", { params: filters });
+  },
+
   getProblemDetail(problemId: string, language?: Language): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
     return api.get(`/problems/${problemId}`, { params: language ? { language } : undefined });
   },

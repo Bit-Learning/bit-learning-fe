@@ -1,23 +1,24 @@
-import React, { useState, useEffect } from "react";
-import {
-  FileCode,
-  Upload,
-  Play,
-  Rocket,
-  X,
-  Settings,
-  Maximize2,
-  Terminal,
-  Trash2,
-  Info,
-  ChevronDown,
-} from "lucide-react";
+import React, { useState, useEffect, useRef } from "react";
+import { FileCode, Upload, Trash2, Info, Terminal, X, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
-import { Language } from "../types/contest.type";
 import { useSubmitSolution } from "../queries/useContest";
 import { useParams } from "@tanstack/react-router";
-import { useCodeTemplates } from "@/feature/code-practice/queries/useCoding";
+import {
+  useCodeTemplates,
+  useRunCode,
+  useDebugCode,
+  useProblemDetail,
+} from "@/feature/code-practice/queries/useCoding";
+import {
+  DebugRequest,
+  DebugResponse,
+  Language,
+  RunCodeRequest,
+  RunCodeResponse,
+} from "@/feature/code-practice/types/coding.type";
+import { EditorFile } from "@/feature/code-practice/components/FileTab";
+import { CodeEditor } from "@/feature/code-practice/components/CodeEditor";
 
 type SubmitMode = "editor" | "file";
 
@@ -35,12 +36,28 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
   const { id } = useParams({ strict: false });
   const { mutate: submitSolution, isPending } = useSubmitSolution();
   const { data: codeTemplates, isLoading: isTemplatesLoading } = useCodeTemplates(problemId);
+  const runCode = useRunCode();
+  const debugCode = useDebugCode();
+
+  const [language, setLanguage] = useState<Language>(Language.PYTHON);
+
+  const { data: problem, isLoading: problemLoading } = useProblemDetail(problemId || "", language, {
+    enabled: !!problemId,
+  });
 
   const [mode, setMode] = useState<SubmitMode>("editor");
-  const [language, setLanguage] = useState<Language>(Language.PYTHON);
-  const [code, setCode] = useState("");
+  const [code, setCode] = useState<string>("");
+  const [isTemplateLoading, setIsTemplateLoading] = useState(true);
+  const [isMultiFileMode, setIsMultiFileMode] = useState(false);
+  const templateCache = useRef<Partial<Record<Language, string>>>({});
+  const multifileTemplateCache = useRef<Partial<Record<Language, string>>>({});
+  const [submissionId, setSubmissionId] = useState<string | null>(null);
+  const [runResult, setRunResult] = useState<RunCodeResponse | null>(null);
+  const [debugResult, setDebugResult] = useState<DebugResponse | null>(null);
+  const [debugLines, setDebugLines] = useState<string>("");
+  const [debugInput, setDebugInput] = useState<string>("");
+  const [editorFiles, setEditorFiles] = useState<EditorFile[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [showTestResult, setShowTestResult] = useState(false);
 
   const languageOptions = [
     { value: Language.PYTHON, label: "Python 3.10" },
@@ -48,15 +65,6 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
     { value: Language.JAVA, label: "Java 11 (OpenJDK)" },
     { value: Language.JAVASCRIPT, label: "JavaScript (Node.js 16)" },
   ];
-
-  useEffect(() => {
-    if (codeTemplates && codeTemplates.length > 0) {
-      const template = codeTemplates.find((t) => t.language === language);
-      if (template) {
-        setCode(template.templateCode);
-      }
-    }
-  }, [language, codeTemplates]);
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -67,39 +75,6 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
 
   const handleRemoveFile = () => {
     setUploadedFile(null);
-  };
-
-  const handleSubmit = () => {
-    if (!id) return;
-
-    if (mode === "editor") {
-      submitSolution({
-        contestId: id,
-        request: {
-          contestProblemId,
-          language,
-          sourceCode: code,
-        },
-      });
-    } else if (uploadedFile) {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        const content = e.target?.result as string;
-        submitSolution({
-          contestId: id,
-          request: {
-            contestProblemId,
-            language,
-            sourceCode: content,
-          },
-        });
-      };
-      reader.readAsText(uploadedFile);
-    }
-  };
-
-  const handleRunTest = () => {
-    setShowTestResult(true);
   };
 
   const getFileExtension = (lang: Language) => {
@@ -117,7 +92,178 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
     }
   };
 
-  if (isTemplatesLoading) {
+  const handleLanguageChange = (lang: Language) => {
+    const cache = isMultiFileMode ? multifileTemplateCache.current : templateCache.current;
+    const cached = cache[lang];
+    if (cached !== undefined) {
+      setCode(cached);
+      setLanguage(lang);
+    } else {
+      setCode("");
+      setIsTemplateLoading(true);
+      setLanguage(lang);
+    }
+  };
+
+  const handleToggleMultiFileMode = (multi: boolean) => {
+    setIsMultiFileMode(multi);
+    if (multi) {
+      const template = multifileTemplateCache.current[language] ?? "";
+      setCode(template);
+    } else {
+      const template = templateCache.current[language] ?? "";
+      setCode(template);
+      setEditorFiles([]);
+    }
+    setDebugLines("");
+    setRunResult(null);
+    setDebugResult(null);
+    setSubmissionId(null);
+  };
+
+  useEffect(() => {
+    if (codeTemplates && codeTemplates.length > 0) {
+      const template = codeTemplates.find((t) => t.language === language);
+      if (template) {
+        templateCache.current[language] = template.templateCode;
+        if (!isMultiFileMode) {
+          setCode(template.templateCode);
+        }
+        setIsTemplateLoading(false);
+      }
+    }
+  }, [language, codeTemplates, isMultiFileMode]);
+
+  const isMultiFile = editorFiles.length > 1;
+  const getActiveFileName = () => editorFiles[0]?.name ?? "main";
+  const toCodeFiles = () => editorFiles.map((f) => ({ name: f.name, content: f.content }));
+
+  const handleFilesChange = (files: EditorFile[]) => {
+    setEditorFiles(files);
+  };
+
+  const handleSubmit = async (): Promise<void> => {
+    if (!id) return;
+
+    try {
+      if (mode === "file" && uploadedFile) {
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const content = e.target?.result as string;
+          submitSolution({
+            contestId: id,
+            request: {
+              contestProblemId,
+              language,
+              sourceCode: content,
+            },
+          });
+        };
+        reader.readAsText(uploadedFile);
+      } else if (mode === "editor") {
+        if (isMultiFile) {
+          const files = toCodeFiles();
+          const fileContent = files.map((f) => `// File: ${f.name}\n${f.content}`).join("\n\n");
+
+          submitSolution({
+            contestId: id,
+            request: {
+              contestProblemId,
+              language,
+              sourceCode: fileContent,
+            },
+          });
+        } else {
+          submitSolution({
+            contestId: id,
+            request: {
+              contestProblemId,
+              language,
+              sourceCode: code,
+            },
+          });
+        }
+      }
+    } catch (error) {
+      console.error("Submit error:", error);
+    }
+  };
+
+  const handleRun = async (): Promise<void> => {
+    if (!problemId) return;
+    try {
+      const request: RunCodeRequest = isMultiFile
+        ? {
+            problemId: problemId,
+            language,
+            files: toCodeFiles(),
+            entryFile: getActiveFileName(),
+            input: debugInput || undefined,
+          }
+        : { problemId: problemId, language, sourceCode: code, input: debugInput || undefined };
+      const response = await runCode.mutateAsync(request);
+      if (response.data.data) {
+        setRunResult(response.data.data);
+        setSubmissionId(null);
+        setDebugResult(null);
+      }
+    } catch (error) {
+      console.error("Run error:", error);
+    }
+  };
+
+  const handleDebug = async (): Promise<void> => {
+    if (!problemId) return;
+    const lines = debugLines
+      .split(",")
+      .map((s) => parseInt(s.trim(), 10))
+      .filter((n) => !isNaN(n) && n > 0);
+    if (lines.length === 0) return;
+    try {
+      const request: DebugRequest = isMultiFile
+        ? {
+            problemId: problemId,
+            language,
+            lines,
+            files: toCodeFiles(),
+            entryFile: getActiveFileName(),
+            input: debugInput || undefined,
+          }
+        : {
+            problemId: problemId,
+            language,
+            code,
+            lines,
+            input: debugInput || undefined,
+          };
+      const response = await debugCode.mutateAsync(request);
+      if (response.data.data) {
+        setDebugResult(response.data.data);
+        setSubmissionId(null);
+        setRunResult(null);
+      }
+    } catch (error) {
+      console.error("Debug error:", error);
+    }
+  };
+
+  const handleReset = () => {
+    const template = templateCache.current[language] ?? "";
+    setCode(template);
+    setEditorFiles([]);
+    setDebugLines("");
+    setRunResult(null);
+    setDebugResult(null);
+    setSubmissionId(null);
+  };
+
+  const handleCloseResult = () => {
+    setRunResult(null);
+    setDebugResult(null);
+    setSubmissionId(null);
+  };
+
+  if (isTemplatesLoading || problemLoading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-120px)] bg-slate-50 dark:bg-slate-950">
         <div className="text-center">
@@ -128,14 +274,25 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
     );
   }
 
+  if (!problem) {
+    return (
+      <div className="flex items-center justify-center min-h-[calc(100vh-120px)] bg-slate-50 dark:bg-slate-950">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
+          <p className="mt-4 text-sm text-slate-600">Đang tải...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden">
-      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between p-4 gap-4 shrink-0">
+    <div className="flex-1 flex flex-col bg-slate-50 dark:bg-slate-950 overflow-hidden min-h-200">
+      <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between px-4 py-2 gap-4 shrink-0">
         <div className="flex items-center gap-4">
-          <div className="flex bg-slate-200/80 dark:bg-slate-800 p-1 rounded-lg">
+          <div className="flex bg-slate-200/80 dark:bg-slate-800 p-1 rounded-md">
             <button
               onClick={() => setMode("editor")}
-              className={`flex items-center cursor-pointer gap-2 py-2 px-4 rounded-md font-bold text-xs transition-all ${
+              className={`flex items-center cursor-pointer gap-2 py-2 px-4 rounded-md font-bold text-sm transition-all ${
                 mode === "editor"
                   ? "bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
@@ -146,7 +303,7 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
             </button>
             <button
               onClick={() => setMode("file")}
-              className={`flex items-center cursor-pointer gap-2 py-2 px-4 rounded-md font-bold text-xs transition-all ${
+              className={`flex items-center cursor-pointer gap-2 py-2 px-4 rounded-md font-bold text-sm transition-all ${
                 mode === "file"
                   ? "bg-white dark:bg-slate-700 shadow-sm text-slate-900 dark:text-white"
                   : "text-slate-500 dark:text-slate-400 hover:text-slate-700"
@@ -157,210 +314,151 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
             </button>
           </div>
 
-          <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />
-
-          <div className="relative group">
-            <select
-              value={language}
-              onChange={(e) => setLanguage(e.target.value as Language)}
-              className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 pr-8 text-xs font-bold focus:ring-2 focus:ring-primary outline-none cursor-pointer"
-            >
-              {languageOptions.map((opt) => (
-                <option key={opt.value} value={opt.value}>
-                  {opt.label}
-                </option>
-              ))}
-            </select>
-            <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
-          </div>
+          {mode === "file" && (
+            <>
+              <div className="h-6 w-px bg-slate-300 dark:bg-slate-700" />
+              <div className="relative group">
+                <select
+                  value={language}
+                  onChange={(e) => setLanguage(e.target.value as Language)}
+                  className="appearance-none bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg px-3 py-1.5 pr-8 text-xs font-bold focus:ring-2 focus:ring-primary outline-none cursor-pointer"
+                >
+                  {languageOptions.map((opt) => (
+                    <option key={opt.value} value={opt.value}>
+                      {opt.label}
+                    </option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none text-slate-400 w-4 h-4" />
+              </div>
+            </>
+          )}
         </div>
-
-        {mode === "editor" && (
-          <div className="flex items-center gap-3">
-            <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1.5">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse" />
-              Code template đã load
-            </span>
-          </div>
-        )}
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden px-4 pb-4">
         {mode === "editor" ? (
-          <div className="flex-1 flex flex-col border border-slate-200 dark:border-slate-800 rounded-xl bg-[#0d1117] overflow-hidden shadow-2xl">
-            <div className="bg-slate-900 px-4 py-2 border-b border-slate-800 flex justify-between items-center shrink-0">
-              <div className="flex items-center gap-2">
-                <div className="flex gap-1.5">
-                  <span className="w-2.5 h-2.5 rounded-full bg-red-500/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
-                  <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
-                </div>
-                <span className="ml-4 text-[10px] font-mono text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                  <FileCode className="w-3 h-3" />
-                  solution{getFileExtension(language)}
-                </span>
-              </div>
-              <div className="flex items-center gap-4">
-                <button className="text-slate-500 hover:text-white transition-colors">
-                  <Settings className="w-5 h-5" />
-                </button>
-                <button className="text-slate-500 hover:text-white transition-colors">
-                  <Maximize2 className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
+          <CodeEditor
+            key={isMultiFileMode ? "multi" : "single"}
+            language={language}
+            code={code}
+            isTemplateLoading={isTemplateLoading}
+            isMultiFileMode={isMultiFileMode}
+            hasMultifileTemplate={!!problem.multifileEntryTemplate}
+            onToggleMultiFileMode={handleToggleMultiFileMode}
+            problem={problem || null}
+            submissionResult={null}
+            runResult={runResult}
+            debugResult={debugResult}
+            isSubmitting={isPending}
+            isRunning={runCode.isPending}
+            isDebugging={debugCode.isPending}
+            debugLines={debugLines}
+            onLanguageChange={handleLanguageChange}
+            onCodeChange={setCode}
+            onFilesChange={handleFilesChange}
+            onDebugLinesChange={setDebugLines}
+            onSubmit={handleSubmit}
+            onRun={handleRun}
+            onDebug={handleDebug}
+            onReset={handleReset}
+            onCloseResult={handleCloseResult}
+          />
+        ) : (
+          <>
+            <div className="flex-1 flex flex-col border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
+              <div className="flex-1 flex flex-col items-center justify-center p-8">
+                <label
+                  htmlFor="file-upload"
+                  className="w-full max-w-2xl aspect-video border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center gap-4 bg-slate-50/50 dark:bg-slate-800/20 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
+                >
+                  <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
+                    <Upload className="w-8 h-8" />
+                  </div>
+                  <div className="text-center">
+                    <p className="text-lg font-bold text-slate-800 dark:text-slate-200">
+                      Kéo thả file code tại đây hoặc click để chọn
+                    </p>
+                    <p className="text-sm text-slate-500 mt-1">Dung lượng tối đa: 10MB</p>
+                  </div>
+                  <div className="flex flex-wrap justify-center gap-2 mt-2">
+                    <Badge className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
+                      {getFileExtension(language)}
+                    </Badge>
+                  </div>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    accept={getFileExtension(language)}
+                    onChange={handleFileUpload}
+                    className="hidden"
+                  />
+                </label>
 
-            <div className="flex-1 relative font-mono text-sm overflow-hidden flex">
-              <div className="w-12 bg-slate-900/50 text-slate-600 text-right pr-3 py-4 select-none border-r border-slate-800/50 text-xs leading-5">
-                {Array.from({ length: Math.max(20, code.split("\n").length) }, (_, i) => (
-                  <div key={i}>{i + 1}</div>
-                ))}
+                {uploadedFile && (
+                  <div className="w-full max-w-2xl mt-6">
+                    <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 flex items-center justify-between shadow-sm">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
+                          <FileCode className="w-6 h-6" />
+                        </div>
+                        <div className="flex flex-col">
+                          <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
+                            {uploadedFile.name}
+                          </span>
+                          <span className="text-xs text-slate-500">
+                            {(uploadedFile.size / 1024).toFixed(1)} KB • Code File
+                          </span>
+                        </div>
+                      </div>
+                      <button
+                        onClick={handleRemoveFile}
+                        className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                      >
+                        <Trash2 className="w-5 h-5" />
+                      </button>
+                    </div>
+                  </div>
+                )}
               </div>
-              <div className="flex-1 relative">
-                <textarea
-                  value={code}
-                  onChange={(e) => setCode(e.target.value)}
-                  className="absolute inset-0 w-full h-full bg-transparent text-slate-300 p-4 resize-none outline-none focus:ring-0 placeholder-slate-600 caret-primary leading-5 font-mono text-sm"
-                  spellCheck={false}
-                  placeholder="// Viết code của bạn ở đây..."
-                />
-              </div>
-            </div>
 
-            {showTestResult && (
-              <div className="h-1/3 min-h-30 bg-[#090c10] border-t border-slate-800 flex flex-col shrink-0">
-                <div className="px-4 py-2 border-b border-slate-800 flex items-center justify-between bg-slate-900/50">
-                  <div className="flex items-center gap-2 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+              <div className="h-48 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
+                <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900/50">
+                  <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                     <Terminal className="w-4 h-4" />
                     Kết quả chạy thử
                   </div>
-                  <button onClick={() => setShowTestResult(false)} className="text-slate-500 hover:text-white">
+                  <button className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
                     <X className="w-4 h-4" />
                   </button>
                 </div>
                 <div className="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-2">
-                  <div className="flex gap-4">
-                    <span className="text-green-500 font-bold">CASE 1:</span>
-                    <span className="text-slate-400">Input: 4 9 [2, 7, 11, 15]</span>
-                    <span className="text-green-400">Output: 0 1 (Chính xác)</span>
+                  <div className="text-slate-400 italic">
+                    Sẵn sàng nộp bài. Vui lòng chọn file và nhấn "Gửi bài làm".
                   </div>
-                  <div className="flex gap-4">
-                    <span className="text-green-500 font-bold">CASE 2:</span>
-                    <span className="text-slate-400">Input: 3 6 [3, 2, 4]</span>
-                    <span className="text-green-400">Output: 1 2 (Chính xác)</span>
-                  </div>
-                  <div className="pt-2 text-slate-500">&gt; Execution time: 12ms | Memory: 4.2MB</div>
-                </div>
-              </div>
-            )}
-          </div>
-        ) : (
-          <div className="flex-1 flex flex-col border border-slate-200 dark:border-slate-800 rounded-xl bg-white dark:bg-slate-900 overflow-hidden shadow-sm">
-            <div className="flex-1 flex flex-col items-center justify-center p-8">
-              <label
-                htmlFor="file-upload"
-                className="w-full max-w-2xl aspect-video border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-2xl flex flex-col items-center justify-center gap-4 bg-slate-50/50 dark:bg-slate-800/20 hover:border-primary/50 hover:bg-primary/5 transition-all cursor-pointer group"
-              >
-                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:scale-110 transition-transform">
-                  <Upload className="w-8 h-8" />
-                </div>
-                <div className="text-center">
-                  <p className="text-lg font-bold text-slate-800 dark:text-slate-200">
-                    Kéo thả file code tại đây hoặc click để chọn
-                  </p>
-                  <p className="text-sm text-slate-500 mt-1">Dung lượng tối đa: 10MB</p>
-                </div>
-                <div className="flex flex-wrap justify-center gap-2 mt-2">
-                  <Badge className="px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-[10px] font-bold text-slate-500 uppercase tracking-wider">
-                    {getFileExtension(language)}
-                  </Badge>
-                </div>
-                <input
-                  id="file-upload"
-                  type="file"
-                  accept={getFileExtension(language)}
-                  onChange={handleFileUpload}
-                  className="hidden"
-                />
-              </label>
-
-              {uploadedFile && (
-                <div className="w-full max-w-2xl mt-6">
-                  <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-800 flex items-center justify-between shadow-sm">
-                    <div className="flex items-center gap-4">
-                      <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-                        <FileCode className="w-6 h-6" />
-                      </div>
-                      <div className="flex flex-col">
-                        <span className="font-bold text-sm text-slate-900 dark:text-slate-100">
-                          {uploadedFile.name}
-                        </span>
-                        <span className="text-xs text-slate-500">
-                          {(uploadedFile.size / 1024).toFixed(1)} KB • Code File
-                        </span>
-                      </div>
-                    </div>
-                    <button
-                      onClick={handleRemoveFile}
-                      className="p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
-                    >
-                      <Trash2 className="w-5 h-5" />
-                    </button>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            <div className="h-48 bg-slate-50 dark:bg-slate-950 border-t border-slate-200 dark:border-slate-800 flex flex-col shrink-0">
-              <div className="px-4 py-2 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between bg-white dark:bg-slate-900/50">
-                <div className="flex items-center gap-2 text-[10px] font-bold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                  <Terminal className="w-4 h-4" />
-                  Kết quả chạy thử
-                </div>
-                <button className="text-slate-400 hover:text-slate-600 dark:hover:text-white">
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-              <div className="flex-1 p-4 font-mono text-xs overflow-y-auto space-y-2">
-                <div className="text-slate-400 italic">
-                  Sẵn sàng nộp bài. Vui lòng chọn file và nhấn "Chạy thử" hoặc "Gửi bài làm".
                 </div>
               </div>
             </div>
-          </div>
+
+            <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
+              <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
+                <span className="flex items-center gap-1">
+                  <Info className="w-4 h-4" />
+                  File nộp phải thuộc định dạng {getFileExtension(language)}
+                </span>
+              </div>
+              <div className="flex items-center gap-3 w-full sm:w-auto">
+                <Button
+                  onClick={handleSubmit}
+                  isDisabled={isPending || !uploadedFile || disabled}
+                  className="flex-1 sm:flex-none px-8 py-5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {isPending ? "Đang gửi..." : "Gửi bài làm"}
+                </Button>
+              </div>
+            </div>
+          </>
         )}
-
-        <div className="mt-4 flex flex-col sm:flex-row items-center justify-between gap-4">
-          <div className="flex items-center gap-4 text-xs text-slate-500 font-medium">
-            {mode === "editor" ? (
-              <></>
-            ) : (
-              <span className="flex items-center gap-1">
-                <Info className="w-4 h-4" />
-                File nộp phải thuộc định dạng {getFileExtension(language)}
-              </span>
-            )}
-          </div>
-          <div className="flex items-center gap-3 w-full sm:w-auto">
-            <Button
-              variant="outline"
-              onClick={handleRunTest}
-              isDisabled={isPending || disabled}
-              className="flex-1 sm:flex-none px-6 py-5 rounded-lg border border-slate-200 dark:border-slate-700 font-bold text-sm bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2"
-            >
-              <Play className="w-5 h-5 text-slate-500" />
-              Chạy thử
-            </Button>
-            <Button
-              onClick={handleSubmit}
-              isDisabled={isPending || (mode === "file" && !uploadedFile) || disabled}
-              className="flex-1 sm:flex-none px-8 py-5 rounded-lg bg-primary hover:bg-primary/90 text-white font-bold text-sm shadow-lg shadow-primary/20 flex items-center justify-center gap-2 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              <Rocket className="w-5 h-5" />
-              {isPending ? "Đang gửi..." : "Gửi bài làm"}
-            </Button>
-          </div>
-        </div>
       </div>
     </div>
   );

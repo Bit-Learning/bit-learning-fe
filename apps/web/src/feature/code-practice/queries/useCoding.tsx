@@ -24,6 +24,8 @@ export const problemKeys = {
   all: ["problems"] as const,
   lists: () => [...problemKeys.all, "list"] as const,
   list: (filters?: ProblemFilters) => [...problemKeys.lists(), filters] as const,
+  myLists: () => [...problemKeys.all, "my-list"] as const,
+  myList: (filters?: ProblemFilters) => [...problemKeys.myLists(), filters] as const,
   details: () => [...problemKeys.all, "detail"] as const,
   detail: (id: string, language?: Language) => [...problemKeys.details(), id, language] as const,
   statistics: (id: string) => [...problemKeys.all, "statistics", id] as const,
@@ -44,9 +46,20 @@ export const submissionKeys = {
 
 export const useProblems = (filters?: ProblemFilters, options?: { enabled?: boolean }) => {
   return useQuery({
-    queryKey: problemKeys.list(filters),
+    queryKey: problemKeys.myList(filters),
     queryFn: async () => {
       const response = await problemApi.getProblems(filters);
+      return response.data;
+    },
+    enabled: options?.enabled ?? true,
+  });
+};
+
+export const useGetMyProblems = (filters?: ProblemFilters, options?: { enabled?: boolean }) => {
+  return useQuery({
+    queryKey: problemKeys.list(filters),
+    queryFn: async () => {
+      const response = await problemApi.getMyProblems(filters);
       return response.data;
     },
     enabled: options?.enabled ?? true,
