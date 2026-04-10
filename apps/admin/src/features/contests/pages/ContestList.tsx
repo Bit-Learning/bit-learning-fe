@@ -100,14 +100,7 @@ const ContestListPage: React.FC = () => {
 
 	return (
 		<>
-			<Header fixed>
-				<Search />
-				<div className="ms-auto flex items-center space-x-4">
-					<ThemeSwitch />
-					<ConfigDrawer />
-					<ProfileDropdown />
-				</div>
-			</Header>
+			<Header />
 
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex justify-between items-center mb-8">
