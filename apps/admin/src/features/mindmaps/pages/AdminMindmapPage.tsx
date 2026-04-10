@@ -168,7 +168,7 @@ export default function AdminMindmapPage() {
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex items-center justify-between">
 					<div>
-						<h1 className="text-2xl font-bold">Mindmap</h1>
+						<h1 className="text-2xl font-bold">Quản lý sơ đồ tư duy</h1>
 						<p className="text-muted-foreground mt-1 text-sm">
 							Quản lý bảng màu, style và cấu trúc cho mindmap
 						</p>
@@ -184,14 +184,14 @@ export default function AdminMindmapPage() {
 					<TabsContent value="themes" className="mt-6 flex flex-col gap-6">
 						<div className="flex items-center justify-between">
 							<div>
-								<h2 className="text-xl font-semibold">Themes</h2>
+								<h2 className="text-xl font-semibold">Quản lý chủ đề</h2>
 								<p className="text-muted-foreground mt-1 text-sm">
-									Quản lý bảng màu và style cho mindmap
+									Quản lý bảng màu và style cho sơ đồ tư duy
 								</p>
 							</div>
 							<Button onClick={openCreateTheme}>
 								<PlusIcon className="mr-2 h-4 w-4" />
-								Thêm Theme
+								Thêm chủ đề
 							</Button>
 						</div>
 
@@ -260,14 +260,14 @@ export default function AdminMindmapPage() {
 					<TabsContent value="structures" className="mt-6 flex flex-col gap-6">
 						<div className="flex items-center justify-between">
 							<div>
-								<h2 className="text-xl font-semibold">Structures</h2>
+								<h2 className="text-xl font-semibold">Quản lý cấu trúc</h2>
 								<p className="text-muted-foreground mt-1 text-sm">
-									Quản lý layout ELK cho mindmap
+									Quản lý bố cục cho sơ đồ tư duy
 								</p>
 							</div>
 							<Button onClick={openCreateStructure}>
 								<PlusIcon className="mr-2 h-4 w-4" />
-								Thêm Structure
+								Thêm cấu trúc
 							</Button>
 						</div>
 

@@ -1,17 +1,14 @@
 import React, { useState } from "react";
-import { Loader2, Pencil, Plus, Tag, Trash2 } from "lucide-react";
+import { Loader2, Plus, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
-import TagFormModal from "../components/TagFormModal";
-import { useDeleteTag, useGetAllTags } from "../queries/useTag";
-import type { TagResponse } from "../types/tag.type";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
 import { Main } from "@/layout/main";
+import TagFormModal from "../components/TagFormModal";
+import { TagsTable } from "../components/tags-tables";
+import { useDeleteTag, useGetAllTags } from "../queries/useTag";
+import type { TagResponse } from "../types/tag.type";
 
 const TagManagementPage: React.FC = () => {
 	const [formModal, setFormModal] = useState<{
@@ -25,6 +22,14 @@ const TagManagementPage: React.FC = () => {
 
 	const { data: tags = [], isLoading } = useGetAllTags();
 	const { mutate: deleteTag, isPending: isDeleting } = useDeleteTag();
+
+	const handleEditTag = (tag: TagResponse) => {
+		setFormModal({ open: true, tag });
+	};
+
+	const handleAskDeleteTag = (tag: TagResponse) => {
+		setDeleteTarget({ id: tag.id, name: tag.name });
+	};
 
 	const handleConfirmDelete = () => {
 		if (!deleteTarget) return;
@@ -82,36 +87,13 @@ const TagManagementPage: React.FC = () => {
 							</button>
 						</div>
 					) : (
-						<ul className="divide-y divide-gray-100">
-							{tags.map((tag) => (
-								<li key={tag.id} className="flex items-center gap-3 px-5 py-3">
-									<span className="flex-1 text-sm font-medium text-gray-800">
-										{tag.name}
-									</span>
-									<span className="text-xs text-gray-400">
-										{new Date(tag.createdAt).toLocaleDateString("vi-VN")}
-									</span>
-									<Button
-										size="sm"
-										variant="ghost"
-										onClick={() => setFormModal({ open: true, tag })}
-										className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600"
-									>
-										<Pencil className="h-3.5 w-3.5" />
-									</Button>
-									<Button
-										size="sm"
-										variant="ghost"
-										onClick={() =>
-											setDeleteTarget({ id: tag.id, name: tag.name })
-										}
-										className="h-8 w-8 p-0 text-gray-400 hover:text-red-600"
-									>
-										<Trash2 className="h-3.5 w-3.5" />
-									</Button>
-								</li>
-							))}
-						</ul>
+						<div className="p-4">
+							<TagsTable
+								data={tags}
+								onEdit={handleEditTag}
+								onDelete={handleAskDeleteTag}
+							/>
+						</div>
 					)}
 				</div>
 
