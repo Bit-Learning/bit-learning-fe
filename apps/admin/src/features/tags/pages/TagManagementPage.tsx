@@ -59,10 +59,10 @@ const TagManagementPage: React.FC = () => {
 					</Button>
 				</div>
 
-				<div className="rounded-xl border border-gray-200 bg-white shadow-sm">
-					<div className="flex items-center justify-between border-b border-gray-100 px-5 py-3">
+				<div>
+					<div className="flex items-center justify-start px-5 py-3">
 						<span className="text-sm font-medium text-gray-700">
-							Tất cả tags
+							Tổng số tags:
 						</span>
 						{!isLoading && (
 							<Badge variant="secondary" className="text-xs">
