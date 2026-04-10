@@ -69,7 +69,7 @@
 		"styled-components": "^6.3.12"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.10",
+		"@biomejs/biome": "^2.4.11",
 		"@faker-js/faker": "^10.4.0",
 		"@tanstack/react-query-devtools": "^5.91.3",
 		"@tanstack/react-router-devtools": "^1.132.51",
