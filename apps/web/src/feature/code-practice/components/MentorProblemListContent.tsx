@@ -8,7 +8,7 @@ import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
 import { Difficulty, ProblemBriefResponse } from "../types/coding.type";
-import { useProblems, useDeleteProblem } from "../queries/useCoding";
+import { useProblems, useDeleteProblem, useGetMyProblems } from "../queries/useCoding";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Pagination } from "@/shared/components/Pagination";
@@ -35,7 +35,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
 
   const size = 20;
 
-  const { data: problemsResponse, isLoading } = useProblems({
+  const { data: problemsResponse, isLoading } = useGetMyProblems({
     page,
     size,
     sort: "createdAt,desc",
