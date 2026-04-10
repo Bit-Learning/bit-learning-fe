@@ -19,7 +19,7 @@ import {
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { useExam, useDownloadExam, usePublishExam } from "../queries/useExam";
+import { useExam, useDownloadExam, usePublishExam, useDownloadExamAnswerKey } from "../queries/useExam";
 import type { ExamType } from "../types/exam.type";
 import { QuestionLevel, QuestionType } from "@/feature/question/types/question.type";
 import { useQuizAttemptsByExam } from "@/feature/quiz/queries/useQuiz";
@@ -41,6 +41,8 @@ const ExamDetailContent: React.FC = () => {
 
   const { data: exam, isLoading } = useExam(examId!, { enabled: !!examId });
   const downloadExam = useDownloadExam();
+  const downloadExamAnswerKey = useDownloadExamAnswerKey();
+
   const { mutate: publishExam, isPending: isPublishing } = usePublishExam();
 
   const { data: attempts, isLoading: isLoadingAttempts } = useQuizAttemptsByExam(
@@ -65,6 +67,11 @@ const ExamDetailContent: React.FC = () => {
   const handleDownload = (format: "pdf" | "docx") => {
     if (!exam) return;
     downloadExam.mutate({ id: exam.id, format, name: exam.name });
+  };
+
+  const handleDownloadWithAnswer = (format: "pdf" | "docx") => {
+    if (!exam) return;
+    downloadExamAnswerKey.mutate({ id: exam.id, format, name: exam.name });
   };
 
   const handleTogglePublish = () => {
@@ -183,18 +190,15 @@ const ExamDetailContent: React.FC = () => {
           </div>
           <div className="flex items-center gap-2">
             <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
-              <Share2 className="h-5 w-5 text-slate-600 dark:text-slate-400" />
-            </button>
-            <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
               <MoreVertical className="h-5 w-5 text-slate-600 dark:text-slate-400" />
             </button>
           </div>
         </div>
       </div>
 
-      <div className="mx-auto px-8 bg-slate-50">
-        <div className="flex gap-6">
-          <div className="w-80 space-y-4 shrink-0">
+      <div className="mx-auto px-6 bg-slate-50">
+        <div className="flex gap-4">
+          <div className="w-75 space-y-4 shrink-0">
             {exam.isPublished ? (
               <div className="bg-green-50 dark:bg-green-900/10 border border-green-400 dark:border-green-900/30 rounded-md p-4 flex items-start gap-3">
                 <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
@@ -224,6 +228,7 @@ const ExamDetailContent: React.FC = () => {
                 )}
                 <span className="font-medium text-slate-900 dark:text-white">Tải đề (.PDF)</span>
               </button>
+
               <button
                 onClick={() => handleDownload("docx")}
                 disabled={downloadExam.isPending}
@@ -236,8 +241,33 @@ const ExamDetailContent: React.FC = () => {
                 )}
                 <span className="font-medium text-slate-900 dark:text-white">Tải đề (.Docx)</span>
               </button>
-            </div>
 
+              <button
+                onClick={() => handleDownloadWithAnswer("pdf")}
+                disabled={downloadExamAnswerKey.isPending}
+                className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-600 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors text-left disabled:opacity-50"
+              >
+                {downloadExamAnswerKey.isPending ? (
+                  <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                )}
+                <span className="font-medium text-blue-600 dark:text-white">Tải đề + đáp án (.PDF)</span>
+              </button>
+
+              <button
+                onClick={() => handleDownloadWithAnswer("docx")}
+                disabled={downloadExamAnswerKey.isPending}
+                className="cursor-pointer w-full flex items-center gap-3 px-4 py-3 bg-blue-50 border border-blue-600 dark:bg-blue-900/20 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-lg transition-colors text-left disabled:opacity-50"
+              >
+                {downloadExamAnswerKey.isPending ? (
+                  <Loader2 className="h-5 w-5 text-blue-600 animate-spin" />
+                ) : (
+                  <CheckCircle className="h-5 w-5 text-blue-600" />
+                )}
+                <span className="font-medium text-blue-600 dark:text-white">Tải đề + đáp án (.Docx)</span>
+              </button>
+            </div>
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4">
               <button
                 onClick={handleTogglePublish}

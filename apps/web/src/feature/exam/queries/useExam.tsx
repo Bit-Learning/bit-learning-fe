@@ -72,7 +72,6 @@ export const useGenerateExam = () => {
   return useMutation({
     mutationFn: (data: ExamGenerateRequest) => examApi.generateExam(data),
     onSuccess: () => {
-      // Invalidate cả list và my-exams
       queryClient.invalidateQueries({ queryKey: examKeys.lists() });
       queryClient.invalidateQueries({ queryKey: examKeys.allMyExams() });
       toast.success({
@@ -205,6 +204,33 @@ export const useDownloadExam = () => {
   return useMutation({
     mutationFn: ({ id, format, name }: { id: number; format: "pdf" | "docx"; name: string }) =>
       examApi.downloadExam(id, format).then((blob) => ({ blob, name, format })),
+    onSuccess: ({ blob, name, format }) => {
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `${name}.${format}`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+      toast.success({
+        title: "Thành công",
+        description: "Tải xuống thành công",
+      });
+    },
+    onError: () => {
+      toast.error({
+        title: "Lỗi",
+        description: "Không thể tải xuống đề thi",
+      });
+    },
+  });
+};
+
+export const useDownloadExamAnswerKey = () => {
+  return useMutation({
+    mutationFn: ({ id, format, name }: { id: number; format: "pdf" | "docx"; name: string }) =>
+      examApi.downloadExamAnswerKey(id, format).then((blob) => ({ blob, name, format })),
     onSuccess: ({ blob, name, format }) => {
       const url = window.URL.createObjectURL(blob);
       const link = document.createElement("a");

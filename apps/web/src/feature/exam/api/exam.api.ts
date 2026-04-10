@@ -73,4 +73,12 @@ export const examApi = {
       })
       .then((response) => response.data);
   },
+  downloadExamAnswerKey(id: number, format: "pdf" | "docx"): Promise<Blob> {
+    return api
+      .get(`/exams/${id}/answer-key`, {
+        params: { format },
+        responseType: "blob",
+      })
+      .then((response) => response.data);
+  },
 };
