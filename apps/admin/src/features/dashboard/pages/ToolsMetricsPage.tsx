@@ -1,10 +1,9 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Main } from "@/layout/main";
+import { Header } from "@/layout/header";
 import { ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { advancedMetricsLinks } from "../data/metrics-links";
 import { AdvancedMetricsLink } from "../types/system-metrics.types";
-import { Header } from "@/layout/header";
 
 // ── Icon config ──
 const CDN = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
@@ -91,81 +90,114 @@ function ToolIcon({ title }: { title: string }) {
 	);
 }
 
-// ── Advanced Metrics Links Panel ──
 function AdvancedMetricsLinksPanel({
 	links,
 }: {
 	links: AdvancedMetricsLink[];
 }) {
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-sm font-semibold">
-					Công cụ giám sát nâng cao
-				</CardTitle>
-				<p className="text-xs text-muted-foreground mt-1">
+		<section className="text-card-foreground">
+			<div className="">
+				<h2 className="text-lg font-semibold">Công cụ giám sát nâng cao</h2>
+				<p className="mt-1 text-sm text-muted-foreground">
 					Các hệ thống giám sát và quan sát — mở trong tab mới để quản trị.
 				</p>
-			</CardHeader>
-			<CardContent>
-				{links.length === 0 && (
+			</div>
+
+			<div className="px-6 py-5">
+				{links.length === 0 ? (
 					<p className="text-xs text-muted-foreground">
 						Chưa cấu hình URL giám sát nâng cao.
 					</p>
+				) : (
+					<div className="overflow-hidden rounded-lg border">
+						<div className="overflow-x-auto">
+							<table className="w-full border-collapse text-sm">
+								<thead className="bg-muted/40">
+									<tr className="border-b">
+										<th className="h-11 px-4 text-left align-middle text-xs font-semibold text-muted-foreground">
+											Tool
+										</th>
+										<th className="h-11 px-4 text-left align-middle text-xs font-semibold text-muted-foreground">
+											Mô tả
+										</th>
+										<th className="hidden h-11 px-4 text-left align-middle text-xs font-semibold text-muted-foreground md:table-cell">
+											Endpoint
+										</th>
+										<th className="h-11 px-4 text-right align-middle text-xs font-semibold text-muted-foreground">
+											Hành động
+										</th>
+									</tr>
+								</thead>
+
+								<tbody>
+									{links.map((link) => {
+										let hostname = link.url;
+
+										try {
+											hostname = new URL(link.url).hostname.replace(
+												/^www\./,
+												"",
+											);
+										} catch {
+											hostname = link.url;
+										}
+
+										return (
+											<tr
+												key={link.url}
+												className="border-b transition-colors hover:bg-muted/40"
+											>
+												<td className="px-4 py-3 align-middle">
+													<div className="flex items-center gap-3">
+														<ToolIcon title={link.title} />
+														<div className="min-w-0">
+															<p className="font-medium text-foreground">
+																{link.title}
+															</p>
+															<p className="mt-0.5 text-[11px] text-muted-foreground md:hidden">
+																{hostname}
+															</p>
+														</div>
+													</div>
+												</td>
+
+												<td className="max-w-[420px] px-4 py-3 align-middle text-xs leading-relaxed text-muted-foreground">
+													{link.purpose}
+												</td>
+
+												<td className="hidden px-4 py-3 align-middle font-mono text-xs text-muted-foreground/70 md:table-cell">
+													{hostname}
+												</td>
+
+												<td className="px-4 py-3 text-right align-middle">
+													<a
+														href={link.url}
+														target="_blank"
+														rel="noreferrer"
+														className="inline-flex items-center gap-1 rounded-md border px-2.5 py-1 text-xs font-medium text-primary transition hover:border-primary/40 hover:bg-primary/5"
+													>
+														Mở
+														<ExternalLink className="h-3 w-3" />
+													</a>
+												</td>
+											</tr>
+										);
+									})}
+								</tbody>
+							</table>
+						</div>
+					</div>
 				)}
-				<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
-					{links.map((link) => {
-						let hostname = link.url;
-						try {
-							hostname = new URL(link.url).hostname.replace(/^www\./, "");
-						} catch {}
-
-						return (
-							<a
-								key={link.url}
-								href={link.url}
-								target="_blank"
-								rel="noreferrer"
-								className="group flex flex-col gap-2.5 rounded-xl border border-border/50 bg-card p-4
-                           transition-colors hover:border-border hover:bg-muted/40 no-underline"
-							>
-								{/* Header: icon + title */}
-								<div className="flex items-center gap-2.5">
-									<ToolIcon title={link.title} />
-									<span className="text-sm font-medium text-foreground leading-tight">
-										{link.title}
-									</span>
-								</div>
-
-								{/* Purpose */}
-								<p className="text-xs text-muted-foreground leading-relaxed flex-1">
-									{link.purpose}
-								</p>
-
-								{/* Footer */}
-								<div className="flex items-center justify-between gap-2 pt-1">
-									<span className="truncate font-mono text-[10px] text-muted-foreground/60">
-										{hostname}
-									</span>
-									<span className="inline-flex shrink-0 items-center gap-1 rounded-md border border-border/60 px-2 py-0.5 text-[11px] font-medium text-primary transition-colors group-hover:border-primary/40 group-hover:bg-primary/5">
-										Mở
-										<ExternalLink className="h-2.5 w-2.5" />
-									</span>
-								</div>
-							</a>
-						);
-					})}
-				</div>
-			</CardContent>
-		</Card>
+			</div>
+		</section>
 	);
 }
 
-// ── Main Dashboard ──
 export function ToolsMetricsPage() {
 	return (
 		<>
-			<Header fixed />
+			<Header />
 			<Main className="flex flex-1 flex-col gap-6 p-8">
 				<AdvancedMetricsLinksPanel links={advancedMetricsLinks} />
 			</Main>
