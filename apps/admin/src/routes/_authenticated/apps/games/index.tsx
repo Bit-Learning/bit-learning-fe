@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { GamesCrudManager } from "@/features/games/components/GamesCrudManager";
-import { MatchingGameManager } from "@/features/games/components/MatchingGameManager";
+import { GamesCrudManager } from "@/features/games/components/GameListPage";
+import { MatchingGameManager } from "@/features/games/components/MatchingGameListPage";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Gamepad2, LayoutGrid } from "lucide-react";
 import { Main } from "@/layout/main";
