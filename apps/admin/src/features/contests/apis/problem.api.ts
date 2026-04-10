@@ -15,6 +15,7 @@ import {
   ProblemBriefResponse,
   ProblemDetailResponse,
   ProblemFilters,
+  TagResponse,
 } from "../types/problem.type";
 import { Language } from "../types/contest.type";
 
@@ -68,5 +69,9 @@ export const problemApi = {
     data: GenerateCodeTemplatesRequest,
   ): Promise<AxiosResponse<ApiResponse<GenerateCodeTemplatesResponse>>> {
     return api.post(`/problems/${problemId}/generate-code-templates`, data);
+  },
+
+  getAllTags(): Promise<AxiosResponse<ApiResponse<TagResponse[]>>> {
+    return api.get("/coding/tags");
   },
 };
