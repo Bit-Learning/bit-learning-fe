@@ -264,6 +264,12 @@ export const ProfileContent = () => {
 			location: formData.location,
 			socialProfile: formData.socialProfile,
 			jobTitle: formData.jobTitle,
+			// Mentor profile fields
+			specialties: formData.specialties ?? undefined,
+			yearsOfExperience: formData.yearsOfExperience ?? undefined,
+			company: formData.company ?? undefined,
+			studentsCount: formData.studentsCount ?? undefined,
+			coursesCount: formData.coursesCount ?? undefined,
 		});
 	};
 
@@ -300,6 +306,8 @@ export const ProfileContent = () => {
 				year: "numeric",
 			})
 		: "";
+
+	const isMentor = formData.role === "MENTOR";
 
 	return (
 		<div className="grow space-y-8 w-full">
@@ -556,6 +564,108 @@ export const ProfileContent = () => {
 									onChange={(e) => handleFieldChange("bio", e.target.value)}
 								/>
 							</div>
+
+							{isMentor && (
+								<div className="pt-8 border-t border-slate-100">
+									<h3 className="text-base font-bold text-slate-900 mb-6">
+										Thông tin Mentor
+									</h3>
+									<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+										<div className="space-y-2 md:col-span-2">
+											<label className="text-sm font-semibold text-slate-700">
+												Lĩnh vực chuyên môn
+											</label>
+											<Input
+												placeholder="Ví dụ: Frontend, Backend, DevOps"
+												value={
+													Array.isArray(formData.specialties)
+														? formData.specialties.join(", ")
+														: ""
+												}
+												onChange={(e) => {
+													const raw = e.target.value;
+													const list = raw
+														.split(",")
+														.map((s) => s.trim())
+														.filter(Boolean);
+													handleFieldChange(
+														"specialties" as keyof TUserProfile,
+														list.length ? list : null,
+													);
+												}}
+											/>
+											<p className="mt-1 text-xs text-slate-500">
+												Nhập các chuyên môn, cách nhau bởi dấu phẩy.
+											</p>
+										</div>
+
+										<div className="space-y-2">
+											<label className="text-sm font-semibold text-slate-700">
+												Số năm kinh nghiệm
+											</label>
+											<Input
+												type="number"
+												min={0}
+												max={50}
+												placeholder="Ví dụ: 5"
+												value={formData.yearsOfExperience ?? ""}
+												onChange={(e) => {
+													const value = e.target.value;
+													const num = value === "" ? null : Number(value);
+													handleFieldChange("yearsOfExperience", num);
+												}}
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="text-sm font-semibold text-slate-700">
+												Công ty hiện tại (tuỳ chọn)
+											</label>
+											<Input
+												placeholder="Ví dụ: Bit Learning, FPT Software"
+												value={formData.company || ""}
+												onChange={(e) =>
+													handleFieldChange("company", e.target.value)
+												}
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="text-sm font-semibold text-slate-700">
+												Số lượng học viên (ước tính)
+											</label>
+											<Input
+												type="number"
+												min={0}
+												placeholder="Ví dụ: 100"
+												value={formData.studentsCount ?? ""}
+												onChange={(e) => {
+													const value = e.target.value;
+													const num = value === "" ? null : Number(value);
+													handleFieldChange("studentsCount", num);
+												}}
+											/>
+										</div>
+
+										<div className="space-y-2">
+											<label className="text-sm font-semibold text-slate-700">
+												Số khoá học đã dạy (ước tính)
+											</label>
+											<Input
+												type="number"
+												min={0}
+												placeholder="Ví dụ: 5"
+												value={formData.coursesCount ?? ""}
+												onChange={(e) => {
+													const value = e.target.value;
+													const num = value === "" ? null : Number(value);
+													handleFieldChange("coursesCount", num);
+												}}
+											/>
+										</div>
+									</div>
+								</div>
+							)}
 
 							<div className="pt-8 border-t border-slate-100">
 								<h3 className="text-base font-bold text-slate-900 mb-6">

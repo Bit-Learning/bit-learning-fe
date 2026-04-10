@@ -26,6 +26,22 @@ export type TUpdateUserRequest = {
 	socialProfile?: TSocialProfile;
 	jobTitle?: string;
 	langKey?: string;
+	// Mentor-specific fields that can be updated from profile
+	specialties?: string[] | null;
+	yearsOfExperience?: number | null;
+	company?: string | null;
+	studentsCount?: number | null;
+	coursesCount?: number | null;
+};
+
+// Shared mentor-specific profile fields
+export type TMentorProfile = {
+	specialties?: string[] | null;
+	yearsOfExperience?: number | null;
+	company?: string | null;
+	featured?: boolean | null;
+	studentsCount?: number | null;
+	coursesCount?: number | null;
 };
 
 export type TUserProfile = {
@@ -54,7 +70,7 @@ export type TUserProfile = {
 	location?: string;
 	socialProfile?: TSocialProfile;
 	jobTitle?: string;
-};
+} & TMentorProfile;
 
 export type TWalletInfo = {
 	id: number;
@@ -91,4 +107,4 @@ export type TInstructor = {
 	bio?: string;
 	jobTitle?: string;
 	socialProfile?: TSocialProfile;
-};
+} & TMentorProfile;

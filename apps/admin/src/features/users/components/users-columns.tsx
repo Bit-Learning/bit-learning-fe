@@ -167,6 +167,100 @@ export const usersColumns: ColumnDef<User>[] = [
 		},
 	},
 	{
+		accessorKey: "specialties",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Chuyên môn" />
+		),
+		cell: ({ row }) => {
+			const specialties = row.original.specialties ?? [];
+			if (!specialties.length) {
+				return <span className="text-xs text-muted-foreground">-</span>;
+			}
+			return (
+				<div className="flex flex-wrap gap-1">
+					{specialties.slice(0, 3).map((s) => (
+						<Badge
+							key={s}
+							variant="outline"
+							className="text-[10px] font-normal"
+						>
+							{s}
+						</Badge>
+					))}
+					{specialties.length > 3 && (
+						<span className="text-[10px] text-muted-foreground">
+							+{specialties.length - 3}
+						</span>
+					)}
+				</div>
+			);
+		},
+	},
+	{
+		accessorKey: "company",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Công ty" />
+		),
+		cell: ({ row }) => {
+			const company = row.original.company;
+			return (
+				<span className="text-xs text-muted-foreground">
+					{company && company.trim().length > 0 ? company : "-"}
+				</span>
+			);
+		},
+	},
+	{
+		accessorKey: "yearsOfExperience",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Kinh nghiệm" />
+		),
+		cell: ({ row }) => {
+			const years = row.original.yearsOfExperience;
+			if (!years) {
+				return <span className="text-xs text-muted-foreground">-</span>;
+			}
+			return <span className="text-xs font-medium">{years} năm</span>;
+		},
+	},
+	{
+		accessorKey: "featured",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Nổi bật" />
+		),
+		cell: ({ row }) => {
+			const featured = row.original.featured;
+			if (!featured) {
+				return <span className="text-xs text-muted-foreground">-</span>;
+			}
+			return (
+				<Badge variant="outline" className="text-[10px] font-medium">
+					Featured
+				</Badge>
+			);
+		},
+	},
+	{
+		accessorKey: "studentsCount",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Học viên" />
+		),
+		cell: ({ row }) => {
+			const students = row.original.studentsCount ?? 0;
+			return <span className="text-xs">{students}</span>;
+		},
+	},
+	{
+		accessorKey: "coursesCount",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Khoá học" />
+		),
+		cell: ({ row }) => {
+			const courses = row.original.coursesCount ?? 0;
+			return <span className="text-xs">{courses}</span>;
+		},
+	},
+	{
 		accessorKey: "wallet",
 		header: ({ column }) => (
 			<DataTableColumnHeader column={column} title="Số dư" />

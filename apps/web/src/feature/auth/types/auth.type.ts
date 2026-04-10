@@ -21,6 +21,12 @@ export type TRegisterRequest = {
 	firstName: string;
 	lastName: string;
 	role: string;
+	// Mentor-specific optional fields
+	specialties?: string[];
+	yearsOfExperience?: number;
+	company?: string;
+	studentsCount?: number;
+	coursesCount?: number;
 };
 export type TForgotPasswordRequest = {
 	email: string;
