@@ -113,7 +113,7 @@ export const PublicProfileContent = ({
 					<img
 						alt="Cover"
 						className="w-full h-full object-cover -mt-6 rounded-t-xl"
-						src={userProfile.coverImage || "/user_no_wallpaper.jpg"}
+						src={userProfile.coverImage || "/graybg.jpg"}
 					/>
 				</div>
 				<div className="px-8 pb-8">

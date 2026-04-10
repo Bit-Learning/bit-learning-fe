@@ -316,7 +316,7 @@ export const ProfileContent = () => {
 					<img
 						alt="Cover"
 						className="w-full h-full object-cover -mt-6 rounded-t-xl"
-						src={formData.coverImage || "/user_no_wallpaper.jpg"}
+						src={formData.coverImage || "/graybg.jpg"}
 					/>
 					<label className="absolute top-4 right-4">
 						<span className="inline-flex items-center gap-1.5 justify-center whitespace-nowrap rounded-sm text-sm font-medium h-7 px-2 bg-white/90 backdrop-blur cursor-pointer border shadow-sm hover:bg-white transition-all">
