@@ -5,7 +5,7 @@ import { useGetAllTags } from "../queries/useTag";
 import { cn } from "@workspace/ui/lib/utils";
 
 interface TagMultiSelectProps {
-  value: string[]; // mảng tag IDs
+  value: string[];
   onChange: (ids: string[]) => void;
   placeholder?: string;
   className?: string;

@@ -83,6 +83,7 @@ const StudentProblemListContent: React.FC = () => {
   const filtered = useMemo(
     () =>
       problems.filter((p) => {
+        if (!p.isPublic) return false;
         if (difficulty !== "all" && p.difficulty !== difficulty) return false;
         if (activeTag && !p.tags?.some((t) => t.name === activeTag)) return false;
         if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;

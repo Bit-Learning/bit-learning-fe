@@ -104,7 +104,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
 
-  // resizable bottom panel
   const [bottomPanelHeight, setBottomPanelHeight] = useState<number>(280);
   const containerRef = useRef<HTMLDivElement>(null);
   const isDragging = useRef(false);
@@ -122,7 +121,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
 
     const onMouseMove = (e: MouseEvent) => {
       if (!isDragging.current) return;
-      const delta = prevY - e.clientY; // moving up = positive = increase height
+      const delta = prevY - e.clientY;
       prevY = e.clientY;
       if (rafId !== null) return;
       rafId = requestAnimationFrame(() => {
@@ -159,7 +158,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     };
   }, []);
 
-  // breakpoints per file: Map<fileId, Set<lineNum>>
   const [breakpointMap, setBreakpointMap] = useState<Map<string, Set<number>>>(new Map());
 
   const activeBreakpoints: Set<number> = breakpointMap.get(activeFileId) ?? new Set();
