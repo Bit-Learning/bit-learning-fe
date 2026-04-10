@@ -96,7 +96,7 @@ export const CourseListPage: React.FC = () => {
 					</Button>
 				</div>
 
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-2 xl:grid-cols-4">
+				<div className="grid grid-cols-1 gap-4 sm:grid-cols-1 xl:grid-cols-3">
 					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
 						<div className="flex items-start justify-between">
 							<div>
@@ -133,7 +133,7 @@ export const CourseListPage: React.FC = () => {
 						<div className="flex items-start justify-between">
 							<div>
 								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-									Chờ duyệt
+									Chưa xuất bản
 								</p>
 								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
 									{stats.pending}
@@ -141,22 +141,6 @@ export const CourseListPage: React.FC = () => {
 							</div>
 							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20">
 								<BookOpen className="h-5 w-5" />
-							</div>
-						</div>
-					</div>
-
-					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-						<div className="flex items-start justify-between">
-							<div>
-								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-									Bị từ chối
-								</p>
-								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-									{stats.rejected}
-								</p>
-							</div>
-							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-rose-50 text-rose-600 ring-1 ring-inset ring-rose-100 dark:bg-rose-500/10 dark:text-rose-400 dark:ring-rose-500/20">
-								<XCircle className="h-5 w-5" />
 							</div>
 						</div>
 					</div>

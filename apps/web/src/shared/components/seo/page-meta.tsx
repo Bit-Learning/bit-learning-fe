@@ -17,7 +17,7 @@ const PageMeta: React.FC<PageMetaProps> = ({
 	description = "Trung tâm đào tạo lập trình hàng đầu Việt Nam, khóa học, tư duy lập trình",
 	keywords = "website, khóa học, tư duy lập trình",
 	url = "https://bithub.edu.vn",
-	image = "./Logo.png",
+	image = "/Logo.png",
 	type = "website",
 	jsonLd,
 	noIndex = false,

@@ -5,6 +5,7 @@ import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/shared/lib/utils";
 import type { CoursePreview, CourseStatus } from "../types/course.type";
+import { convertLevelToVietnamese } from "../utils/courses.utils";
 
 export const publishedStatuses = new Map<boolean, string>([
 	[true, "bg-green-100 text-green-800"],
@@ -66,14 +67,12 @@ export function createCoursesColumns({
 			},
 		},
 		{
-			accessorKey: "instructorName",
+			accessorKey: "description",
 			header: ({ column }) => (
-				<DataTableColumnHeader column={column} title="Giảng viên" />
+				<DataTableColumnHeader column={column} title="Mô tả" />
 			),
 			cell: ({ row }) => (
-				<div className="max-w-[180px] truncate">
-					{row.original.instructorName}
-				</div>
+				<div className="max-w-[180px] truncate">{row.original.description}</div>
 			),
 		},
 		{
@@ -82,6 +81,26 @@ export function createCoursesColumns({
 				<DataTableColumnHeader column={column} title="Lớp" />
 			),
 			cell: ({ row }) => <span>Lớp {row.original.grade}</span>,
+			enableSorting: false,
+		},
+		{
+			accessorKey: "level",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Độ khó" />
+			),
+			cell: ({ row }) => (
+				<span className="capitalize">
+					{convertLevelToVietnamese(row.original.level)}
+				</span>
+			),
+			enableSorting: false,
+		},
+		{
+			accessorKey: "rating",
+			header: ({ column }) => (
+				<DataTableColumnHeader column={column} title="Đánh giá" />
+			),
+			cell: ({ row }) => <span>{row.original.ratingCount ?? "N/A"}</span>,
 			enableSorting: false,
 		},
 		{

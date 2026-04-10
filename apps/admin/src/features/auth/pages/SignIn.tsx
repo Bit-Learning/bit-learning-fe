@@ -32,7 +32,7 @@ const SignIn: React.FC<SignInProps> = ({
 					<div className="space-y-1 text-center">
 						<div className="flex items-center justify-center gap-2">
 							<img
-								src="./Logo.png"
+								src="/Logo.png"
 								alt="Bit Learning Logo"
 								className="h-10 w-full object-contain"
 							/>

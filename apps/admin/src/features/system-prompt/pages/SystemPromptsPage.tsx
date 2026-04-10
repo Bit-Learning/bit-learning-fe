@@ -100,14 +100,7 @@ export const SystemPromptsPage = () => {
 
 	return (
 		<>
-			<Header fixed>
-				<Search />
-				<div className="ms-auto flex items-center space-x-4">
-					<ThemeSwitch />
-					<ConfigDrawer />
-					<ProfileDropdown />
-				</div>
-			</Header>
+			<Header />
 
 			<Main className="space-y-6 p-6">
 				<div className="flex items-center justify-between">

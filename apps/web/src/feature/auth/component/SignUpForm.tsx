@@ -130,7 +130,7 @@ const SignUpForm: React.FC = () => {
 				<div className="w-full max-w-xl">
 					<div className="mb-8 flex items-center justify-center">
 						<img
-							src="./Logo.png"
+							src="/Logo.png"
 							alt="Bit Learning Logo"
 							className="h-10 w-36 object-contain"
 						/>

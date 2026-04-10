@@ -123,7 +123,7 @@ export function CoursesTable({
 						options: [
 							{ label: "Chờ duyệt", value: "PENDING" },
 							{ label: "Đã xuất bản", value: "PUBLISHED" },
-							{ label: "Từ chối", value: "REJECTED" },
+							// { label: "Từ chối", value: "REJECTED" },
 						],
 					},
 				]}

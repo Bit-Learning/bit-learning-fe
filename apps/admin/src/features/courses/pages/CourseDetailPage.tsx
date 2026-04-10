@@ -34,6 +34,7 @@ import { LectureDetail } from "../types/lecture.type";
 import { SectionDetail } from "../types/section.type";
 import { Main } from "@/layout/main";
 import { Header } from "@/layout/header";
+import { convertLevelToVietnamese } from "../utils/courses.utils";
 
 type ModalState =
 	| { type: "none" }
@@ -48,19 +49,6 @@ type DeleteModalState =
 	| { type: "none" }
 	| { type: "section"; id: number; name: string }
 	| { type: "lecture"; id: number; name: string };
-
-const convertLevelToVietnamese = (level: string) => {
-	switch (level) {
-		case "BEGINNING":
-			return "Cơ bản";
-		case "INTERMEDIATE":
-			return "Trung cấp";
-		case "ADVANCED":
-			return "Nâng cao";
-		default:
-			return level;
-	}
-};
 
 export const CourseDetailPage: React.FC = () => {
 	const { id } = useParams({ from: "/_authenticated/courses/$id" });
