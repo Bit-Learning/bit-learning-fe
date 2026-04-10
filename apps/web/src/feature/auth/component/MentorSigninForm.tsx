@@ -73,6 +73,57 @@ const mentorRegisterSchema = z
 		firstName: z.string().min(1, { message: "Họ không được để trống" }),
 		lastName: z.string().min(1, { message: "Tên không được để trống" }),
 		role: z.enum(["MENTOR"], { message: "Vai trò không hợp lệ" }),
+		specialties: z
+			.string()
+			.max(200, {
+				message: "Chuyên môn không được vượt quá 200 ký tự",
+			})
+			.optional()
+			.or(z.literal("")),
+		yearsOfExperience: z
+			.string()
+			.optional()
+			.refine(
+				(value) => {
+					if (!value) return true;
+					const num = Number(value);
+					return !Number.isNaN(num) && num >= 0 && num <= 50;
+				},
+				{
+					message: "Số năm kinh nghiệm phải là số từ 0 đến 50",
+				},
+			),
+		company: z
+			.string()
+			.max(100, { message: "Tên công ty không được vượt quá 100 ký tự" })
+			.optional()
+			.or(z.literal("")),
+		studentsCount: z
+			.string()
+			.optional()
+			.refine(
+				(value) => {
+					if (!value) return true;
+					const num = Number(value);
+					return !Number.isNaN(num) && num >= 0;
+				},
+				{
+					message: "Số lượng học viên phải là số không âm",
+				},
+			),
+		coursesCount: z
+			.string()
+			.optional()
+			.refine(
+				(value) => {
+					if (!value) return true;
+					const num = Number(value);
+					return !Number.isNaN(num) && num >= 0;
+				},
+				{
+					message: "Số lượng khoá học phải là số không âm",
+				},
+			),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: "Mật khẩu và xác nhận mật khẩu không khớp",
@@ -100,6 +151,11 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 			firstName: "",
 			lastName: "",
 			role: "MENTOR",
+			specialties: "",
+			yearsOfExperience: "",
+			company: "",
+			studentsCount: "",
+			coursesCount: "",
 		},
 	});
 
@@ -113,12 +169,32 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 	}, [isSuccess, onBack]);
 
 	function onSubmit(values: TMentorRegisterFormValues) {
+		const specialties = values.specialties
+			?.split(",")
+			.map((item) => item.trim())
+			.filter(Boolean);
+
+		const yearsOfExperience = values.yearsOfExperience
+			? Number(values.yearsOfExperience)
+			: undefined;
+		const studentsCount = values.studentsCount
+			? Number(values.studentsCount)
+			: undefined;
+		const coursesCount = values.coursesCount
+			? Number(values.coursesCount)
+			: undefined;
+
 		register({
 			email: values.email,
 			password: values.password,
 			firstName: values.firstName,
 			lastName: values.lastName,
 			role: values.role,
+			specialties,
+			yearsOfExperience,
+			company: values.company || undefined,
+			studentsCount,
+			coursesCount,
 		});
 	}
 
@@ -280,6 +356,123 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 							</FormItem>
 						)}
 					/>
+
+					<div className="mt-2 border-t border-gray-100 pt-4">
+						<p className="mb-3 text-sm font-semibold text-gray-800">
+							Thông tin Mentor
+						</p>
+						<FormField
+							control={form.control}
+							name="specialties"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="text-sm font-semibold text-gray-700">
+										Lĩnh vực chuyên môn
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Ví dụ: Frontend, Backend, DevOps"
+											{...field}
+											className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+										/>
+									</FormControl>
+									<p className="mt-1 text-xs text-gray-500">
+										Nhập các chuyên môn, cách nhau bởi dấu phẩy.
+									</p>
+									<FormMessage className="text-xs" />
+								</FormItem>
+							)}
+						/>
+
+						<div className="mt-3 grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="yearsOfExperience"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Số năm kinh nghiệm
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												max={50}
+												placeholder="Ví dụ: 5"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="company"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Công ty hiện tại (tuỳ chọn)
+										</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Ví dụ: Bit Learning, FPT Software"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						<div className="mt-3 grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="studentsCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Số lượng học viên (ước tính)
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="Ví dụ: 100"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="coursesCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Số khoá học đã dạy (ước tính)
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="Ví dụ: 5"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+						</div>
+					</div>
 
 					<Button
 						className="bg-linear-to-r h-11 w-full rounded-xl bg-primary font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
