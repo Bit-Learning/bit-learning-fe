@@ -34,6 +34,7 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
 import { CommentItem } from "../components/CommentItem";
 import {
 	getAuthorInitials,
@@ -64,6 +65,8 @@ export const PostDetailPage: React.FC = () => {
 		open: boolean;
 		action: "ban" | "unban" | null;
 	}>({ open: false, action: null });
+	const [blockReason, setBlockReason] = useState("");
+	const [blockReasonError, setBlockReasonError] = useState("");
 
 	const { data: post, isLoading: postLoading } = useGetPostDetail(postId);
 	const { data: comments, isLoading: commentsLoading } = useGetComments(postId);
@@ -73,17 +76,36 @@ export const PostDetailPage: React.FC = () => {
 	const tags = post ? getPostTags(post) : [];
 
 	const handleOpenConfirm = (action: "ban" | "unban") => {
+		if (action === "ban") {
+			setBlockReason(post?.banReason || "");
+		} else {
+			setBlockReason("");
+		}
+		setBlockReasonError("");
 		setConfirmDialog({ open: true, action });
 	};
 
 	const handleConfirm = () => {
-		if (confirmDialog.action === "ban" || confirmDialog.action === "unban") {
-			banPost({ id: postId, isBanned: post?.isBanned || false });
+		if (confirmDialog.action === "ban" && !blockReason.trim()) {
+			setBlockReasonError("Vui lòng nhập lý do khóa bài viết");
+			return;
 		}
+
+		if (confirmDialog.action === "ban" || confirmDialog.action === "unban") {
+			banPost({
+				id: postId,
+				isBanned: post?.isBanned || false,
+				reason: confirmDialog.action === "ban" ? blockReason.trim() : undefined,
+			});
+		}
+		setBlockReason("");
+		setBlockReasonError("");
 		setConfirmDialog({ open: false, action: null });
 	};
 
 	const handleCancel = () => {
+		setBlockReason("");
+		setBlockReasonError("");
 		setConfirmDialog({ open: false, action: null });
 	};
 
@@ -359,6 +381,16 @@ export const PostDetailPage: React.FC = () => {
 										{post.isEditAllowed ? "Có" : "Không"}
 									</span>
 								</div>
+								{post.isBanned && post.banReason ? (
+									<div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-4">
+										<span className="text-sm font-semibold text-red-700">
+											Lý do khóa
+										</span>
+										<p className="text-sm leading-6 text-red-900">
+											{post.banReason}
+										</p>
+									</div>
+								) : null}
 							</CardContent>
 						</Card>
 
@@ -421,6 +453,24 @@ export const PostDetailPage: React.FC = () => {
 									"Bạn có chắc chắn muốn mở khóa bài viết này? Bài viết sẽ hiển thị công khai trở lại."}
 							</AlertDialogDescription>
 						</AlertDialogHeader>
+						{confirmDialog.action === "ban" ? (
+							<div className="space-y-2">
+								<Textarea
+									value={blockReason}
+									onChange={(event) => {
+										setBlockReason(event.target.value);
+										if (blockReasonError) {
+											setBlockReasonError("");
+										}
+									}}
+									placeholder="Nhập lý do khóa bài viết để gửi email cho tác giả"
+									className="min-h-28"
+								/>
+								{blockReasonError ? (
+									<p className="text-sm text-red-600">{blockReasonError}</p>
+								) : null}
+							</div>
+						) : null}
 						<AlertDialogFooter>
 							<AlertDialogCancel onClick={handleCancel}>
 								Hủy bỏ

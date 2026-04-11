@@ -2,6 +2,13 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { postApi } from "../apis/post.api";
 import { toast } from "sonner";
 
+function getErrorMessage(error: unknown, fallback: string) {
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+	return fallback;
+}
+
 export const postKeys = {
 	all: ["posts"] as const,
 	list: (page: number, size: number) => ["posts", "list", page, size] as const,
@@ -9,7 +16,7 @@ export const postKeys = {
 	comments: (postId: number) => ["posts", "comments", postId] as const,
 };
 
-export const useGetPosts = (page: number = 0, size: number = 10) => {
+export const useGetPosts = (page = 0, size = 10) => {
 	return useQuery({
 		queryKey: postKeys.list(page, size),
 		queryFn: async () => {
@@ -48,8 +55,15 @@ export const useBanPost = () => {
 	const queryClient = useQueryClient();
 
 	return useMutation({
-		mutationFn: ({ id, isBanned }: { id: number; isBanned: boolean }) =>
-			isBanned ? postApi.unbanPost(id) : postApi.banPost(id),
+		mutationFn: ({
+			id,
+			isBanned,
+			reason,
+		}: {
+			id: number;
+			isBanned: boolean;
+			reason?: string;
+		}) => (isBanned ? postApi.unbanPost(id) : postApi.banPost(id, reason)),
 		onSuccess: (response, variables) => {
 			queryClient.invalidateQueries({ queryKey: postKeys.all });
 			queryClient.invalidateQueries({
@@ -60,10 +74,12 @@ export const useBanPost = () => {
 				response.data.message || `Đã ${action} bài viết thành công`,
 			);
 		},
-		onError: (error: any) => {
+		onError: (error: unknown) => {
 			toast.error(
-				error?.response?.data?.message ||
+				getErrorMessage(
+					error,
 					"Đã xảy ra lỗi khi cập nhật trạng thái bài viết",
+				),
 			);
 		},
 	});
@@ -85,10 +101,9 @@ export const useFeaturePost = () => {
 				response.data.message || `Đã ${action} bài viết thành công`,
 			);
 		},
-		onError: (error: any) => {
+		onError: (error: unknown) => {
 			toast.error(
-				error?.response?.data?.message ||
-					"Đã xảy ra lỗi khi cập nhật trạng thái nổi bật",
+				getErrorMessage(error, "Đã xảy ra lỗi khi cập nhật trạng thái nổi bật"),
 			);
 		},
 	});
@@ -115,10 +130,12 @@ export const useBanComment = () => {
 				response.data.message || `Đã ${action} bình luận thành công`,
 			);
 		},
-		onError: (error: any) => {
+		onError: (error: unknown) => {
 			toast.error(
-				error?.response?.data?.message ||
+				getErrorMessage(
+					error,
 					"Đã xảy ra lỗi khi cập nhật trạng thái bình luận",
+				),
 			);
 		},
 	});

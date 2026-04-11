@@ -60,6 +60,7 @@ export interface PostPreview {
 	isTrending: boolean;
 	content: string;
 	isBanned: boolean;
+	banReason?: string | null;
 	isEdited: boolean;
 	isEditAllowed?: boolean;
 	likes: number;

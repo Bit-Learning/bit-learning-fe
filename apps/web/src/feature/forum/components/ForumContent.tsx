@@ -18,6 +18,8 @@ import {
 	Compass,
 } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
+import { useSelector } from "react-redux";
+import { toast } from "@/shared/components/Sonner";
 import {
 	useFeaturedForumPosts,
 	useForumCategories,
@@ -26,8 +28,10 @@ import {
 	useMostViewedForumPosts,
 	usePopularForumTags,
 	useRecommendedForumPosts,
+	useSubscribeToForumPosts,
 	useTrendingForumPosts,
 } from "../queries/useForum";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { formatRelative } from "../utils/forum.utils";
 import { AuthorAvatar } from "./AuthorAvatar";
 import type { ForumCategory, Post, Tag as ForumTag } from "../types/forum.type";
@@ -229,6 +233,53 @@ function InlineStateCard({
 				</div>
 			) : null}
 		</div>
+	);
+}
+
+function ForumSubscribeCard({
+	email,
+	setEmail,
+	onSubmit,
+	isPending,
+}: {
+	email: string;
+	setEmail: (value: string) => void;
+	onSubmit: () => void;
+	isPending: boolean;
+}) {
+	return (
+		<section className="overflow-hidden rounded-[1.75rem] bg-[linear-gradient(135deg,#0f6ab8_0%,#1a6eaf_52%,#135e9f_100%)] p-6 text-white shadow-sm">
+			<div className="space-y-5">
+				<div className="space-y-2">
+					<p className="text-xs font-black uppercase tracking-[0.25em] text-blue-100/80">
+						Forum updates
+					</p>
+					<p className="max-w-4xl text-base leading-8 text-blue-50">
+						Nhận email khi cộng đồng Bit Learning có bài viết mới. Đăng ký để
+						không bỏ lỡ các chủ đề Backend, Frontend, DevOps, AI và những chia
+						sẻ hữu ích từ cộng đồng.
+					</p>
+				</div>
+
+				<div className="flex flex-col gap-3 lg:flex-row">
+					<Input
+						type="email"
+						value={email}
+						onChange={(event) => setEmail(event.target.value)}
+						placeholder="Email"
+						className="h-12 border-white/70 bg-white text-slate-900 placeholder:text-slate-400 focus-visible:border-white focus-visible:ring-white/30"
+					/>
+					<Button
+						type="button"
+						onClick={onSubmit}
+						isDisabled={isPending}
+						className="h-12 min-w-44 rounded-xl border border-white/80 bg-transparent px-6 text-base font-semibold text-white hover:bg-white/10"
+					>
+						{isPending ? "Đang gửi..." : "Gửi yêu cầu"}
+					</Button>
+				</div>
+			</div>
+		</section>
 	);
 }
 
@@ -483,6 +534,7 @@ function SidebarList({
 
 const ForumContent: React.FC = () => {
 	const navigate = useNavigate();
+	const { userInfo } = useSelector(selectAuthStateInfo);
 	const search = useSearch({ strict: false }) as {
 		q?: string;
 		category?: string;
@@ -490,6 +542,9 @@ const ForumContent: React.FC = () => {
 		sort?: "latest" | "trending" | "most_viewed" | "most_reacted";
 	};
 	const [searchInput, setSearchInput] = useState(search.q ?? "");
+	const [subscriptionEmail, setSubscriptionEmail] = useState(
+		userInfo?.email ?? "",
+	);
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
 	const selectedSort = search.sort ?? "latest";
@@ -503,6 +558,7 @@ const ForumContent: React.FC = () => {
 	const popularTagsQuery = usePopularForumTags(16);
 	const sidebarMostViewedQuery = useMostViewedForumPosts(5);
 	const sidebarLatestQuery = useLatestForumList(5);
+	const subscribeMutation = useSubscribeToForumPosts();
 
 	const latestFeedQuery = useInfiniteForumPosts({
 		q: search.q,
@@ -542,6 +598,12 @@ const ForumContent: React.FC = () => {
 	useEffect(() => {
 		setSearchInput(search.q ?? "");
 	}, [search.q]);
+
+	useEffect(() => {
+		if (userInfo?.email && !subscriptionEmail) {
+			setSubscriptionEmail(userInfo.email);
+		}
+	}, [userInfo?.email, subscriptionEmail]);
 
 	useEffect(() => {
 		const timer = window.setTimeout(() => {
@@ -627,6 +689,29 @@ const ForumContent: React.FC = () => {
 			tag: selectedTag,
 			sort,
 		});
+
+	const handleSubscribe = () => {
+		const email = subscriptionEmail.trim();
+		if (!email) {
+			toast.error({ title: "Please enter your email address" });
+			return;
+		}
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			toast.error({ title: "Please enter a valid email address" });
+			return;
+		}
+
+		const langKey =
+			typeof window !== "undefined"
+				? localStorage.getItem("i18nextLng") || "vi"
+				: "vi";
+
+		subscribeMutation.mutate({
+			email,
+			langKey,
+		});
+	};
 
 	return (
 		<div className="min-h-screen bg-[#f5f7fb]">
@@ -743,6 +828,13 @@ const ForumContent: React.FC = () => {
 
 				<div className="grid gap-8 xl:grid-cols-[minmax(0,1.75fr)_360px]">
 					<div className="space-y-8">
+						<ForumSubscribeCard
+							email={subscriptionEmail}
+							setEmail={setSubscriptionEmail}
+							onSubmit={handleSubscribe}
+							isPending={subscribeMutation.isPending}
+						/>
+
 						<section className="space-y-4">
 							<div className="flex items-center justify-between gap-4">
 								<div>
