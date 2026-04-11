@@ -2,23 +2,24 @@ import React, { useState, useEffect, useRef } from "react";
 import { FileCode, Upload, Trash2, Info, Terminal, X, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
-import { useSubmitSolution } from "../queries/useContest";
+import { useSubmitSolution, useContestRunCode, useContestDebugCode } from "../queries/useContest";
 import { useParams } from "@tanstack/react-router";
+import { useCodeTemplates, useProblemDetail } from "@/feature/code-practice/queries/useCoding";
 import {
-  useCodeTemplates,
-  useRunCode,
-  useDebugCode,
-  useProblemDetail,
-} from "@/feature/code-practice/queries/useCoding";
-import {
-  DebugRequest,
-  DebugResponse,
   Language,
-  RunCodeRequest,
-  RunCodeResponse,
+  SubmissionStatus,
+  type RunCodeResponse,
+  type DebugResponse,
 } from "@/feature/code-practice/types/coding.type";
 import { EditorFile } from "@/feature/code-practice/components/FileTab";
 import { CodeEditor } from "@/feature/code-practice/components/CodeEditor";
+import type {
+  ContestRunResponse,
+  ContestDebugResponse,
+  ContestRunRequest,
+  ContestDebugRequest,
+  ContestVerdict,
+} from "../types/contest.type";
 
 type SubmitMode = "editor" | "file";
 
@@ -28,16 +29,68 @@ interface ProblemSubmitTabProps {
   disabled?: boolean;
 }
 
+function verdictToSubmissionStatus(verdict: ContestVerdict | "COMPILE_ERROR" | string): SubmissionStatus {
+  switch (verdict) {
+    case "AC":
+      return SubmissionStatus.ACCEPTED;
+    case "WA":
+      return SubmissionStatus.WRONG_ANSWER;
+    case "TLE":
+      return SubmissionStatus.TIME_LIMIT_EXCEEDED;
+    case "MLE":
+      return SubmissionStatus.RUNTIME_ERROR;
+    case "RE":
+      return SubmissionStatus.RUNTIME_ERROR;
+    case "CE":
+    case "COMPILE_ERROR":
+      return SubmissionStatus.COMPILE_ERROR;
+    default:
+      return SubmissionStatus.RUNTIME_ERROR;
+  }
+}
+
+function adaptRunResult(r: ContestRunResponse): RunCodeResponse {
+  return {
+    overallStatus: verdictToSubmissionStatus(r.overallStatus),
+    language: r.language,
+    compileError: r.compileError ?? undefined,
+    testCaseResults: r.testCaseResults.map((tc) => ({
+      orderIndex: tc.orderIndex,
+      status: verdictToSubmissionStatus(tc.status),
+      input: tc.input ?? "",
+      expectedOutput: tc.expectedOutput ?? "",
+      actualOutput: tc.actualOutput ?? undefined,
+      executionTimeMs: tc.executionTimeMs ?? 0,
+      memoryUsageMb: tc.memoryUsageMb ?? 0,
+      errorMessage: tc.errorMessage ?? undefined,
+    })),
+  };
+}
+
+function adaptDebugResult(r: ContestDebugResponse): DebugResponse {
+  return {
+    status: verdictToSubmissionStatus(r.status),
+    steps: r.steps.map((s) => ({
+      line: s.line,
+      iteration: s.iteration,
+      file: s.file,
+      variables: s.variables,
+    })),
+    output: r.output || undefined,
+    error: r.error ?? undefined,
+  };
+}
+
 export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
   contestProblemId,
   problemId,
   disabled = false,
 }) => {
-  const { id } = useParams({ strict: false });
+  const { id: contestId } = useParams({ strict: false });
   const { mutate: submitSolution, isPending } = useSubmitSolution();
   const { data: codeTemplates, isLoading: isTemplatesLoading } = useCodeTemplates(problemId);
-  const runCode = useRunCode();
-  const debugCode = useDebugCode();
+  const runCode = useContestRunCode();
+  const debugCode = useContestDebugCode();
 
   const [language, setLanguage] = useState<Language>(Language.PYTHON);
 
@@ -52,12 +105,15 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
   const templateCache = useRef<Partial<Record<Language, string>>>({});
   const multifileTemplateCache = useRef<Partial<Record<Language, string>>>({});
   const [submissionId, setSubmissionId] = useState<string | null>(null);
-  const [runResult, setRunResult] = useState<RunCodeResponse | null>(null);
-  const [debugResult, setDebugResult] = useState<DebugResponse | null>(null);
+  const [contestRunResult, setContestRunResult] = useState<ContestRunResponse | null>(null);
+  const [contestDebugResult, setContestDebugResult] = useState<ContestDebugResponse | null>(null);
   const [debugLines, setDebugLines] = useState<string>("");
   const [debugInput, setDebugInput] = useState<string>("");
   const [editorFiles, setEditorFiles] = useState<EditorFile[]>([]);
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
+
+  const runResult: RunCodeResponse | null = contestRunResult ? adaptRunResult(contestRunResult) : null;
+  const debugResult: DebugResponse | null = contestDebugResult ? adaptDebugResult(contestDebugResult) : null;
 
   const languageOptions = [
     { value: Language.PYTHON, label: "Python 3.10" },
@@ -68,14 +124,10 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
 
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
-    if (file) {
-      setUploadedFile(file);
-    }
+    if (file) setUploadedFile(file);
   };
 
-  const handleRemoveFile = () => {
-    setUploadedFile(null);
-  };
+  const handleRemoveFile = () => setUploadedFile(null);
 
   const getFileExtension = (lang: Language) => {
     switch (lang) {
@@ -108,16 +160,16 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
   const handleToggleMultiFileMode = (multi: boolean) => {
     setIsMultiFileMode(multi);
     if (multi) {
-      const template = multifileTemplateCache.current[language] ?? "";
+      const template =
+        multifileTemplateCache.current[language] ?? problem?.multifileEntryTemplate ?? problem?.codeTemplate ?? "";
       setCode(template);
     } else {
-      const template = templateCache.current[language] ?? "";
-      setCode(template);
+      setCode(templateCache.current[language] ?? "");
       setEditorFiles([]);
     }
     setDebugLines("");
-    setRunResult(null);
-    setDebugResult(null);
+    setContestRunResult(null);
+    setContestDebugResult(null);
     setSubmissionId(null);
   };
 
@@ -126,61 +178,49 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
       const template = codeTemplates.find((t) => t.language === language);
       if (template) {
         templateCache.current[language] = template.templateCode;
-        if (!isMultiFileMode) {
-          setCode(template.templateCode);
-        }
+        if (!isMultiFileMode) setCode(template.templateCode);
         setIsTemplateLoading(false);
       }
     }
   }, [language, codeTemplates, isMultiFileMode]);
 
   const isMultiFile = editorFiles.length > 1;
-  const getActiveFileName = () => editorFiles[0]?.name ?? "main";
+  const getEntryFileName = () => editorFiles[0]?.name ?? "main";
   const toCodeFiles = () => editorFiles.map((f) => ({ name: f.name, content: f.content }));
 
-  const handleFilesChange = (files: EditorFile[]) => {
-    setEditorFiles(files);
-  };
+  const handleFilesChange = (files: EditorFile[]) => setEditorFiles(files);
 
   const handleSubmit = async (): Promise<void> => {
-    if (!id) return;
-
+    if (!contestId) return;
     try {
       if (mode === "file" && uploadedFile) {
         const reader = new FileReader();
         reader.onload = (e) => {
-          const content = e.target?.result as string;
           submitSolution({
-            contestId: id,
+            contestId,
             request: {
               contestProblemId,
               language,
-              sourceCode: content,
+              sourceCode: e.target?.result as string,
             },
           });
         };
         reader.readAsText(uploadedFile);
       } else if (mode === "editor") {
         if (isMultiFile) {
-          const files = toCodeFiles();
-          const fileContent = files.map((f) => `// File: ${f.name}\n${f.content}`).join("\n\n");
-
           submitSolution({
-            contestId: id,
+            contestId,
             request: {
               contestProblemId,
               language,
-              sourceCode: fileContent,
+              files: toCodeFiles(),
+              entryFile: getEntryFileName(),
             },
           });
         } else {
           submitSolution({
-            contestId: id,
-            request: {
-              contestProblemId,
-              language,
-              sourceCode: code,
-            },
+            contestId,
+            request: { contestProblemId, language, sourceCode: code },
           });
         }
       }
@@ -190,22 +230,17 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
   };
 
   const handleRun = async (): Promise<void> => {
-    if (!problemId) return;
+    if (!contestId) return;
     try {
-      const request: RunCodeRequest = isMultiFile
-        ? {
-            problemId: problemId,
-            language,
-            files: toCodeFiles(),
-            entryFile: getActiveFileName(),
-            input: debugInput || undefined,
-          }
-        : { problemId: problemId, language, sourceCode: code, input: debugInput || undefined };
-      const response = await runCode.mutateAsync(request);
+      const request: ContestRunRequest = isMultiFile
+        ? { contestProblemId, language, files: toCodeFiles(), entryFile: getEntryFileName() }
+        : { contestProblemId, language, sourceCode: code };
+
+      const response = await runCode.mutateAsync({ contestId, request });
       if (response.data.data) {
-        setRunResult(response.data.data);
+        setContestRunResult(response.data.data);
         setSubmissionId(null);
-        setDebugResult(null);
+        setContestDebugResult(null);
       }
     } catch (error) {
       console.error("Run error:", error);
@@ -213,34 +248,36 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
   };
 
   const handleDebug = async (): Promise<void> => {
-    if (!problemId) return;
+    if (!contestId) return;
     const lines = debugLines
       .split(",")
       .map((s) => parseInt(s.trim(), 10))
       .filter((n) => !isNaN(n) && n > 0);
     if (lines.length === 0) return;
+
     try {
-      const request: DebugRequest = isMultiFile
+      const request: ContestDebugRequest = isMultiFile
         ? {
-            problemId: problemId,
+            contestProblemId,
             language,
             lines,
-            files: toCodeFiles(),
-            entryFile: getActiveFileName(),
             input: debugInput || undefined,
+            files: toCodeFiles(),
+            entryFile: getEntryFileName(),
           }
         : {
-            problemId: problemId,
+            contestProblemId,
             language,
-            code,
             lines,
             input: debugInput || undefined,
+            code,
           };
-      const response = await debugCode.mutateAsync(request);
+
+      const response = await debugCode.mutateAsync({ contestId, request });
       if (response.data.data) {
-        setDebugResult(response.data.data);
+        setContestDebugResult(response.data.data);
         setSubmissionId(null);
-        setRunResult(null);
+        setContestRunResult(null);
       }
     } catch (error) {
       console.error("Debug error:", error);
@@ -248,18 +285,17 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
   };
 
   const handleReset = () => {
-    const template = templateCache.current[language] ?? "";
-    setCode(template);
+    setCode(templateCache.current[language] ?? "");
     setEditorFiles([]);
     setDebugLines("");
-    setRunResult(null);
-    setDebugResult(null);
+    setContestRunResult(null);
+    setContestDebugResult(null);
     setSubmissionId(null);
   };
 
   const handleCloseResult = () => {
-    setRunResult(null);
-    setDebugResult(null);
+    setContestRunResult(null);
+    setContestDebugResult(null);
     setSubmissionId(null);
   };
 
@@ -346,7 +382,7 @@ export const ProblemSubmitTab: React.FC<ProblemSubmitTabProps> = ({
             isMultiFileMode={isMultiFileMode}
             hasMultifileTemplate={!!problem.multifileEntryTemplate}
             onToggleMultiFileMode={handleToggleMultiFileMode}
-            problem={problem || null}
+            problem={problem}
             submissionResult={null}
             runResult={runResult}
             debugResult={debugResult}

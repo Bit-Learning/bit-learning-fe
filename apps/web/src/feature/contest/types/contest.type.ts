@@ -1,3 +1,6 @@
+// contest.type.ts — không import gì từ coding module để tránh coupling
+// ProblemSubmitTab chịu trách nhiệm adapter giữa 2 module.
+
 export enum ContestStatus {
   UPCOMING = "UPCOMING",
   RUNNING = "RUNNING",
@@ -19,13 +22,19 @@ export enum ContestVerdict {
   CE = "CE",
 }
 
-export enum Language {
-  JAVA = "JAVA",
-  PYTHON = "PYTHON",
-  CPP = "CPP",
-  C = "C",
-  JAVASCRIPT = "JAVASCRIPT",
+// Không định nghĩa lại Language — dùng Language từ coding.type ở mọi nơi
+// để tránh 2 enum cùng tên gây nhầm lẫn khi import.
+// Export lại từ đây để các file trong contest module không cần biết đường dẫn coding.
+export { Language } from "@/feature/code-practice/types/coding.type";
+
+// ─── Shared ───────────────────────────────────────────────────────────────────
+
+export interface CodeFile {
+  name: string;
+  content: string;
 }
+
+// ─── Contest list / detail ────────────────────────────────────────────────────
 
 export interface ContestListDTO {
   contestId: string;
@@ -75,15 +84,106 @@ export interface RegisterResponse {
   registeredAt: string;
 }
 
-export interface SubmitRequest {
-  contestProblemId: string;
-  language: Language;
-  sourceCode: string;
-}
+// ─── Submit ───────────────────────────────────────────────────────────────────
+
+import type { Language as LangType, SubmissionStatus } from "@/feature/code-practice/types/coding.type";
+
+/** Single-file: set sourceCode, leave files/entryFile undefined.
+ *  Multi-file:  set files + entryFile, leave sourceCode undefined. */
+export type SubmitRequest =
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode: string;
+      files?: never;
+      entryFile?: never;
+    }
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode?: never;
+      files: CodeFile[];
+      entryFile: string;
+    };
 
 export interface SubmitResponse {
   submissionId: string;
   status: ContestSubmissionStatus;
+}
+
+// ─── Run code ─────────────────────────────────────────────────────────────────
+
+/** POST /contests/{contestId}/run */
+export type ContestRunRequest =
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode: string;
+      files?: never;
+      entryFile?: never;
+    }
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode?: never;
+      files: CodeFile[];
+      entryFile: string;
+    };
+
+export interface ContestRunTestCaseResult {
+  orderIndex: number;
+  status: ContestVerdict;
+  input: string | null;
+  expectedOutput: string | null;
+  actualOutput: string | null;
+  executionTimeMs: number | null;
+  memoryUsageMb: number | null;
+  errorMessage: string | null;
+}
+
+export interface ContestRunResponse {
+  /** "COMPILE_ERROR" có thể xuất hiện trước khi chạy được test case nào */
+  overallStatus: ContestVerdict | "COMPILE_ERROR";
+  language: LangType;
+  compileError: string | null;
+  testCaseResults: ContestRunTestCaseResult[];
+}
+
+// ─── Debug code ───────────────────────────────────────────────────────────────
+
+/** POST /contests/{contestId}/debug */
+export type ContestDebugRequest =
+  | {
+      contestProblemId: string;
+      language: LangType;
+      lines: number[];
+      input?: string;
+      code: string;
+      files?: never;
+      entryFile?: never;
+    }
+  | {
+      contestProblemId: string;
+      language: LangType;
+      lines: number[];
+      input?: string;
+      code?: never;
+      files: CodeFile[];
+      entryFile: string;
+    };
+
+export interface ContestDebugStep {
+  line: number;
+  iteration: number;
+  file: string;
+  variables: Record<string, string>;
+}
+
+export interface ContestDebugResponse {
+  status: SubmissionStatus;
+  steps: ContestDebugStep[];
+  output: string;
+  error: string | null;
 }
 
 export interface SubmissionBriefDTO {
@@ -92,7 +192,7 @@ export interface SubmissionBriefDTO {
   problemTitle: string;
   userId: number;
   username: string;
-  language: Language;
+  language: LangType;
   status: ContestSubmissionStatus;
   verdict: ContestVerdict | null;
   passedTestcases: number;
@@ -120,7 +220,7 @@ export interface SubmissionDetailDTO {
   contestProblemId: string;
   problemLabel: string;
   problemTitle: string;
-  language: Language;
+  language: LangType;
   sourceCode: string;
   status: ContestSubmissionStatus;
   verdict: ContestVerdict | null;

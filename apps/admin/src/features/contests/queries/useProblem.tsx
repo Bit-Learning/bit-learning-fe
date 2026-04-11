@@ -44,13 +44,15 @@ export const useProblems = (filters?: ProblemFilters, options?: { enabled?: bool
   return useQuery({
     queryKey: problemKeys.list(filters),
     queryFn: async () => {
-      const response = await problemApi.getProblems(filters);
+      const response = await problemApi.getProblems({
+        ...filters,
+        size: filters?.size ?? 20,
+      });
       return response.data;
     },
     enabled: options?.enabled ?? true,
   });
 };
-
 export const useProblemDetail = (problemId: string, language?: Language, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: problemKeys.detail(problemId, language),
