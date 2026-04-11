@@ -78,6 +78,8 @@ const PostFormContent: React.FC = () => {
 		handleSubmit,
 		watch,
 		setValue,
+		setError,
+		clearErrors,
 		reset,
 		formState: { errors, isSubmitting },
 	} = useForm<PostFormValues>({
@@ -111,7 +113,11 @@ const PostFormContent: React.FC = () => {
 	const addTag = (value: string) => {
 		const trimmed = value.trim().replace(/^#/, "");
 		if (!trimmed || tags.includes(trimmed) || tags.length >= 10) return;
-		setValue("tags", [...tags, trimmed]);
+		setValue("tags", [...tags, trimmed], {
+			shouldDirty: true,
+			shouldValidate: true,
+		});
+		clearErrors("tags");
 		if (tagInputRef.current) tagInputRef.current.value = "";
 	};
 
@@ -119,6 +125,10 @@ const PostFormContent: React.FC = () => {
 		setValue(
 			"tags",
 			tags.filter((t) => t !== tag),
+			{
+				shouldDirty: true,
+				shouldValidate: true,
+			},
 		);
 
 	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -149,6 +159,14 @@ const PostFormContent: React.FC = () => {
 	const canAddMore = totalCount < 5;
 
 	const onSubmit = (values: PostFormValues) => {
+		if (!isEditMode && values.tags.length === 0) {
+			setError("tags", {
+				type: "manual",
+				message: "Vui lòng thêm ít nhất 1 thẻ",
+			});
+			return;
+		}
+
 		if (isEditMode && postId) {
 			const postData: UpdatePostRequest = {
 				title: values.title,
@@ -307,9 +325,14 @@ const PostFormContent: React.FC = () => {
 							<span className="ml-2 normal-case font-normal text-gray-400">
 								({tags.length})
 							</span>
+							{!isEditMode && (
+								<span className="ml-2 normal-case font-normal text-red-500">
+									*bắt buộc
+								</span>
+							)}
 						</label>
 						<div
-							className={`flex flex-wrap gap-2 min-h-11 px-3 py-2.5 bg-white border rounded-sm items-center shadow-sm transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${
+							className={`flex min-h-11 flex-wrap items-center gap-2 rounded-sm border bg-white px-3 py-2.5 shadow-sm transition-all focus-within:border-blue-400 focus-within:ring-2 focus-within:ring-blue-100 ${
 								errors.tags
 									? "border-red-300 ring-2 ring-red-100"
 									: "border-gray-200"
@@ -318,24 +341,24 @@ const PostFormContent: React.FC = () => {
 							{tags.map((tag) => (
 								<span
 									key={tag}
-									className="inline-flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-700 border border-blue-100 rounded-full text-xs font-semibold"
+									className="inline-flex items-center gap-1 rounded-full border border-blue-100 bg-blue-50 px-2.5 py-1 text-xs font-semibold text-blue-700"
 								>
 									#{tag}
 									<button
 										type="button"
 										onClick={() => removeTag(tag)}
-										className="hover:text-red-500 transition-colors ml-0.5"
+										className="ml-0.5 transition-colors hover:text-red-500"
 									>
-										<X className="w-3 h-3" />
+										<X className="h-3 w-3" />
 									</button>
 								</span>
 							))}
 							{tags.length < 10 && (
 								<input
 									ref={tagInputRef}
-									className="bg-transparent outline-none text-sm flex-1 min-w-24 placeholder:text-gray-300"
+									className="min-w-24 flex-1 bg-transparent text-sm outline-none placeholder:text-gray-300"
 									placeholder={
-										tags.length === 0 ? "Thêm thẻ, nhấn Enter..." : ""
+										tags.length === 0 ? "Thêm ít nhất 1 thẻ, nhấn Enter..." : ""
 									}
 									onKeyDown={(e) => {
 										if (e.key === "Enter") {
