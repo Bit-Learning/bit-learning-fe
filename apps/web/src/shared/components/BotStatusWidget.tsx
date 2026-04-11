@@ -518,7 +518,7 @@ export default function BotStatusWidget({
 		if (currentConversation?.id) {
 			navigate({ to: "/chat-ai/$conversationId", params: { conversationId: currentConversation.id } });
 		} else {
-			navigate({ to: "/chat-ai/" });
+			navigate({ to: "/chat-ai" });
 		}
 	};
 

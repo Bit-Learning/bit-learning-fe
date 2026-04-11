@@ -33,22 +33,25 @@ function groupConversations(conversations: Conversation[]) {
   const yesterday = new Date(today.getTime() - 86400000);
   const weekAgo = new Date(today.getTime() - 7 * 86400000);
 
-  const groups: { label: string; items: Conversation[] }[] = [
-    { label: "Hôm nay", items: [] },
-    { label: "Hôm qua", items: [] },
-    { label: "7 ngày qua", items: [] },
-    { label: "Cũ hơn", items: [] },
-  ];
+  const todayItems: Conversation[] = [];
+  const yesterdayItems: Conversation[] = [];
+  const weekAgoItems: Conversation[] = [];
+  const olderItems: Conversation[] = [];
 
   for (const conv of conversations) {
     const d = new Date(conv.updatedAt || conv.createdAt);
-    if (d >= today) groups[0].items.push(conv);
-    else if (d >= yesterday) groups[1].items.push(conv);
-    else if (d >= weekAgo) groups[2].items.push(conv);
-    else groups[3].items.push(conv);
+    if (d >= today) todayItems.push(conv);
+    else if (d >= yesterday) yesterdayItems.push(conv);
+    else if (d >= weekAgo) weekAgoItems.push(conv);
+    else olderItems.push(conv);
   }
 
-  return groups.filter((g) => g.items.length > 0);
+  return [
+    { label: "Hôm nay", items: todayItems },
+    { label: "Hôm qua", items: yesterdayItems },
+    { label: "7 ngày qua", items: weekAgoItems },
+    { label: "Cũ hơn", items: olderItems },
+  ].filter((g) => g.items.length > 0);
 }
 
 const ChatSidebar: React.FC<ChatSidebarProps> = ({
@@ -67,7 +70,7 @@ const ChatSidebar: React.FC<ChatSidebarProps> = ({
     e.stopPropagation();
     await deleteConversation.mutateAsync(id);
     if (currentConversationId === id) {
-      navigate({ to: "/chat-ai/" });
+      navigate({ to: "/chat-ai" });
     }
   };
 

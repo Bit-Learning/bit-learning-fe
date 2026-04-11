@@ -135,7 +135,7 @@ const ChatAIContent: React.FC<ChatAIContentProps> = ({ conversationId }) => {
   const handleNewChat = () => {
     dispatch(clearChatAction());
     setIsCreatingNewChat(false);
-    navigate({ to: "/chat-ai/" });
+    navigate({ to: "/chat-ai" });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
