@@ -176,7 +176,7 @@ const MyQuestionsContent: React.FC = () => {
                 </AlertDialog>
               )}
               <Button
-                onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
+                onClick={() => navigate({ to: "/mentor/exam/generate-from-questions" })}
                 variant="outline"
                 size="lg"
                 className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
@@ -186,7 +186,7 @@ const MyQuestionsContent: React.FC = () => {
               </Button>
               <Button
                 size="lg"
-                onClick={() => navigate({ to: "/mentor/matrix/import" })}
+                onClick={() => navigate({ to: "/mentor/question/import" })}
                 className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
               >
                 <Upload className="h-4 w-4" />
