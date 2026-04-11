@@ -9,6 +9,7 @@ import { categoryApi } from "../apis/category.api";
 import { commentApi } from "../apis/comment.api";
 import { hashtagApi } from "../apis/hashtag.api";
 import { postApi } from "../apis/post.api";
+import { forumSubscriptionApi } from "../apis/subscription.api";
 import { toast } from "@/shared/components/Sonner";
 import {
 	setCommentsAction,
@@ -21,6 +22,7 @@ import type {
 	CreateCommentRequest,
 	CreatePostRequest,
 	FilterByAuthorParams,
+	ForumSubscriptionRequest,
 	PaginationParams,
 	PostFeedParams,
 	ReactionType,
@@ -150,6 +152,27 @@ export const useForumPostsByAuthor = (params: FilterByAuthorParams) => {
 		enabled: !!params.authorId,
 	});
 };
+
+export const useSubscribeToForumPosts = () =>
+	useMutation({
+		mutationFn: (data: ForumSubscriptionRequest) =>
+			forumSubscriptionApi.subscribe(data),
+		onSuccess: () => {
+			toast.success({
+				title: "Subscribed successfully",
+				description:
+					"You will receive email updates when new forum posts are published.",
+			});
+		},
+		onError: (error: any) => {
+			toast.error({
+				title:
+					error?.response?.data?.message ||
+					error?.message ||
+					"Could not save your subscription",
+			});
+		},
+	});
 
 function invalidateForumQueries(
 	queryClient: ReturnType<typeof useQueryClient>,

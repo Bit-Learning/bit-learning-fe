@@ -68,6 +68,7 @@ export interface Post {
 	// Compatibility fields used by existing detail/form/my-post pages.
 	content: string;
 	isBanned: boolean;
+	banReason?: string | null;
 	isEdited: boolean;
 	isEditAllowed: boolean;
 	likes: number;
@@ -135,4 +136,18 @@ export interface FilterByTagsParams extends PaginationParams {
 
 export interface FilterByAuthorParams extends PaginationParams {
 	authorId: number;
+}
+
+export interface ForumSubscriptionRequest {
+	email: string;
+	langKey?: string;
+}
+
+export interface ForumSubscription {
+	id: number;
+	email: string;
+	langKey: string;
+	isActive: boolean;
+	createdAt: string;
+	updatedAt: string;
 }
