@@ -24,8 +24,7 @@ import {
 	useUpdateForumComment,
 	useDeleteForumComment,
 	useReplyForumComment,
-	useLikeForumPost,
-	useDislikeForumPost,
+	useReactToForumPost,
 	useLikeForumComment,
 	useForumPosts,
 } from "../queries/useForum";
@@ -37,6 +36,101 @@ import { useSelector } from "react-redux";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { Separator } from "@workspace/ui/components/Separator";
 import { ShareBar } from "./ShareBar";
+import type { Post, ReactionSummary, ReactionType } from "../types/forum.type";
+import { toast } from "@/shared/components/Sonner";
+
+const REACTIONS: { type: ReactionType; label: string; icon: string }[] = [
+	{ type: "LIKE", label: "Like", icon: "👍" },
+	{ type: "LOVE", label: "Love", icon: "❤️" },
+	{ type: "HAHA", label: "Haha", icon: "😂" },
+	{ type: "WOW", label: "Wow", icon: "😮" },
+	{ type: "SAD", label: "Sad", icon: "😢" },
+	{ type: "ANGRY", label: "Angry", icon: "😡" },
+];
+
+function formatCompactNumber(value: number) {
+	if (value >= 1000) {
+		return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
+	}
+	return String(value);
+}
+
+function getTopReactionIcons(reactionSummary: ReactionSummary) {
+	return Object.entries(reactionSummary)
+		.filter(([, count]) => count > 0)
+		.sort((a, b) => b[1] - a[1])
+		.slice(0, 3)
+		.map(
+			([type]) =>
+				REACTIONS.find((reaction) => reaction.type === type)?.icon ?? "👍",
+		);
+}
+
+function getReactionIcon(type?: ReactionType | null) {
+	return REACTIONS.find((reaction) => reaction.type === type)?.icon ?? "👍";
+}
+
+function ReactionButton({
+	post,
+	onReact,
+	disabled,
+}: {
+	post: Post;
+	onReact: (reactionType: ReactionType) => void;
+	disabled?: boolean;
+}) {
+	const topReactionIcons = getTopReactionIcons(post.reactionSummary);
+	const activeReaction = post.currentUserReaction;
+
+	return (
+		<div className="group relative">
+			<button
+				type="button"
+				disabled={disabled}
+				onClick={() => onReact("LIKE")}
+				className={`flex items-center gap-2 rounded-full border px-3 py-2 text-sm font-semibold transition ${
+					activeReaction
+						? "border-blue-200 bg-blue-50 text-blue-700"
+						: "border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+				}`}
+			>
+				<span className="text-base">{getReactionIcon(activeReaction)}</span>
+				<span>{activeReaction ? activeReaction.toLowerCase() : "Like"}</span>
+				{post.totalReactions > 0 && (
+					<span className="flex items-center gap-1 text-slate-500">
+						{topReactionIcons.length > 0 && (
+							<span className="flex -space-x-1">
+								{topReactionIcons.map((icon) => (
+									<span
+										key={icon}
+										className="rounded-full border border-white bg-white text-xs"
+									>
+										{icon}
+									</span>
+								))}
+							</span>
+						)}
+						{formatCompactNumber(post.totalReactions)}
+					</span>
+				)}
+			</button>
+
+			<div className="pointer-events-none absolute bottom-full left-0 z-20 mb-3 flex translate-y-2 gap-1 rounded-full border border-slate-200 bg-white p-2 opacity-0 shadow-xl transition duration-200 group-hover:pointer-events-auto group-hover:translate-y-0 group-hover:opacity-100 group-focus-within:pointer-events-auto group-focus-within:translate-y-0 group-focus-within:opacity-100">
+				{REACTIONS.map((reaction) => (
+					<button
+						key={reaction.type}
+						type="button"
+						title={reaction.label}
+						className="flex h-10 w-10 items-center justify-center rounded-full text-lg transition hover:-translate-y-1 hover:bg-slate-100"
+						onClick={() => onReact(reaction.type)}
+					>
+						{reaction.icon}
+					</button>
+				))}
+			</div>
+		</div>
+	);
+}
 
 const PostDetailContent: React.FC = () => {
 	const { id } = useParams({ from: "/_layout/forum/post/$id" });
@@ -68,8 +162,7 @@ const PostDetailContent: React.FC = () => {
 	const updateCommentMutation = useUpdateForumComment();
 	const deleteCommentMutation = useDeleteForumComment();
 	const replyCommentMutation = useReplyForumComment();
-	const likePostMutation = useLikeForumPost();
-	const dislikePostMutation = useDislikeForumPost();
+	const reactMutation = useReactToForumPost();
 	const likeCommentMutation = useLikeForumComment();
 
 	const handleSubmitComment = () => {
@@ -84,6 +177,17 @@ const PostDetailContent: React.FC = () => {
 	};
 
 	const { userInfo } = useSelector(selectAuthStateInfo);
+
+	const handleReact = (reactionType: ReactionType) => {
+		if (!selectedPost) return;
+		if (!userInfo) {
+			toast.error({ title: "Vui lòng đăng nhập để thả cảm xúc." });
+			navigate({ to: "/signin" });
+			return;
+		}
+
+		reactMutation.mutate({ id: selectedPost.id, reactionType });
+	};
 
 	if (isPostLoading) {
 		return (
@@ -362,29 +466,14 @@ const PostDetailContent: React.FC = () => {
 								)}
 							</div>
 						)}
-						<div className="flex items-center border-t border-b border-gray-100 mb-10">
+						<div className="flex items-center justify-between gap-4 border-t border-b border-gray-100 py-3 mb-10">
+							<ReactionButton
+								post={selectedPost as Post}
+								onReact={handleReact}
+								disabled={reactMutation.isPending}
+							/>
 							<button
-								className={`cursor-pointer flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold transition-colors ${
-									selectedPost.likes > 0
-										? "text-blue-600 hover:bg-blue-50"
-										: "text-gray-600 hover:bg-gray-50"
-								}`}
-								onClick={() => likePostMutation.mutate(selectedPost.id)}
-							>
-								<ThumbsUp
-									className={`w-4 h-4 ${selectedPost.likes > 0 ? "fill-blue-600" : ""}`}
-								/>
-								Thích
-							</button>
-							<button
-								className="cursor-pointer flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
-								onClick={() => dislikePostMutation.mutate(selectedPost.id)}
-							>
-								<ThumbsDown className="w-4 h-4" />
-								Không thích
-							</button>
-							<button
-								className="cursor-pointer flex-1 flex items-center justify-center gap-2 py-3 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
+								className="cursor-pointer flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
 								onClick={() =>
 									document
 										.getElementById("comment-box")

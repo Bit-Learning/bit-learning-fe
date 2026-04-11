@@ -53,9 +53,9 @@ function getFileName(url: string): string {
 
 export const PostCard: React.FC<PostCardProps> = ({
 	post,
-	onLike,
-	onDislike,
-	showFullContent = false,
+	onLike: _onLike,
+	onDislike: _onDislike,
+	showFullContent: _showFullContent = false,
 }) => {
 	const navigate = useNavigate();
 
