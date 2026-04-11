@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, Send, X, Minus, MessageCircle, ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "@tanstack/react-router";
 import { useAppDispatch } from "@/shared/redux/store";
 import {
 	addMessageAction,
@@ -31,7 +32,7 @@ function MiniChatPanel({
 	const messages = useSelector(selectMessages);
 
 	const createConversation = useCreateConversation();
-	const sendMessage = useSendMessage(currentConversation?.id || "");
+	const sendMessage = useSendMessage();
 
 	const isLoading = sendMessage.isPending || createConversation.isPending;
 
@@ -86,7 +87,7 @@ function MiniChatPanel({
 
 		if (conversationId) {
 			try {
-				await sendMessage.mutateAsync({ question: text });
+				await sendMessage.mutateAsync({ conversationId, request: { question: text } });
 			} catch (err) {
 				console.error("Failed to send message:", err);
 			}
@@ -447,7 +448,9 @@ export default function BotStatusWidget({
 	onNavigateToFull,
 }: BotStatusWidgetProps) {
 	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
 	const messages = useSelector(selectMessages);
+	const currentConversation = useSelector(selectCurrentConversation);
 
 	const [panelOpen, setPanelOpen] = useState(false);
 	const [minimized, setMinimized] = useState(false);
@@ -512,7 +515,11 @@ export default function BotStatusWidget({
 	const handleNavigateToFull = () => {
 		setPanelOpen(false);
 		onNavigateToFull();
-		// Không clear để ChatAIContent kế thừa conversation đang chat
+		if (currentConversation?.id) {
+			navigate({ to: "/chat-ai/$conversationId", params: { conversationId: currentConversation.id } });
+		} else {
+			navigate({ to: "/chat-ai" });
+		}
 	};
 
 	const handleHideWidget = () => {

@@ -7,7 +7,7 @@ import {
   setCurrentConversationAction,
   setMessagesAction,
 } from "../stores/chat.store";
-import type { ChatRequest, ChatResult, CreateConversationRequest, Message } from "../types/chat.type";
+import type { AttachmentResult, ChatRequest, ChatResult, CreateConversationRequest, Message } from "../types/chat.type";
 
 export const chatKeys = {
   all: ["chat"] as const,
@@ -52,6 +52,15 @@ export const useConversationMessages = (conversationId: string, size = 20, befor
       const response = await chatApi.getConversationMessages(conversationId, size, before);
       const chatResults: ChatResult[] = response.data.data?.messages || [];
 
+      const mapAttachments = (attachments?: AttachmentResult[]) =>
+        attachments?.map((att) => ({
+          id: att.id,
+          fileName: att.file_name,
+          fileUrl: att.file_url,
+          fileType: att.file_type,
+          fileSize: att.file_size,
+        }));
+
       const messages: Message[] = chatResults.map((result) => ({
         id: result.id,
         role: result.role,
@@ -61,7 +70,7 @@ export const useConversationMessages = (conversationId: string, size = 20, befor
         completionToken: result.completion_tokens,
         totalToken: result.total_tokens,
         sources: result.sources ? [result.sources] : undefined,
-        attachments: result.attachments,
+        attachments: mapAttachments(result.attachments),
         createdAt: result.created_at,
       }));
 
@@ -107,13 +116,14 @@ export const useDeleteConversation = () => {
   });
 };
 
-export const useSendMessage = (conversationId: string) => {
+export const useSendMessage = () => {
   const dispatch = useAppDispatch();
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (request: ChatRequest) => chatApi.sendMessage(conversationId, request),
-    onSuccess: (response) => {
+    mutationFn: ({ conversationId, request }: { conversationId: string; request: ChatRequest }) =>
+      chatApi.sendMessage(conversationId, request),
+    onSuccess: (response, { conversationId }) => {
       const result = response.data.data;
       if (result) {
         const assistantMessage: Message = {
@@ -125,7 +135,13 @@ export const useSendMessage = (conversationId: string) => {
           completionToken: result.completion_tokens,
           totalToken: result.total_tokens,
           sources: result.sources ? [result.sources] : undefined,
-          attachments: result.attachments,
+          attachments: result.attachments?.map((att) => ({
+            id: att.id,
+            fileName: att.file_name,
+            fileUrl: att.file_url,
+            fileType: att.file_type,
+            fileSize: att.file_size,
+          })),
           createdAt: result.created_at ?? new Date().toISOString(),
         };
         dispatch(addMessageAction(assistantMessage));
