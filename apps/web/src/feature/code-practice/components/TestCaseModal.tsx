@@ -1,34 +1,64 @@
-import React, { useState } from "react";
-import { Plus, X, Eye, EyeOff } from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Plus, X, Eye, EyeOff, Edit } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Textarea } from "@workspace/ui/components/Textarea";
 import { Label } from "@workspace/ui/components/label";
 import { cn } from "@workspace/ui/lib/utils";
+import type { TestCaseResponse } from "../types/coding.type";
 
-interface AddTestCaseModalProps {
+interface TestCaseModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (data: { input: string; expectedOutput: string; isSample: boolean }) => void;
   isLoading?: boolean;
+  mode: "add" | "edit";
   problemTitle?: string;
+  testCase?: TestCaseResponse | null;
 }
 
-const AddTestCaseModal: React.FC<AddTestCaseModalProps> = ({ isOpen, onClose, onSubmit, isLoading, problemTitle }) => {
-  const [formData, setFormData] = useState({ input: "", expectedOutput: "", isSample: true });
+const TestCaseModal: React.FC<TestCaseModalProps> = ({
+  isOpen,
+  onClose,
+  onSubmit,
+  isLoading,
+  mode,
+  problemTitle,
+  testCase,
+}) => {
+  const isEdit = mode === "edit";
+
+  const [formData, setFormData] = useState({
+    input: "",
+    expectedOutput: "",
+    isSample: true,
+  });
+
+  useEffect(() => {
+    if (isEdit && testCase) {
+      setFormData({
+        input: testCase.input,
+        expectedOutput: testCase.expectedOutput,
+        isSample: testCase.isSample,
+      });
+    } else if (!isEdit) {
+      setFormData({ input: "", expectedOutput: "", isSample: true });
+    }
+  }, [isEdit, testCase, isOpen]);
 
   const handleSubmit = () => {
     if (!formData.input || !formData.expectedOutput) return;
     onSubmit(formData);
-    setFormData({ input: "", expectedOutput: "", isSample: true });
+    if (!isEdit) setFormData({ input: "", expectedOutput: "", isSample: true });
   };
 
   const handleClose = () => {
-    setFormData({ input: "", expectedOutput: "", isSample: true });
+    if (!isEdit) setFormData({ input: "", expectedOutput: "", isSample: true });
     onClose();
   };
 
   if (!isOpen) return null;
+  if (isEdit && !testCase) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center">
@@ -36,13 +66,12 @@ const AddTestCaseModal: React.FC<AddTestCaseModalProps> = ({ isOpen, onClose, on
       <Card className="relative max-w-2xl w-full mx-4 z-50 bg-white dark:bg-slate-900">
         <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-lg bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-              <Plus className="w-5 h-5 text-blue-600" />
-            </div>
             <div>
-              <h2 className="text-lg font-bold text-slate-800 dark:text-white">Thêm Test Case mới</h2>
+              <h2 className="text-lg font-bold text-slate-800 dark:text-white">
+                {isEdit ? "Chỉnh sửa Test Case" : "Thêm Test Case mới"}
+              </h2>
               <p className="text-sm text-slate-500 dark:text-slate-400">
-                Tạo mới một kiểm thử cho bài tập {problemTitle || ""}
+                {isEdit ? "Cập nhật nội dung kiểm thử" : `Tạo mới một kiểm thử cho bài tập ${problemTitle || ""}`}
               </p>
             </div>
           </div>
@@ -133,16 +162,16 @@ const AddTestCaseModal: React.FC<AddTestCaseModalProps> = ({ isOpen, onClose, on
         </CardContent>
 
         <div className="px-6 py-4 border-t border-slate-200 dark:border-slate-800 flex items-center justify-end gap-3">
-          <Button variant="outline" onClick={handleClose}>
+          <Button variant="outline" onClick={handleClose} className="py-5">
             Hủy
           </Button>
           <Button
             onClick={handleSubmit}
             isDisabled={!formData.input || !formData.expectedOutput || isLoading}
-            className="bg-blue-600 hover:bg-blue-700 gap-2"
+            className={cn("gap-2 py-5", isEdit ? "bg-blue-500 hover:bg-blue-600" : "bg-blue-600 hover:bg-blue-700")}
           >
-            <Plus className="w-4 h-4" />
-            {isLoading ? "Đang thêm..." : "Thêm mới"}
+            {isEdit ? <Edit className="w-4 h-4" /> : <Plus className="w-4 h-4" />}
+            {isLoading ? (isEdit ? "Đang lưu..." : "Đang thêm...") : isEdit ? "Lưu thay đổi" : "Thêm mới"}
           </Button>
         </div>
       </Card>
@@ -150,4 +179,4 @@ const AddTestCaseModal: React.FC<AddTestCaseModalProps> = ({ isOpen, onClose, on
   );
 };
 
-export default AddTestCaseModal;
+export default TestCaseModal;
