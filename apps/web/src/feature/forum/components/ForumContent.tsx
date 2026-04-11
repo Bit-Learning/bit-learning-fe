@@ -93,14 +93,14 @@ function PostMeta({ post }: { post: Post }) {
 
 function PostBadge({ post }: { post: Post }) {
 	if (post.isFeatured)
-		return <Badge className="bg-amber-500 text-white">Featured</Badge>;
+		return <Badge className="bg-amber-500 text-white">Nổi bật</Badge>;
 	if (post.isTrending)
-		return <Badge className="bg-orange-500 text-white">Trending</Badge>;
+		return <Badge className="bg-orange-500 text-white">Thịnh hành</Badge>;
 
 	const ageInHours =
 		(Date.now() - new Date(post.createdAt).getTime()) / (1000 * 60 * 60);
 	if (ageInHours <= 24)
-		return <Badge className="bg-emerald-500 text-white">New</Badge>;
+		return <Badge className="bg-emerald-500 text-white">Mới</Badge>;
 	return null;
 }
 
@@ -523,7 +523,7 @@ const ForumContent: React.FC = () => {
 									<Tag className="h-4 w-4" />
 									Trending tags
 								</div>
-								<div className="flex gap-2 overflow-x-auto pb-1">
+								<div className="flex flex-wrap gap-2">
 									{popularTags.slice(0, 10).map((tag) => (
 										<button
 											key={tag.id}
@@ -540,44 +540,6 @@ const ForumContent: React.FC = () => {
 									))}
 								</div>
 							</div>
-						</div>
-
-						<div className="grid gap-4 rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-xl">
-							<div className="flex items-center justify-between">
-								<div>
-									<p className="text-sm uppercase tracking-[0.25em] text-slate-400">
-										Community at a glance
-									</p>
-									<p className="mt-2 text-2xl font-black">
-										{formatCompactNumber(
-											categories.reduce(
-												(sum, item) => sum + (item.postsCount ?? 0),
-												0,
-											),
-										)}
-										+ posts
-									</p>
-								</div>
-								<Users className="h-8 w-8 text-blue-300" />
-							</div>
-							<div className="grid grid-cols-2 gap-3 text-sm">
-								<div className="rounded-2xl bg-white/10 p-4">
-									<p className="text-slate-300">Featured</p>
-									<p className="mt-1 text-xl font-bold">
-										{featuredPosts.length}
-									</p>
-								</div>
-								<div className="rounded-2xl bg-white/10 p-4">
-									<p className="text-slate-300">Trending tags</p>
-									<p className="mt-1 text-xl font-bold">{popularTags.length}</p>
-								</div>
-							</div>
-							<Button
-								className="h-12 rounded-full bg-blue-500 text-white hover:bg-blue-600"
-								onClick={() => navigate({ to: "/forum/create" })}
-							>
-								Create a post
-							</Button>
 						</div>
 					</div>
 				</div>
@@ -757,19 +719,19 @@ const ForumContent: React.FC = () => {
 
 					<aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
 						<SidebarList
-							title="Featured"
+							title="Bài viết nổi bật"
 							icon={<Sparkles className="h-4 w-4 text-amber-500" />}
 							posts={featuredPosts}
 							onOpenPost={openPost}
 						/>
 						<SidebarList
-							title="Most viewed"
+							title="Được xem nhiều"
 							icon={<Eye className="h-4 w-4 text-blue-500" />}
 							posts={mostViewedPosts}
 							onOpenPost={openPost}
 						/>
 						<SidebarList
-							title="Latest"
+							title="Mới cập nhật"
 							icon={<Clock3 className="h-4 w-4 text-emerald-500" />}
 							posts={latestCompactPosts}
 							onOpenPost={openPost}
@@ -779,7 +741,7 @@ const ForumContent: React.FC = () => {
 							<div className="mb-4 flex items-center gap-2 text-slate-900">
 								<Tag className="h-4 w-4 text-rose-500" />
 								<h3 className="text-sm font-black uppercase tracking-[0.2em]">
-									Popular tags
+									Từ khóa phổ biến
 								</h3>
 							</div>
 							<div className="flex flex-wrap gap-2">

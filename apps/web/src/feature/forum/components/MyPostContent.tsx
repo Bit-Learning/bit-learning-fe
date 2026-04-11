@@ -86,10 +86,6 @@ const MyPostContent: React.FC = () => {
 		[allPosts],
 	);
 
-	function isEditAllowed(createdAt: string): boolean {
-		return Date.now() - new Date(createdAt).getTime() < 5 * 60 * 1000;
-	}
-
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="bg-white border-b border-gray-200 shadow-sm">
@@ -277,7 +273,7 @@ const MyPostContent: React.FC = () => {
 									key={post.id}
 									post={post}
 									formatDate={formatDate}
-									canEdit={isEditAllowed(post.createdAt)}
+									canEdit={!post.isBanned}
 									onEdit={() =>
 										navigate({
 											to: "/forum/$id/edit",

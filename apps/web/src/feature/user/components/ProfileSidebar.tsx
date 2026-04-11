@@ -12,6 +12,7 @@ import {
 	Check,
 	X,
 	CreditCard,
+	FileText,
 } from "lucide-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { Card } from "@workspace/ui/components/Card";
@@ -75,6 +76,13 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 			label: "Khóa học của tôi",
 			badge: null,
 			to: "/profile/my-course",
+		},
+		{
+			id: "forum",
+			icon: FileText,
+			label: "Diễn đàn chia sẻ",
+			badge: null,
+			to: "/forum",
 		},
 		{
 			id: "password",

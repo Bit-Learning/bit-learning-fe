@@ -5,6 +5,7 @@ import {
 	AtSign,
 	ChevronDown,
 	Download,
+	Pencil,
 	X,
 	ZoomIn,
 	ThumbsUp,
@@ -164,6 +165,9 @@ const PostDetailContent: React.FC = () => {
 	const replyCommentMutation = useReplyForumComment();
 	const reactMutation = useReactToForumPost();
 	const likeCommentMutation = useLikeForumComment();
+	const { userInfo } = useSelector(selectAuthStateInfo);
+
+	const canEdit = !!userInfo && selectedPost?.author?.id === userInfo.id;
 
 	const handleSubmitComment = () => {
 		if (!comment.trim()) return;
@@ -175,8 +179,6 @@ const PostDetailContent: React.FC = () => {
 		}
 		setComment("");
 	};
-
-	const { userInfo } = useSelector(selectAuthStateInfo);
 
 	const handleReact = (reactionType: ReactionType) => {
 		if (!selectedPost) return;
@@ -329,9 +331,26 @@ const PostDetailContent: React.FC = () => {
 									</div>
 								</div>
 							</div>
-							<button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
-								<MoreHorizontal className="w-5 h-5" />
-							</button>
+							<div className="flex items-center gap-2">
+								{canEdit && (
+									<button
+										type="button"
+										onClick={() =>
+											navigate({
+												to: "/forum/$id/edit",
+												params: { id: String(selectedPost.id) },
+											})
+										}
+										className="inline-flex items-center gap-1.5 rounded-full border border-gray-200 px-3 py-1.5 text-xs font-semibold text-gray-600 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+									>
+										<Pencil className="w-3.5 h-3.5" />
+										<span>Chỉnh sửa</span>
+									</button>
+								)}
+								<button className="p-2 text-gray-400 hover:text-gray-600 hover:bg-gray-100 rounded-full transition-colors">
+									<MoreHorizontal className="w-5 h-5" />
+								</button>
+							</div>
 						</div>
 
 						<h1 className="text-3xl font-extrabold text-gray-900 leading-tight tracking-tight mb-6">
