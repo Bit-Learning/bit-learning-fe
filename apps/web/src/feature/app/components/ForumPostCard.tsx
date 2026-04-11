@@ -46,7 +46,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({ post, onClick }) => {
 								{post.author.name ??
 									`${post.author.firstName} ${post.author.lastName}`.trim()}
 							</p>
-							<p className="text-xs text-slate-500">User-generated post</p>
+							{/* <p className="text-xs text-slate-500">User-generated post</p> */}
 						</div>
 					</div>
 
@@ -59,7 +59,12 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({ post, onClick }) => {
 								<Eye className="h-4 w-4" /> {post.viewsCount}
 							</span>
 						</div>
-						<span className="font-bold text-blue-700">View post</span>
+						<span
+							className="font-bold text-blue-700 cursor-pointer"
+							onClick={() => onClick(post)}
+						>
+							Xem bài biết
+						</span>
 					</div>
 				</div>
 			</CardContent>
