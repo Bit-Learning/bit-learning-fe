@@ -66,27 +66,30 @@ const ContestQAContent: React.FC = () => {
 
   return (
     <>
-      <div className="h-full overflow-auto bg-gray-50">
-        <div className="max-w-5xl mx-auto px-6 py-8">
+      <div className="min-h-full overflow-auto bg-gray-50">
+        <div className="max-w-7xl mx-auto px-6 py-8">
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
             <div>
               <h2 className="text-2xl font-bold text-gray-900">Hỏi đáp & Giải thích</h2>
-              <p className="text-sm text-gray-500 mt-1">Gửi thắc mắc về đề bài cho Ban tổ chức</p>
+              <p className="text-md text-gray-500 mt-1">Gửi thắc mắc về đề bài cho Ban tổ chức</p>
             </div>
 
             <div className="flex items-center gap-3">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
-                <Input
+              <div className="relative w-120">
+                <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 w-5 h-5" />
+                <input
                   type="text"
                   placeholder="Tìm kiếm câu hỏi..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-10 w-64"
+                  className="w-full pl-12 pr-4 py-2.5 bg-white border border-gray-300 rounded-md text-md font-medium focus:ring-blue-500 focus:border-blue-500 placeholder:text-gray-400"
                 />
               </div>
 
-              <Button onClick={() => setIsModalOpen(true)} className="bg-blue-600 hover:bg-blue-700 text-white">
+              <Button
+                onClick={() => setIsModalOpen(true)}
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white p-5 text-md"
+              >
                 <MessageSquarePlus className="w-4 h-4 mr-2" />
                 Đặt câu hỏi
               </Button>
@@ -103,15 +106,15 @@ const ContestQAContent: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3">
                       <Avatar className="w-10 h-10">
-                        <AvatarFallback className="text-sm bg-gray-100 text-gray-600">
+                        <AvatarFallback className="text-md bg-gray-100 text-gray-600">
                           {getAuthorInitials(clarification.askedBy)}
                         </AvatarFallback>
                       </Avatar>
 
                       <div>
                         <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-sm font-semibold uppercase text-gray-900">{clarification.askedBy}</span>
-                          <span className="text-xs text-gray-400">{formatTime(clarification.createdAt)}</span>
+                          <span className="text-md font-semibold uppercase text-gray-900">{clarification.askedBy}</span>
+                          <span className="text-sm text-gray-400">{formatTime(clarification.createdAt)}</span>
                         </div>
 
                         <div className="flex items-center gap-2 mt-1 flex-wrap">
@@ -154,11 +157,11 @@ const ContestQAContent: React.FC = () => {
                       <div className="flex items-center justify-between mb-1">
                         <div className="flex items-center gap-2">
                           <ShieldCheck className="w-4 h-4 text-green-600" />
-                          <span className="text-xs font-semibold text-gray-700">{clarification.answeredBy}</span>
+                          <span className="text-sm font-semibold text-gray-700">{clarification.answeredBy}</span>
                         </div>
 
                         {clarification.answeredAt && (
-                          <span className="text-xs text-gray-400">{formatTime(clarification.answeredAt)}</span>
+                          <span className="text-sm text-gray-400">{formatTime(clarification.answeredAt)}</span>
                         )}
                       </div>
 
@@ -172,7 +175,7 @@ const ContestQAContent: React.FC = () => {
 
           {totalPages > 1 && (
             <div className="flex flex-col md:flex-row items-center justify-between gap-6 pt-6">
-              <div className="text-sm text-gray-500">
+              <div className="text-md text-gray-500">
                 Đang xem {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalElements)} /{" "}
                 {totalElements}
               </div>

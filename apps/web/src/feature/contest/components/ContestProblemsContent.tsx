@@ -131,19 +131,18 @@ const ContestProblemsContent: React.FC = () => {
     <div className="flex h-full overflow-hidden">
       <aside className="w-[320px] border-r border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex flex-col shrink-0">
         <div className="p-4 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-          <h3 className="font-bold text-lg">Danh sách bài</h3>
-          <Badge className="text-xs text-black font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800">
+          <h3 className="font-bold text-xl">Danh sách bài</h3>
+          <Badge className="text-sm text-black font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800">
             {problems.length} bài tập
           </Badge>
         </div>
 
         <div className="overflow-y-auto flex-1">
           <table className="w-full text-left border-collapse">
-            <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-xs uppercase tracking-wider font-bold">
+            <thead className="sticky top-0 bg-slate-50 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-md uppercase tracking-wider font-bold">
               <tr>
                 <th className="px-4 py-3 w-12 text-center">#</th>
                 <th className="px-4 py-3">Tên bài</th>
-                <th className="px-4 py-3 text-center">T/S</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
@@ -166,13 +165,13 @@ const ContestProblemsContent: React.FC = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-col gap-1">
-                      <span className="font-bold text-sm">{problem.title}</span>
+                      <span className="font-bold text-md truncate block">{problem.title}</span>{" "}
                       <div className="flex items-center gap-2">
-                        <span className={`text-[10px] font-bold uppercase ${getDifficultyColor(problem.difficulty)}`}>
+                        <span className={`text-xs font-bold uppercase ${getDifficultyColor(problem.difficulty)}`}>
                           {getDifficultyLabel(problem.difficulty)}
                         </span>
                         {problem.myAttempts > 0 && (
-                          <span className="text-[10px] text-slate-400">• {problem.myAttempts} lần</span>
+                          <span className="text-sm text-slate-400">• {problem.myAttempts} lần</span>
                         )}
                       </div>
                     </div>
@@ -190,7 +189,7 @@ const ContestProblemsContent: React.FC = () => {
           <div className="flex gap-8">
             <button
               onClick={() => setActiveTab("description")}
-              className={`py-4 text-sm cursor-pointer font-bold flex items-center gap-2 transition-colors ${
+              className={`py-4 text-md cursor-pointer font-bold flex items-center gap-2 transition-colors ${
                 activeTab === "description"
                   ? "border-primary text-primary border-b-2"
                   : "border-transparent text-slate-500 hover:text-slate-700 dark:hover:text-slate-300"
@@ -202,7 +201,7 @@ const ContestProblemsContent: React.FC = () => {
             <button
               onClick={() => canSubmit && setActiveTab("submit")}
               disabled={!canSubmit}
-              className={`py-4 text-sm font-bold flex items-center gap-2 transition-colors ${
+              className={`py-4 text-md font-bold flex items-center gap-2 transition-colors ${
                 !canSubmit
                   ? "border-transparent text-slate-400 cursor-not-allowed opacity-50"
                   : activeTab === "submit"

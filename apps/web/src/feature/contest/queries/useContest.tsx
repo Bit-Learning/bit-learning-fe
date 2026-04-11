@@ -190,7 +190,7 @@ export const useSubmissionPolling = (submissionId: string, enabled = true) => {
   });
 };
 
-export const useLeaderboard = (contestId: string, page = 0, size = 50) => {
+export const useLeaderboard = (contestId: string, page = 0, size: number) => {
   return useQuery({
     queryKey: contestKeys.leaderboard(contestId, page, size),
     queryFn: async () => {

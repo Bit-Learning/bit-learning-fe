@@ -99,7 +99,7 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
       <header className="sticky top-0 z-50 bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-3 shrink-0">
         <div className="max-w-400 mx-auto flex items-center justify-between">
           <div className="flex items-center gap-6">
-            <Link to="/" className="flex items-center relative z-50">
+            <Link to="/" className="flex items-center relative z-50 mb-2">
               <img
                 src="/Logo.png"
                 alt="Bit Learning"
@@ -113,23 +113,28 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
               <span className="text-lg uppercase font-bold tracking-wider text-primary">{contest.title}</span>
               <div className="flex items-center gap-4 text-slate-500 dark:text-slate-400">
                 <div className="flex items-center gap-2">
-                  <Timer className="w-5 h-5" />
                   <div className="flex items-center gap-2">
-                    <span
-                      className={cn(
-                        "text-sm font-bold px-2 py-0.5 rounded",
-                        contest.status === "RUNNING" && "bg-blue-100 text-blue-600",
-                        contest.status === "UPCOMING" && "bg-green-100 text-green-600",
-                        contest.status === "ENDED" && "bg-gray-200 text-gray-800",
+                    <div className="flex items-center gap-2">
+                      {contest.status === "RUNNING" ? (
+                        <>
+                          <Timer className="w-5 h-5" />
+                          <span className="text-md font-mono font-bold text-slate-900 dark:text-slate-100">
+                            {timeLeft}
+                          </span>
+                        </>
+                      ) : (
+                        <span
+                          className={cn(
+                            "text-sm font-bold px-2 py-0.5 rounded",
+                            contest.status === "UPCOMING" && "bg-green-100 text-green-600",
+                            contest.status === "ENDED" && "bg-gray-200 text-gray-800",
+                          )}
+                        >
+                          {getStatusText()}
+                        </span>
                       )}
-                    >
-                      {getStatusText()}
-                    </span>
-
-                    {contest.status === "RUNNING" && (
-                      <span className="text-md font-mono font-bold text-slate-900 dark:text-slate-100">{timeLeft}</span>
-                    )}
-                  </div>{" "}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -237,34 +242,34 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
         </div>
       </header>
 
-      <main className="flex-1 overflow-hidden">{children || <Outlet />}</main>
+      <main className="flex-1 overflow-hidden bg-gray-50">{children || <Outlet />}</main>
 
       <footer className="bg-slate-900 border-t border-slate-800 px-6 py-4 shrink-0">
-        <div className="max-w-400 mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-slate-400 text-xs">
-          <div className="flex items-center gap-6">
+        <div className="max-w-400 mx-auto flex flex-col md:flex-row items-center justify-between gap-4 text-slate-300 text-sm">
+          <div className="flex items-center gap-6 text-base">
             <span className="flex items-center gap-2">
-              <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
-              <span className="font-medium">Contest Running</span>
+              <span className="w-2.5 h-2.5 rounded-full bg-green-500 animate-pulse" />
+              <span className="font-semibold">Cuộc thi đang diễn ra</span>
             </span>
             <span className="flex items-center gap-2">
-              <Timer className="w-4 h-4" />
-              <span className="font-mono font-bold text-slate-300">{timeLeft || "00:00:00"}</span>
-            </span>
-          </div>
-
-          <div className="flex items-center gap-6">
-            <span className="flex items-center gap-2">
-              <Users className="w-4 h-4" />
-              <span>{contest.participantCount} participants</span>
-            </span>
-            <span className="flex items-center gap-2">
-              <ListChecks className="w-4 h-4" />
-              <span>{contest.problemCount} problems</span>
+              <Timer className="w-5 h-5" />
+              <span className="font-mono font-bold text-slate-100 text-lg">{timeLeft || "00:00:00"}</span>
             </span>
           </div>
 
-          <div className="flex items-center gap-4 text-slate-500">
-            <span className="font-bold text-slate-400">Bitlearning Contest Platform</span>
+          <div className="flex items-center gap-6 text-base">
+            <span className="flex items-center gap-2">
+              <Users className="w-5 h-5" />
+              <span>{contest.participantCount} thí sinh</span>
+            </span>
+            <span className="flex items-center gap-2">
+              <ListChecks className="w-5 h-5" />
+              <span>{contest.problemCount} bài tập</span>
+            </span>
+          </div>
+
+          <div className="flex items-center gap-4 text-slate-400">
+            <span className="font-semibold text-base">Nền tảng thi lập trình Bitlearning</span>
           </div>
         </div>
       </footer>

@@ -82,10 +82,10 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
           <div className="flex items-center gap-4">
             <div>
               <h3 className="text-2xl font-bold text-gray-900">Chi tiết bài nộp</h3>
-              <p className="text-sm text-gray-500 mt-1">Submission #{submission.submissionId}</p>
+              <p className="text-md text-gray-500 mt-1">#{submission.submissionId}</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
+          <button onClick={onClose} className="cursor-pointer p-2 hover:bg-gray-100 rounded-lg transition-colors">
             <X className="w-5 h-5" />
           </button>
         </div>
@@ -93,27 +93,27 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
         <div className="flex-1 overflow-y-auto p-6 space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-gray-500">Bài tập</p>
-              <p className="text-sm font-semibold text-gray-900">
+              <p className="text-sm font-semibold text-gray-500">Bài tập</p>
+              <p className="text-md font-semibold text-gray-900">
                 {submission.problemLabel}. {submission.problemTitle}
               </p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-gray-500">Ngôn ngữ</p>
-              <p className="text-sm font-semibold text-gray-900">{getLanguageLabel(submission.language as Language)}</p>
+              <p className="text-sm font-semibold text-gray-500">Ngôn ngữ</p>
+              <p className="text-md font-semibold text-gray-900">{getLanguageLabel(submission.language as Language)}</p>
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-gray-500">Trạng thái</p>
+              <p className="text-sm font-semibold text-gray-500">Trạng thái</p>
               <div className="flex items-center gap-2">
                 {getVerdictIcon(submission.verdict ?? "")}
-                <Badge className={`${getVerdictBadge(submission.verdict ?? "")} px-2 py-1 text-xs font-semibold`}>
+                <Badge className={`${getVerdictBadge(submission.verdict ?? "")} px-2 py-1 text-sm font-semibold`}>
                   {submission.verdict}
                 </Badge>
               </div>
             </div>
             <div className="space-y-1">
-              <p className="text-xs font-semibold text-gray-500">Kết quả</p>
-              <p className="text-sm font-semibold text-green-600">
+              <p className="text-sm font-semibold text-gray-500">Kết quả</p>
+              <p className="text-md font-semibold text-green-600">
                 {submission.passedTestcases}/{submission.totalTestcases} test cases
               </p>
             </div>
@@ -121,11 +121,11 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
 
           <div className="grid grid-cols-2 gap-4">
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-xs font-semibold text-gray-500 mb-2">Thời gian thực thi</p>
+              <p className="text-sm font-semibold text-gray-500 mb-2">Thời gian thực thi</p>
               <p className="text-2xl font-bold text-gray-900">{submission.executionTimeMs}ms</p>
             </div>
             <div className="bg-gray-50 rounded-lg p-4">
-              <p className="text-xs font-semibold text-gray-500 mb-2">Bộ nhớ sử dụng</p>
+              <p className="text-sm font-semibold text-gray-500 mb-2">Bộ nhớ sử dụng</p>
               <p className="text-2xl font-bold text-gray-900">{submission.memoryUsageMb} MB</p>
             </div>
           </div>
@@ -142,11 +142,11 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
                   <span className="w-2.5 h-2.5 rounded-full bg-yellow-500/80" />
                   <span className="w-2.5 h-2.5 rounded-full bg-green-500/80" />
                 </div>
-                <span className="text-xs font-mono text-gray-400 ml-2">
+                <span className="text-sm font-mono text-gray-400 ml-2">
                   solution.{getFileExtension(submission.language as Language)}
                 </span>
               </div>
-              <pre className="p-4 text-sm text-gray-300 font-mono overflow-x-auto">{submission.sourceCode}</pre>
+              <pre className="p-4 text-md text-gray-300 font-mono overflow-x-auto">{submission.sourceCode}</pre>
             </div>
           </div>
 
@@ -161,18 +161,18 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
                       <span className="font-semibold text-gray-900">
                         Test Case {testcase.orderIndex}
                         {testcase.isSample && (
-                          <Badge className="ml-2 bg-blue-100 text-blue-700 text-xs px-2 py-0.5">Sample</Badge>
+                          <Badge className="ml-2 bg-blue-100 text-blue-700 text-sm px-2 py-0.5">Sample</Badge>
                         )}
                       </span>
                     </div>
-                    <div className="flex items-center gap-4 text-sm">
+                    <div className="flex items-center gap-4 text-md">
                       <span className="text-gray-600">{testcase.executionTimeMs}ms</span>
                       <span className="text-gray-600">{testcase.memoryUsageMb} MB</span>
                     </div>
                   </div>
 
                   {testcase.isSample && (
-                    <div className="grid grid-cols-3 gap-4 text-xs">
+                    <div className="grid grid-cols-3 gap-4 text-sm">
                       <div>
                         <p className="text-gray-500 font-semibold mb-1">Input</p>
                         <pre className="bg-white p-2 rounded border border-gray-200 font-mono">{testcase.input}</pre>
@@ -198,7 +198,7 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
         </div>
 
         <div className="flex items-center justify-end gap-3 p-6 border-t border-gray-200">
-          <Button variant="outline" onClick={onClose}>
+          <Button variant="outline" onClick={onClose} className="p-5 cursor-pointer">
             Đóng
           </Button>
         </div>
