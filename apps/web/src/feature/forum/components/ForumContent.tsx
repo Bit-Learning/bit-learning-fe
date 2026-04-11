@@ -1,8 +1,10 @@
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
 import { Badge } from "@workspace/ui/components/Badge";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
+	AlertTriangle,
 	BookOpen,
 	Clock3,
 	Eye,
@@ -13,7 +15,6 @@ import {
 	Sparkles,
 	Tag,
 	TrendingUp,
-	Users,
 	Compass,
 } from "lucide-react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
@@ -70,6 +71,165 @@ function updateSearchState(
 			sort: nextSearch.sort || undefined,
 		},
 	});
+}
+
+function getErrorMessage(error: unknown) {
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+	return "Unable to load posts right now.";
+}
+
+function getSkeletonKeys(prefix: string, count: number) {
+	return Array.from({ length: count }, (_, index) => `${prefix}-${index + 1}`);
+}
+
+function SkeletonBlock({ className }: { className: string }) {
+	return (
+		<div className={`animate-pulse rounded-3xl bg-slate-200/80 ${className}`} />
+	);
+}
+
+function FilterChipSkeleton() {
+	return <SkeletonBlock className="h-10 w-28 rounded-full" />;
+}
+
+function PostCardSkeleton() {
+	return (
+		<article className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm">
+			<SkeletonBlock className="aspect-[16/9] w-full rounded-none" />
+			<div className="space-y-4 p-5">
+				<div className="space-y-3">
+					<SkeletonBlock className="h-6 w-4/5" />
+					<SkeletonBlock className="h-6 w-3/5" />
+					<SkeletonBlock className="h-4 w-full" />
+					<SkeletonBlock className="h-4 w-5/6" />
+				</div>
+				<div className="flex gap-2">
+					{getSkeletonKeys("post-tag-skeleton", 3).map((key) => (
+						<SkeletonBlock key={key} className="h-7 w-20 rounded-full" />
+					))}
+				</div>
+				<div className="flex items-center gap-3 border-t border-slate-200 pt-4">
+					<SkeletonBlock className="h-10 w-10 rounded-full" />
+					<div className="flex-1 space-y-2">
+						<SkeletonBlock className="h-4 w-32" />
+						<SkeletonBlock className="h-3 w-40" />
+					</div>
+				</div>
+			</div>
+		</article>
+	);
+}
+
+function FeaturedHeroSkeleton() {
+	return (
+		<section className="grid gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,1fr)]">
+			<div className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+				<SkeletonBlock className="h-72 w-full rounded-none sm:h-96" />
+				<div className="space-y-5 p-6 sm:p-8">
+					<div className="flex gap-3">
+						<SkeletonBlock className="h-8 w-28 rounded-full" />
+						<SkeletonBlock className="h-8 w-16 rounded-full" />
+					</div>
+					<div className="space-y-3">
+						<SkeletonBlock className="h-8 w-5/6" />
+						<SkeletonBlock className="h-8 w-3/5" />
+						<SkeletonBlock className="h-4 w-full" />
+						<SkeletonBlock className="h-4 w-11/12" />
+					</div>
+					<div className="flex items-center gap-3 border-t border-slate-200 pt-4">
+						<SkeletonBlock className="h-12 w-12 rounded-full" />
+						<div className="flex-1 space-y-2">
+							<SkeletonBlock className="h-4 w-36" />
+							<SkeletonBlock className="h-3 w-48" />
+						</div>
+					</div>
+				</div>
+			</div>
+			<div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
+				{getSkeletonKeys("featured-side-skeleton", 3).map((key) => (
+					<div
+						key={key}
+						className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm"
+					>
+						<SkeletonBlock className="h-28 w-full rounded-2xl" />
+						<div className="space-y-3">
+							<SkeletonBlock className="h-4 w-20" />
+							<SkeletonBlock className="h-5 w-full" />
+							<SkeletonBlock className="h-5 w-4/5" />
+							<SkeletonBlock className="h-4 w-full" />
+							<SkeletonBlock className="h-4 w-2/3" />
+						</div>
+					</div>
+				))}
+			</div>
+		</section>
+	);
+}
+
+function SidebarListSkeleton() {
+	return (
+		<section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+			<div className="mb-4 flex items-center gap-2">
+				<SkeletonBlock className="h-4 w-4 rounded-full" />
+				<SkeletonBlock className="h-4 w-32" />
+			</div>
+			<div className="space-y-4">
+				{getSkeletonKeys("sidebar-skeleton", 4).map((key) => (
+					<div key={key} className="flex items-start gap-3">
+						<SkeletonBlock className="h-16 w-16 rounded-2xl" />
+						<div className="flex-1 space-y-2">
+							<SkeletonBlock className="h-4 w-full" />
+							<SkeletonBlock className="h-4 w-5/6" />
+							<SkeletonBlock className="h-3 w-2/3" />
+						</div>
+					</div>
+				))}
+			</div>
+		</section>
+	);
+}
+
+function CategoryCardSkeleton() {
+	return (
+		<div className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+			<SkeletonBlock className="mb-4 h-10 w-10 rounded-2xl" />
+			<SkeletonBlock className="h-6 w-32" />
+			<SkeletonBlock className="mt-2 h-4 w-28" />
+		</div>
+	);
+}
+
+function InlineStateCard({
+	title,
+	description,
+	actionLabel,
+	onAction,
+}: {
+	title: string;
+	description: string;
+	actionLabel?: string;
+	onAction?: () => void;
+}) {
+	return (
+		<div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-10 text-center">
+			<div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full bg-amber-50 text-amber-600">
+				<AlertTriangle className="h-5 w-5" />
+			</div>
+			<h3 className="mt-4 text-lg font-bold text-slate-900">{title}</h3>
+			<p className="mx-auto mt-2 max-w-xl text-sm leading-6 text-slate-500">
+				{description}
+			</p>
+			{actionLabel && onAction ? (
+				<div className="mt-5">
+					<Button type="button" onClick={onAction} className="rounded-full">
+						{actionLabel}
+					</Button>
+				</div>
+			) : null}
+		</div>
+	);
 }
 
 function PostMeta({ post }: { post: Post }) {
@@ -363,6 +523,21 @@ const ForumContent: React.FC = () => {
 	);
 	const mostViewedPosts = sidebarMostViewedQuery.data ?? [];
 	const latestCompactPosts = sidebarLatestQuery.data ?? [];
+	const isFeedBootstrapping =
+		latestFeedQuery.isLoading ||
+		(latestFeedQuery.isFetching &&
+			latestPosts.length === 0 &&
+			!latestFeedQuery.isFetchingNextPage);
+	const isRefreshingFeed =
+		latestFeedQuery.isFetching &&
+		latestPosts.length > 0 &&
+		!latestFeedQuery.isFetchingNextPage;
+	const activeFilterSummary = [
+		search.q ? `Search: ${search.q}` : null,
+		selectedCategory ? `Category: ${selectedCategory}` : null,
+		selectedTag ? `Tag: ${selectedTag}` : null,
+		selectedSort !== "latest" ? `Sort: ${selectedSort}` : null,
+	].filter(Boolean);
 
 	useEffect(() => {
 		setSearchInput(search.q ?? "");
@@ -416,7 +591,6 @@ const ForumContent: React.FC = () => {
 		latestFeedQuery.fetchNextPage,
 		latestFeedQuery.hasNextPage,
 		latestFeedQuery.isFetchingNextPage,
-		latestPosts.length,
 	]);
 
 	const openPost = (post: Post) =>
@@ -501,20 +675,24 @@ const ForumContent: React.FC = () => {
 									>
 										All categories
 									</button>
-									{categories.map((category) => (
-										<button
-											key={category.id}
-											type="button"
-											onClick={() => setCategory(category)}
-											className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
-												selectedCategory === category.slug
-													? "bg-slate-900 text-white"
-													: "bg-white text-slate-600 hover:bg-slate-100"
-											}`}
-										>
-											{category.name}
-										</button>
-									))}
+									{categoriesQuery.isLoading
+										? getSkeletonKeys("category-chip", 5).map((key) => (
+												<FilterChipSkeleton key={key} />
+											))
+										: categories.map((category) => (
+												<button
+													key={category.id}
+													type="button"
+													onClick={() => setCategory(category)}
+													className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+														selectedCategory === category.slug
+															? "bg-slate-900 text-white"
+															: "bg-white text-slate-600 hover:bg-slate-100"
+													}`}
+												>
+													{category.name}
+												</button>
+											))}
 								</div>
 							</div>
 
@@ -524,20 +702,24 @@ const ForumContent: React.FC = () => {
 									Trending tags
 								</div>
 								<div className="flex flex-wrap gap-2">
-									{popularTags.slice(0, 10).map((tag) => (
-										<button
-											key={tag.id}
-											type="button"
-											onClick={() => setTag(tag)}
-											className={`rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition ${
-												selectedTag === tag.slug
-													? "border-blue-200 bg-blue-50 text-blue-700"
-													: "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
-											}`}
-										>
-											#{tag.name}
-										</button>
-									))}
+									{popularTagsQuery.isLoading
+										? getSkeletonKeys("popular-tag-chip", 8).map((key) => (
+												<FilterChipSkeleton key={key} />
+											))
+										: popularTags.slice(0, 10).map((tag) => (
+												<button
+													key={tag.id}
+													type="button"
+													onClick={() => setTag(tag)}
+													className={`rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition ${
+														selectedTag === tag.slug
+															? "border-blue-200 bg-blue-50 text-blue-700"
+															: "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+													}`}
+												>
+													#{tag.name}
+												</button>
+											))}
 								</div>
 							</div>
 						</div>
@@ -546,7 +728,18 @@ const ForumContent: React.FC = () => {
 			</div>
 
 			<div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
-				<FeaturedHero posts={featuredPosts} onOpenPost={openPost} />
+				{featuredQuery.isLoading ? (
+					<FeaturedHeroSkeleton />
+				) : featuredQuery.isError ? (
+					<InlineStateCard
+						title="Featured posts are unavailable"
+						description={getErrorMessage(featuredQuery.error)}
+						actionLabel="Retry"
+						onAction={() => featuredQuery.refetch()}
+					/>
+				) : (
+					<FeaturedHero posts={featuredPosts} onOpenPost={openPost} />
+				)}
 
 				<div className="grid gap-8 xl:grid-cols-[minmax(0,1.75fr)_360px]">
 					<div className="space-y-8">
@@ -562,15 +755,30 @@ const ForumContent: React.FC = () => {
 								</div>
 							</div>
 
-							<div className="grid gap-4 md:grid-cols-2">
-								{trendingPosts.map((post) => (
-									<ContentPostCard
-										key={post.id}
-										post={post}
-										onOpenPost={openPost}
-									/>
-								))}
-							</div>
+							{trendingQuery.isLoading ? (
+								<div className="grid gap-4 md:grid-cols-2">
+									{getSkeletonKeys("trending-post", 4).map((key) => (
+										<PostCardSkeleton key={key} />
+									))}
+								</div>
+							) : trendingQuery.isError ? (
+								<InlineStateCard
+									title="Trending posts could not be loaded"
+									description={getErrorMessage(trendingQuery.error)}
+									actionLabel="Retry"
+									onAction={() => trendingQuery.refetch()}
+								/>
+							) : (
+								<div className="grid gap-4 md:grid-cols-2">
+									{trendingPosts.map((post) => (
+										<ContentPostCard
+											key={post.id}
+											post={post}
+											onOpenPost={openPost}
+										/>
+									))}
+								</div>
+							)}
 						</section>
 
 						<section className="space-y-4">
@@ -615,19 +823,47 @@ const ForumContent: React.FC = () => {
 								</div>
 							</div>
 
-							{latestFeedQuery.isLoading ? (
+							{activeFilterSummary.length > 0 ? (
+								<div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+									<span className="font-semibold text-slate-700">Active:</span>
+									{activeFilterSummary.map((item) => (
+										<span
+											key={item}
+											className="rounded-full bg-slate-100 px-3 py-1"
+										>
+											{item}
+										</span>
+									))}
+									{isRefreshingFeed ? (
+										<span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">
+											Updating results...
+										</span>
+									) : null}
+								</div>
+							) : isRefreshingFeed ? (
+								<div className="text-sm font-medium text-blue-700">
+									Updating results...
+								</div>
+							) : null}
+
+							{isFeedBootstrapping ? (
 								<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
-									{Array.from({ length: 6 }).map((_, index) => (
-										<div
-											key={index}
-											className="h-[420px] animate-pulse rounded-[1.75rem] border border-slate-200 bg-white"
-										/>
+									{getSkeletonKeys("feed-post", 6).map((key) => (
+										<PostCardSkeleton key={key} />
 									))}
 								</div>
+							) : latestFeedQuery.isError ? (
+								<InlineStateCard
+									title="Filtered posts could not be loaded"
+									description={getErrorMessage(latestFeedQuery.error)}
+									actionLabel="Retry"
+									onAction={() => latestFeedQuery.refetch()}
+								/>
 							) : latestPosts.length === 0 ? (
-								<div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
-									No posts matched the current filters.
-								</div>
+								<InlineStateCard
+									title="No posts matched the current filters"
+									description="Try another keyword, category, or sort option. The current filter set returned zero posts."
+								/>
 							) : (
 								<>
 									<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 items-stretch">
@@ -641,8 +877,10 @@ const ForumContent: React.FC = () => {
 									</div>
 									<div ref={loadMoreRef} className="flex justify-center py-2">
 										{latestFeedQuery.isFetchingNextPage ? (
-											<div className="rounded-full bg-white px-4 py-2 text-sm text-slate-500 shadow-sm">
-												Loading more posts...
+											<div className="grid w-full gap-4 md:grid-cols-2 xl:grid-cols-2">
+												{getSkeletonKeys("feed-next-page", 2).map((key) => (
+													<PostCardSkeleton key={key} />
+												))}
 											</div>
 										) : latestFeedQuery.hasNextPage ? (
 											<div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-500">
@@ -667,33 +905,48 @@ const ForumContent: React.FC = () => {
 									Browse by topic lane
 								</h2>
 							</div>
-							<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
-								{categories.map((category) => (
-									<button
-										key={category.id}
-										type="button"
-										onClick={() => setCategory(category)}
-										className={`rounded-[1.5rem] border p-5 text-left shadow-sm transition ${
-											selectedCategory === category.slug
-												? "border-blue-200 bg-blue-50"
-												: "border-slate-200 bg-white hover:-translate-y-1 hover:shadow-lg"
-										}`}
-									>
-										<div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white">
-											{CATEGORY_ICONS[category.iconKey] ?? (
-												<Compass className="h-4 w-4" />
-											)}
-										</div>
-										<h3 className="text-lg font-bold text-slate-950">
-											{category.name}
-										</h3>
-										<p className="mt-2 text-sm text-slate-500">
-											{formatCompactNumber(category.postsCount ?? 0)} posts in
-											this topic
-										</p>
-									</button>
-								))}
-							</div>
+							{categoriesQuery.isLoading ? (
+								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+									{getSkeletonKeys("category-card", 6).map((key) => (
+										<CategoryCardSkeleton key={key} />
+									))}
+								</div>
+							) : categoriesQuery.isError ? (
+								<InlineStateCard
+									title="Categories could not be loaded"
+									description={getErrorMessage(categoriesQuery.error)}
+									actionLabel="Retry"
+									onAction={() => categoriesQuery.refetch()}
+								/>
+							) : (
+								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+									{categories.map((category) => (
+										<button
+											key={category.id}
+											type="button"
+											onClick={() => setCategory(category)}
+											className={`rounded-[1.5rem] border p-5 text-left shadow-sm transition ${
+												selectedCategory === category.slug
+													? "border-blue-200 bg-blue-50"
+													: "border-slate-200 bg-white hover:-translate-y-1 hover:shadow-lg"
+											}`}
+										>
+											<div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white">
+												{CATEGORY_ICONS[category.iconKey] ?? (
+													<Compass className="h-4 w-4" />
+												)}
+											</div>
+											<h3 className="text-lg font-bold text-slate-950">
+												{category.name}
+											</h3>
+											<p className="mt-2 text-sm text-slate-500">
+												{formatCompactNumber(category.postsCount ?? 0)} posts in
+												this topic
+											</p>
+										</button>
+									))}
+								</div>
+							)}
 						</section>
 
 						<section className="space-y-4">
@@ -705,37 +958,64 @@ const ForumContent: React.FC = () => {
 									Recommended posts to keep learning
 								</h2>
 							</div>
-							<div className="grid gap-4 md:grid-cols-2">
-								{recommendedPosts.map((post) => (
-									<ContentPostCard
-										key={post.id}
-										post={post}
-										onOpenPost={openPost}
-									/>
-								))}
-							</div>
+							{recommendedQuery.isLoading ? (
+								<div className="grid gap-4 md:grid-cols-2">
+									{getSkeletonKeys("recommended-post", 4).map((key) => (
+										<PostCardSkeleton key={key} />
+									))}
+								</div>
+							) : recommendedQuery.isError ? (
+								<InlineStateCard
+									title="Recommended posts could not be loaded"
+									description={getErrorMessage(recommendedQuery.error)}
+									actionLabel="Retry"
+									onAction={() => recommendedQuery.refetch()}
+								/>
+							) : (
+								<div className="grid gap-4 md:grid-cols-2">
+									{recommendedPosts.map((post) => (
+										<ContentPostCard
+											key={post.id}
+											post={post}
+											onOpenPost={openPost}
+										/>
+									))}
+								</div>
+							)}
 						</section>
 					</div>
 
 					<aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
-						<SidebarList
-							title="Bài viết nổi bật"
-							icon={<Sparkles className="h-4 w-4 text-amber-500" />}
-							posts={featuredPosts}
-							onOpenPost={openPost}
-						/>
-						<SidebarList
-							title="Được xem nhiều"
-							icon={<Eye className="h-4 w-4 text-blue-500" />}
-							posts={mostViewedPosts}
-							onOpenPost={openPost}
-						/>
-						<SidebarList
-							title="Mới cập nhật"
-							icon={<Clock3 className="h-4 w-4 text-emerald-500" />}
-							posts={latestCompactPosts}
-							onOpenPost={openPost}
-						/>
+						{featuredQuery.isLoading ? (
+							<SidebarListSkeleton />
+						) : (
+							<SidebarList
+								title="Bài viết nổi bật"
+								icon={<Sparkles className="h-4 w-4 text-amber-500" />}
+								posts={featuredPosts}
+								onOpenPost={openPost}
+							/>
+						)}
+						{sidebarMostViewedQuery.isLoading ? (
+							<SidebarListSkeleton />
+						) : (
+							<SidebarList
+								title="Được xem nhiều"
+								icon={<Eye className="h-4 w-4 text-blue-500" />}
+								posts={mostViewedPosts}
+								onOpenPost={openPost}
+							/>
+						)}
+						{sidebarLatestQuery.isLoading ? (
+							<SidebarListSkeleton />
+						) : (
+							<SidebarList
+								title="Mới cập nhật"
+								icon={<Clock3 className="h-4 w-4 text-emerald-500" />}
+								posts={latestCompactPosts}
+								onOpenPost={openPost}
+							/>
+						)}
 
 						<section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
 							<div className="mb-4 flex items-center gap-2 text-slate-900">
@@ -745,20 +1025,24 @@ const ForumContent: React.FC = () => {
 								</h3>
 							</div>
 							<div className="flex flex-wrap gap-2">
-								{popularTags.map((tag) => (
-									<button
-										key={tag.id}
-										type="button"
-										onClick={() => setTag(tag)}
-										className={`rounded-full border px-3 py-1.5 text-sm transition ${
-											selectedTag === tag.slug
-												? "border-blue-200 bg-blue-50 text-blue-700"
-												: "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300"
-										}`}
-									>
-										#{tag.name}
-									</button>
-								))}
+								{popularTagsQuery.isLoading
+									? getSkeletonKeys("sidebar-tag-chip", 10).map((key) => (
+											<FilterChipSkeleton key={key} />
+										))
+									: popularTags.map((tag) => (
+											<button
+												key={tag.id}
+												type="button"
+												onClick={() => setTag(tag)}
+												className={`rounded-full border px-3 py-1.5 text-sm transition ${
+													selectedTag === tag.slug
+														? "border-blue-200 bg-blue-50 text-blue-700"
+														: "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300"
+												}`}
+											>
+												#{tag.name}
+											</button>
+										))}
 							</div>
 						</section>
 					</aside>
