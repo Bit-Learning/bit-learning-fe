@@ -380,14 +380,17 @@ function FeaturedHero({
 				{sidePosts.map((post) => (
 					<article
 						key={post.id}
-						className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm"
+						className="grid grid-cols-[120px_minmax(0,1fr)] items-start gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm"
 					>
-						<img
-							src={post.thumbnailUrl}
-							alt={post.title}
-							className="h-full w-full cursor-pointer rounded-2xl object-cover"
-							onClick={() => onOpenPost(post)}
-						/>
+						<div className="h-24 w-[120px] overflow-hidden rounded-2xl">
+							<img
+								src={post.thumbnailUrl}
+								alt={post.title}
+								className="h-full w-full cursor-pointer object-cover"
+								onClick={() => onOpenPost(post)}
+							/>
+						</div>
+
 						<div className="flex min-w-0 flex-col justify-between gap-3">
 							<div className="space-y-2">
 								<div className="flex flex-wrap items-center gap-2">
@@ -398,16 +401,19 @@ function FeaturedHero({
 									)}
 									<PostBadge post={post} />
 								</div>
+
 								<h3
 									className="line-clamp-2 cursor-pointer text-lg font-bold leading-snug text-slate-900 transition hover:text-blue-700"
 									onClick={() => onOpenPost(post)}
 								>
 									{post.title}
 								</h3>
+
 								<p className="line-clamp-2 text-sm leading-6 text-slate-600">
 									{post.excerpt}
 								</p>
 							</div>
+
 							<div className="flex items-center justify-between gap-3">
 								<PostMeta post={post} />
 							</div>
@@ -720,16 +726,17 @@ const ForumContent: React.FC = () => {
 					<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
 						<div className="space-y-5">
 							<Badge className="rounded-full bg-slate-900 px-4 py-1 text-white">
-								Bit Learning Community Hub
+								Cộng đồng chia sẻ công nghệ
 							</Badge>
 							<div className="space-y-3">
 								<h1 className="max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
-									Posts first, discovery rich.
+									Nơi chia sẻ kiến thức, học hỏi và kết nối với cộng đồng Bit
+									Learning
 								</h1>
 								<p className="max-w-3xl text-base leading-7 text-slate-600">
-									Explore community posts through featured stories, trending
-									discussions, fast filters, and high-density side rails built
-									for learning and sharing.
+									Khám phá các bài đăng cộng đồng thông qua các bài viết nổi
+									bật, thảo luận thịnh hành, bộ lọc nhanh và các thanh bên được
+									thiết kế chuyên dụng để học hỏi và chia sẻ.
 								</p>
 							</div>
 
@@ -738,7 +745,7 @@ const ForumContent: React.FC = () => {
 								<Input
 									value={searchInput}
 									onChange={(event) => setSearchInput(event.target.value)}
-									placeholder="Search posts, topics, or tags..."
+									placeholder="Tìm kiếm bài viết, chủ đề..."
 									className="h-14 rounded-full border-slate-200 bg-white pl-12 pr-12 text-base shadow-sm"
 								/>
 							</div>
@@ -746,7 +753,7 @@ const ForumContent: React.FC = () => {
 							<div className="space-y-3">
 								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
 									<Compass className="h-4 w-4" />
-									Categories
+									Chọn danh mục
 								</div>
 								<div className="flex gap-2 overflow-x-auto pb-1">
 									<button
@@ -784,7 +791,7 @@ const ForumContent: React.FC = () => {
 							<div className="space-y-3">
 								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
 									<Tag className="h-4 w-4" />
-									Trending tags
+									Các thẻ thịnh hành
 								</div>
 								<div className="flex flex-wrap gap-2">
 									{popularTagsQuery.isLoading
@@ -839,10 +846,10 @@ const ForumContent: React.FC = () => {
 							<div className="flex items-center justify-between gap-4">
 								<div>
 									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
-										Trending posts
+										Bài viết thịnh hành
 									</p>
 									<h2 className="text-2xl font-black text-slate-950">
-										What the community is reading now
+										Cộng đồng đang quan tâm
 									</h2>
 								</div>
 							</div>
@@ -877,19 +884,19 @@ const ForumContent: React.FC = () => {
 							<div className="flex flex-wrap items-center justify-between gap-4">
 								<div>
 									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
-										Latest posts
+										Bài viết mới nhất
 									</p>
 									<h2 className="text-2xl font-black text-slate-950">
-										Fresh community discussions
+										Luôn cập nhật những chia sẻ mới nhất từ cộng đồng
 									</h2>
 								</div>
 
 								<div className="flex gap-2 overflow-x-auto">
 									{[
-										{ value: "latest", label: "Latest" },
-										{ value: "most_reacted", label: "Most reacted" },
-										{ value: "most_viewed", label: "Most viewed" },
-										{ value: "trending", label: "Trending" },
+										{ value: "latest", label: "Mới nhất" },
+										{ value: "most_reacted", label: "Tương tác cao" },
+										{ value: "most_viewed", label: "Lượt xem nhiều" },
+										{ value: "trending", label: "Thịnh hành" },
 									].map((option) => (
 										<button
 											key={option.value}
@@ -976,11 +983,11 @@ const ForumContent: React.FC = () => {
 											</div>
 										) : latestFeedQuery.hasNextPage ? (
 											<div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-500">
-												Scroll for more
+												Kéo xuống để xem thêm bài viết
 											</div>
 										) : (
 											<div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-500">
-												You reached the end
+												Bạn đã xem hết bài viết rồi
 											</div>
 										)}
 									</div>
@@ -991,10 +998,10 @@ const ForumContent: React.FC = () => {
 						<section className="space-y-4">
 							<div>
 								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
-									Categories
+									Các chủ đề phổ biến
 								</p>
 								<h2 className="text-2xl font-black text-slate-950">
-									Browse by topic lane
+									Đọc theo chủ đề bạn quan tâm
 								</h2>
 							</div>
 							{categoriesQuery.isLoading ? (
@@ -1032,8 +1039,7 @@ const ForumContent: React.FC = () => {
 												{category.name}
 											</h3>
 											<p className="mt-2 text-sm text-slate-500">
-												{formatCompactNumber(category.postsCount ?? 0)} posts in
-												this topic
+												{formatCompactNumber(category.postsCount ?? 0)} bài viết
 											</p>
 										</button>
 									))}
@@ -1044,10 +1050,10 @@ const ForumContent: React.FC = () => {
 						<section className="space-y-4">
 							<div>
 								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
-									Knowledge picks
+									Tâm điểm kiến thức
 								</p>
 								<h2 className="text-2xl font-black text-slate-950">
-									Recommended posts to keep learning
+									Bài viết được đề xuất cho bạn
 								</h2>
 							</div>
 							{recommendedQuery.isLoading ? (
