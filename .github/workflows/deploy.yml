@@ -100,10 +100,24 @@ jobs:
             - name: Checkout
               uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
+            - name: Set up Python
+              uses: actions/setup-python@v5
+              with:
+                python-version: "3.11"
+                cache: "pip"
+
+            - name: Cache Ansible Galaxy collections
+              uses: actions/cache@v4
+              with:
+                path: ~/.ansible
+                key: ansible-${{ runner.os }}-${{ hashFiles('infra/requirements.yml') }}
+                restore-keys: |
+                  ansible-${{ runner.os }}-
+
             - name: Install Ansible & required collections
               run: |
-                  pip install --upgrade ansible
-                  ansible-galaxy collection install community.docker community.general --force
+                  pip install ansible
+                  ansible-galaxy collection install -r infra/requirements.yml
 
             - name: Connect to Tailscale
               uses: tailscale/github-action@v4
