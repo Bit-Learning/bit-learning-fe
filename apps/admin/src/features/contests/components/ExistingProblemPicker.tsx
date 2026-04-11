@@ -1,5 +1,5 @@
 import React, { useState, useMemo, useEffect } from "react";
-import { Search, Plus, Check, X, Filter, Code, Loader2, ArrowLeft } from "lucide-react";
+import { Search, Plus, Check, X, Filter, Code, Loader2, ArrowLeft, ChevronLeft, ChevronRight } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -15,23 +15,37 @@ interface ExistingProblemPickerProps {
 
 export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ contestId, onBack }) => {
   const navigate = useNavigate();
-  const { data: availableProblemsData, isLoading: isLoadingProblems } = useProblems();
+
+  const [currentPage, setCurrentPage] = useState(0);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [difficultyFilter, setDifficultyFilter] = useState<string>("Tất cả");
+  const [activeProblem, setActiveProblem] = useState<ProblemBriefResponse | null>(null);
+  const [activeTab, setActiveTab] = useState<"content" | "testcases" | "details">("content");
+
+  // Fetch data với pagination
+  const { data: availableProblemsData, isLoading: isLoadingProblems } = useProblems({
+    page: currentPage,
+    size: 20,
+  });
+
   const { data: contestProblems, isLoading: isLoadingContestProblems } = useContestProblems(contestId);
   const addProblemMutation = useAddProblem();
   const removeProblemMutation = useRemoveProblem();
 
   const availableProblems = availableProblemsData?.data || [];
-
-  const [activeProblem, setActiveProblem] = useState<ProblemBriefResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<"content" | "testcases" | "details">("content");
-  const [searchQuery, setSearchQuery] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("Tất cả");
+  const totalPages = availableProblemsData?.page?.totalPages || 1;
+  const totalElements = availableProblemsData?.page?.totalElements || 0;
+  const pageSize = availableProblemsData?.page?.size || 20;
 
   useEffect(() => {
     if (!activeProblem && availableProblems.length > 0) {
       setActiveProblem(availableProblems[0]!);
     }
   }, [availableProblems, activeProblem]);
+
+  useEffect(() => {
+    setCurrentPage(0);
+  }, [searchQuery, difficultyFilter]);
 
   const { data: problemDetailData, isLoading: isLoadingDetail } = useProblemDetail(activeProblem?.id || "", undefined, {
     enabled: !!activeProblem,
@@ -85,8 +99,11 @@ export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ co
   };
 
   const toggleProblem = (problem: ProblemBriefResponse) => {
-    if (isProblemInContest(problem.id)) handleRemoveProblem(problem);
-    else handleAddProblem(problem);
+    if (isProblemInContest(problem.id)) {
+      handleRemoveProblem(problem);
+    } else {
+      handleAddProblem(problem);
+    }
   };
 
   const handleClearAll = async () => {
@@ -94,7 +111,10 @@ export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ co
     if (confirm(`Bạn có chắc chắn muốn xóa tất cả ${contestProblems.length} bài tập?`)) {
       try {
         for (const problem of contestProblems) {
-          await removeProblemMutation.mutateAsync({ contestId, contestProblemId: problem.contestProblemId });
+          await removeProblemMutation.mutateAsync({
+            contestId,
+            contestProblemId: problem.contestProblemId,
+          });
         }
       } catch {
         alert("Có lỗi xảy ra khi xóa bài tập!");
@@ -108,15 +128,30 @@ export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ co
         problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
         problem.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
         problem.tags.some((tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase()));
+
       if (difficultyFilter === "Tất cả") return matchesSearch;
+
       const map: Record<string, Difficulty> = {
         Dễ: Difficulty.EASY,
         "Trung bình": Difficulty.MEDIUM,
         Khó: Difficulty.HARD,
       };
+
       return matchesSearch && problem.difficulty === map[difficultyFilter];
     });
   }, [availableProblems, searchQuery, difficultyFilter]);
+
+  const handlePreviousPage = () => {
+    if (currentPage > 0) {
+      setCurrentPage(currentPage - 1);
+    }
+  };
+
+  const handleNextPage = () => {
+    if (currentPage < totalPages - 1) {
+      setCurrentPage(currentPage + 1);
+    }
+  };
 
   const currentProblemData = activeProblem ? getContestProblem(activeProblem.id) : null;
   const isProcessing = addProblemMutation.isPending || removeProblemMutation.isPending;
@@ -238,9 +273,46 @@ export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ co
               })
             )}
           </div>
+
+          <div className="shrink-0 p-4 bg-white border-t border-gray-200">
+            <div className="flex items-center justify-between">
+              <div className="text-xs text-gray-500">
+                Hiển thị {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalElements)} /{" "}
+                {totalElements}
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handlePreviousPage}
+                  disabled={currentPage === 0}
+                  className={cn(
+                    "p-1.5 rounded-lg border transition-colors",
+                    currentPage === 0
+                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400",
+                  )}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                </button>
+                <div className="text-sm font-medium text-gray-700">
+                  {currentPage + 1} / {totalPages}
+                </div>
+                <button
+                  onClick={handleNextPage}
+                  disabled={currentPage >= totalPages - 1}
+                  className={cn(
+                    "p-1.5 rounded-lg border transition-colors",
+                    currentPage >= totalPages - 1
+                      ? "border-gray-200 text-gray-300 cursor-not-allowed"
+                      : "border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400",
+                  )}
+                >
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
         </div>
 
-        {/* Right panel */}
         <div className="flex-1 flex flex-col overflow-hidden">
           <div className="shrink-0 px-8 py-5 bg-white border-b border-gray-200 flex items-center justify-between">
             <div className="flex items-center gap-3">
@@ -327,6 +399,7 @@ export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ co
                     </div>
                   </div>
                 )}
+
                 {activeTab === "testcases" && problemDetailData && (
                   <div className="space-y-4">
                     <h3 className="text-lg font-bold text-gray-900 mb-4">
@@ -356,6 +429,7 @@ export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ co
                     ))}
                   </div>
                 )}
+
                 {activeTab === "details" && problemDetailData && (
                   <div className="space-y-6">
                     <div className="grid grid-cols-2 gap-6">
