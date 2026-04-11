@@ -1,14 +1,22 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "@tanstack/react-router";
+/* biome-ignore-all lint/security/noDangerouslySetInnerHtml: backend stores authored rich HTML for forum posts. */
+import type React from "react";
+import { useState } from "react";
+import { useNavigate, useParams } from "@tanstack/react-router";
 import {
-	useGetPostDetail,
-	useGetComments,
-	useBanPost,
-} from "../queries/usePost";
-import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
-import { Separator } from "@/components/ui/separator";
+	ArrowLeft,
+	Ban,
+	CalendarClock,
+	Eye,
+	File,
+	Flame,
+	MessageSquare,
+	Shield,
+	Tag,
+	ThumbsDown,
+	ThumbsUp,
+} from "lucide-react";
+import { Header } from "@/layout/header";
+import { Main } from "@/layout/main";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -19,31 +27,36 @@ import {
 	AlertDialogHeader,
 	AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
-import {
-	ArrowLeft,
-	Ban,
-	Shield,
-	ThumbsUp,
-	ThumbsDown,
-	MessageSquare,
-	Tag,
-	User,
-	Clock,
-	File,
-} from "lucide-react";
-import { CommentItem } from "../components/CommentItem";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
+import { CommentItem } from "../components/CommentItem";
+import {
+	getAuthorInitials,
+	getAuthorName,
+	getPostExcerpt,
+	getPostTags,
+	getTotalAttachments,
+} from "../post.utils";
+import {
+	useBanPost,
+	useGetComments,
+	useGetPostDetail,
+} from "../queries/usePost";
 import { AttachmentType } from "../types/post.type";
-import { Main } from "@/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { Header } from "@/layout/header";
+
 export const PostDetailPage: React.FC = () => {
 	const { id } = useParams({ strict: false });
 	const navigate = useNavigate();
-	const postId = parseInt(id || "0");
+	const postId = Number.parseInt(id || "0", 10);
+	const commentSkeletonKeys = [
+		"comment-skeleton-1",
+		"comment-skeleton-2",
+		"comment-skeleton-3",
+	];
 
 	const [confirmDialog, setConfirmDialog] = useState<{
 		open: boolean;
@@ -53,6 +66,8 @@ export const PostDetailPage: React.FC = () => {
 	const { data: post, isLoading: postLoading } = useGetPostDetail(postId);
 	const { data: comments, isLoading: commentsLoading } = useGetComments(postId);
 	const { mutate: banPost, isPending: banPending } = useBanPost();
+
+	const tags = post ? getPostTags(post) : [];
 
 	const handleOpenConfirm = (action: "ban" | "unban") => {
 		setConfirmDialog({ open: true, action });
@@ -72,7 +87,7 @@ export const PostDetailPage: React.FC = () => {
 	if (postLoading) {
 		return (
 			<div className="container mx-auto px-4 py-8">
-				<Skeleton className="h-8 w-48 mb-6" />
+				<Skeleton className="mb-6 h-8 w-48" />
 				<Skeleton className="h-96 w-full" />
 			</div>
 		);
@@ -96,34 +111,60 @@ export const PostDetailPage: React.FC = () => {
 					className="mb-6"
 					onClick={() => navigate({ to: "/posts" })}
 				>
-					<ArrowLeft className="w-4 h-4 mr-2" />
+					<ArrowLeft className="mr-2 h-4 w-4" />
 					Quay lại danh sách
 				</Button>
 
-				<div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-					<div className="lg:col-span-2 space-y-6">
+				<div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+					<div className="space-y-6 lg:col-span-2">
 						<Card>
 							<CardHeader>
 								<div className="flex items-start justify-between">
 									<div className="flex-1">
-										<p className="text-sm text-muted-foreground font-mono mb-2">
-											{post.code}
-										</p>
-										<CardTitle className="text-3xl mb-2">
+										<div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+											<span className="font-mono">#{post.id}</span>
+											<span className="font-mono">{post.slug}</span>
+											{post.category && (
+												<Badge variant="outline">{post.category.name}</Badge>
+											)}
+											{post.isFeatured && (
+												<Badge variant="secondary">Nổi bật</Badge>
+											)}
+											{post.isTrending && (
+												<Badge variant="outline">Trending</Badge>
+											)}
+										</div>
+										<CardTitle className="mb-2 text-3xl">
 											{post.title}
 										</CardTitle>
-										<div className="flex items-center gap-3 text-sm text-muted-foreground">
+										<p className="mb-4 text-sm text-muted-foreground">
+											{getPostExcerpt(post)}
+										</p>
+										<div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+											<div className="flex items-center gap-2">
+												<Avatar className="h-7 w-7">
+													<AvatarImage
+														src={post.author.avatar}
+														alt={getAuthorName(post.author)}
+													/>
+													<AvatarFallback>
+														{getAuthorInitials(post.author)}
+													</AvatarFallback>
+												</Avatar>
+												<span>{getAuthorName(post.author)}</span>
+											</div>
+											<span>•</span>
 											<div className="flex items-center gap-1">
-												<User className="w-4 h-4" />
+												<CalendarClock className="h-4 w-4" />
 												<span>
-													{post.author.firstName} {post.author.lastName}
+													{new Date(post.createdAt).toLocaleString("vi-VN")}
 												</span>
 											</div>
 											<span>•</span>
 											<div className="flex items-center gap-1">
-												<Clock className="w-4 h-4" />
+												<Eye className="h-4 w-4" />
 												<span>
-													{new Date(post.createdAt).toLocaleString("vi-VN")}
+													{post.viewsCount.toLocaleString("vi-VN")} lượt xem
 												</span>
 											</div>
 										</div>
@@ -140,50 +181,58 @@ export const PostDetailPage: React.FC = () => {
 							</CardHeader>
 
 							<CardContent className="space-y-4">
-								<p className="text-foreground whitespace-pre-wrap">
-									{post.content}
-								</p>
+								<div className="rounded-xl border bg-background p-6">
+									<div
+										dangerouslySetInnerHTML={{
+											__html: post.content || "<p>Không có nội dung</p>",
+										}}
+										className="lecture-content prose prose-sm max-w-none"
+									/>
+								</div>
 
-								{post.attachments && post.attachments.length > 0 && (
+								{post.attachments.length > 0 && (
 									<>
 										<Separator />
 										<div>
-											<h3 className="font-semibold text-lg mb-3">
+											<h3 className="mb-3 text-lg font-semibold">
 												Tệp đính kèm
 											</h3>
-											<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+											<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
 												{post.attachments.map((attachment) => (
-													<div
+													<a
 														key={attachment.id}
-														className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
+														href={attachment.url}
+														target="_blank"
+														rel="noreferrer"
+														className="overflow-hidden rounded-lg border transition-shadow hover:shadow-md"
 													>
 														{attachment.type === AttachmentType.IMAGE ? (
 															<img
 																src={attachment.url}
-																alt="Attachment"
-																className="w-full h-32 object-cover"
+																alt={`Attachment ${attachment.id}`}
+																className="h-32 w-full object-cover"
 															/>
 														) : (
-															<div className="w-full h-32 bg-slate-100 flex items-center justify-center">
-																<File className="w-12 h-12 text-slate-400" />
+															<div className="flex h-32 w-full items-center justify-center bg-slate-100">
+																<File className="h-12 w-12 text-slate-400" />
 															</div>
 														)}
-													</div>
+													</a>
 												))}
 											</div>
 										</div>
 									</>
 								)}
 
-								{post.hashtags && post.hashtags.length > 0 && (
+								{tags.length > 0 && (
 									<>
 										<Separator />
 										<div>
-											<h3 className="font-semibold text-lg mb-3">Hashtags</h3>
+											<h3 className="mb-3 text-lg font-semibold">Hashtags</h3>
 											<div className="flex flex-wrap gap-2">
-												{post.hashtags.map((tag) => (
+												{tags.map((tag) => (
 													<Badge key={tag.id} variant="outline">
-														<Tag className="w-3 h-3 mr-1" />
+														<Tag className="mr-1 h-3 w-3" />
 														{tag.name}
 													</Badge>
 												))}
@@ -194,18 +243,22 @@ export const PostDetailPage: React.FC = () => {
 
 								<Separator />
 
-								<div className="flex items-center gap-4">
+								<div className="flex flex-wrap items-center gap-4">
 									<Button variant="outline" size="sm">
-										<ThumbsUp className="w-4 h-4 mr-2" />
+										<ThumbsUp className="mr-2 h-4 w-4" />
 										{post.likes}
 									</Button>
 									<Button variant="outline" size="sm">
-										<ThumbsDown className="w-4 h-4 mr-2" />
+										<ThumbsDown className="mr-2 h-4 w-4" />
 										{post.dislikes}
 									</Button>
 									<div className="flex items-center gap-2 text-sm text-muted-foreground">
-										<MessageSquare className="w-4 h-4" />
-										<span>{comments?.length || 0} bình luận</span>
+										<MessageSquare className="h-4 w-4" />
+										<span>{post.commentsCount} bình luận</span>
+									</div>
+									<div className="flex items-center gap-2 text-sm text-muted-foreground">
+										<Flame className="h-4 w-4" />
+										<span>{post.totalReactions} tổng phản ứng</span>
 									</div>
 								</div>
 							</CardContent>
@@ -213,13 +266,13 @@ export const PostDetailPage: React.FC = () => {
 
 						<Card>
 							<CardHeader>
-								<CardTitle>Bình luận ({comments?.length || 0})</CardTitle>
+								<CardTitle>Bình luận ({post.commentsCount})</CardTitle>
 							</CardHeader>
 							<CardContent>
 								{commentsLoading ? (
 									<div className="space-y-4">
-										{[...Array(3)].map((_, i) => (
-											<Skeleton key={i} className="h-24 w-full" />
+										{commentSkeletonKeys.map((skeletonKey) => (
+											<Skeleton key={skeletonKey} className="h-24 w-full" />
 										))}
 									</div>
 								) : comments && comments.length > 0 ? (
@@ -233,7 +286,7 @@ export const PostDetailPage: React.FC = () => {
 										))}
 									</div>
 								) : (
-									<p className="text-center text-muted-foreground py-8">
+									<p className="py-8 text-center text-muted-foreground">
 										Chưa có bình luận nào
 									</p>
 								)}
@@ -248,8 +301,28 @@ export const PostDetailPage: React.FC = () => {
 							</CardHeader>
 							<CardContent className="space-y-4">
 								<div className="flex justify-between">
-									<span className="text-muted-foreground">Mã bài viết</span>
-									<span className="font-mono font-semibold">{post.code}</span>
+									<span className="text-muted-foreground">Slug</span>
+									<span className="font-mono font-semibold">{post.slug}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Danh mục</span>
+									<span className="font-semibold">
+										{post.category?.name || "Chưa phân loại"}
+									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Lượt xem</span>
+									<span className="font-semibold">
+										{post.viewsCount.toLocaleString("vi-VN")}
+									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Bình luận</span>
+									<span className="font-semibold">{post.commentsCount}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Tổng phản ứng</span>
+									<span className="font-semibold">{post.totalReactions}</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">Lượt thích</span>
@@ -264,13 +337,19 @@ export const PostDetailPage: React.FC = () => {
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">Tệp đính kèm</span>
 									<span className="font-semibold">
-										{post.attachments?.length || 0}
+										{getTotalAttachments(post)}
 									</span>
 								</div>
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">Hashtags</span>
+									<span className="font-semibold">{tags.length}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">
+										Cho phép chỉnh sửa
+									</span>
 									<span className="font-semibold">
-										{post.hashtags?.length || 0}
+										{post.isEditAllowed ? "Có" : "Không"}
 									</span>
 								</div>
 							</CardContent>
@@ -288,7 +367,7 @@ export const PostDetailPage: React.FC = () => {
 										onClick={() => handleOpenConfirm("ban")}
 										disabled={banPending}
 									>
-										<Ban className="w-4 h-4 mr-2" />
+										<Ban className="mr-2 h-4 w-4" />
 										Khóa bài viết
 									</Button>
 								) : (
@@ -297,7 +376,7 @@ export const PostDetailPage: React.FC = () => {
 										onClick={() => handleOpenConfirm("unban")}
 										disabled={banPending}
 									>
-										<Shield className="w-4 h-4 mr-2" />
+										<Shield className="mr-2 h-4 w-4" />
 										Mở khóa bài viết
 									</Button>
 								)}

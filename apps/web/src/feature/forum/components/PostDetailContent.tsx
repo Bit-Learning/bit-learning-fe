@@ -95,7 +95,7 @@ function ReactionButton({
 				}`}
 			>
 				<span className="text-base">{getReactionIcon(activeReaction)}</span>
-				<span>{activeReaction ? activeReaction.toLowerCase() : "Like"}</span>
+				{/* <span>{activeReaction ? activeReaction.toLowerCase() : "Like"}</span> */}
 				{post.totalReactions > 0 && (
 					<span className="flex items-center gap-1 text-slate-500">
 						{topReactionIcons.length > 0 && (
