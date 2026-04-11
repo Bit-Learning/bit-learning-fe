@@ -69,23 +69,20 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
       <div className="relative bg-white w-full max-w-xl rounded-lg shadow-xl overflow-hidden mx-4 z-10">
         <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 flex items-center justify-center bg-blue-50 rounded-lg text-blue-600">
-              <MessageCircle className="w-5 h-5" />
-            </div>
             <h3 className="text-lg font-bold text-gray-900">Đặt câu hỏi cho Ban tổ chức</h3>
           </div>
           <button
             onClick={handleClose}
             disabled={createClarification.isPending}
-            className="text-gray-400 hover:text-gray-600 transition-colors disabled:opacity-50"
+            className="text-gray-600 hover:text-gray-600 transition-colors disabled:opacity-50"
           >
-            <X className="w-5 h-5" />
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="problem-select" className="text-sm font-semibold">
+            <Label htmlFor="problem-select" className="text-md font-semibold">
               Chọn bài tập liên quan
             </Label>
             <div className="relative">
@@ -93,7 +90,7 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
                 id="problem-select"
                 value={selectedProblem}
                 onChange={(e) => setSelectedProblem(e.target.value)}
-                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-sm appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
+                className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-2.5 text-md appearance-none focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all"
               >
                 <option value="">Chung (Vấn đề khác)</option>
                 {problems.map((problem) => (
@@ -106,7 +103,7 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="question-content" className="text-sm font-semibold">
+            <Label htmlFor="question-content" className="text-md font-semibold">
               Nội dung câu hỏi <span className="text-red-500">*</span>
             </Label>
             <Textarea
@@ -116,9 +113,9 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
               placeholder="Nhập thắc mắc của bạn về đề bài hoặc kỹ thuật..."
               rows={6}
               required
-              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none placeholder:text-gray-400"
+              className="w-full bg-gray-50 border border-gray-200 rounded-lg px-4 py-3 text-md focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none placeholder:text-gray-400"
             />
-            <p className="text-xs text-gray-400 italic">
+            <p className="text-sm text-gray-500 italic">
               Câu hỏi của bạn sẽ được gửi tới Ban tổ chức và có thể được công khai.
             </p>
           </div>
@@ -130,7 +127,7 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
             variant="outline"
             onClick={handleClose}
             isDisabled={createClarification.isPending}
-            className="border-gray-200"
+            className="cursor-pointer border-gray-400 p-5"
           >
             Hủy
           </Button>
@@ -138,7 +135,7 @@ const CreateClarificationModal: React.FC<CreateClarificationModalProps> = ({
             type="button"
             onClick={handleSubmit}
             isDisabled={createClarification.isPending || !questionContent.trim()}
-            className="bg-blue-600 hover:bg-blue-700 text-white"
+            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white p-5"
           >
             {createClarification.isPending ? (
               <>
