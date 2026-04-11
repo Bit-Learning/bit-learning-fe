@@ -2,13 +2,13 @@ import { useState, useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Plus, Search, Eye, Edit, Trash2, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useMyMatrices, useDeleteMatrix } from "../queries/useMatrix";
 import MatrixFormModal from "./MatrixFormModal";
 import type { TMatrixResponse } from "../types/matrix.type";
 import { Pagination } from "@/shared/components/Pagination";
 import { cn } from "@workspace/ui/lib/utils";
+import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 
 const PAGE_SIZE = 20;
 
@@ -25,6 +25,7 @@ const MyMatricesContent: React.FC = () => {
   const [activeFilter, setActiveFilter] = useState("all");
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
   const [modal, setModal] = useState<{ open: boolean; data?: TMatrixResponse | null }>({ open: false });
+  const [deletingMatrix, setDeletingMatrix] = useState<TMatrixResponse | null>(null);
 
   const { data: response, isLoading } = useMyMatrices(0, 99999);
   const deleteMatrix = useDeleteMatrix();
@@ -69,10 +70,11 @@ const MyMatricesContent: React.FC = () => {
     resetPage();
   };
 
-  const handleDelete = (m: TMatrixResponse) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa ma trận "${m.name}"?`)) {
-      deleteMatrix.mutate(m.id);
-    }
+  const handleConfirmDelete = () => {
+    if (!deletingMatrix) return;
+    deleteMatrix.mutate(deletingMatrix.id, {
+      onSuccess: () => setDeletingMatrix(null),
+    });
   };
 
   return (
@@ -217,21 +219,30 @@ const MyMatricesContent: React.FC = () => {
                           <button
                             className="cursor-pointer p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors"
                             title="Xem chi tiết"
-                            onClick={() => navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } })}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } });
+                            }}
                           >
                             <Eye className="h-5 w-5" />
                           </button>
                           <button
                             className="cursor-pointer p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors"
                             title="Chỉnh sửa"
-                            onClick={() => setModal({ open: true, data: matrix })}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setModal({ open: true, data: matrix });
+                            }}
                           >
                             <Edit className="h-5 w-5" />
                           </button>
                           <button
                             className="cursor-pointer p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
                             title="Xóa"
-                            onClick={() => handleDelete(matrix)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeletingMatrix(matrix);
+                            }}
                           >
                             <Trash2 className="h-5 w-5" />
                           </button>
@@ -258,6 +269,15 @@ const MyMatricesContent: React.FC = () => {
       </div>
 
       <MatrixFormModal isOpen={modal.open} onClose={() => setModal({ open: false })} data={modal.data} />
+
+      <DeleteConfirmModal
+        open={!!deletingMatrix}
+        onClose={() => setDeletingMatrix(null)}
+        onConfirm={handleConfirmDelete}
+        isPending={deleteMatrix.isPending}
+        title="Xóa ma trận"
+        itemName={deletingMatrix?.name}
+      />
     </main>
   );
 };

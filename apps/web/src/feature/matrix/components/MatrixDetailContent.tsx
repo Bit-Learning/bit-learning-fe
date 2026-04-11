@@ -21,6 +21,7 @@ import MatrixFormModal from "./MatrixFormModal";
 import VersionFormModal from "./VersionFormModal";
 import VersionDetailModal from "./VersionDetailModal";
 import { useExamsByMatrix } from "@/feature/exam/queries/useExam";
+import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 
 const MatrixDetailContent: React.FC = () => {
   const { id } = useParams({ from: "/mentor/matrix/$id/" });
@@ -32,6 +33,7 @@ const MatrixDetailContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState("versions");
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const { data: matrix, isLoading } = useMatrixDetail(matrixId);
   const { data: versions } = useMatrixVersions(matrixId);
@@ -43,9 +45,12 @@ const MatrixDetailContent: React.FC = () => {
     setDetailModalOpen(true);
   };
 
-  const handleDelete = () => {
+  const handleConfirmDelete = () => {
     deleteMatrix(matrixId, {
-      onSuccess: () => navigate({ to: "/mentor/matrix/my" }),
+      onSuccess: () => {
+        setShowDeleteModal(false);
+        navigate({ to: "/mentor/matrix/my" });
+      },
     });
   };
 
@@ -99,14 +104,14 @@ const MatrixDetailContent: React.FC = () => {
   const sortedVersions = [...(versions || [])].sort((a, b) => b.versionNo - a.versionNo);
 
   return (
-    <main className="flex-1 p-8 min-h-screen bg-white dark:bg-slate-950">
+    <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="mx-auto">
         <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-center">
           <div>
             <Button
               variant="outline"
               size="lg"
-              className="mb-2 gap-2 border-gray-200 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+              className="mb-2 gap-2 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
               onClick={() => navigate({ to: "/mentor/matrix/my" })}
             >
               <ArrowLeft className="mr-2 h-4 w-4" />
@@ -117,13 +122,13 @@ const MatrixDetailContent: React.FC = () => {
           <div className="flex items-center gap-3">
             <button
               onClick={() => setEditModal(true)}
-              className="cursor-pointer flex items-center gap-2 rounded-lg border border-slate-400 bg-white px-4 py-3 text-sm font-medium transition-all hover:bg-blue-50 dark:border-slate-700 dark:bg-slate-800 dark:hover:bg-slate-700"
+              className="cursor-pointer flex items-center gap-2 rounded-lg bg-blue-600 text-white px-4 py-3 text-sm font-medium transition-all hover:bg-blue-50 border hover:border-blue-600 hover:text-blue-800 dark:hover:bg-slate-700"
             >
               <Pencil className="h-4 w-4" />
               Chỉnh sửa ma trận
             </button>
             <button
-              onClick={handleDelete}
+              onClick={() => setShowDeleteModal(true)}
               disabled={deleting}
               className="cursor-pointer flex items-center gap-2 rounded-lg border border-red-200 px-4 py-3 text-sm font-medium text-red-600 transition-all hover:bg-red-50 dark:border-red-900/30 dark:text-red-400 dark:hover:bg-red-950/30"
             >
@@ -354,9 +359,7 @@ const MatrixDetailContent: React.FC = () => {
                     {["Thông tin đề thi", "Mã đề", "Thời gian", "Thang điểm", "Trạng thái", "Thao tác"].map((h) => (
                       <th
                         key={h}
-                        className={`px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 ${
-                          h === "Thao tác" ? "text-right" : "text-left"
-                        }`}
+                        className={`px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 ${h === "Thao tác" ? "text-right" : "text-left"}`}
                       >
                         {h}
                       </th>
@@ -425,6 +428,14 @@ const MatrixDetailContent: React.FC = () => {
         }}
         versionId={selectedVersionId}
         matrixTotalScore={matrix.totalScore}
+      />
+      <DeleteConfirmModal
+        open={showDeleteModal}
+        onClose={() => setShowDeleteModal(false)}
+        onConfirm={handleConfirmDelete}
+        isPending={deleting}
+        title="Xóa ma trận"
+        itemName={matrix.name}
       />
     </main>
   );
