@@ -11,6 +11,7 @@ import {
 	Flame,
 	MessageSquare,
 	Shield,
+	Star,
 	Tag,
 	ThumbsDown,
 	ThumbsUp,
@@ -43,6 +44,7 @@ import {
 } from "../post.utils";
 import {
 	useBanPost,
+	useFeaturePost,
 	useGetComments,
 	useGetPostDetail,
 } from "../queries/usePost";
@@ -66,6 +68,7 @@ export const PostDetailPage: React.FC = () => {
 	const { data: post, isLoading: postLoading } = useGetPostDetail(postId);
 	const { data: comments, isLoading: commentsLoading } = useGetComments(postId);
 	const { mutate: banPost, isPending: banPending } = useBanPost();
+	const { mutate: featurePost, isPending: featurePending } = useFeaturePost();
 
 	const tags = post ? getPostTags(post) : [];
 
@@ -82,6 +85,10 @@ export const PostDetailPage: React.FC = () => {
 
 	const handleCancel = () => {
 		setConfirmDialog({ open: false, action: null });
+	};
+
+	const handleFeatureToggle = () => {
+		featurePost({ id: postId, isFeatured: post.isFeatured });
 	};
 
 	if (postLoading) {
@@ -360,12 +367,23 @@ export const PostDetailPage: React.FC = () => {
 								<CardTitle>Hành động</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-3">
+								<Button
+									className="w-full"
+									variant={post.isFeatured ? "outline" : "default"}
+									onClick={handleFeatureToggle}
+									disabled={featurePending || banPending}
+								>
+									<Star
+										className={`mr-2 h-4 w-4 ${post.isFeatured ? "fill-current" : ""}`}
+									/>
+									{post.isFeatured ? "Bỏ nổi bật" : "Đánh dấu nổi bật"}
+								</Button>
 								{!post.isBanned ? (
 									<Button
 										className="w-full"
 										variant="destructive"
 										onClick={() => handleOpenConfirm("ban")}
-										disabled={banPending}
+										disabled={banPending || featurePending}
 									>
 										<Ban className="mr-2 h-4 w-4" />
 										Khóa bài viết
@@ -374,7 +392,7 @@ export const PostDetailPage: React.FC = () => {
 									<Button
 										className="w-full"
 										onClick={() => handleOpenConfirm("unban")}
-										disabled={banPending}
+										disabled={banPending || featurePending}
 									>
 										<Shield className="mr-2 h-4 w-4" />
 										Mở khóa bài viết
