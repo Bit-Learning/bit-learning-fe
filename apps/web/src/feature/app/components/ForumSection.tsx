@@ -3,10 +3,12 @@ import { Button } from "@workspace/ui/components/Button";
 import { Link, useNavigate } from "@tanstack/react-router";
 import ForumPostCard from "./ForumPostCard";
 import { useFeaturedForumPosts } from "@/feature/forum/queries/useForum";
+import { Splide, SplideSlide } from "@splidejs/react-splide";
+import "@splidejs/react-splide/css";
 
 const ForumSection: React.FC = () => {
 	const navigate = useNavigate();
-	const { data, isLoading } = useFeaturedForumPosts(3);
+	const { data, isLoading } = useFeaturedForumPosts(6);
 	const posts = data?.data ?? [];
 
 	return (
@@ -18,7 +20,7 @@ const ForumSection: React.FC = () => {
 				<h3 className="text-4xl font-black text-slate-900">
 					Bài đăng thực tế từ cộng đồng Bit Learning
 				</h3>
-				<p className="mx-auto max-w-2xl text-slate-600">
+				<p className="mx-auto max-w-3xl text-slate-600">
 					Các chủ đề thảo luận nổi bật, chia sẻ kinh nghiệm thực tiễn và câu hỏi
 					do người học đặt ra.
 				</p>
@@ -34,20 +36,34 @@ const ForumSection: React.FC = () => {
 					))}
 				</div>
 			) : (
-				<div className="grid gap-8 lg:grid-cols-3">
+				<Splide
+					options={{
+						type: "loop",
+						perPage: 3,
+						gap: "2rem",
+						arrows: true,
+						pagination: true,
+						breakpoints: {
+							1024: { perPage: 2 },
+							640: { perPage: 1 },
+						},
+					}}
+					aria-label="Bài đăng nổi bật từ cộng đồng Bit Learning"
+				>
 					{posts.map((post) => (
-						<ForumPostCard
-							key={post.id}
-							post={post}
-							onClick={(selectedPost) =>
-								navigate({
-									to: "/forum/post/$id",
-									params: { id: String(selectedPost.id) },
-								})
-							}
-						/>
+						<SplideSlide key={post.id}>
+							<ForumPostCard
+								post={post}
+								onClick={(selectedPost) =>
+									navigate({
+										to: "/forum/post/$id",
+										params: { id: String(selectedPost.id) },
+									})
+								}
+							/>
+						</SplideSlide>
 					))}
-				</div>
+				</Splide>
 			)}
 
 			<div className="mt-10 text-center">
