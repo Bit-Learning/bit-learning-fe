@@ -18,7 +18,6 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
     const labels: Record<Language, string> = {
       [Language.PYTHON]: "Python 3.10",
       [Language.CPP]: "C++ 17",
-      [Language.C]: "C 11",
       [Language.JAVA]: "Java 17",
       [Language.JAVASCRIPT]: "JavaScript (Node.js)",
     };
@@ -29,7 +28,6 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
     const extensions: Record<Language, string> = {
       [Language.PYTHON]: "py",
       [Language.CPP]: "cpp",
-      [Language.C]: "c",
       [Language.JAVA]: "java",
       [Language.JAVASCRIPT]: "js",
     };
