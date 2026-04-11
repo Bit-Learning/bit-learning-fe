@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import {
 	useCreateForumPost,
+	useForumCategories,
 	useForumHashtags,
 	useForumPostById,
 	useUpdateForumPost,
@@ -30,6 +31,7 @@ const postSchema = z.object({
 		.min(1, "Vui lòng nhập tiêu đề")
 		.max(200, "Tiêu đề tối đa 200 ký tự"),
 	content: z.string().min(1, "Vui lòng nhập nội dung"),
+	categorySlug: z.string().min(1, "Vui lòng chọn danh mục"),
 	tags: z.array(z.string()).max(10, "Tối đa 10 thẻ"),
 	attachments: z.array(z.instanceof(File)).max(5, "Tối đa 5 tệp đính kèm"),
 });
@@ -60,11 +62,13 @@ const PostFormContent: React.FC = () => {
 	const [previewImg, setPreviewImg] = useState<string | null>(null);
 
 	useForumHashtags();
+	const { data: categoriesResponse } = useForumCategories();
 
 	const { data: postResponse, isLoading: isPostLoading } = useForumPostById(
 		postId!,
 	);
 	const selectedPost = postResponse?.data ?? null;
+	const categories = categoriesResponse?.data ?? [];
 
 	const createPostMutation = useCreateForumPost();
 	const updatePostMutation = useUpdateForumPost();
@@ -78,7 +82,13 @@ const PostFormContent: React.FC = () => {
 		formState: { errors, isSubmitting },
 	} = useForm<PostFormValues>({
 		resolver: zodResolver(postSchema),
-		defaultValues: { title: "", content: "", tags: [], attachments: [] },
+		defaultValues: {
+			title: "",
+			content: "",
+			categorySlug: "",
+			tags: [],
+			attachments: [],
+		},
 	});
 
 	const tags = watch("tags");
@@ -89,6 +99,7 @@ const PostFormContent: React.FC = () => {
 			reset({
 				title: selectedPost.title,
 				content: selectedPost.content,
+				categorySlug: selectedPost.category?.slug ?? "general",
 				tags: selectedPost.hashtags.map((h) => h.name),
 				attachments: [],
 			});
@@ -142,6 +153,7 @@ const PostFormContent: React.FC = () => {
 			const postData: UpdatePostRequest = {
 				title: values.title,
 				content: values.content,
+				categorySlug: values.categorySlug,
 				tags: values.tags,
 				deletedAttachmentIds: deletedAttachmentIds,
 			};
@@ -153,6 +165,7 @@ const PostFormContent: React.FC = () => {
 			const postData: CreatePostRequest = {
 				title: values.title,
 				content: values.content,
+				categorySlug: values.categorySlug,
 				tags: values.tags,
 			};
 			createPostMutation.mutate(
@@ -259,6 +272,32 @@ const PostFormContent: React.FC = () => {
 						/>
 						{errors.content && (
 							<p className="text-xs text-red-500">{errors.content.message}</p>
+						)}
+					</div>
+
+					<div className="space-y-1.5">
+						<label className="text-sm font-bold uppercase tracking-widest text-gray-600">
+							Danh mục
+						</label>
+						<select
+							{...register("categorySlug")}
+							className={`w-full bg-white border rounded-sm px-4 py-3 text-sm font-medium outline-none transition-all shadow-sm ${
+								errors.categorySlug
+									? "border-red-300 ring-2 ring-red-100"
+									: "border-gray-200 focus:border-blue-400 focus:ring-2 focus:ring-blue-100"
+							}`}
+						>
+							<option value="">Chọn danh mục bài viết</option>
+							{categories.map((category) => (
+								<option key={category.id} value={category.slug}>
+									{category.name}
+								</option>
+							))}
+						</select>
+						{errors.categorySlug && (
+							<p className="text-xs text-red-500">
+								{errors.categorySlug.message}
+							</p>
 						)}
 					</div>
 

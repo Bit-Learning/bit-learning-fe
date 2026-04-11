@@ -1,330 +1,805 @@
-import React, { useState, useMemo } from "react";
+import { Button } from "@workspace/ui/components/Button";
+import { Input } from "@workspace/ui/components/Input";
+import { Badge } from "@workspace/ui/components/Badge";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
+	BookOpen,
+	Clock3,
+	Eye,
 	Flame,
-	Sparkles,
-	Clock,
-	TrendingUp,
-	Hash,
-	PenSquare,
 	MessageCircle,
-	ShieldCheck,
-	Lightbulb,
-	PenLine,
 	Search,
-	Inbox,
+	ShieldQuestion,
+	Sparkles,
+	Tag,
+	TrendingUp,
+	Users,
+	Compass,
 } from "lucide-react";
-import { useSelector } from "react-redux";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import {
-	useForumPosts,
-	useLikeForumPost,
-	useDislikeForumPost,
+	useFeaturedForumPosts,
+	useForumCategories,
+	useInfiniteForumPosts,
+	useLatestForumList,
+	useMostViewedForumPosts,
+	usePopularForumTags,
+	useRecommendedForumPosts,
+	useTrendingForumPosts,
 } from "../queries/useForum";
-import { selectForumPosts } from "../stores/forum.store";
-import { PostCard } from "./PostCard";
+import { formatRelative } from "../utils/forum.utils";
 import { AuthorAvatar } from "./AuthorAvatar";
-import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
-import { useNavigate } from "@tanstack/react-router";
-import { Pagination } from "@/shared/components/Pagination";
-import type { Post } from "../types/forum.type";
+import type { ForumCategory, Post, Tag as ForumTag } from "../types/forum.type";
 
-type SortKey = "newest" | "popular";
-type TimeKey = "all" | "today" | "week" | "month";
+const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+	"layout-grid": <Compass className="h-4 w-4" />,
+	server: <ShieldQuestion className="h-4 w-4" />,
+	monitor: <Sparkles className="h-4 w-4" />,
+	rocket: <TrendingUp className="h-4 w-4" />,
+	sparkles: <Flame className="h-4 w-4" />,
+	briefcase: <BookOpen className="h-4 w-4" />,
+};
 
-function filterByTime(posts: Post[], time: TimeKey): Post[] {
-	if (time === "all") return posts;
-	const now = Date.now();
-	const MS = {
-		today: 86_400_000,
-		week: 7 * 86_400_000,
-		month: 30 * 86_400_000,
-	} as const;
-	return posts.filter((p) => now - new Date(p.createdAt).getTime() < MS[time]);
+function formatCompactNumber(value: number) {
+	if (value >= 1000) {
+		return `${(value / 1000).toFixed(value >= 10000 ? 0 : 1)}k`;
+	}
+	return String(value);
 }
 
-function sortPosts(posts: Post[], sort: SortKey): Post[] {
-	if (sort === "popular") return [...posts].sort((a, b) => b.likes - a.likes);
-	return [...posts].sort(
-		(a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+function getAuthorName(post: Post) {
+	if (post.author.name) return post.author.name;
+	return `${post.author.firstName} ${post.author.lastName}`.trim();
+}
+
+function updateSearchState(
+	navigate: ReturnType<typeof useNavigate>,
+	nextSearch: {
+		q?: string;
+		category?: string;
+		tag?: string;
+		sort?: string;
+	},
+) {
+	navigate({
+		to: "/forum",
+		search: {
+			q: nextSearch.q || undefined,
+			category: nextSearch.category || undefined,
+			tag: nextSearch.tag || undefined,
+			sort: nextSearch.sort || undefined,
+		},
+	});
+}
+
+function PostMeta({ post }: { post: Post }) {
+	return (
+		<div className="flex flex-wrap items-center gap-3 text-xs text-slate-500">
+			<span className="inline-flex items-center gap-1.5">
+				<MessageCircle className="h-3.5 w-3.5" />
+				{formatCompactNumber(post.commentsCount)}
+			</span>
+			<span className="inline-flex items-center gap-1.5">
+				<Eye className="h-3.5 w-3.5" />
+				{formatCompactNumber(post.viewsCount)}
+			</span>
+			<span className="inline-flex items-center gap-1.5">
+				<Clock3 className="h-3.5 w-3.5" />
+				{formatRelative(post.createdAt)}
+			</span>
+		</div>
 	);
 }
 
-const TIME_OPTIONS: { key: TimeKey; label: string }[] = [
-	{ key: "all", label: "Tất cả" },
-	{ key: "today", label: "Hôm nay" },
-	{ key: "week", label: "Tuần này" },
-	{ key: "month", label: "Tháng này" },
-];
+function PostBadge({ post }: { post: Post }) {
+	if (post.isFeatured)
+		return <Badge className="bg-amber-500 text-white">Featured</Badge>;
+	if (post.isTrending)
+		return <Badge className="bg-orange-500 text-white">Trending</Badge>;
+
+	const ageInHours =
+		(Date.now() - new Date(post.createdAt).getTime()) / (1000 * 60 * 60);
+	if (ageInHours <= 24)
+		return <Badge className="bg-emerald-500 text-white">New</Badge>;
+	return null;
+}
+
+function FeaturedHero({
+	posts,
+	onOpenPost,
+}: {
+	posts: Post[];
+	onOpenPost: (post: Post) => void;
+}) {
+	const hero = posts[0];
+	if (!hero) return null;
+	const sidePosts = posts.slice(1);
+
+	return (
+		<section className="grid gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,1fr)]">
+			<article className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
+				<div className="cursor-pointer" onClick={() => onOpenPost(hero)}>
+					<img
+						src={hero.thumbnailUrl}
+						alt={hero.title}
+						className="h-72 w-full object-cover sm:h-96"
+					/>
+				</div>
+
+				<div className="space-y-5 p-6 sm:p-8">
+					<div className="flex flex-wrap items-center gap-3">
+						{hero.category && (
+							<span className="inline-flex items-center gap-2 rounded-full bg-slate-900 px-3 py-1 text-xs font-semibold text-white">
+								{CATEGORY_ICONS[hero.category.iconKey] ?? (
+									<Compass className="h-3.5 w-3.5" />
+								)}
+								{hero.category.name}
+							</span>
+						)}
+						<PostBadge post={hero} />
+					</div>
+
+					<div className="space-y-3">
+						<h2
+							className="cursor-pointer text-3xl font-black tracking-tight text-slate-950 transition hover:text-blue-700"
+							onClick={() => onOpenPost(hero)}
+						>
+							{hero.title}
+						</h2>
+						<p className="max-w-3xl text-base leading-7 text-slate-600">
+							{hero.excerpt}
+						</p>
+					</div>
+
+					<div className="flex flex-wrap items-center justify-between gap-4 border-t border-slate-200 pt-4">
+						<div className="flex items-center gap-3">
+							<AuthorAvatar author={hero.author} size="md" />
+							<div>
+								<p className="text-sm font-semibold text-slate-900">
+									{getAuthorName(hero)}
+								</p>
+								<PostMeta post={hero} />
+							</div>
+						</div>
+					</div>
+				</div>
+			</article>
+
+			<div className="grid gap-4 md:grid-cols-3 lg:grid-cols-1">
+				{sidePosts.map((post) => (
+					<article
+						key={post.id}
+						className="grid grid-cols-[112px_minmax(0,1fr)] gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm"
+					>
+						<img
+							src={post.thumbnailUrl}
+							alt={post.title}
+							className="h-full w-full cursor-pointer rounded-2xl object-cover"
+							onClick={() => onOpenPost(post)}
+						/>
+						<div className="flex min-w-0 flex-col justify-between gap-3">
+							<div className="space-y-2">
+								<div className="flex flex-wrap items-center gap-2">
+									{post.category && (
+										<span className="text-xs font-semibold uppercase tracking-[0.2em] text-slate-400">
+											{post.category.name}
+										</span>
+									)}
+									<PostBadge post={post} />
+								</div>
+								<h3
+									className="line-clamp-2 cursor-pointer text-lg font-bold leading-snug text-slate-900 transition hover:text-blue-700"
+									onClick={() => onOpenPost(post)}
+								>
+									{post.title}
+								</h3>
+								<p className="line-clamp-2 text-sm leading-6 text-slate-600">
+									{post.excerpt}
+								</p>
+							</div>
+							<div className="flex items-center justify-between gap-3">
+								<PostMeta post={post} />
+							</div>
+						</div>
+					</article>
+				))}
+			</div>
+		</section>
+	);
+}
+
+function ContentPostCard({
+	post,
+	onOpenPost,
+}: {
+	post: Post;
+	onOpenPost: (post: Post) => void;
+}) {
+	return (
+		<article className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+			<div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
+				<img
+					src={post.thumbnailUrl}
+					alt={post.title}
+					className="h-full w-full cursor-pointer object-cover"
+					onClick={() => onOpenPost(post)}
+				/>
+				<div className="absolute left-4 top-4 flex gap-2">
+					<PostBadge post={post} />
+				</div>
+			</div>
+
+			<div className="space-y-4 p-5">
+				<div className="space-y-3">
+					<h3
+						className="line-clamp-2 min-h-[3em] cursor-pointer text-xl font-bold leading-snug text-slate-950 transition hover:text-blue-700"
+						onClick={() => onOpenPost(post)}
+					>
+						{post.title}
+					</h3>
+					<p className="line-clamp-2 min-h-[3em] text-sm leading-6 text-slate-600">
+						{post.excerpt}
+					</p>
+				</div>
+
+				<div className="flex flex-wrap gap-2">
+					{post.tags.slice(0, 3).map((tag) => (
+						<span
+							key={tag.id}
+							className="rounded-full bg-slate-100 px-3 py-1 text-xs font-medium text-slate-600"
+						>
+							#{tag.name}
+						</span>
+					))}
+				</div>
+
+				<div className="flex items-center justify-between gap-4 border-t border-slate-200 pt-4">
+					<div className="flex items-center gap-3">
+						<AuthorAvatar author={post.author} size="sm" />
+						<div>
+							<p className="text-sm font-semibold text-slate-900">
+								{getAuthorName(post)}
+							</p>
+							<PostMeta post={post} />
+						</div>
+					</div>
+				</div>
+			</div>
+		</article>
+	);
+}
+
+function SidebarList({
+	title,
+	icon,
+	posts,
+	onOpenPost,
+}: {
+	title: string;
+	icon: React.ReactNode;
+	posts: Post[];
+	onOpenPost: (post: Post) => void;
+}) {
+	return (
+		<section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+			<div className="mb-4 flex items-center gap-2 text-slate-900">
+				{icon}
+				<h3 className="text-sm font-black uppercase tracking-[0.2em]">
+					{title}
+				</h3>
+			</div>
+			<div className="space-y-4">
+				{posts.map((post) => (
+					<button
+						key={post.id}
+						type="button"
+						onClick={() => onOpenPost(post)}
+						className="flex w-full items-start gap-3 text-left"
+					>
+						<img
+							src={post.thumbnailUrl}
+							alt={post.title}
+							className="h-16 w-16 rounded-2xl object-cover"
+						/>
+						<div className="min-w-0 flex-1">
+							<p className="line-clamp-2 text-sm font-semibold leading-6 text-slate-900">
+								{post.title}
+							</p>
+							<div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
+								<span>{formatRelative(post.createdAt)}</span>
+								<span>•</span>
+								<span>{formatCompactNumber(post.viewsCount)} views</span>
+							</div>
+						</div>
+					</button>
+				))}
+				{posts.length === 0 && (
+					<p className="text-sm text-slate-500">No posts available.</p>
+				)}
+			</div>
+		</section>
+	);
+}
 
 const ForumContent: React.FC = () => {
 	const navigate = useNavigate();
-	const [sort, setSort] = useState<SortKey>("newest");
-	const [time, setTime] = useState<TimeKey>("all");
-	const [page, setPage] = useState(0);
-	const [search, setSearch] = useState("");
+	const search = useSearch({ strict: false }) as {
+		q?: string;
+		category?: string;
+		tag?: string;
+		sort?: "latest" | "trending" | "most_viewed" | "most_reacted";
+	};
+	const [searchInput, setSearchInput] = useState(search.q ?? "");
+	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-	const allPosts = useSelector(selectForumPosts);
-	const { userInfo } = useSelector(selectAuthStateInfo);
-	const { data } = useForumPosts({ page, size: 10 });
-	const likeMutation = useLikeForumPost();
-	const dislikeMutation = useDislikeForumPost();
+	const selectedSort = search.sort ?? "latest";
+	const selectedCategory = search.category ?? "";
+	const selectedTag = search.tag ?? "";
 
-	const pagination = data?.page;
+	const featuredQuery = useFeaturedForumPosts(4);
+	const trendingQuery = useTrendingForumPosts(8);
+	const recommendedQuery = useRecommendedForumPosts(6);
+	const categoriesQuery = useForumCategories();
+	const popularTagsQuery = usePopularForumTags(16);
+	const sidebarMostViewedQuery = useMostViewedForumPosts(5);
+	const sidebarLatestQuery = useLatestForumList(5);
 
-	const displayPosts = useMemo(() => {
-		let result = sortPosts(filterByTime(allPosts, time), sort);
-		if (search.trim()) {
-			const q = search.toLowerCase();
-			result = result.filter(
-				(p) =>
-					p.title.toLowerCase().includes(q) ||
-					p.content.toLowerCase().includes(q) ||
-					p.hashtags.some((t) => t.name.toLowerCase().includes(q)),
-			);
+	const latestFeedQuery = useInfiniteForumPosts({
+		q: search.q,
+		category: search.category,
+		tag: search.tag,
+		sort: selectedSort,
+		size: 9,
+	});
+
+	const featuredPosts = featuredQuery.data?.data ?? [];
+	const trendingPosts = trendingQuery.data?.data ?? [];
+	const recommendedPosts = recommendedQuery.data?.data ?? [];
+	const categories = categoriesQuery.data?.data ?? [];
+	const popularTags = popularTagsQuery.data?.data ?? [];
+	const latestPosts = useMemo(
+		() => latestFeedQuery.data?.pages.flatMap((page) => page.data ?? []) ?? [],
+		[latestFeedQuery.data],
+	);
+	const mostViewedPosts = sidebarMostViewedQuery.data ?? [];
+	const latestCompactPosts = sidebarLatestQuery.data ?? [];
+
+	useEffect(() => {
+		setSearchInput(search.q ?? "");
+	}, [search.q]);
+
+	useEffect(() => {
+		const timer = window.setTimeout(() => {
+			const nextValue = searchInput.trim();
+			if ((search.q ?? "") === nextValue) return;
+			updateSearchState(navigate, {
+				q: nextValue,
+				category: selectedCategory,
+				tag: selectedTag,
+				sort: selectedSort,
+			});
+		}, 250);
+
+		return () => window.clearTimeout(timer);
+	}, [
+		searchInput,
+		search.q,
+		navigate,
+		selectedCategory,
+		selectedTag,
+		selectedSort,
+	]);
+
+	useEffect(() => {
+		const node = loadMoreRef.current;
+		if (
+			!node ||
+			!latestFeedQuery.hasNextPage ||
+			latestFeedQuery.isFetchingNextPage
+		) {
+			return;
 		}
-		return result;
-	}, [allPosts, sort, time, search]);
 
-	const trendingTags = useMemo(() => {
-		const freq: Record<string, number> = {};
-		allPosts.forEach((p) =>
-			p.hashtags.forEach((t) => {
-				freq[t.name] = (freq[t.name] ?? 0) + 1;
-			}),
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const firstEntry = entries[0];
+				if (firstEntry?.isIntersecting) {
+					latestFeedQuery.fetchNextPage();
+				}
+			},
+			{ rootMargin: "200px 0px" },
 		);
-		return Object.entries(freq)
-			.sort((a, b) => b[1] - a[1])
-			.slice(0, 8)
-			.map(([name, count]) => ({ name, count }));
-	}, [allPosts]);
 
-	const handlePageChange = (newPage: number) => {
-		setPage(newPage);
-		window.scrollTo({ top: 0, behavior: "smooth" });
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [
+		latestFeedQuery.fetchNextPage,
+		latestFeedQuery.hasNextPage,
+		latestFeedQuery.isFetchingNextPage,
+		latestPosts.length,
+	]);
+
+	const openPost = (post: Post) =>
+		navigate({ to: "/forum/post/$id", params: { id: String(post.id) } });
+
+	const setCategory = (category?: ForumCategory | string) => {
+		const categorySlug =
+			typeof category === "string" ? category : category?.slug;
+		updateSearchState(navigate, {
+			q: search.q,
+			category: categorySlug === selectedCategory ? undefined : categorySlug,
+			tag: selectedTag,
+			sort: selectedSort,
+		});
 	};
 
+	const setTag = (tag?: ForumTag | string) => {
+		const tagSlug = typeof tag === "string" ? tag : tag?.slug;
+		if (!tagSlug) return;
+		updateSearchState(navigate, {
+			q: search.q,
+			category: selectedCategory,
+			tag: tagSlug === selectedTag ? undefined : tagSlug,
+			sort: selectedSort,
+		});
+	};
+
+	const setSort = (
+		sort: "latest" | "trending" | "most_viewed" | "most_reacted",
+	) =>
+		updateSearchState(navigate, {
+			q: search.q,
+			category: selectedCategory,
+			tag: selectedTag,
+			sort,
+		});
+
 	return (
-		<div className="min-h-screen bg-gray-50">
-			{/* <div className="relative overflow-hidden h-60 md:h-72 flex items-end">
-        <img src="./forum.jpg" alt="hero" className="absolute inset-0 w-full h-full object-cover" />
-      </div> */}
-			<div className="bg-white border-b border-gray-200 shadow-sm">
-				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-					<nav className="text-md text-gray-500 flex items-center">
-						<span
-							onClick={() => navigate({ to: "/" })}
-							className="hover:text-gray-700 cursor-pointer transition-colors"
-						>
-							Trang chủ
-						</span>
-						<span className="mx-2 text-gray-400">/</span>
-						<span className="text-gray-400 font-medium">Diễn đàn</span>
-					</nav>
-				</div>
-			</div>
-			<div className="max-w-full mx-auto px-4 sm:px-6 lg:px-8 py-4 flex gap-4 items-start">
-				{/* <aside className="w-64 shrink-0 sticky top-8 self-start space-y-3">
-          <div className="bg-white rounded-md border border-gray-200 overflow-hidden">
-            <div className="px-2 py-2 space-y-0.5">
-              <button className="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-md font-semibold text-primary bg-blue-50 text-left">
-                <Flame className="w-4 h-4" />
-                Bảng tin
-              </button>
-              <button
-                className="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-md font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-left"
-                onClick={() => navigate({ to: "/forum/my" })}
-              >
-                <PenSquare className="w-4 h-4" />
-                Bài viết của tôi
-              </button>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-md border border-gray-200 p-4 space-y-4">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-2.5">Thống kê</p>
-              <div className="space-y-1.5">
-                {[
-                  { label: "Tổng bài viết", value: pagination?.totalElements ?? allPosts.length },
-                  { label: "Tháng này", value: filterByTime(allPosts, "month").length },
-                  { label: "Tuần này", value: filterByTime(allPosts, "week").length },
-                  { label: "Hôm nay", value: filterByTime(allPosts, "today").length },
-                ].map(({ label, value }) => (
-                  <div key={label} className="flex items-center justify-between">
-                    <span className="text-sm text-gray-500">{label}</span>
-                    <span className="text-sm font-semibold text-gray-800">{value}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {trendingTags.length > 0 && (
-              <div className="border-t border-gray-100 pt-3">
-                <div className="flex items-center gap-1.5 mb-2.5">
-                  <TrendingUp className="w-3.5 h-3.5 text-orange-400" />
-                  <p className="text-sm font-semibold uppercase tracking-wider text-gray-400">Thẻ phổ biến</p>
-                </div>
-                <div className="flex flex-wrap gap-1.5">
-                  {trendingTags.map(({ name, count }) => (
-                    <button
-                      key={name}
-                      onClick={() => setSearch(name)}
-                      className="cursor-pointer flex items-center gap-1 px-2 py-0.5 rounded-md text-sm font-medium bg-gray-100 text-gray-600 hover:bg-blue-50 hover:text-primary transition-colors"
-                    >
-                      <Hash className="w-3 h-3" />
-                      <span className="truncate max-w-30">{name}</span>
-
-                      <span className="text-gray-400">{count}</span>
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            <div className="border-t border-gray-100 pt-3 space-y-2">
-              <p className="text-sm font-semibold uppercase tracking-wider text-gray-400 mb-1">Nội quy</p>
-              {[
-                {
-                  icon: <MessageCircle className="w-3.5 h-3.5 text-blue-400 shrink-0 mt-0.5" />,
-                  text: "Đặt câu hỏi rõ ràng, có ngữ cảnh",
-                },
-                {
-                  icon: <ShieldCheck className="w-3.5 h-3.5 text-green-400 shrink-0 mt-0.5" />,
-                  text: "Tôn trọng & hỗ trợ lẫn nhau",
-                },
-                {
-                  icon: <Lightbulb className="w-3.5 h-3.5 text-amber-400 shrink-0 mt-0.5" />,
-                  text: "Chia sẻ kinh nghiệm thực tế",
-                },
-              ].map(({ icon, text }) => (
-                <div key={text} className="flex items-start gap-2">
-                  {icon}
-                  <span className="text-sm text-gray-500 leading-relaxed">{text}</span>
-                </div>
-              ))}
-            </div>
-
-            <button
-              onClick={() => navigate({ to: "/forum/create" })}
-              className="cursor-pointer w-full flex items-center justify-center gap-2 text-sm font-semibold bg-primary text-white py-2 rounded-md hover:bg-blue-700 transition"
-            >
-              <PenLine className="w-3.5 h-3.5" />
-              Đăng bài
-            </button>
-          </div>
-        </aside> */}
-
-				<div className="flex-1 min-w-0 space-y-3">
-					<div className="bg-white rounded-md border border-gray-200 overflow-hidden">
-						<div
-							className="px-4 py-3 flex items-center gap-3 cursor-pointer hover:bg-gray-50 transition-colors border-b border-gray-100"
-							onClick={() => navigate({ to: "/forum/create" })}
-						>
-							{userInfo && <AuthorAvatar author={userInfo} size="sm" />}
-							<div className="flex-1 px-4 py-2 bg-gray-100 rounded-full text-sm text-gray-400">
-								Bạn muốn chia sẻ điều gì?
+		<div className="min-h-screen bg-[#f5f7fb]">
+			<div className="border-b border-slate-200 bg-white/90 backdrop-blur">
+				<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+					<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+						<div className="space-y-5">
+							<Badge className="rounded-full bg-slate-900 px-4 py-1 text-white">
+								Bit Learning Community Hub
+							</Badge>
+							<div className="space-y-3">
+								<h1 className="max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+									Posts first, discovery rich.
+								</h1>
+								<p className="max-w-3xl text-base leading-7 text-slate-600">
+									Explore community posts through featured stories, trending
+									discussions, fast filters, and high-density side rails built
+									for learning and sharing.
+								</p>
 							</div>
-						</div>
 
-						<div className="px-4 py-2.5 flex flex-wrap items-center gap-3">
-							<div className="flex items-center gap-1.5 flex-1 min-w-0">
-								<Search className="w-3.5 h-3.5 text-gray-400 shrink-0" />
-								<input
-									type="text"
-									placeholder="Tìm kiếm..."
-									value={search}
-									onChange={(e) => {
-										setSearch(e.target.value);
-										setPage(0);
-									}}
-									className="text-sm text-gray-600 bg-transparent outline-none w-full placeholder:text-gray-400"
+							<div className="relative max-w-2xl">
+								<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+								<Input
+									value={searchInput}
+									onChange={(event) => setSearchInput(event.target.value)}
+									placeholder="Search posts, topics, or tags..."
+									className="h-14 rounded-full border-slate-200 bg-white pl-12 pr-12 text-base shadow-sm"
 								/>
 							</div>
 
-							<div className="h-4 w-px bg-gray-200" />
-
-							<div className="flex items-center gap-0.5 bg-gray-100 rounded-lg p-0.5">
-								<button
-									onClick={() => {
-										setSort("newest");
-										setPage(0);
-									}}
-									className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${sort === "newest" ? "bg-white text-primary shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-								>
-									<Sparkles className="w-3 h-3" />
-									Mới nhất
-								</button>
-								<button
-									onClick={() => {
-										setSort("popular");
-										setPage(0);
-									}}
-									className={`cursor-pointer flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-semibold transition-all ${sort === "popular" ? "bg-white text-orange-500 shadow-sm" : "text-gray-500 hover:text-gray-700"}`}
-								>
-									<Flame className="w-3 h-3" />
-									Phổ biến
-								</button>
+							<div className="space-y-3">
+								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+									<Compass className="h-4 w-4" />
+									Categories
+								</div>
+								<div className="flex gap-2 overflow-x-auto pb-1">
+									<button
+										type="button"
+										onClick={() => setCategory("")}
+										className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+											!selectedCategory
+												? "bg-slate-900 text-white"
+												: "bg-white text-slate-600 hover:bg-slate-100"
+										}`}
+									>
+										All categories
+									</button>
+									{categories.map((category) => (
+										<button
+											key={category.id}
+											type="button"
+											onClick={() => setCategory(category)}
+											className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+												selectedCategory === category.slug
+													? "bg-slate-900 text-white"
+													: "bg-white text-slate-600 hover:bg-slate-100"
+											}`}
+										>
+											{category.name}
+										</button>
+									))}
+								</div>
 							</div>
 
-							<div className="flex items-center gap-1">
-								<Clock className="w-3.5 h-3.5 text-gray-400" />
-								{TIME_OPTIONS.map(({ key, label }) => (
+							<div className="space-y-3">
+								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+									<Tag className="h-4 w-4" />
+									Trending tags
+								</div>
+								<div className="flex gap-2 overflow-x-auto pb-1">
+									{popularTags.slice(0, 10).map((tag) => (
+										<button
+											key={tag.id}
+											type="button"
+											onClick={() => setTag(tag)}
+											className={`rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition ${
+												selectedTag === tag.slug
+													? "border-blue-200 bg-blue-50 text-blue-700"
+													: "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+											}`}
+										>
+											#{tag.name}
+										</button>
+									))}
+								</div>
+							</div>
+						</div>
+
+						<div className="grid gap-4 rounded-[1.75rem] bg-slate-950 p-5 text-white shadow-xl">
+							<div className="flex items-center justify-between">
+								<div>
+									<p className="text-sm uppercase tracking-[0.25em] text-slate-400">
+										Community at a glance
+									</p>
+									<p className="mt-2 text-2xl font-black">
+										{formatCompactNumber(
+											categories.reduce(
+												(sum, item) => sum + (item.postsCount ?? 0),
+												0,
+											),
+										)}
+										+ posts
+									</p>
+								</div>
+								<Users className="h-8 w-8 text-blue-300" />
+							</div>
+							<div className="grid grid-cols-2 gap-3 text-sm">
+								<div className="rounded-2xl bg-white/10 p-4">
+									<p className="text-slate-300">Featured</p>
+									<p className="mt-1 text-xl font-bold">
+										{featuredPosts.length}
+									</p>
+								</div>
+								<div className="rounded-2xl bg-white/10 p-4">
+									<p className="text-slate-300">Trending tags</p>
+									<p className="mt-1 text-xl font-bold">{popularTags.length}</p>
+								</div>
+							</div>
+							<Button
+								className="h-12 rounded-full bg-blue-500 text-white hover:bg-blue-600"
+								onClick={() => navigate({ to: "/forum/create" })}
+							>
+								Create a post
+							</Button>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+				<FeaturedHero posts={featuredPosts} onOpenPost={openPost} />
+
+				<div className="grid gap-8 xl:grid-cols-[minmax(0,1.75fr)_360px]">
+					<div className="space-y-8">
+						<section className="space-y-4">
+							<div className="flex items-center justify-between gap-4">
+								<div>
+									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
+										Trending posts
+									</p>
+									<h2 className="text-2xl font-black text-slate-950">
+										What the community is reading now
+									</h2>
+								</div>
+							</div>
+
+							<div className="grid gap-4 md:grid-cols-2">
+								{trendingPosts.map((post) => (
+									<ContentPostCard
+										key={post.id}
+										post={post}
+										onOpenPost={openPost}
+									/>
+								))}
+							</div>
+						</section>
+
+						<section className="space-y-4">
+							<div className="flex flex-wrap items-center justify-between gap-4">
+								<div>
+									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
+										Latest posts
+									</p>
+									<h2 className="text-2xl font-black text-slate-950">
+										Fresh community discussions
+									</h2>
+								</div>
+
+								<div className="flex gap-2 overflow-x-auto">
+									{[
+										{ value: "latest", label: "Latest" },
+										{ value: "most_reacted", label: "Most reacted" },
+										{ value: "most_viewed", label: "Most viewed" },
+										{ value: "trending", label: "Trending" },
+									].map((option) => (
+										<button
+											key={option.value}
+											type="button"
+											onClick={() =>
+												setSort(
+													option.value as
+														| "latest"
+														| "trending"
+														| "most_viewed"
+														| "most_reacted",
+												)
+											}
+											className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+												selectedSort === option.value
+													? "bg-slate-900 text-white"
+													: "bg-white text-slate-600 hover:bg-slate-100"
+											}`}
+										>
+											{option.label}
+										</button>
+									))}
+								</div>
+							</div>
+
+							{latestFeedQuery.isLoading ? (
+								<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
+									{Array.from({ length: 6 }).map((_, index) => (
+										<div
+											key={index}
+											className="h-[420px] animate-pulse rounded-[1.75rem] border border-slate-200 bg-white"
+										/>
+									))}
+								</div>
+							) : latestPosts.length === 0 ? (
+								<div className="rounded-[1.75rem] border border-dashed border-slate-300 bg-white p-10 text-center text-slate-500">
+									No posts matched the current filters.
+								</div>
+							) : (
+								<>
+									<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 items-stretch">
+										{latestPosts.map((post) => (
+											<ContentPostCard
+												key={post.id}
+												post={post}
+												onOpenPost={openPost}
+											/>
+										))}
+									</div>
+									<div ref={loadMoreRef} className="flex justify-center py-2">
+										{latestFeedQuery.isFetchingNextPage ? (
+											<div className="rounded-full bg-white px-4 py-2 text-sm text-slate-500 shadow-sm">
+												Loading more posts...
+											</div>
+										) : latestFeedQuery.hasNextPage ? (
+											<div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-500">
+												Scroll for more
+											</div>
+										) : (
+											<div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-500">
+												You reached the end
+											</div>
+										)}
+									</div>
+								</>
+							)}
+						</section>
+
+						<section className="space-y-4">
+							<div>
+								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
+									Categories
+								</p>
+								<h2 className="text-2xl font-black text-slate-950">
+									Browse by topic lane
+								</h2>
+							</div>
+							<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+								{categories.map((category) => (
 									<button
-										key={key}
-										onClick={() => {
-											setTime(key);
-											setPage(0);
-										}}
-										className={`cursor-pointer px-2.5 py-1.5 rounded-md text-sm font-semibold transition-all ${time === key ? "bg-blue-50 text-primary border border-blue-100" : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"}`}
+										key={category.id}
+										type="button"
+										onClick={() => setCategory(category)}
+										className={`rounded-[1.5rem] border p-5 text-left shadow-sm transition ${
+											selectedCategory === category.slug
+												? "border-blue-200 bg-blue-50"
+												: "border-slate-200 bg-white hover:-translate-y-1 hover:shadow-lg"
+										}`}
 									>
-										{label}
+										<div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white">
+											{CATEGORY_ICONS[category.iconKey] ?? (
+												<Compass className="h-4 w-4" />
+											)}
+										</div>
+										<h3 className="text-lg font-bold text-slate-950">
+											{category.name}
+										</h3>
+										<p className="mt-2 text-sm text-slate-500">
+											{formatCompactNumber(category.postsCount ?? 0)} posts in
+											this topic
+										</p>
 									</button>
 								))}
 							</div>
+						</section>
 
-							<span className="ml-auto text-sm text-gray-400">
-								{displayPosts.length} bài viết
-							</span>
-						</div>
-					</div>
-
-					<div className="grid grid-cols-3 gap-4">
-						{displayPosts.length === 0 ? (
-							<div className="text-center py-20 bg-white rounded-md border border-gray-200">
-								<Inbox className="w-8 h-8 text-gray-300 mx-auto mb-2" />
-								<p className="text-sm font-semibold text-gray-500">
-									Không có bài viết nào
+						<section className="space-y-4">
+							<div>
+								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
+									Knowledge picks
 								</p>
-								<p className="text-sm mt-1 text-gray-400">
-									Thử đổi bộ lọc hoặc là người đầu tiên chia sẻ!
-								</p>
+								<h2 className="text-2xl font-black text-slate-950">
+									Recommended posts to keep learning
+								</h2>
 							</div>
-						) : (
-							displayPosts.map((post) => (
-								<PostCard
-									key={post.id}
-									post={post}
-									onLike={(id) => likeMutation.mutate(id)}
-									onDislike={(id) => dislikeMutation.mutate(id)}
-									onViewDetails={(id) =>
-										navigate({
-											to: "/forum/post/$id",
-											params: { id: String(id) },
-										})
-									}
-								/>
-							))
-						)}
+							<div className="grid gap-4 md:grid-cols-2">
+								{recommendedPosts.map((post) => (
+									<ContentPostCard
+										key={post.id}
+										post={post}
+										onOpenPost={openPost}
+									/>
+								))}
+							</div>
+						</section>
 					</div>
 
-					{pagination && pagination.totalPages > 1 && (
-						<div className="mt-4 flex items-center justify-center">
-							<Pagination
-								currentPage={page}
-								totalPages={pagination.totalPages}
-								onPageChange={handlePageChange}
-							/>
-						</div>
-					)}
+					<aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
+						<SidebarList
+							title="Featured"
+							icon={<Sparkles className="h-4 w-4 text-amber-500" />}
+							posts={featuredPosts}
+							onOpenPost={openPost}
+						/>
+						<SidebarList
+							title="Most viewed"
+							icon={<Eye className="h-4 w-4 text-blue-500" />}
+							posts={mostViewedPosts}
+							onOpenPost={openPost}
+						/>
+						<SidebarList
+							title="Latest"
+							icon={<Clock3 className="h-4 w-4 text-emerald-500" />}
+							posts={latestCompactPosts}
+							onOpenPost={openPost}
+						/>
+
+						<section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+							<div className="mb-4 flex items-center gap-2 text-slate-900">
+								<Tag className="h-4 w-4 text-rose-500" />
+								<h3 className="text-sm font-black uppercase tracking-[0.2em]">
+									Popular tags
+								</h3>
+							</div>
+							<div className="flex flex-wrap gap-2">
+								{popularTags.map((tag) => (
+									<button
+										key={tag.id}
+										type="button"
+										onClick={() => setTag(tag)}
+										className={`rounded-full border px-3 py-1.5 text-sm transition ${
+											selectedTag === tag.slug
+												? "border-blue-200 bg-blue-50 text-blue-700"
+												: "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300"
+										}`}
+									>
+										#{tag.name}
+									</button>
+								))}
+							</div>
+						</section>
+					</aside>
 				</div>
 			</div>
 		</div>

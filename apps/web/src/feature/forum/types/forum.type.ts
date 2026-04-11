@@ -1,92 +1,138 @@
 export enum AttachmentType {
-  IMAGE = "IMAGE",
-  FILE = "FILE",
+	IMAGE = "IMAGE",
+	FILE = "FILE",
 }
+
+export type ReactionType = "LIKE" | "LOVE" | "HAHA" | "WOW" | "SAD" | "ANGRY";
 
 export interface Author {
-  id: number;
-  firstName: string;
-  lastName: string;
-  avatar?: string;
-  email?: string;
+	id: number;
+	firstName: string;
+	lastName: string;
+	name?: string;
+	avatar?: string;
+	email?: string;
 }
 
-export interface Hashtag {
-  id: number;
-  name: string;
+export interface ForumCategory {
+	id: number;
+	name: string;
+	slug: string;
+	iconKey: string;
+	postsCount?: number;
 }
+
+export interface Tag {
+	id: number;
+	name: string;
+	slug: string;
+	postCount?: number;
+}
+
+export interface Hashtag extends Tag {}
 
 export interface Attachment {
-  id: number;
-  url: string;
-  type: AttachmentType;
+	id: number;
+	url: string;
+	type: AttachmentType;
+}
+
+export interface ReactionSummary {
+	LIKE: number;
+	LOVE: number;
+	HAHA: number;
+	WOW: number;
+	SAD: number;
+	ANGRY: number;
 }
 
 export interface Post {
-  id: number;
-  code: string;
-  title: string;
-  content: string;
-  isBanned: boolean;
-  isEdited: boolean;
-  isEditAllowed: boolean;
-  likes: number;
-  dislikes: number;
-  author: Author;
-  attachments: Attachment[];
-  hashtags: Hashtag[];
-  createdAt: string;
-  updatedAt: string;
+	id: number;
+	title: string;
+	slug: string;
+	excerpt: string;
+	thumbnailUrl: string;
+	category?: ForumCategory | null;
+	tags: Tag[];
+	author: Author;
+	createdAt: string;
+	updatedAt: string;
+	viewsCount: number;
+	commentsCount: number;
+	reactionSummary: ReactionSummary;
+	totalReactions: number;
+	currentUserReaction?: ReactionType | null;
+	isFeatured: boolean;
+	isTrending: boolean;
+
+	// Compatibility fields used by existing detail/form/my-post pages.
+	content: string;
+	isBanned: boolean;
+	isEdited: boolean;
+	isEditAllowed: boolean;
+	likes: number;
+	dislikes: number;
+	attachments: Attachment[];
+	hashtags: Hashtag[];
 }
 
 export interface Comment {
-  id: number;
-  content: string;
-  isBanned: boolean;
-  isEdited: boolean;
-  isEditAllowed: boolean;
-  likes: number;
-  dislikes: number;
-  author: Author;
-  postId: number;
-  parentId?: number;
-  replies?: Comment[];
-  createdAt: string;
-  updatedAt: string;
+	id: number;
+	content: string;
+	isBanned: boolean;
+	isEdited: boolean;
+	isEditAllowed: boolean;
+	likes: number;
+	dislikes: number;
+	author: Author;
+	postId: number;
+	parentId?: number;
+	replies?: Comment[];
+	createdAt: string;
+	updatedAt: string;
 }
 
 export interface CreatePostRequest {
-  title: string;
-  content: string;
-  tags?: string[];
+	title: string;
+	content: string;
+	categorySlug: string;
+	tags?: string[];
 }
 
 export interface UpdatePostRequest {
-  title: string;
-  content: string;
-  tags?: string[];
-  deletedAttachmentIds?: number[];
+	title: string;
+	content: string;
+	categorySlug: string;
+	tags?: string[];
+	deletedAttachmentIds?: number[];
 }
 
 export interface CreateCommentRequest {
-  postId: number;
-  content: string;
+	postId: number;
+	content: string;
 }
 
 export interface UpdateCommentRequest {
-  content: string;
+	content: string;
 }
 
 export interface PaginationParams {
-  page?: number;
-  size?: number;
+	page?: number;
+	size?: number;
+}
+
+export interface PostFeedParams extends PaginationParams {
+	category?: string;
+	tag?: string;
+	q?: string;
+	sort?: "latest" | "trending" | "most_viewed" | "most_reacted";
 }
 
 export interface FilterByTagsParams extends PaginationParams {
-  tagNames: string[];
-  mode: "min" | "max";
+	tagNames: string[];
+	mode: "min" | "max";
 }
 
 export interface FilterByAuthorParams extends PaginationParams {
-  authorId: number;
+	authorId: number;
 }
