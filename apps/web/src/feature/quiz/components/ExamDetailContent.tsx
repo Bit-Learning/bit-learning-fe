@@ -214,7 +214,7 @@ const ExamDetailContent: React.FC = () => {
   const accentColor = isPractice ? "text-orange-500" : "text-blue-600";
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-slate-50">
       <div className="bg-white border-b border-gray-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <nav className="text-md text-gray-500 flex items-center">
@@ -222,7 +222,7 @@ const ExamDetailContent: React.FC = () => {
               Trang chủ
             </span>
             <span className="mx-2 text-gray-400">/</span>
-            <span onClick={() => navigate({ to: "/courses" })} className="hover:text-blue-600 cursor-pointer">
+            <span onClick={() => navigate({ to: "/exams" })} className="hover:text-blue-600 cursor-pointer">
               Danh sách đề thi
             </span>{" "}
             <span className="mx-2 text-gray-400">/</span>
