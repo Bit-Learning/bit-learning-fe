@@ -21,6 +21,15 @@ export interface Attachment {
   fileSize: number;
 }
 
+export interface AttachmentResult {
+  id?: number;
+  file_name: string;
+  file_url: string;
+  file_type: string;
+  file_size: number;
+  created_at?: string;
+}
+
 export interface Conversation {
   id: string;
   title: string;
@@ -45,7 +54,7 @@ export interface ChatResult {
   prompt_tokens?: number;
   completion_tokens?: number;
   total_tokens?: number;
-  attachments?: Attachment[];
+  attachments?: AttachmentResult[];
   created_at: string;
 }
 

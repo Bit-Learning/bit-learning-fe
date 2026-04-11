@@ -143,7 +143,7 @@ const ChatAIContent: React.FC = () => {
 
   const isLoading = sendMessage.isPending || createConversation.isPending;
 
-  const FilePreview = () =>
+  const filePreviewJsx =
     files.length > 0 ? (
       <div className="flex flex-wrap gap-2 mb-2 px-1">
         {files.map((file, i) => {
@@ -176,7 +176,7 @@ const ChatAIContent: React.FC = () => {
       </div>
     ) : null;
 
-  const InputBox = () => (
+  const inputBoxJsx = (
     <div className="bg-white dark:bg-slate-800 border border-slate-300 dark:border-slate-700 rounded-md shadow-sm focus-within:shadow-md focus-within:ring-2 ring-blue-500/20 transition-all flex items-center pr-2 pl-1 gap-1">
       <input
         ref={fileInputRef}
@@ -276,16 +276,16 @@ const ChatAIContent: React.FC = () => {
           <div className="flex-1 flex flex-col items-center justify-center px-4">
             <IntroView onQuickQuestion={handleQuickQuestion} />
             <div className="mt-6 w-full max-w-2xl">
-              <FilePreview />
-              <InputBox />
+              {filePreviewJsx}
+              {inputBoxJsx}
             </div>
           </div>
         ) : (
           <div className="flex flex-col flex-1 min-h-0">
-            <ChatView messages={messages} />
+            <ChatView messages={messages} isTyping={isLoading} />
             <div className="px-6 md:pb-12 max-w-5xl mx-auto w-full">
-              <FilePreview />
-              <InputBox />
+              {filePreviewJsx}
+              {inputBoxJsx}
             </div>
           </div>
         )}
