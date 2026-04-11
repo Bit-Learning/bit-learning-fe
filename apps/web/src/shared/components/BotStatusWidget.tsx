@@ -31,7 +31,7 @@ function MiniChatPanel({
 	const messages = useSelector(selectMessages);
 
 	const createConversation = useCreateConversation();
-	const sendMessage = useSendMessage(currentConversation?.id || "");
+	const sendMessage = useSendMessage();
 
 	const isLoading = sendMessage.isPending || createConversation.isPending;
 
@@ -86,7 +86,7 @@ function MiniChatPanel({
 
 		if (conversationId) {
 			try {
-				await sendMessage.mutateAsync({ question: text });
+				await sendMessage.mutateAsync({ conversationId, request: { question: text } });
 			} catch (err) {
 				console.error("Failed to send message:", err);
 			}

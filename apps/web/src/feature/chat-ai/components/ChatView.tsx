@@ -1,7 +1,9 @@
 import React, { useRef, useEffect } from "react";
-import { Bot, Copy, ThumbsUp, ThumbsDown, FileText, Paperclip } from "lucide-react";
+import { Bot, Copy, ThumbsUp, ThumbsDown, FileText, Paperclip, User } from "lucide-react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
+import { useSelector } from "react-redux";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import type { Message } from "../types/chat.type";
 
 interface ChatViewProps {
@@ -11,6 +13,7 @@ interface ChatViewProps {
 
 const ChatView: React.FC<ChatViewProps> = ({ messages, isTyping }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const { userInfo } = useSelector(selectAuthStateInfo);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -191,12 +194,16 @@ const ChatView: React.FC<ChatViewProps> = ({ messages, isTyping }) => {
           </div>
 
           {message.role === "user" && (
-            <div className="shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden">
-              <img
-                alt="User"
-                className="w-full h-full object-cover"
-                src="https://api.dicebear.com/7.x/avataaars/svg?seed=User"
-              />
+            <div className="shrink-0 w-8 h-8 rounded-full bg-slate-200 dark:bg-slate-700 overflow-hidden flex items-center justify-center">
+              {userInfo?.avatar ? (
+                <img
+                  alt={userInfo.firstName || "User"}
+                  className="w-full h-full object-cover"
+                  src={userInfo.avatar}
+                />
+              ) : (
+                <User size={18} className="text-slate-500 dark:text-slate-400" />
+              )}
             </div>
           )}
         </div>

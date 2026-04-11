@@ -1,14 +1,14 @@
-import React, { useState, useRef, useEffect, useCallback } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { Send, PanelLeft, Plus, Search, X, MessageSquare, Paperclip } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import {
   addMessageAction,
   clearChatAction,
   clearMessagesAction,
-  selectCurrentConversation,
   selectMessages,
-  setCurrentConversationAction,
 } from "../stores/chat.store";
 import {
+  useConversation,
   useCreateConversation,
   useSendMessage,
   useUserConversations,
@@ -21,60 +21,75 @@ import type { Message, Conversation } from "../types/chat.type";
 import { useAppDispatch } from "@/shared/redux/store";
 import { useSelector } from "react-redux";
 
-const ChatAIContent: React.FC = () => {
+interface ChatAIContentProps {
+  conversationId?: string;
+}
+
+const ChatAIContent: React.FC<ChatAIContentProps> = ({ conversationId }) => {
   const dispatch = useAppDispatch();
-  const currentConversation = useSelector(selectCurrentConversation);
+  const navigate = useNavigate();
   const messages = useSelector(selectMessages);
 
-  const [currentView, setCurrentView] = useState<"intro" | "chat">("intro");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  // Hiển thị chat view khi đang tạo conversation mới (trước khi URL thay đổi)
+  const [isCreatingNewChat, setIsCreatingNewChat] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const prevConversationIdRef = useRef<string | undefined>(undefined);
 
   const { data: conversationsData } = useUserConversations(0, 10);
   const createConversation = useCreateConversation();
-  const sendMessage = useSendMessage(currentConversation?.id || "");
+  const sendMessage = useSendMessage();
 
-  const { isLoading: isLoadingMessages } = useConversationMessages(currentConversation?.id || "", 20);
+  // Load conversation metadata và messages khi có conversationId từ URL (F5)
+  useConversation(conversationId || "");
+  useConversationMessages(conversationId || "", 20);
 
   const conversations = conversationsData?.data || [];
+  const currentView: "intro" | "chat" = conversationId || isCreatingNewChat ? "chat" : "intro";
+
+  // Khi switch giữa các conversation (cùng route, khác param) → clear messages cũ
+  useEffect(() => {
+    if (prevConversationIdRef.current !== undefined && prevConversationIdRef.current !== conversationId) {
+      dispatch(clearMessagesAction());
+    }
+    prevConversationIdRef.current = conversationId;
+  }, [conversationId, dispatch]);
 
   const todayString = new Date().toDateString();
   const yesterdayString = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
 
-  const searchedConversations = conversations.filter((c) => c.title.toLowerCase().includes(searchQuery.toLowerCase()));
-
-  const todaySearchResults = searchedConversations.filter((c) => new Date(c.createdAt).toDateString() === todayString);
-
+  const searchedConversations = conversations.filter((c) =>
+    c.title.toLowerCase().includes(searchQuery.toLowerCase()),
+  );
+  const todaySearchResults = searchedConversations.filter(
+    (c) => new Date(c.createdAt).toDateString() === todayString,
+  );
   const yesterdaySearchResults = searchedConversations.filter(
     (c) => new Date(c.createdAt).toDateString() === yesterdayString,
   );
 
-  useEffect(() => {
-    if (currentConversation && messages.length > 0) {
-      setCurrentView("chat");
-    }
-  }, [currentConversation, messages.length]);
-
   const handleSelectConversation = (conversation: Conversation) => {
     dispatch(clearMessagesAction());
-    dispatch(setCurrentConversationAction(conversation));
-    setCurrentView("chat");
+    navigate({ to: "/chat-ai/$conversationId", params: { conversationId: conversation.id } });
   };
 
   const handleSendMessage = async () => {
     if (!inputValue.trim() && files.length === 0) return;
 
+    const question = inputValue;
+    const pendingFiles = [...files];
+
     const userMessage: Message = {
       id: Date.now(),
       role: "user",
-      content: inputValue,
+      content: question,
       createdAt: new Date().toISOString(),
-      attachments: files.map((file) => ({
+      attachments: pendingFiles.map((file) => ({
         fileName: file.name,
         fileUrl: URL.createObjectURL(file),
         fileType: file.type,
@@ -85,30 +100,30 @@ const ChatAIContent: React.FC = () => {
     dispatch(addMessageAction(userMessage));
     setInputValue("");
     setFiles([]);
-    setCurrentView("chat");
 
-    let conversationId = currentConversation?.id;
-    if (!conversationId) {
-      try {
-        const response = await createConversation.mutateAsync({
-          title: inputValue.substring(0, 50),
-        });
-        conversationId = response.data.data?.id;
-      } catch (error) {
-        console.error("Failed to create conversation:", error);
-        return;
+    try {
+      let activeId = conversationId;
+
+      if (!activeId) {
+        setIsCreatingNewChat(true);
+        const response = await createConversation.mutateAsync({ title: question.substring(0, 50) });
+        activeId = response.data.data?.id;
       }
-    }
 
-    if (conversationId) {
-      try {
+      if (activeId) {
         await sendMessage.mutateAsync({
-          question: inputValue,
-          files: files.length > 0 ? files : undefined,
+          conversationId: activeId,
+          request: { question, files: pendingFiles.length > 0 ? pendingFiles : undefined },
         });
-      } catch (error) {
-        console.error("Failed to send message:", error);
+        // Navigate sau khi message đã được gửi để tránh race condition với useConversationMessages
+        if (!conversationId) {
+          navigate({ to: "/chat-ai/$conversationId", params: { conversationId: activeId } });
+        }
       }
+    } catch (error) {
+      console.error("Failed to send message:", error);
+    } finally {
+      setIsCreatingNewChat(false);
     }
   };
 
@@ -119,9 +134,8 @@ const ChatAIContent: React.FC = () => {
 
   const handleNewChat = () => {
     dispatch(clearChatAction());
-    setCurrentView("intro");
-    setInputValue("");
-    setFiles([]);
+    setIsCreatingNewChat(false);
+    navigate({ to: "/chat-ai/" });
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -233,7 +247,7 @@ const ChatAIContent: React.FC = () => {
         {isSidebarOpen ? (
           <ChatSidebar
             conversations={conversations}
-            currentConversationId={currentConversation?.id}
+            currentConversationId={conversationId}
             onNewChat={handleNewChat}
             onSelectConversation={handleSelectConversation}
             onToggleCollapse={() => setIsSidebarOpen(false)}
