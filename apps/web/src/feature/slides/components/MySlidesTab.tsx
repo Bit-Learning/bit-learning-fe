@@ -1,21 +1,9 @@
 import React, { useState } from "react";
-import {
-  Search,
-  Plus,
-  Download,
-  Eye,
-  Trash2,
-  ChevronLeft,
-  ChevronRight,
-  Loader2,
-  Code,
-  AlertTriangle,
-  X,
-} from "lucide-react";
+import { Search, Plus, Download, Eye, Trash2, ChevronLeft, ChevronRight, Loader2, Code } from "lucide-react";
 import { useMySlides, useDeleteSlide } from "../queries/useSlide";
 import type { SlideGenerationResponse } from "../types/slide.type";
-import { Input } from "@workspace/ui/components/Input";
 import { Button } from "@workspace/ui/components/Button";
+import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 
 interface MySlidesTabProps {
   onViewDetail: (slide: SlideGenerationResponse) => void;
@@ -25,7 +13,7 @@ interface MySlidesTabProps {
 export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitchToCreate }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [page, setPage] = useState(0);
-  const [deleteTarget, setDeleteTarget] = useState<{ id: number; topic: string } | null>(null);
+  const [deletingSlide, setDeletingSlide] = useState<SlideGenerationResponse | null>(null);
   const pageSize = 10;
 
   const { data, isLoading, isError } = useMySlides(page, pageSize);
@@ -36,29 +24,21 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
   const pageInfo = springPage;
 
   const filteredSlides = Array.isArray(slides)
-    ? slides.filter((slide: SlideGenerationResponse) => {
-        const matchesSearch = slide.topic.toLowerCase().includes(searchQuery.toLowerCase());
-        return matchesSearch;
-      })
+    ? slides.filter((slide: SlideGenerationResponse) => slide.topic.toLowerCase().includes(searchQuery.toLowerCase()))
     : [];
 
-  const handleDelete = (id: number, topic: string) => {
-    setDeleteTarget({ id, topic });
-  };
-
   const handleConfirmDelete = () => {
-    if (deleteTarget) {
-      deleteSlide.mutate(deleteTarget.id, {
-        onSettled: () => setDeleteTarget(null),
-      });
-    }
+    if (!deletingSlide) return;
+    deleteSlide.mutate(deletingSlide.id, {
+      onSettled: () => setDeletingSlide(null),
+    });
   };
 
   const handleDownload = (slide: SlideGenerationResponse) => {
     if (slide.cloudinaryUrl) {
       window.open(slide.cloudinaryUrl, "_blank");
     } else {
-      alert(`File không khả dụng`);
+      alert("File không khả dụng");
     }
   };
 
@@ -82,10 +62,10 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
   return (
     <div>
       <div className="flex flex-col md:flex-row gap-4 items-center justify-between mb-6">
-        <div className="relative w-full md:w-full">
+        <div className="relative w-full">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
-            placeholder="Tìm kiếm nội dung câu hỏi..."
+            placeholder="Tìm kiếm slide..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
@@ -143,7 +123,7 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
                           <span className="font-medium text-slate-900 block">{slide.topic}</span>
                           {slide.fromCache && (
                             <span className="text-xs text-amber-600 flex items-center gap-1 mt-0.5">
-                              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full"></span>
+                              <span className="w-1.5 h-1.5 bg-amber-500 rounded-full" />
                               Từ cache
                             </span>
                           )}
@@ -180,7 +160,7 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
                         <button
                           className="cursor-pointer p-2 text-slate-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all disabled:opacity-50"
                           title="Xóa"
-                          onClick={() => handleDelete(slide.id, slide.topic)}
+                          onClick={() => setDeletingSlide(slide)}
                           disabled={deleteSlide.isPending}
                         >
                           <Trash2 size={20} />
@@ -204,21 +184,17 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
           >
             <ChevronLeft size={20} />
           </button>
-
           {[...Array(Math.min(pageInfo.totalPages, 10))].map((_, idx) => {
             const shouldShow = idx < 3 || idx >= pageInfo.totalPages - 3 || Math.abs(idx - page) <= 1;
-
             if (!shouldShow) {
-              if (idx === 3) {
+              if (idx === 3)
                 return (
                   <span key={idx} className="px-2 text-slate-400">
                     ...
                   </span>
                 );
-              }
               return null;
             }
-
             return (
               <button
                 key={idx}
@@ -233,7 +209,6 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
               </button>
             );
           })}
-
           <button
             className="w-10 h-10 flex items-center justify-center rounded-lg border border-slate-200 text-slate-800 hover:bg-slate-100 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             onClick={() => setPage((p) => Math.min(pageInfo.totalPages - 1, p + 1))}
@@ -244,47 +219,14 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
         </div>
       )}
 
-      {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/50 backdrop-blur-sm p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 flex flex-col gap-4">
-            <div className="flex items-start justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center shrink-0">
-                  <AlertTriangle className="text-red-500" size={20} />
-                </div>
-                <h3 className="text-base font-bold text-slate-900">Xóa slide</h3>
-              </div>
-              <button
-                className="w-8 h-8 flex items-center justify-center rounded-full hover:bg-slate-100 text-slate-400 transition-colors"
-                onClick={() => setDeleteTarget(null)}
-              >
-                <X size={16} />
-              </button>
-            </div>
-            <p className="text-sm text-slate-600 leading-relaxed">
-              Bạn có chắc muốn xóa slide <span className="font-semibold text-slate-900">"{deleteTarget.topic}"</span>?{" "}
-              Hành động này không thể hoàn tác.
-            </p>
-            <div className="flex gap-3 justify-end pt-1">
-              <button
-                className="px-4 py-2 rounded-lg border border-slate-200 text-sm font-medium text-slate-600 hover:bg-slate-50 transition-all"
-                onClick={() => setDeleteTarget(null)}
-                disabled={deleteSlide.isPending}
-              >
-                Hủy
-              </button>
-              <button
-                className="px-4 py-2 rounded-lg bg-red-500 hover:bg-red-600 text-white text-sm font-semibold transition-all flex items-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
-                onClick={handleConfirmDelete}
-                disabled={deleteSlide.isPending}
-              >
-                {deleteSlide.isPending ? <Loader2 size={15} className="animate-spin" /> : <Trash2 size={15} />}
-                Xóa
-              </button>
-            </div>
-          </div>
-        </div>
-      )}
+      <DeleteConfirmModal
+        open={!!deletingSlide}
+        onClose={() => setDeletingSlide(null)}
+        onConfirm={handleConfirmDelete}
+        isPending={deleteSlide.isPending}
+        title="Xóa slide"
+        itemName={deletingSlide?.topic}
+      />
     </div>
   );
 };

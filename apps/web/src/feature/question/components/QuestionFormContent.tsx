@@ -249,7 +249,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
         <Button
           variant="outline"
           size="lg"
-          className="gap-2 mb-4 border-slate-300 bg-white shadow-sm hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 transition-all"
+          className="mb-2 gap-2 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-600 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
           onClick={() => navigate({ to: backTo })}
         >
           <ArrowLeft className="h-4 w-4" />

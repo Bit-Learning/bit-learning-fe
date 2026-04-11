@@ -16,6 +16,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
 import MediaUploadPanel from "./MediaUploadPanel";
+import { getTypeBadge } from "../utils/question.utils";
 
 const PAGE_SIZE = 10;
 
@@ -101,9 +102,6 @@ export default function QuestionApprovalTableView() {
 
   const formatDate = (dateString: string) =>
     new Date(dateString).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
-
-  const getTypeBadge = (type: QuestionType) =>
-    ({ [QuestionType.MCQ]: "Trắc nghiệm", [QuestionType.ESSAY]: "Tự luận" })[type];
 
   return (
     <div className="bg-slate-50 mx-auto p-8">

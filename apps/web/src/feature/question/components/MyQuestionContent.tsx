@@ -1,7 +1,6 @@
 import { useState, useMemo } from "react";
 import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload, X } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import {
   AlertDialog,
@@ -15,10 +14,12 @@ import {
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
 import { useMyQuestionsAll, useDeleteQuestion, useRequestPublish } from "../queries/useQuestion";
-import { ApprovalStatus, QuestionLevel, QuestionType, type QuestionResponse } from "../types/question.type";
+import { ApprovalStatus, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
 import { useNavigate } from "@tanstack/react-router";
+import { getDifficultyBadge, getStatusBadge, getTypeBadge } from "../utils/question.utils";
+import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 
 const PAGE_SIZE = 20;
 
@@ -35,8 +36,10 @@ const MyQuestionsContent: React.FC = () => {
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [difficultyFilter, setDifficultyFilter] = useState("all");
   const [typeFilter, setTypeFilter] = useState("all");
+  const [statusFilter, setStatusFilter] = useState("all");
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [deletingQuestion, setDeletingQuestion] = useState<QuestionResponse | null>(null);
 
   const { data: allQuestionsData, isLoading } = useMyQuestionsAll();
   const allQuestions = allQuestionsData ?? [];
@@ -60,12 +63,20 @@ const MyQuestionsContent: React.FC = () => {
       const matchSubject = !selectedSubjectId || q.subject?.id === selectedSubjectId;
       const matchDifficulty = difficultyFilter === "all" || q.questionLevel === difficultyFilter;
       const matchType = typeFilter === "all" || q.questionType === typeFilter;
-      return matchSearch && matchSubject && matchDifficulty && matchType;
+      const matchStatus = statusFilter === "all" || q.approvalStatus === statusFilter;
+      return matchSearch && matchSubject && matchDifficulty && matchType && matchStatus;
     });
-  }, [allQuestions, search, selectedSubjectId, difficultyFilter, typeFilter]);
+  }, [allQuestions, search, selectedSubjectId, difficultyFilter, typeFilter, statusFilter]);
 
   const totalPages = Math.ceil(filteredQuestions.length / PAGE_SIZE);
   const pagedQuestions = filteredQuestions.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+
+  const allSelectable = filteredQuestions.filter(
+    (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
+  );
+  const allSelectableIds = allSelectable.map((q) => q.id);
+  const allSelected = allSelectableIds.length > 0 && allSelectableIds.every((id) => selectedQuestions.includes(id));
+  const someSelected = allSelectableIds.some((id) => selectedQuestions.includes(id));
 
   const resetPage = () => setPage(0);
 
@@ -95,14 +106,10 @@ const MyQuestionsContent: React.FC = () => {
   };
 
   const handleSelectAll = () => {
-    const selectable = pagedQuestions.filter(
-      (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
-    );
-    const allSelected = selectable.every((q) => selectedQuestions.includes(q.id));
     if (allSelected) {
-      setSelectedQuestions((prev) => prev.filter((id) => !selectable.map((q) => q.id).includes(id)));
+      setSelectedQuestions((prev) => prev.filter((id) => !allSelectableIds.includes(id)));
     } else {
-      setSelectedQuestions((prev) => [...new Set([...prev, ...selectable.map((q) => q.id)])]);
+      setSelectedQuestions((prev) => [...new Set([...prev, ...allSelectableIds])]);
     }
   };
 
@@ -119,43 +126,14 @@ const MyQuestionsContent: React.FC = () => {
     );
   };
 
-  const handleDelete = (id: number, content: string) => {
-    if (confirm(`Bạn có chắc chắn muốn xóa câu hỏi:\n"${content.substring(0, 50)}..."?`)) {
-      deleteQuestion.mutate(id);
-    }
+  const handleConfirmDelete = () => {
+    if (!deletingQuestion) return;
+    deleteQuestion.mutate(deletingQuestion.id, {
+      onSuccess: () => setDeletingQuestion(null),
+    });
   };
-
-  const getDifficultyBadge = (level: QuestionLevel) => {
-    const variants: Record<QuestionLevel, { className: string; label: string }> = {
-      [QuestionLevel.EASY]: { className: "bg-green-100 text-green-700", label: "Dễ" },
-      [QuestionLevel.MEDIUM]: { className: "bg-yellow-100 text-yellow-700", label: "Trung bình" },
-      [QuestionLevel.HARD]: { className: "bg-red-100 text-red-700", label: "Khó" },
-    };
-    const config = variants[level];
-    return <span className={`px-2 py-1 rounded text-sm font-medium ${config.className}`}>{config.label}</span>;
-  };
-
-  const getStatusBadge = (status: ApprovalStatus) => {
-    const variants: Record<ApprovalStatus, { className: string; label: string }> = {
-      [ApprovalStatus.NONE]: { className: "bg-gray-100 text-gray-700", label: "Chưa gửi" },
-      [ApprovalStatus.PENDING]: { className: "bg-blue-100 text-blue-700", label: "Chờ duyệt" },
-      [ApprovalStatus.APPROVED]: { className: "bg-green-100 text-green-700", label: "Đã duyệt" },
-      [ApprovalStatus.REJECTED]: { className: "bg-red-100 text-red-700", label: "Từ chối" },
-    };
-    const config = variants[status];
-    return <span className={`px-2 py-1 rounded text-sm font-medium ${config.className}`}>{config.label}</span>;
-  };
-
-  const getTypeBadge = (type: QuestionType) =>
-    ({ [QuestionType.MCQ]: "Trắc nghiệm", [QuestionType.ESSAY]: "Tự luận" })[type];
 
   const selectedSubject = subjects.find((s) => s.id === selectedSubjectId);
-
-  const selectableOnPage = pagedQuestions.filter(
-    (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
-  );
-  const allPageSelected =
-    selectableOnPage.length > 0 && selectableOnPage.every((q) => selectedQuestions.includes(q.id));
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -198,7 +176,7 @@ const MyQuestionsContent: React.FC = () => {
                 </AlertDialog>
               )}
               <Button
-                onClick={() => navigate({ to: "/mentor/question/generate-from-questions" })}
+                onClick={() => navigate({ to: "/mentor/exam/generate-from-questions" })}
                 variant="outline"
                 size="lg"
                 className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
@@ -208,7 +186,7 @@ const MyQuestionsContent: React.FC = () => {
               </Button>
               <Button
                 size="lg"
-                onClick={() => navigate({ to: "/mentor/matrix/import" })}
+                onClick={() => navigate({ to: "/mentor/question/import" })}
                 className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
               >
                 <Upload className="h-4 w-4" />
@@ -226,7 +204,7 @@ const MyQuestionsContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-2">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
@@ -255,6 +233,17 @@ const MyQuestionsContent: React.FC = () => {
             <option value="all">Loại: Tất cả</option>
             <option value="MCQ">Trắc nghiệm</option>
             <option value="ESSAY">Tự luận</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={handleFilterChange(setStatusFilter)}
+            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+          >
+            <option value="all">Trạng thái: Tất cả</option>
+            <option value={ApprovalStatus.NONE}>Chưa gửi</option>
+            <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
+            <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
+            <option value={ApprovalStatus.REJECTED}>Từ chối</option>
           </select>
           <select
             value={selectedSubjectId?.toString() ?? "all"}
@@ -294,7 +283,11 @@ const MyQuestionsContent: React.FC = () => {
               <Send className="h-16 w-16 text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Không tìm thấy câu hỏi</h3>
               <p className="text-gray-600 mb-6">
-                {search || selectedSubjectId || difficultyFilter !== "all" || typeFilter !== "all"
+                {search ||
+                selectedSubjectId ||
+                difficultyFilter !== "all" ||
+                typeFilter !== "all" ||
+                statusFilter !== "all"
                   ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác"
                   : "Bạn chưa có câu hỏi nào"}
               </p>
@@ -302,16 +295,41 @@ const MyQuestionsContent: React.FC = () => {
           </div>
         ) : (
           <>
-            <div className="bg-white my-6 rounded-md border border-slate-300 overflow-hidden">
+            {someSelected && (
+              <div className="mt-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+                <span className="text-sm text-blue-700 font-medium">
+                  Đã chọn <span className="font-bold">{selectedQuestions.length}</span> câu hỏi
+                  {selectedQuestions.length < allSelectableIds.length && (
+                    <button
+                      onClick={handleSelectAll}
+                      className="ml-2 underline hover:no-underline text-blue-600 font-semibold"
+                    >
+                      Chọn tất cả {allSelectableIds.length} câu
+                    </button>
+                  )}
+                </span>
+                <button
+                  onClick={() => setSelectedQuestions([])}
+                  className="cursor-pointer text-sm text-blue-500 hover:text-blue-700 font-medium"
+                >
+                  Bỏ chọn tất cả
+                </button>
+              </div>
+            )}
+
+            <div className="bg-white my-4 rounded-md border border-slate-300 overflow-hidden">
               <table className="w-full">
                 <thead>
                   <tr className="border-b border-gray-300 bg-gray-50">
                     <th className="text-left p-4 w-12">
                       <input
                         type="checkbox"
-                        checked={allPageSelected}
+                        checked={allSelected}
+                        ref={(el) => {
+                          if (el) el.indeterminate = someSelected && !allSelected;
+                        }}
                         onChange={handleSelectAll}
-                        className="w-4 h-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
                       />
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">STT</th>
@@ -346,26 +364,23 @@ const MyQuestionsContent: React.FC = () => {
                           type="checkbox"
                           checked={selectedQuestions.includes(question.id)}
                           onChange={() => handleSelectQuestion(question.id)}
+                          onClick={(e) => e.stopPropagation()}
                           disabled={
                             question.approvalStatus === ApprovalStatus.PENDING ||
                             question.approvalStatus === ApprovalStatus.APPROVED
                           }
-                          className="w-4 h-4 rounded mt-1.5 border-gray-300 text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
+                          className="w-5 h-5 rounded mt-1.5 border-gray-300 text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
                         />
                       </td>
                       <td className="p-4">
-                        <span className="text-primary text-lg font-semibold text-center">
-                          {index + 1 + page * PAGE_SIZE}
-                        </span>
+                        <span className="text-primary text-lg font-semibold">{index + 1 + page * PAGE_SIZE}</span>
                       </td>
                       <td className="p-4">
-                        <div className="flex items-start">
-                          <div className="flex-1 min-w-0">
-                            <p className="line-clamp-2 text-gray-900 text-md">{question.content}</p>
-                            <p className="text-sm text-gray-500 mt-1">
-                              Cập nhật {new Date(question.updatedAt || question.createdAt).toLocaleDateString("vi-VN")}
-                            </p>
-                          </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="line-clamp-2 text-gray-900 text-md">{question.content}</p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Cập nhật {new Date(question.updatedAt || question.createdAt).toLocaleDateString("vi-VN")}
+                          </p>
                         </div>
                       </td>
                       <td className="p-4 text-sm">{getDifficultyBadge(question.questionLevel)}</td>
@@ -375,30 +390,34 @@ const MyQuestionsContent: React.FC = () => {
                       <td className="p-4">
                         <div className="flex items-center justify-center gap-1">
                           <button
-                            className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-blue-600 transition-colors"
+                            className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
                             title="Xem"
-                            onClick={() =>
-                              navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } })
-                            }
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } });
+                            }}
                           >
                             <Eye className="h-5 w-5" />
                           </button>
-
-                          {question.approvalStatus == "NONE" && (
+                          {question.approvalStatus === ApprovalStatus.NONE && (
                             <>
                               <button
-                                className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-blue-600 transition-colors"
+                                className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
                                 title="Chỉnh sửa"
-                                onClick={() =>
-                                  navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } })
-                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } });
+                                }}
                               >
                                 <Edit className="h-4 w-4" />
                               </button>
                               <button
-                                className="cursor-pointer p-2 text-slate-600 hover:text-primary dark:hover:text-red-600 transition-colors"
-                                onClick={() => handleDelete(question.id, question.content)}
+                                className="cursor-pointer p-2 text-slate-600 hover:text-red-600 transition-colors"
                                 title="Xóa"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setDeletingQuestion(question);
+                                }}
                               >
                                 <Trash2 className="h-5 w-5" />
                               </button>
@@ -420,12 +439,26 @@ const MyQuestionsContent: React.FC = () => {
                 </span>{" "}
                 trong <span className="font-semibold text-gray-900">{filteredQuestions.length}</span> câu hỏi
               </p>
-
               {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
             </div>
           </>
         )}
       </div>
+
+      <DeleteConfirmModal
+        open={!!deletingQuestion}
+        onClose={() => setDeletingQuestion(null)}
+        onConfirm={handleConfirmDelete}
+        isPending={deleteQuestion.isPending}
+        title="Xóa câu hỏi"
+        itemName={
+          deletingQuestion
+            ? deletingQuestion.content.length > 60
+              ? `${deletingQuestion.content.substring(0, 60)}...`
+              : deletingQuestion.content
+            : undefined
+        }
+      />
     </div>
   );
 };
