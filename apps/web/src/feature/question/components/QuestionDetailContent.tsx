@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Edit, Trash2, BookOpen, GraduationCap, Tag, Calendar } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
@@ -6,6 +7,7 @@ import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useQuestion, useDeleteQuestion } from "../queries/useQuestion";
 import type { QuestionType, QuestionLevel } from "../types/question.type";
 import MediaUploadPanel from "./MediaUploadPanel";
+import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 
 const QuestionDetailContent: React.FC = () => {
   const navigate = useNavigate();
@@ -14,6 +16,7 @@ const QuestionDetailContent: React.FC = () => {
 
   const { data: question, isLoading } = useQuestion(questionId!, { enabled: !!questionId });
   const deleteQuestion = useDeleteQuestion();
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
 
   const getQuestionTypeLabel = (type: QuestionType) => (type === "MCQ" ? "Trắc nghiệm" : "Tự luận");
 
@@ -31,12 +34,13 @@ const QuestionDetailContent: React.FC = () => {
       HARD: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
     })[level];
 
-  const handleDelete = () => {
-    if (confirm(`Bạn có chắc chắn muốn xóa câu hỏi:\n"${question?.content.substring(0, 50)}..."?`)) {
-      deleteQuestion.mutate(questionId!, {
-        onSuccess: () => navigate({ to: "/mentor/question" }),
-      });
-    }
+  const handleConfirmDelete = () => {
+    deleteQuestion.mutate(questionId!, {
+      onSuccess: () => {
+        setShowDeleteModal(false);
+        navigate({ to: "/mentor/question/my" });
+      },
+    });
   };
 
   if (isLoading) {
@@ -68,185 +72,197 @@ const QuestionDetailContent: React.FC = () => {
   }
 
   return (
-    <div className="mx-auto p-6 max-w-5xl">
-      <div className="mb-6">
-        <Button
-          variant="outline"
-          size="lg"
-          className="gap-2 mb-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
-          onClick={() => navigate({ to: "/mentor/question/my" })}
-        >
-          <ArrowLeft className="mr-2 h-4 w-4" />
-          Quay lại
-        </Button>
-        <div className="flex items-center justify-between">
-          <h1 className="text-3xl font-bold">Chi tiết câu hỏi</h1>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              onClick={() => navigate({ to: `/mentor/question/${questionId}/edit` })}
-              className="gap-2"
-            >
-              <Edit className="h-4 w-4" />
-              Chỉnh sửa
-            </Button>
-            <Button
-              variant="outline"
-              onClick={handleDelete}
-              className="gap-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950"
-              isDisabled={deleteQuestion.isPending}
-            >
-              <Trash2 className="h-4 w-4" />
-              Xóa
-            </Button>
+    <div className="bg-slate-50 h-screen">
+      {" "}
+      <div className="mx-auto p-6 max-w-5xl ">
+        <div className="mb-6">
+          <Button
+            variant="outline"
+            size="lg"
+            className="gap-2 mb-3 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+            onClick={() => navigate({ to: "/mentor/question/my" })}
+          >
+            <ArrowLeft className="mr-2 h-4 w-4" />
+            Quay lại
+          </Button>
+          <div className="flex items-center justify-between">
+            <h1 className="text-3xl font-bold">Chi tiết câu hỏi</h1>
+            <div className="flex gap-2">
+              <Button
+                variant="default"
+                onClick={() => navigate({ to: `/mentor/question/${questionId}/edit` })}
+                className="gap-2 cursor-pointer p-5 text-md"
+              >
+                <Edit className="h-4 w-4" />
+                Chỉnh sửa
+              </Button>
+              <Button
+                variant="outline"
+                onClick={() => setShowDeleteModal(true)}
+                className="gap-2 text-red-600 border-red-600 hover:bg-red-50 dark:hover:bg-red-950 p-5 cursor-pointer text-md"
+                isDisabled={deleteQuestion.isPending}
+              >
+                <Trash2 className="h-4 w-4" />
+                Xóa
+              </Button>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="space-y-6">
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <div className="flex items-center gap-2 flex-wrap">
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getQuestionTypeColor(question.questionType)}`}
-              >
-                {getQuestionTypeLabel(question.questionType)}
-              </span>
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getLevelColor(question.questionLevel)}`}
-              >
-                {getLevelLabel(question.questionLevel)}
-              </span>
-              {question.isActive && (
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
-                  Hoạt động
+        <div className="space-y-6">
+          <Card className="border border-gray-200">
+            <CardHeader>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getQuestionTypeColor(question.questionType)}`}
+                >
+                  {getQuestionTypeLabel(question.questionType)}
                 </span>
-              )}
-            </div>
-          </CardHeader>
-          <CardContent className="space-y-6">
-            <div>
-              <h3 className="text-sm font-medium text-muted-foreground mb-2">Nội dung câu hỏi</h3>
-              <p className="text-lg leading-relaxed">{question.content}</p>
-            </div>
-
-            <MediaUploadPanel
-              questionId={questionId!}
-              currentMediaUrl={question.mediaUrl ?? null}
-              currentMediaType={question.mediaType ?? null}
-              variant="inline"
-              onDeleteConfirm={() => confirm("Bạn có chắc chắn muốn xóa media đính kèm?")}
-            />
-
-            {question.questionType === "MCQ" && question.options && question.options.length > 0 && (
-              <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-3">Các đáp án</h3>
-                <div className="space-y-2">
-                  {question.options.map((option) => (
-                    <div
-                      key={option.id}
-                      className={`rounded-lg border p-3 transition-colors ${
-                        option.isCorrect
-                          ? "border-green-500 bg-green-50 dark:bg-green-950/30 dark:border-green-900"
-                          : "border-gray-200 dark:border-gray-800"
-                      }`}
-                    >
-                      <div className="flex items-center gap-3">
-                        <span className="font-semibold text-sm">{option.label}.</span>
-                        <span className="flex-1">{option.content}</span>
-                        {option.isCorrect && (
-                          <span className="inline-flex items-center px-2 py-1 rounded text-xs font-medium bg-green-600 text-white">
-                            Đáp án đúng
-                          </span>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                </div>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium ${getLevelColor(question.questionLevel)}`}
+                >
+                  {getLevelLabel(question.questionLevel)}
+                </span>
+                {question.isActive && (
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200">
+                    Hoạt động
+                  </span>
+                )}
               </div>
-            )}
-
-            {question.canonicalAnswer && (
+            </CardHeader>
+            <CardContent className="space-y-6">
               <div>
-                <h3 className="text-sm font-medium text-muted-foreground mb-2">Đáp án / Hướng dẫn giải</h3>
-                <div className="rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4">
-                  <p className="whitespace-pre-wrap leading-relaxed">{question.canonicalAnswer}</p>
-                </div>
+                <h3 className="text-md font-medium text-muted-foreground mb-2">Nội dung câu hỏi</h3>
+                <p className="text-lg leading-relaxed">{question.content}</p>
               </div>
-            )}
-          </CardContent>
-        </Card>
 
-        <Card className="border border-gray-200">
-          <CardHeader>
-            <h2 className="text-lg font-semibold">Thông tin bổ sung</h2>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {question.subject && (
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
-                    <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Môn học</p>
-                    <p className="font-medium">{question.subject.name}</p>
-                  </div>
-                </div>
-              )}
-              {question.lesson && (
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900">
-                    <GraduationCap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Bài học</p>
-                    <p className="font-medium">{question.lesson.name}</p>
-                  </div>
-                </div>
-              )}
-              {question.chapter && (
-                <div className="flex items-start gap-3">
-                  <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900">
-                    <BookOpen className="h-4 w-4 text-amber-600 dark:text-amber-400" />
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground">Chương</p>
-                    <p className="font-medium">{question.chapter.name}</p>
-                  </div>
-                </div>
-              )}
-              <div className="flex items-start gap-3">
-                <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
-                  <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
-                </div>
+              <MediaUploadPanel
+                questionId={questionId!}
+                currentMediaUrl={question.mediaUrl ?? null}
+                currentMediaType={question.mediaType ?? null}
+                variant="inline"
+                onDeleteConfirm={() => confirm("Bạn có chắc chắn muốn xóa media đính kèm?")}
+              />
+
+              {question.questionType === "MCQ" && question.options && question.options.length > 0 && (
                 <div>
-                  <p className="text-sm text-muted-foreground">Ngày tạo</p>
-                  <p className="font-medium">{new Date(question.createdAt).toLocaleDateString("vi-VN")}</p>
+                  <h3 className="text-md font-medium text-muted-foreground mb-3">Các đáp án</h3>
+                  <div className="space-y-2">
+                    {question.options.map((option) => (
+                      <div
+                        key={option.id}
+                        className={`rounded-lg border p-3 transition-colors ${
+                          option.isCorrect
+                            ? "border-green-500 bg-green-50 dark:bg-green-950/30 dark:border-green-900"
+                            : "border-gray-200 dark:border-gray-800"
+                        }`}
+                      >
+                        <div className="flex items-center gap-3">
+                          <span className="font-semibold text-md">{option.label}.</span>
+                          <span className="flex-1">{option.content}</span>
+                          {option.isCorrect && (
+                            <span className="inline-flex items-center px-2 py-1 rounded text-sm font-medium bg-green-600 text-white">
+                              Đáp án đúng
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            </div>
+              )}
 
-            {question.tags && question.tags.length > 0 && (
-              <div className="pt-4 border-t">
-                <div className="flex items-center gap-2 mb-2">
-                  <Tag className="h-4 w-4 text-muted-foreground" />
-                  <p className="text-sm font-medium text-muted-foreground">Tags</p>
+              {question.canonicalAnswer && (
+                <div>
+                  <h3 className="text-md font-medium text-muted-foreground mb-2">Đáp án / Hướng dẫn giải</h3>
+                  <div className="rounded-lg bg-gray-50 dark:bg-gray-900 border border-gray-200 dark:border-gray-800 p-4">
+                    <p className="whitespace-pre-wrap leading-relaxed">{question.canonicalAnswer}</p>
+                  </div>
                 </div>
-                <div className="flex flex-wrap gap-2">
-                  {question.tags.map((tag) => (
-                    <span
-                      key={tag.id}
-                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
-                    >
-                      {tag.name}
-                    </span>
-                  ))}
+              )}
+            </CardContent>
+          </Card>
+
+          <Card className="border border-gray-200">
+            <CardHeader>
+              <h2 className="text-lg font-semibold">Thông tin bổ sung</h2>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {question.subject && (
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900">
+                      <BookOpen className="h-4 w-4 text-blue-600 dark:text-blue-400" />
+                    </div>
+                    <div>
+                      <p className="text-md text-muted-foreground">Môn học</p>
+                      <p className="font-medium">{question.subject.name}</p>
+                    </div>
+                  </div>
+                )}
+                {question.lesson && (
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-purple-100 dark:bg-purple-900">
+                      <GraduationCap className="h-4 w-4 text-purple-600 dark:text-purple-400" />
+                    </div>
+                    <div>
+                      <p className="text-md text-muted-foreground">Bài học</p>
+                      <p className="font-medium">{question.lesson.name}</p>
+                    </div>
+                  </div>
+                )}
+                {question.chapter && (
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-amber-100 dark:bg-amber-900">
+                      <BookOpen className="h-4 w-4 text-amber-600 dark:text-amber-400" />
+                    </div>
+                    <div>
+                      <p className="text-md text-muted-foreground">Chương</p>
+                      <p className="font-medium">{question.chapter.name}</p>
+                    </div>
+                  </div>
+                )}
+                <div className="flex items-start gap-3">
+                  <div className="p-2 rounded-lg bg-gray-100 dark:bg-gray-800">
+                    <Calendar className="h-4 w-4 text-gray-600 dark:text-gray-400" />
+                  </div>
+                  <div>
+                    <p className="text-md text-muted-foreground">Ngày tạo</p>
+                    <p className="font-medium">{new Date(question.createdAt).toLocaleDateString("vi-VN")}</p>
+                  </div>
                 </div>
               </div>
-            )}
-          </CardContent>
-        </Card>
+
+              {question.tags && question.tags.length > 0 && (
+                <div className="pt-4 border-t">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Tag className="h-4 w-4 text-muted-foreground" />
+                    <p className="text-md font-medium text-muted-foreground">Tags</p>
+                  </div>
+                  <div className="flex flex-wrap gap-2">
+                    {question.tags.map((tag) => (
+                      <span
+                        key={tag.id}
+                        className="inline-flex items-center px-2.5 py-0.5 rounded-full text-sm font-medium bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-200"
+                      >
+                        {tag.name}
+                      </span>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+
+        <DeleteConfirmModal
+          open={showDeleteModal}
+          onClose={() => setShowDeleteModal(false)}
+          onConfirm={handleConfirmDelete}
+          isPending={deleteQuestion.isPending}
+          title="Xóa câu hỏi"
+          itemName={question.content.length > 60 ? `${question.content.substring(0, 60)}...` : question.content}
+        />
       </div>
     </div>
   );

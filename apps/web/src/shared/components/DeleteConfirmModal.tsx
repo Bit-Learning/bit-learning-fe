@@ -45,7 +45,7 @@ const DeleteConfirmModal: React.FC<Props> = ({
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
             {isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
             Xóa

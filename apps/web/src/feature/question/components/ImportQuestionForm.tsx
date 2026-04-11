@@ -29,15 +29,12 @@ import {
   useImportJobStatus,
 } from "../queries/useImportJob";
 import type { PreviewQuestionResponse, PreviewQuestionStatus } from "../types/import.type";
-import { QuestionLevel, QuestionType } from "../types/question.type";
 import { getDifficultyBadge, getTypeBadge } from "../utils/question.utils";
 
 type ImportStep = "upload" | "preview" | "processing" | "completed";
 
-// Trạng thái edit cho 1 câu hỏi: nội dung + options
 interface EditState {
   content: string;
-  // null = không edit options, array = đang chỉnh
   options: { label: string; content: string; orderNo: number; correct: boolean }[] | null;
 }
 
