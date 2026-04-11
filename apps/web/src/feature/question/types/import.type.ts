@@ -32,7 +32,7 @@ export interface PreviewQuestionResponse {
   options?: Array<{
     label?: string;
     content: string;
-    isCorrect: boolean;
+    correct: boolean;
     orderNo: number;
   }>;
   errorMessage?: string;
