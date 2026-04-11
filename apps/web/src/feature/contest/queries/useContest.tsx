@@ -5,6 +5,8 @@ import contestApi from "../apis/contest.api";
 import { selectSelectedStatus, selectSearchQuery, selectPagination } from "../stores/contest.store";
 import {
   type SubmitRequest,
+  type ContestRunRequest,
+  type ContestDebugRequest,
   type CreateClarificationRequest,
   type MySubmissionsParams,
   ContestSubmissionStatus,
@@ -118,6 +120,32 @@ export const useSubmitSolution = () => {
       toast.error({
         title: "Nộp bài thất bại!",
         description: error?.response?.data?.message || "Đã xảy ra lỗi khi nộp bài.",
+      });
+    },
+  });
+};
+
+export const useContestRunCode = () => {
+  return useMutation({
+    mutationFn: ({ contestId, request }: { contestId: string; request: ContestRunRequest }) =>
+      contestApi.runCode(contestId, request),
+    onError: (error: any) => {
+      toast.error({
+        title: "Chạy thử thất bại!",
+        description: error?.response?.data?.message || "Đã xảy ra lỗi khi chạy thử.",
+      });
+    },
+  });
+};
+
+export const useContestDebugCode = () => {
+  return useMutation({
+    mutationFn: ({ contestId, request }: { contestId: string; request: ContestDebugRequest }) =>
+      contestApi.debugCode(contestId, request),
+    onError: (error: any) => {
+      toast.error({
+        title: "Debug thất bại!",
+        description: error?.response?.data?.message || "Đã xảy ra lỗi khi debug.",
       });
     },
   });

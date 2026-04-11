@@ -8,6 +8,10 @@ import type {
   RegisterResponse,
   SubmitRequest,
   SubmitResponse,
+  ContestRunRequest,
+  ContestRunResponse,
+  ContestDebugRequest,
+  ContestDebugResponse,
   SubmissionBriefDTO,
   SubmissionDetailDTO,
   LeaderboardResponse,
@@ -44,6 +48,17 @@ export const contestApi = {
 
   submitSolution(contestId: string, request: SubmitRequest): Promise<AxiosResponse<ApiResponse<SubmitResponse>>> {
     return api.post(`${CONTEST_BASE_URL}/${contestId}/submit`, request);
+  },
+
+  runCode(contestId: string, request: ContestRunRequest): Promise<AxiosResponse<ApiResponse<ContestRunResponse>>> {
+    return api.post(`${CONTEST_BASE_URL}/${contestId}/run`, request);
+  },
+
+  debugCode(
+    contestId: string,
+    request: ContestDebugRequest,
+  ): Promise<AxiosResponse<ApiResponse<ContestDebugResponse>>> {
+    return api.post(`${CONTEST_BASE_URL}/${contestId}/debug`, request);
   },
 
   getSubmissionDetail(submissionId: string): Promise<AxiosResponse<ApiResponse<SubmissionDetailDTO>>> {
