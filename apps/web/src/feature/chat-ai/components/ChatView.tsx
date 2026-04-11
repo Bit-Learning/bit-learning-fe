@@ -15,12 +15,8 @@ const ChatView: React.FC<ChatViewProps> = ({ messages, isTyping }) => {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { userInfo } = useSelector(selectAuthStateInfo);
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-  };
-
   useEffect(() => {
-    scrollToBottom();
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
   const formatTime = (isoString: string) => {

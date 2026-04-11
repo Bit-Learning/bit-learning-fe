@@ -2,11 +2,9 @@ import Footer from "@/layouts/footer";
 import Header from "@/layouts/header";
 import ScrollToTop from "@/layouts/scroll-to-top";
 import BotStatusWidget from "@/shared/components/BotStatusWidget";
-import { createFileRoute, Outlet, useLocation, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 function LayoutComponent() {
-  const navigate = useNavigate();
-
   return (
     <>
       <Header />
@@ -15,7 +13,7 @@ function LayoutComponent() {
         <Outlet />
       </main>
 
-      <BotStatusWidget onNavigateToFull={() => navigate({ to: "/chat-ai" })} />
+      <BotStatusWidget onNavigateToFull={() => {}} />
       <ScrollToTop />
       <Footer />
     </>

@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, Send, X, Minus, MessageCircle, ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "@tanstack/react-router";
 import { useAppDispatch } from "@/shared/redux/store";
 import {
 	addMessageAction,
@@ -447,7 +448,9 @@ export default function BotStatusWidget({
 	onNavigateToFull,
 }: BotStatusWidgetProps) {
 	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
 	const messages = useSelector(selectMessages);
+	const currentConversation = useSelector(selectCurrentConversation);
 
 	const [panelOpen, setPanelOpen] = useState(false);
 	const [minimized, setMinimized] = useState(false);
@@ -512,7 +515,11 @@ export default function BotStatusWidget({
 	const handleNavigateToFull = () => {
 		setPanelOpen(false);
 		onNavigateToFull();
-		// Không clear để ChatAIContent kế thừa conversation đang chat
+		if (currentConversation?.id) {
+			navigate({ to: "/chat-ai/$conversationId", params: { conversationId: currentConversation.id } });
+		} else {
+			navigate({ to: "/chat-ai/" });
+		}
 	};
 
 	const handleHideWidget = () => {
