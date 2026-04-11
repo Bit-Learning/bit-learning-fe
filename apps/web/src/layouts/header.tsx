@@ -330,13 +330,13 @@ const Header: React.FC = () => {
 
 										<button
 											onClick={() => {
-												navigate({ to: "/forum/create" });
+												navigate({ to: "/forum/my" });
 												setIsProfileOpen(false);
 											}}
 											className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
 										>
 											<FileText className="h-4 w-4" />
-											<span>Tạo bài viết mới</span>
+											<span>Quản lý bài viết</span>
 										</button>
 
 										<button
