@@ -1,5 +1,13 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import { getRouteApi } from "@tanstack/react-router";
+import {
+	getCoreRowModel,
+	type OnChangeFn,
+	type PaginationState,
+	useReactTable,
+} from "@tanstack/react-table";
 import { CheckCircle, XCircle, Eye, Calendar } from "lucide-react";
+import { DataTablePagination } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -26,27 +34,34 @@ import {
 } from "../types/question.type";
 import { QuestionDetailDialog } from "../components/QuestionDetailDialog";
 import { RejectDialog } from "../components/RejectDialog";
+import { useTableUrlState } from "@/shared/hooks/use-table-url-state";
 import { cn } from "@/shared/lib/utils";
-import { Main } from "@/layout/main";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
 import { Header } from "@/layout/header";
 import { QuestionBankTab } from "../components/QuestionBankTab";
 
+const route = getRouteApi("/_authenticated/questions/");
+
 export function QuestionApprovalList() {
-	const [activeTab, setActiveTab] = useState("pending");
-	const [search] = useState("");
-	const [page, setPage] = useState(0);
+	const searchParams = route.useSearch();
+	const navigate = route.useNavigate();
+	const activeTab = searchParams.tab || "pending";
 	const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
 	const [viewQuestion, setViewQuestion] = useState<QuestionResponse | null>(
 		null,
 	);
 	const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+	const { pagination: tablePagination, onPaginationChange } = useTableUrlState({
+		search: searchParams,
+		navigate,
+		pagination: { defaultPage: 1, defaultPageSize: 10 },
+		globalFilter: { enabled: false },
+		columnFilters: [],
+	});
+	const page = tablePagination.pageIndex;
+	const PAGE_SIZE = tablePagination.pageSize;
 
 	const { data: response, isLoading } = usePendingApproval(
-		{ page, size: 20 },
+		{ page, size: PAGE_SIZE },
 		{ enabled: activeTab === "pending" },
 	);
 	const approveQuestions = useApproveQuestions();
@@ -54,6 +69,61 @@ export function QuestionApprovalList() {
 
 	const questions = response?.data || [];
 	const pagination = response?.page;
+
+	useEffect(() => {
+		setSelectedQuestions([]);
+	}, [page, activeTab]);
+
+	useEffect(() => {
+		if (
+			activeTab === "pending" &&
+			pagination &&
+			pagination.totalPages > 0 &&
+			page >= pagination.totalPages
+		) {
+			navigate({
+				replace: true,
+				search: (prev) => ({
+					...prev,
+					page: pagination.totalPages <= 1 ? undefined : pagination.totalPages,
+				}),
+			});
+		}
+	}, [activeTab, navigate, page, pagination]);
+
+	const handleTabChange = (tab: string) => {
+		setSelectedQuestions([]);
+		navigate({
+			search: (prev) => ({
+				...prev,
+				tab: tab === "pending" ? undefined : tab,
+				page: undefined,
+			}),
+		});
+	};
+
+	const pendingPaginationChange: OnChangeFn<PaginationState> = (updater) => {
+		const next =
+			typeof updater === "function" ? updater(tablePagination) : updater;
+		onPaginationChange({
+			pageIndex:
+				next.pageSize !== tablePagination.pageSize ? 0 : next.pageIndex,
+			pageSize: next.pageSize,
+		});
+	};
+
+	// eslint-disable-next-line react-hooks/incompatible-library
+	const pendingTable = useReactTable({
+		data: questions,
+		columns: [],
+		state: {
+			pagination: tablePagination,
+		},
+		onPaginationChange: pendingPaginationChange,
+		getCoreRowModel: getCoreRowModel(),
+		manualPagination: true,
+		pageCount: pagination?.totalPages ?? 0,
+	});
 
 	const handleSelectQuestion = (id: number) => {
 		setSelectedQuestions((prev) =>
@@ -175,7 +245,7 @@ export function QuestionApprovalList() {
 
 				<Tabs
 					value={activeTab}
-					onValueChange={setActiveTab}
+					onValueChange={handleTabChange}
 					className="space-y-4"
 				>
 					<TabsList>
@@ -209,9 +279,7 @@ export function QuestionApprovalList() {
 									Không có câu hỏi nào cần phê duyệt
 								</h3>
 								<p className="text-sm text-muted-foreground">
-									{search
-										? "Thử tìm kiếm với từ khóa khác"
-										: "Tất cả câu hỏi đã được xử lý"}
+									Tất cả câu hỏi đã được xử lý
 								</p>
 							</div>
 						) : (
@@ -293,37 +361,28 @@ export function QuestionApprovalList() {
 							</div>
 						)}
 
-						{pagination && pagination.totalPages > 1 && (
+						{pagination && (
 							<div className="flex items-center justify-between">
 								<p className="text-sm text-muted-foreground">
-									Hiển thị {page * 20 + 1} đến{" "}
-									{Math.min((page + 1) * 20, pagination.totalElements)} trong{" "}
-									{pagination.totalElements} câu hỏi
+									Hiển thị {page * PAGE_SIZE + 1} đến{" "}
+									{Math.min((page + 1) * PAGE_SIZE, pagination.totalElements)}{" "}
+									trong {pagination.totalElements} câu hỏi
 								</p>
-								<div className="flex items-center gap-2">
-									<Button
-										variant="outline"
-										size="sm"
-										disabled={pagination.first}
-										onClick={() => setPage((p) => p - 1)}
-									>
-										Trước
-									</Button>
-									<Button
-										variant="outline"
-										size="sm"
-										disabled={pagination.last}
-										onClick={() => setPage((p) => p + 1)}
-									>
-										Sau
-									</Button>
-								</div>
+								<DataTablePagination
+									table={pendingTable}
+									pageCount={pagination.totalPages}
+								/>
 							</div>
 						)}
 					</TabsContent>
 
 					<TabsContent value="bank">
-						<QuestionBankTab />
+						<QuestionBankTab
+							keyword={searchParams.keyword || ""}
+							pagination={tablePagination}
+							onPaginationChange={onPaginationChange}
+							navigate={navigate}
+						/>
 					</TabsContent>
 				</Tabs>
 

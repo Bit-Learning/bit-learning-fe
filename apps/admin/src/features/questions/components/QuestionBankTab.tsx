@@ -1,5 +1,12 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+import {
+	getCoreRowModel,
+	type OnChangeFn,
+	type PaginationState,
+	useReactTable,
+} from "@tanstack/react-table";
 import { Eye, Trash2, Calendar, Search as SearchIcon } from "lucide-react";
+import { DataTablePagination } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
@@ -19,19 +26,26 @@ import {
 } from "../types/question.type";
 import { QuestionDetailDialog } from "../components/QuestionDetailDialog";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
-import { Header } from "@/layout/header";
-import { Search } from "@/components/search";
-import { ThemeSwitch } from "@/components/theme-switch";
-import { ConfigDrawer } from "@/components/config-drawer";
-import { ProfileDropdown } from "@/components/profile-dropdown";
-import { Main } from "@/layout/main";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
+import type { NavigateFn } from "@/shared/hooks/use-table-url-state";
 
-export function QuestionBankTab() {
-	const [keyword, setKeyword] = useState("");
+type QuestionBankTabProps = {
+	keyword: string;
+	pagination: PaginationState;
+	onPaginationChange: OnChangeFn<PaginationState>;
+	navigate: NavigateFn;
+};
+
+export function QuestionBankTab({
+	keyword,
+	pagination: tablePagination,
+	onPaginationChange,
+	navigate,
+}: QuestionBankTabProps) {
+	const page = tablePagination.pageIndex;
+	const pageSize = tablePagination.pageSize;
 	const [searchValue, setSearchValue] = useState("");
-	const [page, setPage] = useState(0);
 	const [viewQuestion, setViewQuestion] = useState<QuestionResponse | null>(
 		null,
 	);
@@ -42,7 +56,7 @@ export function QuestionBankTab() {
 	const { data: response, isLoading } = useSearchQuestions({
 		keyword,
 		page,
-		size: 20,
+		size: pageSize,
 	});
 
 	const deleteQuestionMutation = useDeleteQuestion();
@@ -50,10 +64,58 @@ export function QuestionBankTab() {
 	const questions = response?.data || [];
 	const pagination = response?.page;
 
+	useEffect(() => {
+		setSearchValue(keyword);
+	}, [keyword]);
+
+	useEffect(() => {
+		if (
+			pagination &&
+			pagination.totalPages > 0 &&
+			page >= pagination.totalPages
+		) {
+			navigate({
+				replace: true,
+				search: (prev) => ({
+					...prev,
+					page: pagination.totalPages <= 1 ? undefined : pagination.totalPages,
+				}),
+			});
+		}
+	}, [navigate, page, pagination]);
+
 	const handleSearch = () => {
-		setKeyword(searchValue);
-		setPage(0);
+		navigate({
+			search: (prev) => ({
+				...prev,
+				page: undefined,
+				keyword: searchValue.trim() || undefined,
+			}),
+		});
 	};
+
+	const bankPaginationChange: OnChangeFn<PaginationState> = (updater) => {
+		const next =
+			typeof updater === "function" ? updater(tablePagination) : updater;
+		onPaginationChange({
+			pageIndex:
+				next.pageSize !== tablePagination.pageSize ? 0 : next.pageIndex,
+			pageSize: next.pageSize,
+		});
+	};
+
+	// eslint-disable-next-line react-hooks/incompatible-library
+	const bankTable = useReactTable({
+		data: questions,
+		columns: [],
+		state: {
+			pagination: tablePagination,
+		},
+		onPaginationChange: bankPaginationChange,
+		getCoreRowModel: getCoreRowModel(),
+		manualPagination: true,
+		pageCount: pagination?.totalPages ?? 0,
+	});
 
 	const handleDelete = () => {
 		if (!deleteQuestion) return;
@@ -96,25 +158,21 @@ export function QuestionBankTab() {
 
 	if (isLoading)
 		return (
-			<>
-				<Header />
-
-				<div className="flex flex-1 flex-col gap-6 p-8">
-					<Card>
-						<CardHeader>
-							<Skeleton className="h-8 w-64" />
-							<Skeleton className="h-4 w-96" />
-						</CardHeader>
-						<CardContent>
-							<div className="space-y-3">
-								{[1, 2, 3, 4, 5].map((i) => (
-									<Skeleton key={i} className="h-16 w-full" />
-								))}
-							</div>
-						</CardContent>
-					</Card>
-				</div>
-			</>
+			<div className="flex flex-1 flex-col gap-6">
+				<Card>
+					<CardHeader>
+						<Skeleton className="h-8 w-64" />
+						<Skeleton className="h-4 w-96" />
+					</CardHeader>
+					<CardContent>
+						<div className="space-y-3">
+							{[1, 2, 3, 4, 5].map((i) => (
+								<Skeleton key={i} className="h-16 w-full" />
+							))}
+						</div>
+					</CardContent>
+				</Card>
+			</div>
 		);
 
 	return (
@@ -209,31 +267,17 @@ export function QuestionBankTab() {
 				</div>
 			)}
 
-			{pagination && pagination.totalPages > 1 && (
+			{pagination && (
 				<div className="flex items-center justify-between">
 					<p className="text-sm text-muted-foreground">
-						Hiển thị {page * 20 + 1} đến{" "}
-						{Math.min((page + 1) * 20, pagination.totalElements)} trong{" "}
+						Hiển thị {page * pageSize + 1} đến{" "}
+						{Math.min((page + 1) * pageSize, pagination.totalElements)} trong{" "}
 						{pagination.totalElements} câu hỏi
 					</p>
-					<div className="flex items-center gap-2">
-						<Button
-							variant="outline"
-							size="sm"
-							disabled={pagination.first}
-							onClick={() => setPage((p) => p - 1)}
-						>
-							Trước
-						</Button>
-						<Button
-							variant="outline"
-							size="sm"
-							disabled={pagination.last}
-							onClick={() => setPage((p) => p + 1)}
-						>
-							Sau
-						</Button>
-					</div>
+					<DataTablePagination
+						table={bankTable}
+						pageCount={pagination.totalPages}
+					/>
 				</div>
 			)}
 

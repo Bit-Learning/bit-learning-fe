@@ -18,15 +18,19 @@ import { cn, getPageNumbers } from "@/shared/lib/utils";
 type DataTablePaginationProps<TData> = {
 	table: Table<TData>;
 	className?: string;
+	pageCount?: number;
 };
 
 export function DataTablePagination<TData>({
 	table,
 	className,
+	pageCount,
 }: DataTablePaginationProps<TData>) {
 	const currentPage = table.getState().pagination.pageIndex + 1;
-	const totalPages = table.getPageCount();
+	const totalPages = pageCount ?? table.getPageCount();
 	const pageNumbers = getPageNumbers(currentPage, totalPages);
+	const canPreviousPage = currentPage > 1;
+	const canNextPage = totalPages > 0 && currentPage < totalPages;
 
 	return (
 		<div
@@ -72,7 +76,7 @@ export function DataTablePagination<TData>({
 						variant="outline"
 						className="size-8 p-0 @max-md/content:hidden"
 						onClick={() => table.setPageIndex(0)}
-						disabled={!table.getCanPreviousPage()}
+						disabled={!canPreviousPage}
 					>
 						<span className="sr-only">Go to first page</span>
 						<DoubleArrowLeftIcon className="h-4 w-4" />
@@ -81,7 +85,7 @@ export function DataTablePagination<TData>({
 						variant="outline"
 						className="size-8 p-0"
 						onClick={() => table.previousPage()}
-						disabled={!table.getCanPreviousPage()}
+						disabled={!canPreviousPage}
 					>
 						<span className="sr-only">Go to previous page</span>
 						<ChevronLeftIcon className="h-4 w-4" />
@@ -109,7 +113,7 @@ export function DataTablePagination<TData>({
 						variant="outline"
 						className="size-8 p-0"
 						onClick={() => table.nextPage()}
-						disabled={!table.getCanNextPage()}
+						disabled={!canNextPage}
 					>
 						<span className="sr-only">Go to next page</span>
 						<ChevronRightIcon className="h-4 w-4" />
@@ -117,8 +121,8 @@ export function DataTablePagination<TData>({
 					<Button
 						variant="outline"
 						className="size-8 p-0 @max-md/content:hidden"
-						onClick={() => table.setPageIndex(table.getPageCount() - 1)}
-						disabled={!table.getCanNextPage()}
+						onClick={() => table.setPageIndex(totalPages - 1)}
+						disabled={!canNextPage}
 					>
 						<span className="sr-only">Go to last page</span>
 						<DoubleArrowRightIcon className="h-4 w-4" />
