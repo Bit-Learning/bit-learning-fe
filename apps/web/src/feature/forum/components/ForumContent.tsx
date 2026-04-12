@@ -20,6 +20,7 @@ import {
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import { toast } from "@/shared/components/Sonner";
+import { getAccessToken } from "@/shared/lib/cookies";
 import {
 	useFeaturedForumPosts,
 	useForumCategories,
@@ -541,6 +542,7 @@ function SidebarList({
 const ForumContent: React.FC = () => {
 	const navigate = useNavigate();
 	const { userInfo } = useSelector(selectAuthStateInfo);
+	const canLoadRecommended = Boolean(getAccessToken());
 	const search = useSearch({ strict: false }) as {
 		q?: string;
 		category?: string;
@@ -559,7 +561,7 @@ const ForumContent: React.FC = () => {
 
 	const featuredQuery = useFeaturedForumPosts(4);
 	const trendingQuery = useTrendingForumPosts(8);
-	const recommendedQuery = useRecommendedForumPosts(6);
+	const recommendedQuery = useRecommendedForumPosts(6, canLoadRecommended);
 	const categoriesQuery = useForumCategories();
 	const popularTagsQuery = usePopularForumTags(16);
 	const sidebarMostViewedQuery = useMostViewedForumPosts(5);
@@ -1056,7 +1058,14 @@ const ForumContent: React.FC = () => {
 									Bài viết được đề xuất cho bạn
 								</h2>
 							</div>
-							{recommendedQuery.isLoading ? (
+							{!canLoadRecommended ? (
+								<InlineStateCard
+									title="Đăng nhập để xem bài viết được đề xuất"
+									description="Danh sách này được cá nhân hóa theo hoạt động học tập của bạn. Bạn vẫn có thể đọc toàn bộ bài viết công khai ở các mục bên trên."
+									actionLabel="Đăng nhập"
+									onAction={() => navigate({ to: "/signin-role" })}
+								/>
+							) : recommendedQuery.isLoading ? (
 								<div className="grid gap-4 md:grid-cols-2">
 									{getSkeletonKeys("recommended-post", 4).map((key) => (
 										<PostCardSkeleton key={key} />

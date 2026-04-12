@@ -13,6 +13,8 @@ interface CommentItemProps {
 	onDelete: (commentId: number) => void;
 	onLike: (commentId: number) => void;
 	onSubmitReply: (content: string, commentId: number) => void;
+	isInteractionDisabled?: boolean;
+	onRequireAuth?: () => void;
 }
 
 export const CommentItem: React.FC<CommentItemProps> = ({
@@ -24,6 +26,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 	replyingTo,
 	setReplyingTo,
 	onSubmitReply,
+	isInteractionDisabled = false,
+	onRequireAuth,
 }) => {
 	const [replyContent, setReplyContent] = useState("");
 
@@ -90,7 +94,14 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 							variant="ghost"
 							size="icon"
 							className="text-gray-500 hover:text-blue-600 h-auto p-0"
-							onClick={() => onLike(comment.id)}
+							isDisabled={isInteractionDisabled}
+							onClick={() => {
+								if (isInteractionDisabled) {
+									onRequireAuth?.();
+									return;
+								}
+								onLike(comment.id);
+							}}
 						>
 							<ThumbsUp className="w-5 h-5" />
 						</Button>
@@ -108,7 +119,14 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 					<Button
 						variant="ghost"
 						className="text-blue-600 gap-1.5 h-auto p-0 hover:underline font-semibold"
-						onClick={() => setReplyingTo(isReplying ? null : comment.id)}
+						isDisabled={isInteractionDisabled}
+						onClick={() => {
+							if (isInteractionDisabled) {
+								onRequireAuth?.();
+								return;
+							}
+							setReplyingTo(isReplying ? null : comment.id);
+						}}
 					>
 						<Reply className="w-4 h-4" />
 						Trả lời
@@ -121,6 +139,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 							className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
 							rows={3}
 							placeholder="Nhập phản hồi..."
+							disabled={isInteractionDisabled}
 							value={replyContent}
 							onChange={(e) => setReplyContent(e.target.value)}
 						/>
@@ -137,8 +156,12 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 							</Button>
 
 							<Button
-								isDisabled={!replyContent.trim()}
+								isDisabled={isInteractionDisabled || !replyContent.trim()}
 								onClick={() => {
+									if (isInteractionDisabled) {
+										onRequireAuth?.();
+										return;
+									}
 									onSubmitReply(replyContent, comment.id);
 									setReplyContent("");
 									setReplyingTo(null);
@@ -163,6 +186,8 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 								onDelete={onDelete}
 								onLike={onLike}
 								onSubmitReply={onSubmitReply}
+								isInteractionDisabled={isInteractionDisabled}
+								onRequireAuth={onRequireAuth}
 							/>
 						))}
 					</div>

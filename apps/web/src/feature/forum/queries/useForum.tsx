@@ -74,10 +74,11 @@ export const useTrendingForumPosts = (limit = 8) =>
 		queryFn: () => postApi.getTrendingPosts(limit),
 	});
 
-export const useRecommendedForumPosts = (limit = 6) =>
+export const useRecommendedForumPosts = (limit = 6, enabled = true) =>
 	useQuery({
 		queryKey: ["forum-recommended-posts", limit],
 		queryFn: () => postApi.getRecommendedPosts(limit),
+		enabled,
 	});
 
 export const useMostViewedForumPosts = (limit = 5) =>

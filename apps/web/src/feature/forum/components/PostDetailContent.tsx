@@ -13,7 +13,6 @@ import {
 	MessageCircle,
 	MoreHorizontal,
 	Calendar,
-	TrendingUp,
 	Eye,
 	FileIcon,
 } from "lucide-react";
@@ -22,7 +21,6 @@ import {
 	useForumPostById,
 	useForumComments,
 	useCreateForumComment,
-	useUpdateForumComment,
 	useDeleteForumComment,
 	useReplyForumComment,
 	useReactToForumPost,
@@ -140,7 +138,6 @@ const PostDetailContent: React.FC = () => {
 
 	const [comment, setComment] = useState("");
 	const [replyingTo, setReplyingTo] = useState<number | null>(null);
-	const [editingComment, setEditingComment] = useState<number | null>(null);
 	const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 
 	const { data: postResponse, isLoading: isPostLoading } =
@@ -160,7 +157,6 @@ const PostDetailContent: React.FC = () => {
 		.slice(0, 5);
 
 	const createCommentMutation = useCreateForumComment();
-	const updateCommentMutation = useUpdateForumComment();
 	const deleteCommentMutation = useDeleteForumComment();
 	const replyCommentMutation = useReplyForumComment();
 	const reactMutation = useReactToForumPost();
@@ -169,14 +165,26 @@ const PostDetailContent: React.FC = () => {
 
 	const canEdit = !!userInfo && selectedPost?.author?.id === userInfo.id;
 
+	const handleRequireAuthForComment = () => {
+		toast.error({ title: "Vui lòng đăng nhập để bình luận." });
+		navigate({ to: "/signin" });
+	};
+
 	const handleSubmitComment = () => {
+		if (!userInfo) {
+			handleRequireAuthForComment();
+			return;
+		}
+
 		if (!comment.trim()) return;
+
 		if (replyingTo) {
 			replyCommentMutation.mutate({ id: replyingTo, content: comment });
 			setReplyingTo(null);
 		} else {
 			createCommentMutation.mutate({ postId, content: comment });
 		}
+
 		setComment("");
 	};
 
@@ -550,12 +558,18 @@ const PostDetailContent: React.FC = () => {
 											replyingTo={replyingTo}
 											setReplyingTo={setReplyingTo}
 											onReply={(id) => setReplyingTo(id)}
-											onEdit={(comment) => setEditingComment(comment.id)}
+											onEdit={() =>
+												toast.info({
+													title: "Chỉnh sửa bình luận chưa được hỗ trợ.",
+												})
+											}
 											onDelete={(id) => deleteCommentMutation.mutate(id)}
 											onLike={(id) => likeCommentMutation.mutate(id)}
 											onSubmitReply={(content, id) =>
 												replyCommentMutation.mutate({ id, content })
 											}
+											isInteractionDisabled={!userInfo}
+											onRequireAuth={handleRequireAuthForComment}
 										/>
 									</div>
 								))}
@@ -630,31 +644,21 @@ const PostDetailContent: React.FC = () => {
 				<Separator className="my-0" />
 
 				<div id="comment-box" className="pt-12 pb-32 pl-50 pr-50">
-					{/* <h5 className="text-md font-bold text-gray-900 mb-4 flex items-center gap-2">
-                {replyingTo ? (
-                  <>
-                    Đang trả lời bình luận
-                    <button
-                      className="text-xs text-gray-400 hover:text-red-500 font-normal flex items-center gap-1 transition-colors"
-                      onClick={() => setReplyingTo(null)}
-                    >
-                      <X className="w-3 h-3" /> Hủy
-                    </button>
-                  </>
-                ) : (
-                  "Viết bình luận"
-                )}
-              </h5> */}
 					<div className="flex gap-3">
 						{userInfo && <AuthorAvatar author={userInfo} size="lg" />}
 						<div className="flex-1 space-y-3">
 							<Textarea
-								className="min-h-60 bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-2 focus:ring-blue-100 resize-none text-sm transition-all shadow-sm font-style: italic"
-								placeholder="Bạn nghĩ gì về bài viết này?"
+								disabled={!userInfo}
+								className="min-h-60 bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-2 focus:ring-blue-100 resize-none text-sm transition-all shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
+								placeholder={
+									userInfo
+										? "Bạn nghĩ gì về bài viết này?"
+										: "Đăng nhập để viết bình luận"
+								}
 								value={comment}
 								onChange={(e) => setComment(e.target.value)}
 							/>
-							<div className="flex items-center justify-between">
+							<div className="flex items-center justify-between gap-4">
 								<div className="flex gap-0.5">
 									{[
 										{
@@ -669,25 +673,40 @@ const PostDetailContent: React.FC = () => {
 									].map(({ icon, label }) => (
 										<button
 											key={label}
+											type="button"
 											aria-label={label}
-											className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors"
+											disabled={!userInfo}
+											className="p-2 text-gray-400 hover:text-blue-600 hover:bg-blue-50 rounded-md transition-colors disabled:cursor-not-allowed disabled:hover:bg-transparent disabled:hover:text-gray-400"
 										>
 											{icon}
 										</button>
 									))}
 								</div>
 								<button
+									type="button"
 									className={`cursor-pointer px-5 py-3 rounded-md text-md font-bold transition-all ${
-										comment.trim()
+										userInfo && comment.trim()
 											? "bg-primary text-white shadow-sm"
 											: "bg-gray-100 text-gray-400 cursor-not-allowed"
 									}`}
 									onClick={handleSubmitComment}
-									disabled={!comment.trim()}
+									disabled={!userInfo || !comment.trim()}
 								>
 									Đăng bình luận
 								</button>
 							</div>
+							{!userInfo && (
+								<div className="flex items-center justify-between rounded-md border border-slate-200 bg-slate-50 px-4 py-3 text-sm text-slate-600">
+									<span>Đăng nhập để gửi bình luận mới.</span>
+									<button
+										type="button"
+										className="font-semibold text-blue-600 transition-colors hover:text-blue-700"
+										onClick={handleRequireAuthForComment}
+									>
+										Đăng nhập
+									</button>
+								</div>
+							)}
 						</div>
 					</div>
 				</div>
