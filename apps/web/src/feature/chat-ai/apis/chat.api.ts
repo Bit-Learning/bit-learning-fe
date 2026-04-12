@@ -49,6 +49,10 @@ export const chatApi = {
     const formData = new FormData();
     formData.append("question", request.question);
 
+    if (request.model) {
+      formData.append("model", request.model);
+    }
+
     if (request.files && request.files.length > 0) {
       request.files.forEach((file) => {
         formData.append("files", file);

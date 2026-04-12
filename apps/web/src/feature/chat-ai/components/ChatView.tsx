@@ -19,13 +19,6 @@ const ChatView: React.FC<ChatViewProps> = ({ messages, isTyping }) => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages, isTyping]);
 
-  const formatTime = (isoString: string) => {
-    return new Date(isoString).toLocaleTimeString("vi-VN", {
-      hour: "2-digit",
-      minute: "2-digit",
-    });
-  };
-
   return (
     <div className="flex-1 overflow-y-auto p-6 md:px-12 space-y-6 min-h-0">
       {messages.map((message) => (
@@ -158,17 +151,9 @@ const ChatView: React.FC<ChatViewProps> = ({ messages, isTyping }) => {
                 </div>
               )}
 
-              {message.role === "assistant" && (message.totalToken || message.model) && (
+              {message.role === "assistant" && (
                 <div className="mt-3 pt-3 border-t border-slate-200 dark:border-slate-700 flex items-center justify-between text-[10px] text-slate-400">
-                  <div className="flex items-center gap-4">
-                    {message.model && <span>{message.model}</span>}
-                    {message.totalToken && (
-                      <span className="flex items-center gap-1">
-                        <FileText size={12} /> {message.totalToken} tokens
-                        {/* {message.promptToken ? ` (${message.promptToken}+${message.completionToken})` : ""} */}
-                      </span>
-                    )}
-                  </div>
+                  {message.model && <span>{message.model}</span>}
                   <div className="flex items-center gap-2">
                     <button className="hover:text-blue-500 transition-colors">
                       <Copy size={14} />
@@ -184,9 +169,6 @@ const ChatView: React.FC<ChatViewProps> = ({ messages, isTyping }) => {
               )}
             </div>
 
-            <div className="flex items-center gap-3 text-[11px] text-slate-400 px-1">
-              <span>{formatTime(message.createdAt)}</span>
-            </div>
           </div>
 
           {message.role === "user" && (

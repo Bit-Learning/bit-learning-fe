@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from "react";
-import { Send, PanelLeft, Plus, Search, X, MessageSquare, Paperclip } from "lucide-react";
+import { Send, PanelLeft, Plus, Search, X, MessageSquare, Paperclip, ChevronDown, Check } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   addMessageAction,
@@ -35,10 +35,13 @@ const ChatAIContent: React.FC<ChatAIContentProps> = ({ conversationId }) => {
   const [searchQuery, setSearchQuery] = useState("");
   const [inputValue, setInputValue] = useState("");
   const [files, setFiles] = useState<File[]>([]);
+  const [selectedModel, setSelectedModel] = useState<"gpt-4o-mini" | "gpt-4o">("gpt-4o-mini");
+  const [isModelDropdownOpen, setIsModelDropdownOpen] = useState(false);
   // Hiển thị chat view khi đang tạo conversation mới (trước khi URL thay đổi)
   const [isCreatingNewChat, setIsCreatingNewChat] = useState(false);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const modelDropdownRef = useRef<HTMLDivElement>(null);
   const prevConversationIdRef = useRef<string | undefined>(undefined);
 
   const { data: conversationsData } = useUserConversations(0, 10);
@@ -59,6 +62,17 @@ const ChatAIContent: React.FC<ChatAIContentProps> = ({ conversationId }) => {
     }
     prevConversationIdRef.current = conversationId;
   }, [conversationId, dispatch]);
+
+  // Đóng model dropdown khi click ngoài
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+      if (modelDropdownRef.current && !modelDropdownRef.current.contains(e.target as Node)) {
+        setIsModelDropdownOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => document.removeEventListener("mousedown", handleClickOutside);
+  }, []);
 
   const todayString = new Date().toDateString();
   const yesterdayString = new Date(Date.now() - 24 * 60 * 60 * 1000).toDateString();
@@ -113,7 +127,7 @@ const ChatAIContent: React.FC<ChatAIContentProps> = ({ conversationId }) => {
       if (activeId) {
         await sendMessage.mutateAsync({
           conversationId: activeId,
-          request: { question, files: pendingFiles.length > 0 ? pendingFiles : undefined },
+          request: { question, files: pendingFiles.length > 0 ? pendingFiles : undefined, model: selectedModel },
         });
         // Navigate sau khi message đã được gửi để tránh race condition với useConversationMessages
         if (!conversationId) {
@@ -222,6 +236,51 @@ const ChatAIContent: React.FC<ChatAIContentProps> = ({ conversationId }) => {
         rows={1}
         style={{ height: "auto", minHeight: "0" }}
       />
+
+      {/* Model dropdown */}
+      <div className="relative shrink-0" ref={modelDropdownRef}>
+        <button
+          type="button"
+          onClick={() => setIsModelDropdownOpen((prev) => !prev)}
+          disabled={isLoading}
+          className="flex items-center gap-1 px-2.5 py-1 rounded-full border border-slate-200 dark:border-slate-600 text-[11px] font-medium text-slate-600 dark:text-slate-300 hover:border-slate-300 dark:hover:border-slate-500 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {selectedModel}
+          <ChevronDown
+            size={12}
+            className={`transition-transform duration-150 ${isModelDropdownOpen ? "rotate-180" : ""}`}
+          />
+        </button>
+
+        {isModelDropdownOpen && (
+          <div className="absolute bottom-full right-0 mb-2 w-64 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 shadow-xl z-50 overflow-hidden">
+            {(
+              [
+                { value: "gpt-4o-mini", label: "gpt-4o-mini", desc: "Nhanh, phù hợp câu hỏi thông thường" },
+                { value: "gpt-4o", label: "gpt-4o", desc: "Thông minh hơn, phù hợp bài toán phức tạp" },
+              ] as const
+            ).map((option) => (
+              <button
+                key={option.value}
+                type="button"
+                onClick={() => {
+                  setSelectedModel(option.value);
+                  setIsModelDropdownOpen(false);
+                }}
+                className="w-full flex items-center justify-between gap-3 px-4 py-3 text-left hover:bg-slate-50 dark:hover:bg-slate-700/60 transition-colors"
+              >
+                <div>
+                  <div className="text-[13px] font-medium text-slate-800 dark:text-slate-100">{option.label}</div>
+                  <div className="text-[11px] text-slate-400 dark:text-slate-500 mt-0.5">{option.desc}</div>
+                </div>
+                {selectedModel === option.value && (
+                  <Check size={15} className="shrink-0 text-blue-500" />
+                )}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
       <button
         onClick={handleSendMessage}
