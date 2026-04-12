@@ -65,4 +65,5 @@ export interface CreateConversationRequest {
 export interface ChatRequest {
   question: string;
   files?: File[];
+  model?: "gpt-4o-mini" | "gpt-4o";
 }
