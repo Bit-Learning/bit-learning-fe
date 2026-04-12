@@ -21,14 +21,15 @@ import {
 	DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SignOutDialog } from "@/components/sign-out-dialog";
+import { useSidebar } from "@/components/ui/sidebar";
 import useDialogState from "@/shared/hooks/use-dialog-state";
 import { cn } from "@/shared/lib/utils";
 import { getNavGroupsForRole } from "./data/sidebar-data";
 import type { NavCollapsible, NavItem, NavLink } from "./types";
 import { useAdminProfile } from "@/features/auth/queries/useAuth";
 
-const SIDEBAR_EXPANDED = "w-70";
-const SIDEBAR_COLLAPSED = "w-[88px]";
+const SIDEBAR_EXPANDED = "";
+const SIDEBAR_COLLAPSED = "";
 
 function checkIsActive(href: string, item: NavItem, mainNav = false) {
 	return (
@@ -61,8 +62,8 @@ function SidebarLinkItem({
 			onClick={onNavigate}
 			title={collapsed ? item.title : undefined}
 			className={cn(
-				"group relative flex h-11 items-center rounded-2xl px-3 text-sm font-medium transition-all duration-200",
-				collapsed ? "justify-center" : "gap-3",
+				"group relative flex h-11.5 items-center rounded-2xl px-3 text-sm font-medium transition-all duration-200",
+				collapsed ? "justify-center w-12 mx-auto" : "gap-3",
 				isActive
 					? "bg-white text-slate-950 shadow-[0_10px_30px_rgba(255,255,255,0.08)]"
 					: "text-slate-300 hover:bg-white/6 hover:text-white",
@@ -77,7 +78,7 @@ function SidebarLinkItem({
 					className={cn(
 						"shrink-0 size-4.5",
 						isActive
-							? "text-sky-600"
+							? "text-gray-900"
 							: "text-slate-400 group-hover:text-slate-100",
 					)}
 				/>
@@ -251,19 +252,30 @@ function SidebarHeader({
 				)}
 			>
 				{collapsed ? (
-					<div className="flex size-11 items-center justify-center rounded-2xl bg-white text-base font-bold text-slate-950 shadow-sm">
-						B
+					<div className="flex size-11 items-center justify-center rounded-2xl bg-white shadow-sm overflow-hidden">
+						<img
+							src="/logo/icon-192.png"
+							alt="App icon"
+							className="h-full w-full object-cover"
+						/>
 					</div>
 				) : (
 					<div className="flex items-center gap-3">
-						<div className="flex size-11 items-center justify-center rounded-2xl bg-white text-base font-bold text-slate-950 shadow-sm">
-							B
+						<div className="flex size-11 items-center justify-center rounded-2xl bg-white shadow-sm overflow-hidden">
+							<img
+								src="/logo/icon-192.png"
+								alt="App icon"
+								className="h-full w-full object-cover"
+							/>
 						</div>
+
 						<div className="min-w-0">
 							<p className="truncate text-sm font-semibold text-white">
 								Bit Learning
 							</p>
-							<p className="truncate text-xs text-slate-400">Admin dashboard</p>
+							<p className="truncate text-xs text-slate-400">
+								Cổng quản trị hệ thống
+							</p>
 						</div>
 					</div>
 				)}
@@ -322,8 +334,16 @@ function SidebarFooter({
 						)}
 					>
 						<div className="relative shrink-0">
-							<div className="flex size-10 items-center justify-center rounded-2xl bg-white text-sm font-bold text-slate-950">
+							{/* <div className="flex size-10 items-center justify-center rounded-2xl bg-white text-sm font-bold text-slate-950">
 								{initials}
+							</div> */}
+
+							<div className="flex size-11 items-center justify-center rounded-2xl bg-white shadow-sm overflow-hidden">
+								<img
+									src="/logo/icon-192.png"
+									alt="App icon"
+									className="h-full w-full object-cover"
+								/>
 							</div>
 							<span className="absolute -bottom-0.5 -right-0.5 size-3 rounded-full border-2 border-slate-950 bg-emerald-400" />
 						</div>
@@ -402,9 +422,13 @@ function SidebarFooter({
 
 const AppSidebar: React.FC = () => {
 	const href = useLocation({ select: (l) => l.href });
-	const [collapsed, setCollapsed] = useState(false);
-	const [mobileOpen, setMobileOpen] = useState(false);
 	const [signOutOpen, setSignOutOpen] = useDialogState();
+	const { state, isMobile, openMobile, setOpenMobile, toggleSidebar } =
+		useSidebar();
+
+	// On desktop, use the shared sidebar context state to determine
+	// whether the app sidebar is in a collapsed (icon-only) mode.
+	const collapsed = !isMobile && state === "collapsed";
 
 	const { data: profile } = useAdminProfile();
 
@@ -428,7 +452,7 @@ const AppSidebar: React.FC = () => {
 			.join("")
 			.toUpperCase() || "?";
 
-	const closeMobile = () => setMobileOpen(false);
+	const closeMobile = () => setOpenMobile(false);
 
 	const sidebarContent = (
 		<div className="flex h-full flex-col bg-slate-950">
@@ -440,7 +464,7 @@ const AppSidebar: React.FC = () => {
 			<div className="relative z-10 flex h-full flex-col">
 				<SidebarHeader
 					collapsed={collapsed}
-					onToggle={() => setCollapsed((prev) => !prev)}
+					onToggle={toggleSidebar}
 					onCloseMobile={closeMobile}
 				/>
 
@@ -454,7 +478,7 @@ const AppSidebar: React.FC = () => {
 									</p>
 								)}
 
-								<div className="space-y-1">
+								<div className="flex flex-col justify-center space-y-1">
 									{group.items.map((item) => {
 										const key = `${item.title}-${item.url ?? ""}`;
 
@@ -510,14 +534,14 @@ const AppSidebar: React.FC = () => {
 
 			<button
 				type="button"
-				onClick={() => setMobileOpen(true)}
+				onClick={() => setOpenMobile(true)}
 				className="fixed left-4 top-4 z-50 flex size-10 items-center justify-center rounded-xl border border-slate-200 bg-white text-slate-700 shadow-lg md:hidden"
 				aria-label="Open sidebar"
 			>
 				<Menu className="size-4" />
 			</button>
 
-			{mobileOpen && (
+			{openMobile && (
 				<div className="fixed inset-0 z-50 flex md:hidden">
 					<div
 						className="absolute inset-0 bg-black/60 backdrop-blur-sm"

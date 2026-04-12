@@ -55,7 +55,7 @@ const TagManagementPage: React.FC = () => {
 						className="bg-primary text-white hover:bg-blue-700"
 					>
 						<Plus className="mr-1.5 h-4 w-4" />
-						Thêm tag
+						Tạo mới
 					</Button>
 				</div>
 

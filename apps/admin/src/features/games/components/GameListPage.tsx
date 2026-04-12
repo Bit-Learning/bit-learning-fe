@@ -32,6 +32,7 @@ import { toast } from "sonner";
 import { MINIO_GAME_URL } from "@/shared/constants/endpoints";
 import { GamesTable } from "./games-table";
 import type { GameRow } from "./games-columns";
+import { Loader2 } from "lucide-react";
 
 export const GamesCrudManager = () => {
 	const { data: games = [], isLoading } = useAdminGamesList();
@@ -148,12 +149,15 @@ export const GamesCrudManager = () => {
 	return (
 		<div className="space-y-4">
 			<div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
-				<h2 className="text-xl font-semibold">Danh sách game</h2>
-				<Button onClick={openCreate}>Thêm game</Button>
+				<h2 className="text-xl font-semibold">Danh sách trò chơi</h2>
+				<Button onClick={openCreate}>Thêm trò chơi</Button>
 			</div>
 
 			{isLoading ? (
-				<p>Đang tải danh sách game...</p>
+				<>
+					<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+					Đang tải danh sách trò chơi...
+				</>
 			) : (
 				<GamesTable
 					data={tableData}
@@ -169,12 +173,12 @@ export const GamesCrudManager = () => {
 				<DialogContent>
 					<DialogHeader>
 						<DialogTitle>
-							{editingId ? "Cập nhật game" : "Tạo game mới"}
+							{editingId ? "Cập nhật trò chơi" : "Tạo trò chơi mới"}
 						</DialogTitle>
 						<DialogDescription>
 							{editingId
-								? "Chỉnh sửa thông tin game hiện có."
-								: "Tạo game mới với file game và thông tin chi tiết."}
+								? "Chỉnh sửa thông tin trò chơi hiện có."
+								: "Tạo trò chơi mới với file trò chơi và thông tin chi tiết."}
 						</DialogDescription>
 					</DialogHeader>
 

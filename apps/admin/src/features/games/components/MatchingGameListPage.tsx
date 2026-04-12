@@ -627,7 +627,7 @@ export const MatchingGameManager = () => {
 					</p>
 				</div>
 				<Button onClick={openCreate} className="gap-2">
-					<PlusCircle size={16} /> Thêm matching game
+					<PlusCircle size={16} /> Tạo mới
 				</Button>
 			</div>
 

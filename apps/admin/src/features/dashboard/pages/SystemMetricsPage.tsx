@@ -581,7 +581,7 @@ export function Dashboard() {
 				<div className="space-y-4">
 					<div className="flex items-end justify-between">
 						<div>
-							<h3 className="text-lg font-semibold">Tình trạng hệ thống</h3>
+							<h3 className="text-2xl font-bold">Tình trạng hệ thống</h3>
 							<p className="text-muted-foreground text-sm">
 								Tổng quan về hiệu suất và sức khỏe hệ thống Bit Learning
 							</p>
