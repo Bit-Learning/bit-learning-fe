@@ -5,7 +5,7 @@
 	"type": "module",
 	"scripts": {
 		"dev": "vite",
-		"build": "vite build && tsc --noEmit",
+		"build": "node ./scripts/generate-sitemap.mjs && vite build && tsc --noEmit",
 		"lint": "biome lint .",
 		"format": "biome format --write .",
 		"check": "biome check --write .",

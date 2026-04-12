@@ -3,6 +3,7 @@ import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
 import { CURRICULUM_DATA } from "@/feature/game/data";
 import matchingGameService from "@/feature/game/services/matchingGameService";
 import ScrollToTop from "@/layouts/scroll-to-top";
+import PageMeta from "@/shared/components/seo/page-meta";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@workspace/ui/lib/utils";
 import GameCard from "@/feature/game/components/GameCard";
@@ -54,7 +55,10 @@ export default function PathPage() {
 
 	return (
 		<div className="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen transition-colors duration-300">
-			<title>Tổng quan lộ trình</title>
+			<PageMeta
+				title="Lộ trình trò chơi ghép cặp - Bit Learning"
+				description="Khám phá lộ trình trò chơi ghép cặp theo từng khối lớp và chủ đề tại Bit Learning."
+			/>
 
 			<div className="flex flex-col min-h-screen">
 				{/* Header */}

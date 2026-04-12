@@ -16,6 +16,8 @@ import {
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
+import PageMeta from "@/shared/components/seo/page-meta";
+import { createOrganizationJsonLd } from "@/shared/components/seo/site-meta";
 import NumberTicker from "@workspace/ui/components/custom/ticker";
 import BlueButton from "@/shared/components/button/BlueButton";
 
@@ -100,6 +102,21 @@ function AboutUsPage() {
 
 	return (
 		<main>
+			<PageMeta
+				title="Về Bit Learning"
+				description="Tìm hiểu về Bit Learning, nền tảng học lập trình và AI giúp học sinh Việt Nam phát triển tư duy công nghệ qua lộ trình cá nhân hóa."
+				keywords={[
+					"Bit Learning",
+					"ve Bit Learning",
+					"dao tao lap trinh",
+					"mentor tin hoc",
+					"hoc lap trinh voi AI",
+				]}
+				jsonLd={createOrganizationJsonLd({
+					description:
+						"Nền tảng học lập trình và AI dành cho học sinh Việt Nam.",
+				})}
+			/>
 			<section className="relative overflow-hidden py-16 lg:py-24">
 				<div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
 					<div className="grid grid-cols-1 items-center gap-12 lg:grid-cols-2">

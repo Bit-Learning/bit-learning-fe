@@ -1,13 +1,12 @@
 import React from "react";
 import { Button } from "@workspace/ui/components/Button";
-import { Link, useNavigate } from "@tanstack/react-router";
+import { Link } from "@tanstack/react-router";
 import ForumPostCard from "./ForumPostCard";
 import { useFeaturedForumPosts } from "@/feature/forum/queries/useForum";
 import { Splide, SplideSlide } from "@splidejs/react-splide";
 import "@splidejs/react-splide/css";
 
 const ForumSection: React.FC = () => {
-	const navigate = useNavigate();
 	const { data, isLoading } = useFeaturedForumPosts(6);
 	const posts = data?.data ?? [];
 
@@ -52,15 +51,7 @@ const ForumSection: React.FC = () => {
 				>
 					{posts.map((post) => (
 						<SplideSlide key={post.id}>
-							<ForumPostCard
-								post={post}
-								onClick={(selectedPost) =>
-									navigate({
-										to: "/forum/post/$id",
-										params: { id: String(selectedPost.id) },
-									})
-								}
-							/>
+							<ForumPostCard post={post} />
 						</SplideSlide>
 					))}
 				</Splide>

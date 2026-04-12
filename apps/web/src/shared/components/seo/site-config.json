@@ -1,0 +1,138 @@
+{
+	"siteName": "Bit Learning",
+	"siteUrl": "https://bit-learning.lch.id.vn",
+	"locale": "vi_VN",
+	"defaultTitle": "Bit Learning - Học lập trình và AI cho học sinh Việt Nam",
+	"defaultDescription": "Bit Learning cung cấp khóa học lập trình, luyện đề, diễn đàn công nghệ và công cụ AI giúp học sinh học tập hiệu quả hơn mỗi ngày.",
+	"defaultKeywords": [
+		"Bit Learning",
+		"hoc lap trinh",
+		"khoa hoc lap trinh",
+		"hoc lap trinh cho hoc sinh",
+		"on thi tin hoc",
+		"dien dan lap trinh",
+		"hoc lap trinh voi AI"
+	],
+	"defaultImage": "/Logo.png",
+	"defaultImageAlt": "Bit Learning",
+	"author": "Bit Learning",
+	"organization": {
+		"name": "Bit Learning",
+		"logo": "/Logo.png"
+	},
+	"noIndexPaths": [
+		"/cart",
+		"/checkout",
+		"/contests/my",
+		"/forgot-password",
+		"/notifications",
+		"/open-mobile",
+		"/payment-result",
+		"/reset-password",
+		"/signin",
+		"/signin-2fa",
+		"/signin-role",
+		"/signup"
+	],
+	"noIndexPrefixes": [
+		"/auth",
+		"/chat-ai",
+		"/dashboard",
+		"/forum/create",
+		"/forum/my",
+		"/matching",
+		"/mentor",
+		"/profile"
+	],
+	"sitemap": {
+		"excludeRouteFiles": [
+			"404.tsx",
+			"__root.tsx",
+			"_headerOnly.tsx",
+			"_layout.tsx"
+		],
+		"excludeRoutePrefixes": [
+			"_headerOnly/chat-ai/",
+			"_headerOnly/profile/",
+			"_layout/internal/",
+			"api/",
+			"auth/",
+			"matching/",
+			"mentor/"
+		],
+		"excludePaths": [
+			"/cart",
+			"/checkout",
+			"/contests/my",
+			"/dashboard",
+			"/forgot-password",
+			"/forum/create",
+			"/forum/my",
+			"/notifications",
+			"/open-mobile",
+			"/payment-result",
+			"/reset-password",
+			"/signin",
+			"/signin-2fa",
+			"/signin-role",
+			"/signup"
+		],
+		"excludePathPrefixes": [
+			"/auth",
+			"/chat-ai",
+			"/matching",
+			"/mentor",
+			"/profile"
+		],
+		"overrides": {
+			"/": {
+				"changefreq": "daily",
+				"priority": 1
+			},
+			"/about": {
+				"changefreq": "monthly",
+				"priority": 0.7
+			},
+			"/contests": {
+				"changefreq": "daily",
+				"priority": 0.8
+			},
+			"/courses": {
+				"changefreq": "daily",
+				"priority": 0.9
+			},
+			"/exams": {
+				"changefreq": "daily",
+				"priority": 0.8
+			},
+			"/forum": {
+				"changefreq": "daily",
+				"priority": 0.8
+			},
+			"/games": {
+				"changefreq": "weekly",
+				"priority": 0.7
+			},
+			"/instructors": {
+				"changefreq": "weekly",
+				"priority": 0.7
+			},
+			"/leaderboard": {
+				"changefreq": "daily",
+				"priority": 0.5
+			},
+			"/privacy": {
+				"changefreq": "yearly",
+				"priority": 0.3
+			},
+			"/problem": {
+				"changefreq": "daily",
+				"priority": 0.8
+			},
+			"/terms": {
+				"changefreq": "yearly",
+				"priority": 0.3
+			}
+		}
+	}
+}

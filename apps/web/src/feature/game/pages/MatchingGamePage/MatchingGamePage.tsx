@@ -1,5 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
+import PageMeta from "@/shared/components/seo/page-meta";
 import {
 	CURRICULUM_DATA,
 	GAME_DATA,
@@ -322,7 +323,10 @@ export default function GamePage() {
 
 	return (
 		<div className="font-display bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
-			<title>{gameData.meta.title}</title>
+			<PageMeta
+				title={gameData.meta.title}
+				description="Trải nghiệm trò chơi ghép cặp giúp học sinh rèn luyện kiến thức và phản xạ trên Bit Learning."
+			/>
 			{/* Header */}
 			<header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
 				<div className="flex items-center gap-3">

@@ -1,3 +1,4 @@
+import PageMeta from "@/shared/components/seo/page-meta";
 import useDebounce from "@/shared/hooks/use-debounce";
 import { Link } from "@tanstack/react-router";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
@@ -217,6 +218,10 @@ export default function GameList({ username }: Props) {
 
 	return (
 		<div className="min-h-screen bg-[#12080a] text-white">
+			<PageMeta
+				title="Bit Learning Game Center"
+				description="Khám phá kho trò chơi học tập giúp học sinh luyện tư duy logic, tin học và phản xạ trên Bit Learning."
+			/>
 			<link rel="preconnect" href="https://fonts.googleapis.com" />
 			<link
 				rel="preconnect"
@@ -231,7 +236,6 @@ export default function GameList({ username }: Props) {
 				href="https://fonts.googleapis.com/icon?family=Material+Icons"
 				rel="stylesheet"
 			/>
-			<title>Bit Learning Game Center</title>
 			<Navbar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
 			{isLoading ? (

@@ -1,3 +1,4 @@
+import PageMeta from "@/shared/components/seo/page-meta";
 import { Eye, Heart, MessageCircle, Maximize } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
@@ -180,6 +181,14 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 
 	return (
 		<div className="min-h-screen bg-[#12080a] text-white">
+			<PageMeta
+				title={`${detailGame.title} - Bit Learning Game Center`}
+				description={
+					detailGame.description ||
+					"Chi tiết trò chơi học tập trên Bit Learning Game Center."
+				}
+				image={detailGame.thumbnailFullUrl ?? detailGame.thumbnailUrl}
+			/>
 			<link rel="preconnect" href="https://fonts.googleapis.com" />
 			<link
 				rel="preconnect"
@@ -194,7 +203,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 				href="https://fonts.googleapis.com/icon?family=Material+Icons"
 				rel="stylesheet"
 			/>
-			<title>Bit Learning Game Center</title>
 			<Navbar />
 
 			<div className="min-h-screen max-w-7xl mx-auto px-6 py-16 mt-10">

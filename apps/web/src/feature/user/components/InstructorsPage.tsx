@@ -1,4 +1,5 @@
 import { useMemo, useState } from "react";
+import PageMeta from "@/shared/components/seo/page-meta";
 import { useInstructors } from "../queries/useUser";
 import {
 	Avatar,
@@ -331,290 +332,302 @@ export default function InstructorsPage() {
 	}, [instructors]);
 
 	return (
-		<div className="min-h-screen bg-slate-50 text-slate-900">
-			{/* Hero */}
-			<section className="relative overflow-hidden bg-slate-950">
-				<div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.28),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(139,92,246,0.24),transparent_35%)]" />
-				<div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
-					<div className="max-w-2xl">
-						<p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.16em] text-blue-100">
-							<Sparkles size={14} />
-							Đội ngũ mentor Bit Learning
-						</p>
+		<>
+			<PageMeta
+				title="Đội ngũ giảng viên và mentor - Bit Learning"
+				description="Khám phá đội ngũ giảng viên và mentor tại Bit Learning với kinh nghiệm thực chiến trong lập trình, AI và công nghệ."
+				keywords={[
+					"mentor Bit Learning",
+					"giang vien lap trinh",
+					"instructors Bit Learning",
+					"mentor cong nghe",
+				]}
+			/>
+			<div className="min-h-screen bg-slate-50 text-slate-900">
+				{/* Hero */}
+				<section className="relative overflow-hidden bg-slate-950">
+					<div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(59,130,246,0.28),transparent_30%),radial-gradient(circle_at_bottom_right,rgba(139,92,246,0.24),transparent_35%)]" />
+					<div className="relative mx-auto grid max-w-7xl gap-12 px-6 py-20 lg:grid-cols-2 lg:px-8 lg:py-24">
+						<div className="max-w-2xl">
+							<p className="mb-4 inline-flex items-center gap-2 rounded-full border border-white/15 bg-white/10 px-4 py-1.5 text-xs font-medium uppercase tracking-[0.16em] text-blue-100">
+								<Sparkles size={14} />
+								Đội ngũ mentor Bit Learning
+							</p>
 
-						<h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl">
-							Học cùng mentor thực chiến,
-							<span className="block bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
-								rút ngắn hành trình vào nghề
-							</span>
-						</h1>
+							<h1 className="text-4xl font-semibold leading-tight text-white md:text-5xl">
+								Học cùng mentor thực chiến,
+								<span className="block bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent">
+									rút ngắn hành trình vào nghề
+								</span>
+							</h1>
 
-						<p className="mt-6 max-w-xl text-base leading-8 text-slate-300">
-							Từ nền tảng cơ bản đến kỹ năng làm dự án thực tế, đội ngũ mentor
-							của chúng tôi đồng hành cùng bạn để học nhanh hơn, hiểu sâu hơn và
-							tự tin hơn trên con đường công nghệ.
-						</p>
+							<p className="mt-6 max-w-xl text-base leading-8 text-slate-300">
+								Từ nền tảng cơ bản đến kỹ năng làm dự án thực tế, đội ngũ mentor
+								của chúng tôi đồng hành cùng bạn để học nhanh hơn, hiểu sâu hơn
+								và tự tin hơn trên con đường công nghệ.
+							</p>
 
-						<div className="mt-8 flex flex-wrap gap-4">
-							<a
-								href="#mentor-list"
-								className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
-							>
-								Xem danh sách mentor
-								<ArrowRight size={16} />
-							</a>
-							<a
-								href="/courses"
-								className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
-							>
-								Khám phá khóa học
-							</a>
+							<div className="mt-8 flex flex-wrap gap-4">
+								<a
+									href="#mentor-list"
+									className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+								>
+									Xem danh sách mentor
+									<ArrowRight size={16} />
+								</a>
+								<a
+									href="/courses"
+									className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white backdrop-blur-sm transition hover:bg-white/15"
+								>
+									Khám phá khóa học
+								</a>
+							</div>
+						</div>
+
+						<div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-2">
+							<StatItem
+								icon={<Users size={18} />}
+								value={String(totalInstructors || 0)}
+								label="Mentor đồng hành"
+							/>
+							<StatItem
+								icon={<BookOpen size={18} />}
+								value="Nhiều lộ trình"
+								label="Tập trung thực hành"
+							/>
+							<StatItem
+								icon={<BriefcaseBusiness size={18} />}
+								value="Thực chiến"
+								label="Kinh nghiệm dự án thật"
+							/>
+							<StatItem
+								icon={<BadgeCheck size={18} />}
+								value="Đồng hành"
+								label="Học cùng phản hồi cá nhân"
+							/>
+						</div>
+					</div>
+				</section>
+
+				{/* Featured mentors */}
+				<section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+					<div className="mb-8 flex items-end justify-between gap-6">
+						<div>
+							<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
+								Mentor nổi bật
+							</p>
+							<h2 className="mt-2 text-3xl font-semibold text-slate-900">
+								Gặp gỡ những người sẽ đồng hành cùng bạn
+							</h2>
+							<p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
+								Không chỉ giảng dạy kiến thức, mentor còn giúp bạn định hướng,
+								phản hồi và chia sẻ góc nhìn thực tế từ quá trình làm nghề.
+							</p>
 						</div>
 					</div>
 
-					<div className="grid gap-4 sm:grid-cols-3 lg:grid-cols-2">
-						<StatItem
-							icon={<Users size={18} />}
-							value={String(totalInstructors || 0)}
-							label="Mentor đồng hành"
-						/>
-						<StatItem
-							icon={<BookOpen size={18} />}
-							value="Nhiều lộ trình"
-							label="Tập trung thực hành"
-						/>
-						<StatItem
-							icon={<BriefcaseBusiness size={18} />}
-							value="Thực chiến"
-							label="Kinh nghiệm dự án thật"
-						/>
-						<StatItem
-							icon={<BadgeCheck size={18} />}
-							value="Đồng hành"
-							label="Học cùng phản hồi cá nhân"
-						/>
-					</div>
-				</div>
-			</section>
-
-			{/* Featured mentors */}
-			<section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-				<div className="mb-8 flex items-end justify-between gap-6">
-					<div>
-						<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
-							Mentor nổi bật
-						</p>
-						<h2 className="mt-2 text-3xl font-semibold text-slate-900">
-							Gặp gỡ những người sẽ đồng hành cùng bạn
-						</h2>
-						<p className="mt-3 max-w-2xl text-sm leading-7 text-slate-600">
-							Không chỉ giảng dạy kiến thức, mentor còn giúp bạn định hướng,
-							phản hồi và chia sẻ góc nhìn thực tế từ quá trình làm nghề.
-						</p>
-					</div>
-				</div>
-
-				{isLoading ? (
-					<div className="flex justify-center py-20">
-						<Loader />
-					</div>
-				) : featured.length > 0 ? (
-					<div className="grid gap-5 lg:grid-cols-3">
-						<div className="lg:col-span-2">
-							<FeaturedInstructor instructor={featured[0]!} large />
+					{isLoading ? (
+						<div className="flex justify-center py-20">
+							<Loader />
 						</div>
-						<div className="grid gap-5">
-							{featured.slice(1, 3).map((instructor) => (
-								<FeaturedInstructor
-									key={instructor.id}
-									instructor={instructor}
-								/>
-							))}
+					) : featured.length > 0 ? (
+						<div className="grid gap-5 lg:grid-cols-3">
+							<div className="lg:col-span-2">
+								<FeaturedInstructor instructor={featured[0]!} large />
+							</div>
+							<div className="grid gap-5">
+								{featured.slice(1, 3).map((instructor) => (
+									<FeaturedInstructor
+										key={instructor.id}
+										instructor={instructor}
+									/>
+								))}
+							</div>
+						</div>
+					) : null}
+				</section>
+
+				{/* Benefits */}
+				<section className="border-y border-slate-200 bg-white">
+					<div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+						<div className="mb-10 max-w-2xl">
+							<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
+								Vì sao nên học cùng mentor
+							</p>
+							<h2 className="mt-2 text-3xl font-semibold text-slate-900">
+								Học đúng hướng, tiến bộ nhanh hơn
+							</h2>
+						</div>
+
+						<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
+							<BenefitCard
+								icon={<BriefcaseBusiness size={20} />}
+								title="Kinh nghiệm thực chiến"
+								description="Mentor mang đến góc nhìn từ dự án thực tế, giúp bạn hiểu cách áp dụng kiến thức vào công việc."
+							/>
+							<BenefitCard
+								icon={<Users size={20} />}
+								title="Đồng hành cá nhân"
+								description="Không học một mình. Bạn có người định hướng, phản hồi và giúp tháo gỡ những chỗ đang vướng."
+							/>
+							<BenefitCard
+								icon={<BookOpen size={20} />}
+								title="Lộ trình rõ ràng"
+								description="Từ nền tảng đến nâng cao, mỗi bước học đều có mục tiêu rõ để tránh lan man và mất phương hướng."
+							/>
+							<BenefitCard
+								icon={<BadgeCheck size={20} />}
+								title="Tập trung vào kết quả"
+								description="Mục tiêu không chỉ là học xong bài, mà là làm được sản phẩm, hiểu được bản chất và tiến gần hơn tới công việc thực tế."
+							/>
 						</div>
 					</div>
-				) : null}
-			</section>
+				</section>
 
-			{/* Benefits */}
-			<section className="border-y border-slate-200 bg-white">
-				<div className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
+				{/* Journey */}
+				<section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
 					<div className="mb-10 max-w-2xl">
 						<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
-							Vì sao nên học cùng mentor
+							Hành trình học tập
 						</p>
 						<h2 className="mt-2 text-3xl font-semibold text-slate-900">
-							Học đúng hướng, tiến bộ nhanh hơn
+							Từ người mới đến người sẵn sàng làm dự án
 						</h2>
 					</div>
 
 					<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-						<BenefitCard
-							icon={<BriefcaseBusiness size={20} />}
-							title="Kinh nghiệm thực chiến"
-							description="Mentor mang đến góc nhìn từ dự án thực tế, giúp bạn hiểu cách áp dụng kiến thức vào công việc."
+						<JourneyStep
+							index="01"
+							title="Chọn định hướng"
+							description="Tìm mentor và lộ trình phù hợp với mục tiêu của bạn."
 						/>
-						<BenefitCard
-							icon={<Users size={20} />}
-							title="Đồng hành cá nhân"
-							description="Không học một mình. Bạn có người định hướng, phản hồi và giúp tháo gỡ những chỗ đang vướng."
+						<JourneyStep
+							index="02"
+							title="Học có dẫn dắt"
+							description="Tiếp cận kiến thức theo cách rõ ràng, dễ theo dõi và có hệ thống."
 						/>
-						<BenefitCard
-							icon={<BookOpen size={20} />}
-							title="Lộ trình rõ ràng"
-							description="Từ nền tảng đến nâng cao, mỗi bước học đều có mục tiêu rõ để tránh lan man và mất phương hướng."
+						<JourneyStep
+							index="03"
+							title="Thực hành dự án"
+							description="Biến lý thuyết thành kỹ năng thông qua bài tập và sản phẩm thực tế."
 						/>
-						<BenefitCard
-							icon={<BadgeCheck size={20} />}
-							title="Tập trung vào kết quả"
-							description="Mục tiêu không chỉ là học xong bài, mà là làm được sản phẩm, hiểu được bản chất và tiến gần hơn tới công việc thực tế."
+						<JourneyStep
+							index="04"
+							title="Nhận phản hồi"
+							description="Cải thiện liên tục với góp ý từ mentor để tiến bộ nhanh hơn."
 						/>
 					</div>
-				</div>
-			</section>
+				</section>
 
-			{/* Journey */}
-			<section className="mx-auto max-w-7xl px-6 py-16 lg:px-8">
-				<div className="mb-10 max-w-2xl">
-					<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
-						Hành trình học tập
-					</p>
-					<h2 className="mt-2 text-3xl font-semibold text-slate-900">
-						Từ người mới đến người sẵn sàng làm dự án
-					</h2>
-				</div>
-
-				<div className="grid gap-5 md:grid-cols-2 xl:grid-cols-4">
-					<JourneyStep
-						index="01"
-						title="Chọn định hướng"
-						description="Tìm mentor và lộ trình phù hợp với mục tiêu của bạn."
-					/>
-					<JourneyStep
-						index="02"
-						title="Học có dẫn dắt"
-						description="Tiếp cận kiến thức theo cách rõ ràng, dễ theo dõi và có hệ thống."
-					/>
-					<JourneyStep
-						index="03"
-						title="Thực hành dự án"
-						description="Biến lý thuyết thành kỹ năng thông qua bài tập và sản phẩm thực tế."
-					/>
-					<JourneyStep
-						index="04"
-						title="Nhận phản hồi"
-						description="Cải thiện liên tục với góp ý từ mentor để tiến bộ nhanh hơn."
-					/>
-				</div>
-			</section>
-
-			{/* Mentor list */}
-			<section
-				id="mentor-list"
-				className="mx-auto max-w-7xl px-6 pb-16 lg:px-8"
-			>
-				<div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-					<div>
-						<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
-							Danh sách mentor
-						</p>
-						<h2 className="mt-2 text-3xl font-semibold text-slate-900">
-							Khám phá đội ngũ giảng viên
-						</h2>
-					</div>
-
-					{totalInstructors > 0 && (
-						<p className="text-sm text-slate-500">
-							<span className="font-semibold text-slate-900">
-								{totalInstructors}
-							</span>{" "}
-							mentor đang đồng hành cùng học viên
-						</p>
-					)}
-				</div>
-
-				{isLoading ? (
-					<div className="flex justify-center py-20">
-						<Loader />
-					</div>
-				) : instructors.length === 0 ? (
-					<div className="rounded-3xl border border-dashed border-slate-300 bg-white py-16 text-center text-sm text-slate-500">
-						Chưa có giảng viên nào.
-					</div>
-				) : (
-					<>
-						<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
-							{instructors.map((instructor) => (
-								<InstructorCard key={instructor.id} instructor={instructor} />
-							))}
+				{/* Mentor list */}
+				<section
+					id="mentor-list"
+					className="mx-auto max-w-7xl px-6 pb-16 lg:px-8"
+				>
+					<div className="mb-8 flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
+						<div>
+							<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
+								Danh sách mentor
+							</p>
+							<h2 className="mt-2 text-3xl font-semibold text-slate-900">
+								Khám phá đội ngũ giảng viên
+							</h2>
 						</div>
 
-						{totalPages > 1 && (
-							<div className="mt-12 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
-								<p className="text-sm text-slate-500">
-									Trang {page + 1} / {totalPages}
-								</p>
-
-								<div className="flex gap-2">
-									<button
-										onClick={() => setPage((p) => Math.max(0, p - 1))}
-										disabled={page === 0}
-										className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-35"
-									>
-										<ChevronLeft size={16} />
-										Trước
-									</button>
-
-									<button
-										onClick={() =>
-											setPage((p) => Math.min(totalPages - 1, p + 1))
-										}
-										disabled={page >= totalPages - 1}
-										className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-35"
-									>
-										Sau
-										<ChevronRight size={16} />
-									</button>
-								</div>
-							</div>
+						{totalInstructors > 0 && (
+							<p className="text-sm text-slate-500">
+								<span className="font-semibold text-slate-900">
+									{totalInstructors}
+								</span>{" "}
+								mentor đang đồng hành cùng học viên
+							</p>
 						)}
-					</>
-				)}
-			</section>
+					</div>
 
-			{/* CTA */}
-			<section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
-				<div className="overflow-hidden rounded-[32px] bg-slate-950 px-8 py-12 md:px-12 md:py-14">
-					<div className="max-w-3xl">
-						<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-300">
-							Sẵn sàng bắt đầu?
-						</p>
-						<h2 className="mt-3 text-3xl font-semibold leading-tight text-white md:text-4xl">
-							Tìm mentor phù hợp và bắt đầu hành trình học tập của bạn ngay hôm
-							nay
-						</h2>
-						<p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
-							Khám phá các khóa học, gặp gỡ mentor và xây nền tảng vững chắc để
-							tiến xa hơn trong lĩnh vực công nghệ.
-						</p>
+					{isLoading ? (
+						<div className="flex justify-center py-20">
+							<Loader />
+						</div>
+					) : instructors.length === 0 ? (
+						<div className="rounded-3xl border border-dashed border-slate-300 bg-white py-16 text-center text-sm text-slate-500">
+							Chưa có giảng viên nào.
+						</div>
+					) : (
+						<>
+							<div className="grid grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-3">
+								{instructors.map((instructor) => (
+									<InstructorCard key={instructor.id} instructor={instructor} />
+								))}
+							</div>
 
-						<div className="mt-8 flex flex-wrap gap-4">
-							<a
-								href="/courses"
-								className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
-							>
-								Xem khóa học
-								<ArrowRight size={16} />
-							</a>
-							<a
-								href="/community"
-								className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
-							>
-								Tham gia cộng đồng
-							</a>
+							{totalPages > 1 && (
+								<div className="mt-12 flex flex-col gap-4 border-t border-slate-200 pt-6 sm:flex-row sm:items-center sm:justify-between">
+									<p className="text-sm text-slate-500">
+										Trang {page + 1} / {totalPages}
+									</p>
+
+									<div className="flex gap-2">
+										<button
+											onClick={() => setPage((p) => Math.max(0, p - 1))}
+											disabled={page === 0}
+											className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-35"
+										>
+											<ChevronLeft size={16} />
+											Trước
+										</button>
+
+										<button
+											onClick={() =>
+												setPage((p) => Math.min(totalPages - 1, p + 1))
+											}
+											disabled={page >= totalPages - 1}
+											className="inline-flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-4 py-2.5 text-sm font-medium text-slate-700 transition hover:border-slate-300 hover:text-slate-900 disabled:cursor-not-allowed disabled:opacity-35"
+										>
+											Sau
+											<ChevronRight size={16} />
+										</button>
+									</div>
+								</div>
+							)}
+						</>
+					)}
+				</section>
+
+				{/* CTA */}
+				<section className="mx-auto max-w-7xl px-6 pb-20 lg:px-8">
+					<div className="overflow-hidden rounded-[32px] bg-slate-950 px-8 py-12 md:px-12 md:py-14">
+						<div className="max-w-3xl">
+							<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-300">
+								Sẵn sàng bắt đầu?
+							</p>
+							<h2 className="mt-3 text-3xl font-semibold leading-tight text-white md:text-4xl">
+								Tìm mentor phù hợp và bắt đầu hành trình học tập của bạn ngay
+								hôm nay
+							</h2>
+							<p className="mt-4 text-sm leading-7 text-slate-300 md:text-base">
+								Khám phá các khóa học, gặp gỡ mentor và xây nền tảng vững chắc
+								để tiến xa hơn trong lĩnh vực công nghệ.
+							</p>
+
+							<div className="mt-8 flex flex-wrap gap-4">
+								<a
+									href="/courses"
+									className="inline-flex items-center gap-2 rounded-2xl bg-white px-5 py-3 text-sm font-semibold text-slate-900 transition hover:bg-slate-100"
+								>
+									Xem khóa học
+									<ArrowRight size={16} />
+								</a>
+								<a
+									href="/community"
+									className="inline-flex items-center gap-2 rounded-2xl border border-white/15 bg-white/10 px-5 py-3 text-sm font-semibold text-white transition hover:bg-white/15"
+								>
+									Tham gia cộng đồng
+								</a>
+							</div>
 						</div>
 					</div>
-				</div>
-			</section>
-		</div>
+				</section>
+			</div>
+		</>
 	);
 }

@@ -1,5 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
+import PageMeta from "@/shared/components/seo/page-meta";
 import { SymbolAnimationMode } from "../../data";
 import { SymbolBackground } from "../../components/SymbolBackground";
 import { BrandLogo } from "../../components/BrandLogo";
@@ -31,7 +32,10 @@ export default function MatchingGameHomePage() {
 
 	return (
 		<body className="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-300 overflow-x-hidden min-h-screen">
-			<title>Trang chủ</title>
+			<PageMeta
+				title="Trò chơi ghép cặp - Bit Learning"
+				description="Bắt đầu hành trình học tin học qua trò chơi ghép cặp tương tác trên Bit Learning."
+			/>
 			{/* Background Pattern Overlay */}
 			<SymbolBackground animationMode={symbolAnimation} size="lg" />
 
