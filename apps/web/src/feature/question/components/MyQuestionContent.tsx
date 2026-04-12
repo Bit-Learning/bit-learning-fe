@@ -20,6 +20,7 @@ import { Pagination } from "@/shared/components/Pagination";
 import { useNavigate } from "@tanstack/react-router";
 import { getDifficultyBadge, getStatusBadge, getTypeBadge } from "../utils/question.utils";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
+import { DetailModal } from "./DetailModal";
 
 const PAGE_SIZE = 20;
 
@@ -40,8 +41,9 @@ const MyQuestionsContent: React.FC = () => {
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deletingQuestion, setDeletingQuestion] = useState<QuestionResponse | null>(null);
+  const [viewingQuestion, setViewingQuestion] = useState<QuestionResponse | null>(null);
 
-  const { data: allQuestionsData, isLoading } = useMyQuestionsAll();
+  const { data: allQuestionsData, isLoading, refetch } = useMyQuestionsAll();
   const allQuestions = allQuestionsData ?? [];
 
   const deleteQuestion = useDeleteQuestion();
@@ -138,7 +140,7 @@ const MyQuestionsContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto p-8">
-        <div className="mb-8">
+        <div className="mb-6">
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Danh sách câu hỏi của tôi</h1>
@@ -353,7 +355,7 @@ const MyQuestionsContent: React.FC = () => {
                   {pagedQuestions.map((question: QuestionResponse, index: number) => (
                     <tr
                       key={question.id}
-                      onClick={() => navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } })}
+                      onClick={() => setViewingQuestion(question)}
                       className={cn(
                         "cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors",
                         selectedQuestions.includes(question.id) && "bg-blue-50",
@@ -394,10 +396,10 @@ const MyQuestionsContent: React.FC = () => {
                             title="Xem"
                             onClick={(e) => {
                               e.stopPropagation();
-                              navigate({ to: "/mentor/question/$id", params: { id: question.id.toString() } });
+                              setViewingQuestion(question);
                             }}
                           >
-                            <Eye className="h-5 w-5" />
+                            <Eye className="h-6 w-6" />
                           </button>
                           {question.approvalStatus === ApprovalStatus.NONE && (
                             <>
@@ -409,7 +411,7 @@ const MyQuestionsContent: React.FC = () => {
                                   navigate({ to: "/mentor/question/$id/edit", params: { id: question.id.toString() } });
                                 }}
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-6 w-6" />
                               </button>
                               <button
                                 className="cursor-pointer p-2 text-slate-600 hover:text-red-600 transition-colors"
@@ -419,7 +421,7 @@ const MyQuestionsContent: React.FC = () => {
                                   setDeletingQuestion(question);
                                 }}
                               >
-                                <Trash2 className="h-5 w-5" />
+                                <Trash2 className="h-6 w-6" />
                               </button>
                             </>
                           )}
@@ -459,6 +461,10 @@ const MyQuestionsContent: React.FC = () => {
             : undefined
         }
       />
+
+      {viewingQuestion && (
+        <DetailModal question={viewingQuestion} onClose={() => setViewingQuestion(null)} onDeleted={() => refetch()} />
+      )}
     </div>
   );
 };
