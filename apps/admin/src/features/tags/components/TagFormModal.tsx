@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import type React from "react";
+import { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -93,7 +94,7 @@ const TagFormModal: React.FC<TagFormModalProps> = ({ open, onClose, tag }) => {
 						<Button
 							type="submit"
 							disabled={isPending}
-							className="bg-primary text-white hover:bg-blue-700"
+							className="bg-primary text-primary-foreground hover:bg-primary/90"
 						>
 							{isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
 							{isEdit ? "Lưu thay đổi" : "Tạo tag"}

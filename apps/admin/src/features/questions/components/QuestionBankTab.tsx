@@ -3,9 +3,20 @@ import { Eye, Trash2, Calendar, Search as SearchIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Input } from "@/components/ui/input";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+	Table,
+	TableBody,
+	TableCell,
+	TableHead,
+	TableHeader,
+	TableRow,
+} from "@/components/ui/table";
 import { useSearchQuestions, useDeleteQuestion } from "../queries/useQuestion";
-import { QuestionLevel, QuestionType, type QuestionResponse } from "../types/question.type";
+import {
+	QuestionLevel,
+	QuestionType,
+	type QuestionResponse,
+} from "../types/question.type";
 import { QuestionDetailDialog } from "../components/QuestionDetailDialog";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { Header } from "@/layout/header";
@@ -18,203 +29,229 @@ import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 
 export function QuestionBankTab() {
-  const [keyword, setKeyword] = useState("");
-  const [searchValue, setSearchValue] = useState("");
-  const [page, setPage] = useState(0);
-  const [viewQuestion, setViewQuestion] = useState<QuestionResponse | null>(null);
-  const [deleteQuestion, setDeleteQuestion] = useState<QuestionResponse | null>(null);
+	const [keyword, setKeyword] = useState("");
+	const [searchValue, setSearchValue] = useState("");
+	const [page, setPage] = useState(0);
+	const [viewQuestion, setViewQuestion] = useState<QuestionResponse | null>(
+		null,
+	);
+	const [deleteQuestion, setDeleteQuestion] = useState<QuestionResponse | null>(
+		null,
+	);
 
-  const { data: response, isLoading } = useSearchQuestions({
-    keyword,
-    page,
-    size: 20,
-  });
+	const { data: response, isLoading } = useSearchQuestions({
+		keyword,
+		page,
+		size: 20,
+	});
 
-  const deleteQuestionMutation = useDeleteQuestion();
+	const deleteQuestionMutation = useDeleteQuestion();
 
-  const questions = response?.data || [];
-  const pagination = response?.page;
+	const questions = response?.data || [];
+	const pagination = response?.page;
 
-  const handleSearch = () => {
-    setKeyword(searchValue);
-    setPage(0);
-  };
+	const handleSearch = () => {
+		setKeyword(searchValue);
+		setPage(0);
+	};
 
-  const handleDelete = () => {
-    if (!deleteQuestion) return;
-    deleteQuestionMutation.mutate(deleteQuestion.id, {
-      onSuccess: () => {
-        setDeleteQuestion(null);
-      },
-    });
-  };
+	const handleDelete = () => {
+		if (!deleteQuestion) return;
+		deleteQuestionMutation.mutate(deleteQuestion.id, {
+			onSuccess: () => {
+				setDeleteQuestion(null);
+			},
+		});
+	};
 
-  const getDifficultyBadge = (level: QuestionLevel) => {
-    const config = {
-      [QuestionLevel.EASY]: { variant: "default" as const, label: "Dễ", className: "bg-green-100 text-green-700" },
-      [QuestionLevel.MEDIUM]: {
-        variant: "secondary" as const,
-        label: "Trung bình",
-        className: "bg-yellow-100 text-yellow-700",
-      },
-      [QuestionLevel.HARD]: {
-        variant: "destructive" as const,
-        label: "Khó",
-        className: "bg-red-100 text-red-700",
-      },
-    };
-    const { label, className } = config[level];
-    return <Badge className={className}>{label}</Badge>;
-  };
+	const getDifficultyBadge = (level: QuestionLevel) => {
+		const config = {
+			[QuestionLevel.EASY]: {
+				variant: "default" as const,
+				label: "Dễ",
+				className: "bg-green-100 text-green-700",
+			},
+			[QuestionLevel.MEDIUM]: {
+				variant: "secondary" as const,
+				label: "Trung bình",
+				className: "bg-yellow-100 text-yellow-700",
+			},
+			[QuestionLevel.HARD]: {
+				variant: "destructive" as const,
+				label: "Khó",
+				className: "bg-red-100 text-red-700",
+			},
+		};
+		const { label, className } = config[level];
+		return <Badge className={className}>{label}</Badge>;
+	};
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
-      day: "2-digit",
-      month: "2-digit",
-      year: "numeric",
-    });
-  };
+	const formatDate = (dateString: string) => {
+		return new Date(dateString).toLocaleDateString("vi-VN", {
+			day: "2-digit",
+			month: "2-digit",
+			year: "numeric",
+		});
+	};
 
-  if (isLoading)
-    return (
-      <>
-        <Header fixed>
-          <Search />
-          <div className="ms-auto flex items-center space-x-4">
-            <ThemeSwitch />
-            <ConfigDrawer />
-            <ProfileDropdown />
-          </div>
-        </Header>
+	if (isLoading)
+		return (
+			<>
+				<Header />
 
-        <Main className="flex flex-1 flex-col gap-6 p-8">
-          <Card>
-            <CardHeader>
-              <Skeleton className="h-8 w-64" />
-              <Skeleton className="h-4 w-96" />
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-3">
-                {[1, 2, 3, 4, 5].map((i) => (
-                  <Skeleton key={i} className="h-16 w-full" />
-                ))}
-              </div>
-            </CardContent>
-          </Card>
-        </Main>
-      </>
-    );
+				<div className="flex flex-1 flex-col gap-6 p-8">
+					<Card>
+						<CardHeader>
+							<Skeleton className="h-8 w-64" />
+							<Skeleton className="h-4 w-96" />
+						</CardHeader>
+						<CardContent>
+							<div className="space-y-3">
+								{[1, 2, 3, 4, 5].map((i) => (
+									<Skeleton key={i} className="h-16 w-full" />
+								))}
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+			</>
+		);
 
-  return (
-    <div className="space-y-4">
-      <div className="flex gap-2">
-        <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm câu hỏi theo nội dung..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="pl-9"
-          />
-        </div>
-        <Button onClick={handleSearch}>Tìm kiếm</Button>
-      </div>
+	return (
+		<div className="space-y-4">
+			<div className="flex gap-2">
+				<div className="relative flex-1">
+					<SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+					<Input
+						placeholder="Tìm kiếm câu hỏi theo nội dung..."
+						value={searchValue}
+						onChange={(e) => setSearchValue(e.target.value)}
+						onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+						className="pl-9"
+					/>
+				</div>
+				<Button onClick={handleSearch}>Tìm kiếm</Button>
+			</div>
 
-      {questions.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg">
-          <SearchIcon className="h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">{keyword ? "Không tìm thấy câu hỏi" : "Chưa có câu hỏi nào"}</h3>
-          <p className="text-sm text-muted-foreground">
-            {keyword ? "Thử tìm kiếm với từ khóa khác" : "Ngân hàng câu hỏi đang trống"}
-          </p>
-        </div>
-      ) : (
-        <div className="rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Nội dung câu hỏi</TableHead>
-                <TableHead>Mức độ</TableHead>
-                <TableHead>Loại</TableHead>
-                <TableHead>Ngày tạo</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {questions.map((question: QuestionResponse, index: number) => (
-                <TableRow key={index}>
-                  <TableCell>
-                    <div>
-                      <p className="font-medium line-clamp-2">{question.content}</p>
-                    </div>
-                  </TableCell>
-                  <TableCell>{getDifficultyBadge(question.questionLevel)}</TableCell>
-                  <TableCell>
-                    <span className="text-sm">
-                      {question.questionType === QuestionType.MCQ ? "Trắc nghiệm" : "Tự luận"}
-                    </span>
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                      <Calendar className="h-3 w-3" />
-                      {formatDate(question.createdAt)}
-                    </div>
-                  </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => setViewQuestion(question)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setDeleteQuestion(question)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+			{questions.length === 0 ? (
+				<div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg">
+					<SearchIcon className="h-16 w-16 text-muted-foreground mb-4" />
+					<h3 className="text-lg font-semibold mb-2">
+						{keyword ? "Không tìm thấy câu hỏi" : "Chưa có câu hỏi nào"}
+					</h3>
+					<p className="text-sm text-muted-foreground">
+						{keyword
+							? "Thử tìm kiếm với từ khóa khác"
+							: "Ngân hàng câu hỏi đang trống"}
+					</p>
+				</div>
+			) : (
+				<div className="rounded-md border">
+					<Table>
+						<TableHeader>
+							<TableRow>
+								<TableHead>Nội dung câu hỏi</TableHead>
+								<TableHead>Mức độ</TableHead>
+								<TableHead>Loại</TableHead>
+								<TableHead>Ngày tạo</TableHead>
+								<TableHead className="text-right">Thao tác</TableHead>
+							</TableRow>
+						</TableHeader>
+						<TableBody>
+							{questions.map((question: QuestionResponse, index: number) => (
+								<TableRow key={index}>
+									<TableCell>
+										<div>
+											<p className="font-medium line-clamp-2">
+												{question.content}
+											</p>
+										</div>
+									</TableCell>
+									<TableCell>
+										{getDifficultyBadge(question.questionLevel)}
+									</TableCell>
+									<TableCell>
+										<span className="text-sm">
+											{question.questionType === QuestionType.MCQ
+												? "Trắc nghiệm"
+												: "Tự luận"}
+										</span>
+									</TableCell>
+									<TableCell>
+										<div className="flex items-center gap-1 text-sm text-muted-foreground">
+											<Calendar className="h-3 w-3" />
+											{formatDate(question.createdAt)}
+										</div>
+									</TableCell>
+									<TableCell className="text-right">
+										<div className="flex items-center justify-end gap-1">
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => setViewQuestion(question)}
+											>
+												<Eye className="h-4 w-4" />
+											</Button>
+											<Button
+												variant="ghost"
+												size="sm"
+												onClick={() => setDeleteQuestion(question)}
+												className="text-red-600 hover:text-red-700 hover:bg-red-50"
+											>
+												<Trash2 className="h-4 w-4" />
+											</Button>
+										</div>
+									</TableCell>
+								</TableRow>
+							))}
+						</TableBody>
+					</Table>
+				</div>
+			)}
 
-      {pagination && pagination.totalPages > 1 && (
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground">
-            Hiển thị {page * 20 + 1} đến {Math.min((page + 1) * 20, pagination.totalElements)} trong{" "}
-            {pagination.totalElements} câu hỏi
-          </p>
-          <div className="flex items-center gap-2">
-            <Button variant="outline" size="sm" disabled={pagination.first} onClick={() => setPage((p) => p - 1)}>
-              Trước
-            </Button>
-            <Button variant="outline" size="sm" disabled={pagination.last} onClick={() => setPage((p) => p + 1)}>
-              Sau
-            </Button>
-          </div>
-        </div>
-      )}
+			{pagination && pagination.totalPages > 1 && (
+				<div className="flex items-center justify-between">
+					<p className="text-sm text-muted-foreground">
+						Hiển thị {page * 20 + 1} đến{" "}
+						{Math.min((page + 1) * 20, pagination.totalElements)} trong{" "}
+						{pagination.totalElements} câu hỏi
+					</p>
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={pagination.first}
+							onClick={() => setPage((p) => p - 1)}
+						>
+							Trước
+						</Button>
+						<Button
+							variant="outline"
+							size="sm"
+							disabled={pagination.last}
+							onClick={() => setPage((p) => p + 1)}
+						>
+							Sau
+						</Button>
+					</div>
+				</div>
+			)}
 
-      <QuestionDetailDialog
-        question={viewQuestion}
-        open={!!viewQuestion}
-        onOpenChange={(open: any) => !open && setViewQuestion(null)}
-      />
+			<QuestionDetailDialog
+				question={viewQuestion}
+				open={!!viewQuestion}
+				onOpenChange={(open: any) => !open && setViewQuestion(null)}
+			/>
 
-      <DeleteConfirmModal
-        open={!!deleteQuestion}
-        onClose={() => setDeleteQuestion(null)}
-        onConfirm={handleDelete}
-        title="Xác nhận xóa câu hỏi"
-        description={`Bạn có chắc chắn muốn xóa câu hỏi "${deleteQuestion?.content}"? Hành động này không thể hoàn tác.`}
-        isPending={deleteQuestionMutation.isPending}
-        confirmLabel="Xóa câu hỏi"
-      />
-    </div>
-  );
+			<DeleteConfirmModal
+				open={!!deleteQuestion}
+				onClose={() => setDeleteQuestion(null)}
+				onConfirm={handleDelete}
+				title="Xác nhận xóa câu hỏi"
+				description={`Bạn có chắc chắn muốn xóa câu hỏi "${deleteQuestion?.content}"? Hành động này không thể hoàn tác.`}
+				isPending={deleteQuestionMutation.isPending}
+				confirmLabel="Xóa câu hỏi"
+			/>
+		</div>
+	);
 }

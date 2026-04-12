@@ -21,7 +21,7 @@ export const createTagsColumns = ({
 			<DataTableColumnHeader column={column} title="Tên tag" />
 		),
 		cell: ({ row }) => (
-			<span className="font-medium text-gray-800">{row.original.name}</span>
+			<span className="font-medium text-foreground">{row.original.name}</span>
 		),
 	},
 	{
@@ -32,7 +32,7 @@ export const createTagsColumns = ({
 		cell: ({ row }) => {
 			const createdAt = row.original.createdAt;
 			return (
-				<span className="text-xs text-gray-500">
+				<span className="text-xs text-muted-foreground">
 					{new Date(createdAt).toLocaleDateString("vi-VN")}
 				</span>
 			);
@@ -48,7 +48,7 @@ export const createTagsColumns = ({
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 w-8 p-0 text-gray-400 hover:text-blue-600"
+						className="h-8 w-8 p-0 text-muted-foreground hover:text-primary"
 						onClick={() => onEdit(tag)}
 					>
 						<Pencil className="h-3.5 w-3.5" />
@@ -56,7 +56,7 @@ export const createTagsColumns = ({
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 w-8 p-0 text-gray-400 hover:text-red-600"
+						className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
 						onClick={() => onDelete(tag)}
 					>
 						<Trash2 className="h-3.5 w-3.5" />

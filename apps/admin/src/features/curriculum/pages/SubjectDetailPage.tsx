@@ -112,7 +112,7 @@ const SubjectDetailPage: React.FC = () => {
 	return (
 		<>
 			<Header />
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<div className="mb-6">
 					<Button
 						variant="link"
@@ -253,7 +253,7 @@ const SubjectDetailPage: React.FC = () => {
 					itemName={deleteModal.item?.name}
 					isPending={deletingChapter || deletingLesson}
 				/>
-			</Main>
+			</div>
 		</>
 	);
 };

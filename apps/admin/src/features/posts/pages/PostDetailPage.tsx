@@ -134,7 +134,7 @@ export const PostDetailPage: React.FC = () => {
 		<>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<Button
 					variant="link"
 					className="mb-6"
@@ -481,7 +481,7 @@ export const PostDetailPage: React.FC = () => {
 						</AlertDialogFooter>
 					</AlertDialogContent>
 				</AlertDialog>
-			</Main>
+			</div>
 		</>
 	);
 };

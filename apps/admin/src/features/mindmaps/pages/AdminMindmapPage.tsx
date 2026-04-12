@@ -165,7 +165,7 @@ export default function AdminMindmapPage() {
 		<>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex items-center justify-between">
 					<div>
 						<h1 className="text-2xl font-bold">Quản lý sơ đồ tư duy</h1>
@@ -338,7 +338,7 @@ export default function AdminMindmapPage() {
 						/>
 					</TabsContent>
 				</Tabs>
-			</Main>
+			</div>
 		</>
 	);
 }

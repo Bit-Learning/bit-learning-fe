@@ -112,15 +112,9 @@ const CurriculumListPage: React.FC = () => {
 	if (loadingCurriculums) {
 		return (
 			<>
-				<Header fixed>
-					<Search />
-					<div className="ms-auto flex items-center space-x-4">
-						<ThemeSwitch />
-						<ConfigDrawer />
-						<ProfileDropdown />
-					</div>
-				</Header>
-				<Main className="flex flex-1 flex-col gap-6 p-8">
+				<Header />
+
+				<div className="flex flex-1 flex-col gap-6 p-8">
 					<div className="flex justify-between items-center">
 						<Skeleton className="h-8 w-56" />
 						<Skeleton className="h-9 w-36" />
@@ -132,7 +126,7 @@ const CurriculumListPage: React.FC = () => {
 					{[1, 2, 3].map((i) => (
 						<Skeleton key={i} className="h-20 w-full rounded-xl" />
 					))}
-				</Main>
+				</div>
 			</>
 		);
 	}
@@ -141,7 +135,7 @@ const CurriculumListPage: React.FC = () => {
 		<>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				{/* ── Page header ── */}
 				<div className="flex items-start justify-between gap-4">
 					<div>
@@ -396,7 +390,7 @@ const CurriculumListPage: React.FC = () => {
 					itemName={deleteModal.item?.name}
 					isPending={deletingCurriculum || deletingSubject}
 				/>
-			</Main>
+			</div>
 		</>
 	);
 };

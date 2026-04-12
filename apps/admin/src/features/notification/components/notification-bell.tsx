@@ -139,11 +139,11 @@ export function NotificationBell() {
 				onClick={() => setIsOpen((prev) => !prev)}
 				className={cn(
 					"relative rounded-xl p-2 transition-all duration-200",
-					"hover:bg-white/50 backdrop-blur-sm",
-					isOpen && "bg-white/50",
+					"backdrop-blur-sm hover:bg-slate-100/80 dark:hover:bg-slate-800/70",
+					isOpen && "bg-slate-100/80 dark:bg-slate-800/70",
 				)}
 			>
-				<Bell className="h-6 w-6 text-slate-600" />
+				<Bell className="h-6 w-6 text-slate-600 dark:text-slate-300" />
 				{localUnreadCount > 0 && (
 					<span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-red-500 px-1 text-[11px] font-medium text-white">
 						{localUnreadCount > 99 ? "99+" : localUnreadCount}
@@ -152,11 +152,14 @@ export function NotificationBell() {
 			</button>
 
 			{isOpen && (
-				<div className="absolute right-0 top-full z-50 mt-2 w-80 max-h-96 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 shadow-[0_8px_32px_rgba(15,23,42,0.16)] backdrop-blur-xl">
-					<div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3">
-						<h3 className="text-sm font-semibold text-slate-900">Thông báo</h3>
+				<div className="absolute right-0 top-full z-50 mt-2 max-h-96 w-80 overflow-hidden rounded-2xl border border-slate-200 bg-white/95 shadow-[0_8px_32px_rgba(15,23,42,0.16)] backdrop-blur-xl dark:border-slate-800 dark:bg-slate-950/95 dark:shadow-[0_8px_32px_rgba(2,6,23,0.6)]">
+					<div className="flex items-center justify-between border-b border-slate-200/80 px-4 py-3 dark:border-slate-800/80">
+						<h3 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+							Thông báo
+						</h3>
 						{localUnreadCount > 0 && (
 							<button
+								type="button"
 								onClick={handleMarkAllRead}
 								disabled={markAllAsReadMutation.isPending}
 								className="text-xs font-medium text-sky-600 hover:text-sky-700 disabled:opacity-50"
@@ -169,17 +172,20 @@ export function NotificationBell() {
 					<div className="max-h-80 overflow-y-auto">
 						{recentNotifications.length === 0 ? (
 							<div className="flex flex-col items-center justify-center px-6 py-10 text-center">
-								<Bell className="mb-2 h-10 w-10 text-slate-300" />
-								<p className="text-sm text-slate-500">Chưa có thông báo nào</p>
+								<Bell className="mb-2 h-10 w-10 text-slate-300 dark:text-slate-700" />
+								<p className="text-sm text-slate-500 dark:text-slate-400">
+									Chưa có thông báo nào
+								</p>
 							</div>
 						) : (
 							recentNotifications.map((notif) => (
-								<div
+								<button
 									key={notif.id}
+									type="button"
 									className={cn(
-										"cursor-pointer border-b border-slate-100 px-4 py-3 transition-colors",
-										"hover:bg-slate-50",
-										!notif.isRead && "bg-sky-50/60",
+										"w-full cursor-pointer border-b border-slate-100 px-4 py-3 text-left transition-colors dark:border-slate-800",
+										"hover:bg-slate-50 dark:hover:bg-slate-900/70",
+										!notif.isRead && "bg-sky-50/60 dark:bg-sky-950/30",
 									)}
 									onClick={() => handleNotificationClick(notif)}
 								>
@@ -192,7 +198,9 @@ export function NotificationBell() {
 											<p
 												className={cn(
 													"text-sm font-semibold",
-													!notif.isRead ? "text-slate-900" : "text-slate-600",
+													!notif.isRead
+														? "text-slate-900 dark:text-slate-100"
+														: "text-slate-600 dark:text-slate-300",
 												)}
 											>
 												{notif.title}
@@ -200,29 +208,32 @@ export function NotificationBell() {
 											<p
 												className={cn(
 													"mt-0.5 text-sm line-clamp-2",
-													!notif.isRead ? "text-slate-700" : "text-slate-500",
+													!notif.isRead
+														? "text-slate-700 dark:text-slate-300"
+														: "text-slate-500 dark:text-slate-400",
 												)}
 											>
 												{notif.message}
 											</p>
-											<p className="mt-1 text-xs text-slate-400">
+											<p className="mt-1 text-xs text-slate-400 dark:text-slate-500">
 												{new Date(notif.createdAt).toLocaleString("vi-VN")}
 											</p>
 										</div>
 									</div>
-								</div>
+								</button>
 							))
 						)}
 					</div>
 
 					{recentNotifications.length > 0 && (
-						<div className="border-t border-slate-100 bg-slate-50/80 px-3 py-2.5 text-center">
+						<div className="border-t border-slate-100 bg-slate-50/80 px-3 py-2.5 text-center dark:border-slate-800 dark:bg-slate-900/90">
 							<button
+								type="button"
 								onClick={() => {
 									navigate({ to: "/settings/notifications" });
 									setIsOpen(false);
 								}}
-								className="text-xs font-medium text-sky-700 hover:text-sky-800"
+								className="text-xs font-medium text-sky-700 hover:text-sky-800 dark:text-sky-400 dark:hover:text-sky-300"
 							>
 								Xem tất cả thông báo
 							</button>

@@ -44,11 +44,11 @@ export function Header({
 	return (
 		<header
 			className={cn(
-				"z-40 border-b border-slate-200/70 transition-all duration-300",
+				"z-40 border-b border-slate-200/70 transition-all duration-300 dark:border-slate-800/80",
 				fixed && "sticky top-0",
 				scrolled
-					? "bg-white/90 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl"
-					: "bg-white/80 backdrop-blur-md",
+					? "bg-white/90 shadow-[0_10px_30px_rgba(15,23,42,0.06)] backdrop-blur-xl dark:bg-slate-950/85 dark:shadow-[0_10px_30px_rgba(2,6,23,0.45)]"
+					: "bg-white/80 backdrop-blur-md dark:bg-slate-950/70",
 				className,
 			)}
 			{...props}
@@ -58,17 +58,17 @@ export function Header({
 				<div className="flex shrink-0 items-center gap-3">
 					<div
 						className={cn(
-							"rounded-2xl border border-slate-200 bg-white p-1.5 transition-all duration-300",
+							"rounded-2xl border border-slate-200 bg-white p-1.5 transition-all duration-300 dark:border-slate-800 dark:bg-slate-900",
 							scrolled
-								? "shadow-[0_8px_24px_rgba(15,23,42,0.08)]"
+								? "shadow-[0_8px_24px_rgba(15,23,42,0.08)] dark:shadow-[0_8px_24px_rgba(2,6,23,0.3)]"
 								: "shadow-sm",
 						)}
 					>
-						<SidebarTrigger className="h-9 w-9 rounded-xl border-0 bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-950" />
+						<SidebarTrigger className="h-9 w-9 rounded-xl border-0 bg-transparent text-slate-600 hover:bg-slate-100 hover:text-slate-950 dark:text-slate-300 dark:hover:bg-slate-800 dark:hover:text-white" />
 					</div>
 
 					<div className="hidden md:block">
-						<h1 className="text-lg font-semibold tracking-tight text-slate-900">
+						<h1 className="text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
 							{title}
 						</h1>
 						<div className="space-y-1 text-center">
@@ -80,7 +80,11 @@ export function Header({
 								/>
 							</div>
 						</div>
-						{subtitle && <p className="text-sm text-slate-500">{subtitle}</p>}
+						{subtitle && (
+							<p className="text-sm text-slate-500 dark:text-slate-400">
+								{subtitle}
+							</p>
+						)}
 					</div>
 				</div>
 

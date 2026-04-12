@@ -64,7 +64,7 @@ export const TemplateListPage: React.FC = () => {
 		<>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex items-center justify-between mb-8">
 					<div>
 						<h2 className="text-2xl font-bold text-slate-900">
@@ -206,7 +206,7 @@ export const TemplateListPage: React.FC = () => {
 					onConfirm={handleDelete}
 					onClose={() => setDeleteTarget(undefined)}
 				/>
-			</Main>
+			</div>
 		</>
 	);
 };

@@ -50,7 +50,7 @@ export function Users() {
 		<UsersProvider>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-4 sm:gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-4 sm:gap-6 p-8">
 				<div className="flex flex-wrap items-end justify-between gap-2">
 					<div>
 						<h2 className="text-2xl font-bold tracking-tight">
@@ -82,15 +82,15 @@ export function Users() {
 					)}
 
 					{!isStatsLoading && userStats && (
-						<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 							{[
 								{
-									title: "Tổng người dùng",
+									title: "Tổng số tài khoản trong hệ thống",
 									value: userStats.totalUsers.toLocaleString("vi-VN"),
-									description: "Tổng số tài khoản trong hệ thống",
+									description: "Người dùng đã đăng ký trên nền tảng",
 									icon: UsersIcon,
 									iconColor: "text-purple-600",
-									bgColor: "bg-purple-100 dark:bg-purple-950",
+									bgColor: "bg-purple-100 dark:bg-purple-950/60",
 								},
 								{
 									title: "Người dùng hoạt động",
@@ -98,7 +98,7 @@ export function Users() {
 									description: `${((userStats.activeUsers / userStats.totalUsers) * 100).toFixed(1)}% tổng người dùng`,
 									icon: Activity,
 									iconColor: "text-green-600",
-									bgColor: "bg-green-100 dark:bg-green-950",
+									bgColor: "bg-green-100 dark:bg-green-950/60",
 								},
 								{
 									title: "Người dùng mới (tháng)",
@@ -106,27 +106,39 @@ export function Users() {
 									description: `Hôm nay: +${userStats.newUsersToday.toLocaleString("vi-VN")} · Tuần này: +${userStats.newUsersThisWeek.toLocaleString("vi-VN")}`,
 									icon: UserPlus,
 									iconColor: "text-orange-600",
-									bgColor: "bg-orange-100 dark:bg-orange-950",
+									bgColor: "bg-orange-100 dark:bg-orange-950/60",
 								},
 							].map((stat, index) => {
 								const Icon = stat.icon;
+
 								return (
-									<Card key={index}>
-										<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-											<CardTitle className="text-sm font-medium">
-												{stat.title}
-											</CardTitle>
-											<div className={`rounded-lg p-2 ${stat.bgColor}`}>
+									<div
+										key={index}
+										className="rounded-xl border border-slate-200 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-950"
+									>
+										<div className="flex items-start justify-between gap-3">
+											<div className="min-w-0">
+												<p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+													{stat.title}
+												</p>
+											</div>
+
+											<div
+												className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${stat.bgColor}`}
+											>
 												<Icon className={`h-4 w-4 ${stat.iconColor}`} />
 											</div>
-										</CardHeader>
-										<CardContent>
-											<div className="text-2xl font-bold">{stat.value}</div>
-											<p className="text-muted-foreground text-xs">
+										</div>
+
+										<div className="mt-3">
+											<div className="text-xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
+												{stat.value}
+											</div>
+											<p className="mt-1 line-clamp-2 text-[11px] leading-5 text-slate-500 dark:text-slate-400">
 												{stat.description}
 											</p>
-										</CardContent>
-									</Card>
+										</div>
+									</div>
 								);
 							})}
 						</div>
@@ -162,7 +174,7 @@ export function Users() {
 						navigate={navigate}
 					/>
 				)}
-			</Main>
+			</div>
 
 			<UsersDialogs />
 		</UsersProvider>

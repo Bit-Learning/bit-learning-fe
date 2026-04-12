@@ -199,7 +199,7 @@ export const usersColumns: ColumnDef<User>[] = [
 	{
 		accessorKey: "company",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Công ty" />
+			<DataTableColumnHeader column={column} title="Đơn vị công tác" />
 		),
 		cell: ({ row }) => {
 			const company = row.original.company;
@@ -218,9 +218,11 @@ export const usersColumns: ColumnDef<User>[] = [
 		cell: ({ row }) => {
 			const years = row.original.yearsOfExperience;
 			if (!years) {
-				return <span className="text-xs text-muted-foreground">-</span>;
+				return (
+					<div className="text-center text-xs text-muted-foreground">-</div>
+				);
 			}
-			return <span className="text-xs font-medium">{years} năm</span>;
+			return <div className="text-center text-xs font-medium">{years} năm</div>;
 		},
 	},
 	{
@@ -247,7 +249,7 @@ export const usersColumns: ColumnDef<User>[] = [
 		),
 		cell: ({ row }) => {
 			const students = row.original.studentsCount ?? 0;
-			return <span className="text-xs">{students}</span>;
+			return <div className="text-center text-xs">{students}</div>;
 		},
 	},
 	{
@@ -257,7 +259,7 @@ export const usersColumns: ColumnDef<User>[] = [
 		),
 		cell: ({ row }) => {
 			const courses = row.original.coursesCount ?? 0;
-			return <span className="text-xs">{courses}</span>;
+			return <div className="text-center text-xs">{courses}</div>;
 		},
 	},
 	{

@@ -15,7 +15,7 @@ function GamesRoute() {
 		<>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<div className="mb-6">
 					<h1 className="text-2xl font-bold tracking-tight">
 						Quản lý trò chơi
@@ -44,7 +44,7 @@ function GamesRoute() {
 						<MatchingGameManager />
 					</TabsContent>
 				</Tabs>
-			</Main>
+			</div>
 		</>
 	);
 }

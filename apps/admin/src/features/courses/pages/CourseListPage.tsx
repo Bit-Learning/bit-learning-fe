@@ -82,7 +82,7 @@ export const CourseListPage: React.FC = () => {
 		<>
 			<Header fixed />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex flex-wrap items-end justify-between gap-2 mb-6">
 					<div>
 						<h1 className="text-2xl font-bold">Khóa học của tôi</h1>
@@ -185,7 +185,7 @@ export const CourseListPage: React.FC = () => {
 					isPending={hideMutation.isPending}
 					confirmLabel="Xóa"
 				/>
-			</Main>
+			</div>
 		</>
 	);
 };

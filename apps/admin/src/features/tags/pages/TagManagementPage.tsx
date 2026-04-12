@@ -1,7 +1,9 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
 import { Loader2, Plus, Tag } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Card } from "@/components/ui/card";
 import DeleteConfirmModal from "@/components/DeleteConfirmModal";
 import { Header } from "@/layout/header";
 import { Main } from "@/layout/main";
@@ -40,32 +42,34 @@ const TagManagementPage: React.FC = () => {
 		<>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex items-center justify-between">
 					<div className="flex items-center gap-3">
 						<div>
-							<h1 className="text-2xl font-bold text-gray-900">Quản lý Tags</h1>
-							<p className="text-sm text-gray-500">
+							<h1 className="text-2xl font-bold text-foreground">
+								Quản lý Tags
+							</h1>
+							<p className="text-sm text-muted-foreground">
 								Tạo và quản lý tags cho bài tập lập trình
 							</p>
 						</div>
 					</div>
 					<Button
 						onClick={() => setFormModal({ open: true })}
-						className="bg-primary text-white hover:bg-blue-700"
+						className="bg-primary text-primary-foreground hover:bg-primary/90"
 					>
 						<Plus className="mr-1.5 h-4 w-4" />
 						Tạo mới
 					</Button>
 				</div>
 
-				<div>
-					<div className="flex items-center justify-start px-5 py-3">
-						<span className="text-sm font-medium text-gray-700">
+				<Card className="gap-0 overflow-hidden border shadow-sm">
+					<div className="flex items-center justify-start border-b bg-muted/30 px-5 py-3">
+						<span className="text-sm font-medium text-foreground">
 							Tổng số tags:
 						</span>
 						{!isLoading && (
-							<Badge variant="secondary" className="text-xs">
+							<Badge variant="secondary" className="ml-2 text-xs">
 								{tags.length} tags
 							</Badge>
 						)}
@@ -73,15 +77,16 @@ const TagManagementPage: React.FC = () => {
 
 					{isLoading ? (
 						<div className="flex items-center justify-center py-12">
-							<Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+							<Loader2 className="h-6 w-6 animate-spin text-primary" />
 						</div>
 					) : tags.length === 0 ? (
 						<div className="py-12 text-center">
-							<Tag className="mx-auto mb-3 h-10 w-10 text-gray-300" />
-							<p className="text-sm text-gray-500">Chưa có tag nào.</p>
+							<Tag className="mx-auto mb-3 h-10 w-10 text-muted-foreground/40" />
+							<p className="text-sm text-muted-foreground">Chưa có tag nào.</p>
 							<button
+								type="button"
 								onClick={() => setFormModal({ open: true })}
-								className="mt-2 text-sm font-medium text-blue-600 hover:underline"
+								className="mt-2 text-sm font-medium text-primary hover:underline"
 							>
 								Tạo tag đầu tiên →
 							</button>
@@ -95,7 +100,7 @@ const TagManagementPage: React.FC = () => {
 							/>
 						</div>
 					)}
-				</div>
+				</Card>
 
 				<TagFormModal
 					open={formModal.open}
@@ -111,7 +116,7 @@ const TagManagementPage: React.FC = () => {
 					isPending={isDeleting}
 					title="Xóa tag"
 				/>
-			</Main>
+			</div>
 		</>
 	);
 };

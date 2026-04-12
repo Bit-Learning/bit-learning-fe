@@ -262,7 +262,7 @@ export function NotificationBell() {
 													<p className="text-xs text-gray-400 dark:text-gray-500">
 														{new Date(notif.createdAt).toLocaleString("vi-VN")}
 													</p>
-													<span
+													{/* <span
 														className={cn(
 															"text-xs px-2 py-0.5 rounded-full font-medium",
 															notif.type === "INTERACTION"
@@ -275,7 +275,7 @@ export function NotificationBell() {
 														)}
 													>
 														{notif.type}
-													</span>
+													</span> */}
 												</div>
 											</div>
 										</div>

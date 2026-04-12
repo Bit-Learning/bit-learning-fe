@@ -1,10 +1,7 @@
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Main } from "@/layout/main";
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { Activity, GripVertical, X } from "lucide-react";
-import { useCallback, useRef, useState } from "react";
 import {
+	Area,
+	AreaChart,
+	CartesianGrid,
 	Line,
 	LineChart,
 	ResponsiveContainer,
@@ -12,108 +9,411 @@ import {
 	XAxis,
 	YAxis,
 } from "recharts";
+import { useQuery } from "@tanstack/react-query";
 import {
-	getDashboardSettings,
-	updateDashboardSettings,
-} from "../api/dashboard-api";
+	Activity,
+	Cpu,
+	HardDrive,
+	Layers3,
+	Server,
+	ShieldCheck,
+} from "lucide-react";
+import type React from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import { Header } from "@/layout/header";
+import { Main } from "@/layout/main";
+import { cn } from "@/shared/lib/utils";
 import {
 	getSystemMetricsHealth,
 	getSystemMetricsSummary,
 	getSystemMetricsTrends,
 } from "../api/system-metrics-api";
-import {
+import type {
+	HealthComponent,
 	MetricPoint,
 	MetricsHealth,
 	MetricsSummary,
 	MetricsTrends,
 } from "../types/system-metrics.types";
-import { Header } from "@/layout/header";
 
 function fmt(n: number): string {
 	return n.toLocaleString("vi-VN");
 }
 
-interface StatCard {
-	id: string;
-	title: string;
-	value: string;
-	description: string;
-	icon: React.ElementType;
-	iconColor: string;
-	bgColor: string;
+function fmtNumber(value: number, digits = 1): string {
+	return Number.isFinite(value) ? value.toFixed(digits) : "0.0";
 }
 
-// ── Draggable Grid ──
-function DraggableStatsGrid({ stats }: { stats: StatCard[] }) {
-	const [order, setOrder] = useState(() => stats.map((s) => s.id));
-	const dragItem = useRef<string | null>(null);
-	const dragOver = useRef<string | null>(null);
+function fmtBytesToMb(value: number): number {
+	return value / (1024 * 1024);
+}
 
-	const onDragEnd = useCallback(() => {
-		if (
-			dragItem.current &&
-			dragOver.current &&
-			dragItem.current !== dragOver.current
-		) {
-			setOrder((prev) => {
-				const c = [...prev];
-				const f = c.indexOf(dragItem.current!);
-				const t = c.indexOf(dragOver.current!);
-				c.splice(f, 1);
-				c.splice(t, 0, dragItem.current!);
-				return c;
-			});
+function formatTime(timestamp?: string): string {
+	if (!timestamp) return "--:--";
+	return new Date(timestamp).toLocaleTimeString("vi-VN", {
+		hour: "2-digit",
+		minute: "2-digit",
+		second: "2-digit",
+	});
+}
+
+function getStatusTone(status: string) {
+	if (status === "UP") {
+		return {
+			badge:
+				"border-emerald-500/20 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300",
+			dot: "bg-emerald-500",
+		};
+	}
+
+	if (status === "DOWN") {
+		return {
+			badge:
+				"border-rose-500/20 bg-rose-500/10 text-rose-700 dark:text-rose-300",
+			dot: "bg-rose-500",
+		};
+	}
+
+	return {
+		badge:
+			"border-amber-500/20 bg-amber-500/10 text-amber-700 dark:text-amber-300",
+		dot: "bg-amber-500",
+	};
+}
+
+function mapPoints(points?: MetricPoint[]) {
+	return (points ?? []).map((point) => ({
+		time: new Date(point.timestamp).toLocaleTimeString("vi-VN", {
+			minute: "2-digit",
+			second: "2-digit",
+		}),
+		value: point.value,
+		timestamp: point.timestamp,
+	}));
+}
+
+function withMovingAverage<T extends { value: number }>(
+	points: T[],
+	windowSize = 3,
+) {
+	return points.map((point, index) => {
+		const start = Math.max(0, index - windowSize + 1);
+		const slice = points.slice(start, index + 1);
+		const average =
+			slice.reduce((sum, item) => sum + item.value, 0) /
+			Math.max(slice.length, 1);
+
+		return {
+			...point,
+			avgValue: average,
+		};
+	});
+}
+
+function mergeTrendSeries(data?: MetricsTrends, maxMemoryMb = 0) {
+	const byTimestamp = new Map<
+		string,
+		{
+			timestamp: string;
+			time: string;
+			cpu?: number;
+			memoryPercent?: number;
+			requests?: number;
 		}
-		dragItem.current = null;
-		dragOver.current = null;
-	}, []);
+	>();
 
-	const ordered = order
-		.map((id) => stats.find((s) => s.id === id)!)
-		.filter(Boolean);
+	const upsert = (
+		points: MetricPoint[] | undefined,
+		key: "cpu" | "memoryPercent" | "requests",
+		transform?: (value: number) => number,
+	) => {
+		for (const point of points ?? []) {
+			const entry = byTimestamp.get(point.timestamp) ?? {
+				timestamp: point.timestamp,
+				time: new Date(point.timestamp).toLocaleTimeString("vi-VN", {
+					minute: "2-digit",
+					second: "2-digit",
+				}),
+			};
 
+			entry[key] = transform ? transform(point.value) : point.value;
+			byTimestamp.set(point.timestamp, entry);
+		}
+	};
+
+	upsert(data?.cpu, "cpu");
+	upsert(data?.memory, "memoryPercent", (value) =>
+		maxMemoryMb > 0 ? (value / maxMemoryMb) * 100 : value,
+	);
+	upsert(data?.requestCount, "requests");
+
+	return [...byTimestamp.values()]
+		.sort((a, b) => a.timestamp.localeCompare(b.timestamp))
+		.map((item) => ({
+			...item,
+			cpu: item.cpu ?? 0,
+			memoryPercent: item.memoryPercent ?? 0,
+			requests: item.requests ?? 0,
+		}));
+}
+
+function getSeriesStats(points: { time: string; value: number }[]) {
+	if (points.length === 0) {
+		return { current: 0, average: 0, peak: 0 };
+	}
+
+	const values = points.map((point) => point.value);
+	const current = values[values.length - 1] ?? 0;
+	const average = values.reduce((sum, value) => sum + value, 0) / values.length;
+	const peak = Math.max(...values);
+
+	return { current, average, peak };
+}
+
+function SummarySkeleton() {
 	return (
-		<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-			{ordered.map((s) => {
-				const Icon = s.icon;
-				return (
-					<Card
-						key={s.id}
-						draggable
-						onDragStart={() => {
-							dragItem.current = s.id;
-						}}
-						onDragEnter={() => {
-							dragOver.current = s.id;
-						}}
-						onDragEnd={onDragEnd}
-						onDragOver={(e) => e.preventDefault()}
-						className="cursor-grab active:cursor-grabbing hover:shadow-lg transition-shadow select-none"
-					>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<CardTitle className="text-sm font-medium">{s.title}</CardTitle>
-							<div className="flex items-center gap-1">
-								<GripVertical className="h-3.5 w-3.5 text-muted-foreground/40" />
-								<div className={`rounded-lg p-2 ${s.bgColor}`}>
-									<Icon className={`h-4 w-4 ${s.iconColor}`} />
-								</div>
-							</div>
-						</CardHeader>
-						<CardContent>
-							<div className="text-2xl font-bold">{s.value}</div>
-							<p className="text-muted-foreground text-xs mt-1">
-								{s.description}
-							</p>
-						</CardContent>
-					</Card>
-				);
-			})}
+		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+			{["requests", "cpu", "memory", "threads"].map((key) => (
+				<Card key={key}>
+					<CardHeader className="flex flex-row items-start justify-between space-y-0 pb-3">
+						<div>
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="mt-2 h-3 w-32" />
+						</div>
+						<Skeleton className="h-10 w-10 rounded-2xl" />
+					</CardHeader>
+					<CardContent className="pt-0">
+						<Skeleton className="mb-3 h-8 w-28" />
+						<Skeleton className="h-3 w-36" />
+					</CardContent>
+				</Card>
+			))}
 		</div>
 	);
 }
 
-// ── System Metrics Summary Cards ──
-function SystemSummaryCards({
+function MetricKpiCard({
+	title,
+	value,
+	description,
+	meta,
+	icon: Icon,
+	tone,
+}: {
+	title: string;
+	value: string;
+	description: string;
+	meta: string;
+	icon: React.ElementType;
+	tone: "sky" | "emerald" | "indigo" | "violet" | "amber";
+}) {
+	const toneMap = {
+		sky: {
+			card: "from-sky-50 via-white to-white dark:from-sky-950/25 dark:via-slate-950 dark:to-slate-950",
+			iconWrap: "bg-sky-500/10 dark:bg-sky-400/10",
+			icon: "text-sky-600 dark:text-sky-300",
+			glow: "bg-sky-500/15 dark:bg-sky-400/15",
+		},
+		emerald: {
+			card: "from-emerald-50 via-white to-white dark:from-emerald-950/25 dark:via-slate-950 dark:to-slate-950",
+			iconWrap: "bg-emerald-500/10 dark:bg-emerald-400/10",
+			icon: "text-emerald-600 dark:text-emerald-300",
+			glow: "bg-emerald-500/15 dark:bg-emerald-400/15",
+		},
+		indigo: {
+			card: "from-indigo-50 via-white to-white dark:from-indigo-950/25 dark:via-slate-950 dark:to-slate-950",
+			iconWrap: "bg-indigo-500/10 dark:bg-indigo-400/10",
+			icon: "text-indigo-600 dark:text-indigo-300",
+			glow: "bg-indigo-500/15 dark:bg-indigo-400/15",
+		},
+		violet: {
+			card: "from-violet-50 via-white to-white dark:from-violet-950/25 dark:via-slate-950 dark:to-slate-950",
+			iconWrap: "bg-violet-500/10 dark:bg-violet-400/10",
+			icon: "text-violet-600 dark:text-violet-300",
+			glow: "bg-violet-500/15 dark:bg-violet-400/15",
+		},
+		amber: {
+			card: "from-amber-50 via-white to-white dark:from-amber-950/25 dark:via-slate-950 dark:to-slate-950",
+			iconWrap: "bg-amber-500/10 dark:bg-amber-400/10",
+			icon: "text-amber-600 dark:text-amber-300",
+			glow: "bg-amber-500/15 dark:bg-amber-400/15",
+		},
+	}[tone];
+
+	return (
+		<Card
+			className={cn(
+				"relative overflow-hidden border border-border/70 bg-gradient-to-br shadow-sm",
+				toneMap.card,
+			)}
+		>
+			<div
+				className={cn(
+					"pointer-events-none absolute -right-8 -top-10 h-24 w-24 rounded-full blur-3xl",
+					toneMap.glow,
+				)}
+			/>
+			<CardHeader className="relative flex flex-row items-start justify-between space-y-0 pb-3">
+				<div>
+					<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+						{title}
+					</p>
+					<p className="mt-2 text-xs text-muted-foreground">{description}</p>
+				</div>
+				<div className={cn("rounded-2xl p-2.5", toneMap.iconWrap)}>
+					<Icon className={cn("h-4.5 w-4.5", toneMap.icon)} />
+				</div>
+			</CardHeader>
+			<CardContent className="relative pt-0">
+				<div className="text-2xl font-semibold tracking-tight text-foreground">
+					{value}
+				</div>
+				<p className="mt-1.5 text-xs text-muted-foreground">{meta}</p>
+			</CardContent>
+		</Card>
+	);
+}
+
+function SignalBar({
+	label,
+	value,
+	max,
+	colorClass,
+}: {
+	label: string;
+	value: number;
+	max: number;
+	colorClass: string;
+}) {
+	const progress = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+
+	return (
+		<div className="space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
+			<div className="flex items-center justify-between gap-3">
+				<p className="text-sm font-medium text-foreground">{label}</p>
+				<p className="text-sm font-semibold text-foreground">
+					{fmtNumber(value)}%
+				</p>
+			</div>
+			<div className="h-2 rounded-full bg-muted">
+				<div
+					className={cn("h-full rounded-full transition-all", colorClass)}
+					style={{ width: `${progress}%` }}
+				/>
+			</div>
+		</div>
+	);
+}
+
+function SystemHero({
+	summary,
+	health,
+}: {
+	summary?: MetricsSummary;
+	health?: MetricsHealth;
+}) {
+	const status = health?.status ?? "UNKNOWN";
+	const tone = getStatusTone(status);
+	const components = health?.components ?? [];
+	const upCount = components.filter(
+		(component) => component.status === "UP",
+	).length;
+	const downCount = components.filter(
+		(component) => component.status === "DOWN",
+	).length;
+
+	const cpu = summary?.cpu?.usagePercent ?? 0;
+	const usedBytes = summary?.memory?.usedBytes ?? 0;
+	const maxBytes = summary?.memory?.maxBytes ?? 0;
+	const memoryPercent = maxBytes > 0 ? (usedBytes / maxBytes) * 100 : 0;
+
+	return (
+		<Card className="relative overflow-hidden border border-border/70 bg-gradient-to-br from-slate-50 via-white to-cyan-50/60 shadow-sm dark:from-slate-900 dark:via-slate-950 dark:to-cyan-950/20">
+			<div className="pointer-events-none absolute inset-0 overflow-hidden">
+				<div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/15" />
+				<div className="absolute -bottom-12 left-16 h-36 w-36 rounded-full bg-emerald-500/10 blur-3xl dark:bg-emerald-500/15" />
+			</div>
+
+			<CardContent className="relative p-6">
+				<div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
+					<div className="max-w-2xl">
+						<div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
+							<ShieldCheck className="h-3.5 w-3.5 text-sky-500" />
+							System observability
+						</div>
+						<h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+							Tình trạng hệ thống
+						</h2>
+						<p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+							Theo dõi sức khỏe dịch vụ, hiệu suất runtime và biến động hệ thống
+							trên một layout quan sát rõ ràng hơn cho admin.
+						</p>
+
+						<div className="mt-5 grid gap-3 md:grid-cols-3">
+							<div className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70">
+								<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+									Health status
+								</p>
+								<div className="mt-2 flex items-center gap-2">
+									<span className={cn("h-2.5 w-2.5 rounded-full", tone.dot)} />
+									<span className="text-sm font-semibold text-foreground">
+										{status}
+									</span>
+								</div>
+							</div>
+							<div className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70">
+								<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+									CPU hiện tại
+								</p>
+								<p className="mt-2 text-sm font-semibold text-foreground">
+									{fmtNumber(cpu)}%
+								</p>
+							</div>
+							<div className="rounded-2xl border border-white/60 bg-white/70 px-4 py-3 shadow-sm backdrop-blur-sm dark:border-slate-800 dark:bg-slate-900/70">
+								<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+									Heap usage
+								</p>
+								<p className="mt-2 text-sm font-semibold text-foreground">
+									{fmtNumber(memoryPercent)}%
+								</p>
+							</div>
+						</div>
+					</div>
+
+					<div className="grid gap-3 sm:grid-cols-3 xl:w-[460px]">
+						<div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-4 shadow-sm backdrop-blur-sm">
+							<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+								Dịch vụ UP
+							</p>
+							<p className="mt-2 text-xl font-semibold text-foreground">
+								{fmt(upCount)}
+							</p>
+						</div>
+						<div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-4 shadow-sm backdrop-blur-sm">
+							<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+								Dịch vụ lỗi
+							</p>
+							<p className="mt-2 text-xl font-semibold text-foreground">
+								{fmt(downCount)}
+							</p>
+						</div>
+						<div className="rounded-2xl border border-border/70 bg-background/80 px-4 py-4 shadow-sm backdrop-blur-sm">
+							<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+								Cập nhật
+							</p>
+							<p className="mt-2 text-sm font-semibold text-foreground">
+								{formatTime(summary?.timestamp)}
+							</p>
+						</div>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function SummaryCards({
 	data,
 	isLoading,
 	isError,
@@ -122,29 +422,12 @@ function SystemSummaryCards({
 	isLoading: boolean;
 	isError: boolean;
 }) {
-	if (isLoading) {
-		return (
-			<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-				{Array.from({ length: 5 }).map((_, i) => (
-					<Card key={i}>
-						<CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-							<Skeleton className="h-4 w-24" />
-							<Skeleton className="h-8 w-8 rounded-lg" />
-						</CardHeader>
-						<CardContent>
-							<Skeleton className="mb-2 h-8 w-32" />
-							<Skeleton className="h-3 w-40" />
-						</CardContent>
-					</Card>
-				))}
-			</div>
-		);
-	}
+	if (isLoading) return <SummarySkeleton />;
 
 	if (isError) {
 		return (
-			<Card className="p-4">
-				<p className="text-muted-foreground text-sm">
+			<Card className="p-5">
+				<p className="text-sm text-muted-foreground">
 					Không thể tải số liệu kỹ thuật. Vui lòng thử lại sau.
 				</p>
 			</Card>
@@ -155,70 +438,304 @@ function SystemSummaryCards({
 
 	const totalRequests = data.requests?.totalRequests ?? 0;
 	const cpuPercent = data.cpu?.usagePercent ?? 0;
-	const usedBytes = data.memory?.usedBytes ?? 0;
-	const maxBytes = data.memory?.maxBytes ?? 0;
-	const usedMb = usedBytes / (1024 * 1024);
-	const maxMb = maxBytes / (1024 * 1024);
+	const usedMb = fmtBytesToMb(data.memory?.usedBytes ?? 0);
+	const maxMb = fmtBytesToMb(data.memory?.maxBytes ?? 0);
 	const memPercent = maxMb > 0 ? (usedMb / maxMb) * 100 : 0;
 	const liveThreads = data.jvm?.liveThreads ?? 0;
 	const activeConns = data.db?.activeConnections ?? 0;
 	const maxConns = data.db?.maxConnections ?? 0;
 
-	const cards: StatCard[] = [
+	const cards = [
 		{
-			id: "total-requests",
 			title: "Tổng request",
 			value: fmt(totalRequests),
-			description: "Tổng số request HTTP kể từ khi khởi động",
+			description: "Tổng lưu lượng HTTP kể từ khi service khởi động",
+			meta: "Throughput tích lũy",
 			icon: Activity,
-			iconColor: "text-sky-600",
-			bgColor: "bg-sky-100 dark:bg-sky-950",
+			tone: "sky" as const,
 		},
 		{
-			id: "cpu-usage",
 			title: "CPU hiện tại",
-			value: `${cpuPercent.toFixed(1)}%`,
-			description: "Mức sử dụng CPU của hệ thống",
-			icon: Activity,
-			iconColor: "text-emerald-600",
-			bgColor: "bg-emerald-100 dark:bg-emerald-950",
+			value: `${fmtNumber(cpuPercent)}%`,
+			description: "Mức sử dụng CPU tại thời điểm lấy mẫu gần nhất",
+			meta: "Tải runtime hiện tại",
+			icon: Cpu,
+			tone: "emerald" as const,
 		},
 		{
-			id: "memory-usage",
-			title: "Bộ nhớ heap",
-			value: `${usedMb.toFixed(1)} / ${maxMb.toFixed(1)} MB`,
-			description: `Đang dùng ~${memPercent.toFixed(1)}% dung lượng`,
-			icon: Activity,
-			iconColor: "text-indigo-600",
-			bgColor: "bg-indigo-100 dark:bg-indigo-950",
+			title: "Heap memory",
+			value: `${fmtNumber(usedMb)} / ${fmtNumber(maxMb)} MB`,
+			description: "Dung lượng heap đã dùng so với trần JVM",
+			meta: `Đang sử dụng ${fmtNumber(memPercent)}%`,
+			icon: HardDrive,
+			tone: "indigo" as const,
 		},
 		{
-			id: "jvm-threads",
 			title: "JVM threads",
 			value: fmt(liveThreads),
-			description: "Số luồng JVM đang hoạt động",
-			icon: Activity,
-			iconColor: "text-purple-600",
-			bgColor: "bg-purple-100 dark:bg-purple-950",
+			description: "Số luồng JVM đang hoạt động trong hệ thống",
+			meta:
+				maxConns > 0
+					? `DB pool ${fmt(activeConns)}/${fmt(maxConns)} kết nối`
+					: "Theo dõi thread runtime",
+			icon: Layers3,
+			tone: "violet" as const,
 		},
-		// {
-		// 	id: "db-pool",
-		// 	title: "Kết nối DB",
-		// 	value: maxConns > 0 ? `${activeConns}/${maxConns}` : "Chưa có dữ liệu",
-		// 	description: data.db?.poolName
-		// 		? `Pool: ${data.db.poolName}`
-		// 		: "HikariCP pool (nếu được cấu hình)",
-		// 	icon: Activity,
-		// 	iconColor: "text-rose-600",
-		// 	bgColor: "bg-rose-100 dark:bg-rose-950",
-		// },
 	];
 
-	return <DraggableStatsGrid stats={cards} />;
+	return (
+		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+			{cards.map((card) => (
+				<MetricKpiCard key={card.title} {...card} />
+			))}
+		</div>
+	);
 }
 
-// ── System Health Panel ──
-function SystemHealthPanel({
+function PanelShell({
+	children,
+	className,
+}: {
+	children: React.ReactNode;
+	className?: string;
+}) {
+	return (
+		<div
+			className={cn(
+				"relative overflow-hidden rounded-[28px] border border-slate-200/70 bg-white/92 shadow-[0_24px_80px_rgba(15,23,42,0.08)] backdrop-blur-sm dark:border-slate-800/80 dark:bg-[#0d141c]/92 dark:shadow-[0_24px_80px_rgba(2,6,23,0.55)]",
+				className,
+			)}
+		>
+			<div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,rgba(148,163,184,0.04)_1px,transparent_1px),linear-gradient(to_bottom,rgba(148,163,184,0.04)_1px,transparent_1px)] bg-[size:28px_28px] dark:bg-[linear-gradient(to_right,rgba(51,65,85,0.14)_1px,transparent_1px),linear-gradient(to_bottom,rgba(51,65,85,0.14)_1px,transparent_1px)]" />
+			{children}
+		</div>
+	);
+}
+
+function PanelLegend({
+	items,
+}: {
+	items: Array<{ color: string; label: string; soft?: boolean }>;
+}) {
+	return (
+		<div className="flex flex-wrap items-center gap-3">
+			{items.map((item) => (
+				<div
+					key={item.label}
+					className="inline-flex items-center gap-2 rounded-full border border-slate-200/70 bg-white/80 px-3 py-1 text-xs font-medium text-slate-600 dark:border-slate-800 dark:bg-slate-900/70 dark:text-slate-300"
+				>
+					<span
+						className={cn(
+							"h-2.5 w-2.5 rounded-full",
+							item.soft && "opacity-60",
+						)}
+						style={{ backgroundColor: item.color }}
+					/>
+					{item.label}
+				</div>
+			))}
+		</div>
+	);
+}
+
+function RuntimeSignalsCard({ summary }: { summary?: MetricsSummary }) {
+	const cpu = summary?.cpu?.usagePercent ?? 0;
+	const usedMb = fmtBytesToMb(summary?.memory?.usedBytes ?? 0);
+	const maxMb = fmtBytesToMb(summary?.memory?.maxBytes ?? 0);
+	const memoryPercent = maxMb > 0 ? (usedMb / maxMb) * 100 : 0;
+	const activeConns = summary?.db?.activeConnections ?? 0;
+	const maxConns = summary?.db?.maxConnections ?? 0;
+	const dbPercent = maxConns > 0 ? (activeConns / maxConns) * 100 : 0;
+
+	return (
+		<Card className="h-full border border-border/70 bg-card/95 shadow-sm">
+			<CardHeader className="border-b border-border/60 pb-5">
+				<CardTitle className="text-lg font-semibold">Runtime Signals</CardTitle>
+				<p className="mt-1 text-sm text-muted-foreground">
+					Các chỉ báo nhanh về áp lực CPU, heap và kết nối cơ sở dữ liệu.
+				</p>
+			</CardHeader>
+			<CardContent className="space-y-4 pt-6">
+				<SignalBar
+					label="CPU saturation"
+					value={cpu}
+					max={100}
+					colorClass="bg-emerald-500"
+				/>
+				<SignalBar
+					label="Heap pressure"
+					value={memoryPercent}
+					max={100}
+					colorClass="bg-indigo-500"
+				/>
+				<SignalBar
+					label="DB pool usage"
+					value={dbPercent}
+					max={100}
+					colorClass="bg-amber-500"
+				/>
+
+				<div className="grid gap-3 sm:grid-cols-3">
+					<div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+						<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+							CPU
+						</p>
+						<p className="mt-2 text-lg font-semibold text-foreground">
+							{fmtNumber(cpu)}%
+						</p>
+					</div>
+					<div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+						<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+							Heap dùng
+						</p>
+						<p className="mt-2 text-lg font-semibold text-foreground">
+							{fmtNumber(usedMb)} MB
+						</p>
+					</div>
+					<div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+						<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+							DB active
+						</p>
+						<p className="mt-2 text-lg font-semibold text-foreground">
+							{maxConns > 0 ? `${fmt(activeConns)} / ${fmt(maxConns)}` : "N/A"}
+						</p>
+					</div>
+				</div>
+			</CardContent>
+		</Card>
+	);
+}
+
+function SystemPulsePanel({
+	data,
+	memoryMaxMb,
+}: {
+	data?: MetricsTrends;
+	memoryMaxMb: number;
+}) {
+	const chartData = mergeTrendSeries(data, memoryMaxMb);
+
+	return (
+		<PanelShell className="xl:col-span-8">
+			<div className="relative border-b border-slate-200/70 px-6 py-5 dark:border-slate-800/80">
+				<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+					<div>
+						<p className="text-lg font-semibold text-slate-950 dark:text-slate-50">
+							System Pulse
+						</p>
+						<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+							Quan sát đồng thời CPU, áp lực bộ nhớ và lưu lượng request.
+						</p>
+					</div>
+					<PanelLegend
+						items={[
+							{ color: "#22c55e", label: "CPU" },
+							{ color: "#8b5cf6", label: "Heap pressure" },
+							{ color: "#0ea5e9", label: "Requests" },
+						]}
+					/>
+				</div>
+			</div>
+
+			<div className="relative px-4 pb-4 pt-5 md:px-6 md:pb-6">
+				{chartData.length === 0 ? (
+					<div className="flex h-[360px] items-center justify-center text-sm text-muted-foreground">
+						Chưa có dữ liệu
+					</div>
+				) : (
+					<ResponsiveContainer width="100%" height={360}>
+						<LineChart
+							data={chartData}
+							margin={{ top: 10, right: 16, left: 0, bottom: 0 }}
+						>
+							<CartesianGrid
+								stroke="rgba(148,163,184,0.12)"
+								strokeDasharray="4 4"
+								vertical={true}
+							/>
+							<XAxis
+								dataKey="time"
+								axisLine={false}
+								tickLine={false}
+								fontSize={11}
+								tick={{ fill: "var(--muted-foreground)" }}
+							/>
+							<YAxis
+								yAxisId="percent"
+								axisLine={false}
+								tickLine={false}
+								fontSize={11}
+								width={40}
+								tick={{ fill: "var(--muted-foreground)" }}
+								tickFormatter={(value) => `${Number(value).toFixed(0)}%`}
+							/>
+							<YAxis
+								yAxisId="requests"
+								orientation="right"
+								axisLine={false}
+								tickLine={false}
+								fontSize={11}
+								width={56}
+								tick={{ fill: "var(--muted-foreground)" }}
+								tickFormatter={(value) => fmt(Number(value))}
+							/>
+							<Tooltip
+								content={({ active, payload }) => (
+									<MultiSeriesTooltip
+										active={active}
+										payload={
+											payload as Array<{
+												color?: string;
+												name?: string;
+												value?: number;
+												payload?: { time?: string };
+											}>
+										}
+									/>
+								)}
+							/>
+							<Line
+								yAxisId="percent"
+								type="monotone"
+								dataKey="cpu"
+								name="CPU"
+								stroke="#22c55e"
+								strokeWidth={3}
+								dot={false}
+								activeDot={{ r: 5, fill: "#22c55e", stroke: "#fff" }}
+								isAnimationActive={false}
+							/>
+							<Line
+								yAxisId="percent"
+								type="monotone"
+								dataKey="memoryPercent"
+								name="Heap pressure"
+								stroke="#8b5cf6"
+								strokeWidth={3}
+								dot={false}
+								activeDot={{ r: 5, fill: "#8b5cf6", stroke: "#fff" }}
+								isAnimationActive={false}
+							/>
+							<Line
+								yAxisId="requests"
+								type="monotone"
+								dataKey="requests"
+								name="Requests"
+								stroke="#0ea5e9"
+								strokeWidth={3}
+								dot={false}
+								activeDot={{ r: 5, fill: "#0ea5e9", stroke: "#fff" }}
+								isAnimationActive={false}
+							/>
+						</LineChart>
+					</ResponsiveContainer>
+				)}
+			</div>
+		</PanelShell>
+	);
+}
+
+function HealthOverviewCard({
 	data,
 	isLoading,
 	isError,
@@ -227,24 +744,20 @@ function SystemHealthPanel({
 	isLoading: boolean;
 	isError: boolean;
 }) {
-	const statusColor = (status: string) => {
-		if (status === "UP") return "text-emerald-600";
-		if (status === "DOWN") return "text-red-600";
-		return "text-amber-600";
-	};
-
 	if (isLoading) {
 		return (
-			<Card>
+			<Card className="h-full">
 				<CardHeader>
 					<CardTitle>Tình trạng dịch vụ</CardTitle>
 				</CardHeader>
 				<CardContent className="space-y-3">
-					<Skeleton className="h-4 w-40" />
-					{Array.from({ length: 4 }).map((_, i) => (
-						<div key={i} className="flex items-center justify-between">
-							<Skeleton className="h-3 w-24" />
-							<Skeleton className="h-3 w-16" />
+					{["db", "redis", "disk", "api"].map((key) => (
+						<div
+							key={key}
+							className="flex items-center justify-between rounded-2xl border border-border/60 p-4"
+						>
+							<Skeleton className="h-4 w-24" />
+							<Skeleton className="h-6 w-16 rounded-full" />
 						</div>
 					))}
 				</CardContent>
@@ -254,12 +767,12 @@ function SystemHealthPanel({
 
 	if (isError) {
 		return (
-			<Card>
+			<Card className="h-full">
 				<CardHeader>
 					<CardTitle>Tình trạng dịch vụ</CardTitle>
 				</CardHeader>
 				<CardContent>
-					<p className="text-muted-foreground text-sm">
+					<p className="text-sm text-muted-foreground">
 						Không thể tải thông tin health từ backend.
 					</p>
 				</CardContent>
@@ -275,275 +788,460 @@ function SystemHealthPanel({
 			if (name === "redis") return 1;
 			return 10;
 		};
+
 		return weight(a.name) - weight(b.name);
 	});
 
 	return (
-		<Card>
-			<CardHeader>
-				<CardTitle className="flex items-center gap-2">
-					<span>Tình trạng dịch vụ</span>
+		<Card className="h-full border border-border/70 bg-card/95 shadow-sm">
+			<CardHeader className="border-b border-border/60 pb-5">
+				<div className="flex items-center justify-between gap-3">
+					<div>
+						<CardTitle className="text-lg font-semibold">
+							Tình trạng dịch vụ
+						</CardTitle>
+						<p className="mt-1 text-sm text-muted-foreground">
+							Kiểm tra sức khỏe của các thành phần backend quan trọng.
+						</p>
+					</div>
 					<span
-						className={`text-xs font-semibold px-2 py-0.5 rounded-full border ${
-							data.status === "UP"
-								? "border-emerald-500 text-emerald-600"
-								: "border-amber-500 text-amber-600"
-						}`}
+						className={cn(
+							"inline-flex items-center rounded-full border px-3 py-1 text-xs font-semibold",
+							getStatusTone(data.status).badge,
+						)}
 					>
 						{data.status}
 					</span>
-				</CardTitle>
+				</div>
 			</CardHeader>
-			<CardContent className="space-y-3 text-sm">
-				{components.map((c) => (
-					<div
-						key={c.name}
-						className="flex items-center justify-between gap-4 border-b last:border-b-0 pb-2 last:pb-0"
-					>
-						<div className="flex items-center gap-2 min-w-0">
-							<span
-								className={`h-2 w-2 rounded-full ${
-									c.status === "UP"
-										? "bg-emerald-500"
-										: c.status === "DOWN"
-											? "bg-red-500"
-											: "bg-amber-500"
-								}`}
-							/>
-							<span className="font-medium truncate">{c.name}</span>
-						</div>
-						<span className={`font-semibold ${statusColor(c.status)}`}>
-							{c.status}
-						</span>
-					</div>
-				))}
+
+			<CardContent className="space-y-3 pt-6">
 				{components.length === 0 && (
-					<p className="text-muted-foreground text-xs">
+					<div className="rounded-2xl border border-border/60 bg-muted/20 p-4 text-sm text-muted-foreground">
 						Không có component health chi tiết từ Actuator.
-					</p>
+					</div>
 				)}
+
+				{components.map((component) => (
+					<HealthComponentRow key={component.name} component={component} />
+				))}
 			</CardContent>
 		</Card>
 	);
 }
 
-// ── System Trends Charts ──
-function SystemTrendsCharts({
-	data,
-	isLoading,
-}: {
-	data?: MetricsTrends;
-	isLoading: boolean;
-}) {
-	if (isLoading) {
-		return (
-			<Card>
-				<CardHeader>
-					<CardTitle>Xu hướng kỹ thuật</CardTitle>
-				</CardHeader>
-				<CardContent>
-					<Skeleton className="h-48 w-full" />
-				</CardContent>
-			</Card>
-		);
-	}
-
-	if (!data) return null;
-
-	const toChartData = (points?: MetricPoint[]) => {
-		return (points ?? []).map((p) => ({
-			time: new Date(p.timestamp).toLocaleTimeString("vi-VN", {
-				minute: "2-digit",
-				second: "2-digit",
-			}),
-			value: p.value,
-		}));
-	};
-
-	const requestData = toChartData(data.requestCount);
-	const cpuData = toChartData(data.cpu);
-	const memoryData = toChartData(data.memory);
-
-	const renderLineChart = (
-		title: string,
-		unit: string,
-		chartData: { time: string; value: number }[],
-	) => (
-		<Card>
-			<CardHeader>
-				<CardTitle className="text-sm font-medium">{title}</CardTitle>
-			</CardHeader>
-			<CardContent className="h-56">
-				{chartData.length === 0 ? (
-					<div className="flex h-full items-center justify-center text-muted-foreground text-sm">
-						Chưa có dữ liệu
-					</div>
-				) : (
-					<ResponsiveContainer width="100%" height="100%">
-						<LineChart data={chartData}>
-							<XAxis
-								dataKey="time"
-								stroke="#888888"
-								fontSize={12}
-								tickLine={false}
-								axisLine={false}
-							/>
-							<YAxis
-								stroke="#888888"
-								fontSize={12}
-								tickLine={false}
-								axisLine={false}
-								tickFormatter={(v) => `${v.toFixed(0)}${unit}`}
-							/>
-							<Tooltip
-								content={({ active, payload }) => {
-									if (active && payload && payload.length) {
-										return (
-											<div className="bg-background border rounded-md px-2 py-1 text-xs shadow-sm">
-												<div className="font-medium">
-													{payload[0].payload.time}
-												</div>
-												<div className="text-muted-foreground">
-													{payload[0].value?.toFixed(1)}
-													{unit}
-												</div>
-											</div>
-										);
-									}
-									return null;
-								}}
-							/>
-							<Line
-								type="monotone"
-								dataKey="value"
-								stroke="currentColor"
-								className="text-primary"
-								strokeWidth={2}
-								dot={false}
-								isAnimationActive={false}
-							/>
-						</LineChart>
-					</ResponsiveContainer>
-				)}
-			</CardContent>
-		</Card>
-	);
+function HealthComponentRow({ component }: { component: HealthComponent }) {
+	const tone = getStatusTone(component.status);
+	const detailEntries = Object.entries(component.details ?? {}).slice(0, 2);
 
 	return (
-		<div className="grid gap-4 lg:grid-cols-1">
-			{renderLineChart("CPU (%)", "%", cpuData)}
-			{renderLineChart("Heap đã dùng (MB)", "MB", memoryData)}
-			{renderLineChart("Request (tổng số)", "", requestData)}
-		</div>
-	);
-}
-
-// ── Settings Panel ──
-function SettingsPanel({ onClose }: { onClose: () => void }) {
-	const qc = useQueryClient();
-	const { data: settings, isLoading } = useQuery({
-		queryKey: ["dashboard-settings"],
-		queryFn: getDashboardSettings,
-	});
-	const [interval, setInterval] = useState("");
-	const [autoRefresh, setAutoRefresh] = useState(true);
-	const [initialized, setInitialized] = useState(false);
-
-	if (settings && !initialized) {
-		setInterval(settings.refresh_interval_minutes || "30");
-		setAutoRefresh(settings.auto_refresh_enabled !== "false");
-		setInitialized(true);
-	}
-
-	const saveMutation = useMutation({
-		mutationFn: (updates: Record<string, string>) =>
-			updateDashboardSettings(updates),
-		onSuccess: () => {
-			qc.invalidateQueries({ queryKey: ["dashboard-settings"] });
-		},
-	});
-
-	const handleSave = () => {
-		saveMutation.mutate({
-			refresh_interval_minutes: interval,
-			auto_refresh_enabled: String(autoRefresh),
-		});
-	};
-
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-			<div className="bg-background rounded-xl shadow-2xl max-w-sm w-full p-6 relative border">
-				<button
-					onClick={onClose}
-					className="absolute top-4 right-4 text-muted-foreground hover:text-foreground"
-				>
-					<X className="w-5 h-5" />
-				</button>
-				<h3 className="text-lg font-bold mb-4">Cài đặt Dashboard</h3>
-
-				{isLoading ? (
-					<div className="space-y-3">
-						<Skeleton className="h-10 w-full" />
-						<Skeleton className="h-10 w-full" />
+		<div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+			<div className="flex items-start justify-between gap-3">
+				<div className="flex min-w-0 items-center gap-3">
+					<div className="rounded-xl bg-background p-2 shadow-sm dark:bg-slate-900">
+						<Server className="h-4 w-4 text-muted-foreground" />
 					</div>
-				) : (
-					<div className="space-y-4">
-						<div>
-							<label className="text-sm font-medium mb-1.5 block">
-								Chu kỳ tự động cập nhật (phút)
-							</label>
-							<input
-								type="number"
-								min={1}
-								max={1440}
-								value={interval}
-								onChange={(e) => setInterval(e.target.value)}
-								className="w-full rounded-lg border px-3 py-2 text-sm bg-background"
-							/>
-							<p className="text-xs text-muted-foreground mt-1">
-								Tối thiểu 1 phút, tối đa 1440 phút (24 giờ)
+					<div className="min-w-0">
+						<p className="truncate text-sm font-semibold text-foreground">
+							{component.name}
+						</p>
+						{detailEntries.length > 0 && (
+							<p className="mt-1 truncate text-xs text-muted-foreground">
+								{detailEntries
+									.map(([key, value]) => `${key}: ${String(value)}`)
+									.join(" · ")}
 							</p>
-						</div>
-
-						<div className="flex items-center justify-between">
-							<div>
-								<label className="text-sm font-medium">Tự động cập nhật</label>
-								<p className="text-xs text-muted-foreground">
-									Bật/tắt cron job tự động
-								</p>
-							</div>
-							<button
-								onClick={() => setAutoRefresh(!autoRefresh)}
-								className={`relative w-11 h-6 rounded-full transition-colors ${autoRefresh ? "bg-primary" : "bg-muted"}`}
-							>
-								<span
-									className={`absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow transition-transform ${autoRefresh ? "translate-x-5" : ""}`}
-								/>
-							</button>
-						</div>
-
-						<button
-							onClick={handleSave}
-							disabled={saveMutation.isPending}
-							className="w-full bg-primary text-primary-foreground font-medium py-2 rounded-lg hover:opacity-90 transition-opacity disabled:opacity-50 text-sm"
-						>
-							{saveMutation.isPending
-								? "Đang lưu..."
-								: saveMutation.isSuccess
-									? "✓ Đã lưu"
-									: "Lưu cài đặt"}
-						</button>
+						)}
 					</div>
-				)}
+				</div>
+				<span
+					className={cn(
+						"inline-flex items-center gap-2 rounded-full border px-3 py-1 text-xs font-semibold",
+						tone.badge,
+					)}
+				>
+					<span className={cn("h-2 w-2 rounded-full", tone.dot)} />
+					{component.status}
+				</span>
 			</div>
 		</div>
 	);
 }
 
-// ── Main Dashboard ──
-export function Dashboard() {
-	const [showSettings, setShowSettings] = useState(false);
+function TrendCard({
+	title,
+	description,
+	icon: Icon,
+	data,
+	color,
+	unit,
+	secondaryColor,
+	primaryLabel,
+	secondaryLabel,
+	chartType = "area",
+}: {
+	title: string;
+	description: string;
+	icon: React.ElementType;
+	data: { time: string; value: number }[];
+	color: string;
+	unit: string;
+	secondaryColor: string;
+	primaryLabel: string;
+	secondaryLabel: string;
+	chartType?: "area" | "line";
+}) {
+	const enhancedData = withMovingAverage(data);
+	const stats = getSeriesStats(enhancedData);
+	const gradientId = `${title.replace(/\s+/g, "-").toLowerCase()}-gradient`;
 
+	return (
+		<PanelShell className="h-full">
+			<div className="relative flex flex-row items-start justify-between border-b border-slate-200/70 px-6 py-5 dark:border-slate-800/80">
+				<div>
+					<p className="text-lg font-semibold text-slate-950 dark:text-slate-50">
+						{title}
+					</p>
+					<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+						{description}
+					</p>
+				</div>
+				<div className="flex items-center gap-3">
+					<PanelLegend
+						items={[
+							{ color, label: primaryLabel },
+							{ color: secondaryColor, label: secondaryLabel, soft: true },
+						]}
+					/>
+					<div className="rounded-2xl border border-slate-200/70 bg-white/80 p-2.5 dark:border-slate-800 dark:bg-slate-900/70">
+						<Icon className="h-4.5 w-4.5 text-slate-700 dark:text-slate-200" />
+					</div>
+				</div>
+			</div>
+
+			<div className="relative px-4 pb-4 pt-5 md:px-6 md:pb-6">
+				{enhancedData.length === 0 ? (
+					<div className="flex h-[280px] items-center justify-center text-sm text-muted-foreground">
+						Chưa có dữ liệu
+					</div>
+				) : (
+					<>
+						<ResponsiveContainer width="100%" height={280}>
+							{chartType === "area" ? (
+								<AreaChart
+									data={enhancedData}
+									margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
+								>
+									<defs>
+										<linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+											<stop offset="0%" stopColor={color} stopOpacity={0.35} />
+											<stop
+												offset="100%"
+												stopColor={color}
+												stopOpacity={0.04}
+											/>
+										</linearGradient>
+									</defs>
+									<CartesianGrid
+										stroke="var(--border)"
+										strokeDasharray="4 4"
+										vertical={false}
+									/>
+									<XAxis
+										dataKey="time"
+										axisLine={false}
+										tickLine={false}
+										fontSize={11}
+										tick={{ fill: "var(--muted-foreground)" }}
+									/>
+									<YAxis
+										axisLine={false}
+										tickLine={false}
+										fontSize={11}
+										width={48}
+										tick={{ fill: "var(--muted-foreground)" }}
+										tickFormatter={(value) =>
+											`${Number(value).toFixed(0)}${unit}`
+										}
+									/>
+									<Tooltip
+										content={({ active, payload }) => (
+											<MultiSeriesTooltip
+												active={active}
+												payload={
+													payload as Array<{
+														color?: string;
+														name?: string;
+														value?: number;
+														payload?: { time?: string; value?: number };
+													}>
+												}
+												unit={unit}
+											/>
+										)}
+									/>
+									<Area
+										type="monotone"
+										dataKey="value"
+										stroke={color}
+										strokeWidth={3}
+										fill={`url(#${gradientId})`}
+										activeDot={{ r: 5, fill: color, stroke: "var(--card)" }}
+									/>
+									<Line
+										type="monotone"
+										dataKey="avgValue"
+										name={secondaryLabel}
+										stroke={secondaryColor}
+										strokeWidth={2}
+										strokeDasharray="6 6"
+										dot={false}
+										isAnimationActive={false}
+									/>
+								</AreaChart>
+							) : (
+								<LineChart
+									data={enhancedData}
+									margin={{ top: 10, right: 12, left: 0, bottom: 0 }}
+								>
+									<CartesianGrid
+										stroke="var(--border)"
+										strokeDasharray="4 4"
+										vertical={false}
+									/>
+									<XAxis
+										dataKey="time"
+										axisLine={false}
+										tickLine={false}
+										fontSize={11}
+										tick={{ fill: "var(--muted-foreground)" }}
+									/>
+									<YAxis
+										axisLine={false}
+										tickLine={false}
+										fontSize={11}
+										width={48}
+										tick={{ fill: "var(--muted-foreground)" }}
+										tickFormatter={(value) =>
+											`${Number(value).toFixed(0)}${unit}`
+										}
+									/>
+									<Tooltip
+										content={({ active, payload }) => (
+											<MultiSeriesTooltip
+												active={active}
+												payload={
+													payload as Array<{
+														color?: string;
+														name?: string;
+														value?: number;
+														payload?: { time?: string; value?: number };
+													}>
+												}
+												unit={unit}
+											/>
+										)}
+									/>
+									<Line
+										type="monotone"
+										dataKey="value"
+										stroke={color}
+										strokeWidth={3}
+										dot={false}
+										activeDot={{ r: 5, fill: color, stroke: "var(--card)" }}
+										isAnimationActive={false}
+									/>
+									<Line
+										type="monotone"
+										dataKey="avgValue"
+										name={secondaryLabel}
+										stroke={secondaryColor}
+										strokeWidth={2}
+										strokeDasharray="6 6"
+										dot={false}
+										isAnimationActive={false}
+									/>
+								</LineChart>
+							)}
+						</ResponsiveContainer>
+
+						<div className="mt-6 grid gap-3 sm:grid-cols-3">
+							<TrendStat label="Hiện tại" value={stats.current} unit={unit} />
+							<TrendStat label="Trung bình" value={stats.average} unit={unit} />
+							<TrendStat label="Đỉnh" value={stats.peak} unit={unit} />
+						</div>
+					</>
+				)}
+			</div>
+		</PanelShell>
+	);
+}
+
+function MultiSeriesTooltip({
+	active,
+	payload,
+	unit,
+}: {
+	active?: boolean;
+	payload?: Array<{
+		color?: string;
+		name?: string;
+		value?: number;
+		payload?: { time?: string; value?: number };
+	}>;
+	unit: string;
+}) {
+	if (!active || !payload?.length) return null;
+
+	const item = payload[0]?.payload;
+
+	return (
+		<div className="rounded-2xl border border-slate-200/80 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/95">
+			<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+				{item?.time}
+			</p>
+			<div className="mt-2 space-y-1.5">
+				{payload.map((entry) => (
+					<div
+						key={`${entry.name}-${entry.color}`}
+						className="flex items-center justify-between gap-4 text-sm"
+					>
+						<div className="flex items-center gap-2">
+							<span
+								className="h-2.5 w-2.5 rounded-full"
+								style={{ backgroundColor: entry.color }}
+							/>
+							<span className="text-slate-600 dark:text-slate-300">
+								{entry.name}
+							</span>
+						</div>
+						<span className="font-semibold text-slate-950 dark:text-slate-50">
+							{fmtNumber(Number(entry.value ?? 0))}
+							{unit}
+						</span>
+					</div>
+				))}
+			</div>
+		</div>
+	);
+}
+
+function TrendStat({
+	label,
+	value,
+	unit,
+}: {
+	label: string;
+	value: number;
+	unit: string;
+}) {
+	return (
+		<div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
+			<p className="text-[11px] font-medium uppercase tracking-[0.18em] text-muted-foreground">
+				{label}
+			</p>
+			<p className="mt-2 text-lg font-semibold text-foreground">
+				{fmtNumber(value)}
+				{unit}
+			</p>
+		</div>
+	);
+}
+
+function SystemTrendsSection({
+	data,
+	isLoading,
+	memoryMaxMb,
+}: {
+	data?: MetricsTrends;
+	isLoading: boolean;
+	memoryMaxMb: number;
+}) {
+	if (isLoading) {
+		return (
+			<div className="grid gap-4 xl:grid-cols-12">
+				<div className="xl:col-span-8">
+					<PanelShell>
+						<div className="px-6 py-5">
+							<Skeleton className="h-5 w-40" />
+							<Skeleton className="mt-2 h-4 w-56" />
+						</div>
+						<div className="px-6 pb-6">
+							<Skeleton className="h-[360px] w-full" />
+						</div>
+					</PanelShell>
+				</div>
+				{["cpu", "memory", "requests"].slice(0, 2).map((key) => (
+					<div key={key} className="xl:col-span-4">
+						<PanelShell>
+							<div className="px-6 py-5">
+								<Skeleton className="h-5 w-32" />
+								<Skeleton className="mt-2 h-4 w-48" />
+							</div>
+							<div className="px-6 pb-6">
+								<Skeleton className="h-[280px] w-full" />
+							</div>
+						</PanelShell>
+					</div>
+				))}
+			</div>
+		);
+	}
+
+	if (!data) return null;
+
+	const cpuData = mapPoints(data.cpu);
+	const memoryData = mapPoints(data.memory);
+	const requestData = mapPoints(data.requestCount);
+
+	return (
+		<div className="grid gap-4 xl:grid-cols-12">
+			<SystemPulsePanel data={data} memoryMaxMb={memoryMaxMb} />
+			<div className="xl:col-span-4">
+				<TrendCard
+					title="CPU load"
+					description="Biến động CPU theo chu kỳ lấy mẫu gần nhất."
+					icon={Cpu}
+					data={cpuData}
+					color="#22c55e"
+					secondaryColor="#86efac"
+					primaryLabel="Live CPU"
+					secondaryLabel="Moving avg"
+					unit="%"
+				/>
+			</div>
+			<div className="xl:col-span-4">
+				<TrendCard
+					title="Heap memory"
+					description="Theo dõi áp lực bộ nhớ heap trên JVM."
+					icon={HardDrive}
+					data={memoryData}
+					color="#8b5cf6"
+					secondaryColor="#c4b5fd"
+					primaryLabel="Heap usage"
+					secondaryLabel="Moving avg"
+					unit="MB"
+				/>
+			</div>
+			<div className="xl:col-span-4">
+				<TrendCard
+					title="Request volume"
+					description="Xu hướng request count để quan sát tải hệ thống."
+					icon={Activity}
+					data={requestData}
+					color="#0ea5e9"
+					secondaryColor="#7dd3fc"
+					primaryLabel="Requests"
+					secondaryLabel="Moving avg"
+					unit=""
+					chartType="line"
+				/>
+			</div>
+		</div>
+	);
+}
+
+export function Dashboard() {
 	const {
 		data: sysSummary,
 		isLoading: isSysSummaryLoading,
@@ -573,42 +1271,40 @@ export function Dashboard() {
 		staleTime: 10_000,
 	});
 
+	const memoryMaxMb = fmtBytesToMb(sysSummary?.memory?.maxBytes ?? 0);
+
 	return (
 		<>
 			<Header fixed />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
-				<div className="space-y-4">
-					<div className="flex items-end justify-between">
-						<div>
-							<h3 className="text-2xl font-bold">Tình trạng hệ thống</h3>
-							<p className="text-muted-foreground text-sm">
-								Tổng quan về hiệu suất và sức khỏe hệ thống Bit Learning
-							</p>
-						</div>
-					</div>
+			<div className="flex flex-1 flex-col gap-6 p-8">
+				<SystemHero summary={sysSummary} health={sysHealth} />
 
-					<SystemSummaryCards
-						data={sysSummary}
-						isLoading={isSysSummaryLoading}
-						isError={isSysSummaryError}
-					/>
+				<SummaryCards
+					data={sysSummary}
+					isLoading={isSysSummaryLoading}
+					isError={isSysSummaryError}
+				/>
 
-					<div className="grid gap-4 lg:grid-cols-2">
-						<SystemHealthPanel
+				<div className="grid gap-4 xl:grid-cols-12">
+					<div className="xl:col-span-7">
+						<HealthOverviewCard
 							data={sysHealth}
 							isLoading={isSysHealthLoading}
 							isError={isSysHealthError}
 						/>
-						<SystemTrendsCharts
-							data={sysTrends}
-							isLoading={isSysTrendsLoading}
-						/>
+					</div>
+					<div className="xl:col-span-5">
+						<RuntimeSignalsCard summary={sysSummary} />
 					</div>
 				</div>
-			</Main>
 
-			{showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
+				<SystemTrendsSection
+					data={sysTrends}
+					isLoading={isSysTrendsLoading}
+					memoryMaxMb={memoryMaxMb}
+				/>
+			</div>
 		</>
 	);
 }

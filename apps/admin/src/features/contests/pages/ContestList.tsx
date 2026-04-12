@@ -102,7 +102,7 @@ const ContestListPage: React.FC = () => {
 		<>
 			<Header />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<div className="flex justify-between items-center mb-8">
 					<div>
 						<h2 className="text-2xl font-bold">Quản lý cuộc thi</h2>
@@ -218,7 +218,7 @@ const ContestListPage: React.FC = () => {
 					itemName={contestToDelete?.title}
 					isPending={isDeleting}
 				/>
-			</Main>
+			</div>
 		</>
 	);
 };

@@ -231,7 +231,7 @@ export const CourseDetailPage: React.FC = () => {
 		<>
 			<Header fixed />
 
-			<Main className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-6 p-8">
 				<Button
 					variant="link"
 					size="lg"
@@ -598,7 +598,7 @@ export const CourseDetailPage: React.FC = () => {
 					}
 					confirmLabel="Xóa"
 				/>
-			</Main>
+			</div>
 		</>
 	);
 };
