@@ -64,25 +64,18 @@ const menuItems: MenuItem[] = [
   },
   {
     id: "exams",
-    label: "Đề thi",
+    label: "Quản lí đề thi",
     icon: FileText,
     path: "/mentor/exam/my",
     matchPaths: ["/mentor/exam"],
   },
   {
     id: "questions",
-    label: "Câu hỏi của tôi",
+    label: "Quản lí câu hỏi",
     icon: FileQuestion,
     path: "/mentor/question/my",
     matchPaths: ["/mentor/question/my", "/mentor/question/create"],
     matchSegmentBase: "/mentor/question/",
-  },
-  {
-    id: "my-requests",
-    label: "Yêu cầu duyệt câu hỏi",
-    icon: FileCheck,
-    path: "/mentor/question/my-requests",
-    matchPaths: ["/mentor/question/my-requests"],
   },
   {
     id: "my-slides",
