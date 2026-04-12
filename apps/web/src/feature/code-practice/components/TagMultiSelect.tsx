@@ -41,7 +41,6 @@ const TagMultiSelect: React.FC<TagMultiSelectProps> = ({
     onChange(value.filter((v) => v !== id));
   };
 
-  // Lấy name từ id để hiển thị
   const getTagName = (id: string) => allTags.find((t) => t.id === id)?.name ?? id;
 
   return (
