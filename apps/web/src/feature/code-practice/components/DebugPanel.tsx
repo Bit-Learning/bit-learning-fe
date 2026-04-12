@@ -110,7 +110,7 @@ export const DebugPanel: React.FC<DebugPanelProps> = ({
 			if (!result) return;
 			const clamped = Math.max(0, Math.min(idx, totalSteps - 1));
 			setCurrentIdx(clamped);
-			onStepChange?.(result.steps[clamped]);
+			onStepChange?.(result.steps[clamped] ?? null);
 		},
 		[result, totalSteps, onStepChange],
 	);
