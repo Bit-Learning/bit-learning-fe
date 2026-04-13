@@ -488,20 +488,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
                     jsonError ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-primary",
                   )}
                 />
-                {jsonError && <p className="text-sm text-red-500">❌ {jsonError}</p>}
-                <div className="bg-blue-50 border border-blue-200 p-4 rounded-lg text-sm text-blue-700 space-y-1">
-                  <p className="font-semibold mb-1.5">Hướng dẫn:</p>
-                  <p>
-                    • Mỗi test case cần có <code className="bg-blue-100 px-1 rounded">input</code> và{" "}
-                    <code className="bg-blue-100 px-1 rounded">expectedOutput</code>
-                  </p>
-                  <p>
-                    • <code className="bg-blue-100 px-1 rounded">isSample: true</code> để hiển thị cho người dùng
-                  </p>
-                  <p>
-                    • Phân tách nhiều dòng bằng <code className="bg-blue-100 px-1 rounded">\n</code>
-                  </p>
-                </div>
+                {jsonError && <p className="text-sm text-red-500"> {jsonError}</p>}
               </div>
             )}
 
@@ -577,20 +564,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
                   <span className="text-sm font-medium text-gray-700">Thay thế test cases hiện có</span>
                 </label>
 
-                {jsonError && <p className="text-sm text-red-500">❌ {jsonError}</p>}
-
-                <div className="bg-amber-50 border border-amber-200 p-4 rounded-lg text-sm text-amber-700 space-y-1">
-                  <p className="font-semibold mb-1.5">Định dạng file hỗ trợ:</p>
-                  <p>
-                    • <strong>.json</strong>: Mảng JSON với các trường input, expectedOutput, isSample
-                  </p>
-                  <p>
-                    • <strong>.zip</strong>: Chứa các cặp file .in và .out
-                  </p>
-                  <p>
-                    • <strong>.txt</strong>: Định dạng phân tách theo dòng
-                  </p>
-                </div>
+                {jsonError && <p className="text-sm text-red-500">{jsonError}</p>}
               </div>
             )}
           </CardContent>

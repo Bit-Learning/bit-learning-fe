@@ -16,10 +16,10 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
   const submission = submissionData?.data;
   const getLanguageLabel = (lang: Language): string => {
     const labels: Record<Language, string> = {
-      [Language.PYTHON]: "Python 3.10",
-      [Language.CPP]: "C++ 17",
-      [Language.JAVA]: "Java 17",
-      [Language.JAVASCRIPT]: "JavaScript (Node.js)",
+      [Language.PYTHON]: "Python",
+      [Language.CPP]: "C++",
+      [Language.JAVA]: "Java",
+      [Language.JAVASCRIPT]: "JavaScript",
     };
     return labels[lang] || lang;
   };

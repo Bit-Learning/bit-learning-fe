@@ -165,7 +165,7 @@ const ContestProblemsContent: React.FC = () => {
                   </td>
                   <td className="px-4 py-4">
                     <div className="flex flex-col gap-1">
-                      <span className="font-bold text-md truncate block">{problem.title}</span>{" "}
+                      <span className="font-bold text-md block">{problem.title}</span>{" "}
                       <div className="flex items-center gap-2">
                         <span className={`text-xs font-bold uppercase ${getDifficultyColor(problem.difficulty)}`}>
                           {getDifficultyLabel(problem.difficulty)}

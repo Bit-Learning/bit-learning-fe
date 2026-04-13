@@ -71,16 +71,6 @@ const ContestSubmissionsContent: React.FC = () => {
     });
   };
 
-  const getLanguageLabel = (lang: Language): string => {
-    const labels: Record<Language, string> = {
-      [Language.PYTHON]: "Python 3.10",
-      [Language.CPP]: "C++ 17",
-      [Language.JAVA]: "Java 17",
-      [Language.JAVASCRIPT]: "JavaScript (Node.js)",
-    };
-    return labels[lang] ?? lang;
-  };
-
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-[calc(100vh-120px)]">
