@@ -50,14 +50,19 @@ function verdictToSubmissionStatus(
 ): SubmissionStatus {
 	switch (verdict) {
 		case "AC":
+		case "ACCEPTED":
 			return SubmissionStatus.ACCEPTED;
 		case "WA":
+		case "WRONG_ANSWER":
 			return SubmissionStatus.WRONG_ANSWER;
 		case "TLE":
+		case "TIME_LIMIT_EXCEEDED":
 			return SubmissionStatus.TIME_LIMIT_EXCEEDED;
 		case "MLE":
+		case "MEMORY_LIMIT_EXCEEDED":
 			return SubmissionStatus.RUNTIME_ERROR;
 		case "RE":
+		case "RUNTIME_ERROR":
 			return SubmissionStatus.RUNTIME_ERROR;
 		case "CE":
 		case "COMPILE_ERROR":
