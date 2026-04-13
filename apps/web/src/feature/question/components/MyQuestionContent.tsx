@@ -441,10 +441,7 @@ const MyQuestionsContent: React.FC = () => {
 											<tr
 												key={question.id}
 												onClick={() =>
-													navigate({
-														to: "/mentor/question/$id/",
-														params: { id: question.id.toString() },
-													})
+													navigate({ to: `/mentor/question/${question.id}` })
 												}
 												className={cn(
 													"cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors",
@@ -505,8 +502,7 @@ const MyQuestionsContent: React.FC = () => {
 															onClick={(e) => {
 																e.stopPropagation();
 																navigate({
-																	to: "/mentor/question/$id/",
-																	params: { id: question.id.toString() },
+																	to: `/mentor/question/${question.id}`,
 																});
 															}}
 														>
@@ -521,8 +517,7 @@ const MyQuestionsContent: React.FC = () => {
 																	onClick={(e) => {
 																		e.stopPropagation();
 																		navigate({
-																			to: "/mentor/question/$id/edit",
-																			params: { id: question.id.toString() },
+																			to: `/mentor/question/${question.id}/edit`,
 																		});
 																	}}
 																>
