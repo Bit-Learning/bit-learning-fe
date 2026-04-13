@@ -13,7 +13,6 @@
 			"!**/src/public/**/*",
 			"!**/dist/**/*",
 			"!**/node_modules/**/*",
-			"!**/packages",
 			"!apps/web/src/routeTree.gen.ts",
 			"!apps/admin/src/routeTree.gen.ts"
 		]
@@ -23,7 +22,12 @@
 		"indentStyle": "tab"
 	},
 	"assist": {
-		"actions": { "source": { "organizeImports": "off", "recommended": true } }
+		"actions": {
+			"source": {
+				"organizeImports": "off",
+				"recommended": true
+			}
+		}
 	},
 	"linter": {
 		"enabled": true,

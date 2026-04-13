@@ -8,7 +8,15 @@
 
 @plugin "@tailwindcss/typography";
 @plugin 'tailwind-scrollbar';
-@plugin "daisyui";
+
+@plugin "daisyui" {
+  themes: light --default, dark --prefersdark;
+  root: ":root";
+  include: ;
+  exclude: ;
+  prefix: ;
+  logs: true;
+}
 
 @custom-variant dark (&:is(.dark *));
 
