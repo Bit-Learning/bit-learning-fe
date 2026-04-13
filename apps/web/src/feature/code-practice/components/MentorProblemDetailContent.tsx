@@ -109,7 +109,6 @@ const MentorProblemDetailContent: React.FC = () => {
           </div>
           <div className="flex items-center gap-3">
             <Button
-              variant="outline"
               onClick={() => navigate({ to: `/mentor/problem/${problemId}/edit` })}
               className="flex items-center gap-2 bg-blue-600 text-white p-5"
             >

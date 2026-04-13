@@ -8,7 +8,7 @@ import { useQuestion, useDeleteQuestion } from "../queries/useQuestion";
 import MediaUploadPanel from "./MediaUploadPanel";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { getTypeBadge, getStatusBadge, getDifficultyBadge } from "../utils/question.utils";
-import { type QuestionResponse } from "../types/question.type";
+import { ApprovalStatus, type QuestionResponse } from "../types/question.type";
 
 interface DetailModalProps {
   question?: QuestionResponse;
@@ -68,7 +68,8 @@ export function DetailModal({
                 )}
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                {question && (
+                {(question?.approvalStatus == ApprovalStatus.NONE ||
+                  question?.approvalStatus == ApprovalStatus.REJECTED) && (
                   <>
                     <Button
                       variant="default"

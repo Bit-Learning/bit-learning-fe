@@ -150,9 +150,16 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       tags: data.tags,
     };
 
+    const templatePayload: GenerateTemplateFormData = {
+      functionName: data.functionName,
+      returnType: data.returnType,
+      parameters: data.parameters,
+    };
+
     if (isEditMode) {
       try {
         await updateProblemMutation.mutateAsync({ problemId: problemId!, data: problemPayload });
+        await generateTemplatesMutation.mutateAsync({ problemId: problemId!, data: templatePayload });
         navigate({ to: "/mentor/problem" });
       } catch (err) {
         console.error(err);
@@ -170,12 +177,6 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       const response = await createProblemMutation.mutateAsync(problemPayload);
       const newProblemId = response.data.data?.id;
       if (!newProblemId) throw new Error("Không thể lấy ID bài toán");
-
-      const templatePayload: GenerateTemplateFormData = {
-        functionName: data.functionName,
-        returnType: data.returnType,
-        parameters: data.parameters,
-      };
 
       await generateTemplatesMutation.mutateAsync({ problemId: newProblemId, data: templatePayload });
       await bulkCreateTestCasesMutation.mutateAsync({
@@ -368,98 +369,102 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
               </div>
             </div>
 
-            {!isEditMode && (
-              <div className="space-y-6">
-                <div className="border-b-2 border-gray-200 pb-4">
-                  <h2 className="text-2xl font-bold text-gray-900">Tạo mẫu Code tự động</h2>
-                  <p className="text-sm text-gray-600 mt-1">Python, Java, C++, JavaScript</p>
-                </div>
-
-                <div>
-                  <Label htmlFor="functionName" className="text-base font-semibold text-gray-900 mb-3 block">
-                    Tên hàm <span className="text-red-500">*</span>
-                  </Label>
-                  <Input
-                    id="functionName"
-                    {...form.register("functionName")}
-                    placeholder="solution"
-                    className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
-                  />
-                  {form.formState.errors.functionName && (
-                    <p className="text-sm text-red-500 mt-2">{form.formState.errors.functionName.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <Label htmlFor="returnType" className="text-base font-semibold text-gray-900 mb-3 block">
-                    Kiểu dữ liệu trả về <span className="text-red-500">*</span>
-                  </Label>
-                  <select
-                    id="returnType"
-                    {...form.register("returnType")}
-                    className="h-12 text-base block w-full rounded-md border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  >
-                    {Object.values(ParamType).map((type) => (
-                      <option key={type} value={type}>
-                        {ParamTypeInfo[type].displayName} ({ParamTypeInfo[type].javaType})
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                <div>
-                  <div className="flex items-center justify-between mb-4">
-                    <Label className="text-base font-semibold text-gray-900">
-                      Tham số đầu vào <span className="text-red-500">*</span>
-                    </Label>
-                    <Button
-                      type="button"
-                      onClick={() => append({ name: "", type: ParamType.INT })}
-                      className="cursor-pointer h-9 px-5 bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold"
-                    >
-                      + Thêm tham số
-                    </Button>
-                  </div>
-                  <div className="space-y-4">
-                    {fields.map((field, index) => (
-                      <div key={field.id} className="flex gap-4 items-start">
-                        <div className="flex-1">
-                          <Input
-                            {...form.register(`parameters.${index}.name`)}
-                            placeholder="Tên tham số (vd: nums, target)"
-                            className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
-                          />
-                        </div>
-                        <div className="flex-1">
-                          <select
-                            {...form.register(`parameters.${index}.type`)}
-                            className="h-12 text-base block w-full rounded-md border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                          >
-                            {Object.values(ParamType).map((type) => (
-                              <option key={type} value={type}>
-                                {ParamTypeInfo[type].displayName}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-                        <Button
-                          type="button"
-                          onClick={() => remove(index)}
-                          isDisabled={fields.length === 1}
-                          variant="outline"
-                          className="cursor-pointer h-12 px-5 text-base font-semibold text-red-600 border-2 border-gray-300 hover:bg-red-50"
-                        >
-                          Xóa
-                        </Button>
-                      </div>
-                    ))}
-                  </div>
-                  {form.formState.errors.parameters && (
-                    <p className="text-sm text-red-500 mt-2">{form.formState.errors.parameters.message}</p>
-                  )}
-                </div>
+            <div className="space-y-6">
+              <div className="border-b-2 border-gray-200 pb-4">
+                <h2 className="text-2xl font-bold text-gray-900">
+                  {isEditMode ? "Cấu hình Code Templates" : "Tạo mẫu Code tự động"}
+                </h2>
+                <p className="text-sm text-gray-600 mt-1">
+                  {isEditMode
+                    ? "Cập nhật cấu hình để tạo lại templates cho Python, Java, C++, JavaScript"
+                    : "Python, Java, C++, JavaScript"}
+                </p>
               </div>
-            )}
+
+              <div>
+                <Label htmlFor="functionName" className="text-base font-semibold text-gray-900 mb-3 block">
+                  Tên hàm <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="functionName"
+                  {...form.register("functionName")}
+                  placeholder="solution"
+                  className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                />
+                {form.formState.errors.functionName && (
+                  <p className="text-sm text-red-500 mt-2">{form.formState.errors.functionName.message}</p>
+                )}
+              </div>
+
+              <div>
+                <Label htmlFor="returnType" className="text-base font-semibold text-gray-900 mb-3 block">
+                  Kiểu dữ liệu trả về <span className="text-red-500">*</span>
+                </Label>
+                <select
+                  id="returnType"
+                  {...form.register("returnType")}
+                  className="h-12 text-base block w-full rounded-md border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                >
+                  {Object.values(ParamType).map((type) => (
+                    <option key={type} value={type}>
+                      {ParamTypeInfo[type].displayName} ({ParamTypeInfo[type].javaType})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-4">
+                  <Label className="text-base font-semibold text-gray-900">
+                    Tham số đầu vào <span className="text-red-500">*</span>
+                  </Label>
+                  <Button
+                    type="button"
+                    onClick={() => append({ name: "", type: ParamType.INT })}
+                    className="cursor-pointer h-9 px-5 bg-orange-600 hover:bg-orange-700 text-white text-base font-semibold"
+                  >
+                    + Thêm tham số
+                  </Button>
+                </div>
+                <div className="space-y-4">
+                  {fields.map((field, index) => (
+                    <div key={field.id} className="flex gap-4 items-start">
+                      <div className="flex-1">
+                        <Input
+                          {...form.register(`parameters.${index}.name`)}
+                          placeholder="Tên tham số (vd: nums, target)"
+                          className="h-12 text-base border-2 border-gray-300 focus:border-blue-500"
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <select
+                          {...form.register(`parameters.${index}.type`)}
+                          className="h-12 text-base block w-full rounded-md border-2 border-gray-300 px-4 py-2 focus:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                          {Object.values(ParamType).map((type) => (
+                            <option key={type} value={type}>
+                              {ParamTypeInfo[type].displayName}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+                      <Button
+                        type="button"
+                        onClick={() => remove(index)}
+                        isDisabled={fields.length === 1}
+                        variant="outline"
+                        className="cursor-pointer h-12 px-5 text-base font-semibold text-red-600 border-2 border-gray-300 hover:bg-red-50"
+                      >
+                        Xóa
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+                {form.formState.errors.parameters && (
+                  <p className="text-sm text-red-500 mt-2">{form.formState.errors.parameters.message}</p>
+                )}
+              </div>
+            </div>
 
             {!isEditMode && (
               <TestCaseInput
