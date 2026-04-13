@@ -118,12 +118,14 @@ export const usersColumns: ColumnDef<User>[] = [
 				return null;
 			}
 
+			console.log("userType", userType);
+
 			return (
-				<div className="flex items-center gap-x-2">
+				<div className="flex items-center justify-center gap-x-2">
 					{userType.icon && (
 						<userType.icon size={16} className="text-muted-foreground" />
 					)}
-					<span className="text-sm">{userType.label}</span>
+					{/* <span className="text-sm">{userType.label}</span> */}
 				</div>
 			);
 		},
