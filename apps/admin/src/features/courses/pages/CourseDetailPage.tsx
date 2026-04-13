@@ -231,7 +231,7 @@ export const CourseDetailPage: React.FC = () => {
 		<>
 			<Header fixed />
 
-			<div className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<Button
 					variant="link"
 					size="lg"

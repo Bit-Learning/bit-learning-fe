@@ -114,7 +114,7 @@ const CurriculumListPage: React.FC = () => {
 			<>
 				<Header />
 
-				<div className="flex flex-1 flex-col gap-6 p-8">
+				<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 					<div className="flex justify-between items-center">
 						<Skeleton className="h-8 w-56" />
 						<Skeleton className="h-9 w-36" />
@@ -135,7 +135,7 @@ const CurriculumListPage: React.FC = () => {
 		<>
 			<Header />
 
-			<div className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				{/* ── Page header ── */}
 				<div className="flex items-start justify-between gap-4">
 					<div>
@@ -161,29 +161,25 @@ const CurriculumListPage: React.FC = () => {
 					<div className="grid grid-cols-2 sm:grid-cols-2 gap-3">
 						<Card className="border shadow-sm">
 							<CardContent className="flex items-center gap-3 p-4">
-								<div className="h-9 w-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-									<GraduationCap className="h-5 w-5 text-primary" />
-								</div>
 								<div>
+									<p className="text-xs text-muted-foreground mt-1">
+										Tổng số chương trình
+									</p>
 									<p className="text-2xl font-bold leading-none">
 										{totalCurriculums}
-									</p>
-									<p className="text-xs text-muted-foreground mt-1">
-										Chương trình
 									</p>
 								</div>
 							</CardContent>
 						</Card>
 						<Card className="border shadow-sm">
 							<CardContent className="flex items-center gap-3 p-4">
-								<div className="h-9 w-9 rounded-lg bg-blue-500/10 flex items-center justify-center shrink-0">
-									<BookOpen className="h-5 w-5 text-blue-500" />
-								</div>
 								<div>
+									<p className="text-xs text-muted-foreground mt-1">
+										Tổng số môn học
+									</p>
 									<p className="text-2xl font-bold leading-none">
 										{totalSubjects}
 									</p>
-									<p className="text-xs text-muted-foreground mt-1">Môn học</p>
 								</div>
 							</CardContent>
 						</Card>

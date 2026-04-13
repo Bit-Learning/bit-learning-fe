@@ -82,13 +82,10 @@ export const CourseListPage: React.FC = () => {
 		<>
 			<Header fixed />
 
-			<div className="flex flex-1 flex-col gap-6 p-8">
-				<div className="flex flex-wrap items-end justify-between gap-2 mb-6">
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
+				<div className="flex flex-wrap items-end justify-between gap-2">
 					<div>
 						<h1 className="text-2xl font-bold">Khóa học của tôi</h1>
-						<p className="text-muted-foreground text-sm">
-							Quản lý và chỉnh sửa các khóa học
-						</p>
 					</div>
 					<Button size="sm" onClick={() => navigate({ to: "/courses/create" })}>
 						<Plus className="mr-0 h-4 w-4" />
@@ -96,55 +93,37 @@ export const CourseListPage: React.FC = () => {
 					</Button>
 				</div>
 
-				<div className="grid grid-cols-1 gap-4 sm:grid-cols-1 xl:grid-cols-3">
-					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-						<div className="flex items-start justify-between">
-							<div>
-								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-									Tổng số khóa học
-								</p>
-								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-									{stats.total}
-								</p>
-							</div>
-							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-blue-50 text-blue-600 ring-1 ring-inset ring-blue-100 dark:bg-blue-500/10 dark:text-blue-400 dark:ring-blue-500/20">
-								<BookOpen className="h-5 w-5" />
-							</div>
-						</div>
-					</div>
+				{/* <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-3">
+          {[
+            {
+              label: "Tổng khóa học",
+              value: stats.total,
+            },
+            {
+              label: "Đã xuất bản",
+              value: stats.published,
+            },
+            {
+              label: "Chưa xuất bản",
+              value: stats.pending,
+            },
+          ].map((item) => (
+            <div
+              key={item.label}
+              className="group flex items-center justify-between rounded-xl border border-slate-200 bg-white px-4 py-3 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900"
+            >
+              <div className="space-y-1">
+                <p className="text-xs font-medium text-slate-500 dark:text-slate-400">
+                  {item.label}
+                </p>
+                <p className="text-lg font-semibold text-slate-900 dark:text-slate-50">
+                  {item.value}
+                </p>
+              </div>
 
-					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-						<div className="flex items-start justify-between">
-							<div>
-								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-									Đã xuất bản
-								</p>
-								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-									{stats.published}
-								</p>
-							</div>
-							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-emerald-50 text-emerald-600 ring-1 ring-inset ring-emerald-100 dark:bg-emerald-500/10 dark:text-emerald-400 dark:ring-emerald-500/20">
-								<CheckCircle2 className="h-5 w-5" />
-							</div>
-						</div>
-					</div>
-
-					<div className="group rounded-2xl border border-slate-200 bg-white p-4 shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md dark:border-slate-800 dark:bg-slate-900">
-						<div className="flex items-start justify-between">
-							<div>
-								<p className="text-sm font-medium text-slate-500 dark:text-slate-400">
-									Chưa xuất bản
-								</p>
-								<p className="mt-2 text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-									{stats.pending}
-								</p>
-							</div>
-							<div className="flex h-11 w-11 items-center justify-center rounded-xl bg-amber-50 text-amber-600 ring-1 ring-inset ring-amber-100 dark:bg-amber-500/10 dark:text-amber-400 dark:ring-amber-500/20">
-								<BookOpen className="h-5 w-5" />
-							</div>
-						</div>
-					</div>
-				</div>
+            </div>
+          ))}
+        </div> */}
 
 				{isLoading && (
 					<div className="flex h-100 items-center justify-center">

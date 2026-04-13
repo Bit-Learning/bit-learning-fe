@@ -88,7 +88,20 @@ export const usersColumns: ColumnDef<User>[] = [
 		),
 		cell: ({ row }) => {
 			const activated = row.getValue("activated") as boolean;
+			const accountStatus = row.original.accountStatus;
 			const badgeColor = activatedStatuses.get(activated);
+			if (accountStatus === "DISABLED") {
+				return (
+					<div className="flex space-x-2">
+						<Badge
+							variant="outline"
+							className="border-red-200 bg-red-50 text-red-700"
+						>
+							Bị khóa
+						</Badge>
+					</div>
+				);
+			}
 			return (
 				<div className="flex space-x-2">
 					<Badge variant="outline" className={cn("capitalize", badgeColor)}>
@@ -117,8 +130,6 @@ export const usersColumns: ColumnDef<User>[] = [
 			if (!userType) {
 				return null;
 			}
-
-			console.log("userType", userType);
 
 			return (
 				<div className="flex items-center justify-center gap-x-2">
@@ -166,102 +177,6 @@ export const usersColumns: ColumnDef<User>[] = [
 					{config.label}
 				</Badge>
 			);
-		},
-	},
-	{
-		accessorKey: "specialties",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Chuyên môn" />
-		),
-		cell: ({ row }) => {
-			const specialties = row.original.specialties ?? [];
-			if (!specialties.length) {
-				return <span className="text-xs text-muted-foreground">-</span>;
-			}
-			return (
-				<div className="flex flex-wrap gap-1">
-					{specialties.slice(0, 3).map((s) => (
-						<Badge
-							key={s}
-							variant="outline"
-							className="text-[10px] font-normal"
-						>
-							{s}
-						</Badge>
-					))}
-					{specialties.length > 3 && (
-						<span className="text-[10px] text-muted-foreground">
-							+{specialties.length - 3}
-						</span>
-					)}
-				</div>
-			);
-		},
-	},
-	{
-		accessorKey: "company",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Đơn vị công tác" />
-		),
-		cell: ({ row }) => {
-			const company = row.original.company;
-			return (
-				<span className="text-xs text-muted-foreground">
-					{company && company.trim().length > 0 ? company : "-"}
-				</span>
-			);
-		},
-	},
-	{
-		accessorKey: "yearsOfExperience",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Kinh nghiệm" />
-		),
-		cell: ({ row }) => {
-			const years = row.original.yearsOfExperience;
-			if (!years) {
-				return (
-					<div className="text-center text-xs text-muted-foreground">-</div>
-				);
-			}
-			return <div className="text-center text-xs font-medium">{years} năm</div>;
-		},
-	},
-	{
-		accessorKey: "featured",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Nổi bật" />
-		),
-		cell: ({ row }) => {
-			const featured = row.original.featured;
-			if (!featured) {
-				return <span className="text-xs text-muted-foreground">-</span>;
-			}
-			return (
-				<Badge variant="outline" className="text-[10px] font-medium">
-					Featured
-				</Badge>
-			);
-		},
-	},
-	{
-		accessorKey: "studentsCount",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Học viên" />
-		),
-		cell: ({ row }) => {
-			const students = row.original.studentsCount ?? 0;
-			return <div className="text-center text-xs">{students}</div>;
-		},
-	},
-	{
-		accessorKey: "coursesCount",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Khoá học" />
-		),
-		cell: ({ row }) => {
-			const courses = row.original.coursesCount ?? 0;
-			return <div className="text-center text-xs">{courses}</div>;
 		},
 	},
 	{
