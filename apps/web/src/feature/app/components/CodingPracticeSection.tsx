@@ -40,7 +40,7 @@ const CodingPracticeSection: React.FC = () => {
 				</ul>
 				<Button
 					size="xl"
-					className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 shadow-xl"
+					className="px-8 py-4 bg-slate-700 text-white rounded-xl font-bold hover:bg-slate-800 shadow-xl glass"
 				>
 					Mở AI Lab ngay
 				</Button>

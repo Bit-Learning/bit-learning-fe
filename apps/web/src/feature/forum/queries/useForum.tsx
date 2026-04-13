@@ -68,10 +68,11 @@ export const useFeaturedForumPosts = (limit = 4) =>
 		queryFn: () => postApi.getFeaturedPosts(limit),
 	});
 
-export const useTrendingForumPosts = (limit = 8) =>
+export const useTrendingForumPosts = (limit = 8, enabled = true) =>
 	useQuery({
 		queryKey: ["forum-trending-posts", limit],
 		queryFn: () => postApi.getTrendingPosts(limit),
+		enabled,
 	});
 
 export const useRecommendedForumPosts = (limit = 6, enabled = true) =>
@@ -81,7 +82,7 @@ export const useRecommendedForumPosts = (limit = 6, enabled = true) =>
 		enabled,
 	});
 
-export const useMostViewedForumPosts = (limit = 5) =>
+export const useMostViewedForumPosts = (limit = 5, enabled = true) =>
 	useQuery({
 		queryKey: ["forum-most-viewed-posts", limit],
 		queryFn: () =>
@@ -91,13 +92,15 @@ export const useMostViewedForumPosts = (limit = 5) =>
 				sort: "most_viewed",
 			}),
 		select: (response) => response.data ?? [],
+		enabled,
 	});
 
-export const useLatestForumList = (limit = 5) =>
+export const useLatestForumList = (limit = 5, enabled = true) =>
 	useQuery({
 		queryKey: ["forum-latest-list", limit],
 		queryFn: () => postApi.getLatestPosts({ page: 0, size: limit }),
 		select: (response) => response.data ?? [],
+		enabled,
 	});
 
 export const useForumCategories = () =>
