@@ -8,6 +8,12 @@ import NumberTicker from "@workspace/ui/components/custom/ticker";
 
 import BlueButton from "../../../shared/components/button/BlueButton";
 
+const getRandomAvatar = () => {
+	const gender = Math.random() > 0.5 ? "men" : "women";
+	const id = Math.floor(Math.random() * 100);
+	return `https://randomuser.me/api/portraits/${gender}/${id}.jpg`;
+};
+
 const HeroSection: React.FC = () => {
 	return (
 		<section
@@ -41,24 +47,24 @@ const HeroSection: React.FC = () => {
 							<img
 								className="w-full h-full object-cover"
 								alt="Student avatar"
-								src="https://lh3.googleusercontent.com/aida-public/AB6AXuC-1jf0tv3n3b_laS8jbXy_mzNbi6zdUUO3P6H-TQ8NdCSI0ClNr2T9TUgekKxQY8cc8sZ79cR_rhldDZQiBXSpPdC47sVrBAOJD9AklM3FRUOn8n8jquUBkdmJS7UGB6xrKs2yENeXyCkkguKlE5DBXovrq27ytIbo-27vKpR1R_2rXkJOjRBxHeYVmcQEqPy-N6OCvrnV75rlckB0Mta2cay8QkoGpFdzb-EK4IXWdDR1DmY2sOwWxA6ABvrFFCIck3Pj_IVoRmM"
+								src={getRandomAvatar()}
 							/>
 						</div>
 						<div className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
 							<img
 								className="w-full h-full object-cover"
 								alt="Student avatar"
-								src="https://lh3.googleusercontent.com/aida-public/AB6AXuDilz3TUdy-dz42VEusSZzAd00KdjdeumMxXMImHQSrwk_x6ysT-S63vuI3qEju3MaLp_DBD7yxcBFpbvxOjmVA_S2zRxPYMmsH-fpsqIJfpLebPtiUNTiCJBWKFS064Ih41D5yObDO3mmA27N2edR-BN-YrS2gopJmPldOM5a_KUQvKPCVG5yOBIU7lSwh4cr79bFIgCJm2DKmqvH2Zoqycg-R4ki85ctQ51UpGXECWrpxND_N_qJRZlVFVy_xHg4iETOjW4Y_y3A"
+								src={getRandomAvatar()}
 							/>
 						</div>
 						<div className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
 							<img
 								className="w-full h-full object-cover"
 								alt="Student avatar"
-								src="https://lh3.googleusercontent.com/aida-public/AB6AXuDBiSePN4-jkTXmBTM2QHOwpn2pgQsv96Pae8vSkYYQguVY6zu1kPfDk6q1rpb915r8a5--_ym1gZFuOEWwpCJzWzd2VvBt_qGZeIueGMOtV4UuhLEBfHg-Bu34q9xrUcOTuQ73xUBUNijG0gKDh0SOTZx_GGdzY3v1TgAfBVWQ6EFtKdSt6Jm_KnXtbeDqHcfPOnvlMnwdgGv-L8H1NVTixat0FSvgiSDm7N_i8GSuaCbuHI5WzOija796W5SEtwVIChhKn2Dek-I"
+								src={getRandomAvatar()}
 							/>
 						</div>
-						<div className="w-10 h-10 rounded-full border-2 border-white bg-primary flex items-center justify-center text-white text-[10px] font-bold">
+						<div className="w-10 h-10 rounded-full border-2 border-white bg-primary flex items-center justify-center text-white text-[10px] font-bold glass">
 							+10k
 						</div>
 					</div>
