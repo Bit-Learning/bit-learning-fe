@@ -5,7 +5,6 @@ import {
   ArrowRight,
   Check,
   CheckCircle,
-  Info,
   Rocket,
   Shuffle,
   ArrowUpDown,
@@ -145,14 +144,14 @@ const GenerateExamFlow: React.FC = () => {
     <div className="flex items-center gap-4 mb-8">
       <div className="flex items-center gap-2">
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-md font-bold ${
             currentStep === "check" ? "bg-blue-800 text-white" : "bg-green-500 text-white"
           }`}
         >
           {currentStep !== "check" ? <Check className="h-4 w-4" /> : "1"}
         </div>
         <span
-          className={`text-sm font-bold ${currentStep === "check" ? "text-slate-900 dark:text-slate-100" : "text-green-600"}`}
+          className={`text-md font-bold ${currentStep === "check" ? "text-slate-900 dark:text-slate-100" : "text-green-600"}`}
         >
           Kiểm tra dữ liệu
         </span>
@@ -161,7 +160,7 @@ const GenerateExamFlow: React.FC = () => {
 
       <div className="flex items-center gap-2">
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-md font-bold ${
             currentStep === "setup"
               ? "bg-blue-800 text-white shadow-lg shadow-blue-500/20"
               : currentStep === "complete"
@@ -172,7 +171,7 @@ const GenerateExamFlow: React.FC = () => {
           {currentStep === "complete" ? <Check className="h-4 w-4" /> : "2"}
         </div>
         <span
-          className={`text-sm ${
+          className={`text-md ${
             currentStep === "setup"
               ? "font-bold text-slate-900 dark:text-slate-100"
               : currentStep === "complete"
@@ -187,7 +186,7 @@ const GenerateExamFlow: React.FC = () => {
 
       <div className={`flex items-center gap-2 ${currentStep === "complete" ? "" : "opacity-50"}`}>
         <div
-          className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-bold ${
+          className={`w-8 h-8 rounded-full flex items-center justify-center text-md font-bold ${
             currentStep === "complete"
               ? "bg-green-500 text-white"
               : "bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400"
@@ -195,7 +194,7 @@ const GenerateExamFlow: React.FC = () => {
         >
           {currentStep === "complete" ? <Check className="h-4 w-4" /> : "3"}
         </div>
-        <span className="text-sm font-medium">Hoàn tất</span>
+        <span className="text-md font-medium">Hoàn tất</span>
       </div>
     </div>
   );
@@ -229,15 +228,15 @@ const GenerateExamFlow: React.FC = () => {
             {requirements.map((req) => (
               <tr key={req.lessonId} className="hover:bg-slate-50 dark:hover:bg-slate-800/30 transition-colors">
                 <td className="px-6 py-4">
-                  <p className="text-sm font-semibold text-slate-900 dark:text-white">{req.lessonName}</p>
+                  <p className="text-md font-semibold text-slate-900 dark:text-white">{req.lessonName}</p>
                 </td>
                 <td className="px-6 py-4">
                   {req.isValid ? (
-                    <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
+                    <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-sm font-bold bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-400">
                       <CheckCircle className="h-4 w-4" /> Đạt yêu cầu
                     </span>
                   ) : (
-                    <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-xs font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
+                    <span className="inline-flex items-center gap-1.5 py-1 px-3 rounded-full text-sm font-bold bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-400">
                       <AlertCircle className="h-4 w-4" /> Thiếu câu hỏi
                     </span>
                   )}
@@ -245,7 +244,7 @@ const GenerateExamFlow: React.FC = () => {
                 <td className="px-6 py-4">
                   <div className="space-y-1">
                     {req.requirements.map((r, idx) => (
-                      <p key={idx} className="text-sm text-slate-600 dark:text-slate-400">
+                      <p key={idx} className="text-md text-slate-600 dark:text-slate-400">
                         {r.type} {r.difficulty === "EASY" ? "Dễ" : r.difficulty === "MEDIUM" ? "TB" : "Khó"}:{" "}
                         <span
                           className={`font-bold ${r.available >= r.required ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"}`}
@@ -265,26 +264,10 @@ const GenerateExamFlow: React.FC = () => {
         </table>
       </div>
 
-      {allValid ? (
-        <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-900/30 rounded-xl p-4 mb-10 flex items-center gap-3">
-          <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
-          <p className="text-sm font-bold text-green-800 dark:text-green-300">
-            ✓ Ngân hàng câu hỏi đáp ứng đủ điều kiện để sinh đề thi.
-          </p>
-        </div>
-      ) : (
-        <div className="bg-red-50 dark:bg-red-900/10 border border-red-200 dark:border-red-900/30 rounded-xl p-4 mb-10 flex items-center gap-3">
-          <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400" />
-          <p className="text-sm font-bold text-red-800 dark:text-red-300">
-            ✗ Ngân hàng câu hỏi chưa đủ. Vui lòng bổ sung câu hỏi cho các bài học còn thiếu.
-          </p>
-        </div>
-      )}
-
       <div className="flex items-center justify-between border-t border-slate-200 dark:border-slate-800 pt-8">
         <button
           onClick={() => navigate({ to: "/mentor/matrix/$id", params: { id } })}
-          className="px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2"
+          className="cursor-pointer px-6 py-2.5 text-md font-bold text-slate-600 rounded-lg border border-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4" /> Quay lại
         </button>
@@ -295,7 +278,7 @@ const GenerateExamFlow: React.FC = () => {
             setCurrentStep("setup");
           }}
           disabled={!allValid}
-          className="bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/25"
+          className="cursor-pointer bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-8 py-2.5 rounded-lg text-md font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/25"
         >
           Tiếp tục thiết lập đề thi <ArrowRight className="h-4 w-4" />
         </button>
@@ -306,7 +289,7 @@ const GenerateExamFlow: React.FC = () => {
   const renderSetupStep = () => (
     <>
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Sinh đề thi tự động</h1>
+        <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">Tạo đề thi tự động</h1>
         <p className="text-slate-600 dark:text-slate-400">
           Vui lòng hoàn tất các thông số cần thiết để hệ thống bắt đầu tạo đề.
         </p>
@@ -320,7 +303,7 @@ const GenerateExamFlow: React.FC = () => {
         </div>
         <div className="p-8 space-y-6">
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Tên đề thi</label>
+            <label className="block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">Tên đề thi</label>
             <input
               className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-900 dark:text-white font-medium outline-none"
               type="text"
@@ -330,7 +313,7 @@ const GenerateExamFlow: React.FC = () => {
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Mã đề thi</label>
+              <label className="block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">Mã đề thi</label>
               <input
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-900 dark:text-white uppercase outline-none"
                 type="text"
@@ -339,7 +322,7 @@ const GenerateExamFlow: React.FC = () => {
               />
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Thời gian làm bài
               </label>
               <div className="relative">
@@ -356,7 +339,7 @@ const GenerateExamFlow: React.FC = () => {
             </div>
           </div>
           <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+            <label className="block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">
               Tổng điểm (Từ ma trận)
             </label>
             <input
@@ -370,7 +353,7 @@ const GenerateExamFlow: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <Shuffle className="h-5 w-5 text-slate-400" />
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="text-md font-medium text-slate-700 dark:text-slate-300">
                   Xáo trộn thứ tự đáp án (MCQ)
                 </label>
               </div>
@@ -387,7 +370,7 @@ const GenerateExamFlow: React.FC = () => {
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
                 <ArrowUpDown className="h-5 w-5 text-slate-400" />
-                <label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                <label className="text-md font-medium text-slate-700 dark:text-slate-300">
                   Xáo trộn thứ tự câu hỏi
                 </label>
               </div>
@@ -405,7 +388,7 @@ const GenerateExamFlow: React.FC = () => {
 
           <div className="pt-4 border-t border-slate-100 dark:border-slate-800 grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">Loại đề thi</label>
+              <label className="block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">Loại đề thi</label>
               <select
                 value={examType}
                 onChange={(e) => setExamType(e.target.value as ExamType)}
@@ -416,12 +399,12 @@ const GenerateExamFlow: React.FC = () => {
               </select>
             </div>
             <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-2">
+              <label className="block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2">
                 Mật khẩu vào thi{" "}
                 {examType === "EXAM" ? (
                   <span className="text-red-500">*</span>
                 ) : (
-                  <span className="text-slate-400 text-xs font-normal">(tuỳ chọn)</span>
+                  <span className="text-slate-400 text-sm font-normal">(tuỳ chọn)</span>
                 )}
               </label>
               <input
@@ -440,19 +423,10 @@ const GenerateExamFlow: React.FC = () => {
         </div>
       </div>
 
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-100 dark:border-blue-900/30 rounded-xl p-4 mb-10 flex items-start gap-3">
-        <Info className="h-5 w-5 text-blue-600 dark:text-blue-400 mt-0.5" />
-        <p className="text-sm text-blue-800 dark:text-blue-300 leading-relaxed">
-          Hệ thống sẽ dựa trên cấu trúc{" "}
-          <strong className="font-bold underline decoration-blue-200">Phiên bản {selectedVersion?.versionNo}</strong> để
-          tiến hành lựa chọn ngẫu nhiên các câu hỏi từ ngân hàng đã kiểm duyệt, đảm bảo phân bổ độ khó theo yêu cầu.
-        </p>
-      </div>
-
       <div className="flex items-center justify-between pt-4">
         <button
           onClick={() => setCurrentStep("check")}
-          className="px-6 py-2.5 text-sm font-bold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2 group"
+          className="cursor-pointer px-6 py-2.5 text-md font-bold text-slate-600 rounded-lg border border-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors flex items-center gap-2"
         >
           <ArrowLeft className="h-4 w-4 group-hover:-translate-x-1 transition-transform" /> Quay lại
         </button>
@@ -489,9 +463,9 @@ const GenerateExamFlow: React.FC = () => {
             });
           }}
           disabled={!examName || !examCode || isGenerating || (examType === "EXAM" && !enrollKey.trim())}
-          className="bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-10 py-3 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/25 hover:scale-[1.02] active:scale-95"
+          className="cursor-pointer bg-blue-800 disabled:bg-slate-300 disabled:cursor-not-allowed text-white px-10 py-3 rounded-xl text-md font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/25 hover:scale-[1.02] active:scale-95"
         >
-          <Rocket className="h-5 w-5" /> Bắt đầu tạo đề thi
+          Bắt đầu tạo đề thi
         </button>
       </div>
     </>
@@ -516,7 +490,7 @@ const GenerateExamFlow: React.FC = () => {
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-slate-900 dark:text-white mb-1">Đang tạo đề thi</p>
-              <p className="text-sm text-slate-700 dark:text-slate-400">
+              <p className="text-md text-slate-700 dark:text-slate-400">
                 Hệ thống đang chọn ngẫu nhiên câu hỏi theo ma trận...
               </p>
             </div>
@@ -533,7 +507,7 @@ const GenerateExamFlow: React.FC = () => {
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-slate-900 dark:text-white mb-1">Tạo đề thi thành công!</p>
-              <p className="text-sm text-slate-500 dark:text-slate-400">Đang chuyển hướng về trang ma trận...</p>
+              <p className="text-md text-slate-500 dark:text-slate-400">Đang chuyển hướng về trang ma trận...</p>
             </div>
           </>
         )}
@@ -542,8 +516,8 @@ const GenerateExamFlow: React.FC = () => {
   );
 
   return (
-    <main className="flex-1 bg-slate-50 dark:bg-slate-950 p-8">
-      <div className="max-w-7xl mx-auto">
+    <main className="flex-1 bg-slate-50 dark:bg-slate-950 p-8 min-h-screen">
+      <div className=" mx-auto">
         {currentStep === "check" && renderCheckStep()}
         {currentStep === "setup" && renderSetupStep()}
         {currentStep === "complete" && renderCompleteStep()}

@@ -665,16 +665,6 @@ const QuizAttemptContent: React.FC = () => {
                   Bạn đã trả lời <span className="font-bold text-emerald-600">{answeredCount}</span>/
                   <span className="font-bold">{questions.length}</span> câu hỏi.
                 </p>
-                {answeredCount < questions.length && (
-                  <p className="text-amber-600 dark:text-amber-400 text-sm mt-2 font-medium">
-                    ⚠️ Bạn còn {questions.length - answeredCount} câu chưa trả lời
-                  </p>
-                )}
-                {hasUnsavedChanges && (
-                  <p className="text-blue-600 dark:text-blue-400 text-sm mt-2 font-medium">
-                    💾 Hệ thống sẽ tự động lưu trước khi nộp
-                  </p>
-                )}
               </div>
 
               <div className="flex flex-col gap-3">

@@ -22,6 +22,9 @@ import VersionFormModal from "./VersionFormModal";
 import VersionDetailModal from "./VersionDetailModal";
 import { useExamsByMatrix } from "@/feature/exam/queries/useExam";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
+import { Pagination } from "@/shared/components/Pagination";
+
+const VERSION_PAGE_SIZE = 6;
 
 const MatrixDetailContent: React.FC = () => {
   const { id } = useParams({ from: "/mentor/matrix/$id/" });
@@ -34,6 +37,7 @@ const MatrixDetailContent: React.FC = () => {
   const [detailModalOpen, setDetailModalOpen] = useState(false);
   const [selectedVersionId, setSelectedVersionId] = useState<number | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [versionPage, setVersionPage] = useState(0);
 
   const { data: matrix, isLoading } = useMatrixDetail(matrixId);
   const { data: versions } = useMatrixVersions(matrixId);
@@ -102,6 +106,12 @@ const MatrixDetailContent: React.FC = () => {
   }
 
   const sortedVersions = [...(versions || [])].sort((a, b) => b.versionNo - a.versionNo);
+  const totalVersionPages = Math.ceil(sortedVersions.length / VERSION_PAGE_SIZE);
+  const paginatedVersions = sortedVersions.slice(
+    versionPage * VERSION_PAGE_SIZE,
+    (versionPage + 1) * VERSION_PAGE_SIZE,
+  );
+  const isLastPage = versionPage === totalVersionPages - 1 || totalVersionPages === 0;
 
   return (
     <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
@@ -185,7 +195,7 @@ const MatrixDetailContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="mb-6 flex items-center justify-between border-b border-slate-300 dark:border-slate-800">
+        <div className="mb-6 flex items-center justify-between dark:border-slate-800">
           <div className="flex gap-8">
             <button
               onClick={() => setActiveTab("versions")}
@@ -218,127 +228,136 @@ const MatrixDetailContent: React.FC = () => {
         </div>
 
         {activeTab === "versions" && (
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-            {sortedVersions.map((version, index) => {
-              const isLatest = index === 0;
-              const totalQ =
-                version.matrixDetails?.reduce(
-                  (sum, d) =>
-                    sum +
-                    (d.easyMCQ || 0) +
-                    (d.mediumMCQ || 0) +
-                    (d.hardMCQ || 0) +
-                    (d.easyEssay || 0) +
-                    (d.mediumEssay || 0) +
-                    (d.hardEssay || 0),
-                  0,
-                ) || 0;
+          <>
+            <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+              {paginatedVersions.map((version, index) => {
+                const isLatest = index === 0 && versionPage === 0;
+                const totalQ =
+                  version.matrixDetails?.reduce(
+                    (sum, d) =>
+                      sum +
+                      (d.easyMCQ || 0) +
+                      (d.mediumMCQ || 0) +
+                      (d.hardMCQ || 0) +
+                      (d.easyEssay || 0) +
+                      (d.mediumEssay || 0) +
+                      (d.hardEssay || 0),
+                    0,
+                  ) || 0;
 
-              return (
-                <div
-                  key={version.id}
-                  className={`group relative overflow-hidden rounded-xl bg-white p-6 dark:bg-slate-900 ${
-                    isLatest
-                      ? "border-2 border-blue-800 shadow-md"
-                      : "border border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
-                  } transition-all`}
-                >
-                  {isLatest && (
-                    <div className="absolute right-0 top-0">
-                      <div className="bg-blue-800 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
-                        Mới nhất
+                return (
+                  <div
+                    key={version.id}
+                    className={`group relative overflow-hidden rounded-xl bg-white p-6 dark:bg-slate-900 ${
+                      isLatest
+                        ? "border-2 border-blue-800 shadow-md"
+                        : "border border-slate-200 hover:border-slate-300 dark:border-slate-800 dark:hover:border-slate-700"
+                    } transition-all`}
+                  >
+                    {isLatest && (
+                      <div className="absolute right-0 top-0">
+                        <div className="bg-blue-800 px-4 py-1.5 text-[10px] font-bold uppercase tracking-widest text-white">
+                          Mới nhất
+                        </div>
+                      </div>
+                    )}
+                    <div className="mb-4 flex items-start justify-between">
+                      <div>
+                        <h3 className="text-lg font-bold text-slate-900 dark:text-white">
+                          Phiên bản {version.versionNo} — {version.name || "Không có tên"}
+                        </h3>
+                        <p className="mt-1 text-xs text-slate-500">
+                          Cập nhật lúc: {new Date(version.updatedAt).toLocaleString("vi-VN")}
+                        </p>
+                      </div>
+                      {!isLatest && (
+                        <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+                          <MoreVertical className="h-5 w-5" />
+                        </button>
+                      )}
+                    </div>
+
+                    <div className="mb-6 grid grid-cols-2 gap-4">
+                      <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Số câu hỏi</p>
+                        <p className="text-xl font-bold text-slate-900 dark:text-white">{totalQ}</p>
+                      </div>
+                      <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
+                        <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Tổng điểm</p>
+                        <p
+                          className={`text-xl font-bold ${
+                            isLatest ? "text-blue-800" : "text-slate-900 dark:text-white"
+                          }`}
+                        >
+                          {matrix.totalScore.toFixed(1)}
+                        </p>
                       </div>
                     </div>
-                  )}
-                  <div className="mb-4 flex items-start justify-between">
-                    <div>
-                      <h3 className="text-lg font-bold text-slate-900 dark:text-white">
-                        Phiên bản {version.versionNo} — {version.name || "Không có tên"}
-                      </h3>
-                      <p className="mt-1 text-xs text-slate-500">
-                        Cập nhật lúc: {new Date(version.updatedAt).toLocaleString("vi-VN")}
-                      </p>
-                    </div>
-                    {!isLatest && (
-                      <button className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
-                        <MoreVertical className="h-5 w-5" />
-                      </button>
-                    )}
-                  </div>
 
-                  <div className="mb-6 grid grid-cols-2 gap-4">
-                    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Số câu hỏi</p>
-                      <p className="text-xl font-bold text-slate-900 dark:text-white">{totalQ}</p>
-                    </div>
-                    <div className="rounded-lg border border-slate-100 bg-slate-50 p-3 dark:border-slate-800 dark:bg-slate-800/50">
-                      <p className="mb-1 text-[10px] font-bold uppercase tracking-wider text-slate-400">Tổng điểm</p>
-                      <p
-                        className={`text-xl font-bold ${isLatest ? "text-blue-800" : "text-slate-900 dark:text-white"}`}
+                    <div className="flex flex-col gap-3 sm:flex-row">
+                      <Button
+                        onClick={() => openVersionDetail(version.id)}
+                        className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
+                          isLatest
+                            ? "bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
+                            : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        }`}
                       >
-                        {matrix.totalScore.toFixed(1)}
-                      </p>
+                        <Eye className="h-4 w-4" />
+                        Xem chi tiết
+                      </Button>
+                      <Button
+                        onClick={() => openVersionDetail(version.id)}
+                        className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
+                          isLatest
+                            ? "bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
+                            : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        <Pencil className="h-4 w-4" />
+                        Chỉnh sửa
+                      </Button>
+                      <Button
+                        onClick={() =>
+                          navigate({
+                            to: "/mentor/matrix/$id/generate",
+                            params: { id: matrix.id.toString() },
+                            search: { versionId: version.id },
+                          })
+                        }
+                        className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
+                          isLatest
+                            ? "bg-blue-800 text-white shadow-sm shadow-blue-500/20 hover:bg-blue-700"
+                            : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
+                        }`}
+                      >
+                        <Sparkles className="h-4 w-4" />
+                        Tạo đề thi
+                      </Button>
                     </div>
                   </div>
+                );
+              })}
 
-                  <div className="flex flex-col gap-3 sm:flex-row">
-                    <Button
-                      onClick={() => openVersionDetail(version.id)}
-                      className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
-                        isLatest
-                          ? "bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
-                          : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      <Eye className="h-4 w-4" />
-                      Xem chi tiết
-                    </Button>
-                    <Button
-                      onClick={() => openVersionDetail(version.id)}
-                      className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
-                        isLatest
-                          ? "bg-blue-50 text-blue-800 hover:bg-blue-100 dark:bg-blue-900/20 dark:hover:bg-blue-900/40"
-                          : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      <Pencil className="h-4 w-4" />
-                      Chỉnh sửa
-                    </Button>
-                    <Button
-                      onClick={() =>
-                        navigate({
-                          to: "/mentor/matrix/$id/generate",
-                          params: { id: matrix.id.toString() },
-                          search: { versionId: version.id },
-                        })
-                      }
-                      className={`flex flex-1 cursor-pointer items-center justify-center gap-2 rounded-lg px-4 py-5 text-sm font-bold transition-all ${
-                        isLatest
-                          ? "bg-blue-800 text-white shadow-sm shadow-blue-500/20 hover:bg-blue-700"
-                          : "border border-slate-600 bg-white text-blue-700 hover:border-blue-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800"
-                      }`}
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      Tạo đề thi
-                    </Button>
+              {isLastPage && (
+                <div
+                  onClick={() => setVersionModal(true)}
+                  className="group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-300 p-8 text-center transition-all hover:border-blue-800 hover:bg-blue-50/30 dark:border-slate-800 dark:hover:bg-blue-900/5"
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-300 transition-colors group-hover:bg-blue-800 group-hover:text-white dark:bg-slate-800">
+                    <Plus className="h-6 w-6" />
                   </div>
+                  <h4 className="font-bold text-slate-700 dark:text-slate-200">Tạo phiên bản mới</h4>
                 </div>
-              );
-            })}
-
-            <div
-              onClick={() => setVersionModal(true)}
-              className="group flex cursor-pointer flex-col items-center justify-center rounded-xl border-2 border-dashed border-slate-200 p-8 text-center transition-all hover:border-blue-800 hover:bg-blue-50/30 dark:border-slate-800 dark:hover:bg-blue-900/5"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-slate-100 transition-colors group-hover:bg-blue-800 group-hover:text-white dark:bg-slate-800">
-                <Plus className="h-6 w-6" />
-              </div>
-              <h4 className="font-bold text-slate-700 dark:text-slate-200">Tạo phiên bản mới</h4>
-              <p className="mt-1 max-w-60 text-sm text-slate-500 dark:text-slate-400">
-                Nhập thủ công hoặc tự động từ ngân hàng câu hỏi
-              </p>
+              )}
             </div>
-          </div>
+
+            {totalVersionPages > 1 && (
+              <div className="mt-6 flex justify-center">
+                <Pagination currentPage={versionPage} totalPages={totalVersionPages} onPageChange={setVersionPage} />
+              </div>
+            )}
+          </>
         )}
 
         {activeTab === "exams" && (
@@ -359,7 +378,9 @@ const MatrixDetailContent: React.FC = () => {
                     {["Thông tin đề thi", "Mã đề", "Thời gian", "Thang điểm", "Trạng thái", "Thao tác"].map((h) => (
                       <th
                         key={h}
-                        className={`px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 ${h === "Thao tác" ? "text-right" : "text-left"}`}
+                        className={`px-6 py-3 text-xs font-bold uppercase tracking-wider text-slate-500 ${
+                          h === "Thao tác" ? "text-right" : "text-left"
+                        }`}
                       >
                         {h}
                       </th>
