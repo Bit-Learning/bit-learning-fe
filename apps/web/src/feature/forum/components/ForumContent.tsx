@@ -206,6 +206,54 @@ function CategoryCardSkeleton() {
 	);
 }
 
+function ForumImage({
+	src,
+	alt,
+	className,
+	eager = false,
+}: {
+	src: string;
+	alt: string;
+	className: string;
+	eager?: boolean;
+}) {
+	return (
+		<img
+			src={src}
+			alt={alt}
+			className={className}
+			loading={eager ? "eager" : "lazy"}
+			decoding="async"
+			fetchPriority={eager ? "high" : "auto"}
+		/>
+	);
+}
+
+function useSectionActivation<T extends HTMLElement>() {
+	const ref = useRef<T | null>(null);
+	const [isActive, setIsActive] = useState(false);
+
+	useEffect(() => {
+		const node = ref.current;
+		if (!node || isActive) return;
+
+		const observer = new IntersectionObserver(
+			(entries) => {
+				if (entries[0]?.isIntersecting) {
+					setIsActive(true);
+					observer.disconnect();
+				}
+			},
+			{ rootMargin: "400px 0px" },
+		);
+
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [isActive]);
+
+	return { ref, isActive };
+}
+
 function InlineStateCard({
 	title,
 	description,
@@ -331,10 +379,11 @@ function FeaturedHero({
 		<section className="grid gap-4 lg:grid-cols-[minmax(0,1.65fr)_minmax(320px,1fr)]">
 			<article className="overflow-hidden rounded-[2rem] border border-slate-200 bg-white shadow-sm">
 				<div className="cursor-pointer" onClick={() => onOpenPost(hero)}>
-					<img
+					<ForumImage
 						src={hero.thumbnailUrl}
 						alt={hero.title}
 						className="h-72 w-full object-cover sm:h-96"
+						eager
 					/>
 				</div>
 
@@ -384,12 +433,13 @@ function FeaturedHero({
 						className="grid grid-cols-[120px_minmax(0,1fr)] items-start gap-4 rounded-[1.5rem] border border-slate-200 bg-white p-4 shadow-sm"
 					>
 						<div className="h-24 w-[120px] overflow-hidden rounded-2xl">
-							<img
-								src={post.thumbnailUrl}
-								alt={post.title}
-								className="h-full w-full cursor-pointer object-cover"
-								onClick={() => onOpenPost(post)}
-							/>
+							<div onClick={() => onOpenPost(post)}>
+								<ForumImage
+									src={post.thumbnailUrl}
+									alt={post.title}
+									className="h-full w-full cursor-pointer object-cover"
+								/>
+							</div>
 						</div>
 
 						<div className="flex min-w-0 flex-col justify-between gap-3">
@@ -436,12 +486,13 @@ function ContentPostCard({
 	return (
 		<article className="overflow-hidden rounded-[1.75rem] border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
 			<div className="relative aspect-[16/9] w-full overflow-hidden rounded-xl">
-				<img
-					src={post.thumbnailUrl}
-					alt={post.title}
-					className="h-full w-full cursor-pointer object-cover"
-					onClick={() => onOpenPost(post)}
-				/>
+				<div onClick={() => onOpenPost(post)}>
+					<ForumImage
+						src={post.thumbnailUrl}
+						alt={post.title}
+						className="h-full w-full cursor-pointer object-cover"
+					/>
+				</div>
 				<div className="absolute left-4 top-4 flex gap-2">
 					<PostBadge post={post} />
 				</div>
@@ -514,7 +565,7 @@ function SidebarList({
 						onClick={() => onOpenPost(post)}
 						className="flex w-full items-start gap-3 text-left"
 					>
-						<img
+						<ForumImage
 							src={post.thumbnailUrl}
 							alt={post.title}
 							className="h-16 w-16 rounded-2xl object-cover"
@@ -554,6 +605,8 @@ const ForumContent: React.FC = () => {
 		userInfo?.email ?? "",
 	);
 	const loadMoreRef = useRef<HTMLDivElement | null>(null);
+	const recommendedSection = useSectionActivation<HTMLElement>();
+	const sidebarSection = useSectionActivation<HTMLElement>();
 
 	const selectedSort = search.sort ?? "latest";
 	const selectedCategory = search.category ?? "";
@@ -561,11 +614,17 @@ const ForumContent: React.FC = () => {
 
 	const featuredQuery = useFeaturedForumPosts(4);
 	const trendingQuery = useTrendingForumPosts(8);
-	const recommendedQuery = useRecommendedForumPosts(6, canLoadRecommended);
+	const recommendedQuery = useRecommendedForumPosts(
+		6,
+		canLoadRecommended && recommendedSection.isActive,
+	);
 	const categoriesQuery = useForumCategories();
 	const popularTagsQuery = usePopularForumTags(16);
-	const sidebarMostViewedQuery = useMostViewedForumPosts(5);
-	const sidebarLatestQuery = useLatestForumList(5);
+	const sidebarMostViewedQuery = useMostViewedForumPosts(
+		5,
+		sidebarSection.isActive,
+	);
+	const sidebarLatestQuery = useLatestForumList(5, sidebarSection.isActive);
 	const subscribeMutation = useSubscribeToForumPosts();
 
 	const latestFeedQuery = useInfiniteForumPosts({
@@ -844,7 +903,13 @@ const ForumContent: React.FC = () => {
 							isPending={subscribeMutation.isPending}
 						/>
 
-						<section className="space-y-4">
+						<section
+							className="space-y-4"
+							style={{
+								contentVisibility: "auto",
+								containIntrinsicSize: "960px",
+							}}
+						>
 							<div className="flex items-center justify-between gap-4">
 								<div>
 									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
@@ -882,7 +947,13 @@ const ForumContent: React.FC = () => {
 							)}
 						</section>
 
-						<section className="space-y-4">
+						<section
+							className="space-y-4"
+							style={{
+								contentVisibility: "auto",
+								containIntrinsicSize: "1200px",
+							}}
+						>
 							<div className="flex flex-wrap items-center justify-between gap-4">
 								<div>
 									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
@@ -997,7 +1068,14 @@ const ForumContent: React.FC = () => {
 							)}
 						</section>
 
-						<section className="space-y-4">
+						<section
+							ref={recommendedSection.ref}
+							className="space-y-4"
+							style={{
+								contentVisibility: "auto",
+								containIntrinsicSize: "960px",
+							}}
+						>
 							<div>
 								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
 									Các chủ đề phổ biến
@@ -1065,6 +1143,12 @@ const ForumContent: React.FC = () => {
 									actionLabel="Đăng nhập"
 									onAction={() => navigate({ to: "/signin-role" })}
 								/>
+							) : !recommendedSection.isActive ? (
+								<div className="grid gap-4 md:grid-cols-2">
+									{getSkeletonKeys("recommended-deferred", 2).map((key) => (
+										<PostCardSkeleton key={key} />
+									))}
+								</div>
 							) : recommendedQuery.isLoading ? (
 								<div className="grid gap-4 md:grid-cols-2">
 									{getSkeletonKeys("recommended-post", 4).map((key) => (
@@ -1092,7 +1176,11 @@ const ForumContent: React.FC = () => {
 						</section>
 					</div>
 
-					<aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
+					<aside
+						ref={sidebarSection.ref}
+						className="space-y-5 xl:sticky xl:top-6 xl:self-start"
+						style={{ contentVisibility: "auto", containIntrinsicSize: "960px" }}
+					>
 						{featuredQuery.isLoading ? (
 							<SidebarListSkeleton />
 						) : (
@@ -1103,7 +1191,7 @@ const ForumContent: React.FC = () => {
 								onOpenPost={openPost}
 							/>
 						)}
-						{sidebarMostViewedQuery.isLoading ? (
+						{!sidebarSection.isActive || sidebarMostViewedQuery.isLoading ? (
 							<SidebarListSkeleton />
 						) : (
 							<SidebarList
@@ -1113,7 +1201,7 @@ const ForumContent: React.FC = () => {
 								onOpenPost={openPost}
 							/>
 						)}
-						{sidebarLatestQuery.isLoading ? (
+						{!sidebarSection.isActive || sidebarLatestQuery.isLoading ? (
 							<SidebarListSkeleton />
 						) : (
 							<SidebarList
