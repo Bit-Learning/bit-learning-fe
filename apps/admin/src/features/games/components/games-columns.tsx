@@ -1,18 +1,11 @@
 import type { ColumnDef } from "@tanstack/react-table";
+import { Link } from "@tanstack/react-router";
 import { DataTableColumnHeader } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import type { AdminGameDto } from "../api/admin-games.api";
 
 export type GameRow = AdminGameDto & { categoryName?: string };
-
-export type CreateGamesColumnsArgs = {
-	onEdit: (game: GameRow) => void;
-	onArchive: (game: GameRow) => void;
-	onApprove: (game: GameRow) => void;
-	onReject: (game: GameRow) => void;
-	getPlayUrl: (minioObjectName?: string) => string;
-};
 
 const getStatusLabel = (status?: string) => {
 	switch (status) {
@@ -42,13 +35,7 @@ const getStatusVariant = (
 	}
 };
 
-export const createGamesColumns = ({
-	onEdit,
-	onArchive,
-	onApprove,
-	onReject,
-	getPlayUrl,
-}: CreateGamesColumnsArgs): ColumnDef<GameRow>[] => [
+export const createGamesColumns = (): ColumnDef<GameRow>[] => [
 	{
 		accessorKey: "id",
 		header: ({ column }) => (
@@ -110,62 +97,27 @@ export const createGamesColumns = ({
 		),
 	},
 	{
-		accessorKey: "views",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Lượt xem" />
-		),
-		cell: ({ row }) => <span>{row.original.views ?? 0}</span>,
-	},
-	{
-		accessorKey: "likes",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Lượt thích" />
-		),
-		cell: ({ row }) => <span>{row.original.likes ?? 0}</span>,
-	},
-	{
 		id: "actions",
 		header: () => (
-			<div className="w-55 text-right text-xs font-medium uppercase text-muted-foreground">
+			<div className="w-40 text-right text-xs font-medium uppercase text-muted-foreground">
 				Thao tác
 			</div>
 		),
 		cell: ({ row }) => {
 			const game = row.original;
-			const playUrl = game.minioObjectName
-				? getPlayUrl(game.minioObjectName)
-				: undefined;
 
 			return (
-				<div className="space-x-2 text-right">
-					{playUrl && (
-						<Button asChild size="sm" variant="ghost">
-							<a href={playUrl} target="_blank" rel="noreferrer">
-								Xem
-							</a>
+				<div className="space-y-2 text-right">
+					<div className="text-xs text-muted-foreground">
+						{game.views ?? 0} lượt xem · {game.likes ?? 0} lượt thích
+					</div>
+					<div>
+						<Button asChild size="sm" variant="outline">
+							<Link to="/apps/games/$id" params={{ id: String(game.id) }}>
+								Xem chi tiết
+							</Link>
 						</Button>
-					)}
-					{game.status === "DRAFT" && (
-						<Button variant="outline" size="sm" onClick={() => onApprove(game)}>
-							Duyệt
-						</Button>
-					)}
-					{game.status === "PUBLISHED" && (
-						<Button variant="outline" size="sm" onClick={() => onReject(game)}>
-							Chuyển về nháp
-						</Button>
-					)}
-					<Button size="sm" variant="outline" onClick={() => onEdit(game)}>
-						Sửa
-					</Button>
-					<Button
-						size="sm"
-						variant="outline"
-						disabled={game.status === "ARCHIVED"}
-						onClick={() => onArchive(game)}
-					>
-						Lưu trữ
-					</Button>
+					</div>
 				</div>
 			);
 		},

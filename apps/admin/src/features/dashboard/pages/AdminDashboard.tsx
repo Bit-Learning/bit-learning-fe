@@ -1122,7 +1122,7 @@ export function Dashboard() {
 		<>
 			<Header fixed />
 
-			<div className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<Card className="relative overflow-hidden border border-border/70 bg-gradient-to-br from-slate-50 via-white to-sky-50/60 shadow-sm dark:from-slate-900 dark:via-slate-950 dark:to-sky-950/20">
 					<div className="pointer-events-none absolute inset-0 overflow-hidden">
 						<div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-sky-500/10 blur-3xl dark:bg-sky-500/15" />

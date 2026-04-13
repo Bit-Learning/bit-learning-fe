@@ -15,16 +15,8 @@ function GamesRoute() {
 		<>
 			<Header />
 
-			<div className="flex flex-1 flex-col gap-6 p-8">
-				<div className="mb-6">
-					<h1 className="text-2xl font-bold tracking-tight">
-						Quản lý trò chơi
-					</h1>
-					<p className="text-sm text-muted-foreground mt-1">
-						Xem danh sách, tạo/cập nhật và lưu trữ trò chơi trực tiếp trong hệ
-						thống.
-					</p>
-				</div>
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
+				<h1 className="text-2xl font-bold tracking-tight">Quản lý trò chơi</h1>
 
 				<Tabs defaultValue="general">
 					<TabsList>

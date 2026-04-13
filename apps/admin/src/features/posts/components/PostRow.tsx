@@ -55,7 +55,6 @@ export const PostRow: React.FC<PostRowProps> = ({ post }) => {
 						/>
 						<AvatarFallback>{getAuthorInitials(post.author)}</AvatarFallback>
 					</Avatar>
-					<span>{getAuthorName(post.author)}</span>
 				</div>
 			</td>
 			<td className="px-4 py-3 align-top whitespace-nowrap text-sm text-muted-foreground">
