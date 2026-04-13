@@ -24,11 +24,11 @@ const ContestLeaderboardContent: React.FC = () => {
   };
 
   const totalPages = Math.ceil(leaderboard.totalParticipants / PAGE_SIZE);
-
   const displayFrom = page * PAGE_SIZE + 1;
   const displayTo = Math.min(page * PAGE_SIZE + leaderboard.rankings.length, leaderboard.totalParticipants);
 
-  const getInitials = (name: string) => {
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "?";
     return name
       .split(" ")
       .map((n) => n[0])
@@ -38,15 +38,9 @@ const ContestLeaderboardContent: React.FC = () => {
   };
 
   const getProblemBadgeClass = (result: any) => {
-    if (!result.solved && result.wrongAttempts === 0) {
-      return "bg-gray-100 text-gray-400";
-    }
-    if (!result.solved && result.wrongAttempts > 0) {
-      return "bg-red-500 text-white";
-    }
-    if (result.solved && result.wrongAttempts === 0) {
-      return "bg-green-500 text-white";
-    }
+    if (!result.solved && result.wrongAttempts === 0) return "bg-gray-100 text-gray-400";
+    if (!result.solved && result.wrongAttempts > 0) return "bg-red-500 text-white";
+    if (result.solved && result.wrongAttempts === 0) return "bg-green-500 text-white";
     return "bg-yellow-500 text-white";
   };
 
@@ -55,9 +49,7 @@ const ContestLeaderboardContent: React.FC = () => {
     return `${minutes}m`;
   };
 
-  if (isLoading) {
-    return <Loader />;
-  }
+  if (isLoading) return <Loader />;
 
   return (
     <main className="flex-1 px-6 lg:px-20 py-8">
@@ -70,9 +62,7 @@ const ContestLeaderboardContent: React.FC = () => {
           <div className="flex gap-4">
             <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
               <Users className="w-5 h-5 text-blue-600" />
-              <div className="flex items-center gap-2 ">
-                <span className="text-md font-semibold text-gray-500">Thí sinh {leaderboard.totalParticipants}</span>
-              </div>
+              <span className="text-md font-semibold text-gray-500">Thí sinh {leaderboard.totalParticipants}</span>
             </div>
           </div>
         </div>
@@ -99,6 +89,7 @@ const ContestLeaderboardContent: React.FC = () => {
               <tbody className="divide-y divide-gray-100">
                 {leaderboard.rankings.map((ranking: any) => {
                   const isCurrentUser = ranking.userId === userInfo?.id;
+                  const displayName = ranking.username ?? `User#${ranking.rank}`;
                   return (
                     <tr
                       key={ranking.userId}
@@ -122,7 +113,7 @@ const ContestLeaderboardContent: React.FC = () => {
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex items-center gap-2">
-                            <span className={`font-medium text-gray-900`}>{ranking.username}</span>
+                            <span className="font-medium text-gray-900">{displayName}</span>
                             {isCurrentUser && <Badge className="bg-blue-600 text-white text-xs px-2">Bạn</Badge>}
                           </div>
                         </div>
@@ -136,7 +127,7 @@ const ContestLeaderboardContent: React.FC = () => {
                           {ranking.solvedCount}
                         </Badge>
                       </td>
-                      <td className={`px-6 py-4 text-center text-md font-medium text-gray-600`}>
+                      <td className="px-6 py-4 text-center text-md font-medium text-gray-600">
                         {ranking.totalPenaltyMinutes}
                       </td>
                       {ranking.problemResults.map((result: any) => (
@@ -187,7 +178,6 @@ const ContestLeaderboardContent: React.FC = () => {
             <p>
               Hiển thị {displayFrom}–{displayTo} / {leaderboard.totalParticipants}
             </p>
-
             {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
           </div>
         </div>

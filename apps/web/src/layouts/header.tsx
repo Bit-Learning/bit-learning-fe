@@ -218,7 +218,7 @@ const Header: React.FC = () => {
                  opacity-0 group-hover:opacity-100
                  transition-all duration-200"
 								>
-									Trang Mentor
+									Công cụ giảng viên
 								</span>
 							</button>
 						)}
@@ -229,7 +229,7 @@ const Header: React.FC = () => {
 							>
 								<ShoppingCart className="h-7 w-7 text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors" />
 								{cartItemCount > 0 && (
-									<span className="absolute -top-1 -right-1 flex h-5 w-5 items-center justify-center rounded-full bg-linear-to-r from-red-500 to-pink-500 text-[10px] font-bold text-white shadow-lg">
+									<span className="absolute -top-1 -right-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-[10px] font-bold text-white shadow-lg">
 										{cartItemCount > 9 ? "9+" : cartItemCount}
 									</span>
 								)}
@@ -291,8 +291,8 @@ const Header: React.FC = () => {
 												}}
 												className="flex w-full items-center gap-3 rounded-sm px-2 py-1.5 text-sm cursor-pointer hover:bg-primary hover:text-white transition-colors"
 											>
-												<User2Icon className="h-4 w-4" />
-												<span>Mentor</span>
+												<LayoutDashboard className="h-4 w-4" />
+												<span>Công cụ giảng viên</span>
 											</button>
 										)}
 										<button
