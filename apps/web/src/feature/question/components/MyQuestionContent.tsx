@@ -442,7 +442,7 @@ const MyQuestionsContent: React.FC = () => {
 												key={question.id}
 												onClick={() =>
 													navigate({
-														to: "/mentor/question/$id",
+														to: "/mentor/question/$id/",
 														params: { id: question.id.toString() },
 													})
 												}
@@ -505,7 +505,7 @@ const MyQuestionsContent: React.FC = () => {
 															onClick={(e) => {
 																e.stopPropagation();
 																navigate({
-																	to: "/mentor/question/$id",
+																	to: "/mentor/question/$id/",
 																	params: { id: question.id.toString() },
 																});
 															}}
