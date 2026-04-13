@@ -105,12 +105,6 @@ export const useResumeQuizAttempt = () => {
       dispatch(setQuizAttemptAction(data));
       localStorage.setItem(`quiz_device_token_${data.exam.id}`, data.deviceToken);
     },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể tiếp tục bài thi",
-      });
-    },
   });
 };
 

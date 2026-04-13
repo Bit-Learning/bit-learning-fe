@@ -24,6 +24,7 @@ import {
   useStartQuizAttempt,
   useResumeQuizAttempt,
   useStartQuizSession,
+  quizKeys,
 } from "../queries/useQuiz";
 import { useExam } from "@/feature/exam/queries/useExam";
 import { toast } from "@/shared/components/Sonner";
@@ -39,6 +40,7 @@ const SectionDivider = ({ label }: { label: string }) => (
 
 const ExamDetailContent: React.FC = () => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { examId } = useParams({ from: "/_layout/exams/$examId" });
   const [resumingAttemptId, setResumingAttemptId] = useState<number | null>(null);
   const [enrollKeyInput, setEnrollKeyInput] = useState("");
@@ -145,8 +147,20 @@ const ExamDetailContent: React.FC = () => {
         to: "/quiz-attempts/$attemptId",
         params: { attemptId: String(attemptId) },
       });
-    } catch {
-      toast.error({ title: "Lỗi", description: "Không thể tiếp tục bài thi." });
+    } catch (error: any) {
+      const msg: string = error?.response?.data?.message ?? "";
+      if (msg.includes("expired_auto_submitted")) {
+        toast.error({
+          title: "Bài thi đã kết thúc",
+          description: "Bài thi đã hết giờ và được nộp tự động. Vui lòng xem kết quả.",
+        });
+        queryClient.invalidateQueries({ queryKey: quizKeys.attempts.all });
+      } else {
+        toast.error({
+          title: "Lỗi",
+          description: "Không thể tiếp tục bài thi.",
+        });
+      }
     } finally {
       setResumingAttemptId(null);
     }
