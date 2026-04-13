@@ -137,7 +137,7 @@ export const SystemPromptsPage = () => {
 								<TableHead>Content</TableHead>
 								<TableHead>Trạng thái</TableHead>
 								<TableHead>Cập nhật</TableHead>
-								<TableHead className="text-right">Hành động</TableHead>
+								<TableHead className="text-center">Thao tác</TableHead>
 							</TableRow>
 						</TableHeader>
 						<TableBody>

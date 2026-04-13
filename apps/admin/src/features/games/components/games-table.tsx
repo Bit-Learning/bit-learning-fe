@@ -24,33 +24,15 @@ import { createGamesColumns, type GameRow } from "./games-columns";
 
 type GamesTableProps = {
 	data: GameRow[];
-	onEdit: (game: GameRow) => void;
-	onArchive: (game: GameRow) => void;
-	onApprove: (game: GameRow) => void;
-	onReject: (game: GameRow) => void;
-	getPlayUrl: (minioObjectName?: string) => string;
 };
 
-export function GamesTable({
-	data,
-	onEdit,
-	onArchive,
-	onApprove,
-	onReject,
-	getPlayUrl,
-}: GamesTableProps) {
+export function GamesTable({ data }: GamesTableProps) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 
 	// eslint-disable-next-line react-hooks/incompatible-library
 	const table = useReactTable<GameRow>({
 		data,
-		columns: createGamesColumns({
-			onEdit,
-			onArchive,
-			onApprove,
-			onReject,
-			getPlayUrl,
-		}),
+		columns: createGamesColumns(),
 		state: {
 			sorting,
 		},

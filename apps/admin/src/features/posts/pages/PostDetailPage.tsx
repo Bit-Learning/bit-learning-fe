@@ -110,6 +110,7 @@ export const PostDetailPage: React.FC = () => {
 	};
 
 	const handleFeatureToggle = () => {
+		if (!post) return;
 		featurePost({ id: postId, isFeatured: post.isFeatured });
 	};
 
@@ -137,7 +138,7 @@ export const PostDetailPage: React.FC = () => {
 			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<Button
 					variant="link"
-					className="mb-6"
+					className="justify-start"
 					onClick={() => navigate({ to: "/posts" })}
 				>
 					<ArrowLeft className="mr-2 h-4 w-4" />
@@ -400,33 +401,31 @@ export const PostDetailPage: React.FC = () => {
 							</CardHeader>
 							<CardContent className="space-y-3">
 								<Button
+									size="lg"
 									className="w-full"
 									variant={post.isFeatured ? "outline" : "default"}
 									onClick={handleFeatureToggle}
 									disabled={featurePending || banPending}
 								>
-									<Star
-										className={`mr-2 h-4 w-4 ${post.isFeatured ? "fill-current" : ""}`}
-									/>
 									{post.isFeatured ? "Bỏ nổi bật" : "Đánh dấu nổi bật"}
 								</Button>
 								{!post.isBanned ? (
 									<Button
+										size="lg"
 										className="w-full"
 										variant="destructive"
 										onClick={() => handleOpenConfirm("ban")}
 										disabled={banPending || featurePending}
 									>
-										<Ban className="mr-2 h-4 w-4" />
 										Khóa bài viết
 									</Button>
 								) : (
 									<Button
+										size="lg"
 										className="w-full"
 										onClick={() => handleOpenConfirm("unban")}
 										disabled={banPending || featurePending}
 									>
-										<Shield className="mr-2 h-4 w-4" />
 										Mở khóa bài viết
 									</Button>
 								)}

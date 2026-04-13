@@ -31,7 +31,7 @@ const ScrollToTop: React.FC = () => {
 	return (
 		<button
 			onClick={scrollToTop}
-			className={`fixed right-4 bottom-20 z-50 rounded-full bg-[#222] p-3 text-white shadow-lg transition-all duration-200
+			className={`fixed right-5 bottom-50 z-50 rounded-full bg-[#222] p-3 text-white shadow-lg transition-all duration-200
 			${visible ? "opacity-100 translate-y-0" : "opacity-0 translate-y-4 pointer-events-none"}`}
 		>
 			<ChevronUp className="h-6 w-6" />
