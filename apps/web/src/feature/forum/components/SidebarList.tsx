@@ -40,13 +40,13 @@ export function SidebarList({
 							<div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-slate-500">
 								<span>{formatRelative(post.createdAt)}</span>
 								<span>•</span>
-								<span>{formatCompactNumber(post.viewsCount)} views</span>
+								<span>{formatCompactNumber(post.viewsCount)} lượt xem</span>
 							</div>
 						</div>
 					</button>
 				))}
 				{posts.length === 0 && (
-					<p className="text-sm text-slate-500">No posts available.</p>
+					<p className="text-sm text-slate-500">Hiện không có bài đăng nào..</p>
 				)}
 			</div>
 		</section>
