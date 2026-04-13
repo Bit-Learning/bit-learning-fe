@@ -41,12 +41,12 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
 
   return (
     <div className="grid grid-cols-12 gap-3 items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
-      <div className="col-span-1 text-center text-sm font-bold text-slate-400">{index + 1}</div>
+      <div className="col-span-1 text-center text-md font-bold text-slate-400">{index + 1}</div>
       <div className="col-span-4">
         <select
           value={value.chapterId}
           onChange={(e) => onChange({ ...value, chapterId: Number(e.target.value), lessonId: 0 })}
-          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value={0}>-- Chọn chương --</option>
           {chapters?.map((ch: any, i: number) => (
@@ -61,7 +61,7 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
           value={value.lessonId}
           onChange={(e) => onChange({ ...value, lessonId: Number(e.target.value) })}
           disabled={!value.chapterId}
-          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
+          className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500 disabled:opacity-50"
         >
           <option value={0}>-- Chọn bài học --</option>
           {lessons?.map((l: any) => (
@@ -80,9 +80,9 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
             step={0.01}
             value={value.weight}
             onChange={(e) => onChange({ ...value, weight: parseFloat(e.target.value) || 0 })}
-            className="w-full px-3 py-2 pr-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500 text-center"
+            className="w-full px-3 py-2 pr-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500 text-center"
           />
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-xs text-slate-400">%</span>
+          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
         </div>
       </div>
       <div className="col-span-1 flex justify-center">
@@ -190,7 +190,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
 
   const SumBadge = ({ sum, valid }: { sum: number; valid: boolean }) => (
     <span
-      className={`text-xs font-bold px-2 py-0.5 rounded-full ${
+      className={`text-sm font-bold px-2 py-0.5 rounded-full ${
         valid
           ? "bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400"
           : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
@@ -213,13 +213,13 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
               placeholder="Phiên bản tự động v1"
               className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
             />
-            {errors.name && <p className="text-xs text-red-500 mt-1">{errors.name.message}</p>}
+            {errors.name && <p className="text-sm text-red-500 mt-1">{errors.name.message}</p>}
           </div>
           <div>
             <label className="block text-md font-medium text-slate-700 dark:text-slate-300 mb-2">Ghi chú</label>
             <input
               {...register("notes")}
-              placeholder="Sinh từ ngân hàng câu hỏi HK1..."
+              placeholder="Nhập ghi chú cho phiên bản này..."
               className="w-full px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all outline-none"
             />
           </div>
@@ -227,10 +227,10 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
 
         <div className="flex items-center gap-4 p-4 bg-blue-50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800/50">
           <div className="flex-1">
-            <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1">
+            <label className="block text-md font-medium text-slate-700 dark:text-slate-300 mb-1">
               Tổng số câu hỏi <span className="text-red-500">*</span>
             </label>
-            <p className="text-xs text-slate-500 dark:text-slate-400">
+            <p className="text-sm text-slate-500 dark:text-slate-400">
               Hệ thống sẽ phân bổ tự động theo tỷ lệ đã cấu hình
             </p>
           </div>
@@ -240,14 +240,14 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
             min={1}
             className="w-24 px-4 py-3 text-center text-xl font-bold bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
           />
-          {errors.totalQuestionCount && <p className="text-xs text-red-500">{errors.totalQuestionCount.message}</p>}
+          {errors.totalQuestionCount && <p className="text-sm text-red-500">{errors.totalQuestionCount.message}</p>}
         </div>
 
         <div>
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Bài học & trọng số</h3>
-              <p className="text-xs text-slate-500 mt-0.5">Trọng số (weight) là tỷ lệ phân bổ câu hỏi cho bài học đó</p>
+              <h3 className="text-md font-semibold text-slate-900 dark:text-white">Bài học & trọng số</h3>
+              <p className="text-sm text-slate-500 mt-0.5">Trọng số (weight) là tỷ lệ phân bổ câu hỏi cho bài học đó</p>
             </div>
             <SumBadge sum={weightSum} valid={isWeightValid} />
           </div>
@@ -255,9 +255,9 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
           <div className="space-y-2">
             <div className="grid grid-cols-12 gap-3 px-3 mb-1">
               <div className="col-span-1" />
-              <div className="col-span-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Chương</div>
-              <div className="col-span-4 text-xs font-bold text-slate-500 uppercase tracking-wider">Bài học</div>
-              <div className="col-span-2 text-xs font-bold text-slate-500 uppercase tracking-wider text-center">
+              <div className="col-span-4 text-sm font-bold text-slate-500 uppercase tracking-wider">Chương</div>
+              <div className="col-span-4 text-sm font-bold text-slate-500 uppercase tracking-wider">Bài học</div>
+              <div className="col-span-2 text-sm font-bold text-slate-500 uppercase tracking-wider text-center">
                 Trọng số
               </div>
               <div className="col-span-1" />
@@ -277,7 +277,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
             <button
               type="button"
               onClick={addLesson}
-              className="cursor-pointer w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 rounded-lg text-sm font-medium text-slate-500 hover:text-blue-600 transition-all flex items-center justify-center gap-2"
+              className="cursor-pointer w-full py-2.5 border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-blue-400 rounded-lg text-md font-medium text-slate-500 hover:text-blue-600 transition-all flex items-center justify-center gap-2"
             >
               <Plus className="h-4 w-4" />
               Thêm bài học
@@ -285,14 +285,14 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
           </div>
 
           {!isWeightValid && lessons.length > 0 && (
-            <div className="flex items-center gap-2 mt-2 text-xs text-amber-600 dark:text-amber-400">
+            <div className="flex items-center gap-2 mt-2 text-sm text-amber-600 dark:text-amber-400">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               Tổng trọng số phải bằng 1.0 (hiện tại: {weightSum.toFixed(3)})
             </div>
           )}
 
           {!hasValidLessons && lessons.some((l) => l.chapterId > 0) && (
-            <div className="flex items-center gap-2 mt-2 text-xs text-red-500 dark:text-red-400">
+            <div className="flex items-center gap-2 mt-2 text-sm text-red-500 dark:text-red-400">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
               Vui lòng chọn bài học cho tất cả các dòng
             </div>
@@ -302,24 +302,24 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
         <div className="grid grid-cols-2 gap-4">
           <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Phân bổ độ khó</h3>
+              <h3 className="text-md font-semibold text-slate-900 dark:text-white">Phân bổ độ khó</h3>
               <SumBadge sum={diffSum} valid={isDiffValid} />
             </div>
             <div className="space-y-3">
               {[
-                { label: "Dễ (Easy)", key: "difficultyEasy", color: "text-green-600" },
-                { label: "Trung bình", key: "difficultyMedium", color: "text-amber-600" },
-                { label: "Khó (Hard)", key: "difficultyHard", color: "text-red-600" },
+                { label: "Dễ ", key: "difficultyEasy", color: "text-slate-600" },
+                { label: "Trung bình", key: "difficultyMedium", color: "text-slate-600" },
+                { label: "Khó", key: "difficultyHard", color: "text-slate-600" },
               ].map(({ label, key, color }) => (
                 <div key={key} className="flex items-center gap-3">
-                  <span className={`text-xs font-medium w-24 ${color}`}>{label}</span>
+                  <span className={`text-sm font-medium w-24 ${color}`}>{label}</span>
                   <input
                     {...register(key as any, { valueAsNumber: true })}
                     type="number"
                     min={0}
                     max={1}
                     step={0.01}
-                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               ))}
@@ -328,23 +328,23 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
 
           <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-semibold text-slate-900 dark:text-white">Phân bổ loại câu</h3>
+              <h3 className="text-md font-semibold text-slate-900 dark:text-white">Phân bổ loại câu</h3>
               <SumBadge sum={typeSum} valid={isTypeValid} />
             </div>
             <div className="space-y-3">
               {[
-                { label: "MCQ (Trắc nghiệm)", key: "typeMCQ", color: "text-blue-600" },
-                { label: "Essay (Tự luận)", key: "typeEssay", color: "text-orange-600" },
+                { label: "Trắc nghiệm", key: "typeMCQ", color: "text-slate-600" },
+                { label: "Tự luận", key: "typeEssay", color: "text-slate-600" },
               ].map(({ label, key, color }) => (
                 <div key={key} className="flex items-center gap-3">
-                  <span className={`text-xs font-medium w-24 ${color}`}>{label}</span>
+                  <span className={`text-sm font-medium w-24 ${color}`}>{label}</span>
                   <input
                     {...register(key as any, { valueAsNumber: true })}
                     type="number"
                     min={0}
                     max={1}
                     step={0.01}
-                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
                   />
                 </div>
               ))}
@@ -353,7 +353,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
         </div>
 
         <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-          <h3 className="text-sm font-semibold text-slate-900 dark:text-white mb-3">Chiến lược tính điểm</h3>
+          <h3 className="text-md font-semibold text-slate-900 dark:text-white mb-3">Chiến lược tính điểm</h3>
           <div className="flex gap-3 mb-4">
             {(["UNIFORM", "WEIGHTED"] as const).map((m) => (
               <label
@@ -366,10 +366,10 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
               >
                 <input {...register("scoringMode")} type="radio" value={m} className="accent-blue-600" />
                 <div>
-                  <p className="text-sm font-bold text-slate-800 dark:text-slate-100">
-                    {m === "UNIFORM" ? "Đồng đều (Uniform)" : "Có trọng số (Weighted)"}
+                  <p className="text-md font-bold text-slate-800 dark:text-slate-100">
+                    {m === "UNIFORM" ? "Đồng đều" : "Có trọng số"}
                   </p>
-                  <p className="text-xs text-slate-500 dark:text-slate-400">
+                  <p className="text-sm text-slate-500 dark:text-slate-400">
                     {m === "UNIFORM" ? "Mọi câu cùng điểm số" : "Câu khó > câu dễ theo tỷ lệ"}
                   </p>
                 </div>
@@ -379,7 +379,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
 
           {scoringMode === "WEIGHTED" && (
             <div>
-              <p className="text-xs text-slate-500 mb-3 flex items-center gap-1.5">
+              <p className="text-sm text-slate-500 mb-3 flex items-center gap-1.5">
                 <Info className="h-3.5 w-3.5" />
                 Tỷ lệ điểm theo độ khó (mặc định: Dễ=1, TB=2, Khó=3)
               </p>
@@ -390,12 +390,12 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
                   { label: "Khó", key: "weightHard", color: "text-red-600" },
                 ].map(({ label, key, color }) => (
                   <div key={key}>
-                    <label className={`block text-xs font-medium mb-1 ${color}`}>{label}</label>
+                    <label className={`block text-sm font-medium mb-1 ${color}`}>{label}</label>
                     <input
                       {...register(key as any, { valueAsNumber: true })}
                       type="number"
                       min={1}
-                      className="w-full px-3 py-2 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
                     />
                   </div>
                 ))}
@@ -408,17 +408,17 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
           <Button
             type="button"
             onClick={onClose}
-            className="px-6 py-5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition-all"
+            className="cursor-pointer px-6 py-5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 hover:border-blue-600 rounded-lg text-sm font-medium transition-all"
           >
             Hủy
           </Button>
           <Button
             type="submit"
             isDisabled={isPending || !canSubmit}
-            className="px-6 py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg text-sm font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/30"
+            className="cursor-pointer px-6 py-5 bg-blue-600 hover:bg-blue-700 disabled:bg-slate-300 disabled:cursor-not-allowed text-white rounded-lg text-md font-bold flex items-center gap-2 transition-all shadow-lg shadow-blue-500/30"
           >
             {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
-            <span>Tạo tự động →</span>
+            <span>Tạo tự động</span>
           </Button>
         </div>
       </form>

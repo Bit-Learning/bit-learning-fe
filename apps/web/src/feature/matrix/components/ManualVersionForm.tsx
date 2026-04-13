@@ -231,7 +231,7 @@ const ManualVersionForm: React.FC<Props> = ({ matrixId, totalScore, subjectId, o
                       isScoreMatch ? "text-green-700 dark:text-green-300" : "text-red-700 dark:text-red-300"
                     }`}
                   >
-                    {isScoreMatch ? "✓ Cấu hình hợp lệ" : "✗ Chưa đủ điểm"}
+                    {isScoreMatch ? "Cấu hình hợp lệ" : "Chưa đủ điểm"}
                   </p>
                 </div>
               </div>
@@ -243,7 +243,7 @@ const ManualVersionForm: React.FC<Props> = ({ matrixId, totalScore, subjectId, o
           <Button
             type="button"
             onClick={onClose}
-            className="px-6 py-5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 hover:border-blue-600 rounded-lg text-sm font-medium transition-all"
+            className="cursor-pointer px-6 py-5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-blue-600 hover:border-blue-600 rounded-lg text-sm font-medium transition-all"
           >
             Hủy
           </Button>
