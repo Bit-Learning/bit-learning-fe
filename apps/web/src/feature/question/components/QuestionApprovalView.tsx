@@ -119,7 +119,6 @@ export default function QuestionApprovalTableView() {
         </select>
       </div>
 
-      {/* Content */}
       {isLoading ? (
         <div className="space-y-2">
           {[1, 2, 3, 4, 5].map((i) => (
