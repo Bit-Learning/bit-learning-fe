@@ -26,7 +26,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-4xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
+      <div className="w-full max-w-5xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
           <div className="flex items-center gap-3">
             {mode !== "select" && (
@@ -44,7 +44,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                 {mode === "auto" && "Tự động từ ngân hàng câu hỏi"}
               </h2>
               {mode !== "select" && (
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
                   {mode === "manual"
                     ? "Nhập tay số lượng và điểm cho từng bài học"
                     : "Hệ thống tự phân bổ câu hỏi từ ngân hàng theo cấu hình"}
@@ -82,7 +82,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                     {["Linh hoạt", "Kiểm soát toàn phần"].map((tag) => (
                       <span
                         key={tag}
-                        className="text-sm px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"
+                        className="text-md px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"
                       >
                         {tag}
                       </span>
@@ -105,7 +105,7 @@ const VersionFormModal: React.FC<Props> = ({ isOpen, onClose, matrixId, totalSco
                     {["Nhanh chóng", "Cân bằng tự động"].map((tag) => (
                       <span
                         key={tag}
-                        className="text-sm px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"
+                        className="text-md px-2 py-0.5 rounded-full bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-400"
                       >
                         {tag}
                       </span>
