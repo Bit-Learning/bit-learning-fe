@@ -136,13 +136,7 @@ export const useResumeQuizAttempt = () => {
 				data.deviceToken,
 			);
 		},
-		onError: (error: AxiosError<ApiResponse<null>>) => {
-			toast.error({
-				title: "Lỗi",
-				description:
-					error.response?.data?.message || "Không thể tiếp tục bài thi",
-			});
-		},
+		// onError omitted — caller (ExamDetailContent) handles all error messaging
 	});
 };
 
