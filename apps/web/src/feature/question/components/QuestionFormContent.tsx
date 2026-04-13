@@ -184,7 +184,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     }
   });
 
-  const backTo = mode === "edit" ? `/mentor/question/${questionId}` : "/mentor/question/my";
+  const backTo = "/mentor/question/my";
   const isSubmitting = mode === "edit" ? updateQuestion.isPending : createQuestion.isPending;
 
   if (createdQuestionId !== null) {
