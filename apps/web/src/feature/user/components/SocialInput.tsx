@@ -53,7 +53,7 @@ export const SocialInput = ({
 						href={trimmed}
 						target="_blank"
 						rel="noopener noreferrer"
-						className="size-11 rounded-xl bg-none flex items-center justify-center shrink-0 hover:bg-slate-200 transition-colors cursor-pointer"
+						className="size-15 rounded-xl bg-none flex items-center justify-center shrink-0 hover:bg-slate-200 transition-colors cursor-pointer"
 						style={{ color }}
 					>
 						<Icon className="w-8 h-10" />

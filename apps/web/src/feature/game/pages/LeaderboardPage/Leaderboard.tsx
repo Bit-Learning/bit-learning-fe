@@ -185,11 +185,13 @@ function PodiumCard({
 				</span>
 				<span className="text-4xl block mb-1">{s.medal}</span>
 				{entry.avatar ? (
-					<img
-						src={entry.avatar}
-						alt={entry.username}
-						className="w-12 h-12 rounded-full object-cover mx-auto mb-1"
-					/>
+					<div className="w-30 h-30 mx-auto mb-1 overflow-hidden rounded-full">
+						<img
+							src={entry.avatar}
+							alt={entry.username}
+							className="w-full h-full object-cover"
+						/>
+					</div>
 				) : (
 					<div
 						className="w-12 h-12 rounded-full flex items-center justify-center text-sm font-black text-white mx-auto mb-1"
@@ -267,8 +269,7 @@ export default function LeaderboardPage() {
 		<div className="min-h-screen max-w-3xl mx-auto px-4 py-8">
 			{/* Header */}
 			<div className="text-center mb-8">
-				<h2 className="text-3xl font-black tracking-tight text-gray-900">
-					🏆{" "}
+				<h1 className="text-4xl font-black tracking-tight text-gray-900">
 					<span
 						className="bg-clip-text text-transparent"
 						style={{
@@ -278,8 +279,8 @@ export default function LeaderboardPage() {
 					>
 						Bảng xếp hạng
 					</span>
-				</h2>
-				<p className="text-sm text-gray-500 mt-1">
+				</h1>
+				<p className="text-sm text-gray-500 mt-3">
 					Top người chơi xuất sắc nhất
 				</p>
 			</div>
@@ -355,7 +356,7 @@ export default function LeaderboardPage() {
 									<Eye className="w-3.5 h-3.5" />
 									Xem
 								</button>
-								<FollowButton userId={entry.userId} />
+								{/* <FollowButton userId={entry.userId} /> */}
 							</div>
 						</div>
 					);
