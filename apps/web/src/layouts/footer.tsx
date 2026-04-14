@@ -5,7 +5,7 @@ import { FaLinkedin, FaInstagramSquare, FaTwitter } from "react-icons/fa";
 
 const Footer: React.FC = () => {
 	return (
-		<footer className="bg-white text-slate-800 border-t border-slate-200">
+		<footer className="bg-linear-to-br from-slate-50 to-slate-100 text-slate-800 border-t border-slate-200">
 			<div className="container mx-auto px-4 py-16">
 				<div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
 					{/* Company Info */}
@@ -56,7 +56,7 @@ const Footer: React.FC = () => {
 						<ul className="space-y-2">
 							<li>
 								<Link
-									to="/"
+									to="/courses"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
 									Lập trình Web
@@ -64,7 +64,7 @@ const Footer: React.FC = () => {
 							</li>
 							<li>
 								<Link
-									to="/"
+									to="/courses"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
 									Lập trình Mobile
@@ -72,7 +72,7 @@ const Footer: React.FC = () => {
 							</li>
 							<li>
 								<Link
-									to="/"
+									to="/courses"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
 									Lập trình Backend
@@ -80,7 +80,7 @@ const Footer: React.FC = () => {
 							</li>
 							<li>
 								<Link
-									to="/"
+									to="/courses"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
 									Data Science & AI
@@ -111,34 +111,42 @@ const Footer: React.FC = () => {
 						<ul className="space-y-2">
 							<li>
 								<Link
-									to="/"
+									to="/exams"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
-									Tư vấn khóa học
+									Ma trận đề thi
 								</Link>
 							</li>
 							<li>
 								<Link
-									to="/"
+									to="/chat-ai"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
-									Đào tạo doanh nghiệp
+									Trợ lý AI
 								</Link>
 							</li>
 							<li>
 								<Link
-									to="/"
+									to="/forum"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
-									Mentorship 1-1
+									Diễn đàn học tập
 								</Link>
 							</li>
 							<li>
 								<Link
-									to="/"
+									to="/games"
 									className="text-slate-600 transition-colors hover:text-blue-600"
 								>
-									Thiết kế website
+									Trò chơi nhỏ
+								</Link>
+							</li>
+							<li>
+								<Link
+									to="/contests"
+									className="text-slate-600 transition-colors hover:text-blue-600"
+								>
+									Luyện code trực tuyến
 								</Link>
 							</li>
 						</ul>

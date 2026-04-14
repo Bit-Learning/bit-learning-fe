@@ -41,7 +41,7 @@ const formSchema = z.object({
 		.email({ message: "Email không hợp lệ" }),
 	password: z
 		.string()
-		.min(3, { message: "Mật khẩu phải có ít nhất 3 ký tự" })
+		.min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự" })
 		.max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" }),
 });
 
