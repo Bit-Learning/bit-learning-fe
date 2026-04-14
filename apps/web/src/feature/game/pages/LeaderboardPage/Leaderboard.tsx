@@ -264,7 +264,7 @@ export default function LeaderboardPage() {
 		: (leaderboard?.content ?? []);
 
 	return (
-		<div className="max-w-3xl mx-auto px-4 py-8">
+		<div className="min-h-screen max-w-3xl mx-auto px-4 py-8">
 			{/* Header */}
 			<div className="text-center mb-8">
 				<h2 className="text-3xl font-black tracking-tight text-gray-900">
