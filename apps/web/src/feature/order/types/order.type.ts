@@ -46,4 +46,5 @@ export interface OrderInfo {
   status: OrderStatus;
   details: OrderDetailInfo[];
   transactionId?: number;
+  paymentMethod: PaymentMethod;
 }
