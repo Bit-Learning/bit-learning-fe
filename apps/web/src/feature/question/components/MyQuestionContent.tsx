@@ -324,18 +324,34 @@ const MyQuestionsContent: React.FC = () => {
                 <thead>
                   <tr className="border-b border-gray-300 bg-gray-50">
                     <th className="text-left p-4 w-12">
-                      <input
-                        type="checkbox"
-                        checked={allSelected}
-                        ref={(el) => {
-                          if (el) el.indeterminate = someSelected && !allSelected;
-                        }}
-                        onChange={handleSelectAll}
-                        className="w-5 h-5 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
-                      />
+                      <label className="relative flex items-center cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={allSelected}
+                          ref={(el) => {
+                            if (el) el.indeterminate = someSelected && !allSelected;
+                          }}
+                          onChange={handleSelectAll}
+                          className="peer sr-only"
+                        />
+
+                        <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400 ">
+                          <svg
+                            className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth={3}
+                          >
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                          </svg>
+
+                          <div className="absolute w-3 h-0.5 bg-white opacity-0 peer-indeterminate:opacity-100" />
+                        </div>
+                      </label>
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">STT</th>
-                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-100">
                       NỘI DUNG CÂU HỎI
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-30">
@@ -348,38 +364,53 @@ const MyQuestionsContent: React.FC = () => {
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
                       TRẠNG THÁI
                     </th>
-                    <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider"></th>
+                    <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
+                      Thao tác
+                    </th>
                   </tr>
                 </thead>
                 <tbody className="bg-white">
                   {pagedQuestions.map((question: QuestionResponse, index: number) => (
                     <tr
                       key={question.id}
-                      onClick={() => setViewingQuestion(question)}
                       className={cn(
                         "cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors",
                         selectedQuestions.includes(question.id) && "bg-blue-50",
                       )}
                     >
                       <td className="p-4">
-                        <input
-                          type="checkbox"
-                          checked={selectedQuestions.includes(question.id)}
-                          onChange={() => handleSelectQuestion(question.id)}
-                          onClick={(e) => e.stopPropagation()}
-                          disabled={
-                            question.approvalStatus === ApprovalStatus.PENDING ||
-                            question.approvalStatus === ApprovalStatus.APPROVED
-                          }
-                          className="w-5 h-5 rounded mt-1.5 border-gray-300 text-primary focus:ring-primary cursor-pointer disabled:cursor-not-allowed disabled:opacity-50"
-                        />
+                        <label className="relative flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={selectedQuestions.includes(question.id)}
+                            onChange={() => handleSelectQuestion(question.id)}
+                            onClick={(e) => e.stopPropagation()}
+                            disabled={
+                              question.approvalStatus === ApprovalStatus.PENDING ||
+                              question.approvalStatus === ApprovalStatus.APPROVED
+                            }
+                            className="peer sr-only"
+                          />
+
+                          <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
+                            <svg
+                              className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
+                              fill="none"
+                              viewBox="0 0 24 24"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          </div>
+                        </label>
                       </td>
                       <td className="p-4">
                         <span className="text-primary text-lg font-semibold">{index + 1 + page * PAGE_SIZE}</span>
                       </td>
                       <td className="p-4">
                         <div className="flex-1 min-w-0">
-                          <p className="line-clamp-2 text-gray-900 text-md">{question.content}</p>
+                          <p className="line-clamp-1 text-gray-900 text-md">{question.content}</p>{" "}
                           <p className="text-sm text-gray-500 mt-1">
                             Cập nhật {new Date(question.updatedAt || question.createdAt).toLocaleDateString("vi-VN")}
                           </p>
