@@ -58,7 +58,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.11",
-		"@tailwindcss/postcss": "^4.1.11",
+		"@tailwindcss/postcss": "^4.2.2",
 		"@tailwindcss/typography": "^0.5.16",
 		"@turbo/gen": "^2.9.6",
 		"@types/lodash": "^4.17.24",
