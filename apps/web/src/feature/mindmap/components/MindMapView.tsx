@@ -278,7 +278,7 @@ export default function MindMapView() {
 				);
 				setNodes(withExtras(rfNodes));
 				setEdges(rfEdges);
-			} catch {
+			} catch (error) {
 				toast.error({
 					title: "Lỗi khi thêm node",
 					description: extractApiErrorMessage(error, "Không thể thêm node."),
@@ -323,7 +323,7 @@ export default function MindMapView() {
 				);
 				setNodes(withExtras(rfNodes));
 				setEdges(rfEdges);
-			} catch {
+			} catch (error) {
 				toast.error({
 					title: "Lỗi khi xóa node",
 					description: extractApiErrorMessage(error, "Không thể xóa node."),
@@ -471,7 +471,7 @@ export default function MindMapView() {
 			setCanvasBackground(theme.background);
 			setIsPreviewingVersion(true);
 			setPreviewVersionNumber(detail.version_number);
-		} catch {
+		} catch (error) {
 			toast.error({
 				title: "Lỗi khi xem phiên bản",
 				description: extractApiErrorMessage(error, "Không thể xem phiên bản."),
@@ -525,7 +525,7 @@ export default function MindMapView() {
 			setPreviewVersionNumber(null);
 			previewBackupRef.current = null;
 			setActiveTab("generate");
-		} catch {
+		} catch (error) {
 			toast.error({
 				title: "Lỗi khi tải mindmap",
 				description: extractApiErrorMessage(error, "Không thể tải mindmap."),
