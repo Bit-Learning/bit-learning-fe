@@ -373,7 +373,7 @@ function SidebarFooter({
 					sideOffset={10}
 					className="w-64 rounded-2xl border border-slate-200 bg-white p-2 shadow-2xl dark:border-slate-800 dark:bg-slate-950"
 				>
-					<DropdownMenuLabel className="p-0">
+					{/* <DropdownMenuLabel className="p-0">
 						<div className="flex items-center gap-3 rounded-xl bg-slate-50 px-3 py-3 dark:bg-slate-900">
 							<div className="flex size-10 items-center justify-center rounded-2xl bg-slate-900 text-sm font-bold text-white dark:bg-slate-100 dark:text-slate-950">
 								{initials}
@@ -387,9 +387,9 @@ function SidebarFooter({
 								</p>
 							</div>
 						</div>
-					</DropdownMenuLabel>
+					</DropdownMenuLabel> */}
 
-					<DropdownMenuSeparator className="my-2" />
+					{/* <DropdownMenuSeparator className="my-2" /> */}
 
 					<DropdownMenuGroup>
 						<DropdownMenuItem
