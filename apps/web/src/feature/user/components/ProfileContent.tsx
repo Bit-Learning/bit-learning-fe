@@ -1,15 +1,22 @@
+import ForumPostCard from "@/feature/app/components/ForumPostCard";
+import { useForumPostsByAuthor } from "@/feature/forum/queries/useForum";
+import type { Post } from "@/feature/forum/types/forum.type";
+import { Link } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card } from "@workspace/ui/components/Card";
 import { Input } from "@workspace/ui/components/Input";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import {
+	ArrowRight,
 	Briefcase,
 	Camera,
 	Edit,
 	Facebook,
+	FileText,
 	Github,
 	Globe,
 	Instagram,
+	LayoutGrid,
 	Linkedin,
 	MapPin,
 	Phone,
@@ -29,7 +36,30 @@ import type {
 	TUpdateUserRequest,
 	TUserProfile,
 } from "../types/user.type";
+import { DepositHistoryContent } from "./DepositHistoryContent";
 import { SOCIAL_VALIDATORS, SocialInput } from "./SocialInput";
+
+type ProfileTabKey = "all" | "post" | "deposit";
+
+export const PROFILE_TABS: Array<{
+	key: ProfileTabKey;
+	label: string;
+	icon: typeof LayoutGrid;
+	description: string;
+}> = [
+	{
+		key: "all",
+		label: "Tất cả",
+		icon: LayoutGrid,
+		description: "",
+	},
+	{
+		key: "post",
+		label: "Các bài viết",
+		icon: FileText,
+		description: "",
+	},
+];
 
 export const ProfileContent = () => {
 	const { data: userProfile, isLoading } = useUserProfile();
@@ -39,6 +69,14 @@ export const ProfileContent = () => {
 
 	const [formData, setFormData] = useState<Partial<TUserProfile>>({});
 	const [isEditing, setIsEditing] = useState(false);
+	const [activeTab, setActiveTab] = useState<ProfileTabKey>("all");
+
+	const { data: myPostsResponse, isLoading: isPostsLoading } =
+		useForumPostsByAuthor({
+			authorId: userProfile?.id ?? 0,
+			page: 0,
+			size: 6,
+		});
 
 	useEffect(() => {
 		if (userProfile) {
@@ -127,11 +165,12 @@ export const ProfileContent = () => {
 		: "";
 
 	const isMentor = formData.role === "MENTOR";
+	const myPosts: Post[] = myPostsResponse?.data ?? [];
 
 	return (
 		<div className="grow space-y-8 w-full">
 			<Card>
-				<div className="relative w-full aspect-[16/9]">
+				<div className="relative w-full aspect-video">
 					<img
 						alt="Cover"
 						className="w-full h-full object-cover -mt-6 rounded-t-xl"
@@ -153,9 +192,9 @@ export const ProfileContent = () => {
 					)}
 				</div>
 
-				<div className="px-8 pb-8">
+				<div className="px-0 pb-0">
 					<div className="flex flex-col md:flex-row items-end gap-6 relative">
-						<div className="relative group">
+						<div className="relative group px-6">
 							<div className="size-32 md:size-40 rounded-full overflow-hidden">
 								<img
 									alt="Avatar"
@@ -222,359 +261,425 @@ export const ProfileContent = () => {
 							</div>
 						</div>
 					</div>
-				</div>
+					<div className="border-t-2 mt-6" />
+					<div className="mt-6 flex px-6">
+						{PROFILE_TABS.map((tab) => {
+							const isActive = activeTab === tab.key;
 
-				{/* <div className="px-8 pb-6 flex items-center justify-center gap-2">
-          <Users className="w-5 h-5 text-slate-400" />
-          <FollowDropdown
-            label="Người theo dõi"
-            count={followStats?.followersCount ?? 0}
-            users={followers}
-            isLoading={followersLoading}
-          />
-          <div className="w-px h-10 bg-slate-200" />
-          <FollowDropdown
-            label="Đang theo dõi"
-            count={followStats?.followingCount ?? 0}
-            users={following}
-            isLoading={followingLoading}
-          />
-        </div> */}
+							return (
+								<button
+									key={tab.key}
+									type="button"
+									onClick={() => setActiveTab(tab.key)}
+									className={`flex items-start gap-3 rounded-none px-4 py-3 text-left transition-all ${
+										isActive
+											? "text-primary"
+											: "bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50"
+									}`}
+									title={tab.description}
+								>
+									<div className="text-md font-bold">{tab.label}</div>
+								</button>
+							);
+						})}
+					</div>
+				</div>
 			</Card>
 
-			<Card className="p-8 md:p-10">
-				<div className="flex items-center justify-between mb-3">
-					<div className="flex items-center gap-3 ">
-						<h2 className="text-2xl font-bold text-slate-900">
-							Thông tin cá nhân
-						</h2>
-					</div>
+			{activeTab === "all" && (
+				<Card className="p-8 md:p-10">
+					<div className="flex items-center justify-between mb-3">
+						<div className="flex items-center gap-3 ">
+							<h2 className="text-2xl font-bold text-slate-900">
+								Thông tin cá nhân
+							</h2>
+						</div>
 
-					{isEditing ? (
-						<div className="flex gap-3">
+						{isEditing ? (
+							<div className="flex gap-3">
+								<Button
+									variant="outline"
+									onClick={handleCancel}
+									className="p-5 text-md border-slate-400"
+								>
+									Hủy bỏ
+								</Button>
+								<Button
+									onClick={handleSave}
+									isDisabled={updateProfileMutation.isPending}
+									className="p-5 text-md bg-blue-600 text-white"
+								>
+									<Save className="w-4 h-4 mr-2" />
+									{updateProfileMutation.isPending
+										? "Đang lưu..."
+										: "Lưu thay đổi"}
+								</Button>
+							</div>
+						) : (
 							<Button
-								variant="outline"
-								onClick={handleCancel}
-								className="p-5 text-md border-slate-400"
+								variant="ghost"
+								onClick={() => setIsEditing(true)}
+								className="p-5 text-md bg-stale-900 text-black"
 							>
-								Hủy bỏ
+								<Settings className="w-5 h-5 mr-2" />
+								Chỉnh sửa
 							</Button>
-							<Button
-								onClick={handleSave}
-								isDisabled={updateProfileMutation.isPending}
-								className="p-5 text-md bg-blue-600 text-white"
-							>
-								<Save className="w-4 h-4 mr-2" />
-								{updateProfileMutation.isPending
-									? "Đang lưu..."
-									: "Lưu thay đổi"}
-							</Button>
-						</div>
-					) : (
-						<Button
-							variant="ghost"
-							onClick={() => setIsEditing(true)}
-							className="p-5 text-md bg-stale-900 text-black"
-						>
-							<Settings className="w-5 h-5 mr-2" />
-							Chỉnh sửa
-						</Button>
-					)}
-				</div>
-
-				<div className="space-y-8">
-					<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-						<div className="space-y-3">
-							<label className="text-md font-semibold text-slate-700">
-								Tên hiển thị
-							</label>
-							<div className="relative">
-								<span className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 font-medium">
-									@
-								</span>
-								<Input
-									className="pl-9"
-									value={formData.username || ""}
-									onChange={(e) =>
-										handleFieldChange("username", e.target.value)
-									}
-									placeholder="Nhập tên người dùng"
-									disabled={!isEditing}
-								/>
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">
-								Email
-							</label>
-							<Input value={formData.email || ""} disabled />
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">Họ</label>
-							<Input
-								value={formData.firstName || ""}
-								onChange={(e) => handleFieldChange("firstName", e.target.value)}
-								disabled={!isEditing}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">
-								Tên
-							</label>
-							<Input
-								value={formData.lastName || ""}
-								onChange={(e) => handleFieldChange("lastName", e.target.value)}
-								disabled={!isEditing}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">
-								Đại từ nhân xưng
-							</label>
-							<Input
-								value={formData.pronouns || ""}
-								onChange={(e) => handleFieldChange("pronouns", e.target.value)}
-								placeholder="he/him, she/her, they/them"
-								disabled={!isEditing}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">
-								Chức danh công việc
-							</label>
-							<Input
-								value={formData.jobTitle || ""}
-								onChange={(e) => handleFieldChange("jobTitle", e.target.value)}
-								placeholder="VD: Software Engineer"
-								disabled={!isEditing}
-							/>
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">
-								Số điện thoại
-							</label>
-							<div className="relative">
-								<Phone className="absolute inset-y-0 left-0 flex items-center ml-4 mt-2 text-slate-400 w-5 h-5" />
-								<Input
-									className="pl-11"
-									value={formData.phoneNumber || ""}
-									onChange={(e) =>
-										handleFieldChange("phoneNumber", e.target.value)
-									}
-									disabled={!isEditing}
-								/>
-							</div>
-						</div>
-
-						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">
-								Vị trí
-							</label>
-							<div className="relative">
-								<MapPin className="absolute inset-y-0 left-0 flex items-center ml-4 mt-2 text-slate-400 w-5 h-5" />
-								<Input
-									className="pl-11"
-									value={formData.location || ""}
-									onChange={(e) =>
-										handleFieldChange("location", e.target.value)
-									}
-									disabled={!isEditing}
-								/>
-							</div>
-						</div>
+						)}
 					</div>
 
-					<div className="space-y-2">
-						<label className="text-md font-semibold text-slate-700">
-							Tiểu sử (Bio)
-						</label>
-						<textarea
-							className="w-full px-4 py-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-md min-h-30 outline-none resize-none disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-100"
-							placeholder="Chia sẻ đôi chút về bản thân bạn..."
-							rows={4}
-							value={formData.bio || ""}
-							onChange={(e) => handleFieldChange("bio", e.target.value)}
-							disabled={!isEditing}
-						/>
-					</div>
+					<div className="space-y-8">
+						<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
+							<div className="space-y-3">
+								<label className="text-md font-semibold text-slate-700">
+									Tên hiển thị
+								</label>
+								<div className="relative">
+									<span className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 font-medium">
+										@
+									</span>
+									<Input
+										className="pl-9"
+										value={formData.username || ""}
+										onChange={(e) =>
+											handleFieldChange("username", e.target.value)
+										}
+										placeholder="Nhập tên người dùng"
+										disabled={!isEditing}
+									/>
+								</div>
+							</div>
 
-					{isMentor && (
+							<div className="space-y-2">
+								<label className="text-md font-semibold text-slate-700">
+									Email
+								</label>
+								<Input value={formData.email || ""} disabled />
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-md font-semibold text-slate-700">
+									Họ
+								</label>
+								<Input
+									value={formData.firstName || ""}
+									onChange={(e) =>
+										handleFieldChange("firstName", e.target.value)
+									}
+									disabled={!isEditing}
+								/>
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-md font-semibold text-slate-700">
+									Tên
+								</label>
+								<Input
+									value={formData.lastName || ""}
+									onChange={(e) =>
+										handleFieldChange("lastName", e.target.value)
+									}
+									disabled={!isEditing}
+								/>
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-md font-semibold text-slate-700">
+									Đại từ nhân xưng
+								</label>
+								<Input
+									value={formData.pronouns || ""}
+									onChange={(e) =>
+										handleFieldChange("pronouns", e.target.value)
+									}
+									placeholder="he/him, she/her, they/them"
+									disabled={!isEditing}
+								/>
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-md font-semibold text-slate-700">
+									Chức danh công việc
+								</label>
+								<Input
+									value={formData.jobTitle || ""}
+									onChange={(e) =>
+										handleFieldChange("jobTitle", e.target.value)
+									}
+									placeholder="VD: Software Engineer"
+									disabled={!isEditing}
+								/>
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-md font-semibold text-slate-700">
+									Số điện thoại
+								</label>
+								<div className="relative">
+									<Phone className="absolute inset-y-0 left-0 flex items-center ml-4 mt-2 text-slate-400 w-5 h-5" />
+									<Input
+										className="pl-11"
+										value={formData.phoneNumber || ""}
+										onChange={(e) =>
+											handleFieldChange("phoneNumber", e.target.value)
+										}
+										disabled={!isEditing}
+									/>
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<label className="text-md font-semibold text-slate-700">
+									Vị trí
+								</label>
+								<div className="relative">
+									<MapPin className="absolute inset-y-0 left-0 flex items-center ml-4 mt-2 text-slate-400 w-5 h-5" />
+									<Input
+										className="pl-11"
+										value={formData.location || ""}
+										onChange={(e) =>
+											handleFieldChange("location", e.target.value)
+										}
+										disabled={!isEditing}
+									/>
+								</div>
+							</div>
+						</div>
+
+						<div className="space-y-2">
+							<label className="text-md font-semibold text-slate-700">
+								Tiểu sử (Bio)
+							</label>
+							<textarea
+								className="w-full px-4 py-4 rounded-xl border border-slate-200 bg-slate-50/50 text-slate-900 focus:ring-2 focus:ring-primary focus:border-primary transition-all text-md min-h-30 outline-none resize-none disabled:opacity-60 disabled:cursor-not-allowed disabled:bg-slate-100"
+								placeholder="Chia sẻ đôi chút về bản thân bạn..."
+								rows={4}
+								value={formData.bio || ""}
+								onChange={(e) => handleFieldChange("bio", e.target.value)}
+								disabled={!isEditing}
+							/>
+						</div>
+
+						{isMentor && (
+							<div className="pt-8 border-t border-slate-100">
+								<h3 className="text-base font-bold text-slate-900 mb-6">
+									Thông tin Mentor
+								</h3>
+								<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+									<div className="space-y-2 md:col-span-2">
+										<label className="text-md font-semibold text-slate-700">
+											Lĩnh vực chuyên môn
+										</label>
+										<Input
+											placeholder="Ví dụ: Frontend, Backend, DevOps"
+											value={
+												Array.isArray(formData.specialties)
+													? formData.specialties.join(", ")
+													: ""
+											}
+											onChange={(e) => {
+												const raw = e.target.value;
+												const list = raw
+													.split(",")
+													.map((s) => s.trim())
+													.filter(Boolean);
+												handleFieldChange(
+													"specialties" as keyof TUserProfile,
+													list.length ? list : null,
+												);
+											}}
+											disabled={!isEditing}
+										/>
+										<p className="mt-1 text-sm text-slate-500">
+											Nhập các chuyên môn, cách nhau bởi dấu phẩy.
+										</p>
+									</div>
+
+									<div className="space-y-2">
+										<label className="text-md font-semibold text-slate-700">
+											Số năm kinh nghiệm
+										</label>
+										<Input
+											type="number"
+											min={0}
+											max={50}
+											placeholder="Ví dụ: 5"
+											value={formData.yearsOfExperience ?? ""}
+											onChange={(e) => {
+												const value = e.target.value;
+												const num = value === "" ? null : Number(value);
+												handleFieldChange("yearsOfExperience", num);
+											}}
+											disabled={!isEditing}
+										/>
+									</div>
+
+									<div className="space-y-2">
+										<label className="text-md font-semibold text-slate-700">
+											Công ty hiện tại
+										</label>
+										<Input
+											placeholder="Ví dụ: Bit Learning, FPT Software"
+											value={formData.company || ""}
+											onChange={(e) =>
+												handleFieldChange("company", e.target.value)
+											}
+											disabled={!isEditing}
+										/>
+									</div>
+
+									<div className="space-y-2">
+										<label className="text-md font-semibold text-slate-700">
+											Số lượng học viên
+										</label>
+										<Input
+											type="number"
+											min={0}
+											placeholder="Ví dụ: 100"
+											value={formData.studentsCount ?? ""}
+											onChange={(e) => {
+												const value = e.target.value;
+												const num = value === "" ? null : Number(value);
+												handleFieldChange("studentsCount", num);
+											}}
+											disabled={!isEditing}
+										/>
+									</div>
+
+									<div className="space-y-2">
+										<label className="text-md font-semibold text-slate-700">
+											Số khoá học đã dạy (ước tính)
+										</label>
+										<Input
+											type="number"
+											min={0}
+											placeholder="Ví dụ: 5"
+											value={formData.coursesCount ?? ""}
+											onChange={(e) => {
+												const value = e.target.value;
+												const num = value === "" ? null : Number(value);
+												handleFieldChange("coursesCount", num);
+											}}
+											disabled={!isEditing}
+										/>
+									</div>
+								</div>
+							</div>
+						)}
+
+						{/* Social links */}
 						<div className="pt-8 border-t border-slate-100">
 							<h3 className="text-base font-bold text-slate-900 mb-6">
-								Thông tin Mentor
+								Liên kết mạng xã hội
 							</h3>
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-								<div className="space-y-2 md:col-span-2">
-									<label className="text-md font-semibold text-slate-700">
-										Lĩnh vực chuyên môn
-									</label>
-									<Input
-										placeholder="Ví dụ: Frontend, Backend, DevOps"
-										value={
-											Array.isArray(formData.specialties)
-												? formData.specialties.join(", ")
-												: ""
-										}
-										onChange={(e) => {
-											const raw = e.target.value;
-											const list = raw
-												.split(",")
-												.map((s) => s.trim())
-												.filter(Boolean);
-											handleFieldChange(
-												"specialties" as keyof TUserProfile,
-												list.length ? list : null,
-											);
-										}}
-										disabled={!isEditing}
-									/>
-									<p className="mt-1 text-sm text-slate-500">
-										Nhập các chuyên môn, cách nhau bởi dấu phẩy.
-									</p>
-								</div>
-
-								<div className="space-y-2">
-									<label className="text-md font-semibold text-slate-700">
-										Số năm kinh nghiệm
-									</label>
-									<Input
-										type="number"
-										min={0}
-										max={50}
-										placeholder="Ví dụ: 5"
-										value={formData.yearsOfExperience ?? ""}
-										onChange={(e) => {
-											const value = e.target.value;
-											const num = value === "" ? null : Number(value);
-											handleFieldChange("yearsOfExperience", num);
-										}}
-										disabled={!isEditing}
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<label className="text-md font-semibold text-slate-700">
-										Công ty hiện tại
-									</label>
-									<Input
-										placeholder="Ví dụ: Bit Learning, FPT Software"
-										value={formData.company || ""}
-										onChange={(e) =>
-											handleFieldChange("company", e.target.value)
-										}
-										disabled={!isEditing}
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<label className="text-md font-semibold text-slate-700">
-										Số lượng học viên
-									</label>
-									<Input
-										type="number"
-										min={0}
-										placeholder="Ví dụ: 100"
-										value={formData.studentsCount ?? ""}
-										onChange={(e) => {
-											const value = e.target.value;
-											const num = value === "" ? null : Number(value);
-											handleFieldChange("studentsCount", num);
-										}}
-										disabled={!isEditing}
-									/>
-								</div>
-
-								<div className="space-y-2">
-									<label className="text-md font-semibold text-slate-700">
-										Số khoá học đã dạy (ước tính)
-									</label>
-									<Input
-										type="number"
-										min={0}
-										placeholder="Ví dụ: 5"
-										value={formData.coursesCount ?? ""}
-										onChange={(e) => {
-											const value = e.target.value;
-											const num = value === "" ? null : Number(value);
-											handleFieldChange("coursesCount", num);
-										}}
-										disabled={!isEditing}
-									/>
-								</div>
+								<SocialInput
+									icon={Facebook}
+									color="#1877F2"
+									placeholder="https://www.facebook.com/username"
+									value={formData.socialProfile?.facebook}
+									onChange={(v: string) => handleSocialChange("facebook", v)}
+									type="facebook"
+									disabled={!isEditing}
+								/>
+								<SocialInput
+									icon={Instagram}
+									color="#E4405F"
+									placeholder="https://www.instagram.com/username"
+									value={formData.socialProfile?.instagram}
+									onChange={(v: string) => handleSocialChange("instagram", v)}
+									type="instagram"
+									disabled={!isEditing}
+								/>
+								<SocialInput
+									icon={Twitter}
+									color="#1DA1F2"
+									placeholder="https://www.twitter.com/username"
+									value={formData.socialProfile?.twitter}
+									onChange={(v: string) => handleSocialChange("twitter", v)}
+									type="twitter"
+									disabled={!isEditing}
+								/>
+								<SocialInput
+									icon={Linkedin}
+									color="#0077B5"
+									placeholder="https://www.linkedin.com/in/username"
+									value={formData.socialProfile?.linkedin}
+									onChange={(v: string) => handleSocialChange("linkedin", v)}
+									type="linkedin"
+									disabled={!isEditing}
+								/>
+								<SocialInput
+									icon={Github}
+									color="#24292e"
+									placeholder="https://github.com/username"
+									value={formData.socialProfile?.github}
+									onChange={(v: string) => handleSocialChange("github", v)}
+									type="github"
+									disabled={!isEditing}
+								/>
+								<SocialInput
+									icon={Globe}
+									color="#6B7280"
+									placeholder="https://yourwebsite.com"
+									value={formData.socialProfile?.website}
+									onChange={(v: string) => handleSocialChange("website", v)}
+									type="website"
+									disabled={!isEditing}
+								/>
 							</div>
 						</div>
-					)}
-
-					{/* Social links */}
-					<div className="pt-8 border-t border-slate-100">
-						<h3 className="text-base font-bold text-slate-900 mb-6">
-							Liên kết mạng xã hội
-						</h3>
-						<div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-							<SocialInput
-								icon={Facebook}
-								color="#1877F2"
-								placeholder="https://www.facebook.com/username"
-								value={formData.socialProfile?.facebook}
-								onChange={(v: string) => handleSocialChange("facebook", v)}
-								type="facebook"
-								disabled={!isEditing}
-							/>
-							<SocialInput
-								icon={Instagram}
-								color="#E4405F"
-								placeholder="https://www.instagram.com/username"
-								value={formData.socialProfile?.instagram}
-								onChange={(v: string) => handleSocialChange("instagram", v)}
-								type="instagram"
-								disabled={!isEditing}
-							/>
-							<SocialInput
-								icon={Twitter}
-								color="#1DA1F2"
-								placeholder="https://www.twitter.com/username"
-								value={formData.socialProfile?.twitter}
-								onChange={(v: string) => handleSocialChange("twitter", v)}
-								type="twitter"
-								disabled={!isEditing}
-							/>
-							<SocialInput
-								icon={Linkedin}
-								color="#0077B5"
-								placeholder="https://www.linkedin.com/in/username"
-								value={formData.socialProfile?.linkedin}
-								onChange={(v: string) => handleSocialChange("linkedin", v)}
-								type="linkedin"
-								disabled={!isEditing}
-							/>
-							<SocialInput
-								icon={Github}
-								color="#24292e"
-								placeholder="https://github.com/username"
-								value={formData.socialProfile?.github}
-								onChange={(v: string) => handleSocialChange("github", v)}
-								type="github"
-								disabled={!isEditing}
-							/>
-							<SocialInput
-								icon={Globe}
-								color="#6B7280"
-								placeholder="https://yourwebsite.com"
-								value={formData.socialProfile?.website}
-								onChange={(v: string) => handleSocialChange("website", v)}
-								type="website"
-								disabled={!isEditing}
-							/>
-						</div>
 					</div>
+				</Card>
+			)}
+
+			{activeTab === "post" && (
+				<div className="space-y-6">
+					<div className="flex items-center justify-between">
+						<div>
+							<h2 className="text-2xl font-bold text-slate-900">
+								Bài viết của tôi
+							</h2>
+							<p className="text-sm text-slate-500">
+								Các bài viết bạn đã chia sẻ trên diễn đàn
+							</p>
+						</div>
+						<Link
+							to="/forum/my"
+							className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+						>
+							Xem tất cả
+							<ArrowRight className="h-4 w-4" />
+						</Link>
+					</div>
+
+					{isPostsLoading ? (
+						<Loader />
+					) : myPosts.length === 0 ? (
+						<Card className="p-10 text-center">
+							<FileText className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+							<h3 className="text-lg font-semibold text-slate-900">
+								Chưa có bài viết nào
+							</h3>
+							<p className="mt-2 text-sm text-slate-500">
+								Bạn có thể tạo bài viết mới trong diễn đàn để hiển thị tại đây.
+							</p>
+							<Link
+								to="/forum/create"
+								className="mt-5 inline-flex items-center gap-2 rounded-xl bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition hover:bg-blue-700"
+							>
+								Tạo bài viết
+								<ArrowRight className="h-4 w-4" />
+							</Link>
+						</Card>
+					) : (
+						<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
+							{myPosts.map((post) => (
+								<ForumPostCard key={post.id} post={post} />
+							))}
+						</div>
+					)}
 				</div>
-			</Card>
+			)}
 		</div>
 	);
 };
