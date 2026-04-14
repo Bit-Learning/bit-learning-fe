@@ -25,8 +25,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
   const syncIntervalRef = useRef<NodeJS.Timeout | null>(null);
   const hideControlsTimeout = useRef<NodeJS.Timeout | null>(null);
   const hasMarkedComplete = useRef(false);
-  const maxWatchedTime = useRef(0);
-  const lastValidTime = useRef(0);
   const lastProcessedSeekTo = useRef<number | null>(null);
 
   const [isPlaying, setIsPlaying] = useState(false);
@@ -92,7 +90,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
       videoRef.current.readyState >= 2
     ) {
       const video = videoRef.current;
-      if (seekTo <= maxWatchedTime.current && Math.abs(video.currentTime - seekTo) > 0.5) {
+      if (Math.abs(video.currentTime - seekTo) > 0.5) {
         video.currentTime = seekTo;
       }
       lastProcessedSeekTo.current = seekTo;
@@ -101,8 +99,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
 
   useEffect(() => {
     hasMarkedComplete.current = false;
-    maxWatchedTime.current = 0;
-    lastValidTime.current = 0;
     lastProcessedSeekTo.current = null;
     setHasResumed(false);
     setCurrentTime(0);
@@ -122,8 +118,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
     ) {
       lastWatchedSecondRef.current = watchedSecond;
       videoRef.current.currentTime = watchedSecond;
-      maxWatchedTime.current = watchedSecond;
-      lastValidTime.current = watchedSecond;
     }
   }, [lastWatchedSecond, duration]);
 
@@ -220,9 +214,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
 
     const handleTimeUpdate = () => {
       const current = video.currentTime;
-      if (current > maxWatchedTime.current) maxWatchedTime.current = current;
-      lastValidTime.current = current;
-
       setCurrentTime(current);
 
       const now = Date.now();
@@ -254,19 +245,12 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
       onCompleteRef.current?.();
     };
 
-    const handleSeeking = () => {
-      if (video.currentTime > maxWatchedTime.current) {
-        video.currentTime = lastValidTime.current;
-      }
-    };
-
     video.addEventListener("play", handlePlay);
     video.addEventListener("pause", handlePause);
     video.addEventListener("timeupdate", handleTimeUpdate);
     video.addEventListener("durationchange", handleDurationChange);
     video.addEventListener("progress", handleProgress);
     video.addEventListener("ended", handleEnded);
-    video.addEventListener("seeking", handleSeeking);
 
     return () => {
       video.removeEventListener("play", handlePlay);
@@ -275,7 +259,6 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
       video.removeEventListener("durationchange", handleDurationChange);
       video.removeEventListener("progress", handleProgress);
       video.removeEventListener("ended", handleEnded);
-      video.removeEventListener("seeking", handleSeeking);
     };
   }, []);
 
@@ -294,7 +277,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
   }, []);
 
   const handleSeek = useCallback((time: number) => {
-    if (videoRef.current && time <= maxWatchedTime.current) {
+    if (videoRef.current) {
       videoRef.current.currentTime = time;
       setCurrentTime(time);
     }
@@ -346,7 +329,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
     const targetTime = video.currentTime + seconds;
     if (seconds < 0) {
       video.currentTime = Math.max(0, targetTime);
-    } else if (targetTime <= maxWatchedTime.current) {
+    } else {
       video.currentTime = Math.min(video.duration || 0, targetTime);
     }
     setCurrentTime(video.currentTime);
@@ -355,8 +338,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
   return (
     <div
       ref={containerRef}
-      className="relative w-full bg-black"
-      style={{ aspectRatio: "16/9" }}
+      className="relative w-full bg-black h-full"
       onMouseMove={resetHideControlsTimer}
       onMouseLeave={() => isPlaying && setShowControls(false)}
       onClick={handlePlayPause}
