@@ -1,218 +1,41 @@
-import React, { useState, useEffect, useRef } from "react";
+import { Button } from "@workspace/ui/components/Button";
+import { Card } from "@workspace/ui/components/Card";
+import { Input } from "@workspace/ui/components/Input";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import {
+	Briefcase,
 	Camera,
 	Edit,
-	Save,
+	Facebook,
+	Github,
+	Globe,
+	Instagram,
+	Linkedin,
 	MapPin,
 	Phone,
-	Facebook,
-	Instagram,
-	Github,
-	Linkedin,
-	Globe,
-	Twitter,
-	Users,
+	Save,
 	Settings,
-	X,
+	Twitter,
 } from "lucide-react";
-import { Card } from "@workspace/ui/components/Card";
-import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
+import React, { useEffect, useState } from "react";
 import {
-	useUserProfile,
 	useUpdateUserProfile,
 	useUploadAvatar,
 	useUploadCoverImage,
-	useFollowStats,
-	useFollowers,
-	useFollowing,
+	useUserProfile,
 } from "../queries/useUser";
 import type {
-	TUserProfile,
 	TSocialProfile,
-	TFollowUser,
+	TUpdateUserRequest,
+	TUserProfile,
 } from "../types/user.type";
-import Loader from "@workspace/ui/components/loader/TerminalLoader";
-import { useNavigate } from "@tanstack/react-router";
-
-const SOCIAL_VALIDATORS: Record<string, { pattern: RegExp; example: string }> =
-	{
-		facebook: {
-			pattern: /^https:\/\/(www\.)?facebook\.com\/.+/,
-			example: "https://www.facebook.com/username",
-		},
-		instagram: {
-			pattern: /^https:\/\/(www\.)?instagram\.com\/.+/,
-			example: "https://www.instagram.com/username",
-		},
-		twitter: {
-			pattern: /^https:\/\/(www\.)?(twitter|x)\.com\/.+/,
-			example: "https://www.twitter.com/username",
-		},
-		linkedin: {
-			pattern: /^https:\/\/(www\.)?linkedin\.com\/in\/.+/,
-			example: "https://www.linkedin.com/in/username",
-		},
-		github: {
-			pattern: /^https:\/\/github\.com\/.+/,
-			example: "https://github.com/username",
-		},
-		website: {
-			pattern: /^https:\/\/.+/,
-			example: "https://yourwebsite.com",
-		},
-	};
-
-const SocialInput = ({
-	icon: Icon,
-	color,
-	placeholder,
-	value,
-	onChange,
-	type,
-	disabled,
-}: any) => {
-	const trimmed = value?.trim() || "";
-	const hasValue = trimmed.length > 0;
-	const validator = SOCIAL_VALIDATORS[type];
-	const isValid = hasValue && validator?.pattern.test(trimmed);
-	const isInvalid = hasValue && !isValid && !disabled;
-
-	return (
-		<div className="flex flex-col gap-1">
-			<div className="flex items-center gap-4">
-				{hasValue && isValid ? (
-					<a
-						href={trimmed}
-						target="_blank"
-						rel="noopener noreferrer"
-						className="size-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0 hover:bg-slate-200 transition-colors cursor-pointer"
-						style={{ color }}
-					>
-						<Icon className="w-6 h-6" />
-					</a>
-				) : (
-					<div
-						className="size-11 rounded-xl bg-slate-100 flex items-center justify-center shrink-0"
-						style={{ color: isInvalid ? "#ef4444" : color }}
-					>
-						<Icon className="w-6 h-6" />
-					</div>
-				)}
-				<Input
-					placeholder={placeholder}
-					value={value || ""}
-					onChange={(e: any) => onChange(e.target.value)}
-					disabled={disabled}
-					className={
-						isInvalid
-							? "border-red-400 focus:ring-red-400 focus:border-red-400"
-							: ""
-					}
-				/>
-			</div>
-			{isInvalid && (
-				<p className="text-sm text-red-500 ml-15 pl-0.5">
-					VD: {validator?.example}
-				</p>
-			)}
-		</div>
-	);
-};
-
-const FollowDropdown = ({
-	label,
-	count,
-	users,
-	isLoading,
-}: {
-	label: string;
-	count: number;
-	users: TFollowUser[] | undefined;
-	isLoading: boolean;
-}) => {
-	const [open, setOpen] = useState(false);
-	const ref = useRef<HTMLDivElement>(null);
-	const navigate = useNavigate();
-
-	useEffect(() => {
-		const handler = (e: MouseEvent) => {
-			if (ref.current && !ref.current.contains(e.target as Node)) {
-				setOpen(false);
-			}
-		};
-		document.addEventListener("mousedown", handler);
-		return () => document.removeEventListener("mousedown", handler);
-	}, []);
-
-	return (
-		<div className="relative" ref={ref}>
-			<button
-				onClick={() => setOpen(!open)}
-				className="flex flex-col items-center gap-1 px-6 py-3 rounded-xl hover:bg-slate-50 transition-colors cursor-pointer"
-			>
-				<span className="text-xl font-bold text-slate-900">{count}</span>
-				<span className="text-sm text-slate-500">{label}</span>
-			</button>
-			{open && (
-				<div className="absolute top-full mt-2 left-1/2 -translate-x-1/2 w-72 bg-white rounded-xl shadow-xl border border-slate-200 z-50 max-h-80 overflow-y-auto">
-					<div className="p-3 border-b border-slate-100">
-						<span className="text-md font-semibold text-slate-700">
-							{label} ({count})
-						</span>
-					</div>
-					{isLoading ? (
-						<Loader />
-					) : !users || users.length === 0 ? (
-						<div className="p-4 text-center text-md text-slate-400">
-							Chưa có ai
-						</div>
-					) : (
-						users.map((user) => (
-							<button
-								key={user.userId}
-								onClick={() => {
-									setOpen(false);
-									navigate({
-										to: "/profile/$username",
-										params: { username: user.username },
-									});
-								}}
-								className="flex items-center gap-3 w-full px-4 py-3 hover:bg-slate-50 transition-colors text-left"
-							>
-								<img
-									src={user.avatar || "/default-avatar.jpg"}
-									alt={user.username}
-									className="w-9 h-9 rounded-full object-cover shrink-0"
-								/>
-								<div className="min-w-0">
-									<div className="text-md font-semibold text-slate-800 truncate">
-										{user.firstName} {user.lastName}
-									</div>
-									<div className="text-sm text-slate-400 truncate">
-										@{user.username}
-									</div>
-								</div>
-							</button>
-						))
-					)}
-				</div>
-			)}
-		</div>
-	);
-};
+import { SOCIAL_VALIDATORS, SocialInput } from "./SocialInput";
 
 export const ProfileContent = () => {
-	const navigate = useNavigate();
 	const { data: userProfile, isLoading } = useUserProfile();
 	const updateProfileMutation = useUpdateUserProfile();
 	const uploadAvatarMutation = useUploadAvatar();
 	const uploadCoverMutation = useUploadCoverImage();
-
-	const userId = userProfile?.id ?? 0;
-	const { data: followStats } = useFollowStats(userId);
-	const { data: followers, isLoading: followersLoading } = useFollowers(userId);
-	const { data: following, isLoading: followingLoading } = useFollowing(userId);
 
 	const [formData, setFormData] = useState<Partial<TUserProfile>>({});
 	const [isEditing, setIsEditing] = useState(false);
@@ -235,27 +58,33 @@ export const ProfileContent = () => {
 
 	const handleSave = () => {
 		if (hasSocialErrors()) return;
-		updateProfileMutation.mutate(
-			{
-				username: formData.username,
-				firstName: formData.firstName,
-				lastName: formData.lastName,
-				pronouns: formData.pronouns,
-				bio: formData.bio,
-				phoneNumber: formData.phoneNumber,
-				location: formData.location,
-				socialProfile: formData.socialProfile,
-				jobTitle: formData.jobTitle,
-				specialties: formData.specialties ?? undefined,
-				yearsOfExperience: formData.yearsOfExperience ?? undefined,
-				company: formData.company ?? undefined,
-				studentsCount: formData.studentsCount ?? undefined,
-				coursesCount: formData.coursesCount ?? undefined,
-			},
-			{
-				onSuccess: () => setIsEditing(false),
-			},
-		);
+		const currentUsername = userProfile?.username?.trim() ?? "";
+		const nextUsername = formData.username?.trim() ?? "";
+		const payload: TUpdateUserRequest = {
+			firstName: formData.firstName,
+			lastName: formData.lastName,
+			pronouns: formData.pronouns,
+			bio: formData.bio,
+			phoneNumber: formData.phoneNumber,
+			location: formData.location,
+			socialProfile: formData.socialProfile,
+			jobTitle: formData.jobTitle,
+			specialties: formData.specialties ?? undefined,
+			yearsOfExperience: formData.yearsOfExperience ?? undefined,
+			company: formData.company ?? undefined,
+			studentsCount: formData.studentsCount ?? undefined,
+			coursesCount: formData.coursesCount ?? undefined,
+		};
+
+		// Avoid triggering duplicate-username validation when the user did not
+		// actually change their username.
+		if (nextUsername && nextUsername !== currentUsername) {
+			payload.username = nextUsername;
+		}
+
+		updateProfileMutation.mutate(payload, {
+			onSuccess: () => setIsEditing(false),
+		});
 	};
 
 	const handleCancel = () => {
@@ -302,7 +131,7 @@ export const ProfileContent = () => {
 	return (
 		<div className="grow space-y-8 w-full">
 			<Card>
-				<div className="relative h-56 md:h-64">
+				<div className="relative w-full aspect-[16/9]">
 					<img
 						alt="Cover"
 						className="w-full h-full object-cover -mt-6 rounded-t-xl"
@@ -325,9 +154,9 @@ export const ProfileContent = () => {
 				</div>
 
 				<div className="px-8 pb-8">
-					<div className="flex flex-col md:flex-row items-end gap-6 -mt-16 relative">
+					<div className="flex flex-col md:flex-row items-end gap-6 relative">
 						<div className="relative group">
-							<div className="size-32 md:size-40 rounded-3xl border-4 border-white bg-white shadow-xl overflow-hidden">
+							<div className="size-32 md:size-40 rounded-full overflow-hidden">
 								<img
 									alt="Avatar"
 									className="w-full h-full object-cover"
@@ -348,16 +177,48 @@ export const ProfileContent = () => {
 						</div>
 
 						<div className="grow flex flex-col md:flex-row items-center md:items-end justify-between gap-6 w-full md:pb-2">
-							<div className="text-center md:text-left">
+							<div className="text-center md:text-left max-w-xl">
+								{/* Name */}
 								<h1 className="text-2xl font-bold text-slate-900">
 									{fullName || "Người dùng"}
 								</h1>
-								<p className="text-slate-500 font-medium">
-									{formData.jobTitle || "Học viên"}
-								</p>
-								<p className="mt-2 text-slate-300 font-small">
-									Tham gia từ {joinedDate}
-								</p>
+
+								{/* Bio */}
+								{formData.bio && (
+									<p className="mt-2 text-slate-600 leading-relaxed">
+										{formData.bio}
+									</p>
+								)}
+
+								{/* Info list */}
+								<div className="mt-4 space-y-2 text-sm text-slate-700">
+									{formData.location && (
+										<div className="flex items-center gap-2 justify-center md:justify-start">
+											<MapPin className="w-4 h-4 text-slate-400" />
+											<span>{formData.location}</span>
+										</div>
+									)}
+
+									{formData.jobTitle && (
+										<div className="flex items-center gap-2 justify-center md:justify-start">
+											<Briefcase className="w-4 h-4 text-slate-400" />
+											<span>{formData.jobTitle}</span>
+										</div>
+									)}
+
+									{formData.socialProfile?.facebook && (
+										<div className="flex items-center gap-2 justify-center md:justify-start">
+											<Facebook className="w-4 h-4 text-blue-500" />
+											<a
+												href={formData.socialProfile.facebook}
+												target="_blank"
+												className="hover:underline text-blue-600 break-all"
+											>
+												{formData.socialProfile.facebook}
+											</a>
+										</div>
+									)}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -382,8 +243,8 @@ export const ProfileContent = () => {
 			</Card>
 
 			<Card className="p-8 md:p-10">
-				<div className="flex items-center justify-between mb-8">
-					<div className="flex items-center gap-3">
+				<div className="flex items-center justify-between mb-3">
+					<div className="flex items-center gap-3 ">
 						<h2 className="text-2xl font-bold text-slate-900">
 							Thông tin cá nhân
 						</h2>
@@ -411,21 +272,21 @@ export const ProfileContent = () => {
 						</div>
 					) : (
 						<Button
-							variant="default"
+							variant="ghost"
 							onClick={() => setIsEditing(true)}
-							className="p-5 text-md bg-blue-600 text-white"
+							className="p-5 text-md bg-stale-900 text-black"
 						>
-							<Settings className="w-4 h-4 mr-2" />
-							Chỉnh sửa hồ sơ
+							<Settings className="w-5 h-5 mr-2" />
+							Chỉnh sửa
 						</Button>
 					)}
 				</div>
 
 				<div className="space-y-8">
 					<div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-						<div className="space-y-2">
+						<div className="space-y-3">
 							<label className="text-md font-semibold text-slate-700">
-								Tên người dùng (Username)
+								Tên hiển thị
 							</label>
 							<div className="relative">
 								<span className="absolute inset-y-0 left-0 flex items-center pl-4 text-slate-400 font-medium">
@@ -451,9 +312,7 @@ export const ProfileContent = () => {
 						</div>
 
 						<div className="space-y-2">
-							<label className="text-md font-semibold text-slate-700">
-								Họ (First Name)
-							</label>
+							<label className="text-md font-semibold text-slate-700">Họ</label>
 							<Input
 								value={formData.firstName || ""}
 								onChange={(e) => handleFieldChange("firstName", e.target.value)}
@@ -463,7 +322,7 @@ export const ProfileContent = () => {
 
 						<div className="space-y-2">
 							<label className="text-md font-semibold text-slate-700">
-								Tên (Last Name)
+								Tên
 							</label>
 							<Input
 								value={formData.lastName || ""}
@@ -474,7 +333,7 @@ export const ProfileContent = () => {
 
 						<div className="space-y-2">
 							<label className="text-md font-semibold text-slate-700">
-								Đại từ nhân xưng (Pronouns)
+								Đại từ nhân xưng
 							</label>
 							<Input
 								value={formData.pronouns || ""}
@@ -601,7 +460,7 @@ export const ProfileContent = () => {
 
 								<div className="space-y-2">
 									<label className="text-md font-semibold text-slate-700">
-										Công ty hiện tại (tuỳ chọn)
+										Công ty hiện tại
 									</label>
 									<Input
 										placeholder="Ví dụ: Bit Learning, FPT Software"
@@ -615,7 +474,7 @@ export const ProfileContent = () => {
 
 								<div className="space-y-2">
 									<label className="text-md font-semibold text-slate-700">
-										Số lượng học viên (ước tính)
+										Số lượng học viên
 									</label>
 									<Input
 										type="number"
