@@ -66,8 +66,7 @@ export const LectureDetailModal: React.FC<LectureDetailModalProps> = ({ lecture,
                 <span className="font-medium">Bài kiểm tra</span>
               </div>
               <div className="flex gap-4 text-sm text-gray-600">
-                <span>Điểm đạt: {((quizData?.passPercent || 0) * 100).toFixed(0)}%</span>
-                <span>Số lần làm tối đa: {quizData?.maxAttempts || 0}</span>
+                <span>Phần trăm đúng tối thiểu: {((quizData?.passPercent || 0) * 100).toFixed(0)}%</span>
               </div>
             </div>
 
