@@ -1,16 +1,17 @@
-import React, { useState } from "react";
-import { ThumbsUp, ThumbsDown, Reply, Edit, Trash2 } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { ThumbsUp, ThumbsDown, Reply } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import type { Comment } from "../types/forum.type";
 import { AuthorAvatar } from "./AuthorAvatar";
+import { resolveAuthorUsername } from "../utils/author-profile";
 
 interface CommentItemProps {
 	comment: Comment;
 	replyingTo: number | null;
 	setReplyingTo: (id: number | null) => void;
 	onReply: (commentId: number) => void;
-	onEdit: (comment: Comment) => void;
-	onDelete: (commentId: number) => void;
 	onLike: (commentId: number) => void;
 	onSubmitReply: (content: string, commentId: number) => void;
 	isInteractionDisabled?: boolean;
@@ -20,8 +21,6 @@ interface CommentItemProps {
 export const CommentItem: React.FC<CommentItemProps> = ({
 	comment,
 	onReply,
-	onEdit,
-	onDelete,
 	onLike,
 	replyingTo,
 	setReplyingTo,
@@ -30,8 +29,20 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 	onRequireAuth,
 }) => {
 	const [replyContent, setReplyContent] = useState("");
+	const navigate = useNavigate();
 
 	const isReplying = replyingTo === comment.id;
+	const authorFullName =
+		`${comment.author.firstName} ${comment.author.lastName}`.trim();
+
+	const handleViewProfile = async () => {
+		const username = await resolveAuthorUsername(comment.author);
+		navigate({
+			to: "/profile/$username",
+			params: { username },
+		});
+	};
+
 	const formatDate = (date: string) => {
 		const now = new Date();
 		const commentDate = new Date(date);
@@ -46,13 +57,23 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 
 	return (
 		<div className="flex items-start gap-4">
-			<AuthorAvatar author={comment.author} size="lg" />
+			<button
+				type="button"
+				onClick={handleViewProfile}
+				className="shrink-0 cursor-pointer"
+			>
+				<AuthorAvatar author={comment.author} size="lg" />
+			</button>
 			<div className="flex-1">
 				<div className="flex items-center justify-between mb-3">
 					<div className="flex items-center gap-3">
-						<span className="font-bold text-gray-900 hover:text-gray-700 cursor-pointer transition-colors">
-							{comment.author.firstName} {comment.author.lastName}
-						</span>
+						<button
+							type="button"
+							onClick={handleViewProfile}
+							className="cursor-pointer font-bold text-gray-900 transition-colors hover:text-gray-700"
+						>
+							{authorFullName}
+						</button>
 						<span className="text-xs text-gray-500">
 							{formatDate(comment.createdAt)}
 						</span>
@@ -62,26 +83,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 							</span>
 						)}
 					</div>
-					{comment.isEditAllowed && (
-						<div className="flex items-center gap-1">
-							<Button
-								variant="ghost"
-								size="icon"
-								className="text-gray-400 hover:text-blue-600 h-8 w-8"
-								onClick={() => onEdit(comment)}
-							>
-								<Edit className="w-4 h-4" />
-							</Button>
-							<Button
-								variant="ghost"
-								size="icon"
-								className="text-gray-400 hover:text-red-500 h-8 w-8"
-								onClick={() => onDelete(comment.id)}
-							>
-								<Trash2 className="w-4 h-4" />
-							</Button>
-						</div>
-					)}
 				</div>
 
 				<p className="text-gray-700 text-base leading-relaxed mb-6">
@@ -182,8 +183,6 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 								replyingTo={replyingTo}
 								setReplyingTo={setReplyingTo}
 								onReply={onReply}
-								onEdit={onEdit}
-								onDelete={onDelete}
 								onLike={onLike}
 								onSubmitReply={onSubmitReply}
 								isInteractionDisabled={isInteractionDisabled}

@@ -9,6 +9,7 @@ export interface Author {
 	id: number;
 	firstName: string;
 	lastName: string;
+	username?: string;
 	name?: string;
 	avatar?: string;
 	email?: string;
