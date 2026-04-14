@@ -22,6 +22,7 @@ import {
 	Sparkles,
 } from "lucide-react";
 import type { TInstructor } from "../types/user.type";
+import { useNavigate } from "@tanstack/react-router";
 
 function SocialIconLink({
 	href,
@@ -48,6 +49,8 @@ function SocialIconLink({
 function InstructorCard({ instructor }: { instructor: TInstructor }) {
 	const fullName =
 		`${instructor.firstName ?? ""} ${instructor.lastName ?? ""}`.trim();
+
+	const navigate = useNavigate();
 
 	return (
 		<article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60">
@@ -150,7 +153,15 @@ function InstructorCard({ instructor }: { instructor: TInstructor }) {
 								: "Mentor thực chiến"}
 						</span>
 
-						<button className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition hover:text-blue-700">
+						<button
+							onClick={() => {
+								navigate({
+									to: "/profile/$username",
+									params: { username: instructor.username ?? "" },
+								});
+							}}
+							className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition hover:text-blue-700 cursor-pointer"
+						>
 							Xem hồ sơ
 							<ArrowRight size={15} />
 						</button>
@@ -175,6 +186,8 @@ function FeaturedInstructor({
 		instructor.jobTitle || instructor.company
 			? [instructor.jobTitle, instructor.company].filter(Boolean).join(" · ")
 			: "Giảng viên nổi bật";
+
+	const navigate = useNavigate();
 
 	return (
 		<article
@@ -243,7 +256,15 @@ function FeaturedInstructor({
 						)}
 					</div>
 
-					<button className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-slate-900 transition group-hover:translate-x-0.5">
+					<button
+						onClick={() => {
+							navigate({
+								to: "/profile/$username",
+								params: { username: instructor.username ?? "" },
+							});
+						}}
+						className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-slate-900 transition group-hover:translate-x-0.5 cursor-pointer"
+					>
 						Khám phá thêm
 						<ArrowRight size={15} />
 					</button>
