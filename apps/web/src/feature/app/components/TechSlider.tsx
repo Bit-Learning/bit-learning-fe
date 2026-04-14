@@ -142,7 +142,7 @@ const toolItems: TechItem[] = [
 		logo: "/tech-logos/dynamodb-original.svg",
 	},
 	{
-		name: "Elacsticsearch",
+		name: "Elasticsearch",
 		logo: "/tech-logos/elasticsearch-original.svg",
 	},
 	{
@@ -233,7 +233,7 @@ const platforms: TechItem[] = [
 		logo: "/tech-logos/github-original.svg",
 	},
 	{
-		name: "GitHub",
+		name: "GitLab",
 		logo: "/tech-logos/gitlab-original.svg",
 	},
 	{

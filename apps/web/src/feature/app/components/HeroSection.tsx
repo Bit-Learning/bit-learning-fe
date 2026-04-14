@@ -1,20 +1,49 @@
-import React from "react";
+import { useMemo } from "react";
+import type { FC } from "react";
 import { Link } from "@tanstack/react-router";
-import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import CodeProfile from "@workspace/ui/components/custom/codeprofile";
-import { ArrowRight } from "lucide-react";
 import NumberTicker from "@workspace/ui/components/custom/ticker";
 
 import BlueButton from "../../../shared/components/button/BlueButton";
+import {
+	usePublicStudentAvatars,
+	usePublicStudentCount,
+} from "../queries/usePublicStats";
+import { formatCompactNumber } from "@/shared/format";
 
-const getRandomAvatar = () => {
-	const gender = Math.random() > 0.5 ? "men" : "women";
-	const id = Math.floor(Math.random() * 100);
-	return `https://randomuser.me/api/portraits/${gender}/${id}.jpg`;
-};
+const HERO_AVATARS = [
+	"/avatars/student-01.svg",
+	"/avatars/student-02.svg",
+	"/avatars/student-03.svg",
+	"/avatars/student-04.svg",
+	"/avatars/student-05.svg",
+	"/avatars/student-06.svg",
+];
 
-const HeroSection: React.FC = () => {
+const HeroSection: FC = () => {
+	const { data: studentCount = 0, isLoading } = usePublicStudentCount();
+	const { data: studentAvatars = [] } = usePublicStudentAvatars(3);
+
+	const fallbackAvatars = useMemo(() => {
+		const shuffled = [...HERO_AVATARS].sort(() => Math.random() - 0.5);
+		return shuffled.slice(0, 3);
+	}, []);
+
+	const avatars = studentAvatars.length
+		? studentAvatars.map((student, index) => ({
+				id: student.id,
+				src: student.avatar || fallbackAvatars[index % fallbackAvatars.length],
+				alt:
+					`${student.firstName ?? ""} ${student.lastName ?? ""}`.trim() ||
+					"Hoc sinh Bit Learning",
+			}))
+		: fallbackAvatars.map((src, index) => ({
+				id: `fallback-${index}`,
+				src,
+				alt: "Hoc sinh Bit Learning",
+			}));
+
 	return (
 		<section
 			id="tour-hero"
@@ -43,40 +72,32 @@ const HeroSection: React.FC = () => {
 				</div>
 				<div className="flex items-center gap-4 pt-4">
 					<div className="flex -space-x-3">
-						<div className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
-							<img
-								className="w-full h-full object-cover"
-								alt="Student avatar"
-								src={getRandomAvatar()}
-							/>
-						</div>
-						<div className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
-							<img
-								className="w-full h-full object-cover"
-								alt="Student avatar"
-								src={getRandomAvatar()}
-							/>
-						</div>
-						<div className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden">
-							<img
-								className="w-full h-full object-cover"
-								alt="Student avatar"
-								src={getRandomAvatar()}
-							/>
-						</div>
+						{avatars.map((avatar) => (
+							<div
+								key={avatar.id}
+								className="w-10 h-10 rounded-full border-2 border-white bg-slate-200 overflow-hidden"
+							>
+								<img
+									className="w-full h-full object-cover"
+									alt={avatar.alt}
+									src={avatar.src}
+									loading="lazy"
+								/>
+							</div>
+						))}
 						<div className="w-10 h-10 rounded-full border-2 border-white bg-primary flex items-center justify-center text-white text-[10px] font-bold glass">
-							+10k
+							{isLoading ? "..." : `+${formatCompactNumber(studentCount)}`}
 						</div>
 					</div>
 					<p className="text-sm text-slate-500 font-medium flex items-center gap-1">
 						Hơn
 						<NumberTicker
-							value={10000}
+							value={studentCount}
 							duration={2500}
 							className="font-semibold text-primary"
 							decimalPlaces={0}
 						/>
-						học sinh đang tham gia mỗi ngày
+						học sinh đã tham gia
 					</p>
 				</div>
 			</div>
