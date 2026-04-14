@@ -95,8 +95,8 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
                   Số Slide
                 </th>
                 <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800">Ngày tạo</th>
-                <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800 text-right">
-                  Hành động
+                <th className="px-6 py-4 text-md font-semibold uppercase tracking-wider text-slate-800 text-center">
+                  Thao tác
                 </th>
               </tr>
             </thead>
@@ -141,8 +141,8 @@ export const MySlidesTab: React.FC<MySlidesTabProps> = ({ onViewDetail, onSwitch
                         day: "2-digit",
                       })}
                     </td>
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="px-6 py-4 text-center">
+                      <div className="flex items-center justify-center gap-2">
                         <button
                           className="cursor-pointer p-2 text-slate-800 hover:text-primary hover:bg-slate-100 rounded-lg transition-all"
                           title="Download PPTX"

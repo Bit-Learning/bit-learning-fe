@@ -141,22 +141,25 @@ export default function QuestionApprovalTableView() {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-300">
                 <tr>
-                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-32">
+                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-24">
                     ID
                   </th>
-                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider">
-                    Nội dung câu hỏi
+                  <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-100">
+                    NỘI DUNG CÂU HỎI
                   </th>
-                  <th className="p-4 text-center font-semibold text-md text-slate-800 uppercase tracking-wider">
-                    Loại
+                  <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-30">
+                    MỨC ĐỘ
                   </th>
-                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-36">
-                    Ngày gửi
+                  <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">LOẠI</th>
+                  <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
+                    MÔN HỌC
                   </th>
-                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-40">
-                    Trạng thái
+                  <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
+                    TRẠNG THÁI
                   </th>
-                  <th className="px-6 py-4 w-52"></th>
+                  <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
+                    Thao tác
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
@@ -168,14 +171,14 @@ export default function QuestionApprovalTableView() {
                   >
                     <td className="px-6 py-4 text-md font-medium text-slate-900">{question.id}</td>
                     <td className="px-6 py-4">
-                      <div className="max-w-xl">
-                        <p className="text-md font-medium text-slate-900 mb-1 line-clamp-2">{question.content}</p>
-                        {question.subject && <span className="text-sm text-slate-500">{question.subject.name}</span>}
+                      <div className="min-w-0">
+                        <p className="line-clamp-1 text-gray-900 text-md">{question.content}</p>
                       </div>
                     </td>
-                    <td className="px-6 py-4 text-center">{getTypeBadge(question.questionType)}</td>
-                    <td className="px-6 py-4 text-sm text-slate-800">{formatDate(question.createdAt)}</td>
-                    <td className="px-6 py-4">{getStatusBadge(question.approvalStatus)}</td>
+                    <td className="p-4 text-sm">{getDifficultyBadge(question.questionLevel)}</td>
+                    <td className="p-4 text-sm text-gray-700">{getTypeBadge(question.questionType)}</td>
+                    <td className="p-4 text-sm text-gray-700">{question.subject?.name}</td>
+                    <td className="p-4 text-sm">{getStatusBadge(question.approvalStatus)}</td>
                     <td className="px-2 py-4">
                       <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
                         {question.approvalStatus === ApprovalStatus.REJECTED && (

@@ -32,6 +32,7 @@ export interface TransactionInfo {
   code: string;
   type: TransactionType;
   status: TransactionStatus;
+  paymentMethod: PaymentMethod;
   orderId?: number;
   createdAt: string;
   updatedAt: string;
