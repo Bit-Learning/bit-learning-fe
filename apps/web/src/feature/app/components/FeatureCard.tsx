@@ -1,9 +1,10 @@
 import { Card, CardContent } from "@workspace/ui/components/Card";
+import { Link } from "@tanstack/react-router";
 import { ArrowRight } from "lucide-react";
-import React from "react";
+import type { FC } from "react";
 import { FeatureCardProps } from "../types";
 
-const FeatureCard: React.FC<FeatureCardProps> = ({
+const FeatureCard: FC<FeatureCardProps> = ({
 	color,
 	title,
 	description,
@@ -58,7 +59,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
 					{description}
 				</p>
 
-				<a
+				<Link
 					className={`
             ${textClass}
             inline-flex
@@ -69,7 +70,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
             transition-all
             group-hover:gap-2
           `}
-					href={link}
+					to={link}
 				>
 					{linkText}
 
@@ -80,7 +81,7 @@ const FeatureCard: React.FC<FeatureCardProps> = ({
             group-hover:translate-x-1
           "
 					/>
-				</a>
+				</Link>
 			</CardContent>
 		</Card>
 	);

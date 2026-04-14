@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="Partner logo">
+  <rect width="160" height="160" rx="24" fill="#0F172A" opacity="0.08"/>
+  <rect x="30" y="46" width="100" height="68" rx="14" fill="#2563EB" opacity="0.12"/>
+  <path d="M48 98V62h22c10 0 18 8 18 18s-8 18-18 18H48z" fill="#2563EB" opacity="0.55"/>
+  <path d="M98 98V62h14c6 0 10 4 10 10v16c0 6-4 10-10 10H98z" fill="#2563EB" opacity="0.35"/>
+  <path d="M50 112h60" stroke="#0F172A" stroke-width="6" stroke-linecap="round" opacity="0.12"/>
+</svg>
+
