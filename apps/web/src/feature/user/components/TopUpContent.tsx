@@ -16,8 +16,8 @@ const PRESET_AMOUNTS = [
   { value: 20000, label: 20000 },
   { value: 50000, label: 50000 },
   { value: 100000, label: 100000 },
-  { value: 200000, label: 200.0 },
-  { value: 500000, label: 500.0 },
+  { value: 200000, label: 200000 },
+  { value: 500000, label: 500000 },
 ];
 
 const toBIT = (vnd: number) => vnd;

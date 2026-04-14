@@ -47,7 +47,7 @@ const VideoPlayerWithNotes: React.FC<VideoPlayerWithNotesProps> = memo(
     }, []);
 
     return (
-      <div className="relative w-full" style={{ aspectRatio: "16/9" }}>
+      <div className="relative w-full h-full">
         <VideoPlayer
           lectureId={lectureId}
           onComplete={handleComplete}
