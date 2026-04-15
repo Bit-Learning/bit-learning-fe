@@ -1,8 +1,8 @@
-import React, { useState, useRef } from "react";
+import React, { useState } from "react";
 import { useForm, useFieldArray, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
-import { ArrowLeft, Plus, Trash2, Upload, FileJson, X, Loader2, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, Plus, Trash2, Loader2, CheckCircle2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -19,6 +19,7 @@ import {
 } from "../queries/useProblem";
 import { useAddProblem, useContestProblems } from "../queries/useContest";
 import TagMultiSelect from "./TagMultiSelect";
+import TestCaseInput, { defaultTestCaseInputState, resolveTestCases, TestCaseInputState } from "./TestCaseInput";
 
 const schema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
@@ -42,8 +43,6 @@ const schema = z.object({
 
 type FormData = z.infer<typeof schema>;
 
-type TestCaseMode = "json" | "file";
-
 interface CreateContestProblemProps {
   contestId: string;
   onBack: () => void;
@@ -51,15 +50,10 @@ interface CreateContestProblemProps {
 }
 
 const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, onBack, onSuccess }) => {
-  const [testCasesJson, setTestCasesJson] = useState("");
   const [jsonError, setJsonError] = useState<string | null>(null);
-  const [testCaseMode, setTestCaseMode] = useState<TestCaseMode>("json");
-  const [uploadedFile, setUploadedFile] = useState<File | null>(null);
-  const [replaceExisting, setReplaceExisting] = useState(false);
-  const [isDragging, setIsDragging] = useState(false);
   const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-
+  const [tcState, setTcState] = useState<TestCaseInputState>(defaultTestCaseInputState);
+  const [tcError, setTcError] = useState<string | null>(null);
   const createProblem = useCreateProblem();
   const generateTemplates = useGenerateCodeTemplates();
   const bulkCreateTestCases = useBulkCreateTestCases();
@@ -113,55 +107,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
     form.setValue("slug", slug);
   };
 
-  const handleFormatJson = () => {
-    if (!testCasesJson.trim()) return;
-    try {
-      const parsed = JSON.parse(testCasesJson);
-      const arr = Array.isArray(parsed) ? parsed : [parsed];
-      const normalized = arr.map((item) => ({
-        input: String(item.input ?? ""),
-        expectedOutput: String(item.expectedOutput ?? ""),
-        isSample: typeof item.isSample === "boolean" ? item.isSample : false,
-      }));
-      setTestCasesJson(JSON.stringify(normalized, null, 2));
-      setJsonError(null);
-    } catch {
-      setJsonError("JSON không hợp lệ, vui lòng kiểm tra lại");
-    }
-  };
-
-  const handleFileDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) setUploadedFile(file);
-  };
-
-  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) setUploadedFile(file);
-  };
-
   const onSubmit = async (data: FormData) => {
-    if (testCaseMode === "json") {
-      if (!testCasesJson.trim()) {
-        setJsonError("Vui lòng nhập test cases");
-        return;
-      }
-      try {
-        const parsed = JSON.parse(testCasesJson);
-        if (!Array.isArray(parsed)) throw new Error();
-      } catch {
-        setJsonError("JSON không hợp lệ");
-        return;
-      }
-    } else {
-      if (!uploadedFile) {
-        setJsonError("Vui lòng chọn file test cases");
-        return;
-      }
-    }
-
     try {
       const createRes = await createProblem.mutateAsync({
         title: data.title,
@@ -175,6 +121,12 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
         tags: selectedTagIds,
       });
 
+      const { testCases, error } = resolveTestCases(tcState);
+      if (error) {
+        setTcError(error);
+        return;
+      }
+
       const newProblemId = createRes.data.data?.id;
       if (!newProblemId) throw new Error("Không thể lấy ID bài toán");
 
@@ -187,19 +139,10 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
         },
       });
 
-      if (testCaseMode === "json") {
-        const testCases = JSON.parse(testCasesJson);
-        await bulkCreateTestCases.mutateAsync({
-          problemId: newProblemId,
-          data: { testCases, replaceExisting: false },
-        });
-      } else {
-        await importTestCases.mutateAsync({
-          problemId: newProblemId,
-          file: uploadedFile!,
-          replaceExisting,
-        });
-      }
+      await bulkCreateTestCases.mutateAsync({
+        problemId: newProblemId,
+        data: { testCases, replaceExisting: false },
+      });
 
       await addProblem.mutateAsync({
         contestId,
@@ -241,27 +184,10 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
           </button>
           <span className="text-gray-300">|</span>
           <h1 className="text-base font-bold text-gray-900">Tạo bài tập mới</h1>
-          <Badge variant="outline" className="text-xs font-medium text-orange-600 bg-orange-50 border-orange-200">
+          <Badge variant="outline" className="text-xs font-medium text-orange-700 bg-orange-50 border-orange-200">
             Không công khai
           </Badge>
         </div>
-        <Button
-          onClick={form.handleSubmit(onSubmit)}
-          disabled={isPending}
-          className="gap-2 bg-primary hover:bg-blue-700 text-white min-w-36"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="w-4 h-4 animate-spin" />
-              Đang xử lý...
-            </>
-          ) : (
-            <>
-              <CheckCircle2 className="w-4 h-4" />
-              Tạo &amp; thêm vào thi
-            </>
-          )}
-        </Button>
       </div>
 
       <div className="flex-1 max-w-5xl mx-auto w-full px-8 py-8 space-y-8">
@@ -430,143 +356,19 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
           </CardContent>
         </Card>
 
-        <Card className="border border-gray-200 shadow-sm">
-          <CardContent className="px-6 space-y-5">
-            <SectionTitle subtitle="Nhập test cases theo JSON hoặc import từ file">Test Cases</SectionTitle>
-
-            <div className="flex gap-2 p-1 bg-gray-100 rounded-lg w-fit">
-              {(["json", "file"] as TestCaseMode[]).map((m) => (
-                <button
-                  key={m}
-                  type="button"
-                  onClick={() => setTestCaseMode(m)}
-                  className={cn(
-                    "px-5 py-2 text-sm font-semibold rounded-md transition-all",
-                    testCaseMode === m ? "bg-white shadow-sm text-gray-900" : "text-gray-500 hover:text-gray-700",
-                  )}
-                >
-                  {m === "json" ? (
-                    <span className="flex items-center gap-2">
-                      <FileJson className="w-4 h-4" />
-                      Nhập JSON
-                    </span>
-                  ) : (
-                    <span className="flex items-center gap-2">
-                      <Upload className="w-4 h-4" />
-                      Import file
-                    </span>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            {testCaseMode === "json" && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold text-gray-900">
-                    Dữ liệu JSON <span className="text-red-500">*</span>
-                  </Label>
-                  <button
-                    type="button"
-                    onClick={handleFormatJson}
-                    disabled={!testCasesJson.trim()}
-                    className="px-3 py-1.5 text-xs font-semibold text-gray-600 border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                  >
-                    Định dạng JSON
-                  </button>
-                </div>
-                <Textarea
-                  value={testCasesJson}
-                  onChange={(e) => {
-                    setTestCasesJson(e.target.value);
-                    setJsonError(null);
-                  }}
-                  rows={14}
-                  placeholder={`[\n  {\n    "input": "1\\n2",\n    "expectedOutput": "3",\n    "isSample": true\n  }\n]`}
-                  className={cn(
-                    "font-mono text-sm border-2",
-                    jsonError ? "border-red-300 focus:border-red-500" : "border-gray-300 focus:border-primary",
-                  )}
-                />
-                {jsonError && <p className="text-sm text-red-500"> {jsonError}</p>}
-              </div>
-            )}
-
-            {testCaseMode === "file" && (
-              <div className="space-y-4">
-                <div
-                  onDragOver={(e) => {
-                    e.preventDefault();
-                    setIsDragging(true);
-                  }}
-                  onDragLeave={() => setIsDragging(false)}
-                  onDrop={handleFileDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className={cn(
-                    "border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-all",
-                    isDragging
-                      ? "border-primary bg-blue-50"
-                      : uploadedFile
-                        ? "border-green-400 bg-green-50"
-                        : "border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-white",
-                  )}
-                >
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept=".json,.zip,.txt"
-                    onChange={handleFileSelect}
-                    className="hidden"
-                  />
-                  {uploadedFile ? (
-                    <div className="flex flex-col items-center gap-2">
-                      <CheckCircle2 className="w-10 h-10 text-green-500" />
-                      <p className="font-semibold text-gray-900">{uploadedFile.name}</p>
-                      <p className="text-sm text-gray-500">{(uploadedFile.size / 1024).toFixed(1)} KB</p>
-                      <button
-                        type="button"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setUploadedFile(null);
-                        }}
-                        className="flex items-center gap-1 text-xs text-red-500 hover:text-red-700 mt-1"
-                      >
-                        <X className="w-3.5 h-3.5" />
-                        Xóa file
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-center gap-2">
-                      <Upload className="w-10 h-10 text-gray-400" />
-                      <p className="font-semibold text-gray-700">
-                        Kéo thả file vào đây hoặc <span className="text-primary">chọn file</span>
-                      </p>
-                      <p className="text-xs text-gray-400">Hỗ trợ .json, .txt</p>
-                    </div>
-                  )}
-                </div>
-
-                <label className="flex items-center gap-3 cursor-pointer">
-                  <div
-                    onClick={() => setReplaceExisting(!replaceExisting)}
-                    className={cn(
-                      "w-10 h-6 rounded-full flex items-center transition-colors px-1",
-                      replaceExisting ? "bg-primary" : "bg-gray-300",
-                    )}
-                  >
-                    <div
-                      className={cn(
-                        "w-4 h-4 bg-white rounded-full shadow transition-transform",
-                        replaceExisting ? "translate-x-4" : "translate-x-0",
-                      )}
-                    />
-                  </div>
-                  <span className="text-sm font-medium text-gray-700">Thay thế test cases hiện có</span>
-                </label>
-
-                {jsonError && <p className="text-sm text-red-500">{jsonError}</p>}
-              </div>
-            )}
+        <Card>
+          <CardContent className="px-6 space-y-6">
+            <SectionTitle subtitle="Chọn cách nhập test cases phù hợp">Test Cases</SectionTitle>
+            <TestCaseInput
+              state={tcState}
+              onChange={(s) => {
+                setTcState(s);
+                setTcError(null);
+              }}
+              error={tcError}
+              jsonError={jsonError}
+              onSetJsonError={setJsonError}
+            />
           </CardContent>
         </Card>
 
