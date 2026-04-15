@@ -19,12 +19,7 @@ import { Label } from "@workspace/ui/components/label";
 import { Checkbox } from "@workspace/ui/components/Checkbox";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@/shared/components/Sonner";
-import {
-  useSearchQuestions,
-  useMyQuestions,
-  useMyQuestionsAll,
-  useSearchQuestionsAll,
-} from "@/feature/question/queries/useQuestion";
+import { useMyQuestionsAll, useSearchQuestionsAll } from "@/feature/question/queries/useQuestion";
 import { useGenerateExamFromQuestions, useExam, useDownloadExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { ApprovalStatus, type QuestionLevel } from "@/feature/question/types/question.type";
@@ -53,15 +48,6 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 20;
 
-  // const { data: systemResponse, isLoading: systemLoading } = useSearchQuestions(
-  //   { keyword: searchTerm, page: currentPage, size: pageSize },
-  //   { enabled: questionSource === "system" },
-  // );
-
-  // const { data: userResponse, isLoading: userLoading } = useMyQuestions(
-  //   { page: currentPage, size: pageSize },
-  //   { enabled: questionSource === "user" },
-  // );
   const { data: systemResponse, isLoading: systemLoading } = useSearchQuestionsAll();
 
   const { data: userResponse, isLoading: userLoading } = useMyQuestionsAll();
