@@ -57,7 +57,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const rawQuestions =
     (questionSource === "system"
       ? (systemResponse || []).filter((q) => q.approvalStatus === ApprovalStatus.APPROVED)
-      : (userResponse || []).filter((q) => q.approvalStatus === ApprovalStatus.APPROVED)) || [];
+      : userResponse || []) || [];
   const isLoading = questionSource === "system" ? systemLoading : userLoading;
 
   const questions = useMemo(() => {
@@ -316,6 +316,12 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
                               <span className={`text-xs`}>{getTypeBadge(question.questionType)}</span>
                               <span className={`text-xs`}>{getDifficultyBadge(question.questionLevel)}</span>
+                              {question.subject && (
+                                <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                                  {question.subject.name}
+                                </span>
+                              )}
+                              <span className=" text-slate-400">●</span>
                               {question.lesson && (
                                 <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
                                   {question.lesson.name}
