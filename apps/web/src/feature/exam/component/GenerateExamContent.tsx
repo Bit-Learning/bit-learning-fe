@@ -394,8 +394,8 @@ const GenerateExamFlow: React.FC = () => {
                 onChange={(e) => setExamType(e.target.value as ExamType)}
                 className="w-full px-4 py-3 rounded-xl border border-slate-200 dark:border-slate-700 dark:bg-slate-800 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all text-slate-900 dark:text-white outline-none"
               >
-                <option value="EXAM">Đề thi chính thức</option>
-                <option value="PRACTICE">Đề luyện tập</option>
+                <option value="EXAM">Đề thi</option>
+                <option value="PRACTICE">Luyện tập</option>
               </select>
             </div>
             <div>
@@ -436,7 +436,7 @@ const GenerateExamFlow: React.FC = () => {
             if (examType === "EXAM" && !enrollKey.trim()) {
               toast.error({
                 title: "Lỗi",
-                description: "Đề thi chính thức bắt buộc phải có mật khẩu vào thi",
+                description: "Đề thi bắt buộc phải có mật khẩu vào thi",
               });
               return;
             }

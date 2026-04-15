@@ -80,7 +80,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
       return;
     }
     if (examType === "EXAM" && !enrollKey.trim()) {
-      toast.error({ title: "Lỗi", description: "Đề thi chính thức bắt buộc phải có mật khẩu vào thi" });
+      toast.error({ title: "Lỗi", description: "Đề thi bắt buộc phải có mật khẩu vào thi" });
       return;
     }
     if (selectedQuestions.size === 0) {
@@ -431,8 +431,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                       onChange={(e) => setExamType(e.target.value as ExamType)}
                       className="w-full mt-1.5 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none"
                     >
-                      <option value="EXAM">Đề thi chính thức</option>
-                      <option value="PRACTICE">Đề luyện tập</option>
+                      <option value="EXAM">Đề thi</option>
+                      <option value="PRACTICE">Luyện tập</option>
                     </select>
                   </div>
 

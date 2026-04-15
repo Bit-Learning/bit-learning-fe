@@ -10,7 +10,7 @@ import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import type { ExamType, ExamBriefResponse, ExamUpdateRequest } from "../types/exam.type";
 
 const TYPE_LABELS: Record<ExamType, string> = {
-  EXAM: "Chính thức",
+  EXAM: "Đề thi",
   PRACTICE: "Luyện tập",
 };
 
@@ -236,7 +236,7 @@ const MyExamsContent: React.FC = () => {
     if (!type) return null;
     return (
       <span
-        className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold ${
+        className={`inline-flex items-center px-2 py-0.5 rounded text-sm font-bold ${
           type === "EXAM"
             ? "bg-blue-50 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400 border border-blue-100 dark:border-blue-800/50"
             : "bg-violet-50 dark:bg-violet-900/30 text-violet-600 dark:text-violet-400 border border-violet-100 dark:border-violet-800/50"
@@ -251,7 +251,7 @@ const MyExamsContent: React.FC = () => {
     <div className="flex-1 p-8 bg-slate-50 min-h-screen dark:bg-slate-950">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold dark:text-white">Đề thi của tôi</h1>
+          <h1 className="text-3xl font-bold dark:text-white">Danh sách đề thi của tôi</h1>
           <p className="text-slate-500 dark:text-slate-400 text-lg mt-1">
             Quản lý các đề thi bạn đã tạo cho học sinh của mình.
           </p>
@@ -299,7 +299,7 @@ const MyExamsContent: React.FC = () => {
             className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
           >
             <option value="">Tất cả loại</option>
-            <option value="EXAM">Chính thức</option>
+            <option value="EXAM">Đề thi</option>
             <option value="PRACTICE">Luyện tập</option>
           </select>
 

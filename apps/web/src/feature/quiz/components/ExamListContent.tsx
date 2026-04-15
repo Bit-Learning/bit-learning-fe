@@ -1,10 +1,9 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Timer, HelpCircle, Trophy, BookOpen as BookOpenIcon } from "lucide-react";
+import { Search, Timer, HelpCircle } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
 import { useMyQuizAttempts } from "../queries/useQuiz";
-import type { ExamBriefResponse } from "../../exam/types/exam.type";
 import { useAllExams } from "@/feature/exam/queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { Pagination } from "@/shared/components/Pagination";
@@ -75,7 +74,7 @@ const ExamListContent: React.FC = () => {
 
   const tabs = [
     { key: "ALL" as TabType, label: "Tất cả" },
-    { key: "EXAM" as TabType, label: "Kỳ thi" },
+    { key: "EXAM" as TabType, label: "Đề thi" },
     { key: "PRACTICE" as TabType, label: "Luyện tập" },
   ];
 
@@ -187,14 +186,6 @@ const ExamListContent: React.FC = () => {
                     </h3>
 
                     <div className="space-y-2.5">
-                      {exam.subject && (
-                        <div className="flex items-center gap-2.5 text-sm text-slate-600">
-                          <BookOpenIcon className={cn("w-4 h-4 shrink-0", iconColor)} />
-                          <span>
-                            Môn học: <span className="font-semibold text-slate-800">{exam.subject.name}</span>
-                          </span>
-                        </div>
-                      )}
                       <div className="flex items-center gap-2.5 text-sm text-slate-600">
                         <Timer className={cn("w-4 h-4 shrink-0", iconColor)} />
                         <span>
@@ -207,14 +198,6 @@ const ExamListContent: React.FC = () => {
                           Số câu: <span className="font-semibold text-slate-800">{exam.totalQuestions} câu</span>
                         </span>
                       </div>
-                      {exam.isCompleted && exam.lastAttemptScore !== undefined && (
-                        <div className="flex items-center gap-2.5 text-sm text-emerald-600">
-                          <Trophy className="w-4 h-4 shrink-0" />
-                          <span className="font-semibold">
-                            Điểm: {exam.lastAttemptScore}/{exam.totalScore}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -238,7 +221,7 @@ const ExamListContent: React.FC = () => {
                           : "bg-blue-500 hover:bg-blue-800 text-white ",
                       )}
                     >
-                      {exam.isCompleted ? "Xem kết quả" : "Tham gia"}
+                      {exam.isCompleted ? "Xem kết quả" : "Làm bài"}
                     </button>
                   </div>
                 </div>
