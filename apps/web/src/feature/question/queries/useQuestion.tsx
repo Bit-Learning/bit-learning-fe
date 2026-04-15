@@ -33,7 +33,7 @@ export const useSearchQuestions = (params?: QuestionSearchParams, options?: { en
 };
 export const useSearchQuestionsAll = () => {
   return useQuery({
-    queryKey: questionKeys.myQuestionsAll(),
+    queryKey: questionKeys.lists(),
     queryFn: async () => {
       const response = await questionApi.searchQuestions({ size: 99999 });
       return response.data.data ?? [];
