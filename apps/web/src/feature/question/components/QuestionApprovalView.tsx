@@ -157,7 +157,7 @@ export default function QuestionApprovalTableView() {
                   <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
                     TRẠNG THÁI
                   </th>
-                  <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
+                  <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-48">
                     Thao tác
                   </th>
                 </tr>
@@ -195,8 +195,8 @@ export default function QuestionApprovalTableView() {
                               onClick={() => setEditingQuestion(question)}
                               className="flex items-center gap-1.5 px-3 py-1.5 text-md font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50 transition-colors cursor-pointer"
                             >
-                              <Edit className="w-3.5 h-3.5" />
-                              Sửa & Gửi lại
+                              <Edit className="w-5 h-5" />
+                              Gửi lại
                             </button>
                           </>
                         )}
