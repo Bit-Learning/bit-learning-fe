@@ -20,7 +20,6 @@ import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { useExam, useDownloadExam, usePublishExam, useDownloadExamAnswerKey } from "../queries/useExam";
-import type { ExamType } from "../types/exam.type";
 import { QuestionLevel, QuestionType } from "@/feature/question/types/question.type";
 import { useQuizAttemptsByExam } from "@/feature/quiz/queries/useQuiz";
 import { QuizAttemptStatus } from "@/feature/quiz/types/quiz.type";
