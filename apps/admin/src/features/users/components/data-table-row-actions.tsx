@@ -1,6 +1,13 @@
 import { DotsHorizontalIcon } from "@radix-ui/react-icons";
 import type { Row } from "@tanstack/react-table";
-import { CheckCircle2, ShieldX, Trash2, UserPen } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
+import {
+	CheckCircle2,
+	CreditCard,
+	ShieldX,
+	Trash2,
+	UserPen,
+} from "lucide-react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -34,6 +41,7 @@ type DataTableRowActionsProps = {
 
 export function DataTableRowActions({ row }: DataTableRowActionsProps) {
 	const { setOpen, setCurrentRow } = useUsers();
+	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [isRejectDialogOpen, setIsRejectDialogOpen] = useState(false);
 	const [rejectionReason, setRejectionReason] = useState("");
@@ -127,6 +135,21 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
 						Xem chi tiết
 						<DropdownMenuShortcut>
 							<UserPen size={16} />
+						</DropdownMenuShortcut>
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						onClick={() => {
+							navigate({
+								to: "/transactions",
+								search: {
+									userId: user.id,
+								},
+							});
+						}}
+					>
+						Xem giao dịch
+						<DropdownMenuShortcut>
+							<CreditCard size={16} />
 						</DropdownMenuShortcut>
 					</DropdownMenuItem>
 					<DropdownMenuSeparator />
