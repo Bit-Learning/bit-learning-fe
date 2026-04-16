@@ -7,11 +7,31 @@ import { useMyContests } from "../queries/useContest";
 import { useNavigate } from "@tanstack/react-router";
 
 export const MyContestPage: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<number>(0);
-  const pageSize = 6;
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [status, setStatus] = useState<"ALL" | ContestStatus>("ALL");
+  const [search, setSearch] = useState("");
 
-  const { data: contestsData, isLoading, error } = useMyContests();
+  const {
+    data: contestsData,
+    isLoading,
+    error,
+  } = useMyContests({
+    status: status === "ALL" ? undefined : status,
+    search: search || undefined,
+    page: currentPage,
+    size: 6,
+  });
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(0);
+  };
+
+  const handleStatus = (value: "ALL" | ContestStatus) => {
+    setStatus(value);
+    setCurrentPage(0);
+  };
 
   const contests = useMemo(() => {
     if (!contestsData?.data) return [];
@@ -63,7 +83,6 @@ export const MyContestPage: React.FC = () => {
   }, [contestsData]);
 
   const totalPages = contestsData?.page?.totalPages || 0;
-  const totalElements = contestsData?.page?.totalElements || 0;
 
   if (isLoading) {
     return (
@@ -80,9 +99,6 @@ export const MyContestPage: React.FC = () => {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center mx-auto mb-4">
-            <span className="text-3xl">⚠️</span>
-          </div>
           <h2 className="text-xl font-bold text-gray-900 mb-2">Không thể tải dữ liệu</h2>
           <p className="text-gray-600 mb-4">Vui lòng thử lại sau</p>
           <button
@@ -118,6 +134,10 @@ export const MyContestPage: React.FC = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
+        search={search}
+        onSearchChange={handleSearch}
+        status={status}
+        onStatusChange={handleStatus}
       />
     </>
   );

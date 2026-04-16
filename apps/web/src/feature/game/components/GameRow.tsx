@@ -1,20 +1,22 @@
-import React from "react";
-import { Game } from "../services/gameService";
+import type { GamePreview } from "../services/gameService";
 import { useNavigate } from "@tanstack/react-router";
 import { parseMatchingMetaFromTitle } from "../utils";
-import { TopicCode } from "../data";
+import type { TopicCode } from "../data";
+import styles from "./GameRow.module.css";
 
 interface Props {
-	game: Game;
+	game: GamePreview;
 	categoryName: string;
 }
 
 const GameCard = ({ game, categoryName }: Props) => {
 	const navigate = useNavigate();
+	const likes = game.likes ?? 0;
+	const views = game.views ?? 0;
 
 	return (
-		<div
-			key={game.id}
+		<button
+			type="button"
 			onClick={() => {
 				if (categoryName === "MATCHING") {
 					// Parse grade & topic from title like: "Lớp 3 - B: ..."
@@ -32,28 +34,38 @@ const GameCard = ({ game, categoryName }: Props) => {
 					});
 				}
 			}}
-			className="flex-none w-64 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+			className={styles.card}
 		>
-			<div className="relative aspect-video rounded-md overflow-hidden bg-linear-to-br from-purple-600 to-blue-500 shadow-lg">
+			<div className={styles.mediaFrame}>
 				{game.thumbnailUrl ? (
 					<img
 						src={game.thumbnailUrl}
 						alt={game.title}
-						className="w-full h-full object-cover"
+						className={styles.media}
 					/>
 				) : (
-					<div className="w-full h-full flex items-center justify-center text-5xl">
-						🎮
-					</div>
+					<div className={styles.mediaFallback}>🎮</div>
 				)}
-				<div className="absolute inset-0 bg-linear-to-t from-black/60 to-transparent opacity-0 hover:opacity-100 transition-opacity flex flex-col justify-end p-4">
-					<h3 className="text-white font-bold text-sm truncate">
-						{game.title}
-					</h3>
-					<p className="text-white/80 text-xs truncate">{game.description}</p>
+				<div className={styles.overlay}>
+					<div className={styles.statPill}>
+						👁 {views.toLocaleString("vi-VN")}
+					</div>
+					<div className={styles.statPill}>
+						❤ {likes.toLocaleString("vi-VN")}
+					</div>
 				</div>
 			</div>
-		</div>
+			<div className={styles.copy}>
+				<h3 className={styles.title}>{game.title}</h3>
+				<p className={styles.description}>{game.description}</p>
+				<div className={styles.footer}>
+					<span className={styles.categoryTag}>{categoryName}</span>
+					<span className={styles.trendText}>
+						{views + likes * 5 > 0 ? "Đang được chú ý" : "Mới lên kệ"}
+					</span>
+				</div>
+			</div>
+		</button>
 	);
 };
 

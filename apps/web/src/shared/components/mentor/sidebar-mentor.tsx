@@ -142,7 +142,6 @@ export function SidebarMentor({
         )}
       >
         <Card className="flex h-full flex-col rounded-none border-r shadow-xl py-0">
-          {/* ── Logo ── */}
           <div className="border-b border-blue-400 p-4 dark:border-gray-700">
             {isOpen ? (
               <Link to="/" className="flex items-center relative z-50">

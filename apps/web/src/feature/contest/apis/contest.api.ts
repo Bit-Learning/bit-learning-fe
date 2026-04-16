@@ -28,9 +28,9 @@ export const contestApi = {
     return api.get(CONTEST_BASE_URL, { params });
   },
 
-  getMyContests(page = 0, size = 20): Promise<AxiosResponse<ApiResponse<ContestListDTO[]>>> {
+  getMyContests(params?: ContestListParams): Promise<AxiosResponse<ApiResponse<ContestListDTO[]>>> {
     return api.get(`${CONTEST_BASE_URL}/my-contests`, {
-      params: { page, size },
+      params,
     });
   },
 

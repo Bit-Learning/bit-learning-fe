@@ -7,6 +7,7 @@ export interface StudentProfile {
 	createdAt: string;
 	totalScore: number;
 	gamesPlayed: number;
+	totalAttempts: number;
 }
 
 export interface PlayHistoryItem {
@@ -16,7 +17,12 @@ export interface PlayHistoryItem {
 	gameThumbnail: string;
 	playedAt: string;
 	score: number;
+	rawScore: number;
+	maxScore: number;
+	normalizedScore: number;
+	leaderboardPoints: number;
 	duration: number;
+	completed: boolean;
 }
 
 export interface PaginatedPlayHistory {

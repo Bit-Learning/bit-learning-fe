@@ -183,9 +183,9 @@ export const useCertificate = (courseId: number, enabled = false) => {
 
 export const useDownloadCertificate = () => {
   return useMutation({
-    mutationFn: (courseId: number) => {
-      courseApi.downloadCertificate(courseId);
-      return Promise.resolve();
+    mutationFn: async (courseId: number) => {
+      const res = await courseApi.downloadCertificate(courseId);
+      return res;
     },
   });
 };

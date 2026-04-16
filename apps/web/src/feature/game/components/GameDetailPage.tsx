@@ -1,13 +1,11 @@
 import PageMeta from "@/shared/components/seo/page-meta";
 import { Eye, Heart, MessageCircle, Maximize } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 import type { Comment, Game } from "../services/gameService";
 import gameService from "../services/gameService";
-import styles from "./GameDetailPage.module.css";
-import { Link } from "@tanstack/react-router";
 import { Navbar } from "./Navbar/Navbar";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import Footer from "./Footer";
@@ -20,34 +18,23 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 	const navigate = useNavigate();
 	const auth = useSelector((state: RootState) => state.auth);
 	const username = auth.userInfo?.username ?? null;
-	const role = auth.userInfo?.role ?? null;
+	const userEmail = auth.userInfo?.email ?? null;
+	const currentUserAvatar = auth.userInfo?.avatar ?? null;
 
 	const [detailGame, setDetailGame] = useState<Game | null>(null);
 	const [comments, setComments] = useState<Comment[]>([]);
 	const [commentText, setCommentText] = useState("");
 	const [replyTo, setReplyTo] = useState<number | null>(null);
 	const [replyText, setReplyText] = useState("");
+	const [brokenAvatarKeys, setBrokenAvatarKeys] = useState<
+		Record<string, boolean>
+	>({});
 	const [isLiked, setIsLiked] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const gameContainerRef = useRef<HTMLDivElement>(null);
 
-	useEffect(() => {
-		loadGameDetail();
-	}, [id]);
-
-	useEffect(() => {
-		const handleFullscreenChange = () => {
-			setIsFullscreen(!!document.fullscreenElement);
-		};
-		document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-		return () => {
-			document.removeEventListener("fullscreenchange", handleFullscreenChange);
-		};
-	}, []);
-
-	const loadGameDetail = async () => {
+	const loadGameDetail = useCallback(async () => {
 		try {
 			setLoading(true);
 
@@ -68,7 +55,22 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 		} finally {
 			setLoading(false);
 		}
-	};
+	}, [id, username]);
+
+	useEffect(() => {
+		loadGameDetail();
+	}, [loadGameDetail]);
+
+	useEffect(() => {
+		const handleFullscreenChange = () => {
+			setIsFullscreen(!!document.fullscreenElement);
+		};
+		document.addEventListener("fullscreenchange", handleFullscreenChange);
+
+		return () => {
+			document.removeEventListener("fullscreenchange", handleFullscreenChange);
+		};
+	}, []);
 
 	const handleLike = async () => {
 		if (!username) {
@@ -165,6 +167,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 						Không tìm thấy game
 					</p>
 					<button
+						type="button"
 						onClick={() => navigate({ to: "/games" })}
 						className="mt-4 bg-red-600 hover:bg-red-700 px-6 py-2 rounded font-bold transition-colors"
 					>
@@ -178,6 +181,76 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 	const topLevelComments = comments.filter((c) => !c.parentCommentId);
 	const getReplies = (parentId: number) =>
 		comments.filter((c) => c.parentCommentId === parentId);
+	const getCommentAvatarKey = (comment: Comment) => {
+		return String(
+			comment.id ??
+				comment.author?.id ??
+				comment.author?.username ??
+				comment.author?.email ??
+				comment.username,
+		).toLowerCase();
+	};
+	const getCommentDisplayName = (comment: Comment) => {
+		const fullName =
+			`${comment.author?.firstName ?? ""} ${comment.author?.lastName ?? ""}`.trim();
+		return fullName || comment.username;
+	};
+	const getCommentInitials = (comment: Comment) => {
+		const firstName = comment.author?.firstName?.trim() ?? "";
+		const lastName = comment.author?.lastName?.trim() ?? "";
+
+		if (firstName || lastName) {
+			return `${firstName[0] ?? ""}${lastName[0] ?? ""}`.toUpperCase();
+		}
+
+		return comment.username.charAt(0).toUpperCase();
+	};
+	const getCommentAvatarSrc = (comment: Comment) => {
+		const normalizedCommentUsername = comment.username.trim().toLowerCase();
+		const isCurrentUser =
+			(username &&
+				normalizedCommentUsername === username.trim().toLowerCase()) ||
+			(userEmail &&
+				normalizedCommentUsername === userEmail.trim().toLowerCase());
+
+		if (isCurrentUser && currentUserAvatar) {
+			return currentUserAvatar;
+		}
+
+		return comment.author?.avatar ?? comment.avatar ?? null;
+	};
+	const renderCommentAvatar = (
+		comment: Comment,
+		sizeClassName: string,
+		fallbackClassName: string,
+	) => {
+		const avatarSrc = getCommentAvatarSrc(comment);
+		const avatarKey = getCommentAvatarKey(comment);
+
+		if (avatarSrc && !brokenAvatarKeys[avatarKey]) {
+			return (
+				<img
+					src={avatarSrc}
+					alt={getCommentDisplayName(comment)}
+					className={`${sizeClassName} rounded-full object-cover shrink-0`}
+					onError={() =>
+						setBrokenAvatarKeys((prev) => ({
+							...prev,
+							[avatarKey]: true,
+						}))
+					}
+				/>
+			);
+		}
+
+		return (
+			<div
+				className={`${sizeClassName} rounded-full flex items-center justify-center font-bold shrink-0 ${fallbackClassName}`}
+			>
+				{getCommentInitials(comment)}
+			</div>
+		);
+	};
 
 	return (
 		<div className="min-h-screen bg-[#12080a] text-white">
@@ -207,6 +280,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 
 			<div className="min-h-screen max-w-7xl mx-auto px-6 py-16 mt-10">
 				<button
+					type="button"
 					onClick={() => navigate({ to: "/games" })}
 					className="mb-10 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
 				>
@@ -228,6 +302,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 								/>
 							</div>
 							<button
+								type="button"
 								onClick={toggleFullscreen}
 								className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-all backdrop-blur-sm"
 								title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
@@ -238,6 +313,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 
 						<div className="mt-6 mb-6 flex items-center gap-4">
 							<button
+								type="button"
 								onClick={handlePlayGame}
 								className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
 							>
@@ -245,6 +321,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 							</button>
 
 							<button
+								type="button"
 								onClick={handleLike}
 								className={`px-6 py-3 rounded-lg font-bold transition-all flex items-center gap-2 ${
 									isLiked
@@ -297,13 +374,36 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 
 							{username ? (
 								<form onSubmit={handleAddComment} className="mb-12">
-									<textarea
-										value={commentText}
-										onChange={(e) => setCommentText(e.target.value)}
-										placeholder="Chia sẻ suy nghĩ của bạn..."
-										className="w-full px-4 py-3 bg-[rgba(255,255,255,0.04)] border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 resize-none text-white"
-										rows={3}
-									/>
+									<div className="flex items-start gap-3">
+										{renderCommentAvatar(
+											{
+												id: -1,
+												gameId: detailGame.id,
+												username: username,
+												content: "",
+												datePosted: new Date().toISOString(),
+												author: auth.userInfo
+													? {
+															id: auth.userInfo.id,
+															username: auth.userInfo.username,
+															email: auth.userInfo.email,
+															firstName: auth.userInfo.firstName,
+															lastName: auth.userInfo.lastName,
+															avatar: auth.userInfo.avatar,
+														}
+													: null,
+											},
+											"w-10 h-10",
+											"bg-linear-to-br from-purple-500 to-blue-500",
+										)}
+										<textarea
+											value={commentText}
+											onChange={(e) => setCommentText(e.target.value)}
+											placeholder="Chia sẻ suy nghĩ của bạn..."
+											className="w-full px-4 py-3 bg-[rgba(255,255,255,0.04)] border border-gray-700 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-600 resize-none text-white"
+											rows={3}
+										/>
+									</div>
 									<div className="flex justify-end gap-3 mt-3">
 										<button
 											type="submit"
@@ -333,12 +433,16 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 										className="bg-[rgba(255,255,255,0.04)] rounded-lg p-4"
 									>
 										<div className="flex items-start gap-3">
-											<div className="w-10 h-10 rounded-full bg-linear-to-br from-purple-500 to-blue-500 flex items-center justify-center font-bold">
-												{comment.username.charAt(0).toUpperCase()}
-											</div>
+											{renderCommentAvatar(
+												comment,
+												"w-10 h-10",
+												"bg-linear-to-br from-purple-500 to-blue-500",
+											)}
 											<div className="flex-1">
 												<div className="flex items-center gap-2 mb-1">
-													<p className="font-bold">{comment.username}</p>
+													<p className="font-bold">
+														{getCommentDisplayName(comment)}
+													</p>
 													<span className="text-xs text-gray-500">
 														{new Date(comment.datePosted).toLocaleDateString()}
 													</span>
@@ -349,6 +453,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 
 												{username && (
 													<button
+														type="button"
 														onClick={() => setReplyTo(comment.id)}
 														className="text-xs font-bold text-red-500 hover:text-red-400 mt-2"
 													>
@@ -367,12 +472,14 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 														/>
 														<div className="flex gap-2 mt-2">
 															<button
+																type="button"
 																onClick={() => handleAddReply(comment.id)}
 																className="bg-red-600 hover:bg-red-700 text-white text-xs font-bold px-4 py-1.5 rounded-lg transition-colors"
 															>
 																Đăng
 															</button>
 															<button
+																type="button"
 																onClick={() => {
 																	setReplyTo(null);
 																	setReplyText("");
@@ -391,13 +498,15 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 														className="mt-3 ml-8 bg-gray-800 rounded-lg p-3"
 													>
 														<div className="flex items-start gap-2">
-															<div className="w-8 h-8 rounded-full bg-linear-to-br from-green-500 to-teal-500 flex items-center justify-center font-bold text-xs">
-																{reply.username.charAt(0).toUpperCase()}
-															</div>
+															{renderCommentAvatar(
+																reply,
+																"w-8 h-8 text-xs",
+																"bg-linear-to-br from-green-500 to-teal-500",
+															)}
 															<div className="flex-1">
 																<div className="flex items-center gap-2 mb-1">
 																	<p className="font-bold text-sm">
-																		{reply.username}
+																		{getCommentDisplayName(reply)}
 																	</p>
 																	<span className="text-xs text-gray-500">
 																		{new Date(

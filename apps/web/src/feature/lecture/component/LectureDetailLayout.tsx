@@ -5,7 +5,7 @@ import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { useSectionsByCourse } from "../queries/useSection";
-import { LEARNING_KEYS, useMultipleLecturesCompleted } from "../queries/useLearning";
+import { LEARNING_KEYS, useMarkAsCompleted, useMultipleLecturesCompleted } from "../queries/useLearning";
 import { LectureType } from "../types/lecture.type";
 import { useCourseAccess } from "@/feature/course/queries/useEnroll";
 import CourseSidebar from "./CourseSidebar";
@@ -27,6 +27,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
 
   const { data: enrollAccess = false } = useCourseAccess(courseId);
   const hasAccess = enrollAccess;
+  const { mutate: markAsCompleted } = useMarkAsCompleted();
 
   const { data: sections, isLoading } = useSectionsByCourse(courseId);
 
@@ -213,10 +214,23 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                 <div className="w-full bg-black h-150">
                   <VideoPlayerWithNotes
                     lectureId={lectureId}
+                    hasAccess={hasAccess}
                     onComplete={handleVideoComplete}
                     onProgressUpdate={handleProgressUpdate}
                   />
                 </div>
+                {hasAccess && !isCompleted && (
+                  <div className="flex justify-end px-6 pt-3">
+                    <button
+                      type="button"
+                      onClick={() => markAsCompleted(lectureId, { onSuccess: handleVideoComplete })}
+                      className="flex items-center gap-1.5 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Đánh dấu hoàn thành
+                    </button>
+                  </div>
+                )}
                 <div className="p-6">
                   <div className="mx-auto max-w-4xl">
                     <LectureQA lectureId={lectureId} />
@@ -225,7 +239,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
               </div>
             ) : currentLecture?.type === LectureType.QUIZ ? (
               <div>
-                <QuizPlayer lectureId={lectureId} onComplete={handleVideoComplete} />
+                <QuizPlayer lectureId={lectureId} hasAccess={hasAccess} onComplete={handleVideoComplete} />
                 <div className="p-6">
                   <div className="mx-auto max-w-4xl">
                     <LectureQA lectureId={lectureId} />
@@ -235,6 +249,18 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
             ) : currentLecture?.type === LectureType.TEXT ? (
               <div>
                 <TextContent lectureId={lectureId} onComplete={handleVideoComplete} />
+                {hasAccess && !isCompleted && (
+                  <div className="flex justify-end px-6 pb-2">
+                    <button
+                      type="button"
+                      onClick={() => markAsCompleted(lectureId, { onSuccess: handleVideoComplete })}
+                      className="flex items-center gap-1.5 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
+                    >
+                      <CheckCircle className="h-4 w-4" />
+                      Đánh dấu hoàn thành
+                    </button>
+                  </div>
+                )}
                 <div className="border-t border-gray-200 p-6">
                   <div className="mx-auto max-w-4xl">
                     <LectureQA lectureId={lectureId} />

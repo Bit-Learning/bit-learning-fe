@@ -31,12 +31,10 @@ export const courseApi = {
     });
   },
 
-  downloadCertificate(courseId: number): void {
-    const url = `${endpoints.COURSES}/${courseId}/certificate/download`;
-    const a = document.createElement("a");
-    a.href = api.defaults.baseURL + url;
-    a.download = "certificate.png";
-    a.click();
+  downloadCertificate(courseId: number) {
+    return api.get(`${endpoints.COURSES}/${courseId}/certificate/download`, {
+      responseType: "blob",
+    });
   },
 
   verifyCertificate(file: File): Promise<AxiosResponse<ApiResponse<VerifyCertificateResponse>>> {

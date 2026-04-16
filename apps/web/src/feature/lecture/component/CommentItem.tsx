@@ -27,13 +27,6 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, lectureId, isReply =
 
   const fullName = `${comment.user.firstName} ${comment.user.lastName}`.trim();
 
-  const formatTimestamp = (seconds: number | null) => {
-    if (seconds === null) return null;
-    const minutes = Math.floor(seconds / 60);
-    const secs = seconds % 60;
-    return `${minutes}:${secs.toString().padStart(2, "0")}`;
-  };
-
   const handleReply = () => {
     if (!replyContent.trim()) return;
 
@@ -50,7 +43,7 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, lectureId, isReply =
           setShowReplyForm(false);
           setShowReplies(true);
         },
-      }
+      },
     );
   };
 
@@ -62,6 +55,13 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, lectureId, isReply =
     addSuffix: true,
     locale: vi,
   });
+
+  const roleMap: Record<string, string> = {
+    STUDENT: "Học viên",
+    MENTOR: "Giảng viên",
+    MANAGER: "Quản lý",
+    ADMIN: "Quản trị viên",
+  };
 
   return (
     <div className={`${isReply ? "ml-12" : ""}`}>
@@ -79,9 +79,9 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, lectureId, isReply =
               <div>
                 <div className="flex items-center gap-2">
                   <span className="font-semibold text-gray-900">{fullName}</span>
-                  {comment.user.role && (
+                  {roleMap[comment.user.role] && (
                     <Badge variant="outline" className="text-xs">
-                      {comment.user.role}
+                      {roleMap[comment.user.role]}
                     </Badge>
                   )}
                   {comment.isPinned && (
@@ -94,12 +94,6 @@ const CommentItem: React.FC<CommentItemProps> = ({ comment, lectureId, isReply =
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Clock className="h-3 w-3" />
                   <span>{timeAgo}</span>
-                  {comment.videoTimestamp !== null && (
-                    <>
-                      <span>•</span>
-                      <span className="font-mono text-blue-600">{formatTimestamp(comment.videoTimestamp)}</span>
-                    </>
-                  )}
                 </div>
               </div>
             </div>

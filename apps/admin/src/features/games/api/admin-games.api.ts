@@ -13,6 +13,13 @@ export interface AdminGameDto {
 	thumbnailUrl?: string;
 	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
 	difficulty?: string;
+	scoringBaseScoreMax?: number;
+	scoringDifficultyMultiplier?: number;
+	scoringPassingThreshold?: number;
+	featuredViewWeight?: number;
+	featuredLikeWeight?: number;
+	featuredManualBoost?: number;
+	trendScore?: number;
 	categoryId?: number | null;
 	views?: number;
 	likes?: number;
@@ -23,6 +30,12 @@ export interface CreateGamePayload {
 	title: string;
 	desc: string;
 	difficulty?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
+	featuredViewWeight?: number;
+	featuredLikeWeight?: number;
+	featuredManualBoost?: number;
 	categoryId?: number;
 	thumbnailUrl?: string;
 	thumbnail?: File;
@@ -33,6 +46,12 @@ export interface UpdateGamePayload {
 	title: string;
 	desc: string;
 	difficulty?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
+	featuredViewWeight?: number;
+	featuredLikeWeight?: number;
+	featuredManualBoost?: number;
 	categoryId?: number;
 	thumbnailUrl?: string;
 	thumbnail?: File;
@@ -52,6 +71,30 @@ export const adminGamesApi = {
 		formData.append("desc", payload.desc);
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.baseScoreMax !== undefined) {
+			formData.append("baseScoreMax", String(payload.baseScoreMax));
+		}
+		if (payload.difficultyMultiplier !== undefined) {
+			formData.append(
+				"difficultyMultiplier",
+				String(payload.difficultyMultiplier),
+			);
+		}
+		if (payload.passingThreshold !== undefined) {
+			formData.append("passingThreshold", String(payload.passingThreshold));
+		}
+		if (payload.featuredViewWeight !== undefined) {
+			formData.append("featuredViewWeight", String(payload.featuredViewWeight));
+		}
+		if (payload.featuredLikeWeight !== undefined) {
+			formData.append("featuredLikeWeight", String(payload.featuredLikeWeight));
+		}
+		if (payload.featuredManualBoost !== undefined) {
+			formData.append(
+				"featuredManualBoost",
+				String(payload.featuredManualBoost),
+			);
 		}
 		if (payload.categoryId !== undefined) {
 			formData.append("categoryId", String(payload.categoryId));
@@ -80,6 +123,30 @@ export const adminGamesApi = {
 		formData.append("desc", payload.desc);
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.baseScoreMax !== undefined) {
+			formData.append("baseScoreMax", String(payload.baseScoreMax));
+		}
+		if (payload.difficultyMultiplier !== undefined) {
+			formData.append(
+				"difficultyMultiplier",
+				String(payload.difficultyMultiplier),
+			);
+		}
+		if (payload.passingThreshold !== undefined) {
+			formData.append("passingThreshold", String(payload.passingThreshold));
+		}
+		if (payload.featuredViewWeight !== undefined) {
+			formData.append("featuredViewWeight", String(payload.featuredViewWeight));
+		}
+		if (payload.featuredLikeWeight !== undefined) {
+			formData.append("featuredLikeWeight", String(payload.featuredLikeWeight));
+		}
+		if (payload.featuredManualBoost !== undefined) {
+			formData.append(
+				"featuredManualBoost",
+				String(payload.featuredManualBoost),
+			);
 		}
 		if (payload.categoryId !== undefined) {
 			formData.append("categoryId", String(payload.categoryId));

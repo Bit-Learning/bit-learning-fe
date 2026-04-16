@@ -20,17 +20,19 @@ const BitCoinIcon: React.FC<BitCoinIconProps> = ({ size = 120, className, style 
     >
       <defs>
         <radialGradient id={`coinBody-${id}`} cx="38%" cy="32%" r="65%">
-          <stop offset="0%" stopColor="#FFE066" />
-          <stop offset="45%" stopColor="#F5B800" />
-          <stop offset="100%" stopColor="#C47F00" />
+          <stop offset="0%" stopColor="#FFF2A6" />
+          <stop offset="45%" stopColor="#E0A800" />
+          <stop offset="100%" stopColor="#8A5A00" />
         </radialGradient>
+
         <radialGradient id={`coinInner-${id}`} cx="40%" cy="35%" r="60%">
-          <stop offset="0%" stopColor="#FFD54F" />
-          <stop offset="100%" stopColor="#E6A000" />
+          <stop offset="0%" stopColor="#F7C948" />
+          <stop offset="100%" stopColor="#B87400" />
         </radialGradient>
+
         <radialGradient id={`coinShine-${id}`} cx="30%" cy="25%" r="55%">
-          <stop offset="0%" stopColor="#FFF8DC" stopOpacity="0.9" />
-          <stop offset="100%" stopColor="#FFE066" stopOpacity="0" />
+          <stop offset="0%" stopColor="#FFFFFF" stopOpacity="0.6" />
+          <stop offset="100%" stopColor="#FFD36A" stopOpacity="0" />
         </radialGradient>
         <filter id={`shadow-${id}`} x="-20%" y="-20%" width="140%" height="140%">
           <feDropShadow dx="2" dy="4" stdDeviation="4" floodColor="#8B5E00" floodOpacity="0.45" />
@@ -40,8 +42,8 @@ const BitCoinIcon: React.FC<BitCoinIconProps> = ({ size = 120, className, style 
           <stop offset="100%" stopColor="#7A4C00" />
         </linearGradient>
         <linearGradient id={`textGrad-${id}`} x1="0" y1="0" x2="0" y2="1">
-          <stop offset="0%" stopColor="#C24F00" />
-          <stop offset="100%" stopColor="#7A2800" />
+          <stop offset="0%" stopColor="#FFB000" />
+          <stop offset="100%" stopColor="#6A2E00" />
         </linearGradient>
       </defs>
 
@@ -58,13 +60,13 @@ const BitCoinIcon: React.FC<BitCoinIconProps> = ({ size = 120, className, style 
         x="59"
         y="66"
         textAnchor="middle"
-        fontFamily="'Arial Black', 'Arial Bold', Arial, sans-serif"
+        fontFamily="'Arial Black', Arial, sans-serif"
         fontSize="26"
-        fontWeight="900"
+        fontWeight="1000"
         letterSpacing="1"
         fill={`url(#textGrad-${id})`}
-        stroke="#5C1A00"
-        strokeWidth="0.8"
+        stroke="#3A1200"
+        strokeWidth="1.2"
         paintOrder="stroke fill"
       >
         BIT

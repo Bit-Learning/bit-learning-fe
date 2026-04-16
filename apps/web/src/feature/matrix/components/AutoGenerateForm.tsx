@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { useForm } from "react-hook-form";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Loader2, Plus, Trash2, AlertCircle, Info } from "lucide-react";
@@ -7,6 +7,59 @@ import { Button } from "@workspace/ui/components/Button";
 import { useGenerateVersion } from "../queries/useMatrix";
 import { useChaptersBySubject } from "../queries/useChapter";
 import { useLessonsByChapter } from "../queries/useLesson";
+
+interface NumericInputProps {
+  value: number;
+  onChange: (val: number) => void;
+  onBlur?: () => void;
+  className?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  placeholder?: string;
+}
+
+const NumericInput: React.FC<NumericInputProps> = ({
+  value,
+  onChange,
+  onBlur,
+  min,
+  max,
+  step = 1,
+  placeholder = "0",
+  className = "",
+}) => {
+  const [display, setDisplay] = useState<string>(value === 0 ? "" : String(value));
+
+  useState(() => {
+    setDisplay(value === 0 ? "" : String(value));
+  });
+
+  return (
+    <input
+      type="number"
+      min={min}
+      max={max}
+      step={step}
+      placeholder={placeholder}
+      className={className}
+      value={display}
+      onChange={(e) => {
+        const raw = e.target.value;
+        setDisplay(raw);
+        const parsed = parseFloat(raw);
+        onChange(isNaN(parsed) ? 0 : parsed);
+      }}
+      onBlur={() => {
+        if (display !== "") {
+          const parsed = parseFloat(display);
+          setDisplay(isNaN(parsed) ? "" : String(parsed));
+        }
+        onBlur?.();
+      }}
+    />
+  );
+};
 
 const formSchema = z.object({
   name: z.string().min(1, "Vui lòng nhập tên phiên bản"),
@@ -73,13 +126,12 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
       </div>
       <div className="col-span-2">
         <div className="relative">
-          <input
-            type="number"
+          <NumericInput
+            value={value.weight}
+            onChange={(val) => onChange({ ...value, weight: val })}
             min={0.01}
             max={1}
             step={0.01}
-            value={value.weight}
-            onChange={(e) => onChange({ ...value, weight: parseFloat(e.target.value) || 0 })}
             className="w-full px-3 py-2 pr-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500 text-center"
           />
           <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
@@ -93,7 +145,6 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
     </div>
   );
 };
-
 interface Props {
   matrixId: number;
   totalScore: number;
@@ -108,6 +159,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
     register,
     handleSubmit,
     watch,
+    control,
     formState: { errors },
   } = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -234,11 +286,19 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
               Hệ thống sẽ phân bổ tự động theo tỷ lệ đã cấu hình
             </p>
           </div>
-          <input
-            {...register("totalQuestionCount", { valueAsNumber: true })}
-            type="number"
-            min={1}
-            className="w-24 px-4 py-3 text-center text-xl font-bold bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+          <Controller
+            name="totalQuestionCount"
+            control={control}
+            render={({ field }) => (
+              <NumericInput
+                value={field.value}
+                onChange={field.onChange}
+                onBlur={field.onBlur}
+                min={1}
+                step={1}
+                className="w-24 px-4 py-3 text-center text-xl font-bold bg-white dark:bg-slate-800 border border-blue-200 dark:border-blue-700 rounded-lg focus:ring-2 focus:ring-blue-500 outline-none"
+              />
+            )}
           />
           {errors.totalQuestionCount && <p className="text-sm text-red-500">{errors.totalQuestionCount.message}</p>}
         </div>
@@ -247,7 +307,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
           <div className="flex items-center justify-between mb-3">
             <div>
               <h3 className="text-md font-semibold text-slate-900 dark:text-white">Bài học & trọng số</h3>
-              <p className="text-sm text-slate-500 mt-0.5">Trọng số (weight) là tỷ lệ phân bổ câu hỏi cho bài học đó</p>
+              <p className="text-sm text-slate-500 mt-0.5">Trọng số là tỷ lệ phân bổ câu hỏi cho bài học đó</p>
             </div>
             <SumBadge sum={weightSum} valid={isWeightValid} />
           </div>
@@ -290,7 +350,6 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
               Tổng trọng số phải bằng 1.0 (hiện tại: {weightSum.toFixed(3)})
             </div>
           )}
-
           {!hasValidLessons && lessons.some((l) => l.chapterId > 0) && (
             <div className="flex items-center gap-2 mt-2 text-sm text-red-500 dark:text-red-400">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
@@ -306,20 +365,29 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
               <SumBadge sum={diffSum} valid={isDiffValid} />
             </div>
             <div className="space-y-3">
-              {[
-                { label: "Dễ ", key: "difficultyEasy", color: "text-slate-600" },
-                { label: "Trung bình", key: "difficultyMedium", color: "text-slate-600" },
-                { label: "Khó", key: "difficultyHard", color: "text-slate-600" },
-              ].map(({ label, key, color }) => (
-                <div key={key} className="flex items-center gap-3">
-                  <span className={`text-sm font-medium w-24 ${color}`}>{label}</span>
-                  <input
-                    {...register(key as any, { valueAsNumber: true })}
-                    type="number"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+              {(
+                [
+                  { label: "Dễ", name: "difficultyEasy" },
+                  { label: "Trung bình", name: "difficultyMedium" },
+                  { label: "Khó", name: "difficultyHard" },
+                ] as const
+              ).map(({ label, name }) => (
+                <div key={name} className="flex items-center gap-3">
+                  <span className="text-sm font-medium w-24 text-slate-600">{label}</span>
+                  <Controller
+                    name={name}
+                    control={control}
+                    render={({ field }) => (
+                      <NumericInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    )}
                   />
                 </div>
               ))}
@@ -332,19 +400,28 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
               <SumBadge sum={typeSum} valid={isTypeValid} />
             </div>
             <div className="space-y-3">
-              {[
-                { label: "Trắc nghiệm", key: "typeMCQ", color: "text-slate-600" },
-                { label: "Tự luận", key: "typeEssay", color: "text-slate-600" },
-              ].map(({ label, key, color }) => (
-                <div key={key} className="flex items-center gap-3">
-                  <span className={`text-sm font-medium w-24 ${color}`}>{label}</span>
-                  <input
-                    {...register(key as any, { valueAsNumber: true })}
-                    type="number"
-                    min={0}
-                    max={1}
-                    step={0.01}
-                    className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+              {(
+                [
+                  { label: "Trắc nghiệm", name: "typeMCQ" },
+                  { label: "Tự luận", name: "typeEssay" },
+                ] as const
+              ).map(({ label, name }) => (
+                <div key={name} className="flex items-center gap-3">
+                  <span className="text-sm font-medium w-24 text-slate-600">{label}</span>
+                  <Controller
+                    name={name}
+                    control={control}
+                    render={({ field }) => (
+                      <NumericInput
+                        value={field.value}
+                        onChange={field.onChange}
+                        onBlur={field.onBlur}
+                        min={0}
+                        max={1}
+                        step={0.01}
+                        className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    )}
                   />
                 </div>
               ))}
@@ -384,18 +461,28 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
                 Tỷ lệ điểm theo độ khó (mặc định: Dễ=1, TB=2, Khó=3)
               </p>
               <div className="grid grid-cols-3 gap-3">
-                {[
-                  { label: "Dễ", key: "weightEasy", color: "text-green-600" },
-                  { label: "TB", key: "weightMedium", color: "text-amber-600" },
-                  { label: "Khó", key: "weightHard", color: "text-red-600" },
-                ].map(({ label, key, color }) => (
-                  <div key={key}>
+                {(
+                  [
+                    { label: "Dễ", name: "weightEasy", color: "text-green-600" },
+                    { label: "TB", name: "weightMedium", color: "text-amber-600" },
+                    { label: "Khó", name: "weightHard", color: "text-red-600" },
+                  ] as const
+                ).map(({ label, name, color }) => (
+                  <div key={name}>
                     <label className={`block text-sm font-medium mb-1 ${color}`}>{label}</label>
-                    <input
-                      {...register(key as any, { valueAsNumber: true })}
-                      type="number"
-                      min={1}
-                      className="w-full px-3 py-2 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+                    <Controller
+                      name={name}
+                      control={control}
+                      render={({ field }) => (
+                        <NumericInput
+                          value={field.value ?? 0}
+                          onChange={field.onChange}
+                          onBlur={field.onBlur}
+                          min={1}
+                          step={1}
+                          className="w-full px-3 py-2 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      )}
                     />
                   </div>
                 ))}

@@ -658,22 +658,6 @@ const ImportQuestionForm: React.FC = () => {
           <p className="text-md text-muted-foreground mb-4">
             Hệ thống đang import câu hỏi vào database. Vui lòng đợi...
           </p>
-          {jobStatus && (
-            <div className="max-w-md mx-auto space-y-2">
-              <div className="flex justify-between text-md">
-                <span>Đã import:</span>
-                <span className="font-semibold">
-                  {jobStatus.importedQuestions}/{jobStatus.totalQuestions}
-                </span>
-              </div>
-              {jobStatus.failedQuestions > 0 && (
-                <div className="flex justify-between text-md text-red-600">
-                  <span>Lỗi:</span>
-                  <span className="font-semibold">{jobStatus.failedQuestions}</span>
-                </div>
-              )}
-            </div>
-          )}
         </div>
       </CardContent>
     </Card>

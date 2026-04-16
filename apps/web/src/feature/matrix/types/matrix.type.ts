@@ -1,3 +1,4 @@
+import { TChapterBriefResponse } from "./chapter.type";
 import { TLessonBriefResponse } from "./lesson.type";
 import { TSubjectBriefResponse } from "./subject.type";
 
@@ -76,6 +77,7 @@ export type TMatrixDetailResponse = {
   id: number;
   matrixVersionId: number;
   lesson: TLessonBriefResponse;
+  chaper: TChapterBriefResponse;
   easyMCQ: number;
   mediumMCQ: number;
   hardMCQ: number;

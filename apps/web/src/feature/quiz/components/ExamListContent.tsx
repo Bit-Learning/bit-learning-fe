@@ -62,6 +62,8 @@ const ExamListContent: React.FC = () => {
     { key: "PRACTICE" as TabType, label: "Luyện tập" },
   ];
 
+  const totalPages = Math.ceil(filteredExams.length / pageSize);
+
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="overflow-x-hidden">
@@ -212,9 +214,9 @@ const ExamListContent: React.FC = () => {
           </div>
         )}
 
-        {pagination && pagination.totalPages > 1 && (
+        {pagination && totalPages > 1 && (
           <div className="flex justify-center pt-6">
-            <Pagination currentPage={currentPage} totalPages={pagination.totalPages} onPageChange={setCurrentPage} />
+            <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={setCurrentPage} />
           </div>
         )}
       </main>

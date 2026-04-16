@@ -8,10 +8,31 @@ import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { useNavigate } from "@tanstack/react-router";
 
 export const ContestListPage: React.FC = () => {
-  const [currentPage, setCurrentPage] = useState<number>(0);
   const navigate = useNavigate();
+  const [currentPage, setCurrentPage] = useState(0);
+  const [status, setStatus] = useState<"ALL" | ContestStatus>("ALL");
+  const [search, setSearch] = useState("");
 
-  const { data: contestsData, isLoading, error } = useContestList();
+  const {
+    data: contestsData,
+    isLoading,
+    error,
+  } = useContestList({
+    status: status === "ALL" ? undefined : status,
+    search: search || undefined,
+    page: currentPage,
+    size: 6,
+  });
+
+  const handleSearch = (value: string) => {
+    setSearch(value);
+    setCurrentPage(0);
+  };
+
+  const handleStatus = (value: "ALL" | ContestStatus) => {
+    setStatus(value);
+    setCurrentPage(0);
+  };
 
   const contests = useMemo(() => {
     if (!contestsData?.data) return [];
@@ -110,6 +131,10 @@ export const ContestListPage: React.FC = () => {
         currentPage={currentPage}
         totalPages={totalPages}
         onPageChange={setCurrentPage}
+        search={search}
+        onSearchChange={handleSearch}
+        status={status}
+        onStatusChange={handleStatus}
       />
     </>
   );

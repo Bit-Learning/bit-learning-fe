@@ -1,8 +1,6 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
 import { toast } from "@/shared/components/Sonner";
 import contestApi from "../apis/contest.api";
-import { selectSelectedStatus, selectSearchQuery, selectPagination } from "../stores/contest.store";
 import {
   type SubmitRequest,
   type ContestRunRequest,
@@ -10,6 +8,7 @@ import {
   type CreateClarificationRequest,
   type MySubmissionsParams,
   ContestSubmissionStatus,
+  ContestListParams,
 } from "../types/contest.type";
 
 export const contestKeys = {
@@ -26,20 +25,16 @@ export const contestKeys = {
     [...contestKeys.detail(contestId), "leaderboard", page, size] as const,
   clarifications: (contestId: string, page?: number, size?: number) =>
     [...contestKeys.detail(contestId), "clarifications", page, size] as const,
-  myContests: (page?: number, size?: number) => [...contestKeys.all, "my-contests", page, size] as const,
+  myContests: (params?: ContestListParams) => [...contestKeys.all, "my-contests", params] as const,
 };
 
-export const useContestList = () => {
-  const status = useSelector(selectSelectedStatus);
-  const search = useSelector(selectSearchQuery);
-  const { page, size } = useSelector(selectPagination);
-
+export const useContestList = ({ status, search, page, size }: ContestListParams) => {
   return useQuery({
-    queryKey: contestKeys.list({ status: status ?? undefined, search: search ?? undefined, page, size }),
+    queryKey: ["contests", { status, search, page, size }],
     queryFn: async () => {
       const response = await contestApi.listContests({
-        status: status ?? undefined,
-        search: search ?? undefined,
+        status,
+        search,
         page,
         size,
       });
@@ -48,16 +43,20 @@ export const useContestList = () => {
   });
 };
 
-export const useMyContests = (page = 0, size = 6) => {
+export const useMyContests = ({ status, search, page, size }: ContestListParams) => {
   return useQuery({
-    queryKey: contestKeys.myContests(page, size),
+    queryKey: contestKeys.myContests({ status, search, page, size }),
     queryFn: async () => {
-      const response = await contestApi.getMyContests(page, size);
+      const response = await contestApi.getMyContests({
+        status,
+        search,
+        page,
+        size,
+      });
       return response.data;
     },
   });
 };
-
 export const useContestDetail = (contestId: string) => {
   return useQuery({
     queryKey: contestKeys.detail(contestId),

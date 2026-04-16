@@ -34,9 +34,13 @@ export interface Stage {
 
 export interface GameData {
 	meta: {
+		gameId?: number;
 		title: string;
 		version: string;
 		language: string;
+		baseScoreMax?: number;
+		difficultyMultiplier?: number;
+		passingThreshold?: number;
 	};
 	stages: Stage[];
 }

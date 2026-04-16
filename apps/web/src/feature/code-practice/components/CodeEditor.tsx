@@ -443,6 +443,29 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
     .filter((n) => !isNaN(n) && n > 0);
   const lineCount = activeFile.content.split("\n").length;
 
+  const [scrollTop, setScrollTop] = useState(0);
+
+  useEffect(() => {
+    const textarea = textareaRef.current;
+    if (!textarea) return;
+
+    const handleScroll = () => {
+      setScrollTop(textarea.scrollTop);
+    };
+
+    textarea.addEventListener("scroll", handleScroll);
+    return () => textarea.removeEventListener("scroll", handleScroll);
+  }, []);
+  const getLineHeight = () => {
+    const el = textareaRef.current;
+    if (!el) return 24;
+    const computed = window.getComputedStyle(el);
+    return parseFloat(computed.lineHeight);
+  };
+
+  const lineHeight = getLineHeight();
+  const paddingTop = 16;
+
   return (
     <div ref={containerRef} className="flex flex-col h-full min-h-0 overflow-hidden">
       <div className="h-12 flex items-center bg-gray-800 border-b border-gray-700">
@@ -650,14 +673,19 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </div>
           )}
 
-          <div className="absolute inset-0 pointer-events-none" style={{ paddingTop: "1rem", lineHeight: 1.6 }}>
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              transform: `translateY(-${scrollTop}px)`,
+            }}
+          >
             {[...activeBreakpoints].map((lineNum) => (
               <div
                 key={lineNum}
                 className="absolute left-0 right-0 bg-red-500/10"
                 style={{
-                  top: `calc(1rem + ${(lineNum - 1) * 1.6}em)`,
-                  height: "1.6em",
+                  top: paddingTop + (lineNum - 1) * lineHeight,
+                  height: lineHeight,
                 }}
               />
             ))}
@@ -665,8 +693,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <div
                 className="absolute left-0 right-0 bg-yellow-400/15 border-l-2 border-yellow-400"
                 style={{
-                  top: `calc(1rem + ${(debugCurrentLine.line - 1) * 1.6}em)`,
-                  height: "1.6em",
+                  top: paddingTop + (debugCurrentLine.line - 1) * lineHeight,
+                  height: lineHeight,
                 }}
               />
             )}

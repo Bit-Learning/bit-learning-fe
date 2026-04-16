@@ -5,12 +5,15 @@ import { ExamMonthlyChart } from "../components/ExamMonthlyChart";
 import { SlideMonthlyChart, MindMapMonthlyChart } from "../components/ContentMonthlyChart";
 import { mockStats, mockQuestionStatus, mockExamMonthly, mockContentMonthly } from "../data/data";
 import { QuestionStatusChart } from "../components/QuestionStatusChar";
+import { MentorHeader } from "@/shared/components/mentor/mentor-header";
 
 export default function DashboardPage() {
   return (
     <>
       <PageMeta title="Trang thống kê - Mentor" description="Dashboard" />
       <MentorLayout>
+        <MentorHeader />
+
         <div className="space-y-6 p-8 mx-auto">
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Trang thống kê</h1>
