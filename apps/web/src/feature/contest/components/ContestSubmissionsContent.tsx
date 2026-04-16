@@ -4,7 +4,7 @@ import { Search, Eye, ChevronDown } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { useMySubmissions, useContestProblems } from "../queries/useContest";
 import { SubmissionDetailModal } from "./SubmissionDetailModal";
-import { Language, ContestVerdict } from "../types/contest.type";
+import { ContestVerdict } from "../types/contest.type";
 
 const ContestSubmissionsContent: React.FC = () => {
   const { id } = useParams({ strict: false });

@@ -3,7 +3,7 @@ import { X, CheckCircle, XCircle, Clock, AlertCircle, Code, Loader2 } from "luci
 import { Badge } from "@workspace/ui/components/Badge";
 import { Button } from "@workspace/ui/components/Button";
 import { useSubmissionDetail } from "../queries/useContest";
-import { Language } from "../types/contest.type";
+import { Language } from "@/feature/code-practice/types/coding.type";
 
 interface SubmissionDetailModalProps {
   submissionId: string;

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Outlet, useParams, useLocation, useNavigate } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { Timer, ListChecks, Trophy, MessageSquare, Bell, Users, Home } from "lucide-react";
+import { Timer, ListChecks, Trophy, MessageSquare, Bell, Users, Home, Info } from "lucide-react";
 import { Avatar, AvatarImage, AvatarFallback } from "@workspace/ui/components/Avatar";
 import { useContestDetail } from "../queries/useContest";
 import { useUserProfile } from "@/feature/user/queries/useUser";
@@ -141,6 +141,19 @@ export const ContestLayout: React.FC<ContestLayoutProps> = ({ children }) => {
           </div>
 
           <nav className="flex items-center gap-1">
+            <Link
+              to="/contests/$id/info"
+              params={{ id: id || "" }}
+              className={cn(
+                "px-4 py-2 rounded-lg font-bold text-sm flex items-center gap-2 transition-colors",
+                isActive("/info")
+                  ? "bg-primary/10 text-primary"
+                  : "hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-400 font-medium",
+              )}
+            >
+              <Info className="w-5 h-5" />
+              Thông tin
+            </Link>
             <Link
               to="/contests/$id/problems"
               params={{ id: id || "" }}
