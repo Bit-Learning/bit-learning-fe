@@ -6,12 +6,13 @@ import VideoNotesSidebar from "./VideoNotesSidebar";
 
 interface VideoPlayerWithNotesProps {
   lectureId: number;
+  hasAccess?: boolean;
   onComplete?: () => void;
   onProgressUpdate?: (percent: number) => void;
 }
 
 const VideoPlayerWithNotes: React.FC<VideoPlayerWithNotesProps> = memo(
-  ({ lectureId, onComplete, onProgressUpdate }) => {
+  ({ lectureId, hasAccess = false, onComplete, onProgressUpdate }) => {
     const [isNotesSidebarOpen, setIsNotesSidebarOpen] = useState(false);
     const [currentVideoTime, setCurrentVideoTime] = useState(0);
     const [videoSeekTo, setVideoSeekTo] = useState<number | null>(null);
@@ -50,6 +51,7 @@ const VideoPlayerWithNotes: React.FC<VideoPlayerWithNotesProps> = memo(
       <div className="relative w-full h-full">
         <VideoPlayer
           lectureId={lectureId}
+          hasAccess={hasAccess}
           onComplete={handleComplete}
           onProgressUpdate={handleProgressUpdate}
           onTimeUpdate={handleTimeUpdate}

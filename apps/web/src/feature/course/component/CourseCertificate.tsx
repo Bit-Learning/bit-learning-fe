@@ -14,6 +14,34 @@ export const CourseCertificate: React.FC<CourseCertificateProps> = ({ courseId, 
 
   const { data: certificateUrl, isLoading: certLoading } = useCertificate(courseId, isCompleted);
   const { mutate: download, isPending: downloading } = useDownloadCertificate();
+  const slugify = (str: string) => {
+    return str
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/đ/g, "d")
+      .replace(/Đ/g, "D")
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  };
+
+  const handleDownload = () => {
+    download(courseId, {
+      onSuccess: (response) => {
+        const blob = new Blob([response.data], { type: "image/png" });
+        const url = URL.createObjectURL(blob);
+
+        const a = document.createElement("a");
+        a.href = url;
+        const safeName = slugify(courseName);
+
+        a.download = `${safeName}.png`;
+        a.click();
+
+        URL.revokeObjectURL(url);
+      },
+    });
+  };
 
   return (
     <Card className="overflow-hidden border-0 p-0">
@@ -33,7 +61,7 @@ export const CourseCertificate: React.FC<CourseCertificateProps> = ({ courseId, 
         <div className="flex gap-2">
           <Button
             className="flex-1 bg-blue-600 hover:bg-blue-700 text-white gap-2 py-5"
-            onClick={() => download(courseId)}
+            onClick={() => handleDownload()}
             isDisabled={downloading}
           >
             {downloading ? <Loader2 className="h-4 w-4 animate-spin" /> : <Download className="h-4 w-4" />}

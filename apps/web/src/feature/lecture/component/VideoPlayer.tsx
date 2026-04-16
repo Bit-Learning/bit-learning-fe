@@ -9,6 +9,7 @@ import { VideoControls } from "./VideoControls";
 
 interface VideoPlayerProps {
   lectureId: number;
+  hasAccess?: boolean;
   onComplete?: () => void;
   onProgressUpdate?: (percent: number) => void;
   onTimeUpdate?: (time: number) => void;
@@ -18,7 +19,14 @@ interface VideoPlayerProps {
 const SYNC_INTERVAL = 1000;
 const COMPLETION_THRESHOLD = 90;
 
-const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProgressUpdate, onTimeUpdate, seekTo }) => {
+const VideoPlayer: React.FC<VideoPlayerProps> = ({
+  lectureId,
+  hasAccess = false,
+  onComplete,
+  onProgressUpdate,
+  onTimeUpdate,
+  seekTo,
+}) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hlsRef = useRef<Hls | null>(null);
@@ -66,6 +74,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
 
   useEffect(() => {
     const doSync = () => {
+      if (!hasAccess) return;
       const video = videoRef.current;
       if (video && video.duration > 0 && !syncProgressRef.current.isPending) {
         syncProgressRef.current.mutate({
@@ -229,7 +238,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
 
         if (percent >= COMPLETION_THRESHOLD && !hasMarkedComplete.current) {
           hasMarkedComplete.current = true;
-          onCompleteRef.current?.();
+          if (hasAccess) onCompleteRef.current?.();
         }
       }
     };
@@ -242,7 +251,7 @@ const VideoPlayer: React.FC<VideoPlayerProps> = ({ lectureId, onComplete, onProg
 
     const handleEnded = () => {
       setIsPlaying(false);
-      onCompleteRef.current?.();
+      if (hasAccess) onCompleteRef.current?.();
     };
 
     video.addEventListener("play", handlePlay);

@@ -7,10 +7,11 @@ import { useIsLectureCompleted, useMarkAsCompleted } from "../queries/useLearnin
 
 interface QuizPlayerProps {
   lectureId: number;
+  hasAccess?: boolean;
   onComplete?: () => void;
 }
 
-const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
+const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, hasAccess = false, onComplete }) => {
   const { data: quizData, isLoading } = useLectureQuiz(lectureId);
   const { data: isCompleted } = useIsLectureCompleted(lectureId);
   const { mutate: markAsCompleted } = useMarkAsCompleted();
@@ -37,7 +38,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
     setSubmitted(true);
 
     const isPassed = percentage >= quizData.passPercent * 100;
-    if (isPassed) {
+    if (isPassed && hasAccess) {
       markAsCompleted(lectureId, {
         onSuccess: () => {
           onComplete?.();
@@ -138,15 +139,23 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                 )}
                 <div className="flex-1">
                   <h3 className={`text-xl font-bold ${isPassed ? "text-green-900" : "text-red-900"}`}>
-                    {isPassed ? "🎉 Chúc mừng! Bạn đã vượt qua bài quiz" : "😔 Chưa đạt yêu cầu"}
+                    {isPassed ? "Chúc mừng! Bạn đã vượt qua bài quiz" : "Chưa đạt yêu cầu"}
                   </h3>
                   <p className={`text-sm ${isPassed ? "text-green-700" : "text-red-700"}`}>
-                    Điểm của bạn: <strong>{score.toFixed(1)}%</strong> / {quizData.passPercent * 100}%
+                    Điểm của bạn: <strong>{Math.floor(score)}%</strong> / {quizData.passPercent * 100}%
                   </p>
                 </div>
                 {!isPassed && (
                   <Button onPress={handleRetry} className="bg-red-600 text-white hover:bg-red-700">
-                    🔄 Thử lại
+                    Thử lại
+                  </Button>
+                )}
+                {isPassed && hasAccess && !isCompleted && (
+                  <Button
+                    onPress={() => markAsCompleted(lectureId, { onSuccess: () => onComplete?.() })}
+                    className="bg-green-600 text-white hover:bg-green-700"
+                  >
+                    Đánh dấu hoàn thành
                   </Button>
                 )}
               </div>
@@ -257,7 +266,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, onComplete }) => {
                   onPress={handleSubmit}
                   className="bg-emerald-600 px-8 text-white hover:from-green-700 hover:to-emerald-700"
                 >
-                  ✅ Nộp bài
+                  Nộp bài
                 </Button>
               ) : (
                 <Button
