@@ -87,10 +87,7 @@ export const useMyPublishRequests = (params?: QuestionApprovalParams, options?: 
   });
 };
 
-export const usePendingApproval = (
-  params?: Omit<QuestionApprovalParams, "status">,
-  options?: { enabled?: boolean },
-) => {
+export const usePendingApproval = (params?: QuestionApprovalParams, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: questionKeys.pendingApproval(params),
     queryFn: async () => {

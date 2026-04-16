@@ -1,12 +1,13 @@
 import { useState, useMemo } from "react";
 import { FileText, Eye, Search, Edit } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { useMyPublishRequestsAll } from "../queries/useQuestion";
+import { useMyPublishRequests, useMyPublishRequestsAll } from "../queries/useQuestion";
 import { QuestionType, ApprovalStatus, type QuestionResponse } from "../types/question.type";
 import { Pagination } from "@/shared/components/Pagination";
 import { getTypeBadge, getStatusBadge, getDifficultyBadge, levelColors, statusConfig } from "../utils/question.utils";
 import { DetailModal } from "./DetailModal";
 import { EditAndResubmitModal } from "./EditAndResubmitModal";
+import { QuestionApprovalParams } from "../api/question.api";
 
 const PAGE_SIZE = 10;
 
@@ -25,38 +26,31 @@ export default function QuestionApprovalTableView() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
 
-  const { data: myRequestsData, isLoading, refetch } = useMyPublishRequestsAll();
+  const params: QuestionApprovalParams = {
+    page,
+    size: PAGE_SIZE,
+    status: statusFilter !== "all" ? (statusFilter as ApprovalStatus) : undefined,
+  };
 
-  const rawData = useMemo(
-    () =>
-      (myRequestsData ?? []).filter(
-        (q) => q.approvalStatus === ApprovalStatus.PENDING || q.approvalStatus === ApprovalStatus.REJECTED,
-      ),
-    [myRequestsData],
-  );
+  const { data, isLoading, refetch } = useMyPublishRequests(params);
+  const rawData = data?.data ?? [];
+  const totalPages = data?.page?.totalPages ?? 0;
 
-  const subjects = useMemo(() => {
-    const seen = new Map<number, { id: number; name: string }>();
-    rawData.forEach((q) => {
-      if (q.subject && !seen.has(q.subject.id)) seen.set(q.subject.id, { id: q.subject.id, name: q.subject.name });
-    });
-    return Array.from(seen.values());
-  }, [rawData]);
+  // const subjects = useMemo(() => {
+  //   const seen = new Map<number, { id: number; name: string }>();
+  //   rawData.forEach((q) => {
+  //     if (q.subject && !seen.has(q.subject.id)) seen.set(q.subject.id, { id: q.subject.id, name: q.subject.name });
+  //   });
+  //   return Array.from(seen.values());
+  // }, [rawData]);
 
-  const filteredQuestions = useMemo(
-    () =>
-      rawData.filter((q) => {
-        const matchSearch = !search || normalize(q.content).includes(normalize(search));
-        const matchSubject = !selectedSubjectId || q.subject?.id === selectedSubjectId;
-        const matchType = typeFilter === "all" || q.questionType === typeFilter;
-        const matchStatus = statusFilter === "all" || q.approvalStatus === statusFilter;
-        return matchSearch && matchSubject && matchType && matchStatus;
-      }),
-    [rawData, search, selectedSubjectId, typeFilter, statusFilter],
-  );
+  const filteredQuestions = useMemo(() => {
+    if (!search) return rawData;
 
-  const totalPages = Math.ceil(filteredQuestions.length / PAGE_SIZE);
-  const pagedQuestions = filteredQuestions.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
+    return rawData.filter((q) => normalize(q.content).includes(normalize(search)));
+  }, [rawData, search]);
+
+  const pagedQuestions = filteredQuestions;
 
   const resetPage = () => setPage(0);
   const handleSubjectSelect = (id: number | undefined) => {
@@ -80,7 +74,6 @@ export default function QuestionApprovalTableView() {
         <p className="text-lg text-slate-500 mt-1">Theo dõi trạng thái phê duyệt các câu hỏi.</p>
       </div>
 
-      {/* Filters */}
       <div className="flex flex-col md:flex-row gap-3 mb-4">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -95,17 +88,18 @@ export default function QuestionApprovalTableView() {
             }}
           />
         </div>
-        <select value={typeFilter} onChange={handleFilterChange(setTypeFilter)} className={selectCls}>
+        {/* <select value={typeFilter} onChange={handleFilterChange(setTypeFilter)} className={selectCls}>
           <option value="all">Loại: Tất cả</option>
           <option value={QuestionType.MCQ}>Trắc nghiệm</option>
           <option value={QuestionType.ESSAY}>Tự luận</option>
-        </select>
+        </select> */}
         <select value={statusFilter} onChange={handleFilterChange(setStatusFilter)} className={selectCls}>
           <option value="all">Trạng thái: Tất cả</option>
           <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
+          <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
           <option value={ApprovalStatus.REJECTED}>Từ chối</option>
         </select>
-        <select
+        {/* <select
           value={selectedSubjectId?.toString() ?? "all"}
           onChange={(e) => handleSubjectSelect(e.target.value === "all" ? undefined : Number(e.target.value))}
           className={selectCls}
@@ -116,7 +110,7 @@ export default function QuestionApprovalTableView() {
               {s.name}
             </option>
           ))}
-        </select>
+        </select> */}
       </div>
 
       {isLoading ? (

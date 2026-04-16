@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
-import { useMyQuestionsAll, useDeleteQuestion, useRequestPublish } from "../queries/useQuestion";
+import { useMyQuestionsAll, useDeleteQuestion, useRequestPublish, useMyQuestions } from "../queries/useQuestion";
 import { ApprovalStatus, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
@@ -21,6 +21,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { getDifficultyBadge, getStatusBadge, getTypeBadge } from "../utils/question.utils";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { DetailModal } from "./DetailModal";
+import { QuestionSearchParams } from "../api/question.api";
 
 const PAGE_SIZE = 20;
 
@@ -41,10 +42,18 @@ const MyQuestionsContent: React.FC = () => {
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deletingQuestion, setDeletingQuestion] = useState<QuestionResponse | null>(null);
-
+  const [selectAllGlobal, setSelectAllGlobal] = useState(false);
   const [viewingQuestion, setViewingQuestion] = useState<QuestionResponse | null>(null);
-  const { data: allQuestionsData, isLoading, refetch } = useMyQuestionsAll();
-  const allQuestions = allQuestionsData ?? [];
+  const params: QuestionSearchParams = {
+    page,
+    size: PAGE_SIZE,
+    keyword: search || undefined,
+  };
+
+  const { data, isLoading, refetch } = useMyQuestions(params);
+
+  const allQuestions = data?.data ?? [];
+  const totalPages = data?.page?.totalPages ?? 0;
 
   const deleteQuestion = useDeleteQuestion();
   const requestPublish = useRequestPublish();
@@ -59,21 +68,9 @@ const MyQuestionsContent: React.FC = () => {
     return Array.from(seen.values());
   }, [allQuestions]);
 
-  const filteredQuestions = useMemo(() => {
-    return allQuestions.filter((q) => {
-      const matchSearch = !search || normalize(q.content).includes(normalize(search));
-      const matchSubject = !selectedSubjectId || q.subject?.id === selectedSubjectId;
-      const matchDifficulty = difficultyFilter === "all" || q.questionLevel === difficultyFilter;
-      const matchType = typeFilter === "all" || q.questionType === typeFilter;
-      const matchStatus = statusFilter === "all" || q.approvalStatus === statusFilter;
-      return matchSearch && matchSubject && matchDifficulty && matchType && matchStatus;
-    });
-  }, [allQuestions, search, selectedSubjectId, difficultyFilter, typeFilter, statusFilter]);
+  const pagedQuestions = allQuestions;
 
-  const totalPages = Math.ceil(filteredQuestions.length / PAGE_SIZE);
-  const pagedQuestions = filteredQuestions.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
-
-  const allSelectable = filteredQuestions.filter(
+  const allSelectable = allQuestions.filter(
     (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
   );
   const allSelectableIds = allSelectable.map((q) => q.id);
@@ -109,12 +106,12 @@ const MyQuestionsContent: React.FC = () => {
 
   const handleSelectAll = () => {
     if (allSelected) {
-      setSelectedQuestions((prev) => prev.filter((id) => !allSelectableIds.includes(id)));
+      setSelectedQuestions([]);
+      setSelectAllGlobal(false);
     } else {
-      setSelectedQuestions((prev) => [...new Set([...prev, ...allSelectableIds])]);
+      setSelectedQuestions(allSelectableIds);
     }
   };
-
   const handleRequestPublish = () => {
     if (selectedQuestions.length === 0) return;
     requestPublish.mutate(
@@ -217,7 +214,7 @@ const MyQuestionsContent: React.FC = () => {
               onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
-          <select
+          {/* <select
             value={difficultyFilter}
             onChange={handleFilterChange(setDifficultyFilter)}
             className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
@@ -258,10 +255,10 @@ const MyQuestionsContent: React.FC = () => {
                 {s.name}
               </option>
             ))}
-          </select>
+          </select> */}
         </div>
 
-        {selectedSubject && (
+        {/* {selectedSubject && (
           <div className="flex items-center gap-2 mt-3 flex-wrap">
             <span className="text-xs text-gray-500">Đang lọc:</span>
             <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
@@ -271,7 +268,7 @@ const MyQuestionsContent: React.FC = () => {
               </button>
             </span>
           </div>
-        )}
+        )} */}
 
         {isLoading ? (
           <div className="p-6 space-y-2">
@@ -279,7 +276,7 @@ const MyQuestionsContent: React.FC = () => {
               <Skeleton key={i} className="h-16 w-full rounded-lg" />
             ))}
           </div>
-        ) : !filteredQuestions.length ? (
+        ) : !allQuestions.length ? (
           <div className="p-16 text-center">
             <div className="flex flex-col items-center">
               <Send className="h-16 w-16 text-gray-400 mb-4" />
@@ -466,9 +463,9 @@ const MyQuestionsContent: React.FC = () => {
               <p className="text-sm text-gray-600">
                 Hiển thị{" "}
                 <span className="font-semibold text-gray-900">
-                  {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filteredQuestions.length)}
+                  {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, allQuestions.length)}
                 </span>{" "}
-                trong <span className="font-semibold text-gray-900">{filteredQuestions.length}</span> câu hỏi
+                trong <span className="font-semibold text-gray-900">{allQuestions.length}</span> câu hỏi
               </p>
               {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
             </div>
