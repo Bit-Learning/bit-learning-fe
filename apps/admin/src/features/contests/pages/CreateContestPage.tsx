@@ -98,6 +98,7 @@ export const CreateContestPage: React.FC = () => {
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
+    const now = new Date();
 
     if (!formData.title.trim()) {
       newErrors.title = "Tên cuộc thi không được để trống";
@@ -105,18 +106,28 @@ export const CreateContestPage: React.FC = () => {
 
     if (!formData.startTime) {
       newErrors.startTime = "Vui lòng chọn thời gian bắt đầu";
+    } else {
+      const start = new Date(formData.startTime);
+      if (start < now) {
+        newErrors.startTime = "Thời gian bắt đầu không được ở quá khứ";
+      }
     }
 
     if (!formData.endTime) {
       newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
-    }
-
-    if (formData.startTime && formData.endTime) {
-      const start = new Date(formData.startTime);
+    } else {
       const end = new Date(formData.endTime);
 
-      if (end <= start) {
-        newErrors.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
+      if (formData.startTime) {
+        const start = new Date(formData.startTime);
+
+        if (end <= start) {
+          newErrors.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
+        }
+      }
+
+      if (end < now) {
+        newErrors.endTime = "Thời gian kết thúc không được ở quá khứ";
       }
     }
 
@@ -150,8 +161,8 @@ export const CreateContestPage: React.FC = () => {
         await updateMutation.mutateAsync({ contestId, data: payload });
         navigate({ to: "/contests/$id", params: { id: contestId } });
       } else {
-        await createMutation.mutateAsync(payload);
-        navigate({ to: "/contests" });
+        const response = await createMutation.mutateAsync(payload);
+        navigate({ to: `/contests/${response.data.data?.contestId}/manage-problems` });
       }
     } catch (error) {
       console.error("Error:", error);
@@ -167,7 +178,15 @@ export const CreateContestPage: React.FC = () => {
       to: isEditMode ? `/contests/${contestId}` : "/contests",
     });
   };
+  const getNowLocal = () => {
+    const now = new Date();
 
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(
+      now.getHours(),
+    )}:${pad(now.getMinutes())}`;
+  };
   if (isLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
@@ -237,6 +256,7 @@ export const CreateContestPage: React.FC = () => {
                 <input
                   id="start_time"
                   type="datetime-local"
+                  min={getNowLocal()}
                   value={formData.startTime}
                   onChange={(e) => handleChange("startTime", e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl border ${
@@ -258,6 +278,7 @@ export const CreateContestPage: React.FC = () => {
                 <input
                   id="end_time"
                   type="datetime-local"
+                  min={getNowLocal()}
                   value={formData.endTime}
                   onChange={(e) => handleChange("endTime", e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl border ${
@@ -288,7 +309,6 @@ export const CreateContestPage: React.FC = () => {
             </div>
           </div>
 
-          {/* Prize Configuration */}
           <div className="space-y-4 border border-slate-200 dark:border-slate-700 rounded-xl p-6">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-3">
@@ -398,7 +418,7 @@ export const CreateContestPage: React.FC = () => {
 
                 <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 rounded-lg p-3">
                   <p className="text-xs text-amber-700 dark:text-amber-400">
-                    💡 Nếu 2 người cùng hạng (ICPC), cả 2 sẽ nhận thưởng cùng mức. Chỉ người giải được ≥ 1 bài mới nhận
+                    Nếu 2 người cùng hạng (ICPC), cả 2 sẽ nhận thưởng cùng mức. Chỉ người giải được ≥ 1 bài mới nhận
                     thưởng.
                   </p>
                 </div>
