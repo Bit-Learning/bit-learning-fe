@@ -169,12 +169,12 @@ const gameService = {
 		gameId: number,
 		username: string,
 	): Promise<LikeResponse> => {
-		const response = await api.post<LikeResponse>(
+		const response = await api.post<ApiResponse<LikeResponse>>(
 			`/games/${gameId}/like`,
 			null,
 			{ params: { username } },
 		);
-		return response.data;
+		return response.data.data as LikeResponse;
 	},
 
 	// Check if user has liked a game
@@ -201,11 +201,11 @@ const gameService = {
 
 	// Add a comment or reply
 	addComment: async (request: CommentRequest): Promise<Comment> => {
-		const response = await api.post<Comment>(
+		const response = await api.post<ApiResponse<Comment>>(
 			`/games/${request.gameId}/comments`,
 			request,
 		);
-		return response.data;
+		return response.data.data as Comment;
 	},
 
 	// Get game categories with games (Netflix style)
