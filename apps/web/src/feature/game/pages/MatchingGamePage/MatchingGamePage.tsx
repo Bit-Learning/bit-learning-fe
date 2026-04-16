@@ -88,16 +88,33 @@ export default function GamePage() {
 	}, [grade, topic]);
 
 	const [stageIndex, setStageIndex] = useState(0);
+	const [completedPairCount, setCompletedPairCount] = useState(0);
+	const [completedStagesCount, setCompletedStagesCount] = useState(0);
+	const [totalMistakesCount, setTotalMistakesCount] = useState(0);
 
 	// Track matching game result to backend
 	const trackMatchingResult = (correctCount: number, totalCount: number) => {
-		if (trackedRef.current) return;
+		if (trackedRef.current || !gameData.meta.gameId) return;
 		trackedRef.current = true;
 		const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
-		const score = Math.round((correctCount / Math.max(totalCount, 1)) * 100);
-		gameService.recordScore(score, elapsed).catch(() => {
-			trackedRef.current = false;
-		});
+		gameService
+			.submitAttempt(gameData.meta.gameId, {
+				attemptType: "MATCHING",
+				rawScore: correctCount,
+				maxRawScore: totalCount,
+				duration: elapsed,
+				completed: true,
+				resultMetrics: {
+					correctCount,
+					totalCount,
+					mistakes: totalMistakesCount + mistakesCount,
+					completedStages: completedStagesCount + 1,
+					stageCount: gameData.stages.length,
+				},
+			})
+			.catch(() => {
+				trackedRef.current = false;
+			});
 	};
 	// Pause background music while in the game route
 	useEffect(() => {
@@ -139,11 +156,12 @@ export default function GamePage() {
 			(sum, s) => sum + s.pairs.length,
 			0,
 		);
-		trackMatchingResult(matchedPairIds.length, totalPairs);
+		const totalCorrect = completedPairCount + matchedPairIds.length;
+		trackMatchingResult(totalCorrect, totalPairs);
 		navigate({
 			to: "/matching/dashboard",
 			search: {
-				correct: matchedPairIds.length,
+				correct: totalCorrect,
 				total: totalPairs,
 				time: elapsed,
 				title: gameData.meta.title,
@@ -257,6 +275,11 @@ export default function GamePage() {
 	// Reset to the first stage and clear state when the underlying game data changes
 	useEffect(() => {
 		setStageIndex(0);
+		trackedRef.current = false;
+		startTimeRef.current = Date.now();
+		setCompletedPairCount(0);
+		setCompletedStagesCount(0);
+		setTotalMistakesCount(0);
 		setMatchedPairIds([]);
 		setSelectedLeftId(null);
 		setSelectedRightId(null);
@@ -269,6 +292,9 @@ export default function GamePage() {
 
 	const handleRestartAll = () => {
 		setStageIndex(0);
+		setCompletedPairCount(0);
+		setCompletedStagesCount(0);
+		setTotalMistakesCount(0);
 		setMatchedPairIds([]);
 		setSelectedLeftId(null);
 		setSelectedRightId(null);
@@ -282,6 +308,9 @@ export default function GamePage() {
 	const handleNextStage = () => {
 		playSound("anime-wow");
 		if (isLastStage) return;
+		setCompletedPairCount((prev) => prev + matchedPairIds.length);
+		setCompletedStagesCount((prev) => prev + 1);
+		setTotalMistakesCount((prev) => prev + mistakesCount);
 		const nextIndex = Math.min(stageIndex + 1, gameData.stages.length - 1);
 		setStageIndex(nextIndex);
 		setMatchedPairIds([]);

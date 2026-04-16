@@ -45,6 +45,9 @@ export interface UpsertGamePayload {
 	title: string;
 	desc: string;
 	difficulty?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
 	categoryId?: number;
 	thumbnailUrl?: string;
 	thumbnail?: File;

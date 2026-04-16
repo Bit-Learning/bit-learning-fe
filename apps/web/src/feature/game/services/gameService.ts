@@ -20,6 +20,9 @@ export interface Game {
 	thumbnailUrl?: string;
 	thumbnailFullUrl?: string;
 	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
+	scoringBaseScoreMax?: number;
+	scoringDifficultyMultiplier?: number;
+	scoringPassingThreshold?: number;
 	category: GameCategory;
 	createdBy?: string;
 }
@@ -45,6 +48,15 @@ export interface Comment {
 	content: string;
 	datePosted: string;
 	parentCommentId?: number;
+	avatar?: string | null;
+	author?: {
+		id?: number;
+		username?: string;
+		email?: string;
+		firstName?: string;
+		lastName?: string;
+		avatar?: string | null;
+	} | null;
 }
 
 export interface CommentRequest {
@@ -67,6 +79,27 @@ export interface LeaderboardEntry {
 	avatar: string | null;
 	totalScore: number;
 	gamesPlayed: number;
+	totalAttempts: number;
+}
+
+export interface GameAttemptRequest {
+	attemptType?: string;
+	rawScore?: number;
+	maxRawScore?: number;
+	duration?: number;
+	completed: boolean;
+	resultMetrics?: Record<string, unknown>;
+}
+
+export interface GameAttemptResponse {
+	gameId: number;
+	rawScore: number;
+	maxRawScore: number;
+	normalizedScore: number;
+	leaderboardPoints: number;
+	duration: number;
+	completed: boolean;
+	bestAttempt: boolean;
 }
 
 export interface Page<T> {
@@ -123,8 +156,8 @@ const gameService = {
 	trackPlay: async (
 		gameId: number,
 		userId: string,
-		score: number = 0,
-		duration: number = 0,
+		score = 0,
+		duration = 0,
 	): Promise<void> => {
 		await api.post(`/games/${gameId}/play`, null, {
 			params: { userId, score, duration },
@@ -184,8 +217,8 @@ const gameService = {
 	},
 
 	getLeaderboard: async (
-		page: number = 0,
-		size: number = 10,
+		page = 0,
+		size = 10,
 	): Promise<Page<LeaderboardEntry>> => {
 		const response = await api.get<ApiResponse<Page<LeaderboardEntry>>>(
 			"/games/leaderboard",
@@ -198,12 +231,24 @@ const gameService = {
 
 	// Record score for authenticated user (no game entity required)
 	recordScore: async (
-		score: number = 0,
-		duration: number = 0,
+		gameId: number,
+		score = 0,
+		duration = 0,
 	): Promise<void> => {
 		await api.post("/games/record-score", null, {
-			params: { score, duration },
+			params: { gameId, score, duration },
 		});
+	},
+
+	submitAttempt: async (
+		gameId: number,
+		payload: GameAttemptRequest,
+	): Promise<GameAttemptResponse> => {
+		const response = await api.post<ApiResponse<GameAttemptResponse>>(
+			`/games/${gameId}/attempts`,
+			payload,
+		);
+		return response.data.data as GameAttemptResponse;
 	},
 };
 

@@ -37,16 +37,45 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	}, []);
 
 	const trackResult = useCallback(
-		async (score: number, duration?: number) => {
+		async (
+			payload:
+				| {
+						rawScore?: number;
+						maxRawScore?: number;
+						duration?: number;
+						completed?: boolean;
+						resultMetrics?: Record<string, unknown>;
+						attemptType?: string;
+				  }
+				| { score: number; duration?: number },
+		) => {
 			if (!username || tracked) return;
 			setTracked(true);
 			const elapsed =
-				duration ?? Math.round((Date.now() - startTimeRef.current) / 1000);
+				("duration" in payload ? payload.duration : undefined) ??
+				Math.round((Date.now() - startTimeRef.current) / 1000);
 			try {
-				await gameService.trackPlay(id, username, score, elapsed);
+				if ("score" in payload) {
+					await gameService.submitAttempt(id, {
+						attemptType: "LEGACY_STANDARD",
+						rawScore: payload.score,
+						maxRawScore: 100,
+						duration: elapsed,
+						completed: payload.score > 0,
+					});
+				} else {
+					await gameService.submitAttempt(id, {
+						attemptType: payload.attemptType ?? "STANDARD_HTML",
+						rawScore: payload.rawScore ?? 0,
+						maxRawScore: payload.maxRawScore ?? 100,
+						duration: elapsed,
+						completed: payload.completed ?? true,
+						resultMetrics: payload.resultMetrics,
+					});
+				}
 				toast.success({
 					title: "Kết quả đã được ghi nhận",
-					description: `Điểm: ${score} | Thời gian: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
+					description: `Thời gian: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
 				});
 			} catch (e) {
 				console.error("Tracking error", e);
@@ -61,8 +90,27 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	useEffect(() => {
 		const handleMessage = (event: MessageEvent) => {
 			const data = event.data;
+			if (data && data.type === "GAME_RESULT") {
+				trackResult({
+					rawScore:
+						typeof data.rawScore === "number" ? data.rawScore : undefined,
+					maxRawScore:
+						typeof data.maxRawScore === "number" ? data.maxRawScore : undefined,
+					duration:
+						typeof data.duration === "number" ? data.duration : undefined,
+					completed: data.completed !== false,
+					resultMetrics:
+						typeof data.metrics === "object" && data.metrics !== null
+							? data.metrics
+							: undefined,
+					attemptType:
+						typeof data.attemptType === "string"
+							? data.attemptType
+							: "STANDARD_HTML",
+				});
+			}
 			if (data && data.type === "GAME_OVER" && typeof data.score === "number") {
-				trackResult(data.score, data.duration);
+				trackResult({ score: data.score, duration: data.duration });
 			}
 		};
 		window.addEventListener("message", handleMessage);
@@ -104,7 +152,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 		// Track before navigating away if not already tracked
 		if (!tracked && username) {
 			const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
-			trackResult(0, elapsed);
+			trackResult({ score: 0, duration: elapsed });
 		}
 		navigate({ to: "/games/$id", params: { id: String(id) } });
 	};

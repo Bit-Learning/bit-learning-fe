@@ -13,6 +13,9 @@ export interface AdminGameDto {
 	thumbnailUrl?: string;
 	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
 	difficulty?: string;
+	scoringBaseScoreMax?: number;
+	scoringDifficultyMultiplier?: number;
+	scoringPassingThreshold?: number;
 	categoryId?: number | null;
 	views?: number;
 	likes?: number;
@@ -23,6 +26,9 @@ export interface CreateGamePayload {
 	title: string;
 	desc: string;
 	difficulty?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
 	categoryId?: number;
 	thumbnailUrl?: string;
 	thumbnail?: File;
@@ -33,6 +39,9 @@ export interface UpdateGamePayload {
 	title: string;
 	desc: string;
 	difficulty?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
 	categoryId?: number;
 	thumbnailUrl?: string;
 	thumbnail?: File;
@@ -52,6 +61,18 @@ export const adminGamesApi = {
 		formData.append("desc", payload.desc);
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.baseScoreMax !== undefined) {
+			formData.append("baseScoreMax", String(payload.baseScoreMax));
+		}
+		if (payload.difficultyMultiplier !== undefined) {
+			formData.append(
+				"difficultyMultiplier",
+				String(payload.difficultyMultiplier),
+			);
+		}
+		if (payload.passingThreshold !== undefined) {
+			formData.append("passingThreshold", String(payload.passingThreshold));
 		}
 		if (payload.categoryId !== undefined) {
 			formData.append("categoryId", String(payload.categoryId));
@@ -80,6 +101,18 @@ export const adminGamesApi = {
 		formData.append("desc", payload.desc);
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.baseScoreMax !== undefined) {
+			formData.append("baseScoreMax", String(payload.baseScoreMax));
+		}
+		if (payload.difficultyMultiplier !== undefined) {
+			formData.append(
+				"difficultyMultiplier",
+				String(payload.difficultyMultiplier),
+			);
+		}
+		if (payload.passingThreshold !== undefined) {
+			formData.append("passingThreshold", String(payload.passingThreshold));
 		}
 		if (payload.categoryId !== undefined) {
 			formData.append("categoryId", String(payload.categoryId));

@@ -93,6 +93,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		title: "",
 		desc: "",
 		difficulty: "MEDIUM",
+		baseScoreMax: 100,
+		difficultyMultiplier: 1.2,
+		passingThreshold: 60,
 	});
 
 	const game = useMemo(
@@ -102,7 +105,14 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 
 	useEffect(() => {
 		if (isCreateMode) {
-			setForm({ title: "", desc: "", difficulty: "MEDIUM" });
+			setForm({
+				title: "",
+				desc: "",
+				difficulty: "MEDIUM",
+				baseScoreMax: 100,
+				difficultyMultiplier: 1.2,
+				passingThreshold: 60,
+			});
 			return;
 		}
 		if (!game) return;
@@ -111,6 +121,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 			title: game.title ?? "",
 			desc: game.description ?? "",
 			difficulty: game.difficulty ?? "MEDIUM",
+			baseScoreMax: game.scoringBaseScoreMax ?? 100,
+			difficultyMultiplier: game.scoringDifficultyMultiplier ?? 1.2,
+			passingThreshold: game.scoringPassingThreshold ?? 60,
 			categoryId: game.categoryId ?? undefined,
 			thumbnailUrl: game.thumbnailUrl ?? "",
 		});
@@ -324,6 +337,60 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 											))}
 										</SelectContent>
 									</Select>
+								</div>
+							</div>
+
+							<div className="grid gap-4 md:grid-cols-3">
+								<div className="space-y-2">
+									<Label htmlFor="baseScoreMax">Base score max</Label>
+									<Input
+										id="baseScoreMax"
+										type="number"
+										min={1}
+										value={form.baseScoreMax ?? 100}
+										onChange={(e) =>
+											setForm((prev) => ({
+												...prev,
+												baseScoreMax: Number(e.target.value || 100),
+											}))
+										}
+									/>
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="difficultyMultiplier">
+										Difficulty multiplier
+									</Label>
+									<Input
+										id="difficultyMultiplier"
+										type="number"
+										min={0.1}
+										step="0.1"
+										value={form.difficultyMultiplier ?? 1.2}
+										onChange={(e) =>
+											setForm((prev) => ({
+												...prev,
+												difficultyMultiplier: Number(e.target.value || 1.2),
+											}))
+										}
+									/>
+								</div>
+
+								<div className="space-y-2">
+									<Label htmlFor="passingThreshold">Passing threshold</Label>
+									<Input
+										id="passingThreshold"
+										type="number"
+										min={0}
+										max={100}
+										value={form.passingThreshold ?? 60}
+										onChange={(e) =>
+											setForm((prev) => ({
+												...prev,
+												passingThreshold: Number(e.target.value || 60),
+											}))
+										}
+									/>
 								</div>
 							</div>
 						</CardContent>
