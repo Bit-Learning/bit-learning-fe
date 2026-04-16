@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
 	ImageIcon,
 	Paperclip,
@@ -136,6 +136,7 @@ const PostDetailContent: React.FC = () => {
 	const [comment, setComment] = useState("");
 	const [replyingTo, setReplyingTo] = useState<number | null>(null);
 	const [lightboxImg, setLightboxImg] = useState<string | null>(null);
+	const [activeImageUrl, setActiveImageUrl] = useState<string | null>(null);
 
 	const { data: postResponse, isLoading: isPostLoading } =
 		useForumPostById(postId);
@@ -248,6 +249,16 @@ const PostDetailContent: React.FC = () => {
 			</div>
 		);
 	}
+	const imageAttachments = (selectedPost?.attachments ?? []).filter(
+		(a) => a.type === "IMAGE",
+	);
+	const fileAttachments = (selectedPost?.attachments ?? []).filter(
+		(a) => a.type !== "IMAGE",
+	);
+
+	useEffect(() => {
+		setActiveImageUrl(imageAttachments[0]?.url ?? null);
+	}, [selectedPost?.id, imageAttachments]);
 
 	if (!selectedPost) return null;
 
@@ -260,12 +271,6 @@ const PostDetailContent: React.FC = () => {
 			params: { username },
 		});
 	};
-	const imageAttachments = selectedPost.attachments.filter(
-		(a) => a.type === "IMAGE",
-	);
-	const fileAttachments = selectedPost.attachments.filter(
-		(a) => a.type !== "IMAGE",
-	);
 
 	return (
 		<div className="min-h-screen bg-gray-50">
@@ -380,63 +385,63 @@ const PostDetailContent: React.FC = () => {
 						</h1>
 
 						{imageAttachments.length > 0 && (
-							<div className="mb-6 rounded-md overflow-hidden">
-								{imageAttachments.length === 1 ? (
-									<div
-										className="cursor-zoom-in relative group"
-										onClick={() => setLightboxImg(imageAttachments[0]?.url!)}
-									>
-										<img
-											src={imageAttachments[0]?.url}
-											alt=""
-											className="w-full max-h-140 object-cover"
-										/>
-										<div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors flex items-center justify-center">
-											<ZoomIn className="w-9 h-9 text-white opacity-0 group-hover:opacity-80 transition-opacity drop-shadow-lg" />
+							<div className="mb-6 space-y-3 overflow-hidden rounded-md">
+								<div
+									className="group relative cursor-zoom-in overflow-hidden rounded-2xl bg-slate-100"
+									onClick={() =>
+										activeImageUrl && setLightboxImg(activeImageUrl)
+									}
+								>
+									<img
+										src={activeImageUrl ?? imageAttachments[0]?.url}
+										alt=""
+										className="max-h-[42rem] w-full object-cover"
+									/>
+									<div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover:bg-black/10">
+										<ZoomIn className="h-9 w-9 text-white opacity-0 transition-opacity drop-shadow-lg group-hover:opacity-80" />
+									</div>
+									{imageAttachments.length > 1 ? (
+										<div className="absolute left-4 top-4 rounded-full bg-black/65 px-3 py-1 text-xs font-semibold text-white backdrop-blur">
+											Ảnh{" "}
+											{Math.max(
+												imageAttachments.findIndex(
+													(attachment) => attachment.url === activeImageUrl,
+												) + 1,
+												1,
+											)}
+											/{imageAttachments.length}
 										</div>
+									) : null}
+								</div>
+
+								{imageAttachments.length > 1 ? (
+									<div className="flex gap-2 overflow-x-auto pb-1">
+										{imageAttachments.map((attachment) => {
+											const isActive = attachment.url === activeImageUrl;
+											return (
+												<button
+													key={attachment.id}
+													type="button"
+													onClick={() => setActiveImageUrl(attachment.url)}
+													className={`relative h-20 w-24 shrink-0 overflow-hidden rounded-xl border transition ${
+														isActive
+															? "border-blue-500 ring-2 ring-blue-100"
+															: "border-slate-200 hover:border-slate-300"
+													}`}
+												>
+													<img
+														src={attachment.url}
+														alt=""
+														className="h-full w-full object-cover"
+													/>
+													{isActive ? (
+														<div className="absolute inset-x-0 bottom-0 h-7 bg-gradient-to-t from-black/45 to-transparent" />
+													) : null}
+												</button>
+											);
+										})}
 									</div>
-								) : imageAttachments.length === 2 ? (
-									<div className="grid grid-cols-2 gap-0.5">
-										{imageAttachments.map((img) => (
-											<div
-												key={img.id}
-												className="relative cursor-zoom-in group"
-												onClick={() => setLightboxImg(img.url)}
-											>
-												<img
-													src={img.url}
-													alt=""
-													className="w-full h-72 object-cover"
-												/>
-												<div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors" />
-											</div>
-										))}
-									</div>
-								) : (
-									<div className="grid grid-cols-3 gap-0.5">
-										{imageAttachments.slice(0, 6).map((img, i) => (
-											<div
-												key={img.id}
-												className="relative cursor-zoom-in group"
-												onClick={() => setLightboxImg(img.url)}
-											>
-												<img
-													src={img.url}
-													alt=""
-													className="w-full h-52 object-cover"
-												/>
-												<div className="absolute inset-0 bg-black/0 group-hover:bg-black/15 transition-colors" />
-												{i === 5 && imageAttachments.length > 6 && (
-													<div className="absolute inset-0 bg-black/55 flex items-center justify-center">
-														<span className="text-white font-bold text-2xl">
-															+{imageAttachments.length - 6}
-														</span>
-													</div>
-												)}
-											</div>
-										))}
-									</div>
-								)}
+								) : null}
 							</div>
 						)}
 
