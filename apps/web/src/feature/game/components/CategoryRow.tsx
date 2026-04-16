@@ -1,7 +1,7 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
-import type { Game } from "../services/gameService";
+import type { GamePreview } from "../services/gameService";
 import { useAudio } from "../contexts/AudioProvider";
 import GameCard from "./GameRow";
 import styles from "./GameRow.module.css";
@@ -9,7 +9,7 @@ import styles from "./GameRow.module.css";
 interface CategoryRowProps {
 	categoryName: string;
 	categoryDescription: string;
-	games: Game[];
+	games: GamePreview[];
 }
 
 export default function CategoryRow({
@@ -57,7 +57,11 @@ export default function CategoryRow({
 					</div>
 					<span className="text-gray-300 text-sm">{categoryDescription}</span>
 				</h2>
-				<button className={styles.viewAll} onClick={() => handleViewMore()}>
+				<button
+					type="button"
+					className={styles.viewAll}
+					onClick={() => handleViewMore()}
+				>
 					{" "}
 					Xem tất cả{" "}
 				</button>
@@ -98,6 +102,7 @@ export default function CategoryRow({
 
 					{/* Right scroll button */}
 					<button
+						type="button"
 						onClick={() => scroll("right")}
 						className="absolute right-0 top-0 bottom-0 z-10 w-12 bg-gradient-to-l from-black/80 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity flex items-center justify-center hover:from-black/90"
 						aria-label="Scroll right"

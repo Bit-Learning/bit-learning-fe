@@ -5,7 +5,6 @@ export interface GameCategory {
 	id: number;
 	name: string;
 	description: string;
-	games?: Game[];
 }
 
 export interface Game {
@@ -21,8 +20,40 @@ export interface Game {
 	thumbnailUrl?: string;
 	thumbnailFullUrl?: string;
 	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
+	scoringBaseScoreMax?: number;
+	scoringDifficultyMultiplier?: number;
+	scoringPassingThreshold?: number;
 	category: GameCategory;
 	createdBy?: string;
+}
+
+export interface GamePreview {
+	id: number;
+	title: string;
+	description: string;
+	thumbnailUrl?: string;
+	likes?: number;
+	views?: number;
+	trendScore?: number;
+}
+
+export type FeaturedReason =
+	| "MANUAL_BOOST"
+	| "TOP_LIKED"
+	| "TOP_VIEWED"
+	| "TRENDING";
+
+export interface FeaturedGame extends GamePreview {
+	featuredReason?: FeaturedReason | null;
+	categoryName?: string | null;
+	categoryDescription?: string | null;
+}
+
+export interface GameCategoryWithGames {
+	id: number;
+	name: string;
+	description: string;
+	games?: GamePreview[];
 }
 
 export interface Comment {
@@ -32,6 +63,15 @@ export interface Comment {
 	content: string;
 	datePosted: string;
 	parentCommentId?: number;
+	avatar?: string | null;
+	author?: {
+		id?: number;
+		username?: string;
+		email?: string;
+		firstName?: string;
+		lastName?: string;
+		avatar?: string | null;
+	} | null;
 }
 
 export interface CommentRequest {
@@ -54,6 +94,27 @@ export interface LeaderboardEntry {
 	avatar: string | null;
 	totalScore: number;
 	gamesPlayed: number;
+	totalAttempts: number;
+}
+
+export interface GameAttemptRequest {
+	attemptType?: string;
+	rawScore?: number;
+	maxRawScore?: number;
+	duration?: number;
+	completed: boolean;
+	resultMetrics?: Record<string, unknown>;
+}
+
+export interface GameAttemptResponse {
+	gameId: number;
+	rawScore: number;
+	maxRawScore: number;
+	normalizedScore: number;
+	leaderboardPoints: number;
+	duration: number;
+	completed: boolean;
+	bestAttempt: boolean;
 }
 
 export interface Page<T> {
@@ -110,8 +171,8 @@ const gameService = {
 	trackPlay: async (
 		gameId: number,
 		userId: string,
-		score: number = 0,
-		duration: number = 0,
+		score = 0,
+		duration = 0,
 	): Promise<void> => {
 		await api.post(`/games/${gameId}/play`, null, {
 			params: { userId, score, duration },
@@ -123,12 +184,12 @@ const gameService = {
 		gameId: number,
 		username: string,
 	): Promise<LikeResponse> => {
-		const response = await api.post<LikeResponse>(
+		const response = await api.post<ApiResponse<LikeResponse>>(
 			`/games/${gameId}/like`,
 			null,
 			{ params: { username } },
 		);
-		return response.data;
+		return response.data.data as LikeResponse;
 	},
 
 	// Check if user has liked a game
@@ -155,24 +216,34 @@ const gameService = {
 
 	// Add a comment or reply
 	addComment: async (request: CommentRequest): Promise<Comment> => {
-		const response = await api.post<Comment>(
+		const response = await api.post<ApiResponse<Comment>>(
 			`/games/${request.gameId}/comments`,
 			request,
 		);
-		return response.data;
+		return response.data.data as Comment;
 	},
 
 	// Get game categories with games (Netflix style)
-	getCategoriesWithGames: async (): Promise<GameCategory[]> => {
-		const response = await api.get<ApiResponse<GameCategory[]>>(
+	getCategoriesWithGames: async (): Promise<GameCategoryWithGames[]> => {
+		const response = await api.get<ApiResponse<GameCategoryWithGames[]>>(
 			"/games/game-categories",
 		);
 		return response.data.data ?? [];
 	},
 
+	getFeaturedGames: async (limit = 5): Promise<FeaturedGame[]> => {
+		const response = await api.get<ApiResponse<FeaturedGame[]>>(
+			"/games/featured",
+			{
+				params: { limit },
+			},
+		);
+		return response.data.data ?? [];
+	},
+
 	getLeaderboard: async (
-		page: number = 0,
-		size: number = 10,
+		page = 0,
+		size = 10,
 	): Promise<Page<LeaderboardEntry>> => {
 		const response = await api.get<ApiResponse<Page<LeaderboardEntry>>>(
 			"/games/leaderboard",
@@ -185,12 +256,24 @@ const gameService = {
 
 	// Record score for authenticated user (no game entity required)
 	recordScore: async (
-		score: number = 0,
-		duration: number = 0,
+		gameId: number,
+		score = 0,
+		duration = 0,
 	): Promise<void> => {
 		await api.post("/games/record-score", null, {
-			params: { score, duration },
+			params: { gameId, score, duration },
 		});
+	},
+
+	submitAttempt: async (
+		gameId: number,
+		payload: GameAttemptRequest,
+	): Promise<GameAttemptResponse> => {
+		const response = await api.post<ApiResponse<GameAttemptResponse>>(
+			`/games/${gameId}/attempts`,
+			payload,
+		);
+		return response.data.data as GameAttemptResponse;
 	},
 };
 

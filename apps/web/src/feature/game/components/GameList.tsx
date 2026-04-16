@@ -1,11 +1,17 @@
 import PageMeta from "@/shared/components/seo/page-meta";
 import useDebounce from "@/shared/hooks/use-debounce";
 import { Link } from "@tanstack/react-router";
+import { ArrowUpRight, Flame, Heart, Sparkles } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
-import { featuredGame } from "../data/games";
-import type { Game, GameCategory } from "../services/gameService";
+import type {
+	FeaturedGame,
+	FeaturedReason,
+	Game,
+	GameCategoryWithGames,
+	GamePreview,
+} from "../services/gameService";
 import gameService from "../services/gameService";
 import Footer from "./Footer";
 import styles from "./HomePage.module.css";
@@ -22,6 +28,33 @@ const CATEGORY_ROW_SKELETONS = [
 	{ id: "puzzle", descriptionWidth: "w-80" },
 	{ id: "challenge", descriptionWidth: "w-64" },
 ] as const;
+
+type SpotlightGame = GamePreview & {
+	categoryName: string;
+	categoryDescription: string;
+	trendScore: number;
+	featuredReason?: FeaturedReason | null;
+};
+
+function formatCompactNumber(value: number) {
+	return new Intl.NumberFormat("vi-VN", {
+		notation: "compact",
+		maximumFractionDigits: value >= 1000 ? 1 : 0,
+	}).format(value);
+}
+
+function getFeaturedReasonLabel(reason?: FeaturedReason | null) {
+	switch (reason) {
+		case "MANUAL_BOOST":
+			return "Được đẩy thủ công";
+		case "TOP_LIKED":
+			return "Nhiều lượt thích nhất";
+		case "TOP_VIEWED":
+			return "Nhiều lượt xem nhất";
+		default:
+			return "Đang tăng nhiệt";
+	}
+}
 
 function GameHeroSkeleton() {
 	return (
@@ -90,8 +123,9 @@ function CategoryRowSkeleton({
 
 export default function GameList({ username }: Props) {
 	const [categoriesWithGames, setCategoriesWithGames] = useState<
-		GameCategory[]
+		GameCategoryWithGames[]
 	>([]);
+	const [featuredGames, setFeaturedGames] = useState<FeaturedGame[]>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [loadError, setLoadError] = useState<string | null>(null);
 	const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -106,18 +140,23 @@ export default function GameList({ username }: Props) {
 			setIsLoading(true);
 			setLoadError(null);
 			try {
-				const data = await gameService.getCategoriesWithGames();
-				console.log("Categories with games:", data);
-				if (Array.isArray(data)) {
-					setCategoriesWithGames(data);
+				const [categoryData, featuredData] = await Promise.all([
+					gameService.getCategoriesWithGames(),
+					gameService.getFeaturedGames(5),
+				]);
+				if (Array.isArray(categoryData)) {
+					setCategoriesWithGames(categoryData);
+					setFeaturedGames(Array.isArray(featuredData) ? featuredData : []);
 				} else {
-					console.error("API returned non-array data:", data);
+					console.error("API returned non-array data:", categoryData);
 					setCategoriesWithGames([]);
+					setFeaturedGames([]);
 					setLoadError("Game data is unavailable right now.");
 				}
 			} catch (error) {
 				console.error("Failed to load categories with games", error);
 				setCategoriesWithGames([]);
+				setFeaturedGames([]);
 				setLoadError("Unable to load games right now. Please try again.");
 			} finally {
 				setIsLoading(false);
@@ -193,7 +232,7 @@ export default function GameList({ username }: Props) {
 	const filteredCategoriesWithGames = normalizedSearch
 		? categoriesWithGames
 				.map((category) => {
-					const games = (category.games || []).filter((game) => {
+					const games = (category.games ?? []).filter((game) => {
 						const title = game.title?.toLowerCase() || "";
 						const description = game.description?.toLowerCase() || "";
 						return (
@@ -201,7 +240,7 @@ export default function GameList({ username }: Props) {
 							description.includes(normalizedSearch)
 						);
 					});
-					return { ...category, games } as GameCategory;
+					return { ...category, games } as GameCategoryWithGames;
 				})
 				.filter(
 					(category) =>
@@ -215,9 +254,48 @@ export default function GameList({ username }: Props) {
 		(sum, category) => sum + (category.games?.length ?? 0),
 		0,
 	);
+	const fallbackSpotlightGames = filteredCategoriesWithGames
+		.flatMap((category) =>
+			(category.games ?? []).map((game) => ({
+				...game,
+				categoryName: category.name,
+				categoryDescription: category.description,
+				trendScore: game.trendScore ?? 0,
+				featuredReason: "TRENDING" as FeaturedReason,
+			})),
+		)
+		.sort((left, right) => {
+			if (right.trendScore !== left.trendScore) {
+				return right.trendScore - left.trendScore;
+			}
+
+			return (right.likes ?? 0) - (left.likes ?? 0);
+		});
+	const spotlightGames =
+		featuredGames.length > 0
+			? featuredGames.map((game) => ({
+					...game,
+					categoryName: game.categoryName ?? "Khác",
+					categoryDescription: game.categoryDescription ?? "",
+					trendScore: game.trendScore ?? 0,
+					featuredReason: (game.featuredReason ?? "TRENDING") as FeaturedReason,
+				}))
+			: fallbackSpotlightGames;
+	const featuredGame = spotlightGames[0] ?? null;
+	const risingGames = spotlightGames.slice(1, 5);
+	const totalViews = spotlightGames.reduce(
+		(sum, game) => sum + (game.views ?? 0),
+		0,
+	);
+	const totalLikes = spotlightGames.reduce(
+		(sum, game) => sum + (game.likes ?? 0),
+		0,
+	);
+	const totalGames = spotlightGames.length;
+	const heroBackdrop = featuredGame?.thumbnailUrl || "/game-center-banner.jpg";
 
 	return (
-		<div className="min-h-screen bg-[#12080a] text-white">
+		<div className={styles.pageShell}>
 			<PageMeta
 				title="Bit Learning Game Center"
 				description="Khám phá kho trò chơi học tập giúp học sinh luyện tư duy logic, tin học và phản xạ trên Bit Learning."
@@ -244,8 +322,8 @@ export default function GameList({ username }: Props) {
 				<section className={styles.hero}>
 					<div className={styles.heroBg}>
 						<img
-							src="/game-center-banner.jpg"
-							alt="Game Hero"
+							src={heroBackdrop}
+							alt={featuredGame?.title ?? "Game Hero"}
 							className={styles.heroBgImg}
 						/>
 						<div className={styles.heroGradient} />
@@ -253,36 +331,121 @@ export default function GameList({ username }: Props) {
 					<div className={styles.heroContent}>
 						<div className={styles.heroInner}>
 							<div className={styles.heroBadges}>
-								<span className={styles.badge}>Game nổi bật</span>
-								<span className={styles.badgeSub}>#1 Xu hướng Quiz</span>
+								<span className={styles.badge}>Featured Game</span>
+								<span className={styles.badgeSub}>
+									{featuredGame
+										? `${featuredGame.categoryName} · trend ${formatCompactNumber(
+												featuredGame.trendScore,
+											)}`
+										: "Kho game Bit Learning"}
+								</span>
 							</div>
 							<h1 className={styles.heroTitle}>
-								Uma
-								<br />
-								Quiz
-								<br />
-								<span className={styles.heroAccent}>Run</span>
+								{featuredGame?.title ?? "Bit Learning Game Center"}
 							</h1>
 							<p className={styles.heroDesc}>
-								Thử thách kiến thức và tốc độ của bạn trong trò chơi quiz nhịp
-								độ nhanh! Kiểm tra bản thân với thời gian và leo lên bảng xếp
-								hạng. Bạn đã sẵn sàng chưa?
+								{featuredGame?.description ??
+									"Chọn một trò chơi, vào nhịp học nhanh và khám phá những thử thách đang được học sinh chơi nhiều nhất."}
 							</p>
-							<div className={styles.heroActions}>
-								<Link
-									to="/games/$id"
-									params={{ id: featuredGame.id }}
-									className={styles.btnPlay}
-								>
-									<span className="material-icons">play_arrow</span>
-									CHƠI NGAY
-								</Link>
-								<button type="button" className={styles.btnInfo}>
-									<span className="material-icons" style={{ fontSize: 20 }}>
-										info
+							<div className={styles.heroMetaRow}>
+								<div className={styles.metricPill}>
+									<Flame size={16} />
+									<span>
+										{featuredGame
+											? getFeaturedReasonLabel(featuredGame.featuredReason)
+											: "Luôn cập nhật"}
 									</span>
-									THÔNG TIN
-								</button>
+								</div>
+								<div className={styles.metricPill}>
+									<Heart size={16} />
+									<span>
+										{formatCompactNumber(featuredGame?.likes ?? totalLikes)}{" "}
+										lượt yêu thích
+									</span>
+								</div>
+								<div className={styles.metricPill}>
+									<span>👁</span>
+									<span>
+										{formatCompactNumber(featuredGame?.views ?? totalViews)}{" "}
+										lượt xem
+									</span>
+								</div>
+							</div>
+							<div className={styles.heroActions}>
+								{featuredGame ? (
+									<>
+										<Link
+											to="/games/$id"
+											params={{ id: String(featuredGame.id) }}
+											className={styles.btnPlay}
+										>
+											<span className="material-icons">play_arrow</span>
+											MỞ GAME
+										</Link>
+										<Link
+											to="/games/$id"
+											params={{ id: String(featuredGame.id) }}
+											className={styles.btnInfo}
+										>
+											<ArrowUpRight size={18} />
+											XEM CHI TIẾT
+										</Link>
+									</>
+								) : (
+									<div className={styles.emptyHeroState}>
+										Chưa có game nào đủ dữ liệu để làm featured.
+									</div>
+								)}
+							</div>
+						</div>
+						<div className={styles.heroAside}>
+							<div className={styles.asideCard}>
+								<div className={styles.asideLabel}>
+									<Sparkles size={16} />
+									Spotlight
+								</div>
+								<div className={styles.asideStats}>
+									<div>
+										<strong>{formatCompactNumber(totalGames)}</strong>
+										<span>game đang mở</span>
+									</div>
+									<div>
+										<strong>{formatCompactNumber(totalViews)}</strong>
+										<span>lượt xem</span>
+									</div>
+									<div>
+										<strong>{formatCompactNumber(totalLikes)}</strong>
+										<span>lượt thích</span>
+									</div>
+								</div>
+								<div className={styles.asideDivider} />
+								<div className={styles.asideList}>
+									{risingGames.length > 0 ? (
+										risingGames.map((game, index) => (
+											<Link
+												key={game.id}
+												to="/games/$id"
+												params={{ id: String(game.id) }}
+												className={styles.asideItem}
+											>
+												<span className={styles.asideRank}>
+													{String(index + 2).padStart(2, "0")}
+												</span>
+												<div>
+													<div className={styles.asideTitle}>{game.title}</div>
+													<div className={styles.asideMeta}>
+														{getFeaturedReasonLabel(game.featuredReason)} ·{" "}
+														{formatCompactNumber(game.trendScore)} trend
+													</div>
+												</div>
+											</Link>
+										))
+									) : (
+										<div className={styles.asideEmpty}>
+											Featured rail sẽ hiện khi có thêm game.
+										</div>
+									)}
+								</div>
 							</div>
 						</div>
 					</div>
@@ -290,6 +453,59 @@ export default function GameList({ username }: Props) {
 			)}
 
 			<main className={styles.main}>
+				{!isLoading && spotlightGames.length > 0 && (
+					<section className={styles.spotlightSection}>
+						<div className={styles.spotlightHeader}>
+							<div>
+								<p className={styles.kicker}>Curated for momentum</p>
+								<h2 className={styles.spotlightTitle}>Đang được chú ý nhất</h2>
+								<p className={styles.spotlightCopy}>
+									Xếp theo tổ hợp lượt xem và lượt yêu thích để hero không còn
+									là một banner tĩnh.
+								</p>
+							</div>
+						</div>
+						<div className={styles.spotlightGrid}>
+							{spotlightGames.slice(0, 4).map((game, index) => (
+								<Link
+									key={game.id}
+									to="/games/$id"
+									params={{ id: String(game.id) }}
+									className={styles.spotlightCard}
+								>
+									<div className={styles.spotlightMedia}>
+										{game.thumbnailUrl ? (
+											<img
+												src={game.thumbnailUrl}
+												alt={game.title}
+												className={styles.spotlightImage}
+											/>
+										) : (
+											<div className={styles.spotlightFallback}>🎮</div>
+										)}
+										<div className={styles.spotlightOverlay} />
+										<div className={styles.spotlightRank}>
+											#{String(index + 1).padStart(2, "0")}
+										</div>
+									</div>
+									<div className={styles.spotlightBody}>
+										<div className={styles.spotlightTopLine}>
+											<span>{getFeaturedReasonLabel(game.featuredReason)}</span>
+											<span>{formatCompactNumber(game.trendScore)} trend</span>
+										</div>
+										<h3>{game.title}</h3>
+										<p>{game.description}</p>
+										<div className={styles.spotlightStats}>
+											<span>❤ {formatCompactNumber(game.likes ?? 0)}</span>
+											<span>👁 {formatCompactNumber(game.views ?? 0)}</span>
+										</div>
+									</div>
+								</Link>
+							))}
+						</div>
+					</section>
+				)}
+
 				{isSearching && (
 					<div className="mb-2 px-8 text-sm text-slate-300">
 						Kết quả cho

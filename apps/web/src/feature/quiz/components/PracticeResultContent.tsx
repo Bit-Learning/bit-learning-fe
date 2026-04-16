@@ -24,14 +24,16 @@ const PracticeResultContent: React.FC = () => {
 		from: "/_layout/quiz-sessions/$sessionId/result",
 	});
 
-	const { data: result, isLoading: sessionLoading } = useQuizSession(
-		Number(sessionId),
-		{
-			staleTime: 0,
-			refetchOnMount: true,
-		},
-	);
-	const { data: examData, isLoading: examLoading } = useExam(
+	const {
+		data: result,
+		isPending: sessionPending,
+		isError: sessionError,
+		refetch,
+	} = useQuizSession(Number(sessionId), {
+		staleTime: 0,
+		refetchOnMount: true,
+	});
+	const { data: examData, isPending: examPending } = useExam(
 		result?.exam?.id || 0,
 		{
 			enabled: !!result?.exam?.id,
@@ -60,6 +62,9 @@ const PracticeResultContent: React.FC = () => {
 
 	const isEssay = (type: string) => type?.toUpperCase() === "ESSAY";
 
+	const sessionLoading = sessionPending;
+	const examLoading = examPending && !!result?.exam?.id;
+
 	if (sessionLoading || examLoading) {
 		return (
 			<div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
@@ -73,10 +78,23 @@ const PracticeResultContent: React.FC = () => {
 		);
 	}
 
-	if (!result) {
+	if (sessionError || !result) {
 		return (
-			<div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
-				<p className="text-slate-500">Không tìm thấy kết quả.</p>
+			<div className="min-h-screen bg-white dark:bg-slate-900 flex flex-col items-center justify-center gap-4">
+				<p className="text-slate-500">
+					{sessionError
+						? "Không thể tải kết quả. Vui lòng thử lại."
+						: "Không tìm thấy kết quả."}
+				</p>
+				{sessionError && (
+					<button
+						type="button"
+						onClick={() => refetch()}
+						className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 text-sm font-medium"
+					>
+						Thử lại
+					</button>
+				)}
 			</div>
 		);
 	}
