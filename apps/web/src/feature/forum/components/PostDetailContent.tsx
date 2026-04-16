@@ -69,6 +69,22 @@ function getReactionIcon(type?: ReactionType | null) {
 	return REACTIONS.find((reaction) => reaction.type === type)?.icon ?? "👍";
 }
 
+function getAttachmentDisplayName(url: string, originalName?: string | null) {
+	if (originalName && originalName.trim()) return originalName.trim();
+	const pathSegment = url.split("/").pop() ?? "tep-dinh-kem";
+	return decodeURIComponent(pathSegment.split("?")[0] ?? pathSegment);
+}
+
+function getAttachmentKindLabel(fileName: string) {
+	const extension = fileName.split(".").pop()?.toLowerCase() ?? "";
+	if (["xls", "xlsx", "csv"].includes(extension)) return "Tệp bảng tính";
+	if (["ppt", "pptx"].includes(extension)) return "Tệp trình chiếu";
+	if (["doc", "docx"].includes(extension)) return "Tệp tài liệu";
+	if (extension === "pdf") return "Tệp PDF";
+	if (extension === "txt") return "Tệp văn bản";
+	return "Tệp đính kèm";
+}
+
 function ReactionButton({
 	post,
 	onReact,
@@ -205,7 +221,7 @@ const PostDetailContent: React.FC = () => {
 
 	useEffect(() => {
 		setActiveImageUrl(imageAttachments[0]?.url ?? null);
-	}, [selectedPost?.id, imageAttachments]);
+	}, [selectedPost?.id]);
 
 	if (isPostLoading) {
 		return (
@@ -469,26 +485,34 @@ const PostDetailContent: React.FC = () => {
 								<p className="text-xs font-bold uppercase tracking-wider text-gray-400 mb-3">
 									Tài liệu đính kèm
 								</p>
-								{fileAttachments.map((file) => (
-									<a
-										key={file.id}
-										href={file.url}
-										target="_blank"
-										rel="noopener noreferrer"
-										className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group shadow-sm"
-									>
-										<div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
-											<Paperclip className="w-4 h-4 text-blue-600" />
-										</div>
-										<div className="flex-1 min-w-0">
-											<p className="text-sm font-medium text-gray-700 group-hover:text-blue-700 truncate transition-colors">
-												Tài liệu
-											</p>
-											<p className="text-xs text-gray-400">{file.type}</p>
-										</div>
-										<Download className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors shrink-0" />
-									</a>
-								))}
+								{fileAttachments.map((file) => {
+									const displayName = getAttachmentDisplayName(
+										file.url,
+										file.originalName,
+									);
+									const kindLabel = getAttachmentKindLabel(displayName);
+									return (
+										<a
+											key={file.id}
+											href={file.url}
+											target="_blank"
+											rel="noopener noreferrer"
+											download={file.originalName ?? undefined}
+											className="flex items-center gap-3 px-4 py-3 bg-white border border-gray-200 rounded-md hover:border-blue-300 hover:bg-blue-50/50 transition-all group shadow-sm"
+										>
+											<div className="w-9 h-9 bg-blue-100 rounded-xl flex items-center justify-center shrink-0">
+												<Paperclip className="w-4 h-4 text-blue-600" />
+											</div>
+											<div className="flex-1 min-w-0">
+												<p className="text-sm font-medium text-gray-700 group-hover:text-blue-700 truncate transition-colors">
+													{displayName}
+												</p>
+												<p className="text-xs text-gray-400">{kindLabel}</p>
+											</div>
+											<Download className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors shrink-0" />
+										</a>
+									);
+								})}
 							</div>
 						)}
 
