@@ -19,6 +19,7 @@ import {
 	transactionStatusOptions,
 	transactionTypeOptions,
 } from "../types/transaction.type";
+import { Field, FieldLabel } from "@/components/ui/field";
 
 const route = getRouteApi("/_authenticated/transactions/");
 
@@ -166,7 +167,7 @@ export function TransactionsPage() {
 				<div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
 					<div>
 						<h1 className="text-2xl font-bold tracking-tight">
-							Transaction Explorer
+							Tra cứu giao dịch
 						</h1>
 						<p className="text-muted-foreground mt-1 text-sm">
 							Tra cứu giao dịch toàn hệ thống theo người dùng, loại giao dịch,
@@ -217,88 +218,97 @@ export function TransactionsPage() {
 								}}
 							>
 								<RotateCcw className="size-4" />
-								Reset filters
+								Xóa bộ lọc
 							</Button>
 						</div>
 					</CardHeader>
-					<CardContent className="grid gap-3 lg:grid-cols-2 xl:grid-cols-5">
-						<UserLookupCombobox
-							value={selectedUser}
-							onChange={(user) => {
-								navigate({
-									search: (prev) => ({
-										...prev,
-										userId: user?.id,
-										page: undefined,
-									}),
-								});
-							}}
-						/>
-
-						<TransactionsMultiSelect
-							title="Loại giao dịch"
-							options={transactionTypeOptions}
-							selectedValues={search.type ?? []}
-							onChange={(values) => {
-								navigate({
-									search: (prev) => ({
-										...prev,
-										type: values.length ? values : undefined,
-										page: undefined,
-									}),
-								});
-							}}
-						/>
-
-						<TransactionsMultiSelect
-							title="Trạng thái"
-							options={transactionStatusOptions}
-							selectedValues={search.status ?? []}
-							onChange={(values) => {
-								navigate({
-									search: (prev) => ({
-										...prev,
-										status: values.length ? values : undefined,
-										page: undefined,
-									}),
-								});
-							}}
-						/>
-
-						<Input
-							value={codeInput}
-							onChange={(event) => setCodeInput(event.target.value)}
-							placeholder="Tìm theo mã giao dịch..."
-							className="h-9"
-						/>
-
-						<div className="grid gap-3 sm:grid-cols-2 xl:grid-cols-1 2xl:grid-cols-2">
-							<DatePicker
-								selected={fromDate}
-								onSelect={(date) => {
+					<CardContent className="space-y-3">
+						<div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
+							<UserLookupCombobox
+								value={selectedUser}
+								onChange={(user) => {
 									navigate({
 										search: (prev) => ({
 											...prev,
-											fromDate: formatSearchDate(date),
+											userId: user?.id,
 											page: undefined,
 										}),
 									});
 								}}
-								placeholder="Từ ngày"
 							/>
-							<DatePicker
-								selected={toDate}
-								onSelect={(date) => {
+
+							<TransactionsMultiSelect
+								title="Loại giao dịch"
+								options={transactionTypeOptions}
+								selectedValues={search.type ?? []}
+								onChange={(values) => {
 									navigate({
 										search: (prev) => ({
 											...prev,
-											toDate: formatSearchDate(date),
+											type: values.length ? values : undefined,
 											page: undefined,
 										}),
 									});
 								}}
-								placeholder="Đến ngày"
 							/>
+
+							<TransactionsMultiSelect
+								title="Trạng thái"
+								options={transactionStatusOptions}
+								selectedValues={search.status ?? []}
+								onChange={(values) => {
+									navigate({
+										search: (prev) => ({
+											...prev,
+											status: values.length ? values : undefined,
+											page: undefined,
+										}),
+									});
+								}}
+							/>
+
+							<Input
+								value={codeInput}
+								onChange={(event) => setCodeInput(event.target.value)}
+								placeholder="Tìm theo mã giao dịch..."
+								className="h-9"
+							/>
+						</div>
+
+						<div className="grid gap-3 sm:grid-cols-2 xl:max-w-[28rem]">
+							<Field className="flex flex-col gap-2">
+								<FieldLabel htmlFor="from-date">Từ ngày</FieldLabel>
+								<DatePicker
+									selected={fromDate}
+									onSelect={(date) => {
+										navigate({
+											search: (prev) => ({
+												...prev,
+												fromDate: formatSearchDate(date),
+												page: undefined,
+											}),
+										});
+									}}
+									placeholder="Chọn ngày bắt đầu"
+								/>
+							</Field>
+
+							<Field className="flex flex-col gap-2">
+								<FieldLabel htmlFor="to-date">Đến ngày</FieldLabel>
+								<DatePicker
+									selected={toDate}
+									onSelect={(date) => {
+										navigate({
+											search: (prev) => ({
+												...prev,
+												toDate: formatSearchDate(date),
+												page: undefined,
+											}),
+										});
+									}}
+									placeholder="Chọn ngày kết thúc"
+								/>
+							</Field>
 						</div>
 					</CardContent>
 				</Card>
