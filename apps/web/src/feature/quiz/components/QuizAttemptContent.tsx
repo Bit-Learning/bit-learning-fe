@@ -51,8 +51,23 @@ const QuizAttemptContent: React.FC = () => {
 	const timeRemaining = useSelector(selectTimeRemaining);
 	const stats = useSelector(selectQuestionStats);
 
-	const { data: attemptData, isLoading: attemptLoading } =
-		useQuizAttempt(numericAttemptId);
+	// Lấy deviceToken từ localStorage (đã lưu khi start/resume attempt)
+	const storedDeviceToken = React.useMemo(() => {
+		// Tìm token cho attempt này — cần examId nhưng chưa có, dùng attemptId-based key
+		// Hoặc thử tìm tất cả quiz_device_token_* keys
+		for (let i = 0; i < localStorage.length; i++) {
+			const key = localStorage.key(i);
+			if (key?.startsWith("quiz_device_token_")) {
+				return localStorage.getItem(key) ?? undefined;
+			}
+		}
+		return undefined;
+	}, []);
+
+	const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(
+		numericAttemptId,
+		{ deviceToken: storedDeviceToken },
+	);
 	const { data: examData, isLoading: examLoading } = useExam(
 		attemptData?.exam?.id || 0,
 		{

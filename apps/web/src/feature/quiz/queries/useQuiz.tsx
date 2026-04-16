@@ -46,11 +46,19 @@ export const quizKeys = {
 	},
 };
 
-export const useQuizAttempt = (attemptId: number, enabled = true) => {
+export const useQuizAttempt = (
+	attemptId: number,
+	options?: { enabled?: boolean; deviceToken?: string },
+) => {
+	const enabled = options?.enabled ?? true;
+	const deviceToken = options?.deviceToken;
 	return useQuery({
 		queryKey: quizKeys.attempts.detail(attemptId),
 		queryFn: async () => {
-			const response = await quizAttemptApi.getAttemptById(attemptId);
+			const response = await quizAttemptApi.getAttemptById(
+				attemptId,
+				deviceToken ?? undefined,
+			);
 			return response.data.data!;
 		},
 		enabled: !!attemptId && enabled,
@@ -246,7 +254,11 @@ export const useQuizSession = (
 		queryKey: quizKeys.sessions.detail(sessionId),
 		queryFn: async () => {
 			const response = await quizSessionApi.getSessionById(sessionId);
-			return response.data.data;
+			const data = response.data.data;
+			if (data === undefined) {
+				throw new Error("Session data not found");
+			}
+			return data ?? null;
 		},
 		enabled: !!sessionId && (options?.enabled ?? true),
 		staleTime: options?.staleTime ?? Infinity,
