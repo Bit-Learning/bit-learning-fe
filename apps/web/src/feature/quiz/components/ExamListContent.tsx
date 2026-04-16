@@ -3,7 +3,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { Search, Timer, HelpCircle } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
-import { useMyQuizAttempts } from "../queries/useQuiz";
 import { useAllExams } from "@/feature/exam/queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { Pagination } from "@/shared/components/Pagination";
@@ -41,32 +40,22 @@ const ExamListContent: React.FC = () => {
     page: currentPage,
     size: pageSize,
   });
-  const { data: attemptsData } = useMyQuizAttempts({ page: 0, size: 100 });
   const { data: subjects = [] } = useSubjectsList();
 
   const exams = examsData?.data || [];
   const pagination = examsData?.page;
-  const attempts = attemptsData || [];
 
-  const examsWithAttempt = exams
+  const filteredExams = exams
     .filter((exam) => exam.isPublished)
-    .map((exam) => {
-      const attempt = attempts.find((a) => a.exam.id === exam.id && a.status === "SUBMITTED");
-      return {
-        ...exam,
-        lastAttemptScore: attempt?.score,
-        isCompleted: !!attempt,
-      };
+    .filter((exam) => {
+      const matchSearch =
+        exam.name.toLowerCase().includes(search.toLowerCase()) ||
+        exam.code.toLowerCase().includes(search.toLowerCase());
+      const matchTab =
+        activeTab === "ALL" || (activeTab === "EXAM" ? !exam.type || exam.type === "EXAM" : exam.type === "PRACTICE");
+      const matchSubject = selectedSubject === "all" || exam.subject?.id === selectedSubject;
+      return matchSearch && matchTab && matchSubject;
     });
-
-  const filteredExams = examsWithAttempt.filter((exam) => {
-    const matchSearch =
-      exam.name.toLowerCase().includes(search.toLowerCase()) || exam.code.toLowerCase().includes(search.toLowerCase());
-    const matchTab =
-      activeTab === "ALL" || (activeTab === "EXAM" ? !exam.type || exam.type === "EXAM" : exam.type === "PRACTICE");
-    const matchSubject = selectedSubject === "all" || exam.subject?.id === selectedSubject;
-    return matchSearch && matchTab && matchSubject;
-  });
 
   const handleExamClick = (examId: number) => {
     navigate({ to: "/exams/$examId", params: { examId: String(examId) } });
@@ -217,13 +206,10 @@ const ExamListContent: React.FC = () => {
                         handleExamClick(exam.id);
                       }}
                       className={cn(
-                        "cursor-pointer px-5 border py-2 rounded-lg text-sm font-bold shadow transition-all active:scale-95",
-                        exam.isCompleted
-                          ? " border-blue-500 hover:bg-blue-100 text-blue-600 "
-                          : "bg-blue-500 hover:bg-blue-800 text-white ",
+                        "cursor-pointer px-5 border py-2 rounded-lg text-sm font-bold shadow transition-all active:scale-95 border-blue-500 hover:bg-blue-100 text-blue-600 ",
                       )}
                     >
-                      {exam.isCompleted ? "Xem kết quả" : "Làm bài"}
+                      Làm bài
                     </button>
                   </div>
                 </div>
