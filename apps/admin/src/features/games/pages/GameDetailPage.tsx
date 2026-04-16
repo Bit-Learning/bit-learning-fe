@@ -96,6 +96,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		baseScoreMax: 100,
 		difficultyMultiplier: 1.2,
 		passingThreshold: 60,
+		featuredViewWeight: 1,
+		featuredLikeWeight: 5,
+		featuredManualBoost: 0,
 	});
 
 	const game = useMemo(
@@ -112,6 +115,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 				baseScoreMax: 100,
 				difficultyMultiplier: 1.2,
 				passingThreshold: 60,
+				featuredViewWeight: 1,
+				featuredLikeWeight: 5,
+				featuredManualBoost: 0,
 			});
 			return;
 		}
@@ -124,6 +130,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 			baseScoreMax: game.scoringBaseScoreMax ?? 100,
 			difficultyMultiplier: game.scoringDifficultyMultiplier ?? 1.2,
 			passingThreshold: game.scoringPassingThreshold ?? 60,
+			featuredViewWeight: game.featuredViewWeight ?? 1,
+			featuredLikeWeight: game.featuredLikeWeight ?? 5,
+			featuredManualBoost: game.featuredManualBoost ?? 0,
 			categoryId: game.categoryId ?? undefined,
 			thumbnailUrl: game.thumbnailUrl ?? "",
 		});
@@ -393,6 +402,69 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 									/>
 								</div>
 							</div>
+
+							<div className="rounded-xl border bg-amber-50/40 p-4">
+								<div className="mb-4">
+									<h3 className="text-sm font-semibold text-slate-900">
+										Featured ranking
+									</h3>
+									<p className="mt-1 text-xs text-muted-foreground">
+										Trend score ở trang `/games` sẽ tính từ: `views x view
+										weight + likes x like weight + manual boost`.
+									</p>
+								</div>
+								<div className="grid gap-4 md:grid-cols-3">
+									<div className="space-y-2">
+										<Label htmlFor="featuredViewWeight">View weight</Label>
+										<Input
+											id="featuredViewWeight"
+											type="number"
+											min={0}
+											step="0.1"
+											value={form.featuredViewWeight ?? 1}
+											onChange={(e) =>
+												setForm((prev) => ({
+													...prev,
+													featuredViewWeight: Number(e.target.value || 1),
+												}))
+											}
+										/>
+									</div>
+
+									<div className="space-y-2">
+										<Label htmlFor="featuredLikeWeight">Like weight</Label>
+										<Input
+											id="featuredLikeWeight"
+											type="number"
+											min={0}
+											step="0.1"
+											value={form.featuredLikeWeight ?? 5}
+											onChange={(e) =>
+												setForm((prev) => ({
+													...prev,
+													featuredLikeWeight: Number(e.target.value || 5),
+												}))
+											}
+										/>
+									</div>
+
+									<div className="space-y-2">
+										<Label htmlFor="featuredManualBoost">Manual boost</Label>
+										<Input
+											id="featuredManualBoost"
+											type="number"
+											step="1"
+											value={form.featuredManualBoost ?? 0}
+											onChange={(e) =>
+												setForm((prev) => ({
+													...prev,
+													featuredManualBoost: Number(e.target.value || 0),
+												}))
+											}
+										/>
+									</div>
+								</div>
+							</div>
 						</CardContent>
 					</Card>
 
@@ -482,6 +554,10 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 										{form.file?.name ??
 											(isCreateMode ? "Chưa chọn" : "Đang giữ file hiện tại")}
 									</span>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-muted-foreground">Trend score</span>
+									<span className="font-medium">{game?.trendScore ?? 0}</span>
 								</div>
 							</div>
 

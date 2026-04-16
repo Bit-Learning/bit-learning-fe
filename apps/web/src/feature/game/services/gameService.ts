@@ -32,6 +32,21 @@ export interface GamePreview {
 	title: string;
 	description: string;
 	thumbnailUrl?: string;
+	likes?: number;
+	views?: number;
+	trendScore?: number;
+}
+
+export type FeaturedReason =
+	| "MANUAL_BOOST"
+	| "TOP_LIKED"
+	| "TOP_VIEWED"
+	| "TRENDING";
+
+export interface FeaturedGame extends GamePreview {
+	featuredReason?: FeaturedReason | null;
+	categoryName?: string | null;
+	categoryDescription?: string | null;
 }
 
 export interface GameCategoryWithGames {
@@ -212,6 +227,16 @@ const gameService = {
 	getCategoriesWithGames: async (): Promise<GameCategoryWithGames[]> => {
 		const response = await api.get<ApiResponse<GameCategoryWithGames[]>>(
 			"/games/game-categories",
+		);
+		return response.data.data ?? [];
+	},
+
+	getFeaturedGames: async (limit = 5): Promise<FeaturedGame[]> => {
+		const response = await api.get<ApiResponse<FeaturedGame[]>>(
+			"/games/featured",
+			{
+				params: { limit },
+			},
 		);
 		return response.data.data ?? [];
 	},
