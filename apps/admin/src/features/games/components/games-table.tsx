@@ -24,15 +24,30 @@ import { createGamesColumns, type GameRow } from "./games-columns";
 
 type GamesTableProps = {
 	data: GameRow[];
+	onDeleteStandard: (id: number) => void;
+	onDeleteMatching: (grade: number, topicCode: string) => void;
+	isDeletingStandard?: boolean;
+	isDeletingMatching?: boolean;
 };
 
-export function GamesTable({ data }: GamesTableProps) {
+export function GamesTable({
+	data,
+	onDeleteMatching,
+	onDeleteStandard,
+	isDeletingMatching = false,
+	isDeletingStandard = false,
+}: GamesTableProps) {
 	const [sorting, setSorting] = useState<SortingState>([]);
 
 	// eslint-disable-next-line react-hooks/incompatible-library
 	const table = useReactTable<GameRow>({
 		data,
-		columns: createGamesColumns(),
+		columns: createGamesColumns({
+			onDeleteMatching,
+			onDeleteStandard,
+			isDeletingMatching,
+			isDeletingStandard,
+		}),
 		state: {
 			sorting,
 		},
@@ -52,6 +67,14 @@ export function GamesTable({ data }: GamesTableProps) {
 				searchPlaceholder="Lọc game theo tiêu đề..."
 				searchKey="title"
 				filters={[
+					{
+						columnId: "rowType",
+						title: "Loại game",
+						options: [
+							{ label: "Game thường", value: "standard" },
+							{ label: "Nối khái niệm", value: "matching" },
+						],
+					},
 					{
 						columnId: "status",
 						title: "Trạng thái",

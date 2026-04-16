@@ -1,10 +1,28 @@
 import type React from "react";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import { ArrowLeft, ExternalLink, Eye, Heart, Loader2 } from "lucide-react";
+import {
+	ArrowLeft,
+	Archive,
+	ExternalLink,
+	Eye,
+	FileImage,
+	FileUp,
+	Gamepad2,
+	Heart,
+	Loader2,
+	Save,
+	Send,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Card,
+	CardContent,
+	CardDescription,
+	CardHeader,
+	CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import {
@@ -48,27 +66,45 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 	return fallback;
 };
 
-export const GameDetailPage: React.FC = () => {
-	const { id } = useParams({ strict: false });
-	const navigate = useNavigate();
-	const gameId = Number.parseInt(id || "0", 10);
+type StandardGameEditorPageProps = {
+	gameId?: number;
+};
 
-	const { data: games = [], isLoading } = useAdminGamesList();
+const getCategoryName = (
+	categoryId?: number | null,
+	cats?: GameCategoryOption[],
+) => {
+	if (!categoryId || !cats || cats.length === 0) return "Chưa phân loại";
+	return cats.find((c) => c.id === categoryId)?.name ?? "Chưa phân loại";
+};
+
+export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
+	gameId,
+}) => {
+	const navigate = useNavigate();
+	const isCreateMode = gameId === undefined;
+	const { data: games = [], isLoading: isLoadingGames } = useAdminGamesList();
 	const { data: categories = [] } = useGameCategories();
 	const upsertGame = useUpsertGame();
 	const deleteGame = useDeleteGame();
 	const approveGame = useApproveGame();
 	const rejectGame = useRejectGame();
-
 	const [form, setForm] = useState<UpsertGamePayload>({
 		title: "",
 		desc: "",
 		difficulty: "MEDIUM",
 	});
 
-	const game = games.find((item) => item.id === gameId);
+	const game = useMemo(
+		() => (isCreateMode ? undefined : games.find((item) => item.id === gameId)),
+		[gameId, games, isCreateMode],
+	);
 
 	useEffect(() => {
+		if (isCreateMode) {
+			setForm({ title: "", desc: "", difficulty: "MEDIUM" });
+			return;
+		}
 		if (!game) return;
 		setForm({
 			id: game.id,
@@ -78,15 +114,7 @@ export const GameDetailPage: React.FC = () => {
 			categoryId: game.categoryId ?? undefined,
 			thumbnailUrl: game.thumbnailUrl ?? "",
 		});
-	}, [game]);
-
-	const getCategoryName = (
-		categoryId?: number | null,
-		cats?: GameCategoryOption[],
-	) => {
-		if (!categoryId || !cats || cats.length === 0) return "-";
-		return cats.find((c) => c.id === categoryId)?.name ?? "-";
-	};
+	}, [game, isCreateMode]);
 
 	const onThumbnailChange = (file?: File | null) => {
 		setForm((prev) => ({ ...prev, thumbnail: file ?? undefined }));
@@ -96,17 +124,30 @@ export const GameDetailPage: React.FC = () => {
 		setForm((prev) => ({ ...prev, file: file ?? undefined }));
 	};
 
-	const playUrl = game?.minioObjectName
-		? `${MINIO_GAME_URL}/${game.minioObjectName}`
-		: undefined;
+	const playUrl =
+		game?.minioObjectName !== undefined
+			? `${MINIO_GAME_URL}/${game.minioObjectName}`
+			: undefined;
 
 	const handleSave = async () => {
-		if (!game) return;
 		try {
-			await upsertGame.mutateAsync({ ...form, id: game.id });
-			toast.success("Cập nhật game thành công");
+			const saved = await upsertGame.mutateAsync({
+				...form,
+				id: gameId,
+			});
+			toast.success(
+				isCreateMode ? "Tạo game thành công" : "Cập nhật game thành công",
+			);
+			if (isCreateMode) {
+				navigate({ to: "/apps/games/$id", params: { id: String(saved.id) } });
+			}
 		} catch (error: unknown) {
-			toast.error(getErrorMessage(error, "Không thể cập nhật game"));
+			toast.error(
+				getErrorMessage(
+					error,
+					isCreateMode ? "Không thể tạo game" : "Không thể cập nhật game",
+				),
+			);
 		}
 	};
 
@@ -141,7 +182,7 @@ export const GameDetailPage: React.FC = () => {
 		}
 	};
 
-	if (isLoading) {
+	if (!isCreateMode && isLoadingGames) {
 		return (
 			<div className="flex items-center gap-2 p-6 text-muted-foreground">
 				<Loader2 className="h-4 w-4 animate-spin" />
@@ -150,7 +191,7 @@ export const GameDetailPage: React.FC = () => {
 		);
 	}
 
-	if (!game) {
+	if (!isCreateMode && !game) {
 		return (
 			<div className="p-6">
 				<p className="text-destructive">Không tìm thấy game.</p>
@@ -167,206 +208,251 @@ export const GameDetailPage: React.FC = () => {
 						Quay lại danh sách
 					</Link>
 				</Button>
-				<div className="flex flex-wrap items-center justify-between gap-3">
-					<div>
-						<h2 className="text-2xl font-bold tracking-tight">{game.title}</h2>
-						<p className="text-sm text-muted-foreground">
-							ID #{game.id} · {getCategoryName(game.categoryId, categories)}
-						</p>
+				<div className="flex flex-wrap items-start justify-between gap-4">
+					<div className="space-y-2">
+						<div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-sm text-slate-600">
+							<Gamepad2 className="h-4 w-4" />
+							{isCreateMode ? "Tạo game thường" : "Biên tập game thường"}
+						</div>
+						<div>
+							<h2 className="text-3xl font-bold tracking-tight">
+								{isCreateMode ? "Tạo trò chơi mới" : game?.title}
+							</h2>
+							<p className="mt-1 text-sm text-muted-foreground">
+								{isCreateMode
+									? "Tạo game với file HTML hoặc ZIP, metadata và thumbnail trong cùng một màn hình."
+									: `ID #${game?.id} · ${getCategoryName(game?.categoryId, categories)}`}
+							</p>
+						</div>
 					</div>
+
 					<div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
-						<span className="inline-flex items-center gap-1">
-							<Eye className="h-4 w-4" />
-							{game.views ?? 0}
-						</span>
-						<span className="inline-flex items-center gap-1">
-							<Heart className="h-4 w-4" />
-							{game.likes ?? 0}
-						</span>
+						{!isCreateMode ? (
+							<>
+								<span className="inline-flex items-center gap-1">
+									<Eye className="h-4 w-4" />
+									{game?.views ?? 0}
+								</span>
+								<span className="inline-flex items-center gap-1">
+									<Heart className="h-4 w-4" />
+									{game?.likes ?? 0}
+								</span>
+							</>
+						) : null}
 					</div>
 				</div>
 			</div>
 
-			<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px]">
-				<Card>
-					<CardHeader>
-						<CardTitle>Thông tin game</CardTitle>
-					</CardHeader>
-					<CardContent className="space-y-4">
-						<div className="space-y-1">
-							<Label htmlFor="title">Tiêu đề</Label>
-							<Input
-								id="title"
-								value={form.title}
-								onChange={(e) =>
-									setForm((prev) => ({ ...prev, title: e.target.value }))
-								}
-							/>
-						</div>
-
-						<div className="space-y-1">
-							<Label htmlFor="desc">Mô tả</Label>
-							<Textarea
-								id="desc"
-								value={form.desc}
-								onChange={(e) =>
-									setForm((prev) => ({ ...prev, desc: e.target.value }))
-								}
-								className="min-h-32"
-							/>
-						</div>
-
-						<div className="grid gap-4 md:grid-cols-2">
-							<div className="space-y-1">
-								<Label>Độ khó</Label>
-								<Select
-									value={form.difficulty ?? "MEDIUM"}
-									onValueChange={(value) =>
-										setForm((prev) => ({ ...prev, difficulty: value }))
-									}
-								>
-									<SelectTrigger>
-										<SelectValue placeholder="Chọn độ khó" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="EASY">Dễ</SelectItem>
-										<SelectItem value="MEDIUM">Trung bình</SelectItem>
-										<SelectItem value="HARD">Khó</SelectItem>
-									</SelectContent>
-								</Select>
-							</div>
-
-							<div className="space-y-1">
-								<Label>Danh mục</Label>
-								<Select
-									value={
-										form.categoryId !== undefined
-											? String(form.categoryId)
-											: "__none__"
-									}
-									onValueChange={(value) =>
-										setForm((prev) => ({
-											...prev,
-											categoryId:
-												value === "__none__" ? undefined : Number(value),
-										}))
-									}
-								>
-									<SelectTrigger>
-										<SelectValue placeholder="Chọn danh mục" />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="__none__">Không chọn</SelectItem>
-										{categories.map((c) => (
-											<SelectItem key={c.id} value={String(c.id)}>
-												{c.name}
-											</SelectItem>
-										))}
-									</SelectContent>
-								</Select>
-							</div>
-						</div>
-
-						<div className="space-y-1">
-							<Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
-							<Input
-								id="thumbnailUrl"
-								value={form.thumbnailUrl ?? ""}
-								onChange={(e) =>
-									setForm((prev) => ({
-										...prev,
-										thumbnailUrl: e.target.value || undefined,
-									}))
-								}
-							/>
-						</div>
-
-						<div className="grid gap-4 md:grid-cols-2">
-							<div className="space-y-1">
-								<Label htmlFor="thumbnailFile">Upload thumbnail</Label>
-								<Input
-									id="thumbnailFile"
-									type="file"
-									accept="image/*"
-									onChange={(e) =>
-										onThumbnailChange(e.target.files?.[0] ?? null)
-									}
-								/>
-							</div>
-							<div className="space-y-1">
-								<Label htmlFor="file">Thay file game</Label>
-								<Input
-									id="file"
-									type="file"
-									accept=".zip,.html"
-									onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
-								/>
-							</div>
-						</div>
-					</CardContent>
-				</Card>
-
+			<div className="grid gap-6 xl:grid-cols-[minmax(0,1fr)_360px]">
 				<div className="space-y-6">
 					<Card>
-						<CardHeader>
-							<CardTitle>Thông tin nhanh</CardTitle>
+						<CardHeader className="border-b">
+							<CardTitle>Thông tin cơ bản</CardTitle>
+							<CardDescription>
+								Thiết lập tiêu đề, mô tả, độ khó và danh mục hiển thị của game.
+							</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-3 text-sm">
-							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground">Trạng thái</span>
-								<span className="font-medium">{game.status ?? "-"}</span>
+						<CardContent className="space-y-5 pt-6">
+							<div className="space-y-2">
+								<Label htmlFor="title">Tiêu đề</Label>
+								<Input
+									id="title"
+									value={form.title}
+									onChange={(e) =>
+										setForm((prev) => ({ ...prev, title: e.target.value }))
+									}
+								/>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground">Danh mục</span>
-								<span className="font-medium">
-									{getCategoryName(game.categoryId, categories)}
-								</span>
+
+							<div className="space-y-2">
+								<Label htmlFor="desc">Mô tả</Label>
+								<Textarea
+									id="desc"
+									value={form.desc}
+									onChange={(e) =>
+										setForm((prev) => ({ ...prev, desc: e.target.value }))
+									}
+									className="min-h-36"
+								/>
 							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground">Lượt xem</span>
-								<span className="font-medium">{game.views ?? 0}</span>
-							</div>
-							<div className="flex items-center justify-between">
-								<span className="text-muted-foreground">Lượt thích</span>
-								<span className="font-medium">{game.likes ?? 0}</span>
+
+							<div className="grid gap-4 md:grid-cols-2">
+								<div className="space-y-2">
+									<Label>Độ khó</Label>
+									<Select
+										value={form.difficulty ?? "MEDIUM"}
+										onValueChange={(value) =>
+											setForm((prev) => ({ ...prev, difficulty: value }))
+										}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Chọn độ khó" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="EASY">Dễ</SelectItem>
+											<SelectItem value="MEDIUM">Trung bình</SelectItem>
+											<SelectItem value="HARD">Khó</SelectItem>
+										</SelectContent>
+									</Select>
+								</div>
+
+								<div className="space-y-2">
+									<Label>Danh mục</Label>
+									<Select
+										value={
+											form.categoryId !== undefined
+												? String(form.categoryId)
+												: "__none__"
+										}
+										onValueChange={(value) =>
+											setForm((prev) => ({
+												...prev,
+												categoryId:
+													value === "__none__" ? undefined : Number(value),
+											}))
+										}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Chọn danh mục" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="__none__">Không chọn</SelectItem>
+											{categories.map((c) => (
+												<SelectItem key={c.id} value={String(c.id)}>
+													{c.name}
+												</SelectItem>
+											))}
+										</SelectContent>
+									</Select>
+								</div>
 							</div>
 						</CardContent>
 					</Card>
 
 					<Card>
-						<CardHeader>
-							<CardTitle>Thao tác</CardTitle>
+						<CardHeader className="border-b">
+							<CardTitle>Media và tệp game</CardTitle>
+							<CardDescription>
+								Quản lý thumbnail và file chơi của game trong cùng một khu vực.
+							</CardDescription>
 						</CardHeader>
-						<CardContent className="space-y-3">
+						<CardContent className="space-y-5 pt-6">
+							<div className="space-y-2">
+								<Label htmlFor="thumbnailUrl">Thumbnail URL</Label>
+								<Input
+									id="thumbnailUrl"
+									value={form.thumbnailUrl ?? ""}
+									onChange={(e) =>
+										setForm((prev) => ({
+											...prev,
+											thumbnailUrl: e.target.value || undefined,
+										}))
+									}
+								/>
+							</div>
+
+							<div className="grid gap-4 md:grid-cols-2">
+								<div className="rounded-xl border border-dashed p-4">
+									<div className="mb-3 flex items-center gap-2 text-sm font-medium">
+										<FileImage className="h-4 w-4 text-sky-600" />
+										Upload thumbnail
+									</div>
+									<Input
+										id="thumbnailFile"
+										type="file"
+										accept="image/*"
+										onChange={(e) =>
+											onThumbnailChange(e.target.files?.[0] ?? null)
+										}
+									/>
+								</div>
+								<div className="rounded-xl border border-dashed p-4">
+									<div className="mb-3 flex items-center gap-2 text-sm font-medium">
+										<FileUp className="h-4 w-4 text-emerald-600" />
+										{isCreateMode ? "Upload file game" : "Thay file game"}
+									</div>
+									<Input
+										id="file"
+										type="file"
+										accept=".zip,.html"
+										onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
+									/>
+									<p className="mt-2 text-xs text-muted-foreground">
+										Chấp nhận file `.zip` hoặc `.html`.
+									</p>
+								</div>
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+
+				<div className="space-y-6">
+					<Card className="xl:sticky xl:top-24">
+						<CardHeader className="border-b">
+							<CardTitle>{isCreateMode ? "Xuất bản" : "Điều khiển"}</CardTitle>
+							<CardDescription>
+								Thao tác lưu, duyệt, chuyển nháp và lưu trữ được gom vào một
+								panel rõ ràng.
+							</CardDescription>
+						</CardHeader>
+						<CardContent className="space-y-4 pt-6">
+							<div className="grid gap-3 rounded-xl border bg-muted/20 p-4 text-sm">
+								<div className="flex items-center justify-between">
+									<span className="text-muted-foreground">Trạng thái</span>
+									<span className="font-medium">
+										{isCreateMode ? "Bản nháp mới" : (game?.status ?? "-")}
+									</span>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-muted-foreground">Danh mục</span>
+									<span className="font-medium">
+										{getCategoryName(form.categoryId, categories)}
+									</span>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-muted-foreground">File game</span>
+									<span className="font-medium">
+										{form.file?.name ??
+											(isCreateMode ? "Chưa chọn" : "Đang giữ file hiện tại")}
+									</span>
+								</div>
+							</div>
+
 							<Button
 								className="w-full"
 								onClick={() => void handleSave()}
 								disabled={upsertGame.isPending}
 							>
-								{upsertGame.isPending ? "Đang lưu..." : "Lưu thay đổi"}
+								<Save className="mr-2 h-4 w-4" />
+								{upsertGame.isPending
+									? "Đang lưu..."
+									: isCreateMode
+										? "Tạo game"
+										: "Lưu thay đổi"}
 							</Button>
 
 							{playUrl ? (
 								<Button asChild className="w-full" variant="outline">
 									<a href={playUrl} target="_blank" rel="noreferrer">
 										<ExternalLink className="mr-2 h-4 w-4" />
-										Chơi ngay
+										Mở bản chơi
 									</a>
 								</Button>
 							) : null}
 
-							{game.status === "DRAFT" ? (
+							{!isCreateMode && game?.status === "DRAFT" ? (
 								<Button
 									className="w-full"
 									variant="outline"
 									onClick={() => void handleApprove()}
 									disabled={approveGame.isPending}
 								>
-									Duyệt
+									<Send className="mr-2 h-4 w-4" />
+									Duyệt và xuất bản
 								</Button>
 							) : null}
 
-							{game.status === "PUBLISHED" ? (
+							{!isCreateMode && game?.status === "PUBLISHED" ? (
 								<Button
 									className="w-full"
 									variant="outline"
@@ -377,18 +463,27 @@ export const GameDetailPage: React.FC = () => {
 								</Button>
 							) : null}
 
-							<Button
-								className="w-full"
-								variant="destructive"
-								onClick={() => void handleArchive()}
-								disabled={deleteGame.isPending || game.status === "ARCHIVED"}
-							>
-								Lưu trữ
-							</Button>
+							{!isCreateMode ? (
+								<Button
+									className="w-full"
+									variant="destructive"
+									onClick={() => void handleArchive()}
+									disabled={deleteGame.isPending || game?.status === "ARCHIVED"}
+								>
+									<Archive className="mr-2 h-4 w-4" />
+									Lưu trữ game
+								</Button>
+							) : null}
 						</CardContent>
 					</Card>
 				</div>
 			</div>
 		</div>
 	);
+};
+
+export const GameDetailPage: React.FC = () => {
+	const { id } = useParams({ strict: false });
+	const gameId = Number.parseInt(id || "0", 10);
+	return <StandardGameEditorPage gameId={gameId} />;
 };
