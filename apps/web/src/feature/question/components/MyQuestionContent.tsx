@@ -350,8 +350,7 @@ const MyQuestionsContent: React.FC = () => {
                         </div>
                       </label>
                     </th>
-                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">STT</th>
-                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-100">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-120">
                       NỘI DUNG CÂU HỎI
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-30">
@@ -372,7 +371,7 @@ const MyQuestionsContent: React.FC = () => {
                 <tbody className="bg-white">
                   {pagedQuestions.map((question: QuestionResponse, index: number) => (
                     <tr
-                      key={question.id}
+                      key={index}
                       className={cn(
                         "cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors",
                         selectedQuestions.includes(question.id) && "bg-blue-50",
@@ -404,9 +403,6 @@ const MyQuestionsContent: React.FC = () => {
                             </svg>
                           </div>
                         </label>
-                      </td>
-                      <td className="p-4">
-                        <span className="text-primary text-lg font-semibold">{index + 1 + page * PAGE_SIZE}</span>
                       </td>
                       <td className="p-4">
                         <div className="flex-1 min-w-0">

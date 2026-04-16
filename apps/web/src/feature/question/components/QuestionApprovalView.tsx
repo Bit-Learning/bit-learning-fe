@@ -141,9 +141,6 @@ export default function QuestionApprovalTableView() {
             <table className="w-full">
               <thead className="bg-slate-50 border-b border-slate-300">
                 <tr>
-                  <th className="px-6 py-4 text-left text-md font-semibold text-slate-800 uppercase tracking-wider w-24">
-                    ID
-                  </th>
                   <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-100">
                     NỘI DUNG CÂU HỎI
                   </th>
@@ -169,7 +166,6 @@ export default function QuestionApprovalTableView() {
                     onClick={() => setSelectedQuestion(question)}
                     className="hover:bg-slate-50 transition-colors cursor-pointer"
                   >
-                    <td className="px-6 py-4 text-md font-medium text-slate-900">{question.id}</td>
                     <td className="px-6 py-4">
                       <div className="min-w-0">
                         <p className="line-clamp-1 text-gray-900 text-md">{question.content}</p>

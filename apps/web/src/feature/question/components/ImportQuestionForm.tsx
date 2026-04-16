@@ -322,7 +322,7 @@ const ImportQuestionForm: React.FC = () => {
               <span className="text-muted-foreground">Đang xử lý file...</span>
               <span className="font-medium">{uploadProgress}%</span>
             </div>
-            <Progress value={uploadProgress} className="h-2" />
+            <Progress value={uploadProgress} className="h-2" fillClassName="bg-blue-500" />
           </div>
         )}
 
@@ -346,7 +346,7 @@ const ImportQuestionForm: React.FC = () => {
             {previewImport.isPending ? "Đang xử lý..." : "Xem trước"}
           </Button>
           {uploadedFile && !previewImport.isPending && (
-            <Button variant="outline" onClick={handleReset} className=" p-5 text-md">
+            <Button variant="outline" onClick={handleReset} className="p-5 text-md">
               Chọn file khác
             </Button>
           )}
@@ -389,7 +389,7 @@ const ImportQuestionForm: React.FC = () => {
               )}
             </div>
           </div>
-          <Button variant="outline" size="sm" onClick={handleReset}>
+          <Button variant="outline" size="lg" onClick={handleReset}>
             <ArrowLeft className="h-4 w-4 mr-2" />
             Chọn file khác
           </Button>
@@ -634,12 +634,12 @@ const ImportQuestionForm: React.FC = () => {
           <Button
             onClick={handleConfirmImport}
             isDisabled={confirmImport.isPending || getKeepCount() === 0 || getErrorKeepCount() > 0}
-            className="gap-2 flex-1"
+            className="gap-2 flex-1 text-md p-5"
           >
             <Upload className="h-4 w-4" />
             {confirmImport.isPending ? "Đang xác nhận..." : `Xác nhận import (${getKeepCount()} câu hỏi)`}
           </Button>
-          <Button variant="outline" onClick={handleReset}>
+          <Button variant="outline" className="p-5 text-md" onClick={handleReset}>
             Hủy
           </Button>
         </div>
@@ -699,10 +699,10 @@ const ImportQuestionForm: React.FC = () => {
               </p>
             )}
             <div className="flex gap-2">
-              <Button size="sm" onClick={() => navigate({ to: "/mentor/question/my" })}>
+              <Button className="p-5 text-md" onClick={() => navigate({ to: "/mentor/question/my" })}>
                 Xem danh sách câu hỏi
               </Button>
-              <Button size="sm" variant="outline" onClick={handleReset}>
+              <Button className="p-5 text-md" variant="outline" onClick={handleReset}>
                 Import thêm file
               </Button>
             </div>

@@ -10,7 +10,12 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { usePendingApproval, useApproveQuestions, useRejectQuestions } from "../queries/useQuestion";
+import {
+  usePendingApproval,
+  useApproveQuestions,
+  useRejectQuestions,
+  usePendingApprovalAll,
+} from "../queries/useQuestion";
 import { QuestionLevel, QuestionType, type QuestionResponse } from "../types/question.type";
 import { QuestionDetailDialog } from "../components/QuestionDetailDialog";
 import { RejectDialog } from "../components/RejectDialog";
@@ -42,6 +47,9 @@ export function QuestionApprovalList() {
     { page, size: PAGE_SIZE },
     { enabled: activeTab === "pending" },
   );
+
+  const { data: questionsAll } = usePendingApprovalAll();
+
   const approveQuestions = useApproveQuestions();
   const rejectQuestions = useRejectQuestions();
 
@@ -105,7 +113,7 @@ export function QuestionApprovalList() {
     if (selectedQuestions.length === questions.length) {
       setSelectedQuestions([]);
     } else {
-      setSelectedQuestions(questions.map((q) => q.id));
+      setSelectedQuestions(questionsAll?.data?.map((q) => q.id)!);
     }
   };
 
@@ -206,11 +214,9 @@ export function QuestionApprovalList() {
             <TabsTrigger value="pending" className="gap-2 px-6 py-3 text-base font-medium">
               <CheckCircle className="h-4 w-4" />
               Chờ phê duyệt
-              {questions.length > 0 && (
-                <Badge variant="secondary" className="ml-1">
-                  {questions.length}
-                </Badge>
-              )}
+              <Badge variant="secondary" className="ml-1">
+                {questionsAll?.page?.totalElements}
+              </Badge>
             </TabsTrigger>
 
             <TabsTrigger value="bank" className="gap-2 px-6 py-3 text-base font-medium">

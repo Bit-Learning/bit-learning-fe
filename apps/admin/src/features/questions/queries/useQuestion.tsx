@@ -96,8 +96,9 @@ export const useApproveQuestions = () => {
   return useMutation({
     mutationFn: (data: ApproveRejectDTO) => questionApi.approveQuestions(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.pendingApproval() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+      queryClient.invalidateQueries({
+        queryKey: questionKeys.all,
+      });
       toast.success({
         title: "Thành công",
         description: "Phê duyệt câu hỏi thành công",
