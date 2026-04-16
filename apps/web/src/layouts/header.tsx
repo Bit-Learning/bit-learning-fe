@@ -234,7 +234,7 @@ const Header: React.FC = () => {
                   onClick={() => setIsProfileOpen((prev) => !prev)}
                   className="flex items-center gap-3 px-4 py-2 cursor-pointer hover:bg-gray-100 dark:hover:bg-gray-800 rounded-xl transition-all duration-200"
                 >
-                  <div className="relative size-12 shrink-0 overflow-hidden rounded-full pointer-events-none">
+                  <div className="relative size-13 shrink-0 overflow-hidden rounded-full pointer-events-none">
                     {userInfo.avatar ? (
                       <img
                         src={userInfo.avatar}
@@ -252,10 +252,10 @@ const Header: React.FC = () => {
                       {mergeName(userInfo.firstName, userInfo.lastName)}
                     </span>
                     <div className="flex items-center justify-center gap-1">
-                      <span className="text-sm font-semibold text-amber-700 dark:text-gray-100 mt-1 ">
+                      <span className="text-[16px] font-semibold text-amber-700 dark:text-gray-100 mt-0.5">
                         {userInfo.wallet.balance.toLocaleString("vi-VN")}
                       </span>
-                      <BitCoinIcon size={20} />
+                      <BitCoinIcon size={19} />
                     </div>
                   </div>
                 </button>
