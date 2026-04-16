@@ -196,6 +196,17 @@ const PostDetailContent: React.FC = () => {
 		reactMutation.mutate({ id: selectedPost.id, reactionType });
 	};
 
+	const imageAttachments = (selectedPost?.attachments ?? []).filter(
+		(a) => a.type === "IMAGE",
+	);
+	const fileAttachments = (selectedPost?.attachments ?? []).filter(
+		(a) => a.type !== "IMAGE",
+	);
+
+	useEffect(() => {
+		setActiveImageUrl(imageAttachments[0]?.url ?? null);
+	}, [selectedPost?.id, imageAttachments]);
+
 	if (isPostLoading) {
 		return (
 			<div className="min-h-screen bg-white">
@@ -249,16 +260,6 @@ const PostDetailContent: React.FC = () => {
 			</div>
 		);
 	}
-	const imageAttachments = (selectedPost?.attachments ?? []).filter(
-		(a) => a.type === "IMAGE",
-	);
-	const fileAttachments = (selectedPost?.attachments ?? []).filter(
-		(a) => a.type !== "IMAGE",
-	);
-
-	useEffect(() => {
-		setActiveImageUrl(imageAttachments[0]?.url ?? null);
-	}, [selectedPost?.id, imageAttachments]);
 
 	if (!selectedPost) return null;
 
