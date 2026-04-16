@@ -10,7 +10,6 @@ import {
   selectAnswersMap,
   selectCurrentQuestionIndex,
   selectTimeRemaining,
-  selectQuestionStats,
   nextQuestionAction,
   previousQuestionAction,
   goToQuestionAction,
@@ -37,9 +36,20 @@ const QuizAttemptContent: React.FC = () => {
   const answersMap = useSelector(selectAnswersMap);
   const currentIndex = useSelector(selectCurrentQuestionIndex);
   const timeRemaining = useSelector(selectTimeRemaining);
-  const stats = useSelector(selectQuestionStats);
 
-  const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(numericAttemptId);
+  const storedDeviceToken = React.useMemo(() => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("quiz_device_token_")) {
+        return localStorage.getItem(key) ?? undefined;
+      }
+    }
+    return undefined;
+  }, []);
+
+  const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(numericAttemptId, {
+    deviceToken: storedDeviceToken,
+  });
   const { data: examData, isLoading: examLoading } = useExam(attemptData?.exam?.id || 0, {
     enabled: !!attemptData?.exam?.id,
   });
