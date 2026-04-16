@@ -20,7 +20,6 @@ interface LectureDetailLayoutProps {
 }
 
 const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lectureId }) => {
-  const [localCompletedLectures, setLocalCompletedLectures] = useState<number[]>([]);
   const [lectureProgress, setLectureProgress] = useState<Record<number, number>>({});
 
   const navigate = useNavigate();
@@ -43,10 +42,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
 
   const { completedIds: serverCompletedIds } = useMultipleLecturesCompleted(allLectureIds);
 
-  const completedLectures = useMemo(
-    () => [...new Set([...serverCompletedIds, ...localCompletedLectures])],
-    [serverCompletedIds, localCompletedLectures],
-  );
+  const completedLectures = serverCompletedIds;
 
   const currentLecture = useMemo(() => {
     if (!sections) return null;
@@ -80,11 +76,9 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
 
   const handleVideoComplete = useCallback(() => {
     const currentLectureId = lectureIdRef.current;
-    setLocalCompletedLectures((prev) => {
-      if (prev.includes(currentLectureId)) return prev;
-      return [...prev, currentLectureId];
+    queryClient.invalidateQueries({
+      queryKey: LEARNING_KEYS.isCompleted(currentLectureId),
     });
-    queryClient.setQueryData(LEARNING_KEYS.isCompleted(currentLectureId), true);
   }, [queryClient]);
 
   const handleProgressUpdate = useCallback((percent: number) => {

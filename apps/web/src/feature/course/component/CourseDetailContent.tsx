@@ -135,7 +135,11 @@ const CourseDetailContent: React.FC = () => {
                 onAddToCart={handleAddToCart}
                 onBuyNow={handleBuyNow}
                 onStartLearning={() => {
-                  const firstId = course.sections?.[0]?.lectures?.[0]?.id;
+                  const firstSection = course.sections?.find((s) => !s.isDeleted);
+
+                  const firstLecture = firstSection?.lectures?.find((l) => !l.isDeleted);
+
+                  const firstId = firstLecture?.id;
                   if (firstId)
                     navigate({
                       to: "/lectures/$id",

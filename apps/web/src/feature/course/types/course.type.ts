@@ -1,3 +1,6 @@
+import { LectureDetail } from "@/feature/lecture/types/lecture.type";
+import { SectionDetail } from "@/feature/lecture/types/section.type";
+
 export enum CourseLevel {
   BEGINNING = "BEGINNING",
   INTERMEDIATE = "INTERMEDIATE",
@@ -13,13 +16,6 @@ export enum CourseStatus {
 export enum Language {
   VIETNAMESE = "VIETNAMESE",
   ENGLISH = "ENGLISH",
-}
-
-export interface SectionDetail {
-  id: number;
-  title: string;
-  order: number;
-  lectures: any[];
 }
 
 export interface CoursePreview {
