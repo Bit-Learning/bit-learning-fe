@@ -1,18 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import {
-  CheckCircle2,
-  XCircle,
-  ArrowRight,
-  ArrowLeft,
-  Info,
-  Smile,
-  BookOpen,
-  Save,
-  Flag,
-  Clock,
-  Target,
-} from "lucide-react";
+import { CheckCircle2, XCircle, ArrowRight, ArrowLeft, Info, BookOpen, Save, Flag, Target } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { useDispatch, useSelector } from "react-redux";
 import {
@@ -159,6 +147,9 @@ const QuizSessionContent: React.FC = () => {
           selectedOptionIds: [],
           isMarked: markedQuestions.has(questionId),
           questionNo: questions.indexOf(question) + 1,
+          isCorrect: question.canonicalAnswer
+            ? question.canonicalAnswer.trim().toLowerCase() === text.trim().toLowerCase()
+            : false,
         }),
       );
 
@@ -210,6 +201,7 @@ const QuizSessionContent: React.FC = () => {
         answerText: "",
         isMarked: markedQuestions.has(currentQuestion.id),
         questionNo: currentIndex + 1,
+        isCorrect: getIsCorrect(currentQuestion.id, [optionId]),
       }),
     );
 
@@ -488,8 +480,7 @@ const QuizSessionContent: React.FC = () => {
                       isCorrectCurrent ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400",
                     )}
                   >
-                    <Smile className="w-8 h-8" />
-                    <span className="text-xl font-bold">{isCorrectCurrent ? "Chính xác! 🎉" : "Sai rồi!"}</span>
+                    <span className="text-xl font-bold">{isCorrectCurrent ? "Chính xác!" : "Sai rồi!"}</span>
                   </div>
 
                   {!isCorrectCurrent && correctOption && (
