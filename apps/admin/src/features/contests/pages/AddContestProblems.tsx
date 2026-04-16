@@ -24,7 +24,7 @@ const AddContestProblems: React.FC = () => {
     <CreateContestProblem
       contestId={contestId}
       onBack={handleBack}
-      onSuccess={() => navigate({ to: `/contests/${contestId}` })}
+      onSuccess={() => navigate({ to: `/contests/${contestId}/manage-problems` })}
     />
   );
 };
