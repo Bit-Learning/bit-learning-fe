@@ -225,7 +225,7 @@ const ExamDetailContent: React.FC = () => {
   }
 
   const isPractice = exam.type === "PRACTICE";
-  const accentColor = isPractice ? "text-orange-500" : "text-blue-600";
+  const accentColor = isPractice ? "text-blue-500" : "text-blue-600";
 
   return (
     <div className="min-h-screen bg-slate-50">
@@ -251,7 +251,7 @@ const ExamDetailContent: React.FC = () => {
             <span
               className={cn(
                 "px-3 py-1 text-xs font-bold rounded-full uppercase tracking-wider",
-                isPractice ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-700",
+                isPractice ? "bg-blue-100 text-blue-600" : "bg-blue-100 text-blue-700",
               )}
             >
               {isPractice ? "Luyện tập" : "Kỳ thi"}
@@ -272,7 +272,7 @@ const ExamDetailContent: React.FC = () => {
                   {
                     icon: <BookOpen className="w-5 h-5" />,
                     label: "Môn học",
-                    value: exam.subject?.name ?? "—",
+                    value: exam.subject?.name ?? "Tin học",
                   },
                   {
                     icon: <Tag className="w-5 h-5" />,
@@ -395,16 +395,16 @@ const ExamDetailContent: React.FC = () => {
                     return (
                       <div
                         key={`session-${session.id}`}
-                        className="p-5 rounded-xl bg-white border border-slate-200 border-l-4 border-l-orange-400 shadow-sm"
+                        className="p-5 rounded-xl bg-white border border-slate-200 border-l-4 border-l-blue-500 shadow-sm"
                       >
                         <div className="flex items-center justify-between gap-4 flex-wrap">
                           <div className="flex items-center gap-4">
-                            <div className="w-11 h-11 bg-orange-50 rounded-lg flex items-center justify-center font-black text-orange-500 border border-orange-200 shrink-0">
+                            <div className="w-11 h-11 bg-blue-50 rounded-lg flex items-center justify-center font-black text-blue-600 border border-blue-200 shrink-0">
                               L{index + 1}
                             </div>
                             <div>
                               <div className="flex items-center gap-2 mb-1 flex-wrap">
-                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-orange-100 text-orange-600">
+                                <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-blue-100 text-blue-600">
                                   Luyện tập
                                 </span>
                                 {isSubmitted ? (
@@ -538,7 +538,7 @@ const ExamDetailContent: React.FC = () => {
                       <button
                         onClick={handleStartPractice}
                         disabled={startSessionMutation.isPending}
-                        className="cursor-pointer w-full h-12 flex items-center justify-center gap-2 rounded-md font-bold text-white bg-orange-500 hover:bg-orange-600 active:scale-95 transition-all disabled:opacity-60"
+                        className="cursor-pointer w-full h-12 flex items-center justify-center gap-2 rounded-md font-bold text-white bg-blue-500 hover:bg-blue-600 active:scale-95 transition-all disabled:opacity-60"
                       >
                         {startSessionMutation.isPending ? (
                           <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />

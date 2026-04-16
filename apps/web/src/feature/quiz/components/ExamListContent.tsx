@@ -13,12 +13,7 @@ const TypeBadge = ({ type }: { type?: string }) => {
   if (!type) return null;
   const label = type === "EXAM" ? "Đề thi" : "Luyện tập";
   return (
-    <span
-      className={cn(
-        "px-2.5 py-0.5 rounded-full text-sm font-bold tracking-wide",
-        type === "EXAM" ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-600",
-      )}
-    >
+    <span className={cn("px-2.5 py-0.5 rounded-full text-sm font-bold tracking-wide bg-blue-100 text-blue-700")}>
       {label}
     </span>
   );
@@ -34,7 +29,7 @@ const ExamListContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");
   const [selectedSubject, setSelectedSubject] = useState<number | "all">("all");
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 10;
+  const pageSize = 9;
 
   const { data: examsData, isLoading } = useAllExams({
     page: currentPage,
@@ -156,7 +151,6 @@ const ExamListContent: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredExams.map((exam) => {
               const isPractice = exam.type === "PRACTICE";
-              const iconColor = isPractice ? "text-orange-500" : "text-blue-600";
 
               return (
                 <div
@@ -178,13 +172,13 @@ const ExamListContent: React.FC = () => {
 
                     <div className="space-y-2.5">
                       <div className="flex items-center gap-2.5 text-sm text-slate-600">
-                        <Timer className={cn("w-4 h-4 shrink-0", iconColor)} />
+                        <Timer className={cn("w-4 h-4 shrink-0 text-blue-600")} />
                         <span>
                           Thời gian: <span className="font-semibold text-slate-800">{exam.durationInMinutes} phút</span>
                         </span>
                       </div>
                       <div className="flex items-center gap-2.5 text-sm text-slate-600">
-                        <HelpCircle className={cn("w-4 h-4 shrink-0", iconColor)} />
+                        <HelpCircle className={cn("w-4 h-4 shrink-0 text-blue-600")} />
                         <span>
                           Số câu: <span className="font-semibold text-slate-800">{exam.totalQuestions} câu</span>
                         </span>

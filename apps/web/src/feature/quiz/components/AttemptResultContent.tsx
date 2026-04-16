@@ -93,72 +93,47 @@ const QuizAttemptResultContent: React.FC = () => {
       <main className="max-w-5xl mx-auto p-4 md:p-8">
         <Card
           className={cn(
-            "mb-6 border rounded-md shadow-md",
-            isPassed
-              ? "border-emerald-400 dark:border-emerald-800  dark:bg-emerald-900/20"
-              : "border-red-600 dark:border-amber-800  dark:bg-amber-900/20",
+            "mb-6 border rounded-md shadow-sm py-0",
+            isPassed ? "border-emerald-300 dark:border-emerald-800" : "border-red-300 dark:border-red-800",
           )}
         >
-          <CardContent className="px-8">
-            <div className="text-center mb-6">
-              <div
-                className={cn(
-                  "w-14 h-14 rounded-full flex items-center justify-center mx-auto mb-4 shadow-lg",
-                  isPassed ? "bg-emerald-500" : "bg-red-600",
-                )}
-              >
-                {isPassed ? <Trophy className="w-6 h-7 text-white" /> : <XCircle className="w-10 h-10 text-white" />}
-              </div>
-              <h1 className="text-2xl font-black mb-2 text-slate-900 dark:text-slate-100">
-                {isPassed ? "🎉 Chúc mừng! Bạn đã đạt" : "Chưa đạt yêu cầu"}
-              </h1>
+          <CardContent className="p-6 space-y-6">
+            <div className="text-center">
+              <h1 className="text-xl font-semibold">{isPassed ? "Kết quả: Đạt" : "Kết quả: Chưa đạt"}</h1>
             </div>
 
-            <div className="flex items-center justify-center mb-6">
-              <div className="text-center">
-                <div
-                  className={cn(
-                    "text-4xl font-black mb-2",
-                    isPassed ? "text-emerald-600 dark:text-emerald-400" : "text-amber-600 dark:text-amber-400",
-                  )}
-                >
-                  {score.toFixed(1)} / {totalScore} điểm
+            <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
+              <div className="md:col-span-2 border rounded-md p-4 text-center">
+                <div className="text-xl font-bold">
+                  {score.toFixed(1)} / {totalScore}
                 </div>
+                <div className="text-xs text-slate-500">điểm</div>
+              </div>
+
+              <div className="border rounded-md p-4 text-center">
+                <div className="font-bold">{totalQuestions}</div>
+                <div className="text-xs text-slate-500">Câu hỏi</div>
+              </div>
+
+              <div className="border rounded-md p-4 text-center">
+                <div className="font-bold text-emerald-600">{correctCount}</div>
+                <div className="text-xs text-slate-500">Đúng</div>
+              </div>
+
+              <div className="border rounded-md p-4 text-center">
+                <div className="font-bold text-red-600">{incorrectCount}</div>
+                <div className="text-xs text-slate-500">Sai</div>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-              <div className="bg-white dark:bg-slate-800 rounded-md p-4 text-center border border-slate-200 dark:border-slate-700">
-                <div className="text-2xl font-bold text-slate-900 dark:text-slate-100">{totalQuestions}</div>
-                <div className="text-xs text-slate-500 dark:text-slate-400">Tổng số câu</div>
-              </div>
-              <div className="bg-emerald-50 dark:bg-emerald-900/20 rounded-md p-4 text-center border border-emerald-200 dark:border-emerald-800">
-                <div className="text-2xl font-bold text-emerald-600 dark:text-emerald-400">{correctCount}</div>
-                <div className="text-xs text-emerald-700 dark:text-emerald-400">Trả lời đúng</div>
-              </div>
-              <div className="bg-red-50 dark:bg-red-900/20 rounded-md p-4 text-center border border-red-200 dark:border-red-800">
-                <div className="text-2xl font-bold text-red-600 dark:text-red-400">{incorrectCount}</div>
-                <div className="text-xs text-red-700 dark:text-red-400">Trả lời sai</div>
-              </div>
-              <div className="bg-amber-50 dark:bg-amber-900/20 rounded-md p-4 text-center border border-amber-200 dark:border-amber-800">
-                <div className="text-2xl font-bold text-amber-600 dark:text-amber-400">{unansweredCount}</div>
-                <div className="text-xs text-amber-700 dark:text-amber-400">Chưa trả lời</div>
-              </div>
-            </div>
-
-            <div className="flex flex-col sm:flex-row gap-3 mt-6">
-              <Button
-                size="lg"
-                className="flex-1 gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-                onClick={() => navigate({ to: "/exams" })}
-              >
-                <Home className="w-5 h-5" />
-                Về trang chủ
+            <div className="flex gap-3">
+              <Button className="flex-1 text-md p-5" onClick={() => navigate({ to: "/exams" })}>
+                Về danh sách
               </Button>
+
               <Button
                 variant="outline"
-                size="lg"
-                className="flex-1 gap-2 border-blue-200 dark:border-blue-800 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                className="flex-1 text-md p-5"
                 onClick={() =>
                   navigate({
                     to: "/exams/$examId",
@@ -166,14 +141,12 @@ const QuizAttemptResultContent: React.FC = () => {
                   })
                 }
               >
-                <RotateCcw className="w-5 h-5" />
                 Làm lại
               </Button>
             </div>
           </CardContent>
         </Card>
-
-        <Card className="shadow-md rounded-md border border-slate-200 dark:border-slate-700">
+        <Card className="shadow-md rounded-md border border-slate-200 dark:border-slate-700 py-0">
           <CardContent className="p-6">
             <h2 className="text-xl font-bold mb-4 text-slate-900 dark:text-slate-100">Chi tiết câu trả lời</h2>
 
