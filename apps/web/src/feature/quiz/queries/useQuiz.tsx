@@ -202,19 +202,26 @@ export const useSendHeartbeat = () => {
   });
 };
 
-export const useQuizSession = (sessionId: number, enabled = true) => {
-  return useQuery({
-    queryKey: quizKeys.sessions.detail(sessionId),
-    queryFn: async () => {
-      const response = await quizSessionApi.getSessionById(sessionId);
-      return response.data.data;
-    },
-    enabled: !!sessionId && enabled,
-    staleTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-  });
+export const useQuizSession = (
+	sessionId: number,
+	options?: {
+		enabled?: boolean;
+		staleTime?: number;
+		refetchOnMount?: boolean | "always";
+	},
+) => {
+	return useQuery({
+		queryKey: quizKeys.sessions.detail(sessionId),
+		queryFn: async () => {
+			const response = await quizSessionApi.getSessionById(sessionId);
+			return response.data.data;
+		},
+		enabled: !!sessionId && (options?.enabled ?? true),
+		staleTime: options?.staleTime ?? Infinity,
+		refetchOnMount: options?.refetchOnMount ?? false,
+		refetchOnWindowFocus: false,
+		refetchOnReconnect: false,
+	});
 };
 
 export const useMyQuizSessions = (params?: PaginationParams) => {
