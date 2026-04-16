@@ -1,10 +1,21 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-import { useContestDetail } from "../queries/useContest";
+import { useContestDetail, useEndContest } from "../queries/useContest";
 import { ContestStatus } from "../types/contest.type";
 import { ArrowLeft, Calendar, Edit2, Loader2, StopCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ContestOverview } from "../components/ContestOverview";
 import { ContestProblems } from "../components/ContestProblems";
 import { ContestParticipants } from "../components/ContestParticipants";
@@ -17,6 +28,7 @@ const ContestDetailPage: React.FC = () => {
   const navigate = useNavigate();
   const { data: contest, isLoading } = useContestDetail(id);
   const [activeTab, setActiveTab] = useState("overview");
+  const endContestMutation = useEndContest();
 
   const getStatusBadge = (status: ContestStatus) => {
     const config = {
@@ -61,6 +73,10 @@ const ContestDetailPage: React.FC = () => {
     const minutes = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
 
     return `${hours}h ${minutes}m`;
+  };
+
+  const handleEndContest = (contestId: string) => {
+    endContestMutation.mutate(contestId);
   };
 
   const handleBack = () => {
@@ -122,12 +138,35 @@ const ContestDetailPage: React.FC = () => {
         </div>
         <div className="flex gap-3">
           {contest?.status === ContestStatus.RUNNING && (
-            <Button variant="outline">
-              <StopCircle className="w-4 h-4 mr-2" />
-              Kết thúc sớm
-            </Button>
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" disabled={endContestMutation.isPending} className="p-5 text-md">
+                  <StopCircle className="w-4 h-4 mr-2" />
+                  Kết thúc cuộc thi
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Kết thúc cuộc thi?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Hành động này sẽ kết thúc cuộc thi ngay lập tức. Người tham gia sẽ không thể tiếp tục làm bài.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleEndContest(contest.contestId)}
+                    disabled={endContestMutation.isPending}
+                  >
+                    Xác nhận
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
-          <Button onClick={handleEditContest}>
+          <Button onClick={handleEditContest} className="p-5 text-md">
             <Edit2 className="w-4 h-4 mr-2" />
             Chỉnh sửa
           </Button>

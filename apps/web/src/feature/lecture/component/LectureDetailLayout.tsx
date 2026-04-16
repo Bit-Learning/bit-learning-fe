@@ -216,7 +216,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
               </div>
             ) : currentLecture?.type === LectureType.VIDEO ? (
               <div>
-                <div className="w-full bg-black" style={{ aspectRatio: "16/9" }}>
+                <div className="w-full bg-black h-150">
                   <VideoPlayerWithNotes
                     lectureId={lectureId}
                     onComplete={handleVideoComplete}

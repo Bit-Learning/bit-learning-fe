@@ -1,4 +1,4 @@
-import { Award, CheckCircle } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import type React from "react";
 import { useEffect, useRef, useState } from "react";
 import CourseCurriculum from "./CourseCurriculum";
@@ -25,13 +25,6 @@ const SECTIONS = [
   { key: "curriculum", label: "Giáo trình" },
   { key: "reviews", label: "Đánh giá" },
   { key: "certificate", label: "Chứng chỉ" },
-];
-
-const BENEFITS = [
-  { icon: "🏆", text: "Nhận chứng chỉ khi hoàn thành khóa học" },
-  { icon: "🥇", text: "Tham gia cuộc thi lập trình định kỳ" },
-  { icon: "</>", text: "Truy cập linh hoạt, mọi lúc mọi nơi" },
-  { icon: "🎁", text: "Nhận nhiều phần quà hấp dẫn" },
 ];
 
 const SectionCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
@@ -107,25 +100,8 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({ course, hasAccess }) => 
         >
           <SectionCard>
             <div className="space-y-6">
-              <div>
-                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-5">Quyền lợi của học viên</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-4 gap-3">
-                  {BENEFITS.map((item, i) => (
-                    <div
-                      key={i}
-                      className="flex items-center gap-2 rounded-xl border border-gray-100 dark:border-slate-700 bg-slate-50 dark:bg-slate-800 px-4 py-3"
-                    >
-                      <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-blue-100 dark:bg-blue-950 text-lg">
-                        {item.icon}
-                      </div>
-                      <p className="text-sm text-gray-700 dark:text-slate-200 leading-snug">{item.text}</p>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="border-t border-gray-100 dark:border-slate-800 pt-6">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-3">Mô tả khóa học</h3>
+              <div className="">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Mô tả khóa học</h2>
                 <div
                   className="text-gray-600 dark:text-slate-300 text-sm leading-relaxed"
                   dangerouslySetInnerHTML={{ __html: course.description.replace(/\n/g, "<br/>") }}
@@ -201,22 +177,6 @@ export const CourseTabs: React.FC<CourseTabsProps> = ({ course, hasAccess }) => 
         >
           <SectionCard>
             <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-5">Chứng chỉ</h2>
-
-            <div className="flex flex-col md:flex-row items-center gap-6 rounded-xl border border-gray-200 dark:border-slate-700 bg-gray-50 dark:bg-slate-800 px-6 py-4 mb-5">
-              <div className="flex-1">
-                <h3 className="text-base font-bold text-gray-900 dark:text-white mb-1.5">
-                  Chứng nhận hoàn thành khóa học
-                </h3>
-                <p className="text-sm text-gray-600 dark:text-slate-300 leading-relaxed">
-                  Bạn sẽ nhận được giấy chứng nhận hoàn thành khóa học sau khi hoàn thành nội dung khóa học.
-                </p>
-              </div>
-              <img
-                src="https://cdn-icons-png.flaticon.com/512/3769/3769051.png"
-                alt="Certificate"
-                className="w-28 h-28 object-contain opacity-90"
-              />
-            </div>
 
             {hasAccess ? (
               <CourseCertificate

@@ -198,7 +198,7 @@ export function ToolsMetricsPage() {
 	return (
 		<>
 			<Header />
-			<div className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<AdvancedMetricsLinksPanel links={advancedMetricsLinks} />
 			</div>
 		</>

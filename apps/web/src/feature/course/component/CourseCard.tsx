@@ -8,6 +8,7 @@ import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { CoursePreview } from "../types/course.type";
+import { useCourseAccess, useEnrollCourse } from "../queries/useEnroll";
 
 const LEVEL_CONFIG: Record<string, { label: string; badgeClass: string }> = {
   BEGINNING: { label: "Cơ bản", badgeClass: "bg-emerald-500" },
@@ -31,10 +32,18 @@ const CoursePopup: React.FC<{
   onMouseEnter: () => void;
   onMouseLeave: () => void;
 }> = ({ courseId, position, cartPending, onAddToCart, onBuyNow, onMouseEnter, onMouseLeave }) => {
+  const navigate = useNavigate();
   const { data: course, isLoading } = useCourseDetail(courseId);
   const level = course?.level ? LEVEL_CONFIG[course.level] : null;
   const totalHours = course?.totalDuration ? Math.round(course.totalDuration / 3600) : null;
+  const { data: enrollAccess } = useCourseAccess(course?.id || 0);
+  const hasAccess = enrollAccess;
+  const { mutate: enroll, isPending: enrollPending } = useEnrollCourse();
 
+  const isPending = cartPending || enrollPending;
+  const handleEnroll = () => {
+    if (course?.id) enroll(course.id);
+  };
   const style: React.CSSProperties = {
     position: "fixed",
     top: position.top,
@@ -120,40 +129,54 @@ const CoursePopup: React.FC<{
               </ul>
             )}
 
-            {course.price === 0 ? (
-              <button
-                disabled={cartPending}
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onAddToCart();
-                }}
-                className="w-full py-3 rounded-xl bg-emerald-500 text-white text-sm font-semibold hover:bg-emerald-600 disabled:opacity-60 transition-colors"
-              >
-                {cartPending ? "Đang xử lý..." : "Đăng ký miễn phí"}
-              </button>
-            ) : (
-              <div className="flex gap-2">
+            <div className="space-y-2">
+              {hasAccess ? (
+                <>
+                  <button
+                    onClick={() => {
+                      const firstId = course.sections?.[0]?.lectures?.[0]?.id;
+                      if (firstId)
+                        navigate({
+                          to: "/lectures/$id",
+                          params: { id: String(firstId) },
+                        });
+                    }}
+                    className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                  >
+                    <Play className="h-4 w-4" />
+                    Vào học ngay
+                  </button>
+                </>
+              ) : course.price === 0 ? (
                 <button
-                  disabled={cartPending}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onAddToCart();
-                  }}
-                  className="flex-1 py-3 rounded-xl bg-slate-900 dark:bg-white text-white dark:text-slate-900 text-sm font-semibold hover:bg-slate-700 dark:hover:bg-slate-100 disabled:opacity-60 transition-colors"
+                  onClick={handleEnroll}
+                  disabled={isPending}
+                  className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
                 >
-                  {cartPending ? "..." : "Thêm vào giỏ"}
+                  {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                  {isPending ? "Đang xử lý..." : "Đăng ký miễn phí"}
                 </button>
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onBuyNow();
-                  }}
-                  className="flex-1 py-3 rounded-xl bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
-                >
-                  Mua ngay
-                </button>
-              </div>
-            )}
+              ) : (
+                <>
+                  <button
+                    onClick={onBuyNow}
+                    disabled={isPending}
+                    className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+                    {isPending ? "Đang xử lý..." : "Mua ngay"}
+                  </button>
+
+                  <button
+                    onClick={onAddToCart}
+                    disabled={isPending}
+                    className="cursor-pointer flex w-full items-center justify-center rounded-xl border border-slate-400 bg-white py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+                  >
+                    Thêm vào giỏ hàng
+                  </button>
+                </>
+              )}
+            </div>
           </>
         )}
       </div>

@@ -21,7 +21,6 @@ import {
 	useForumPostById,
 	useForumComments,
 	useCreateForumComment,
-	useDeleteForumComment,
 	useReplyForumComment,
 	useReactToForumPost,
 	useLikeForumComment,
@@ -37,6 +36,7 @@ import { Separator } from "@workspace/ui/components/Separator";
 import { ShareBar } from "./ShareBar";
 import type { Post, ReactionSummary, ReactionType } from "../types/forum.type";
 import { toast } from "@/shared/components/Sonner";
+import { resolveAuthorUsername } from "../utils/author-profile";
 
 const REACTIONS: { type: ReactionType; label: string; icon: string }[] = [
 	{ type: "LIKE", label: "Like", icon: "👍" },
@@ -100,10 +100,7 @@ function ReactionButton({
 						{topReactionIcons.length > 0 && (
 							<span className="flex -space-x-1">
 								{topReactionIcons.map((icon) => (
-									<span
-										key={icon}
-										className="rounded-full border border-white bg-white text-xs"
-									>
+									<span key={icon} className="rounded-full text-2xl">
 										{icon}
 									</span>
 								))}
@@ -157,7 +154,6 @@ const PostDetailContent: React.FC = () => {
 		.slice(0, 5);
 
 	const createCommentMutation = useCreateForumComment();
-	const deleteCommentMutation = useDeleteForumComment();
 	const replyCommentMutation = useReplyForumComment();
 	const reactMutation = useReactToForumPost();
 	const likeCommentMutation = useLikeForumComment();
@@ -255,6 +251,15 @@ const PostDetailContent: React.FC = () => {
 
 	if (!selectedPost) return null;
 
+	const authorFullName =
+		`${selectedPost.author.firstName} ${selectedPost.author.lastName}`.trim();
+	const handleViewAuthorProfile = async () => {
+		const username = await resolveAuthorUsername(selectedPost.author);
+		navigate({
+			to: "/profile/$username",
+			params: { username },
+		});
+	};
 	const imageAttachments = selectedPost.attachments.filter(
 		(a) => a.type === "IMAGE",
 	);
@@ -313,12 +318,21 @@ const PostDetailContent: React.FC = () => {
 					<div className="flex-1 min-w-0 bg-white rounded-md shadow-sm border border-gray-200 p-8">
 						<div className="pb-5 flex items-start justify-between">
 							<div className="flex items-center gap-3.5">
-								<AuthorAvatar author={selectedPost.author} size="lg" />
+								<button
+									type="button"
+									onClick={handleViewAuthorProfile}
+									className="shrink-0 cursor-pointer"
+								>
+									<AuthorAvatar author={selectedPost.author} size="lg" />
+								</button>
 								<div>
-									<p className="text-md font-bold text-gray-900 leading-none">
-										{selectedPost.author.firstName}{" "}
-										{selectedPost.author.lastName}
-									</p>
+									<button
+										type="button"
+										onClick={handleViewAuthorProfile}
+										className="cursor-pointer text-md font-bold leading-none text-gray-900 transition-colors hover:text-gray-700"
+									>
+										{authorFullName}
+									</button>
 									<div className="flex items-center gap-1.5 mt-1">
 										<Calendar className="w-4 h-4 text-gray-400" />
 										<span className="text-sm text-gray-400">
@@ -558,12 +572,6 @@ const PostDetailContent: React.FC = () => {
 											replyingTo={replyingTo}
 											setReplyingTo={setReplyingTo}
 											onReply={(id) => setReplyingTo(id)}
-											onEdit={() =>
-												toast.info({
-													title: "Chỉnh sửa bình luận chưa được hỗ trợ.",
-												})
-											}
-											onDelete={(id) => deleteCommentMutation.mutate(id)}
 											onLike={(id) => likeCommentMutation.mutate(id)}
 											onSubmitReply={(content, id) =>
 												replyCommentMutation.mutate({ id, content })

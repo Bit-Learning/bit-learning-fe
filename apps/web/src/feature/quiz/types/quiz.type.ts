@@ -103,6 +103,7 @@ export interface QuizSessionAnswerResponse {
   selectedOptionIds?: number[];
   isMarked: boolean;
   questionNo: number;
+  isCorrect: boolean;
 }
 
 export interface QuizSessionResponse {

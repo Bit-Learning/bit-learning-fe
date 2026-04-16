@@ -50,17 +50,14 @@ export function Users() {
 		<UsersProvider>
 			<Header />
 
-			<div className="flex flex-1 flex-col gap-4 sm:gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<div className="flex flex-wrap items-end justify-between gap-2">
 					<div>
-						<h2 className="text-2xl font-bold tracking-tight">
+						<h2 className="text-xl font-bold tracking-tight">
 							Quản lí người dùng
 						</h2>
-						<p className="text-muted-foreground text-sm">
-							Quản lí tất cả người dùng trong hệ thống
-						</p>
 					</div>
-					<UsersPrimaryButtons />
+					{/* <UsersPrimaryButtons /> */}
 				</div>
 
 				<div className="space-y-4">
@@ -123,11 +120,11 @@ export function Users() {
 												</p>
 											</div>
 
-											<div
+											{/* <div
 												className={`flex h-9 w-9 shrink-0 items-center justify-center rounded-lg ${stat.bgColor}`}
 											>
 												<Icon className={`h-4 w-4 ${stat.iconColor}`} />
-											</div>
+											</div> */}
 										</div>
 
 										<div className="mt-3">

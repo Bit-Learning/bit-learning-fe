@@ -102,7 +102,7 @@ const ContestListPage: React.FC = () => {
 		<>
 			<Header />
 
-			<div className="flex flex-1 flex-col gap-6 p-8">
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<div className="flex justify-between items-center mb-8">
 					<div>
 						<h2 className="text-2xl font-bold">Quản lý cuộc thi</h2>

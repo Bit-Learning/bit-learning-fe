@@ -1,6 +1,5 @@
 import PageMeta from "@/shared/components/seo/page-meta";
-import SignInForm from "../component/SigninForm";
-import AuthLayout from "../layout/AuthLayout";
+import UnifiedLoginPage from "./UnifiedLogin";
 
 const SignInPage: React.FC = () => {
 	return (
@@ -9,9 +8,7 @@ const SignInPage: React.FC = () => {
 				title="Đăng Nhập - Bit Learning"
 				description="Đăng nhập vào tài khoản Bit Learning để truy cập các khóa học và dịch vụ công nghệ"
 			/>
-			<AuthLayout>
-				<SignInForm />
-			</AuthLayout>
+			<UnifiedLoginPage defaultRole="STUDENT" />
 		</>
 	);
 };

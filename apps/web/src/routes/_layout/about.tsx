@@ -20,6 +20,7 @@ import PageMeta from "@/shared/components/seo/page-meta";
 import { createOrganizationJsonLd } from "@/shared/components/seo/site-meta";
 import NumberTicker from "@workspace/ui/components/custom/ticker";
 import BlueButton from "@/shared/components/button/BlueButton";
+import { usePublicStudentCount } from "@/feature/app/queries/usePublicStats";
 
 export const Route = createFileRoute("/_layout/about")({
 	component: AboutUsPage,
@@ -99,6 +100,7 @@ const impactPoints = [
 
 function AboutUsPage() {
 	const navigate = useNavigate();
+	const { data: studentCount = 0 } = usePublicStudentCount();
 
 	return (
 		<main>
@@ -158,7 +160,7 @@ function AboutUsPage() {
 								</div>
 								<div>
 									<NumberTicker
-										value={10000}
+										value={studentCount}
 										duration={2500}
 										className="text-4xl font-bold"
 										prefix="+"

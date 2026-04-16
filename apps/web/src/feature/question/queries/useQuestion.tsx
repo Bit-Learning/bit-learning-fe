@@ -31,7 +31,16 @@ export const useSearchQuestions = (params?: QuestionSearchParams, options?: { en
     staleTime: 5 * 60 * 1000,
   });
 };
-
+export const useSearchQuestionsAll = () => {
+  return useQuery({
+    queryKey: questionKeys.lists(),
+    queryFn: async () => {
+      const response = await questionApi.searchQuestions({ size: 99999 });
+      return response.data.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
 export const useQuestion = (id: number, options?: { enabled?: boolean }) => {
   return useQuery({
     queryKey: questionKeys.detail(id),

@@ -1,7 +1,12 @@
 import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import { endpoints } from "@/shared/constants/endpoints";
-import type { MentorApprovalStatus, PagedUsers } from "../data/schema";
+import type {
+	AccountStatus,
+	MentorApprovalStatus,
+	PagedUsers,
+	User,
+} from "../data/schema";
 
 interface GetPagedUsersParams {
 	page?: number;
@@ -20,6 +25,28 @@ export function GetPagedUsers(
 	sort.forEach((s) => void queryParams.append("sort", s));
 
 	return api.get(`${endpoints.ACCOUNT}/paged?${queryParams.toString()}`);
+}
+
+export function getUserProfileById(
+	userId: number,
+): Promise<AxiosResponse<{ data: User }>> {
+	return api.get(`${endpoints.ACCOUNT}/profile/view`, {
+		params: { userId },
+	});
+}
+
+interface UpdateUserAccountStatusParams {
+	userId: number;
+	status: AccountStatus;
+	reason?: string;
+	appealUrl?: string;
+}
+
+export function updateUserAccountStatus(
+	params: UpdateUserAccountStatusParams,
+): Promise<AxiosResponse<{ data: User }>> {
+	const { userId, ...data } = params;
+	return api.patch(`${endpoints.ACCOUNT}/admin/${userId}/account-status`, data);
 }
 
 interface UpdateMentorStatusParams {

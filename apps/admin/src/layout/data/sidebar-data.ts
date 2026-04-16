@@ -14,6 +14,7 @@ import {
 	Shield,
 	ToolboxIcon,
 	Tag,
+	CreditCard,
 } from "lucide-react";
 import type { NavGroup } from "../types";
 
@@ -22,6 +23,7 @@ const ADMIN_ONLY_URLS = [
 	"/tools-metrics",
 	"/system-prompt",
 	"/users",
+	"/transactions",
 ];
 
 export const navGroups: NavGroup[] = [
@@ -31,6 +33,7 @@ export const navGroups: NavGroup[] = [
 			{ title: "Bảng thống kê", url: "/", icon: LayoutDashboard },
 			{ title: "Tình trạng hệ thống", url: "/metrics", icon: Shield },
 			{ title: "Quản lý người dùng", url: "/users", icon: Users },
+			{ title: "Tra cứu giao dịch", url: "/transactions", icon: CreditCard },
 			{ title: "Quản lý khóa học", url: "/courses", icon: Book },
 			{ title: "Quản lý chương trình", url: "/curriculum", icon: School },
 			{ title: "Quản lý bài viết", url: "/posts", icon: MessageSquareText },

@@ -1,10 +1,8 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Timer, HelpCircle, Trophy, BookOpen as BookOpenIcon } from "lucide-react";
+import { Search, Timer, HelpCircle } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
-import { useMyQuizAttempts } from "../queries/useQuiz";
-import type { ExamBriefResponse } from "../../exam/types/exam.type";
 import { useAllExams } from "@/feature/exam/queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { Pagination } from "@/shared/components/Pagination";
@@ -15,12 +13,7 @@ const TypeBadge = ({ type }: { type?: string }) => {
   if (!type) return null;
   const label = type === "EXAM" ? "Đề thi" : "Luyện tập";
   return (
-    <span
-      className={cn(
-        "px-2.5 py-0.5 rounded-full text-sm font-bold tracking-wide",
-        type === "EXAM" ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-600",
-      )}
-    >
+    <span className={cn("px-2.5 py-0.5 rounded-full text-sm font-bold tracking-wide bg-blue-100 text-blue-700")}>
       {label}
     </span>
   );
@@ -36,38 +29,28 @@ const ExamListContent: React.FC = () => {
   const [activeTab, setActiveTab] = useState<TabType>("ALL");
   const [selectedSubject, setSelectedSubject] = useState<number | "all">("all");
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 10;
+  const pageSize = 9;
 
   const { data: examsData, isLoading } = useAllExams({
     page: currentPage,
     size: pageSize,
   });
-  const { data: attemptsData } = useMyQuizAttempts({ page: 0, size: 100 });
   const { data: subjects = [] } = useSubjectsList();
 
   const exams = examsData?.data || [];
   const pagination = examsData?.page;
-  const attempts = attemptsData || [];
 
-  const examsWithAttempt = exams
+  const filteredExams = exams
     .filter((exam) => exam.isPublished)
-    .map((exam) => {
-      const attempt = attempts.find((a) => a.exam.id === exam.id && a.status === "SUBMITTED");
-      return {
-        ...exam,
-        lastAttemptScore: attempt?.score,
-        isCompleted: !!attempt,
-      };
+    .filter((exam) => {
+      const matchSearch =
+        exam.name.toLowerCase().includes(search.toLowerCase()) ||
+        exam.code.toLowerCase().includes(search.toLowerCase());
+      const matchTab =
+        activeTab === "ALL" || (activeTab === "EXAM" ? !exam.type || exam.type === "EXAM" : exam.type === "PRACTICE");
+      const matchSubject = selectedSubject === "all" || exam.subject?.id === selectedSubject;
+      return matchSearch && matchTab && matchSubject;
     });
-
-  const filteredExams = examsWithAttempt.filter((exam) => {
-    const matchSearch =
-      exam.name.toLowerCase().includes(search.toLowerCase()) || exam.code.toLowerCase().includes(search.toLowerCase());
-    const matchTab =
-      activeTab === "ALL" || (activeTab === "EXAM" ? !exam.type || exam.type === "EXAM" : exam.type === "PRACTICE");
-    const matchSubject = selectedSubject === "all" || exam.subject?.id === selectedSubject;
-    return matchSearch && matchTab && matchSubject;
-  });
 
   const handleExamClick = (examId: number) => {
     navigate({ to: "/exams/$examId", params: { examId: String(examId) } });
@@ -75,14 +58,16 @@ const ExamListContent: React.FC = () => {
 
   const tabs = [
     { key: "ALL" as TabType, label: "Tất cả" },
-    { key: "EXAM" as TabType, label: "Kỳ thi" },
+    { key: "EXAM" as TabType, label: "Đề thi" },
     { key: "PRACTICE" as TabType, label: "Luyện tập" },
   ];
 
   return (
     <div className="min-h-screen bg-slate-50">
-      <div className="relative overflow-hidden h-60 md:h-72 flex items-end -mx-5">
-        <img src="exam.png" alt="hero" className="absolute inset-0 w-full h-full object-cover" />
+      <div className="overflow-x-hidden">
+        <div className="relative overflow-hidden h-60 md:h-72 flex items-end -mx-5">
+          <img src="exam.png" alt="hero" className="absolute inset-0 w-full h-full object-cover" />
+        </div>
       </div>
       <div className="bg-white border-b border-gray-200 shadow-sm mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
@@ -166,7 +151,6 @@ const ExamListContent: React.FC = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredExams.map((exam) => {
               const isPractice = exam.type === "PRACTICE";
-              const iconColor = isPractice ? "text-orange-500" : "text-blue-600";
 
               return (
                 <div
@@ -187,34 +171,18 @@ const ExamListContent: React.FC = () => {
                     </h3>
 
                     <div className="space-y-2.5">
-                      {exam.subject && (
-                        <div className="flex items-center gap-2.5 text-sm text-slate-600">
-                          <BookOpenIcon className={cn("w-4 h-4 shrink-0", iconColor)} />
-                          <span>
-                            Môn học: <span className="font-semibold text-slate-800">{exam.subject.name}</span>
-                          </span>
-                        </div>
-                      )}
                       <div className="flex items-center gap-2.5 text-sm text-slate-600">
-                        <Timer className={cn("w-4 h-4 shrink-0", iconColor)} />
+                        <Timer className={cn("w-4 h-4 shrink-0 text-blue-600")} />
                         <span>
                           Thời gian: <span className="font-semibold text-slate-800">{exam.durationInMinutes} phút</span>
                         </span>
                       </div>
                       <div className="flex items-center gap-2.5 text-sm text-slate-600">
-                        <HelpCircle className={cn("w-4 h-4 shrink-0", iconColor)} />
+                        <HelpCircle className={cn("w-4 h-4 shrink-0 text-blue-600")} />
                         <span>
                           Số câu: <span className="font-semibold text-slate-800">{exam.totalQuestions} câu</span>
                         </span>
                       </div>
-                      {exam.isCompleted && exam.lastAttemptScore !== undefined && (
-                        <div className="flex items-center gap-2.5 text-sm text-emerald-600">
-                          <Trophy className="w-4 h-4 shrink-0" />
-                          <span className="font-semibold">
-                            Điểm: {exam.lastAttemptScore}/{exam.totalScore}
-                          </span>
-                        </div>
-                      )}
                     </div>
                   </div>
 
@@ -232,13 +200,10 @@ const ExamListContent: React.FC = () => {
                         handleExamClick(exam.id);
                       }}
                       className={cn(
-                        "cursor-pointer px-5 border py-2 rounded-lg text-sm font-bold shadow transition-all active:scale-95",
-                        exam.isCompleted
-                          ? " border-blue-500 hover:bg-blue-100 text-blue-600 "
-                          : "bg-blue-500 hover:bg-blue-800 text-white ",
+                        "cursor-pointer px-5 border py-2 rounded-lg text-sm font-bold shadow transition-all active:scale-95 border-blue-500 hover:bg-blue-100 text-blue-600 ",
                       )}
                     >
-                      {exam.isCompleted ? "Xem kết quả" : "Tham gia"}
+                      Làm bài
                     </button>
                   </div>
                 </div>

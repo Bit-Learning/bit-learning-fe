@@ -40,7 +40,7 @@ export const createTagsColumns = ({
 	},
 	{
 		id: "actions",
-		header: () => null,
+		header: () => <div className="text-right">Thao tác</div>,
 		cell: ({ row }) => {
 			const tag = row.original;
 			return (
@@ -56,7 +56,7 @@ export const createTagsColumns = ({
 					<Button
 						size="sm"
 						variant="ghost"
-						className="h-8 w-8 p-0 text-muted-foreground hover:text-destructive"
+						className="h-8 w-8 p-0 text-destructive  hover:text-destructive"
 						onClick={() => onDelete(tag)}
 					>
 						<Trash2 className="h-3.5 w-3.5" />

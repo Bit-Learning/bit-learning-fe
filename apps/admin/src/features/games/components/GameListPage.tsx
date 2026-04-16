@@ -1,11 +1,8 @@
 import { useState } from "react";
 import {
 	useAdminGamesList,
-	useDeleteGame,
 	useGameCategories,
 	useUpsertGame,
-	useApproveGame,
-	useRejectGame,
 	type GameCategoryOption,
 	type UpsertGamePayload,
 } from "../queries/useAdminGamesCrud";
@@ -29,26 +26,38 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { MINIO_GAME_URL } from "@/shared/constants/endpoints";
 import { GamesTable } from "./games-table";
 import type { GameRow } from "./games-columns";
 import { Loader2 } from "lucide-react";
+
+const getErrorMessage = (error: unknown, fallback: string) => {
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"response" in error &&
+		typeof error.response === "object" &&
+		error.response !== null &&
+		"data" in error.response &&
+		typeof error.response.data === "object" &&
+		error.response.data !== null &&
+		"message" in error.response.data &&
+		typeof error.response.data.message === "string"
+	) {
+		return error.response.data.message;
+	}
+	return fallback;
+};
 
 export const GamesCrudManager = () => {
 	const { data: games = [], isLoading } = useAdminGamesList();
 	const { data: categories = [] } = useGameCategories();
 	const upsertGame = useUpsertGame();
-	const deleteGame = useDeleteGame();
-	const approveGame = useApproveGame();
-	const rejectGame = useRejectGame();
-
 	const [dialogOpen, setDialogOpen] = useState(false);
 	const [editingId, setEditingId] = useState<number | undefined>(undefined);
 	const [form, setForm] = useState<UpsertGamePayload>({ title: "", desc: "" });
-
-	const getErrorMessage = (e: any, fallback: string) => {
-		return e?.response?.data?.message ?? e?.message ?? fallback;
-	};
 
 	const openCreate = () => {
 		setEditingId(undefined);
@@ -64,19 +73,6 @@ export const GamesCrudManager = () => {
 		return cats.find((c) => c.id === categoryId)?.name ?? "-";
 	};
 
-	const openEdit = (game: any) => {
-		setEditingId(game.id as number);
-		setForm({
-			id: game.id,
-			title: game.title ?? "",
-			desc: game.description ?? "",
-			difficulty: game.difficulty ?? "MEDIUM",
-			categoryId: game.categoryId ?? undefined,
-			thumbnailUrl: game.thumbnailUrl ?? "",
-		});
-		setDialogOpen(true);
-	};
-
 	const handleSubmit = async () => {
 		try {
 			await upsertGame.mutateAsync({ ...form, id: editingId });
@@ -84,35 +80,8 @@ export const GamesCrudManager = () => {
 				editingId ? "Cập nhật game thành công" : "Tạo game thành công",
 			);
 			setDialogOpen(false);
-		} catch (e: any) {
-			toast.error(getErrorMessage(e, "Không thể lưu game"));
-		}
-	};
-
-	const handleDelete = async (id: number) => {
-		try {
-			await deleteGame.mutateAsync(id);
-			toast.success("Đã lưu trữ game");
-		} catch (e: any) {
-			toast.error(getErrorMessage(e, "Không thể xoá game"));
-		}
-	};
-
-	const handleApprove = async (id: number) => {
-		try {
-			await approveGame.mutateAsync(id);
-			toast.success("Game đã được duyệt và xuất bản");
-		} catch (e: any) {
-			toast.error(getErrorMessage(e, "Không thể duyệt game"));
-		}
-	};
-
-	const handleReject = async (id: number) => {
-		try {
-			await rejectGame.mutateAsync(id);
-			toast.success("Game đã được chuyển về trạng thái nháp");
-		} catch (e: any) {
-			toast.error(getErrorMessage(e, "Không thể chuyển trạng thái game"));
+		} catch (error: unknown) {
+			toast.error(getErrorMessage(error, "Không thể lưu game"));
 		}
 	};
 
@@ -124,27 +93,10 @@ export const GamesCrudManager = () => {
 		setForm((prev) => ({ ...prev, thumbnail: file ?? undefined }));
 	};
 
-	const getPlayUrl = (minioObjectName?: string) => {
-		if (!minioObjectName) return "#";
-		return `${MINIO_GAME_URL}/${minioObjectName}`;
-	};
-
-	const tableData: GameRow[] = games.map((g: any) => ({
+	const tableData: GameRow[] = games.map((g) => ({
 		...g,
 		categoryName: getCategoryName(g.categoryId, categories),
 	}));
-
-	const handleArchiveGame = (game: GameRow) => {
-		void handleDelete(game.id as number);
-	};
-
-	const handleApproveGameRow = (game: GameRow) => {
-		void handleApprove(game.id as number);
-	};
-
-	const handleRejectGameRow = (game: GameRow) => {
-		void handleReject(game.id as number);
-	};
 
 	return (
 		<div className="space-y-4">
@@ -159,14 +111,7 @@ export const GamesCrudManager = () => {
 					Đang tải danh sách trò chơi...
 				</>
 			) : (
-				<GamesTable
-					data={tableData}
-					onEdit={openEdit}
-					onArchive={handleArchiveGame}
-					onApprove={handleApproveGameRow}
-					onReject={handleRejectGameRow}
-					getPlayUrl={getPlayUrl}
-				/>
+				<GamesTable data={tableData} />
 			)}
 
 			<Dialog open={dialogOpen} onOpenChange={setDialogOpen}>

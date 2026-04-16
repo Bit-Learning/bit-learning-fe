@@ -147,13 +147,9 @@ export function NotificationBell() {
 			<button
 				type="button"
 				onClick={() => setIsOpen(!isOpen)}
-				className={cn(
-					"relative rounded-xl p-2 transition-all duration-200",
-					"hover:bg-white/50 dark:hover:bg-white/10 backdrop-blur-sm",
-					isOpen && "bg-white/50 dark:bg-white/10",
-				)}
+				className="relative rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer"
 			>
-				<Bell className="h-7 w-7 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer" />
+				<Bell className="h-7 w-7 text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors" />
 				{localUnreadCount > 0 && (
 					<span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-inter text-white">
 						{localUnreadCount > 99 ? "99+" : localUnreadCount}

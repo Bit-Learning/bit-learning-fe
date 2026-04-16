@@ -118,10 +118,8 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 		if (!userInfo) return;
 
 		if (userInfo.mfaEnabled) {
-			// Disable 2FA
 			disable2FAMutation.mutate();
 		} else {
-			// Enable 2FA — call backend to get QR code
 			enable2FAMutation.mutate(undefined, {
 				onSuccess: (data) => {
 					setMfaSetupData(data);
@@ -144,7 +142,6 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 	};
 
 	const handleCancelSetup = () => {
-		// User cancelled — disable the secret that was just set
 		disable2FAMutation.mutate();
 		setShowMfaSetup(false);
 		setMfaSetupData(null);
@@ -174,7 +171,7 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 			<aside className="w-full lg:w-70 shrink-0 lg:sticky lg:top-28">
 				<Card className="overflow-hidden">
 					<div className="p-3 border-b border-slate-50 flex items-center gap-3">
-						<Avatar className="size-16">
+						<Avatar className="size-20">
 							<AvatarImage
 								src={
 									userInfo?.avatar ||
@@ -197,16 +194,13 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 						</div>
 					</div>
 					<div className="px-4 py-3 border-b border-slate-50 flex items-center gap-2 bg-amber-50">
-						<BitCoinIcon size={32} />
 						<div className="flex flex-col leading-tight">
-							<span className="text-[11px] text-slate-500 font-medium">
+							<span className="text-sm text-slate-500 font-medium">
 								Số dư xu
 							</span>
-							<span className="text-base font-bold text-amber-700">
+							<span className="text-md font-bold text-amber-700 flex items-center ">
 								{userInfo?.wallet?.balance?.toLocaleString("vi-VN") ?? 0}{" "}
-								<span className="text-xs font-semibold text-amber-500">
-									BIT
-								</span>
+								<BitCoinIcon size={24} />
 							</span>
 						</div>
 						<Link
@@ -249,7 +243,6 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({
 							);
 						})}
 
-						{/* MFA Toggle */}
 						<div className="flex items-center justify-between px-4 py-3 rounded-xl hover:bg-slate-50 transition-all">
 							<div className="flex items-center gap-3">
 								<Shield className="w-5 h-5 text-emerald-600" />

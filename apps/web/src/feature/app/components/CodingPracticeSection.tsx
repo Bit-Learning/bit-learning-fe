@@ -1,9 +1,10 @@
-import React from "react";
+import type { FC } from "react";
 import { Button } from "@workspace/ui/components/Button";
 import { CheckCircle } from "lucide-react";
 import OnlineCodeEditor from "./OnlineCodeEditor";
+import { Link } from "@tanstack/react-router";
 
-const CodingPracticeSection: React.FC = () => {
+const CodingPracticeSection: FC = () => {
 	return (
 		<section
 			id="tour-coding-practice"
@@ -38,12 +39,14 @@ const CodingPracticeSection: React.FC = () => {
 						Chạy code trực tiếp trên trình duyệt
 					</li>
 				</ul>
-				<Button
-					size="xl"
-					className="px-8 py-4 bg-slate-900 text-white rounded-xl font-bold hover:bg-slate-800 shadow-xl"
-				>
-					Mở AI Lab ngay
-				</Button>
+				<Link to="/problem">
+					<Button
+						size="xl"
+						className="px-8 py-4 bg-slate-700 text-white rounded-xl font-bold hover:bg-slate-800 shadow-xl glass"
+					>
+						Mở AI Lab ngay
+					</Button>
+				</Link>
 			</div>
 			<div className="lg:col-span-3">
 				<OnlineCodeEditor />

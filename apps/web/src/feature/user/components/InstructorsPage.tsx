@@ -22,6 +22,7 @@ import {
 	Sparkles,
 } from "lucide-react";
 import type { TInstructor } from "../types/user.type";
+import { useNavigate } from "@tanstack/react-router";
 
 function SocialIconLink({
 	href,
@@ -48,6 +49,8 @@ function SocialIconLink({
 function InstructorCard({ instructor }: { instructor: TInstructor }) {
 	const fullName =
 		`${instructor.firstName ?? ""} ${instructor.lastName ?? ""}`.trim();
+
+	const navigate = useNavigate();
 
 	return (
 		<article className="group overflow-hidden rounded-3xl border border-slate-200 bg-white transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-slate-200/60">
@@ -150,7 +153,15 @@ function InstructorCard({ instructor }: { instructor: TInstructor }) {
 								: "Mentor thực chiến"}
 						</span>
 
-						<button className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition hover:text-blue-700">
+						<button
+							onClick={() => {
+								navigate({
+									to: "/profile/$username",
+									params: { username: instructor.username ?? "" },
+								});
+							}}
+							className="inline-flex items-center gap-1 text-sm font-medium text-blue-600 transition hover:text-blue-700 cursor-pointer"
+						>
 							Xem hồ sơ
 							<ArrowRight size={15} />
 						</button>
@@ -171,86 +182,92 @@ function FeaturedInstructor({
 	const fullName =
 		`${instructor.firstName ?? ""} ${instructor.lastName ?? ""}`.trim();
 
+	const metaText =
+		instructor.jobTitle || instructor.company
+			? [instructor.jobTitle, instructor.company].filter(Boolean).join(" · ")
+			: "Giảng viên nổi bật";
+
+	const navigate = useNavigate();
+
 	return (
 		<article
-			className={`group overflow-hidden rounded-3xl border border-slate-200 bg-white transition hover:shadow-xl hover:shadow-slate-200/60 ${
-				large ? "lg:min-h-[420px]" : "lg:min-h-[200px]"
-			}`}
+			className={`
+				group rounded-3xl border border-slate-200 bg-white p-5 transition
+				hover:border-slate-300 hover:shadow-md
+				${large ? "max-w-xl" : "max-w-md"}
+			`}
 		>
-			<div className={`${large ? "lg:flex h-full" : "flex h-full"}`}>
-				<div
-					className={`${large ? "lg:w-[52%] h-64 lg:h-auto" : "w-40"} relative bg-slate-200`}
-				>
-					{instructor.coverImage ? (
-						<img
-							src={instructor.coverImage}
-							alt={fullName}
-							className="h-full w-full object-cover object-top"
-						/>
-					) : (
-						<div className="h-full w-full bg-gradient-to-br from-slate-200 to-slate-300" />
-					)}
-				</div>
+			<div className="flex h-full flex-col">
+				<div className="flex items-start gap-4">
+					<Avatar className="h-14 w-14 shrink-0 rounded-full border border-slate-200">
+						<AvatarImage src={instructor.avatar} />
+						<AvatarFallback className="bg-slate-100 text-slate-700">
+							{instructor.firstName?.charAt(0) ?? "M"}
+						</AvatarFallback>
+					</Avatar>
 
-				<div className="flex flex-1 flex-col justify-between p-6">
-					<div>
-						<div className="mb-4 flex items-center gap-3">
-							<Avatar className="h-12 w-12 rounded-xl">
-								<AvatarImage src={instructor.avatar} />
-								<AvatarFallback className="rounded-xl bg-gradient-to-br from-blue-500 to-violet-500 text-white">
-									{instructor.firstName?.charAt(0) ?? "M"}
-								</AvatarFallback>
-							</Avatar>
-							<div>
-								<h3 className="text-lg font-semibold text-slate-900">
-									{fullName}
-								</h3>
-								{(instructor.jobTitle || instructor.company) && (
-									<p className="text-sm text-slate-500">
-										{instructor.jobTitle}
-										{instructor.jobTitle && instructor.company && " · "}
-										{instructor.company}
-									</p>
-								)}
-							</div>
-						</div>
-
-						{instructor.bio && (
-							<p className="line-clamp-4 text-sm leading-6 text-slate-600">
-								{instructor.bio}
-							</p>
-						)}
+					<div className="min-w-0 flex-1">
+						<h3 className="truncate text-lg font-semibold text-slate-900">
+							{fullName}
+						</h3>
+						<p className="mt-1 text-sm text-slate-500">{metaText}</p>
 
 						{instructor.specialties && instructor.specialties.length > 0 && (
-							<div className="mt-3 flex flex-wrap gap-1">
-								{instructor.specialties.slice(0, 4).map((s) => (
+							<div className="mt-3 flex flex-wrap gap-2">
+								{instructor.specialties.slice(0, 3).map((s) => (
 									<span
 										key={s}
-										className="inline-flex items-center rounded-full bg-blue-50 px-2.5 py-0.5 text-[11px] font-medium text-blue-700"
+										className="rounded-full bg-slate-100 px-2.5 py-1 text-xs font-medium text-slate-600"
 									>
 										{s}
 									</span>
 								))}
-								{instructor.specialties.length > 4 && (
-									<span className="text-[11px] text-slate-400">
-										+{instructor.specialties.length - 4}
+								{instructor.specialties.length > 3 && (
+									<span className="rounded-full bg-slate-100 px-2.5 py-1 text-xs text-slate-500">
+										+{instructor.specialties.length - 3}
 									</span>
 								)}
 							</div>
 						)}
 					</div>
+				</div>
 
-					<div className="mt-6 flex items-center justify-between">
-						<span className="inline-flex items-center rounded-full bg-blue-50 px-3 py-1 text-xs font-medium text-blue-700">
-							{instructor.studentsCount || instructor.coursesCount
-								? `${instructor.studentsCount ?? 0} học viên · ${instructor.coursesCount ?? 0} khoá học`
-								: "Mentor nổi bật"}
-						</span>
-						<button className="inline-flex items-center gap-1 text-sm font-medium text-slate-900">
-							Khám phá thêm
-							<ArrowRight size={15} />
-						</button>
+				{instructor.bio && (
+					<p className="mt-4 line-clamp-3 text-sm leading-6 text-slate-600">
+						{instructor.bio}
+					</p>
+				)}
+
+				<div className="mt-5 flex items-center justify-between gap-4 border-t border-slate-100 pt-4">
+					<div className="text-sm text-slate-500">
+						{instructor.studentsCount || instructor.coursesCount ? (
+							<span>
+								<span className="font-medium text-slate-900">
+									{instructor.studentsCount ?? 0}
+								</span>{" "}
+								học viên ·{" "}
+								<span className="font-medium text-slate-900">
+									{instructor.coursesCount ?? 0}
+								</span>{" "}
+								khoá học
+							</span>
+						) : (
+							<span>Mentor nổi bật</span>
+						)}
 					</div>
+
+					<button
+						onClick={() => {
+							navigate({
+								to: "/profile/$username",
+								params: { username: instructor.username ?? "" },
+							});
+						}}
+						className="inline-flex shrink-0 items-center gap-1 text-sm font-medium text-slate-900 transition group-hover:translate-x-0.5 cursor-pointer"
+					>
+						Khám phá thêm
+						<ArrowRight size={15} />
+					</button>
 				</div>
 			</div>
 		</article>
@@ -431,18 +448,13 @@ export default function InstructorsPage() {
 							<Loader />
 						</div>
 					) : featured.length > 0 ? (
-						<div className="grid gap-5 lg:grid-cols-3">
-							<div className="lg:col-span-2">
-								<FeaturedInstructor instructor={featured[0]!} large />
-							</div>
-							<div className="grid gap-5">
-								{featured.slice(1, 3).map((instructor) => (
-									<FeaturedInstructor
-										key={instructor.id}
-										instructor={instructor}
-									/>
-								))}
-							</div>
+						<div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+							{featured.slice(0, 3).map((instructor) => (
+								<FeaturedInstructor
+									key={instructor.id}
+									instructor={instructor}
+								/>
+							))}
 						</div>
 					) : null}
 				</section>

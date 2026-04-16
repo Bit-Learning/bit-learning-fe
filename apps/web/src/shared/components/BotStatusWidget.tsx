@@ -87,7 +87,10 @@ function MiniChatPanel({
 
 		if (conversationId) {
 			try {
-				await sendMessage.mutateAsync({ conversationId, request: { question: text } });
+				await sendMessage.mutateAsync({
+					conversationId,
+					request: { question: text },
+				});
 			} catch (err) {
 				console.error("Failed to send message:", err);
 			}
@@ -111,7 +114,7 @@ function MiniChatPanel({
 			style={{
 				position: "fixed",
 				bottom: "80px",
-				left: "16px",
+				right: "16px",
 				width: "340px",
 				maxHeight: "500px",
 				background: "white",
@@ -516,7 +519,10 @@ export default function BotStatusWidget({
 		setPanelOpen(false);
 		onNavigateToFull();
 		if (currentConversation?.id) {
-			navigate({ to: "/chat-ai/$conversationId", params: { conversationId: currentConversation.id } });
+			navigate({
+				to: "/chat-ai/$conversationId",
+				params: { conversationId: currentConversation.id },
+			});
 		} else {
 			navigate({ to: "/chat-ai" });
 		}
@@ -572,7 +578,7 @@ export default function BotStatusWidget({
         .bot-widget-btn:active { transform:scale(0.94) !important; }
 		.bot-inner {
           display:flex; align-items:center; gap:12px;
-          padding:10px 16px 10px 10px; border-radius:18px;
+          padding:10px 10px 10px 10px; border-radius:18px;
           border:1px solid rgba(19,127,236,0.12); background:white;
         }
 		.bot-icon-wrap {
@@ -635,7 +641,7 @@ export default function BotStatusWidget({
 			)}
 
 			{/* Widget Button */}
-			<div style={{ position: "fixed", bottom: 16, left: 16, zIndex: 9998 }}>
+			<div style={{ position: "fixed", bottom: 30, right: 16, zIndex: 9998 }}>
 				<button
 					className="bot-widget-btn"
 					onClick={handleWidgetClick}
@@ -663,45 +669,6 @@ export default function BotStatusWidget({
 							{unreadCount > 0 && !panelOpen && (
 								<div className="notif-badge">{unreadCount}</div>
 							)}
-						</div>
-
-						<div className="bot-text-block">
-							<p
-								style={{
-									margin: "0 0 2px",
-									fontSize: 10,
-									textTransform: "uppercase",
-									letterSpacing: "0.06em",
-									fontWeight: 700,
-									color: "#94a3b8",
-									fontFamily: "'DM Sans',system-ui,sans-serif",
-								}}
-							>
-								Trạng thái Bot
-							</p>
-							<p
-								style={{
-									margin: 0,
-									fontSize: 14,
-									fontWeight: 700,
-									color: "#1e293b",
-									fontFamily: "'DM Sans',system-ui,sans-serif",
-									display: "flex",
-									alignItems: "center",
-								}}
-							>
-								<span
-									style={{
-										display: "inline-block",
-										width: 7,
-										height: 7,
-										background: "#22c55e",
-										borderRadius: "50%",
-										marginRight: 5,
-									}}
-								/>
-								{panelOpen && !minimized ? "Đang chat..." : "Sẵn sàng hỗ trợ!"}
-							</p>
 						</div>
 					</div>
 

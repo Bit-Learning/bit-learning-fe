@@ -3,6 +3,25 @@ import { useNavigate } from "@tanstack/react-router";
 import React from "react";
 import AuthCallbackPageContent from "../component/AuthCallbackPageContent";
 
+function getErrorMessage(error: unknown) {
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"response" in error &&
+		typeof error.response === "object" &&
+		error.response !== null &&
+		"data" in error.response &&
+		typeof error.response.data === "object" &&
+		error.response.data !== null &&
+		"message" in error.response.data &&
+		typeof error.response.data.message === "string"
+	) {
+		return error.response.data.message;
+	}
+
+	return "Đăng nhập thất bại";
+}
+
 function GitHubCallbackPage() {
 	const navigate = useNavigate();
 	const { mutate: githubLogin, isError, error } = useGitHubLogin();
@@ -31,14 +50,13 @@ function GitHubCallbackPage() {
 					onSuccess: () => {
 						navigate({ to: "/" });
 					},
-					onError: (err: any) => {
-						const errorMessage =
-							err?.response?.data?.message || "Đăng nhập thất bại";
+					onError: (err: unknown) => {
+						const errorMessage = getErrorMessage(err);
 						setLocalError(errorMessage);
 						setTimeout(() => navigate({ to: "/signin" }), 3000);
 					},
 				});
-			} catch (err: any) {
+			} catch (err: unknown) {
 				console.error("GitHub OAuth callback error:", err);
 				setLocalError("Có lỗi xảy ra trong quá trình đăng nhập");
 				setTimeout(() => navigate({ to: "/signin" }), 3000);
@@ -50,7 +68,14 @@ function GitHubCallbackPage() {
 
 	const hasError = isError || localError;
 
-	return AuthCallbackPageContent({ hasError, localError, error });
+	return (
+		<AuthCallbackPageContent
+			hasError={hasError}
+			localError={localError}
+			error={error}
+			fullScreen
+		/>
+	);
 }
 
 export default GitHubCallbackPage;

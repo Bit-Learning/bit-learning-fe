@@ -53,6 +53,7 @@ const CheckoutContent: React.FC = () => {
   }, [courses]);
 
   const isWalletInsufficient = paymentMethod === PaymentMethod.WALLET && walletBalance < cartSummary.totalAmount;
+  const isWalletPayment = paymentMethod === PaymentMethod.WALLET;
 
   const handleCheckout = () => {
     if (!courses || courses.length === 0) return;
@@ -160,7 +161,16 @@ const CheckoutContent: React.FC = () => {
                           🎓 Lớp: {course.grade}
                           {course.level && ` · ${COURSE_LEVEL_LABEL[course.level] ?? course.level}`}
                         </p>
-                        <p className="mt-1.5 text-lg font-bold text-blue-600">{course.price.toLocaleString()}đ</p>
+                        <div className="mt-1.5 flex items-center gap-1">
+                          <p className={`text-lg font-bold ${isWalletPayment ? "text-amber-700" : "text-blue-600"}`}>
+                            {course.price.toLocaleString()}
+                          </p>
+                          {isWalletPayment ? (
+                            <BitCoinIcon size={20} />
+                          ) : (
+                            <span className="text-lg font-bold text-blue-600">đ</span>
+                          )}
+                        </div>
                       </div>
 
                       {!isDirectCheckout && courses.length > 1 && (
@@ -230,40 +240,31 @@ const CheckoutContent: React.FC = () => {
           <div className="lg:col-span-1">
             <div className="sticky top-6 rounded-md bg-white shadow-sm border border-gray-100">
               <div className="border-b border-gray-100 px-6 py-4">
-                <h2 className="font-bold text-lg text-gray-900">Tổng quan thanh toán</h2>
+                <h2 className="font-bold text-xl text-gray-900">Tổng quan thanh toán</h2>
               </div>
 
               <div className="space-y-3 px-6 py-5">
-                <div className="flex justify-between text-sm text-gray-600">
+                <div className="flex justify-between text-md text-gray-600">
                   <span>Tạm tính ({cartSummary.totalItems} sản phẩm)</span>
-                  <span className="font-medium text-gray-900">{cartSummary.totalAmount.toLocaleString()}đ</span>
-                </div>
-                <div className="flex justify-between text-sm text-gray-600">
-                  <span>Phí giao dịch</span>
-                  <span className="font-medium text-gray-900">0đ</span>
-                </div>
-
-                {paymentMethod === PaymentMethod.WALLET && (
-                  <div
-                    className={`flex justify-between rounded-lg px-3 py-2 text-sm border ${
-                      isWalletInsufficient ? "bg-red-50 border-red-200" : "bg-amber-50 border-amber-200"
-                    }`}
-                  >
-                    <div className="flex items-center gap-1">
-                      <BitCoinIcon size={14} />
-                      <span className={isWalletInsufficient ? "text-red-600" : "text-amber-700"}>Số dư BIT</span>
-                    </div>
-                    <span className={`font-semibold ${isWalletInsufficient ? "text-red-600" : "text-amber-700"}`}>
-                      {walletBalance.toLocaleString()} BIT
+                  <div className="flex items-center gap-1">
+                    <span className={`font-medium ${isWalletPayment ? "text-amber-700" : "text-gray-900"}`}>
+                      {cartSummary.totalAmount.toLocaleString()}
                     </span>
+                    {isWalletPayment ? <BitCoinIcon size={20} /> : <span className="font-medium text-gray-900">đ</span>}
                   </div>
-                )}
-
-                <div className="border-t border-gray-100 pt-3">
+                </div>
+                <div className="border-t border-gray-100 pt-4">
                   <div className="flex items-baseline justify-between">
-                    <span className="font-bold text-gray-900">Tổng tiền</span>
-                    <div className="text-right">
-                      <p className="text-2xl font-black text-blue-600">{cartSummary.totalAmount.toLocaleString()}đ</p>
+                    <span className="font-bold text-xl text-gray-900">Tổng tiền</span>
+                    <div className="flex items-center gap-1">
+                      <p className={`text-2xl font-black ${isWalletPayment ? "text-amber-700" : "text-blue-600"}`}>
+                        {cartSummary.totalAmount.toLocaleString()}
+                      </p>
+                      {isWalletPayment ? (
+                        <BitCoinIcon size={24} />
+                      ) : (
+                        <span className="text-2xl font-black text-blue-600">đ</span>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -272,9 +273,10 @@ const CheckoutContent: React.FC = () => {
               {isWalletInsufficient && (
                 <div className="mx-6 mb-4 rounded-lg bg-red-50 border border-red-200 px-4 py-3 text-xs text-red-600">
                   <p className="font-semibold">⚠ Số dư không đủ</p>
-                  <p className="mt-0.5">
+                  <p className="mt-0.5 flex items-center gap-1">
                     Cần thêm{" "}
-                    <span className="font-bold">{(cartSummary.totalAmount - walletBalance).toLocaleString()} BIT</span>.{" "}
+                    <span className="font-bold">{(cartSummary.totalAmount - walletBalance).toLocaleString()}</span>
+                    <BitCoinIcon size={16} />.{" "}
                     <a href="/profile/top-up" className="underline font-semibold hover:text-red-700">
                       Nạp thêm ngay
                     </a>

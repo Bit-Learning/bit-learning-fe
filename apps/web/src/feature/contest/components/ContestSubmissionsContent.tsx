@@ -4,7 +4,7 @@ import { Search, Eye, ChevronDown } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
 import { useMySubmissions, useContestProblems } from "../queries/useContest";
 import { SubmissionDetailModal } from "./SubmissionDetailModal";
-import { Language, ContestVerdict } from "../types/contest.type";
+import { ContestVerdict } from "../types/contest.type";
 
 const ContestSubmissionsContent: React.FC = () => {
   const { id } = useParams({ strict: false });
@@ -69,16 +69,6 @@ const ContestSubmissionsContent: React.FC = () => {
       month: "2-digit",
       year: "numeric",
     });
-  };
-
-  const getLanguageLabel = (lang: Language): string => {
-    const labels: Record<Language, string> = {
-      [Language.PYTHON]: "Python 3.10",
-      [Language.CPP]: "C++ 17",
-      [Language.JAVA]: "Java 17",
-      [Language.JAVASCRIPT]: "JavaScript (Node.js)",
-    };
-    return labels[lang] ?? lang;
   };
 
   if (isLoading) {

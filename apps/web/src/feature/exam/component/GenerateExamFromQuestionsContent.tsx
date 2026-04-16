@@ -19,11 +19,12 @@ import { Label } from "@workspace/ui/components/label";
 import { Checkbox } from "@workspace/ui/components/Checkbox";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@/shared/components/Sonner";
-import { useSearchQuestions, useMyQuestions } from "@/feature/question/queries/useQuestion";
+import { useMyQuestionsAll, useSearchQuestionsAll } from "@/feature/question/queries/useQuestion";
 import { useGenerateExamFromQuestions, useExam, useDownloadExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
-import type { QuestionLevel } from "@/feature/question/types/question.type";
+import { ApprovalStatus, type QuestionLevel } from "@/feature/question/types/question.type";
 import type { ExamType } from "../types/exam.type";
+import { getDifficultyBadge, getTypeBadge } from "@/feature/question/utils/question.utils";
 
 const DEFAULT_DURATION = 30;
 const DEFAULT_SCORE = 10;
@@ -47,26 +48,25 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(0);
   const pageSize = 20;
 
-  const { data: systemResponse, isLoading: systemLoading } = useSearchQuestions(
-    { keyword: searchTerm, page: currentPage, size: pageSize },
-    { enabled: questionSource === "system" },
-  );
+  const { data: systemResponse, isLoading: systemLoading } = useSearchQuestionsAll();
 
-  const { data: userResponse, isLoading: userLoading } = useMyQuestions(
-    { page: currentPage, size: pageSize },
-    { enabled: questionSource === "user" },
-  );
+  const { data: userResponse, isLoading: userLoading } = useMyQuestionsAll();
 
   const { data: subjectsData } = useSubjectsList();
 
-  const rawQuestions = (questionSource === "system" ? systemResponse : userResponse)?.data || [];
-  const pagination = (questionSource === "system" ? systemResponse : userResponse)?.page;
+  const rawQuestions =
+    (questionSource === "system"
+      ? (systemResponse || []).filter((q) => q.approvalStatus === ApprovalStatus.APPROVED)
+      : userResponse || []) || [];
   const isLoading = questionSource === "system" ? systemLoading : userLoading;
 
   const questions = useMemo(() => {
     if (!filterSubjectId) return rawQuestions;
-    return rawQuestions.filter((q) => q.lesson?.id === filterSubjectId);
+    return rawQuestions.filter((q) => q.subject?.id === filterSubjectId);
   }, [rawQuestions, filterSubjectId]);
+
+  const totalPages = Math.ceil(questions.length / pageSize);
+  const pagedQuestions = questions.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
 
   const { data: examData } = useExam(generatedExamId!, { enabled: !!generatedExamId });
   const generateExam = useGenerateExamFromQuestions();
@@ -80,7 +80,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
       return;
     }
     if (examType === "EXAM" && !enrollKey.trim()) {
-      toast.error({ title: "Lỗi", description: "Đề thi chính thức bắt buộc phải có mật khẩu vào thi" });
+      toast.error({ title: "Lỗi", description: "Đề thi bắt buộc phải có mật khẩu vào thi" });
       return;
     }
     if (selectedQuestions.size === 0) {
@@ -119,11 +119,6 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     });
   };
 
-  const handleSelectAll = () => {
-    if (isExamGenerated) return;
-    setSelectedQuestions(new Set(questions.map((q) => q.id)));
-  };
-
   const handleDeselectAll = () => {
     if (isExamGenerated) return;
     setSelectedQuestions(new Set());
@@ -156,21 +151,6 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setSearchTerm("");
     setFilterSubjectId("");
     setCurrentPage(0);
-  };
-
-  const getLevelColor = (level: QuestionLevel) => {
-    const colors = {
-      EASY: "bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200",
-      MEDIUM: "bg-yellow-100 text-yellow-800 dark:bg-yellow-900 dark:text-yellow-200",
-      HARD: "bg-red-100 text-red-800 dark:bg-red-900 dark:text-red-200",
-    };
-    return colors[level];
-  };
-
-  const getTypeColor = (type: string) => {
-    return type === "MCQ"
-      ? "bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200"
-      : "bg-purple-100 text-purple-800 dark:bg-purple-900 dark:text-purple-200";
   };
 
   return (
@@ -227,7 +207,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                   <button
                     onClick={() => handleSourceChange("system")}
                     disabled={isExamGenerated}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`cursor-pointer px-5 py-2 rounded-lg text-md font-medium transition-colors ${
                       questionSource === "system"
                         ? "bg-primary text-white"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
@@ -238,7 +218,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                   <button
                     onClick={() => handleSourceChange("user")}
                     disabled={isExamGenerated}
-                    className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
+                    className={`cursor-pointer px-5 py-2 rounded-lg text-md font-medium transition-colors ${
                       questionSource === "user"
                         ? "bg-primary text-white"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
@@ -251,16 +231,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 {!isExamGenerated && (
                   <div className="flex gap-2">
                     <button
-                      onClick={handleSelectAll}
-                      className="flex items-center gap-1 text-sm text-primary hover:underline"
-                    >
-                      <CheckSquare className="h-4 w-4" />
-                      Chọn tất cả
-                    </button>
-                    <span className="text-slate-300">|</span>
-                    <button
                       onClick={handleDeselectAll}
-                      className="flex items-center gap-1 text-sm text-slate-500 hover:underline"
+                      className="cursor-pointer flex items-center gap-1 text-sm text-slate-500 hover:underline"
                     >
                       <Square className="h-4 w-4" />
                       Bỏ chọn
@@ -319,7 +291,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {questions.map((question) => {
+                  {pagedQuestions.map((question) => {
                     const isSelected = selectedQuestions.has(question.id);
                     return (
                       <div
@@ -338,22 +310,20 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                             )}
                           </div>
                           <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-slate-900 dark:text-white line-clamp-2">
+                            <p className="text-md font-medium text-slate-900 dark:text-white line-clamp-2">
                               {question.content}
                             </p>
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              <span
-                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${getTypeColor(question.questionType)}`}
-                              >
-                                {question.questionType}
-                              </span>
-                              <span
-                                className={`text-xs px-2 py-0.5 rounded-full font-medium ${getLevelColor(question.questionLevel)}`}
-                              >
-                                {question.questionLevel}
-                              </span>
+                              <span className={`text-xs`}>{getTypeBadge(question.questionType)}</span>
+                              <span className={`text-xs`}>{getDifficultyBadge(question.questionLevel)}</span>
+                              {question.subject && (
+                                <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                                  {question.subject.name}
+                                </span>
+                              )}
+                              <span className=" text-slate-400">●</span>
                               {question.lesson && (
-                                <span className="text-xs text-slate-500 dark:text-slate-400 truncate">
+                                <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
                                   {question.lesson.name}
                                 </span>
                               )}
@@ -366,7 +336,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               )}
 
-              {pagination && pagination.totalPages > 1 && (
+              {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <Button
                     variant="outline"
@@ -377,13 +347,13 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                     Trước
                   </Button>
                   <span className="text-sm text-muted-foreground">
-                    Trang {currentPage + 1} / {pagination.totalPages}
+                    Trang {currentPage + 1} / {totalPages}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => setCurrentPage((p) => p + 1)}
-                    isDisabled={currentPage >= pagination.totalPages - 1 || isExamGenerated}
+                    isDisabled={currentPage >= totalPages - 1 || isExamGenerated}
                   >
                     Sau
                   </Button>
@@ -467,8 +437,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                       onChange={(e) => setExamType(e.target.value as ExamType)}
                       className="w-full mt-1.5 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none"
                     >
-                      <option value="EXAM">Đề thi chính thức</option>
-                      <option value="PRACTICE">Đề luyện tập</option>
+                      <option value="EXAM">Đề thi</option>
+                      <option value="PRACTICE">Luyện tập</option>
                     </select>
                   </div>
 

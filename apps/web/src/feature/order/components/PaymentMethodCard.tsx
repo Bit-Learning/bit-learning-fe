@@ -53,17 +53,17 @@ export const PaymentMethodCard: React.FC<PaymentMethodCardProps> = ({
           <div className="text-sm text-gray-600">{description}</div>
 
           {isWallet && (
-            <div className="mt-1.5 flex items-center gap-1.5">
-              <BitCoinIcon size={16} />
-              <span className={`text-xs font-semibold ${insufficient ? "text-red-500" : "text-amber-600"}`}>
-                Số dư: {walletBalance.toLocaleString("vi-VN")} BIT
+            <div className="mt-1.5 flex items-center gap-1">
+              <span className={`text-sm font-semibold ${insufficient ? "text-red-500" : "text-amber-600"}`}>
+                Số dư: {walletBalance.toLocaleString("vi-VN")}
               </span>
+              <BitCoinIcon size={18} />
             </div>
           )}
 
           {insufficient && (
-            <p className="mt-1 text-xs font-medium text-red-500">
-              ⚠ Cần thêm {(totalAmount! - walletBalance).toLocaleString("vi-VN")} BIT
+            <p className="mt-1 text-sm font-medium text-red-500 flex items-center">
+              Cần thêm {(totalAmount! - walletBalance).toLocaleString("vi-VN")} <BitCoinIcon size={18} />
             </p>
           )}
         </div>

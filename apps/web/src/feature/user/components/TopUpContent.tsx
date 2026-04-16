@@ -16,8 +16,8 @@ const PRESET_AMOUNTS = [
   { value: 20000, label: 20000 },
   { value: 50000, label: 50000 },
   { value: 100000, label: 100000 },
-  { value: 200000, label: 200.0 },
-  { value: 500000, label: 500.0 },
+  { value: 200000, label: 200000 },
+  { value: 500000, label: 500000 },
 ];
 
 const toBIT = (vnd: number) => vnd;
@@ -93,7 +93,7 @@ export const TopUpContent: React.FC = () => {
       <div className="max-w-full mx-auto py-6 bg-slate-50" aria-busy={showLoadingOverlay}>
         <div className="mb-4">
           <div className="flex items-center gap-3 mb-2">
-            <FcMoneyTransfer className="w-6 h-6" />
+            {/* <FcMoneyTransfer className="w-6 h-6" /> */}
             <h1 className="text-3xl font-bold text-gray-900">Nạp tiền vào ví</h1>
           </div>
           <p className="text-gray-600">Chọn số tiền bạn muốn nạp vào ví của mình</p>
@@ -104,13 +104,13 @@ export const TopUpContent: React.FC = () => {
                 <p className="text-black text-lg font-bold mb-1">Số dư hiện tại</p>
 
                 <div className="flex items-center gap-1.5 mt-2">
-                  <BitCoinIcon size={32} />
                   <span className="text-amber-600 text-3xl font-bold">{formatBIT(currentBIT)}</span>
+                  <BitCoinIcon size={32} />
                 </div>
               </div>
-              <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
+              {/* <div className="p-3 bg-white/20 rounded-xl backdrop-blur-sm">
                 <img src="/icons/trending-up.png" alt="trending" className="w-16 h-16 object-contain" />
-              </div>
+              </div> */}
             </div>
           </div>
         </div>
@@ -267,29 +267,23 @@ export const TopUpContent: React.FC = () => {
               <h3 className="text-2xl font-semibold mb-4 border-b-3 pb-3 border-white/30">Đơn hàng</h3>
 
               <div className="space-y-3 mb-6">
-                <div className="flex justify-between items-center pb-3 border-b border-blue-500">
+                <div className="flex justify-between items-center pb-3 border-b border-gray-350">
                   <span className="text-black">Số tiền nạp</span>
                   <span className="text-xl font-bold">{finalAmount ? formatCurrency(finalAmount) : "0đ"}</span>
                 </div>
 
-                <div className="flex justify-between items-center pb-3 border-b border-blue-500">
+                <div className="flex justify-between items-center pb-3 border-b border-gray-350">
                   <span className="text-black flex items-center gap-1">
-                    <BitCoinIcon size={18} />
+                    <BitCoinIcon size={22} />
                     nhận được
                   </span>
-                  <span className="font-bold text-amber-500 text-lg">
-                    {earnedBIT > 0 ? `+${formatBIT(earnedBIT)}` : "0 BIT"}
+                  <span className="font-bold text-black text-lg">
+                    {earnedBIT > 0 ? `+${formatBIT(earnedBIT)} ` : "0"}
                   </span>
                 </div>
-
-                <div className="flex justify-between items-center pb-3 border-b-3 border-white/30">
-                  <span className="text-black">Phí giao dịch</span>
-                  <span className="font-semibold">0đ</span>
-                </div>
-
                 <div className="flex justify-between items-center pt-2">
                   <span className=" text-black">Tổng tiền </span>
-                  <span className="text-2xl font-bold text-amber-600">
+                  <span className="text-2xl font-bold text-black">
                     {finalAmount ? formatCurrency(finalAmount) : "0đ"}
                   </span>
                 </div>
