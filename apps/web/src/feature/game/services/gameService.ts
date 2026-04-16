@@ -5,7 +5,6 @@ export interface GameCategory {
 	id: number;
 	name: string;
 	description: string;
-	games?: Game[];
 }
 
 export interface Game {
@@ -23,6 +22,20 @@ export interface Game {
 	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
 	category: GameCategory;
 	createdBy?: string;
+}
+
+export interface GamePreview {
+	id: number;
+	title: string;
+	description: string;
+	thumbnailUrl?: string;
+}
+
+export interface GameCategoryWithGames {
+	id: number;
+	name: string;
+	description: string;
+	games?: GamePreview[];
 }
 
 export interface Comment {
@@ -163,8 +176,8 @@ const gameService = {
 	},
 
 	// Get game categories with games (Netflix style)
-	getCategoriesWithGames: async (): Promise<GameCategory[]> => {
-		const response = await api.get<ApiResponse<GameCategory[]>>(
+	getCategoriesWithGames: async (): Promise<GameCategoryWithGames[]> => {
+		const response = await api.get<ApiResponse<GameCategoryWithGames[]>>(
 			"/games/game-categories",
 		);
 		return response.data.data ?? [];

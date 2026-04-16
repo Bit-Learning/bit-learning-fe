@@ -1,11 +1,10 @@
-import React from "react";
-import { Game } from "../services/gameService";
+import type { GamePreview } from "../services/gameService";
 import { useNavigate } from "@tanstack/react-router";
 import { parseMatchingMetaFromTitle } from "../utils";
-import { TopicCode } from "../data";
+import type { TopicCode } from "../data";
 
 interface Props {
-	game: Game;
+	game: GamePreview;
 	categoryName: string;
 }
 
@@ -13,8 +12,8 @@ const GameCard = ({ game, categoryName }: Props) => {
 	const navigate = useNavigate();
 
 	return (
-		<div
-			key={game.id}
+		<button
+			type="button"
 			onClick={() => {
 				if (categoryName === "MATCHING") {
 					// Parse grade & topic from title like: "Lớp 3 - B: ..."
@@ -32,7 +31,7 @@ const GameCard = ({ game, categoryName }: Props) => {
 					});
 				}
 			}}
-			className="flex-none w-64 cursor-pointer transform transition-transform duration-300 hover:scale-105"
+			className="flex-none w-64 cursor-pointer transform transition-transform duration-300 hover:scale-105 text-left"
 		>
 			<div className="relative aspect-video rounded-md overflow-hidden bg-linear-to-br from-purple-600 to-blue-500 shadow-lg">
 				{game.thumbnailUrl ? (
@@ -53,7 +52,7 @@ const GameCard = ({ game, categoryName }: Props) => {
 					<p className="text-white/80 text-xs truncate">{game.description}</p>
 				</div>
 			</div>
-		</div>
+		</button>
 	);
 };
 

@@ -5,7 +5,7 @@ import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { AnimatePresence, motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
 import { featuredGame } from "../data/games";
-import type { Game, GameCategory } from "../services/gameService";
+import type { Game, GameCategoryWithGames } from "../services/gameService";
 import gameService from "../services/gameService";
 import Footer from "./Footer";
 import styles from "./HomePage.module.css";
@@ -90,7 +90,7 @@ function CategoryRowSkeleton({
 
 export default function GameList({ username }: Props) {
 	const [categoriesWithGames, setCategoriesWithGames] = useState<
-		GameCategory[]
+		GameCategoryWithGames[]
 	>([]);
 	const [isLoading, setIsLoading] = useState(true);
 	const [loadError, setLoadError] = useState<string | null>(null);
@@ -107,7 +107,6 @@ export default function GameList({ username }: Props) {
 			setLoadError(null);
 			try {
 				const data = await gameService.getCategoriesWithGames();
-				console.log("Categories with games:", data);
 				if (Array.isArray(data)) {
 					setCategoriesWithGames(data);
 				} else {
@@ -193,7 +192,7 @@ export default function GameList({ username }: Props) {
 	const filteredCategoriesWithGames = normalizedSearch
 		? categoriesWithGames
 				.map((category) => {
-					const games = (category.games || []).filter((game) => {
+					const games = (category.games ?? []).filter((game) => {
 						const title = game.title?.toLowerCase() || "";
 						const description = game.description?.toLowerCase() || "";
 						return (
@@ -201,7 +200,7 @@ export default function GameList({ username }: Props) {
 							description.includes(normalizedSearch)
 						);
 					});
-					return { ...category, games } as GameCategory;
+					return { ...category, games } as GameCategoryWithGames;
 				})
 				.filter(
 					(category) =>
