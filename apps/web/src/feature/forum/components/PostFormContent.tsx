@@ -12,6 +12,8 @@ import {
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
+import { toast } from "@/shared/components/Sonner";
+import { getAccessToken } from "@/shared/lib/cookies";
 import {
 	useCreateForumPost,
 	useForumCategories,
@@ -26,6 +28,28 @@ import type {
 } from "../types/forum.type";
 import { useNavigate, useParams } from "@tanstack/react-router";
 
+const MAX_ATTACHMENTS = 5;
+const SAFE_IMAGE_EXTENSIONS = new Set([
+	"jpg",
+	"jpeg",
+	"png",
+	"webp",
+	"gif",
+	"avif",
+]);
+const SAFE_FILE_EXTENSIONS = new Set([
+	"pdf",
+	"txt",
+	"doc",
+	"docx",
+	"xls",
+	"xlsx",
+	"ppt",
+	"pptx",
+]);
+const SAFE_IMAGE_ACCEPT = ".jpg,.jpeg,.png,.webp,.gif,.avif";
+const SAFE_FILE_ACCEPT = ".pdf,.txt,.doc,.docx,.xls,.xlsx,.ppt,.pptx";
+
 const postSchema = z.object({
 	title: z
 		.string()
@@ -34,7 +58,9 @@ const postSchema = z.object({
 	content: z.string().min(1, "Vui lòng nhập nội dung"),
 	categorySlug: z.string().min(1, "Vui lòng chọn danh mục"),
 	tags: z.array(z.string()).max(10, "Tối đa 10 thẻ"),
-	attachments: z.array(z.instanceof(File)).max(5, "Tối đa 5 tệp đính kèm"),
+	attachments: z
+		.array(z.instanceof(File))
+		.max(MAX_ATTACHMENTS, `Tối đa ${MAX_ATTACHMENTS} tệp đính kèm`),
 });
 
 type PostFormValues = z.infer<typeof postSchema>;
@@ -43,6 +69,32 @@ function formatFileSize(bytes: number): string {
 	if (bytes < 1024) return `${bytes} B`;
 	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 	return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function getFileExtension(fileName: string): string {
+	const parts = fileName.split(".");
+	return parts.length > 1 ? (parts.at(-1)?.toLowerCase() ?? "") : "";
+}
+
+function isSafeImage(file: File): boolean {
+	const extension = getFileExtension(file.name);
+	return (
+		SAFE_IMAGE_EXTENSIONS.has(extension) &&
+		(file.type === "" || file.type.startsWith("image/"))
+	);
+}
+
+function isSafeDocument(file: File): boolean {
+	const extension = getFileExtension(file.name);
+	return SAFE_FILE_EXTENSIONS.has(extension);
+}
+
+function buildThumbnailKeyForFile(file: File): string {
+	return `new:${file.name}:${file.size}:${file.lastModified}`;
+}
+
+function buildThumbnailKeyForAttachment(attachment: Attachment): string {
+	return `existing:${attachment.id}`;
 }
 
 const notionFontFamily =
@@ -62,7 +114,9 @@ const PostFormContent: React.FC = () => {
 	const params = useParams({ strict: false });
 	const postId = params.id ? Number(params.id) : null;
 	const isEditMode = !!postId;
+	const isAuthenticated = Boolean(getAccessToken());
 
+	const imageInputRef = useRef<HTMLInputElement>(null);
 	const fileInputRef = useRef<HTMLInputElement>(null);
 	const tagInputRef = useRef<HTMLInputElement>(null);
 
@@ -76,6 +130,9 @@ const PostFormContent: React.FC = () => {
 	const [attachmentPreviewUrls, setAttachmentPreviewUrls] = useState<
 		Record<string, string>
 	>({});
+	const [selectedThumbnailKey, setSelectedThumbnailKey] = useState<
+		string | null
+	>(null);
 
 	useForumHashtags();
 	const { data: categoriesResponse } = useForumCategories();
@@ -122,6 +179,38 @@ const PostFormContent: React.FC = () => {
 		.map((segment) => segment.trim())
 		.filter(Boolean).length;
 
+	const existingImageAttachments = existingAttachments.filter(
+		(attachment) => attachment.type === "IMAGE",
+	);
+	const existingFileAttachments = existingAttachments.filter(
+		(attachment) => attachment.type !== "IMAGE",
+	);
+	const imageFiles = attachments.filter((file) => isSafeImage(file));
+	const documentFiles = attachments.filter((file) => !isSafeImage(file));
+	const totalImageCount = existingImageAttachments.length + imageFiles.length;
+	const totalCount = existingAttachments.length + attachments.length;
+	const canAddMore = totalCount < MAX_ATTACHMENTS;
+	const selectedNewThumbnailFile =
+		imageFiles.find(
+			(file) => buildThumbnailKeyForFile(file) === selectedThumbnailKey,
+		) ?? null;
+	const selectedExistingThumbnail =
+		existingImageAttachments.find(
+			(attachment) =>
+				buildThumbnailKeyForAttachment(attachment) === selectedThumbnailKey,
+		) ?? null;
+	const canSelectThumbnail =
+		!isEditMode || existingImageAttachments.length === 0;
+
+	useEffect(() => {
+		if (!isAuthenticated) {
+			toast.error({
+				title: "Bạn cần đăng nhập để tạo bài viết trên diễn đàn",
+			});
+			navigate({ to: "/forum" });
+		}
+	}, [isAuthenticated, navigate]);
+
 	useEffect(() => {
 		if (isEditMode && selectedPost) {
 			reset({
@@ -133,13 +222,51 @@ const PostFormContent: React.FC = () => {
 			});
 			setExistingAttachments(selectedPost.attachments ?? []);
 			setDeletedAttachmentIds([]);
+			const firstExistingImage = (selectedPost.attachments ?? []).find(
+				(attachment) => attachment.type === "IMAGE",
+			);
+			setSelectedThumbnailKey(
+				firstExistingImage
+					? buildThumbnailKeyForAttachment(firstExistingImage)
+					: null,
+			);
 		}
 	}, [isEditMode, selectedPost, reset]);
 
 	useEffect(() => {
+		const firstImageFile = imageFiles[0];
+		if (!isEditMode && selectedThumbnailKey == null && firstImageFile) {
+			setSelectedThumbnailKey(buildThumbnailKeyForFile(firstImageFile));
+		}
+	}, [imageFiles, isEditMode, selectedThumbnailKey]);
+
+	useEffect(() => {
+		const stillExists =
+			existingImageAttachments.some(
+				(attachment) =>
+					buildThumbnailKeyForAttachment(attachment) === selectedThumbnailKey,
+			) ||
+			imageFiles.some(
+				(file) => buildThumbnailKeyForFile(file) === selectedThumbnailKey,
+			);
+
+		if (selectedThumbnailKey && !stillExists) {
+			const fallbackExisting = existingImageAttachments[0];
+			const fallbackNew = imageFiles[0];
+			setSelectedThumbnailKey(
+				fallbackExisting
+					? buildThumbnailKeyForAttachment(fallbackExisting)
+					: fallbackNew
+						? buildThumbnailKeyForFile(fallbackNew)
+						: null,
+			);
+		}
+	}, [existingImageAttachments, imageFiles, selectedThumbnailKey]);
+
+	useEffect(() => {
 		const previews = attachments.reduce<Record<string, string>>((acc, file) => {
 			if (file.type.startsWith("image/")) {
-				acc[file.name] = URL.createObjectURL(file);
+				acc[buildThumbnailKeyForFile(file)] = URL.createObjectURL(file);
 			}
 			return acc;
 		}, {});
@@ -174,27 +301,90 @@ const PostFormContent: React.FC = () => {
 			},
 		);
 
-	const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-		const files = Array.from(e.target.files ?? []);
+	const mergeAttachments = (incomingFiles: File[]) => {
 		const usedSlots = existingAttachments.length + attachments.length;
-		const remaining = 5 - usedSlots;
-		const existingNames = new Set(attachments.map((f) => f.name));
-		const merged = [
-			...attachments,
-			...files.filter((f) => !existingNames.has(f.name)),
-		].slice(0, attachments.length + remaining);
+		const remaining = MAX_ATTACHMENTS - usedSlots;
+		if (remaining <= 0) {
+			setError("attachments", {
+				type: "manual",
+				message: `Chỉ có thể đính kèm tối đa ${MAX_ATTACHMENTS} tệp.`,
+			});
+			return;
+		}
+
+		const existingKeys = new Set(
+			attachments.map(
+				(file) => `${file.name}:${file.size}:${file.lastModified}`,
+			),
+		);
+		const deduped = incomingFiles.filter(
+			(file) =>
+				!existingKeys.has(`${file.name}:${file.size}:${file.lastModified}`),
+		);
+		const limitedFiles = deduped.slice(0, remaining);
+		const merged = [...attachments, ...limitedFiles];
 		setValue("attachments", merged, {
 			shouldDirty: true,
 			shouldValidate: true,
 		});
 		clearErrors("attachments");
+
+		if (selectedThumbnailKey == null) {
+			const firstNewImage = limitedFiles.find((file) => isSafeImage(file));
+			if (firstNewImage) {
+				setSelectedThumbnailKey(buildThumbnailKeyForFile(firstNewImage));
+			}
+		}
+
+		if (deduped.length > limitedFiles.length) {
+			toast.error({
+				title: `Chỉ có thể thêm tối đa ${MAX_ATTACHMENTS} tệp cho mỗi bài viết`,
+			});
+		}
+	};
+
+	const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = Array.from(e.target.files ?? []);
+		if (files.length === 0) return;
+
+		const invalidFiles = files.filter((file) => !isSafeImage(file));
+		if (invalidFiles.length > 0) {
+			setError("attachments", {
+				type: "manual",
+				message:
+					"Chỉ chấp nhận ảnh JPG, JPEG, PNG, WEBP, GIF hoặc AVIF. Không hỗ trợ SVG.",
+			});
+			e.target.value = "";
+			return;
+		}
+
+		mergeAttachments(files);
 		e.target.value = "";
 	};
 
-	const removeNewAttachment = (name: string) =>
+	const handleDocumentChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+		const files = Array.from(e.target.files ?? []);
+		if (files.length === 0) return;
+
+		const invalidFiles = files.filter((file) => !isSafeDocument(file));
+		if (invalidFiles.length > 0) {
+			setError("attachments", {
+				type: "manual",
+				message:
+					"Chỉ chấp nhận tệp an toàn: PDF, TXT, DOC, DOCX, XLS, XLSX, PPT, PPTX.",
+			});
+			e.target.value = "";
+			return;
+		}
+
+		mergeAttachments(files);
+		e.target.value = "";
+	};
+
+	const removeNewAttachment = (fileKey: string) =>
 		setValue(
 			"attachments",
-			attachments.filter((f) => f.name !== name),
+			attachments.filter((file) => buildThumbnailKeyForFile(file) !== fileKey),
 			{
 				shouldDirty: true,
 				shouldValidate: true,
@@ -205,9 +395,6 @@ const PostFormContent: React.FC = () => {
 		setDeletedAttachmentIds((prev) => [...prev, id]);
 		setExistingAttachments((prev) => prev.filter((a) => a.id !== id));
 	};
-
-	const totalCount = existingAttachments.length + attachments.length;
-	const canAddMore = totalCount < 5;
 	const writingChecklist = [
 		{
 			label: "Tiêu đề rõ nghĩa",
@@ -229,14 +416,39 @@ const PostFormContent: React.FC = () => {
 			description: "Giải thích tình huống, câu hỏi hoặc insight cụ thể.",
 			ready: contentLength >= 80,
 		},
+		{
+			label: "Có ít nhất một ảnh",
+			description:
+				"Ảnh là bắt buộc để card bài viết luôn có thumbnail và giữ bố cục đẹp.",
+			ready: totalImageCount > 0,
+		},
 	];
 	const completedItems = writingChecklist.filter((item) => item.ready).length;
 
 	const onSubmit = (values: PostFormValues) => {
+		const selectedThumbnail =
+			imageFiles.find(
+				(file) => buildThumbnailKeyForFile(file) === selectedThumbnailKey,
+			) ?? imageFiles[0];
+		const orderedAttachments = [
+			...(selectedThumbnail ? [selectedThumbnail] : []),
+			...imageFiles.filter((file) => file !== selectedThumbnail),
+			...documentFiles,
+		];
+
 		if (!isEditMode && values.tags.length === 0) {
 			setError("tags", {
 				type: "manual",
 				message: "Vui lòng thêm ít nhất 1 thẻ",
+			});
+			return;
+		}
+
+		if (totalImageCount === 0) {
+			setError("attachments", {
+				type: "manual",
+				message:
+					"Bài viết phải có ít nhất 1 ảnh để hiển thị thumbnail trên diễn đàn.",
 			});
 			return;
 		}
@@ -250,7 +462,7 @@ const PostFormContent: React.FC = () => {
 				deletedAttachmentIds: deletedAttachmentIds,
 			};
 			updatePostMutation.mutate(
-				{ id: postId, data: postData, attachments: values.attachments },
+				{ id: postId, data: postData, attachments: orderedAttachments },
 				{ onSuccess: () => navigate({ to: "/forum/my" }) },
 			);
 		} else {
@@ -261,7 +473,7 @@ const PostFormContent: React.FC = () => {
 				tags: values.tags,
 			};
 			createPostMutation.mutate(
-				{ data: postData, attachments: values.attachments },
+				{ data: postData, attachments: orderedAttachments },
 				{ onSuccess: () => navigate({ to: "/forum" }) },
 			);
 		}
@@ -289,6 +501,10 @@ const PostFormContent: React.FC = () => {
 				</div>
 			</div>
 		);
+	}
+
+	if (!isAuthenticated) {
+		return null;
 	}
 
 	return (
@@ -558,67 +774,195 @@ const PostFormContent: React.FC = () => {
 									<div className="mb-4 flex flex-wrap items-start justify-between gap-3">
 										<div>
 											<label
-												htmlFor="post-attachments"
+												htmlFor="post-images"
 												className="text-[11px] font-semibold uppercase tracking-[0.16em] text-[#615d59]"
 											>
-												Tệp đính kèm
+												Ảnh và tệp đính kèm
 											</label>
 											<p className="mt-1 text-sm text-[#615d59]">
-												Đính kèm khi hình ảnh hoặc tài liệu giúp làm rõ nội
-												dung.
+												Bài viết bắt buộc có ít nhất một ảnh. Bạn vẫn có thể
+												đính kèm thêm tài liệu an toàn để bổ sung nội dung.
 											</p>
 										</div>
 										<span className="rounded-full border border-black/10 bg-white px-3 py-1 text-[11px] font-medium text-[#615d59]">
-											{totalCount}/5 tệp
+											{totalCount}/{MAX_ATTACHMENTS} tệp
 										</span>
 									</div>
 
+									<input
+										id="post-images"
+										ref={imageInputRef}
+										type="file"
+										multiple
+										accept={SAFE_IMAGE_ACCEPT}
+										className="hidden"
+										onChange={handleImageChange}
+									/>
 									<input
 										id="post-attachments"
 										ref={fileInputRef}
 										type="file"
 										multiple
-										accept="image/*,.pdf,.doc,.docx"
+										accept={SAFE_FILE_ACCEPT}
 										className="hidden"
-										onChange={handleFileChange}
+										onChange={handleDocumentChange}
 									/>
 
 									<div className="space-y-3">
-										{existingAttachments.length > 0 && (
+										{existingImageAttachments.length > 0 && (
 											<div className="space-y-2">
 												<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#615d59]">
-													Tệp hiện có
+													Ảnh hiện có
 												</p>
-												{existingAttachments.map((file) => (
+												{existingImageAttachments.map((file) => (
 													<div
 														key={file.id}
 														className="group flex items-center gap-3 rounded-[1rem] border border-black/10 bg-white px-4 py-3"
 													>
-														{file.type === "IMAGE" ? (
-															<button
-																type="button"
-																className="group/thumb relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-xl"
-																onClick={() => setPreviewImg(file.url)}
-															>
-																<img
-																	src={file.url}
-																	alt=""
-																	className="h-full w-full object-cover"
-																/>
-																<div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover/thumb:bg-black/30">
-																	<ZoomIn className="h-3.5 w-3.5 text-white opacity-0 transition-opacity group-hover/thumb:opacity-100" />
-																</div>
-															</button>
-														) : (
-															<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-[#f6f5f4]">
-																<FileText className="h-4 w-4 text-[#615d59]" />
+														<button
+															type="button"
+															className="group/thumb relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-xl"
+															onClick={() => setPreviewImg(file.url)}
+														>
+															<img
+																src={file.url}
+																alt=""
+																className="h-full w-full object-cover"
+															/>
+															<div className="absolute inset-0 flex items-center justify-center bg-black/0 transition-colors group-hover/thumb:bg-black/30">
+																<ZoomIn className="h-3.5 w-3.5 text-white opacity-0 transition-opacity group-hover/thumb:opacity-100" />
 															</div>
-														)}
+														</button>
 														<div className="min-w-0 flex-1">
 															<p className="truncate text-sm font-medium text-[#1f1c19]">
-																{file.type === "IMAGE"
-																	? "Hình ảnh đã tải lên"
-																	: "Tài liệu đã tải lên"}
+																Hình ảnh đã tải lên
+															</p>
+															<a
+																href={file.url}
+																target="_blank"
+																rel="noopener noreferrer"
+																className="text-xs text-[#0075de] transition-colors hover:text-[#005bab] hover:underline"
+															>
+																Mở tệp
+															</a>
+														</div>
+														{selectedThumbnailKey ===
+														buildThumbnailKeyForAttachment(file) ? (
+															<span className="rounded-full border border-[#097fe8]/20 bg-[#f2f9ff] px-3 py-1 text-[11px] font-semibold text-[#097fe8]">
+																Thumbnail hiện tại
+															</span>
+														) : null}
+														<button
+															type="button"
+															className="rounded-full p-2 text-[#a39e98] transition-colors hover:bg-[#fff5ec] hover:text-[#dd5b00]"
+															onClick={() => removeExistingAttachment(file.id)}
+														>
+															<Trash2 className="h-4 w-4" />
+														</button>
+													</div>
+												))}
+											</div>
+										)}
+
+										{imageFiles.length > 0 && (
+											<div className="space-y-2">
+												<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#615d59]">
+													{existingImageAttachments.length > 0
+														? "Ảnh mới"
+														: "Ảnh đã chọn"}
+												</p>
+												{imageFiles.map((file) => (
+													// Keep selected thumbnail visible even when multiple images are attached.
+													<div
+														key={buildThumbnailKeyForFile(file)}
+														className="group flex items-center gap-3 rounded-[1rem] border border-[#097fe8]/15 bg-[#f8fbff] px-4 py-3"
+													>
+														<button
+															type="button"
+															className="relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-xl"
+															onClick={() =>
+																setPreviewImg(
+																	attachmentPreviewUrls[
+																		buildThumbnailKeyForFile(file)
+																	] ?? null,
+																)
+															}
+														>
+															<img
+																src={
+																	attachmentPreviewUrls[
+																		buildThumbnailKeyForFile(file)
+																	]
+																}
+																alt={file.name}
+																className="h-full w-full object-cover"
+															/>
+														</button>
+														<div className="min-w-0 flex-1">
+															<p className="truncate text-sm font-medium text-[#1f1c19]">
+																{file.name}
+															</p>
+															<p className="text-xs text-[#615d59]">
+																{formatFileSize(file.size)}
+															</p>
+														</div>
+														{canSelectThumbnail ? (
+															<button
+																type="button"
+																className={`rounded-full border px-3 py-1 text-[11px] font-semibold transition ${
+																	selectedThumbnailKey ===
+																	buildThumbnailKeyForFile(file)
+																		? "border-[#097fe8]/20 bg-white text-[#097fe8]"
+																		: "border-[#097fe8]/10 bg-white text-[#615d59] hover:border-[#097fe8]/20 hover:text-[#097fe8]"
+																}`}
+																onClick={() =>
+																	setSelectedThumbnailKey(
+																		buildThumbnailKeyForFile(file),
+																	)
+																}
+															>
+																{selectedThumbnailKey ===
+																buildThumbnailKeyForFile(file)
+																	? "Đang là thumbnail"
+																	: "Chọn làm thumbnail"}
+															</button>
+														) : (
+															<span className="rounded-full border border-black/10 bg-white px-3 py-1 text-[11px] font-semibold text-[#615d59]">
+																Ảnh bổ sung
+															</span>
+														)}
+														<button
+															type="button"
+															className="rounded-full p-2 text-[#a39e98] transition-colors hover:bg-[#fff5ec] hover:text-[#dd5b00]"
+															onClick={() =>
+																removeNewAttachment(
+																	buildThumbnailKeyForFile(file),
+																)
+															}
+														>
+															<Trash2 className="h-4 w-4" />
+														</button>
+													</div>
+												))}
+											</div>
+										)}
+
+										{existingFileAttachments.length > 0 && (
+											<div className="space-y-2">
+												<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#615d59]">
+													Tệp hiện có
+												</p>
+												{existingFileAttachments.map((file) => (
+													<div
+														key={file.id}
+														className="group flex items-center gap-3 rounded-[1rem] border border-black/10 bg-white px-4 py-3"
+													>
+														<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-black/10 bg-[#f6f5f4]">
+															<FileText className="h-4 w-4 text-[#615d59]" />
+														</div>
+														<div className="min-w-0 flex-1">
+															<p className="truncate text-sm font-medium text-[#1f1c19]">
+																Tài liệu đã tải lên
 															</p>
 															<a
 																href={file.url}
@@ -641,39 +985,19 @@ const PostFormContent: React.FC = () => {
 											</div>
 										)}
 
-										{attachments.length > 0 && (
+										{documentFiles.length > 0 && (
 											<div className="space-y-2">
 												<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#615d59]">
-													{existingAttachments.length > 0
-														? "Tệp mới"
-														: "Tệp đã chọn"}
+													Tệp mới
 												</p>
-												{attachments.map((file) => (
+												{documentFiles.map((file) => (
 													<div
-														key={file.name}
+														key={buildThumbnailKeyForFile(file)}
 														className="group flex items-center gap-3 rounded-[1rem] border border-[#097fe8]/15 bg-[#f8fbff] px-4 py-3"
 													>
-														{file.type.startsWith("image/") ? (
-															<button
-																type="button"
-																className="relative h-12 w-12 shrink-0 cursor-pointer overflow-hidden rounded-xl"
-																onClick={() =>
-																	setPreviewImg(
-																		attachmentPreviewUrls[file.name] ?? null,
-																	)
-																}
-															>
-																<img
-																	src={attachmentPreviewUrls[file.name]}
-																	alt={file.name}
-																	className="h-full w-full object-cover"
-																/>
-															</button>
-														) : (
-															<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#097fe8]/10 bg-white">
-																<FileText className="h-4 w-4 text-[#097fe8]" />
-															</div>
-														)}
+														<div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-xl border border-[#097fe8]/10 bg-white">
+															<FileText className="h-4 w-4 text-[#097fe8]" />
+														</div>
 														<div className="min-w-0 flex-1">
 															<p className="truncate text-sm font-medium text-[#1f1c19]">
 																{file.name}
@@ -685,7 +1009,11 @@ const PostFormContent: React.FC = () => {
 														<button
 															type="button"
 															className="rounded-full p-2 text-[#a39e98] transition-colors hover:bg-[#fff5ec] hover:text-[#dd5b00]"
-															onClick={() => removeNewAttachment(file.name)}
+															onClick={() =>
+																removeNewAttachment(
+																	buildThumbnailKeyForFile(file),
+																)
+															}
 														>
 															<Trash2 className="h-4 w-4" />
 														</button>
@@ -695,22 +1023,55 @@ const PostFormContent: React.FC = () => {
 										)}
 
 										{canAddMore && (
-											<button
-												type="button"
-												className="flex w-full items-center justify-center gap-2 rounded-[1rem] border border-dashed border-black/15 bg-white px-4 py-4 text-sm font-medium text-[#615d59] transition duration-200 hover:border-[#097fe8]/40 hover:bg-[#f8fbff] hover:text-[#097fe8]"
-												onClick={() => fileInputRef.current?.click()}
-											>
-												<Paperclip className="h-4 w-4" />
-												{totalCount === 0
-													? "Đính kèm hình ảnh hoặc tài liệu"
-													: "Thêm tệp đính kèm"}
-											</button>
+											<div className="grid gap-3 sm:grid-cols-2">
+												<button
+													type="button"
+													className="flex w-full items-center justify-center gap-2 rounded-[1rem] border border-dashed border-[#097fe8]/30 bg-white px-4 py-4 text-sm font-medium text-[#097fe8] transition duration-200 hover:border-[#097fe8]/50 hover:bg-[#f8fbff]"
+													onClick={() => imageInputRef.current?.click()}
+												>
+													<Paperclip className="h-4 w-4" />
+													{totalImageCount === 0
+														? "Tải ảnh bắt buộc"
+														: "Thêm ảnh"}
+												</button>
+												<button
+													type="button"
+													className="flex w-full items-center justify-center gap-2 rounded-[1rem] border border-dashed border-black/15 bg-white px-4 py-4 text-sm font-medium text-[#615d59] transition duration-200 hover:border-[#097fe8]/40 hover:bg-[#f8fbff] hover:text-[#097fe8]"
+													onClick={() => fileInputRef.current?.click()}
+												>
+													<FileText className="h-4 w-4" />
+													Thêm tài liệu an toàn
+												</button>
+											</div>
 										)}
 
-										<p className="text-xs leading-5 text-[#a39e98]">
-											Hỗ trợ ảnh, PDF, DOC và DOCX. Tối đa 5 tệp cho mỗi bài
-											viết.
-										</p>
+										<div className="rounded-[1rem] border border-[#097fe8]/15 bg-[#f2f9ff] px-4 py-3 text-xs leading-5 text-[#615d59]">
+											<p className="font-semibold text-[#1f1c19]">
+												Quy tắc upload
+											</p>
+											<p className="mt-1">
+												Bài viết phải có ít nhất 1 ảnh. Ảnh được hỗ trợ: JPG,
+												JPEG, PNG, WEBP, GIF, AVIF. Tệp bổ sung chỉ chấp nhận
+												các định dạng an toàn: PDF, TXT, DOC, DOCX, XLS, XLSX,
+												PPT, PPTX.
+											</p>
+											{!canSelectThumbnail ? (
+												<p className="mt-2">
+													Bài viết này đã có ảnh cũ nên thumbnail hiện tại vẫn
+													theo ảnh đầu tiên đang lưu. Nếu muốn đổi thumbnail,
+													hãy xóa ảnh thumbnail cũ rồi tải lại ảnh mới.
+												</p>
+											) : null}
+											{selectedNewThumbnailFile || selectedExistingThumbnail ? (
+												<p className="mt-2">
+													Thumbnail hiện chọn:{" "}
+													<span className="font-semibold text-[#097fe8]">
+														{selectedNewThumbnailFile?.name ??
+															(selectedExistingThumbnail ? "Ảnh hiện có" : "")}
+													</span>
+												</p>
+											) : null}
+										</div>
 									</div>
 
 									{errors.attachments && (

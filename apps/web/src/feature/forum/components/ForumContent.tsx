@@ -10,6 +10,7 @@ import {
 	Compass,
 	Eye,
 	Flame,
+	PenSquare,
 	Search,
 	ShieldQuestion,
 	Sparkles,
@@ -60,7 +61,8 @@ export const CATEGORY_ICONS: Record<string, React.ReactNode> = {
 const ForumContent: React.FC = () => {
 	const navigate = useNavigate();
 	const { userInfo } = useSelector(selectAuthStateInfo);
-	const canLoadRecommended = Boolean(getAccessToken());
+	const isAuthenticated = Boolean(getAccessToken());
+	const canLoadRecommended = isAuthenticated;
 	const search = useSearch({ strict: false }) as {
 		q?: string;
 		category?: string;
@@ -258,6 +260,24 @@ const ForumContent: React.FC = () => {
 									bật, thảo luận thịnh hành, bộ lọc nhanh và các thanh bên được
 									thiết kế chuyên dụng để học hỏi và chia sẻ.
 								</p>
+							</div>
+
+							<div className="flex flex-wrap items-center gap-3">
+								{isAuthenticated ? (
+									<button
+										type="button"
+										onClick={() => navigate({ to: "/forum/create" })}
+										className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+									>
+										<PenSquare className="h-4 w-4" />
+										Tạo bài viết
+									</button>
+								) : null}
+								<span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
+									{isAuthenticated
+										? "Bạn đã đăng nhập. Chia sẻ ngay một bài viết mới cho cộng đồng."
+										: "Đăng nhập để mở nút tạo bài viết và tham gia thảo luận."}
+								</span>
 							</div>
 
 							<div className="relative max-w-2xl">
