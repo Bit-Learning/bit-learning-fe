@@ -4,19 +4,31 @@ import { Trophy, Star, ChevronLeft, ChevronRight, LayoutDashboard, Search } from
 import { cn } from "@workspace/ui/lib/utils";
 import { ContestListDTO, ContestStatus } from "../types/contest.type";
 import { ContestCard } from "./ContestCard";
+import { Pagination } from "@/shared/components/Pagination";
 
 interface Props {
   contests: ContestListDTO[];
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  search: string;
+  onSearchChange: (value: string) => void;
+  status: "ALL" | ContestStatus;
+  onStatusChange: (value: "ALL" | ContestStatus) => void;
 }
 
-export const ContestListContent: React.FC<Props> = ({ contests, currentPage, totalPages, onPageChange }) => {
+export const ContestListContent: React.FC<Props> = ({
+  contests,
+  currentPage,
+  totalPages,
+  onPageChange,
+  search,
+  onSearchChange,
+  status,
+  onStatusChange,
+}) => {
   const pathname = useRouterState({ select: (s) => s.location.pathname });
   const navigate = useNavigate();
-  const [search, setSearch] = React.useState("");
-  const [statusFilter, setStatusFilter] = React.useState<"ALL" | ContestStatus>("ALL");
 
   const isAll = pathname === "/contests";
   const isMine = pathname === "/contests/my";
@@ -24,14 +36,6 @@ export const ContestListContent: React.FC<Props> = ({ contests, currentPage, tot
   const ongoingCount = contests.filter((c) => c.status === ContestStatus.RUNNING).length;
   const upcomingCount = contests.filter((c) => c.status === ContestStatus.UPCOMING).length;
   const endedCount = contests.filter((c) => c.status === ContestStatus.ENDED).length;
-
-  const filteredContests = contests.filter((c) => {
-    const matchStatus = statusFilter === "ALL" || c.status === statusFilter;
-    const matchSearch = c.title.toLowerCase().includes(search.toLowerCase());
-    const hasProblem = c.problemCount > 0;
-
-    return matchStatus && matchSearch && hasProblem;
-  });
 
   const statusItems = [
     { label: "Tất cả", value: "ALL", count: contests.length, color: "" },
@@ -94,11 +98,11 @@ export const ContestListContent: React.FC<Props> = ({ contests, currentPage, tot
               <h3 className="text-md font-black uppercase tracking-wider text-slate-800 mb-3">Trạng thái</h3>
               <div className="space-y-0.5">
                 {statusItems.map((item) => {
-                  const isActive = statusFilter === item.value;
+                  const isActive = status === item.value;
                   return (
                     <div
                       key={item.value}
-                      onClick={() => setStatusFilter(item.value as any)}
+                      onClick={() => onStatusChange(item.value as any)}
                       className={cn(
                         "flex items-center justify-between px-3 py-2 rounded-lg cursor-pointer transition-all text-sm font-semibold",
                         isActive ? "bg-blue-50 text-blue-600" : "text-slate-600 hover:bg-slate-50",
@@ -125,64 +129,25 @@ export const ContestListContent: React.FC<Props> = ({ contests, currentPage, tot
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => onSearchChange(e.target.value)}
                 placeholder="Tìm kiếm cuộc thi..."
                 className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
               />
             </div>
 
-            {filteredContests.length === 0 ? (
+            {contests.length === 0 ? (
               <div className="text-center py-20 text-slate-400 text-sm">Không tìm thấy cuộc thi nào.</div>
             ) : (
               <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-                {filteredContests.map((contest) => (
+                {contests.map((contest) => (
                   <ContestCard key={contest.contestId} contest={contest} />
                 ))}
               </div>
             )}
 
             {totalPages > 1 && (
-              <div className="flex justify-center pt-4">
-                <div className="flex items-center gap-1.5">
-                  <button
-                    onClick={() => onPageChange(Math.max(0, currentPage - 1))}
-                    disabled={currentPage === 0}
-                    className="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-colors"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  {Array.from({ length: Math.min(5, totalPages) }).map((_, i) => {
-                    const page =
-                      totalPages <= 5
-                        ? i
-                        : currentPage < 3
-                          ? i
-                          : currentPage > totalPages - 3
-                            ? totalPages - 5 + i
-                            : currentPage - 2 + i;
-                    return (
-                      <button
-                        key={page}
-                        onClick={() => onPageChange(page)}
-                        className={cn(
-                          "w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold transition-colors",
-                          currentPage === page
-                            ? "bg-blue-600 text-white shadow"
-                            : "border border-slate-200 text-slate-600 hover:bg-slate-100",
-                        )}
-                      >
-                        {page + 1}
-                      </button>
-                    );
-                  })}
-                  <button
-                    onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
-                    disabled={currentPage === totalPages - 1}
-                    className="w-10 h-10 rounded-lg border border-slate-200 flex items-center justify-center text-slate-500 hover:bg-slate-100 disabled:opacity-30 transition-colors"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
+              <div className="flex justify-center pt-6">
+                <Pagination currentPage={currentPage} totalPages={totalPages} onPageChange={onPageChange} />
               </div>
             )}
           </div>

@@ -128,7 +128,7 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center bg-black/50 p-4">
-      <div className="w-full max-w-7xl bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
+      <div className="w-full max-w-360 bg-white dark:bg-slate-900 rounded-2xl shadow-2xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
         <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-800 shrink-0">
           <div>
             <div className="flex items-center gap-2">
@@ -168,7 +168,7 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
             ].map(({ label, value, unit }) => (
               <div key={label} className="bg-white dark:bg-slate-900 px-6 py-3 flex items-center gap-3">
                 <div>
-                  <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400">{label}</p>
+                  <p className="text-sm font-bold uppercase tracking-wider text-slate-500">{label}</p>
                   <p className="text-lg font-bold text-slate-900 dark:text-white">
                     {value} <span className="text-sm font-normal text-slate-500">{unit}</span>
                   </p>
@@ -190,28 +190,28 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
               <table className="w-full text-sm">
                 <thead>
                   <tr className="bg-slate-50 dark:bg-slate-800">
-                    <th className="px-4 py-3 text-left text-xs font-bold uppercase tracking-wider text-slate-500 w-52">
+                    <th className="px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-slate-500 w-60">
                       Bài học
                     </th>
                     <th
                       colSpan={3}
-                      className="px-2 py-3 text-center text-xs font-bold text-blue-600 dark:text-blue-400"
+                      className="px-2 py-3 text-center text-sm font-bold text-blue-600 dark:text-blue-400"
                     >
                       MCQ — Trắc nghiệm
                     </th>
                     <th
                       colSpan={3}
-                      className="px-2 py-3 text-center text-xs font-bold text-orange-600 dark:text-orange-400"
+                      className="px-2 py-3 text-center text-sm font-bold text-orange-600 dark:text-orange-400"
                     >
                       Essay — Tự luận
                     </th>
-                    <th className="px-2 py-3 text-center text-xs font-bold text-slate-600 dark:text-slate-400">Điểm</th>
+                    <th className="px-2 py-3 text-center text-sm font-bold text-slate-600 dark:text-slate-400">Điểm</th>
                     <th className="w-20" />
                   </tr>
                   <tr className="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
                     <th />
                     {["Dễ", "TB", "Khó", "Dễ", "TB", "Khó"].map((l, i) => (
-                      <th key={i} className="px-2 py-2 text-center text-[11px] font-medium text-slate-500">
+                      <th key={i} className="px-2 py-2 text-center text-xs font-medium text-slate-500">
                         {l}
                       </th>
                     ))}
@@ -264,7 +264,9 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
                           <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">
                             {detail.lesson?.name}
                           </p>
-                          <p className="text-xs text-slate-400">ID: {detail.lesson?.id}</p>
+                          <p className="text-xs text-slate-400">
+                            C{detail.chapter.chapterNo}: {detail.chapter.name}
+                          </p>
                         </td>
 
                         {(
@@ -338,7 +340,7 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
                 </tbody>
                 <tfoot>
                   <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                    <td className="px-4 py-3 text-sm font-bold text-slate-700 dark:text-slate-300">Tổng</td>
+                    <td className="px-4 py-3 text-md font-bold text-slate-700 dark:text-slate-300">Tổng</td>
                     {["easyMCQ", "mediumMCQ", "hardMCQ", "easyEssay", "mediumEssay", "hardEssay"].map((f) => (
                       <td key={f} className="px-2 py-3 text-center">
                         <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
@@ -368,7 +370,7 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
         <div className="flex justify-end px-6 py-4 border-t border-slate-200 dark:border-slate-800 shrink-0">
           <Button
             onClick={onClose}
-            className="px-6 py-2.5 border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg text-sm font-medium transition-all"
+            className="px-6 py-5 text-md border border-slate-200 dark:border-slate-700 hover:bg-slate-100 hover:text-blue-600 dark:hover:bg-slate-800 rounded-lg font-medium transition-all"
           >
             Đóng
           </Button>
