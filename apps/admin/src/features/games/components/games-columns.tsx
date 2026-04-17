@@ -17,13 +17,14 @@ export type GameRow = {
 	likes?: number;
 	views?: number;
 	standardId?: number;
+	matchingGameId?: number;
 	matchingGrade?: number;
 	matchingTopicCode?: string;
 };
 
 type CreateGamesColumnsOptions = {
 	onDeleteStandard: (id: number) => void;
-	onDeleteMatching: (grade: number, topicCode: string) => void;
+	onDeleteMatching: (gameId: number) => void;
 	isDeletingStandard?: boolean;
 	isDeletingMatching?: boolean;
 };
@@ -188,8 +189,9 @@ export const createGamesColumns = ({
 								<Link
 									to="/apps/games/matching"
 									search={{
-										grade: game.matchingGrade ?? 0,
-										topic: game.matchingTopicCode ?? "",
+										gameId: game.matchingGameId,
+										grade: game.matchingGrade,
+										topic: game.matchingTopicCode,
 									}}
 								>
 									Xem chi tiết
@@ -216,14 +218,8 @@ export const createGamesColumns = ({
 							}
 							onClick={() => {
 								if (isMatching) {
-									if (
-										game.matchingGrade !== undefined &&
-										game.matchingTopicCode
-									) {
-										onDeleteMatching(
-											game.matchingGrade,
-											game.matchingTopicCode,
-										);
+									if (game.matchingGameId !== undefined) {
+										onDeleteMatching(game.matchingGameId);
 									}
 									return;
 								}

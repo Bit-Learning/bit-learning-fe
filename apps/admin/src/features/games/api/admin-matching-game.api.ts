@@ -5,6 +5,8 @@ import type { ApiResponse } from "@/shared/api/api.type";
 const MATCHING_ADMIN_BASE = "/matching/admin";
 const MATCHING_PUBLIC_BASE = "/matching";
 
+export type MatchingGameStatus = "PUBLISHED" | "DRAFT" | "ARCHIVED";
+
 // ─── DTOs mirroring the backend ────────────────────────────────────────────
 
 export interface MatchingItemDto {
@@ -38,12 +40,19 @@ export interface MatchingStageDto {
 }
 
 export interface MatchingMetaDto {
+	gameId?: number;
+	grade?: number;
+	topicCode?: string;
 	title: string;
 	version?: string;
 	language?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
 }
 
 export interface MatchingGameFullDto {
+	status?: MatchingGameStatus;
 	meta: MatchingMetaDto;
 	stages: MatchingStageDto[];
 }
@@ -60,6 +69,7 @@ export interface CurriculumMappingDto {
 	topicCode: string;
 	gameId: number;
 	gameTitle: string;
+	status?: MatchingGameStatus;
 }
 
 // ─── API ───────────────────────────────────────────────────────────────────
@@ -71,12 +81,21 @@ export const adminMatchingGameApi = {
 	> => api.get(`${MATCHING_PUBLIC_BASE}/curriculum/mappings`),
 
 	/** Get full matching-game data for a given grade + topic (public endpoint) */
-	getGame: (
-		grade: number,
-		topicCode: string,
-	): Promise<AxiosResponse<ApiResponse<MatchingGameFullDto>>> =>
+	getGame: ({
+		gameId,
+		grade,
+		topicCode,
+	}: {
+		gameId?: number;
+		grade?: number;
+		topicCode?: string;
+	}): Promise<AxiosResponse<ApiResponse<MatchingGameFullDto>>> =>
 		api.get(`${MATCHING_PUBLIC_BASE}/game`, {
-			params: { grade, topic: topicCode },
+			params: {
+				...(gameId !== undefined ? { gameId } : {}),
+				...(grade !== undefined ? { grade } : {}),
+				...(topicCode ? { topic: topicCode } : {}),
+			},
 		}),
 
 	/** Admin: create or update a matching game */
@@ -86,9 +105,6 @@ export const adminMatchingGameApi = {
 		api.post(`${MATCHING_ADMIN_BASE}/upsert`, request),
 
 	/** Admin: delete matching game by curriculum slot */
-	deleteGame: (
-		grade: number,
-		topicCode: string,
-	): Promise<AxiosResponse<ApiResponse<void>>> =>
-		api.delete(MATCHING_ADMIN_BASE, { params: { grade, topic: topicCode } }),
+	deleteGame: (gameId: number): Promise<AxiosResponse<ApiResponse<void>>> =>
+		api.delete(MATCHING_ADMIN_BASE, { params: { gameId } }),
 };

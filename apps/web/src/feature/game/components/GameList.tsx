@@ -4,15 +4,18 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Flame, Heart, Sparkles } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
 import type {
 	FeaturedGame,
 	FeaturedReason,
 	Game,
 	GameCategoryWithGames,
-	GamePreview,
 } from "../services/gameService";
 import gameService from "../services/gameService";
+import matchingGameService, {
+	type CurriculumMapping,
+	type MatchingGameLinkTarget,
+} from "../services/matchingGameService";
 import Footer from "./Footer";
 import styles from "./HomePage.module.css";
 import { Navbar } from "./Navbar/Navbar";
@@ -29,12 +32,54 @@ const CATEGORY_ROW_SKELETONS = [
 	{ id: "challenge", descriptionWidth: "w-64" },
 ] as const;
 
-type SpotlightGame = GamePreview & {
-	categoryName: string;
-	categoryDescription: string;
-	trendScore: number;
-	featuredReason?: FeaturedReason | null;
-};
+function GameNavigationLink({
+	gameId,
+	categoryName,
+	matchingTargetsByGameId,
+	className,
+	children,
+}: {
+	gameId: number;
+	categoryName?: string | null;
+	matchingTargetsByGameId: ReadonlyMap<number, MatchingGameLinkTarget>;
+	className?: string;
+	children: ReactNode;
+}) {
+	const matchingTarget =
+		categoryName === "MATCHING"
+			? matchingTargetsByGameId.get(gameId)
+			: undefined;
+
+	if (matchingTarget) {
+		return (
+			<Link
+				to="/matching/game"
+				search={{
+					gameId,
+					grade: matchingTarget.grade,
+					topic: matchingTarget.topicCode,
+				}}
+				className={className}
+			>
+				{children}
+			</Link>
+		);
+	}
+
+	if (categoryName === "MATCHING") {
+		return (
+			<Link to="/matching/game" search={{ gameId }} className={className}>
+				{children}
+			</Link>
+		);
+	}
+
+	return (
+		<Link to="/games/$id" params={{ id: String(gameId) }} className={className}>
+			{children}
+		</Link>
+	);
+}
 
 function formatCompactNumber(value: number) {
 	return new Intl.NumberFormat("vi-VN", {
@@ -126,6 +171,9 @@ export default function GameList({ username }: Props) {
 		GameCategoryWithGames[]
 	>([]);
 	const [featuredGames, setFeaturedGames] = useState<FeaturedGame[]>([]);
+	const [matchingMappings, setMatchingMappings] = useState<CurriculumMapping[]>(
+		[],
+	);
 	const [isLoading, setIsLoading] = useState(true);
 	const [loadError, setLoadError] = useState<string | null>(null);
 	const [selectedGame, setSelectedGame] = useState<Game | null>(null);
@@ -140,23 +188,36 @@ export default function GameList({ username }: Props) {
 			setIsLoading(true);
 			setLoadError(null);
 			try {
-				const [categoryData, featuredData] = await Promise.all([
-					gameService.getCategoriesWithGames(),
-					gameService.getFeaturedGames(5),
-				]);
+				const [categoryData, featuredData, matchingMappingsData] =
+					await Promise.all([
+						gameService.getCategoriesWithGames(),
+						gameService.getFeaturedGames(5),
+						matchingGameService.getCurriculumMappings().catch((error) => {
+							console.error(
+								"Failed to load matching curriculum mappings",
+								error,
+							);
+							return [];
+						}),
+					]);
 				if (Array.isArray(categoryData)) {
 					setCategoriesWithGames(categoryData);
 					setFeaturedGames(Array.isArray(featuredData) ? featuredData : []);
+					setMatchingMappings(
+						Array.isArray(matchingMappingsData) ? matchingMappingsData : [],
+					);
 				} else {
 					console.error("API returned non-array data:", categoryData);
 					setCategoriesWithGames([]);
 					setFeaturedGames([]);
+					setMatchingMappings([]);
 					setLoadError("Game data is unavailable right now.");
 				}
 			} catch (error) {
 				console.error("Failed to load categories with games", error);
 				setCategoriesWithGames([]);
 				setFeaturedGames([]);
+				setMatchingMappings([]);
 				setLoadError("Unable to load games right now. Please try again.");
 			} finally {
 				setIsLoading(false);
@@ -186,6 +247,20 @@ export default function GameList({ username }: Props) {
 			document.exitFullscreen();
 		}
 	};
+
+	const matchingTargetsByGameId = useMemo(
+		() =>
+			new Map(
+				matchingMappings.map((mapping) => [
+					mapping.gameId,
+					{
+						grade: mapping.grade,
+						topicCode: mapping.topicCode,
+					} satisfies MatchingGameLinkTarget,
+				]),
+			),
+		[matchingMappings],
+	);
 
 	if (selectedGame) {
 		const gameUrl = `${selectedGame.playUrl}?gameId=${selectedGame.id}&userId=${encodeURIComponent(username || "")}`;
@@ -374,22 +449,24 @@ export default function GameList({ username }: Props) {
 							<div className={styles.heroActions}>
 								{featuredGame ? (
 									<>
-										<Link
-											to="/games/$id"
-											params={{ id: String(featuredGame.id) }}
+										<GameNavigationLink
+											gameId={featuredGame.id}
+											categoryName={featuredGame.categoryName}
+											matchingTargetsByGameId={matchingTargetsByGameId}
 											className={styles.btnPlay}
 										>
 											<span className="material-icons">play_arrow</span>
 											MỞ GAME
-										</Link>
-										<Link
-											to="/games/$id"
-											params={{ id: String(featuredGame.id) }}
+										</GameNavigationLink>
+										<GameNavigationLink
+											gameId={featuredGame.id}
+											categoryName={featuredGame.categoryName}
+											matchingTargetsByGameId={matchingTargetsByGameId}
 											className={styles.btnInfo}
 										>
 											<ArrowUpRight size={18} />
 											XEM CHI TIẾT
-										</Link>
+										</GameNavigationLink>
 									</>
 								) : (
 									<div className={styles.emptyHeroState}>
@@ -422,10 +499,11 @@ export default function GameList({ username }: Props) {
 								<div className={styles.asideList}>
 									{risingGames.length > 0 ? (
 										risingGames.map((game, index) => (
-											<Link
+											<GameNavigationLink
 												key={game.id}
-												to="/games/$id"
-												params={{ id: String(game.id) }}
+												gameId={game.id}
+												categoryName={game.categoryName}
+												matchingTargetsByGameId={matchingTargetsByGameId}
 												className={styles.asideItem}
 											>
 												<span className={styles.asideRank}>
@@ -438,7 +516,7 @@ export default function GameList({ username }: Props) {
 														{formatCompactNumber(game.trendScore)} trend
 													</div>
 												</div>
-											</Link>
+											</GameNavigationLink>
 										))
 									) : (
 										<div className={styles.asideEmpty}>
@@ -467,10 +545,11 @@ export default function GameList({ username }: Props) {
 						</div>
 						<div className={styles.spotlightGrid}>
 							{spotlightGames.slice(0, 4).map((game, index) => (
-								<Link
+								<GameNavigationLink
 									key={game.id}
-									to="/games/$id"
-									params={{ id: String(game.id) }}
+									gameId={game.id}
+									categoryName={game.categoryName}
+									matchingTargetsByGameId={matchingTargetsByGameId}
 									className={styles.spotlightCard}
 								>
 									<div className={styles.spotlightMedia}>
@@ -500,7 +579,7 @@ export default function GameList({ username }: Props) {
 											<span>👁 {formatCompactNumber(game.views ?? 0)}</span>
 										</div>
 									</div>
-								</Link>
+								</GameNavigationLink>
 							))}
 						</div>
 					</section>
@@ -539,6 +618,7 @@ export default function GameList({ username }: Props) {
 									categoryName={category.name}
 									categoryDescription={category.description}
 									games={category.games || []}
+									matchingTargetsByGameId={matchingTargetsByGameId}
 								/>
 							</motion.div>
 						))}

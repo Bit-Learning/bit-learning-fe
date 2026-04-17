@@ -4,7 +4,15 @@ import { useNavigate } from "@tanstack/react-router";
 
 export default function DashboardPage() {
 	const navigate = useNavigate();
-	const { correct = 0, total = 0, time = 0, title } = Route.useSearch();
+	const {
+		correct = 0,
+		total = 0,
+		time = 0,
+		title,
+		gameId,
+		grade,
+		topic,
+	} = Route.useSearch();
 
 	const minutes = Math.floor(time / 60);
 	const seconds = time % 60;
@@ -19,6 +27,8 @@ export default function DashboardPage() {
 			: pct > 0
 				? "Cố gắng thêm nhé, bạn sẽ làm tốt hơn! 📚"
 				: "Hãy bắt đầu chơi để xem kết quả của bạn! 🎮";
+	const canReplayCurrentGame =
+		gameId !== undefined || (grade !== undefined && topic !== undefined);
 
 	return (
 		<div className="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 transition-colors duration-300 min-h-screen">
@@ -122,13 +132,26 @@ export default function DashboardPage() {
 							{/* Actions */}
 							<div className="flex flex-col sm:flex-row gap-4 justify-center">
 								<button
-									onClick={() => navigate({ to: "/matching/game" })}
+									type="button"
+									onClick={() =>
+										canReplayCurrentGame
+											? navigate({
+													to: "/matching/game",
+													search: {
+														gameId,
+														grade,
+														topic,
+													},
+												})
+											: navigate({ to: "/matching/path" })
+									}
 									className="flex items-center justify-center gap-2 rounded-xl border-2 border-primary px-8 py-4 text-primary font-bold text-lg hover:bg-primary/5 transition-all active:scale-95 sm:min-w-[180px]"
 								>
 									<span className="material-symbols-outlined">replay</span>
 									Làm lại
 								</button>
 								<button
+									type="button"
 									onClick={() => navigate({ to: "/matching/path" })}
 									className="flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-white font-bold text-lg hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95 sm:min-w-[180px]"
 								>

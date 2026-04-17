@@ -1,20 +1,13 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useNavigate } from "@tanstack/react-router";
 import { useEffect, useRef, useState } from "react";
 import PageMeta from "@/shared/components/seo/page-meta";
-import {
-	CURRICULUM_DATA,
-	GAME_DATA,
-	Item,
-	TopicCode,
-} from "@/feature/game/data";
+import { GAME_DATA, type Item } from "@/feature/game/data";
 import { useAudio } from "@/feature/game/contexts/AudioProvider";
 import { AudioToggle } from "@/feature/game/components/AudioToggle";
 import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
 import matchingGameService from "@/feature/game/services/matchingGameService";
 import gameService from "@/feature/game/services/gameService";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/shared/redux/store";
 import { Route } from "@/routes/matching/game";
 
 function shuffle<T>(arr: T[]): T[] {
@@ -39,18 +32,54 @@ function renderItemContent(
 
 	if (item.type === "audio") {
 		const sizeClass = variant === "large" ? "w-full" : "w-full max-w-xs";
-		return <audio controls src={item.value} className={sizeClass} />;
+		return (
+			<audio controls className={sizeClass}>
+				<source src={item.value} />
+				<track kind="captions" />
+			</audio>
+		);
 	}
 
 	return <span className={textClassName}>{item.value}</span>;
 }
 
+const getMatchingGameLoadErrorMessage = (error: unknown) => {
+	if (
+		typeof error === "object" &&
+		error !== null &&
+		"response" in error &&
+		typeof error.response === "object" &&
+		error.response !== null
+	) {
+		const response = error.response as {
+			status?: number;
+			data?: { message?: string };
+		};
+
+		if (response.status === 403) {
+			return "Matching game này chưa được xuất bản hoặc bạn không có quyền xem.";
+		}
+
+		if (response.status === 404) {
+			return "Không tìm thấy matching game cho lớp và chủ đề này.";
+		}
+
+		if (typeof response.data?.message === "string") {
+			return response.data.message;
+		}
+	}
+
+	if (error instanceof Error && error.message) {
+		return error.message;
+	}
+
+	return "Không thể tải matching game này.";
+};
+
 export default function GamePage() {
 	const navigate = useNavigate();
 	const { playSound, stopSound } = useAudio();
-	const { grade = 3, topic = "A" } = Route.useSearch();
-	const auth = useSelector((state: RootState) => state.auth);
-	const username = auth.userInfo?.username ?? null;
+	const { gameId, grade, topic } = Route.useSearch();
 
 	const [gameData, setGameData] = useState(() => GAME_DATA);
 	const [loading, setLoading] = useState(true);
@@ -59,23 +88,25 @@ export default function GamePage() {
 	const trackedRef = useRef(false);
 
 	useEffect(() => {
+		if (gameId === undefined && (grade === undefined || topic === undefined)) {
+			setLoading(false);
+			setError("Liên kết matching game không hợp lệ.");
+			return;
+		}
+
 		let isMounted = true;
 		setLoading(true);
 		setError(null);
 
 		matchingGameService
-			.getGameByCurriculum(grade, topic)
+			.getGame({ gameId, grade, topic })
 			.then((data) => {
 				if (!isMounted) return;
 				setGameData(data);
 			})
-			.catch(() => {
-				// Fallback to local mock data if backend is not ready
+			.catch((error: unknown) => {
 				if (!isMounted) return;
-				const gradeData = CURRICULUM_DATA.grades.find((g) => g.id === grade);
-				const topicData = gradeData?.topics.find((t) => t.code === topic);
-				setGameData(topicData?.gameData ?? GAME_DATA);
-				setError("Không tải được dữ liệu từ máy chủ. Đang dùng dữ liệu mẫu.");
+				setError(getMatchingGameLoadErrorMessage(error));
 			})
 			.finally(() => {
 				if (!isMounted) return;
@@ -85,7 +116,7 @@ export default function GamePage() {
 		return () => {
 			isMounted = false;
 		};
-	}, [grade, topic]);
+	}, [gameId, grade, topic]);
 
 	const [stageIndex, setStageIndex] = useState(0);
 	const [completedPairCount, setCompletedPairCount] = useState(0);
@@ -123,16 +154,21 @@ export default function GamePage() {
 			playSound("game-background-music", { loop: true });
 		};
 	}, [playSound, stopSound]);
-	const currentStage = (gameData.stages[stageIndex] ?? gameData.stages[0])!;
-	const rightIds = currentStage.pairs.map((p) => p.id);
+	const currentStage =
+		gameData.stages[stageIndex] ?? gameData.stages[0] ?? null;
+	const rightIds = currentStage?.pairs.map((p) => p.id) ?? [];
 	const [shuffledRightIds, setShuffledRightIds] = useState<string[]>(() =>
-		currentStage.config?.shuffle ? shuffle(rightIds) : rightIds,
+		currentStage?.config?.shuffle ? shuffle(rightIds) : rightIds,
 	);
 
 	useEffect(() => {
+		if (!currentStage) {
+			setShuffledRightIds([]);
+			return;
+		}
+
 		const ids = currentStage.pairs.map((p) => p.id);
-		const next = currentStage.config?.shuffle ? shuffle(ids) : ids;
-		setShuffledRightIds(next);
+		setShuffledRightIds(currentStage.config?.shuffle ? shuffle(ids) : ids);
 	}, [currentStage]);
 	const [selectedLeftId, setSelectedLeftId] = useState<string | null>(null);
 	const [selectedRightId, setSelectedRightId] = useState<string | null>(null);
@@ -145,8 +181,12 @@ export default function GamePage() {
 	// const [showHint, setShowHint] = useState<boolean>(() => currentStage.config?.showHints ?? true)
 	const [lastMatchedId, setLastMatchedId] = useState<string | null>(null);
 	const [mistakesCount, setMistakesCount] = useState(0);
-	const [limitMistakes, setLimitMistakes] = useState(true);
+	const [limitMistakes, _setLimitMistakes] = useState(true);
 	const [isGameOver, setIsGameOver] = useState(false);
+	const gameIdentity = [
+		gameData.meta.gameId ?? "unknown",
+		gameData.stages.map((stage) => stage.id).join(","),
+	].join(":");
 
 	const isLastStage = stageIndex >= gameData.stages.length - 1;
 
@@ -165,6 +205,9 @@ export default function GamePage() {
 				total: totalPairs,
 				time: elapsed,
 				title: gameData.meta.title,
+				gameId: gameData.meta.gameId ?? gameId,
+				grade: gameData.meta.grade ?? grade,
+				topic: gameData.meta.topicCode ?? topic,
 			},
 		});
 	};
@@ -178,6 +221,8 @@ export default function GamePage() {
 	};
 
 	const handleRightClick = (pairId: string) => {
+		if (!currentStage) return;
+
 		const layoutType = currentStage.config?.layoutType ?? "match";
 		const isMediaQuiz = layoutType === "media-quiz";
 		const stageMaxMistakes = currentStage.config?.maxMistakes;
@@ -186,7 +231,8 @@ export default function GamePage() {
 		const isLimitedModeLocal = limitMistakes && canLimitByConfig;
 
 		if (isMediaQuiz) {
-			const questionPair = currentStage.pairs[0]!;
+			const questionPair = currentStage.pairs[0];
+			if (!questionPair) return;
 			if (isGameOver || matchedPairIds.includes(questionPair.id)) return;
 
 			setSelectedRightId(pairId);
@@ -274,6 +320,7 @@ export default function GamePage() {
 
 	// Reset to the first stage and clear state when the underlying game data changes
 	useEffect(() => {
+		void gameIdentity;
 		setStageIndex(0);
 		trackedRef.current = false;
 		startTimeRef.current = Date.now();
@@ -288,7 +335,7 @@ export default function GamePage() {
 		setLastMatchedId(null);
 		setMistakesCount(0);
 		setIsGameOver(false);
-	}, [gameData]);
+	}, [gameIdentity]);
 
 	const handleRestartAll = () => {
 		setStageIndex(0);
@@ -323,18 +370,20 @@ export default function GamePage() {
 		setIsGameOver(false);
 	};
 
-	const layoutType = currentStage.config?.layoutType ?? "match";
+	const layoutType = currentStage?.config?.layoutType ?? "match";
 	const isMediaQuiz = layoutType === "media-quiz";
-	const mediaQuestionPair = isMediaQuiz ? currentStage.pairs[0] : null;
+	const mediaQuestionPair =
+		isMediaQuiz && currentStage ? (currentStage.pairs[0] ?? null) : null;
 
 	const matchedCount = isMediaQuiz
 		? mediaQuestionPair && matchedPairIds.includes(mediaQuestionPair.id)
 			? 1
 			: 0
 		: matchedPairIds.length;
-	const totalCount = isMediaQuiz ? 1 : currentStage.pairs.length;
-	const progressPct = Math.round((matchedCount / totalCount) * 100);
-	const stageMaxMistakes = currentStage.config?.maxMistakes;
+	const totalCount = isMediaQuiz ? 1 : (currentStage?.pairs.length ?? 0);
+	const progressPct =
+		totalCount > 0 ? Math.round((matchedCount / totalCount) * 100) : 0;
+	const stageMaxMistakes = currentStage?.config?.maxMistakes;
 	const canLimitByConfig =
 		typeof stageMaxMistakes === "number" && stageMaxMistakes > 0;
 	const isLimitedMode = limitMistakes && canLimitByConfig;
@@ -342,9 +391,80 @@ export default function GamePage() {
 		isLimitedMode && stageMaxMistakes
 			? Math.max(0, stageMaxMistakes - mistakesCount)
 			: null;
+	const heartSlots = Array.from(
+		{ length: stageMaxMistakes ?? 0 },
+		(_, heartNumber) => heartNumber + 1,
+	);
 
 	if (loading) {
 		return <Loader />;
+	}
+
+	if (error) {
+		return (
+			<div className="bg-background-light text-slate-900 min-h-screen">
+				<PageMeta title="Không thể mở matching game" description={error} />
+				<div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center p-6">
+					<div className="w-full rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+						<div className="mx-auto mb-6 flex h-16 w-16 items-center justify-center rounded-full bg-amber-100 text-amber-600">
+							<span className="material-symbols-outlined text-3xl">
+								warning
+							</span>
+						</div>
+						<h1 className="text-2xl font-bold tracking-tight">
+							Không thể mở matching game
+						</h1>
+						<p className="mt-3 text-sm text-slate-600">{error}</p>
+						<div className="mt-6 flex flex-col gap-3 sm:flex-row sm:justify-center">
+							<button
+								type="button"
+								onClick={() => navigate({ to: "/matching/path" })}
+								className="rounded-xl bg-primary px-6 py-3 font-bold text-white transition-colors hover:bg-primary/90"
+							>
+								Quay lại chọn bài học
+							</button>
+							<button
+								type="button"
+								onClick={() => window.history.back()}
+								className="rounded-xl border border-slate-200 px-6 py-3 font-bold transition-colors hover:bg-slate-50"
+							>
+								Quay lại trang trước
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (!currentStage) {
+		return (
+			<div className="bg-background-light text-slate-900 min-h-screen">
+				<PageMeta
+					title="Matching game chưa có dữ liệu"
+					description="Matching game này hiện chưa có stage nào để hiển thị."
+				/>
+				<div className="mx-auto flex min-h-screen max-w-3xl items-center justify-center p-6">
+					<div className="w-full rounded-3xl border border-slate-200 bg-white p-8 text-center shadow-sm">
+						<h1 className="text-2xl font-bold tracking-tight">
+							Matching game chưa có dữ liệu
+						</h1>
+						<p className="mt-3 text-sm text-slate-600">
+							Game này chưa có stage nào được cấu hình.
+						</p>
+						<div className="mt-6 flex justify-center">
+							<button
+								type="button"
+								onClick={() => navigate({ to: "/matching/path" })}
+								className="rounded-xl bg-primary px-6 py-3 font-bold text-white transition-colors hover:bg-primary/90"
+							>
+								Quay lại chọn bài học
+							</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		);
 	}
 
 	// const nextHintPair = currentStage.pairs.find((p) => !matchedPairIds.includes(p.id))
@@ -359,12 +479,13 @@ export default function GamePage() {
 			{/* Header */}
 			<header className="w-full bg-white dark:bg-slate-900 border-b border-slate-200 dark:border-slate-800 px-6 py-4 flex items-center justify-between sticky top-0 z-50">
 				<div className="flex items-center gap-3">
-					<div
+					<button
+						type="button"
 						className="bg-primary/10 p-2 rounded-lg text-primary cursor-pointer"
 						onClick={() => navigate({ to: "/matching/path" })}
 					>
 						<span className="material-symbols-outlined text-2xl">school</span>
-					</div>
+					</button>
 					<h1 className="text-xl font-bold tracking-tight">
 						{gameData.meta.title}
 					</h1>
@@ -382,18 +503,18 @@ export default function GamePage() {
 						<div
 							className="bg-primary h-full rounded-full transition-all duration-500"
 							style={{ width: `${progressPct}%` }}
-						></div>
+						/>
 					</div>
 				</div>
 				{isLimitedMode && (
 					<div className="flex items-center gap-2 mt-1 text-xs font-semibold text-slate-500">
 						{/* <span className="uppercase tracking-wider">Lượt sai:</span> */}
 						<div className="flex items-center gap-0.5">
-							{Array.from({ length: stageMaxMistakes ?? 0 }).map((_, idx) => {
-								const filled = heartsLeft !== null && idx < heartsLeft;
+							{heartSlots.map((heartNumber) => {
+								const filled = heartsLeft !== null && heartNumber <= heartsLeft;
 								return (
 									<span
-										key={idx}
+										key={heartNumber}
 										className={`material-symbols-outlined text-sm ${
 											filled
 												? "text-rose-500"
@@ -477,6 +598,7 @@ export default function GamePage() {
 								return (
 									<button
 										key={pair.id}
+										type="button"
 										onClick={() => handleRightClick(pair.id)}
 										disabled={isGameOver || hasAnswered}
 										className={`match-card flex items-center gap-4 p-6 rounded-xl shadow-sm text-left transition-all
@@ -528,6 +650,7 @@ export default function GamePage() {
 								return (
 									<button
 										key={pair.id}
+										type="button"
 										onClick={() => handleLeftClick(pair.id)}
 										disabled={isMatched || isGameOver}
 										className={`match-card flex items-center gap-4 p-6 rounded-xl shadow-sm text-left transition-all
@@ -568,6 +691,7 @@ export default function GamePage() {
 								return (
 									<button
 										key={pair.id}
+										type="button"
 										onClick={() => handleRightClick(pair.id)}
 										disabled={isMatched || !selectedLeftId || isGameOver}
 										className={`match-card flex items-center gap-4 p-6 rounded-xl shadow-sm text-left transition-all
@@ -628,12 +752,14 @@ export default function GamePage() {
 				</div>
 				<div className="flex gap-3">
 					<button
+						type="button"
 						onClick={handleReset}
 						className="px-6 py-2.5 rounded-lg border border-slate-200 dark:border-slate-800 font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors"
 					>
 						Làm lại
 					</button>
 					<button
+						type="button"
 						onClick={goToDashboard}
 						className="px-8 py-2.5 rounded-lg bg-primary text-white font-bold shadow-lg shadow-primary/30 hover:bg-primary/90 transition-all flex items-center gap-2"
 					>
@@ -662,6 +788,7 @@ export default function GamePage() {
 						</p>
 						<div className="flex flex-col gap-3">
 							<button
+								type="button"
 								onClick={isLastStage ? handleRestartAll : handleNextStage}
 								className="w-full bg-primary text-white font-bold py-4 rounded-xl text-lg hover:bg-primary/90 transition-colors"
 							>
@@ -669,6 +796,7 @@ export default function GamePage() {
 							</button>
 							{isLastStage && (
 								<button
+									type="button"
 									onClick={goToDashboard}
 									className="w-full bg-slate-100 dark:bg-slate-800 font-bold py-4 rounded-xl text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
 								>
@@ -694,12 +822,14 @@ export default function GamePage() {
 						</p>
 						<div className="flex flex-col gap-3">
 							<button
+								type="button"
 								onClick={handleReset}
 								className="w-full bg-primary text-white font-bold py-4 rounded-xl text-lg hover:bg-primary/90 transition-colors"
 							>
 								Chơi lại
 							</button>
 							<button
+								type="button"
 								onClick={goToDashboard}
 								className="w-full bg-slate-100 dark:bg-slate-800 font-bold py-4 rounded-xl text-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors"
 							>

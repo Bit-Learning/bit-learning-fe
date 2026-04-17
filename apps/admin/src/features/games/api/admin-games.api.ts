@@ -4,11 +4,14 @@ import type { ApiResponse } from "@/shared/api/api.type";
 
 const ADMIN_GAMES_ENDPOINT = "/admin/games";
 
+export type AdminGameType = "QUIZ" | "TYPING" | "MATCHING";
+
 // This mirrors the backend Game entity JSON we actually use in admin.
 export interface AdminGameDto {
 	id: number;
 	title: string;
 	description?: string;
+	gameType?: AdminGameType;
 	minioObjectName?: string;
 	thumbnailUrl?: string;
 	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";

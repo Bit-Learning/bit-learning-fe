@@ -3,6 +3,7 @@ import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
 import type { GamePreview } from "../services/gameService";
 import { useAudio } from "../contexts/AudioProvider";
+import type { MatchingGameLinkTarget } from "../services/matchingGameService";
 import GameCard from "./GameRow";
 import styles from "./GameRow.module.css";
 
@@ -10,12 +11,14 @@ interface CategoryRowProps {
 	categoryName: string;
 	categoryDescription: string;
 	games: GamePreview[];
+	matchingTargetsByGameId?: ReadonlyMap<number, MatchingGameLinkTarget>;
 }
 
 export default function CategoryRow({
 	categoryName,
 	categoryDescription,
 	games,
+	matchingTargetsByGameId,
 }: CategoryRowProps) {
 	const navigate = useNavigate();
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
@@ -96,7 +99,12 @@ export default function CategoryRow({
 						}}
 					>
 						{games.map((game) => (
-							<GameCard game={game} categoryName={categoryName} key={game.id} />
+							<GameCard
+								game={game}
+								categoryName={categoryName}
+								matchingTarget={matchingTargetsByGameId?.get(game.id)}
+								key={game.id}
+							/>
 						))}
 					</div>
 

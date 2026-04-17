@@ -25,7 +25,7 @@ import { createGamesColumns, type GameRow } from "./games-columns";
 type GamesTableProps = {
 	data: GameRow[];
 	onDeleteStandard: (id: number) => void;
-	onDeleteMatching: (grade: number, topicCode: string) => void;
+	onDeleteMatching: (gameId: number) => void;
 	isDeletingStandard?: boolean;
 	isDeletingMatching?: boolean;
 };

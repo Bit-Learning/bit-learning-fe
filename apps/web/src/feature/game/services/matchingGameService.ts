@@ -2,20 +2,32 @@ import api from "@/shared/api/api";
 import type { GameData, TopicCode } from "@/feature/game/data";
 import type { ApiResponse } from "@/shared/api/api.type";
 
-export interface CurriculumMapping {
+export interface MatchingGameLinkTarget {
 	grade: number;
 	topicCode: TopicCode;
+}
+
+export interface CurriculumMapping extends MatchingGameLinkTarget {
 	gameId: number;
 	gameTitle: string;
 }
 
 const matchingGameService = {
-	getGameByCurriculum: async (
-		grade: number,
-		topic: TopicCode,
-	): Promise<GameData> => {
+	getGame: async ({
+		gameId,
+		grade,
+		topic,
+	}: {
+		gameId?: number;
+		grade?: number;
+		topic?: TopicCode;
+	}): Promise<GameData> => {
 		const response = await api.get<ApiResponse<GameData>>("/matching/game", {
-			params: { grade, topic },
+			params: {
+				...(gameId !== undefined ? { gameId } : {}),
+				...(grade !== undefined ? { grade } : {}),
+				...(topic ? { topic } : {}),
+			},
 		});
 		return response.data.data as GameData;
 	},

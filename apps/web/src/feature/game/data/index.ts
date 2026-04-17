@@ -35,6 +35,8 @@ export interface Stage {
 export interface GameData {
 	meta: {
 		gameId?: number;
+		grade?: number;
+		topicCode?: TopicCode;
 		title: string;
 		version: string;
 		language: string;
