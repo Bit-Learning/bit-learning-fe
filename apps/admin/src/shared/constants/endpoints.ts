@@ -12,31 +12,27 @@ export const MINIO_GAME_URL =
 	import.meta.env.VITE_MINIO_GAME_URL ??
 	"https://bit-learning-minio.lch.id.vn/scratch-games";
 
-const getPublicSiteUrlFromCurrentOrigin = () => {
+const LOCAL_PUBLIC_SITE_URL = "http://localhost:5173";
+const PRODUCTION_PUBLIC_SITE_URL = "https://bit-learning.lch.id.vn";
+
+const isLocalAdminHost = (hostname: string) =>
+	hostname === "localhost" ||
+	hostname === "127.0.0.1" ||
+	hostname === "0.0.0.0";
+
+const getPublicSiteUrlFromAdminOrigin = () => {
 	if (typeof window === "undefined") return undefined;
 
-	const currentUrl = new URL(window.location.origin);
-
-	if (currentUrl.hostname.startsWith("bit-learning-admin.")) {
-		currentUrl.hostname = currentUrl.hostname.replace(
-			"bit-learning-admin.",
-			"bit-learning.",
-		);
-		return currentUrl.origin;
-	}
-
-	if (currentUrl.hostname.startsWith("admin.")) {
-		currentUrl.hostname = currentUrl.hostname.replace(/^admin\./, "");
-		return currentUrl.origin;
-	}
-
-	return currentUrl.origin;
+	return isLocalAdminHost(window.location.hostname)
+		? LOCAL_PUBLIC_SITE_URL
+		: PRODUCTION_PUBLIC_SITE_URL;
 };
 
 export const PUBLIC_SITE_URL =
-	(import.meta.env as Record<string, string | undefined>).VITE_SITE_URL ??
-	getPublicSiteUrlFromCurrentOrigin() ??
-	"https://bit-learning.lch.id.vn";
+	(import.meta.env as Record<string, string | undefined>)
+		.VITE_PUBLIC_SITE_URL ??
+	getPublicSiteUrlFromAdminOrigin() ??
+	PRODUCTION_PUBLIC_SITE_URL;
 
 export const getMatchingGamePlayUrl = ({
 	gameId,
