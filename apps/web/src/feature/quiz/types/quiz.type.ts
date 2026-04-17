@@ -101,9 +101,9 @@ export interface QuizSessionAnswerResponse {
   question: QuestionBriefResponse;
   answerText?: string;
   selectedOptionIds?: number[];
-  isMarked: boolean;
+  marked: boolean;
   questionNo: number;
-  isCorrect: boolean;
+  correct: boolean;
 }
 
 export interface QuizSessionResponse {

@@ -55,7 +55,7 @@ const QuizSessionContent: React.FC = () => {
           draft[a.question.id] = a.answerText;
           saved[a.question.id] = true;
         }
-        if (a.isMarked) marked.add(a.question.id);
+        if (a.marked) marked.add(a.question.id);
       });
 
       setEssayDraft(draft);
@@ -145,9 +145,9 @@ const QuizSessionContent: React.FC = () => {
           },
           answerText: text,
           selectedOptionIds: [],
-          isMarked: markedQuestions.has(questionId),
+          marked: markedQuestions.has(questionId),
           questionNo: questions.indexOf(question) + 1,
-          isCorrect: question.canonicalAnswer
+          correct: question.canonicalAnswer
             ? question.canonicalAnswer.trim().toLowerCase() === text.trim().toLowerCase()
             : false,
         }),
@@ -199,9 +199,9 @@ const QuizSessionContent: React.FC = () => {
         },
         selectedOptionIds: [optionId],
         answerText: "",
-        isMarked: markedQuestions.has(currentQuestion.id),
+        marked: markedQuestions.has(currentQuestion.id),
         questionNo: currentIndex + 1,
-        isCorrect: getIsCorrect(currentQuestion.id, [optionId]),
+        correct: getIsCorrect(currentQuestion.id, [optionId]),
       }),
     );
 

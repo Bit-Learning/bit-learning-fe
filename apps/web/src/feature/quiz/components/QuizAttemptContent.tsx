@@ -162,6 +162,7 @@ const QuizAttemptContent: React.FC = () => {
               questionId: answer.question.id,
               selectedOptionIds: answer.selectedOptionIds,
               answerText: answer.answerText ?? undefined,
+              questionNo: answer.questionNo,
               navigationState:
                 "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
             })),
@@ -325,6 +326,7 @@ const QuizAttemptContent: React.FC = () => {
           questionId: answer.question.id,
           selectedOptionIds: answer.selectedOptionIds,
           answerText: answer.answerText ?? undefined,
+          questionNo: answer.questionNo,
           navigationState:
             "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
         }));

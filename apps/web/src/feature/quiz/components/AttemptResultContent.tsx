@@ -66,7 +66,7 @@ const QuizAttemptResultContent: React.FC = () => {
     return (answer.selectedOptionIds?.length ?? 0) > 0;
   };
 
-  const totalQuestions = attemptData.answers.length;
+  const totalQuestions = attemptData.exam.totalQuestions;
   let correctCount = 0;
   let incorrectCount = 0;
   let unansweredCount = 0;

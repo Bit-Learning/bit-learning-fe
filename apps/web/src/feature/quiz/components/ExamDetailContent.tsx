@@ -377,7 +377,7 @@ const ExamDetailContent: React.FC = () => {
                                     params: { attemptId: String(attempt.id) },
                                   })
                                 }
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-colors"
+                                className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-colors"
                               >
                                 <Eye className="w-4 h-4" /> Xem kết quả
                               </button>
@@ -422,9 +422,6 @@ const ExamDetailContent: React.FC = () => {
                                 )}
                               </div>
                               <p className="font-semibold text-slate-800 text-sm">{formatDate(session.startTime)}</p>
-                              <p className="text-xs text-slate-400 mt-0.5">
-                                Câu {session.currentIndex + 1} / {exam?.examQuestions?.length || 0}
-                              </p>
                             </div>
                           </div>
                           <div className="flex items-center gap-2">
@@ -449,7 +446,7 @@ const ExamDetailContent: React.FC = () => {
                                     params: { sessionId: String(session.id) },
                                   })
                                 }
-                                className="flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-colors"
+                                className="cursor-pointer flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-bold border border-slate-200 hover:bg-slate-50 transition-colors"
                               >
                                 <Eye className="w-4 h-4" /> Xem kết quả
                               </button>
