@@ -42,8 +42,8 @@ export const useAddToCart = () => {
 
       toast.success({ title: "Đã thêm vào giỏ hàng" });
     },
-    onError: (error: Error) => {
-      toast.error({ title: "Không thể thêm vào giỏ hàng", description: error.message });
+    onError: (error: any) => {
+      toast.error({ title: "Không thể thêm vào giỏ hàng", description: error?.response?.data?.message });
     },
   });
 };
@@ -61,8 +61,8 @@ export const useRemoveFromCart = () => {
 
       toast.success({ title: "Đã xóa khỏi giỏ hàng" });
     },
-    onError: (error: Error) => {
-      toast.error({ title: "Không thể xóa khỏi giỏ hàng", description: error.message });
+    onError: (error: any) => {
+      toast.error({ title: "Không thể xóa khỏi giỏ hàng", description: error?.response?.data?.message });
     },
   });
 };

@@ -55,10 +55,13 @@ export const useCreateOrder = () => {
         toast.success({ title: "Đặt hàng thành công" });
       }
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
+      const message =
+        error?.response?.data?.message || error?.response?.data?.error || error?.message || "Có lỗi xảy ra";
+
       toast.error({
         title: "Không thể tạo đơn hàng",
-        description: error.message,
+        description: message,
       });
     },
   });
@@ -73,10 +76,10 @@ export const useCancelOrder = () => {
       queryClient.invalidateQueries({ queryKey: ["orders"] });
       toast.success({ title: "Đã hủy đơn hàng" });
     },
-    onError: (error: Error) => {
+    onError: (error: any) => {
       toast.error({
         title: "Không thể hủy đơn hàng",
-        description: error.message,
+        description: error?.response?.data?.message,
       });
     },
   });
