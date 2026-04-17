@@ -105,7 +105,7 @@ const QuizAttemptResultContent: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-5 gap-3">
               <div className="md:col-span-2 border rounded-md p-4 text-center">
                 <div className="text-xl font-bold">
-                  {score.toFixed(1)} / {totalScore}
+                  {Number.isInteger(score) ? score : score.toFixed(1)} / {totalScore}
                 </div>
                 <div className="text-xs text-slate-500">điểm</div>
               </div>

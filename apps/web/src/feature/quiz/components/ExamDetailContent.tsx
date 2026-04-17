@@ -350,7 +350,7 @@ const ExamDetailContent: React.FC = () => {
                               <div className="text-right">
                                 <p className="text-[10px] text-slate-400 uppercase tracking-wider">Điểm số</p>
                                 <p className="text-2xl font-black text-blue-600">
-                                  {attempt.score.toFixed(1)}
+                                  {Number.isInteger(attempt.score) ? attempt.score : attempt.score.toFixed(1)}
                                   <span className="text-sm text-slate-400 ml-1">/{exam?.totalScore}</span>
                                 </p>
                               </div>
