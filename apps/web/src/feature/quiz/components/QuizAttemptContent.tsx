@@ -168,6 +168,7 @@ const QuizAttemptContent: React.FC = () => {
             })),
           },
         });
+        localStorage.removeItem(`quiz_device_token_${attemptData?.exam.id}`);
       }
     } catch (error) {
       console.error("Auto-submit failed:", error);
@@ -336,6 +337,8 @@ const QuizAttemptContent: React.FC = () => {
         deviceToken: token,
         data: { confirmSubmit: true, answers: buildAnswers() },
       });
+
+      localStorage.removeItem(`quiz_device_token_${attemptData?.exam.id}`);
 
       navigate({
         to: "/quiz-attempts/$attemptId/result",
