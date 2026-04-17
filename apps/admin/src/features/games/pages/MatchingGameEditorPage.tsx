@@ -1,14 +1,17 @@
 import { Link, useNavigate } from "@tanstack/react-router";
+import { useQueryClient } from "@tanstack/react-query";
 import { useEffect, useMemo, useState } from "react";
 import {
 	ArrowLeft,
 	BookOpen,
 	ChevronDown,
 	ChevronUp,
+	ExternalLink,
 	LayoutGrid,
 	Loader2,
 	PlusCircle,
 	Save,
+	Send,
 	Trash2,
 } from "lucide-react";
 import { toast } from "sonner";
@@ -38,12 +41,17 @@ import {
 } from "@/components/ui/select";
 import { Separator } from "@/components/ui/separator";
 import { Textarea } from "@/components/ui/textarea";
+import { getMatchingGamePlayUrl } from "@/shared/constants/endpoints";
 import type {
+	MatchingGameFullDto,
+	MatchingGameStatus,
 	MatchingPairDto,
 	MatchingStageConfigDto,
 	MatchingStageDto,
 } from "../api/admin-matching-game.api";
+import { useApproveGame, useRejectGame } from "../queries/useAdminGamesCrud";
 import {
+	MATCHING_GAME_KEYS,
 	useDeleteMatchingGame,
 	useMatchingGameDetail,
 	useUpsertMatchingGame,
@@ -130,17 +138,38 @@ const defaultForm = (): GameForm => ({
 	stages: [defaultStage()],
 });
 
+const getStatusLabel = (status?: MatchingGameStatus) => {
+	switch (status) {
+		case "PUBLISHED":
+			return "Đã xuất bản";
+		case "DRAFT":
+			return "Nháp";
+		case "ARCHIVED":
+			return "Đã lưu trữ";
+		default:
+			return "Không rõ";
+	}
+};
+
+const getStatusVariant = (
+	status?: MatchingGameStatus,
+): "default" | "secondary" | "destructive" | "outline" => {
+	switch (status) {
+		case "PUBLISHED":
+			return "default";
+		case "DRAFT":
+			return "secondary";
+		case "ARCHIVED":
+			return "destructive";
+		default:
+			return "outline";
+	}
+};
+
 const apiToForm = (
 	grade: number,
 	topicCode: string,
-	data: {
-		meta?: {
-			title?: string;
-			version?: string;
-			language?: string;
-		};
-		stages?: MatchingStageDto[];
-	},
+	data: MatchingGameFullDto,
 ): GameForm => {
 	const rawTitle = data?.meta?.title ?? "";
 	return {
@@ -546,35 +575,49 @@ const StageEditor = ({
 
 type MatchingGameEditorPageProps = {
 	mode: "create" | "edit";
+	gameId?: number;
 	grade?: number;
 	topicCode?: string;
 };
 
 export function MatchingGameEditorPage({
 	mode,
+	gameId,
 	grade,
 	topicCode,
 }: MatchingGameEditorPageProps) {
 	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const isCreateMode = mode === "create";
 	const normalizedTopicCode = topicCode?.toUpperCase();
 	const { data, isLoading } = useMatchingGameDetail(
-		grade ?? 0,
-		normalizedTopicCode ?? "",
-		!isCreateMode && grade !== undefined && Boolean(normalizedTopicCode),
+		{
+			gameId,
+			grade,
+			topicCode: normalizedTopicCode,
+		},
+		!isCreateMode &&
+			(gameId !== undefined ||
+				(grade !== undefined && Boolean(normalizedTopicCode))),
 	);
 	const upsertGame = useUpsertMatchingGame();
 	const deleteGame = useDeleteMatchingGame();
+	const approveGame = useApproveGame();
+	const rejectGame = useRejectGame();
 	const [form, setForm] = useState<GameForm>(defaultForm());
+	const matchingGameId = data?.meta?.gameId ?? gameId;
+	const resolvedGrade = data?.meta?.grade ?? grade;
+	const resolvedTopicCode =
+		data?.meta?.topicCode?.toUpperCase() ?? normalizedTopicCode;
 
 	useEffect(() => {
 		if (isCreateMode) {
 			setForm(defaultForm());
 			return;
 		}
-		if (!data || grade === undefined || !normalizedTopicCode) return;
-		setForm(apiToForm(grade, normalizedTopicCode, data));
-	}, [data, grade, isCreateMode, normalizedTopicCode]);
+		if (!data || resolvedGrade === undefined || !resolvedTopicCode) return;
+		setForm(apiToForm(resolvedGrade, resolvedTopicCode, data));
+	}, [data, isCreateMode, resolvedGrade, resolvedTopicCode]);
 
 	const updateStage = (stageIndex: number, stage: StageForm) => {
 		setForm((prev) => ({
@@ -611,10 +654,11 @@ export function MatchingGameEditorPage({
 
 		try {
 			const nextTopicCode = form.topicCode.toUpperCase();
-			await upsertGame.mutateAsync({
+			const savedGame = await upsertGame.mutateAsync({
 				grade: form.grade,
 				topicCode: nextTopicCode,
 				meta: {
+					gameId: matchingGameId,
 					title: buildTitle(form.grade, nextTopicCode, form.topicName),
 					version: form.metaVersion || "1.0.0",
 					language: form.metaLanguage || "vi",
@@ -626,14 +670,14 @@ export function MatchingGameEditorPage({
 					? "Tạo matching game thành công"
 					: "Cập nhật matching game thành công",
 			);
-			if (
-				isCreateMode ||
-				nextTopicCode !== normalizedTopicCode ||
-				form.grade !== grade
-			) {
+			if (savedGame.meta.gameId !== undefined) {
 				navigate({
 					to: "/apps/games/matching",
-					search: { grade: form.grade, topic: nextTopicCode },
+					search: {
+						gameId: savedGame.meta.gameId,
+						grade: savedGame.meta.grade ?? form.grade,
+						topic: savedGame.meta.topicCode ?? nextTopicCode,
+					},
 				});
 			}
 		} catch (error: unknown) {
@@ -642,16 +686,18 @@ export function MatchingGameEditorPage({
 	};
 
 	const handleDelete = async () => {
-		if (grade === undefined || !normalizedTopicCode) return;
+		if (matchingGameId === undefined) return;
+		const gradeLabel = resolvedGrade ?? form.grade;
+		const topicLabel = resolvedTopicCode ?? form.topicCode.toUpperCase();
 		if (
 			!confirm(
-				`Xoá matching game Lớp ${grade} - Chủ đề ${normalizedTopicCode}?`,
+				`Xoá matching game #${matchingGameId} · Lớp ${gradeLabel} - Chủ đề ${topicLabel}?`,
 			)
 		) {
 			return;
 		}
 		try {
-			await deleteGame.mutateAsync({ grade, topicCode: normalizedTopicCode });
+			await deleteGame.mutateAsync({ gameId: matchingGameId });
 			toast.success("Đã xoá matching game");
 			navigate({ to: "/apps/games" });
 		} catch (error: unknown) {
@@ -668,11 +714,69 @@ export function MatchingGameEditorPage({
 			),
 		[form.grade, form.topicCode, form.topicName],
 	);
+	const currentStatus = isCreateMode ? ("DRAFT" as const) : data?.status;
+	const playUrl =
+		!isCreateMode && matchingGameId !== undefined
+			? getMatchingGamePlayUrl({
+					gameId: matchingGameId,
+					grade: resolvedGrade,
+					topicCode: resolvedTopicCode,
+				})
+			: undefined;
 
-	if (!isCreateMode && (grade === undefined || !normalizedTopicCode)) {
+	const refreshMatchingQueries = async () => {
+		await Promise.all([
+			queryClient.invalidateQueries({
+				queryKey: MATCHING_GAME_KEYS.mappings(),
+			}),
+			matchingGameId !== undefined
+				? queryClient.invalidateQueries({
+						queryKey: MATCHING_GAME_KEYS.detail({
+							gameId: matchingGameId,
+							grade: resolvedGrade,
+							topicCode: resolvedTopicCode,
+						}),
+					})
+				: Promise.resolve(),
+		]);
+	};
+
+	const handleApprove = async () => {
+		if (isCreateMode || matchingGameId === undefined) {
+			return;
+		}
+		try {
+			await approveGame.mutateAsync(matchingGameId);
+			await refreshMatchingQueries();
+			toast.success("Matching game đã được duyệt và xuất bản");
+		} catch (error: unknown) {
+			toast.error(getErrorMessage(error, "Không thể duyệt matching game"));
+		}
+	};
+
+	const handleReject = async () => {
+		if (isCreateMode || matchingGameId === undefined) {
+			return;
+		}
+		try {
+			await rejectGame.mutateAsync(matchingGameId);
+			await refreshMatchingQueries();
+			toast.success("Matching game đã được chuyển về trạng thái nháp");
+		} catch (error: unknown) {
+			toast.error(
+				getErrorMessage(error, "Không thể chuyển matching game về nháp"),
+			);
+		}
+	};
+
+	if (
+		!isCreateMode &&
+		gameId === undefined &&
+		(grade === undefined || !normalizedTopicCode)
+	) {
 		return (
 			<div className="p-6 text-destructive">
-				Thiếu `grade` hoặc `topic` trong URL.
+				Thiếu `gameId` hoặc `grade/topic` trong URL.
 			</div>
 		);
 	}
@@ -894,9 +998,27 @@ export function MatchingGameEditorPage({
 						<CardContent className="space-y-4 pt-6">
 							<div className="space-y-3 rounded-xl border bg-muted/20 p-4 text-sm">
 								<div className="flex items-center justify-between">
-									<span className="text-muted-foreground">Khóa định danh</span>
+									<span className="text-muted-foreground">ID game</span>
+									<Badge variant="outline">
+										{matchingGameId !== undefined
+											? `#${matchingGameId}`
+											: "Mới"}
+									</Badge>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-muted-foreground">
+										Slot chương trình học
+									</span>
 									<Badge variant="outline">
 										L{form.grade}-{form.topicCode || "A"}
+									</Badge>
+								</div>
+								<div className="flex items-center justify-between">
+									<span className="text-muted-foreground">Trạng thái</span>
+									<Badge variant={getStatusVariant(currentStatus)}>
+										{isCreateMode
+											? "Bản nháp mới"
+											: getStatusLabel(currentStatus)}
 									</Badge>
 								</div>
 								<div className="flex items-center justify-between">
@@ -921,6 +1043,42 @@ export function MatchingGameEditorPage({
 										? "Tạo matching game"
 										: "Lưu thay đổi"}
 							</Button>
+
+							{playUrl ? (
+								<Button asChild className="w-full" variant="outline">
+									<a href={playUrl} target="_blank" rel="noreferrer">
+										<ExternalLink className="mr-2 h-4 w-4" />
+										Mở bản chơi
+									</a>
+								</Button>
+							) : null}
+
+							{!isCreateMode && currentStatus === "DRAFT" ? (
+								<Button
+									className="w-full"
+									variant="outline"
+									onClick={() => void handleApprove()}
+									disabled={
+										approveGame.isPending || matchingGameId === undefined
+									}
+								>
+									<Send className="mr-2 h-4 w-4" />
+									Duyệt và xuất bản
+								</Button>
+							) : null}
+
+							{!isCreateMode && currentStatus === "PUBLISHED" ? (
+								<Button
+									className="w-full"
+									variant="outline"
+									onClick={() => void handleReject()}
+									disabled={
+										rejectGame.isPending || matchingGameId === undefined
+									}
+								>
+									Chuyển về nháp
+								</Button>
+							) : null}
 
 							{!isCreateMode ? (
 								<Button

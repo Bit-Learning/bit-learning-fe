@@ -105,6 +105,14 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		() => (isCreateMode ? undefined : games.find((item) => item.id === gameId)),
 		[gameId, games, isCreateMode],
 	);
+	useEffect(() => {
+		if (game?.gameType !== "MATCHING" || game.id === undefined) return;
+		navigate({
+			to: "/apps/games/matching",
+			search: { gameId: game.id },
+			replace: true,
+		});
+	}, [game?.gameType, game?.id, navigate]);
 
 	useEffect(() => {
 		if (isCreateMode) {
@@ -313,6 +321,15 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		return (
 			<div className="p-6">
 				<p className="text-destructive">Không tìm thấy game.</p>
+			</div>
+		);
+	}
+
+	if (!isCreateMode && game?.gameType === "MATCHING") {
+		return (
+			<div className="flex items-center gap-2 p-6 text-muted-foreground">
+				<Loader2 className="h-4 w-4 animate-spin" />
+				Đang chuyển sang trình biên tập matching game...
 			</div>
 		);
 	}

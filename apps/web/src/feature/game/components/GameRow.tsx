@@ -1,15 +1,15 @@
 import type { GamePreview } from "../services/gameService";
 import { useNavigate } from "@tanstack/react-router";
-import { parseMatchingMetaFromTitle } from "../utils";
-import type { TopicCode } from "../data";
+import type { MatchingGameLinkTarget } from "../services/matchingGameService";
 import styles from "./GameRow.module.css";
 
 interface Props {
 	game: GamePreview;
 	categoryName: string;
+	matchingTarget?: MatchingGameLinkTarget;
 }
 
-const GameCard = ({ game, categoryName }: Props) => {
+const GameCard = ({ game, categoryName, matchingTarget }: Props) => {
 	const navigate = useNavigate();
 	const likes = game.likes ?? 0;
 	const views = game.views ?? 0;
@@ -19,13 +19,13 @@ const GameCard = ({ game, categoryName }: Props) => {
 			type="button"
 			onClick={() => {
 				if (categoryName === "MATCHING") {
-					// Parse grade & topic from title like: "Lớp 3 - B: ..."
-					const parsed = parseMatchingMetaFromTitle(game.title);
-					const grade = parsed?.grade ?? 3;
-					const topic = parsed?.topic ?? ("A" as TopicCode);
 					navigate({
 						to: "/matching/game",
-						search: { grade, topic },
+						search: {
+							gameId: game.id,
+							grade: matchingTarget?.grade,
+							topic: matchingTarget?.topicCode,
+						},
 					});
 				} else {
 					navigate({

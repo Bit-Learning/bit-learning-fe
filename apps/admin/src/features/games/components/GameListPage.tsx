@@ -63,28 +63,32 @@ export const GamesCrudManager = () => {
 		);
 	};
 
-	const standardRows: GameRow[] = games.map((game) => ({
-		id: `standard-${game.id}`,
-		rowType: "standard",
-		displayId: `#${game.id}`,
-		title: game.title,
-		status: game.status,
-		categoryOrTopic: getCategoryName(game.categoryId),
-		difficultyOrGrade: game.difficulty ?? "MEDIUM",
-		description: game.description,
-		likes: game.likes,
-		views: game.views,
-		standardId: game.id,
-	}));
+	const standardRows: GameRow[] = games
+		.filter((game) => game.gameType !== "MATCHING")
+		.map((game) => ({
+			id: `standard-${game.id}`,
+			rowType: "standard",
+			displayId: `#${game.id}`,
+			title: game.title,
+			status: game.status,
+			categoryOrTopic: getCategoryName(game.categoryId),
+			difficultyOrGrade: game.difficulty ?? "MEDIUM",
+			description: game.description,
+			likes: game.likes,
+			views: game.views,
+			standardId: game.id,
+		}));
 
 	const matchingRows: GameRow[] = mappings.map((mapping) => ({
-		id: `matching-${mapping.grade}-${mapping.topicCode}`,
+		id: `matching-${mapping.gameId}`,
 		rowType: "matching",
-		displayId: `L${mapping.grade}-${mapping.topicCode}`,
+		displayId: `#${mapping.gameId}`,
 		title: mapping.gameTitle,
+		status: mapping.status,
 		categoryOrTopic: `Chủ đề ${mapping.topicCode}`,
 		difficultyOrGrade: `Lớp ${mapping.grade}`,
-		description: "Game nối khái niệm theo chương trình học",
+		description: `Game nối khái niệm theo chương trình học · Lớp ${mapping.grade} · Chủ đề ${mapping.topicCode}`,
+		matchingGameId: mapping.gameId,
 		matchingGrade: mapping.grade,
 		matchingTopicCode: mapping.topicCode,
 	}));
@@ -101,12 +105,16 @@ export const GamesCrudManager = () => {
 		}
 	};
 
-	const handleDeleteMatching = async (grade: number, topicCode: string) => {
-		if (!confirm(`Xoá matching game Lớp ${grade} - Chủ đề ${topicCode}?`)) {
+	const handleDeleteMatching = async (gameId: number) => {
+		const mapping = mappings.find((item) => item.gameId === gameId);
+		const label = mapping
+			? `#${gameId} · Lớp ${mapping.grade} - Chủ đề ${mapping.topicCode}`
+			: `#${gameId}`;
+		if (!confirm(`Xoá matching game ${label}?`)) {
 			return;
 		}
 		try {
-			await deleteMatchingGame.mutateAsync({ grade, topicCode });
+			await deleteMatchingGame.mutateAsync({ gameId });
 			toast.success("Đã xoá matching game");
 		} catch (error: unknown) {
 			toast.error(getErrorMessage(error, "Không thể xoá matching game"));

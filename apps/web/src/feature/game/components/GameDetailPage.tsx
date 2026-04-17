@@ -317,7 +317,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 								onClick={handlePlayGame}
 								className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
 							>
-								▶ Chơi ngay
+								▶ Xem toàn màn hình
 							</button>
 
 							<button
@@ -565,12 +565,12 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 									<span className="text-gray-400">Lượt thích</span>
 									<span className="font-bold">{detailGame.likes || 0}</span>
 								</div>
-								<div className="flex justify-between">
+								{/* <div className="flex justify-between">
 									<span className="text-gray-400">Tạo bởi</span>
 									<span className="font-bold">
 										{detailGame.createdBy || "Không rõ"}
 									</span>
-								</div>
+								</div> */}
 								{detailGame.dateAdded && (
 									<div className="flex justify-between">
 										<span className="text-gray-400">Ngày thêm</span>

@@ -8,33 +8,6 @@ import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@workspace/ui/lib/utils";
 import GameCard from "@/feature/game/components/GameCard";
 
-const topicVisualMap: Record<string, { icon: string; gradient: string }> = {
-	A: {
-		icon: "computer",
-		gradient: "from-sky-500 via-sky-400 to-cyan-400",
-	},
-	B: {
-		icon: "public",
-		gradient: "from-indigo-500 via-indigo-400 to-sky-400",
-	},
-	C: {
-		icon: "folder_open",
-		gradient: "from-amber-500 via-amber-400 to-orange-400",
-	},
-	D: {
-		icon: "verified_user",
-		gradient: "from-rose-500 via-pink-500 to-fuchsia-500",
-	},
-	E: {
-		icon: "apps",
-		gradient: "from-emerald-500 via-emerald-400 to-teal-400",
-	},
-	F: {
-		icon: "psychology",
-		gradient: "from-purple-500 via-violet-500 to-indigo-500",
-	},
-};
-
 export default function PathPage() {
 	const navigate = useNavigate();
 
@@ -43,14 +16,15 @@ export default function PathPage() {
 		queryFn: matchingGameService.getCurriculumMappings,
 	});
 
-	// Map of "grade-topicCode" → mapping entry for O(1) lookup
-	const gameMap = new Map(
-		mappings.map((m) => [`${m.grade}-${m.topicCode}`, m]),
-	);
+	const mappingsByGrade = new Map<number, typeof mappings>();
+	for (const mapping of mappings) {
+		const existingMappings = mappingsByGrade.get(mapping.grade) ?? [];
+		existingMappings.push(mapping);
+		mappingsByGrade.set(mapping.grade, existingMappings);
+	}
 
-	// Only render grades that have at least one live game in the DB
-	const grades = CURRICULUM_DATA.grades.filter((g) =>
-		g.topics.some((t) => gameMap.has(`${g.id}-${t.code}`)),
+	const grades = CURRICULUM_DATA.grades.filter(
+		(g) => (mappingsByGrade.get(g.id)?.length ?? 0) > 0,
 	);
 
 	return (
@@ -65,7 +39,8 @@ export default function PathPage() {
 				<header className="sticky top-0 z-50 w-full border-b border-slate-200 dark:border-slate-800 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md">
 					<div className="max-w-6xl mx-auto px-6 h-16 flex items-center justify-between">
 						<div className="flex items-center gap-3">
-							<div
+							<button
+								type="button"
 								className="cursor-pointer"
 								onClick={() => navigate({ to: "/matching" })}
 							>
@@ -76,7 +51,7 @@ export default function PathPage() {
 										"object-contain transition-all duration-300 h-10",
 									)}
 								/>
-							</div>
+							</button>
 						</div>
 						<ThemeToggle />
 					</div>
@@ -104,17 +79,21 @@ export default function PathPage() {
 									Lộ trình học Tin học 3–12
 								</h2>
 								<p className="text-slate-500 dark:text-slate-400 text-lg max-w-3xl">
-									Lựa chọn lớp, cuộn ngang để xem các chủ đề A–F.
+									Lựa chọn lớp, cuộn ngang để xem tất cả matching game đã xuất
+									bản.
 								</p>
 							</div>
 
-							{/* Netflix-style rows: mỗi lớp là một hàng cuộn ngang */}
 							<div className="space-y-10">
 								{grades.map((grade) => {
 									const isPrimary = grade.id === 3;
-									// Only show topics that exist in DB for this grade
-									const visibleTopics = grade.topics.filter((t) =>
-										gameMap.has(`${grade.id}-${t.code}`),
+									const visibleMappings = [
+										...(mappingsByGrade.get(grade.id) ?? []),
+									].sort(
+										(left, right) =>
+											left.topicCode.localeCompare(right.topicCode) ||
+											left.gameTitle.localeCompare(right.gameTitle) ||
+											left.gameId - right.gameId,
 									);
 									return (
 										<section key={grade.id} className="space-y-3">
@@ -146,7 +125,7 @@ export default function PathPage() {
 														<p className="text-xs text-slate-500 dark:text-slate-400">
 															{isPrimary
 																? "Làm quen máy tính và môi trường học tập số."
-																: "Các chủ đề A–F theo chương trình Tin học mới."}
+																: "Các matching game được nhóm theo khối lớp."}
 														</p>
 													</div>
 												</div>
@@ -157,33 +136,23 @@ export default function PathPage() {
 
 											<div className="-mx-6 px-6">
 												<div className="flex gap-4 overflow-x-auto pb-4 snap-x snap-mandatory scroll-smooth">
-													{visibleTopics.map((topic) => {
-														const mapping = gameMap.get(
-															`${grade.id}-${topic.code}`,
-														);
-														const isPlayable = !!mapping;
-														const displayTitle =
-															mapping?.gameTitle ?? topic.title;
-														const visual = (topicVisualMap[topic.code] ??
-															topicVisualMap.A)!;
-
+													{visibleMappings.map((mapping) => {
 														return (
 															<GameCard
-																key={topic.code}
+																key={mapping.gameId}
 																className="snap-start shrink-0"
-																topicCode={topic.code}
-																title={displayTitle}
-																isPlayable={isPlayable}
+																topicCode={mapping.topicCode}
+																title={mapping.gameTitle}
+																isPlayable
 																onClick={() => {
-																	if (isPlayable) {
-																		navigate({
-																			to: "/matching/game",
-																			search: {
-																				grade: grade.id,
-																				topic: topic.code,
-																			},
-																		});
-																	}
+																	navigate({
+																		to: "/matching/game",
+																		search: {
+																			gameId: mapping.gameId,
+																			grade: mapping.grade,
+																			topic: mapping.topicCode,
+																		},
+																	});
 																}}
 															/>
 														);

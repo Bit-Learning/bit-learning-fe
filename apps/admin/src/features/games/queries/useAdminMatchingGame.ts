@@ -8,8 +8,22 @@ import {
 
 export const MATCHING_GAME_KEYS = {
 	mappings: () => ["matching-game", "mappings"] as const,
-	detail: (grade: number, topicCode: string) =>
-		["matching-game", "detail", grade, topicCode] as const,
+	detail: ({
+		gameId,
+		grade,
+		topicCode,
+	}: {
+		gameId?: number;
+		grade?: number;
+		topicCode?: string;
+	}) =>
+		[
+			"matching-game",
+			"detail",
+			gameId ?? null,
+			grade ?? null,
+			topicCode ?? null,
+		] as const,
 };
 
 export const useMatchingGameMappings = () =>
@@ -22,14 +36,25 @@ export const useMatchingGameMappings = () =>
 	});
 
 export const useMatchingGameDetail = (
-	grade: number,
-	topicCode: string,
+	{
+		gameId,
+		grade,
+		topicCode,
+	}: {
+		gameId?: number;
+		grade?: number;
+		topicCode?: string;
+	},
 	enabled = true,
 ) =>
 	useQuery({
-		queryKey: MATCHING_GAME_KEYS.detail(grade, topicCode),
+		queryKey: MATCHING_GAME_KEYS.detail({ gameId, grade, topicCode }),
 		queryFn: async () => {
-			const res = await adminMatchingGameApi.getGame(grade, topicCode);
+			const res = await adminMatchingGameApi.getGame({
+				gameId,
+				grade,
+				topicCode,
+			});
 			return res.data.data as MatchingGameFullDto;
 		},
 		enabled,
@@ -43,9 +68,14 @@ export const useUpsertMatchingGame = () => {
 			return res.data.data as MatchingGameFullDto;
 		},
 		onSuccess: () => {
-			void queryClient.invalidateQueries({
-				queryKey: MATCHING_GAME_KEYS.mappings(),
-			});
+			void Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: MATCHING_GAME_KEYS.mappings(),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["matching-game", "detail"],
+				}),
+			]);
 		},
 	});
 };
@@ -53,19 +83,18 @@ export const useUpsertMatchingGame = () => {
 export const useDeleteMatchingGame = () => {
 	const queryClient = useQueryClient();
 	return useMutation({
-		mutationFn: async ({
-			grade,
-			topicCode,
-		}: {
-			grade: number;
-			topicCode: string;
-		}) => {
-			await adminMatchingGameApi.deleteGame(grade, topicCode);
+		mutationFn: async ({ gameId }: { gameId: number }) => {
+			await adminMatchingGameApi.deleteGame(gameId);
 		},
 		onSuccess: () => {
-			void queryClient.invalidateQueries({
-				queryKey: MATCHING_GAME_KEYS.mappings(),
-			});
+			void Promise.all([
+				queryClient.invalidateQueries({
+					queryKey: MATCHING_GAME_KEYS.mappings(),
+				}),
+				queryClient.invalidateQueries({
+					queryKey: ["matching-game", "detail"],
+				}),
+			]);
 		},
 	});
 };
