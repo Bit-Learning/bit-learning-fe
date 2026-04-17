@@ -715,8 +715,18 @@ export function MatchingGameEditorPage({
 		[form.grade, form.topicCode, form.topicName],
 	);
 	const currentStatus = isCreateMode ? ("DRAFT" as const) : data?.status;
-	const playUrl =
+	const previewSearch =
 		!isCreateMode && matchingGameId !== undefined
+			? {
+					gameId: matchingGameId,
+					grade: resolvedGrade,
+					topic: resolvedTopicCode,
+				}
+			: undefined;
+	const playUrl =
+		!isCreateMode &&
+		matchingGameId !== undefined &&
+		currentStatus === "PUBLISHED"
 			? getMatchingGamePlayUrl({
 					gameId: matchingGameId,
 					grade: resolvedGrade,
@@ -1044,13 +1054,32 @@ export function MatchingGameEditorPage({
 										: "Lưu thay đổi"}
 							</Button>
 
+							{previewSearch ? (
+								<Button asChild className="w-full" variant="outline">
+									<Link
+										to="/apps/games/matching/preview"
+										search={previewSearch}
+									>
+										<LayoutGrid className="mr-2 h-4 w-4" />
+										Xem thử nội bộ
+									</Link>
+								</Button>
+							) : null}
+
 							{playUrl ? (
 								<Button asChild className="w-full" variant="outline">
 									<a href={playUrl} target="_blank" rel="noreferrer">
 										<ExternalLink className="mr-2 h-4 w-4" />
-										Mở bản chơi
+										Mở bản chơi công khai
 									</a>
 								</Button>
+							) : null}
+
+							{!isCreateMode && currentStatus === "DRAFT" ? (
+								<p className="rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-700">
+									Bản nháp có thể xem qua nút preview nội bộ. Bản công khai chỉ
+									mở sau khi duyệt và xuất bản.
+								</p>
 							) : null}
 
 							{!isCreateMode && currentStatus === "DRAFT" ? (
