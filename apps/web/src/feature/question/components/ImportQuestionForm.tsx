@@ -284,9 +284,19 @@ const ImportQuestionForm: React.FC = () => {
       <CardHeader>
         <div className="flex items-center justify-between">
           <div>
-            <h2 className="text-xl font-semibold">Tải lên tệp</h2>
-            <p className="text-md text-muted-foreground mt-1"> Chọn file Word chứa câu hỏi</p>
+            <h2 className="text-xl font-semibold">Tải file câu hỏi</h2>
+            <p className="text-md text-muted-foreground mt-1"> Chọn file chứa câu hỏi</p>
           </div>
+          <Button asChild variant="outline" className="mt-3">
+            <a
+              href="https://docs.google.com/document/d/1xV_OeKjdjeY5WYccvm2Hil080e6vcoC_VB8bsqlw6fg/export?format=docx"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-block mt-2 text-sm text-blue-600 hover:underline"
+            >
+              Tải file mẫu (.docx)
+            </a>
+          </Button>
         </div>
       </CardHeader>
       <CardContent>
@@ -303,7 +313,6 @@ const ImportQuestionForm: React.FC = () => {
                 <FileSpreadsheet className="h-6 w-6 text-primary" />
               </div>
               <p className="font-medium text-lg mb-2">Click để chọn file hoặc kéo thả vào đây</p>
-              <p className="text-md text-muted-foreground">Hỗ trợ: .docx, .doc (Tối đa 10MB)</p>
             </div>
           ) : (
             <div className="text-center">
