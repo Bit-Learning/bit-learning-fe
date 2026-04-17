@@ -97,6 +97,12 @@ function buildThumbnailKeyForAttachment(attachment: Attachment): string {
 	return `existing:${attachment.id}`;
 }
 
+function getAttachmentDisplayName(attachment: Attachment): string {
+	if (attachment.originalName?.trim()) return attachment.originalName.trim();
+	const pathSegment = attachment.url.split("/").pop() ?? "tep-dinh-kem";
+	return decodeURIComponent(pathSegment.split("?")[0] ?? pathSegment);
+}
+
 const notionFontFamily =
 	'"NotionInter", Inter, -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif';
 const notionCardShadow =
@@ -962,12 +968,13 @@ const PostFormContent: React.FC = () => {
 														</div>
 														<div className="min-w-0 flex-1">
 															<p className="truncate text-sm font-medium text-[#1f1c19]">
-																Tài liệu đã tải lên
+																{getAttachmentDisplayName(file)}
 															</p>
 															<a
 																href={file.url}
 																target="_blank"
 																rel="noopener noreferrer"
+																download={file.originalName ?? undefined}
 																className="text-xs text-[#0075de] transition-colors hover:text-[#005bab] hover:underline"
 															>
 																Mở tệp

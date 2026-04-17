@@ -35,6 +35,7 @@ export interface Hashtag extends Tag {}
 export interface Attachment {
 	id: number;
 	url: string;
+	originalName?: string;
 	type: AttachmentType;
 }
 
