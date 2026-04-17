@@ -192,21 +192,8 @@ const ChatAIContent: React.FC<ChatAIContentProps> = ({ conversationId }) => {
 				}
 			}
 		} catch (error) {
-			const errorMessage =
-				(
-					error as {
-						response?: { data?: { message?: string; error?: string } };
-					}
-				)?.response?.data?.message ||
-				(
-					error as {
-						response?: { data?: { message?: string; error?: string } };
-					}
-				)?.response?.data?.error ||
-				"Lỗi khi gửi tin nhắn. Vui lòng thử lại.";
 			toast.error({
-				title: "Gửi tin nhắn thất bại",
-				description: errorMessage,
+				title: "tin nhắn không hợp lệ",
 			});
 			console.error("Failed to send message:", error);
 		} finally {
