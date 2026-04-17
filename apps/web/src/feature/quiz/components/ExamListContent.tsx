@@ -173,12 +173,22 @@ const ExamListContent: React.FC = () => {
                     </h3>
 
                     <div className="space-y-2.5">
-                      <div className="flex items-center gap-2.5 text-sm text-slate-600">
-                        <Timer className={cn("w-4 h-4 shrink-0 text-blue-600")} />
-                        <span>
-                          Thời gian: <span className="font-semibold text-slate-800">{exam.durationInMinutes} phút</span>
-                        </span>
-                      </div>
+                      {exam.type !== "PRACTICE" ? (
+                        <div className="flex items-center gap-2.5 text-sm text-slate-600">
+                          <Timer className="w-4 h-4 shrink-0 text-blue-600" />
+                          <span>
+                            Thời gian:{" "}
+                            <span className="font-semibold text-slate-800">{exam.durationInMinutes} phút</span>
+                          </span>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2.5 text-sm text-slate-600">
+                          <Timer className="w-4 h-4 shrink-0 text-blue-600" />
+                          <span>
+                            Thời gian: <span className="font-semibold text-slate-800">Không giới hạn</span>
+                          </span>
+                        </div>
+                      )}
                       <div className="flex items-center gap-2.5 text-sm text-slate-600">
                         <HelpCircle className={cn("w-4 h-4 shrink-0 text-blue-600")} />
                         <span>
