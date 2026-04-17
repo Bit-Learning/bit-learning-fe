@@ -567,8 +567,8 @@ importers:
         specifier: ^8.21.3
         version: 8.21.3(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@xstate/store':
-        specifier: ^3.14.1
-        version: 3.15.0(react@19.2.5)
+        specifier: ^3.17.1
+        version: 3.17.1(react@19.2.5)
       axios:
         specifier: ^1.15.0
         version: 1.15.0
@@ -4375,8 +4375,8 @@ packages:
   '@vitest/utils@4.1.4':
     resolution: {integrity: sha512-13QMT+eysM5uVGa1rG4kegGYNp6cnQcsTc67ELFbhNLQO+vgsygtYJx2khvdt4gVQqSSpC/KT5FZZxUpP3Oatw==}
 
-  '@xstate/store@3.15.0':
-    resolution: {integrity: sha512-1V4/5D55zvJz3inEbAH+pqrAy2xhb2d8OKC1fZcBwWmr51VpxTOCNgf9ma4fa/seUfpQPjRf9wxBSyfcTKtUbQ==}
+  '@xstate/store@3.17.1':
+    resolution: {integrity: sha512-jwNJ4nXM6WNXhW8IvrWuNqf7sMTBzfRXj2mHoxVkQDLCuZCjQ3xtXeykB4fLkdmWPAjh9dEZAjMAX43IlWq1LA==}
     peerDependencies:
       react: ^18.2.0 || ^19.0.0
       solid-js: ^1.7.6
@@ -12215,7 +12215,7 @@ snapshots:
       convert-source-map: 2.0.0
       tinyrainbow: 3.1.0
 
-  '@xstate/store@3.15.0(react@19.2.5)':
+  '@xstate/store@3.17.1(react@19.2.5)':
     optionalDependencies:
       react: 19.2.5
 
