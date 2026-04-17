@@ -10,6 +10,20 @@ interface GamePlayPageProps {
 	id: number;
 }
 
+interface AttemptPayload {
+	rawScore?: number;
+	maxRawScore?: number;
+	duration?: number;
+	completed?: boolean;
+	resultMetrics?: Record<string, unknown>;
+	attemptType?: string;
+}
+
+interface LegacyPayload {
+	score: number;
+	duration?: number;
+}
+
 export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const navigate = useNavigate();
 	const auth = useSelector((state: RootState) => state.auth);
@@ -21,6 +35,8 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const [tracked, setTracked] = useState(false);
 	const gameContainerRef = useRef<HTMLIFrameElement>(null);
 	const startTimeRef = useRef<number>(Date.now());
+	const trackedRef = useRef(false);
+	const latestProgressRef = useRef<AttemptPayload | null>(null);
 
 	useEffect(() => {
 		loadGame();
@@ -37,19 +53,9 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	}, []);
 
 	const trackResult = useCallback(
-		async (
-			payload:
-				| {
-						rawScore?: number;
-						maxRawScore?: number;
-						duration?: number;
-						completed?: boolean;
-						resultMetrics?: Record<string, unknown>;
-						attemptType?: string;
-				  }
-				| { score: number; duration?: number },
-		) => {
-			if (!username || tracked) return;
+		async (payload: AttemptPayload | LegacyPayload) => {
+			if (!username || trackedRef.current) return;
+			trackedRef.current = true;
 			setTracked(true);
 			const elapsed =
 				("duration" in payload ? payload.duration : undefined) ??
@@ -73,33 +79,120 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 						resultMetrics: payload.resultMetrics,
 					});
 				}
+				latestProgressRef.current = null;
 				toast.success({
 					title: "Kết quả đã được ghi nhận",
 					description: `Thời gian: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
 				});
 			} catch (e) {
 				console.error("Tracking error", e);
+				trackedRef.current = false;
 				setTracked(false);
 			}
 		},
-		[id, username, tracked],
+		[id, username],
+	);
+
+	const buildAttemptPayload = useCallback(
+		(data: {
+			rawScore?: number;
+			maxRawScore?: number;
+			duration?: number;
+			completed?: boolean;
+			metrics?: Record<string, unknown>;
+			attemptType?: string;
+		}): AttemptPayload => ({
+			rawScore: data.rawScore ?? 0,
+			maxRawScore: data.maxRawScore ?? 0,
+			duration: data.duration,
+			completed: data.completed,
+			resultMetrics: data.metrics,
+			attemptType: data.attemptType ?? "STANDARD_HTML",
+		}),
+		[],
+	);
+
+	const submitPartialAttempt = useCallback(
+		(reason: "BACK" | "BEFORE_UNLOAD" | "PAGE_HIDE") => {
+			if (!username || trackedRef.current) return false;
+
+			const progress = latestProgressRef.current;
+			const totalCount =
+				typeof progress?.resultMetrics?.totalCount === "number"
+					? progress.resultMetrics.totalCount
+					: (progress?.maxRawScore ?? 0);
+
+			if (!progress || totalCount <= 0) {
+				return false;
+			}
+
+			const payload = {
+				attemptType: progress.attemptType ?? "STANDARD_HTML",
+				rawScore: progress.rawScore ?? 0,
+				maxRawScore: Math.max(
+					progress.maxRawScore ?? totalCount,
+					totalCount,
+					1,
+				),
+				duration:
+					progress.duration ??
+					Math.round((Date.now() - startTimeRef.current) / 1000),
+				completed: false,
+				resultMetrics: {
+					...(progress.resultMetrics ?? {}),
+					attemptState: "PARTIAL",
+					exitReason: reason,
+				},
+			};
+
+			const url = `/api/games/${id}/attempts`;
+			const body = JSON.stringify(payload);
+			trackedRef.current = true;
+			setTracked(true);
+
+			if (navigator.sendBeacon) {
+				const success = navigator.sendBeacon(
+					url,
+					new Blob([body], { type: "application/json" }),
+				);
+				if (success) {
+					return true;
+				}
+			}
+
+			void fetch(url, {
+				method: "POST",
+				body,
+				headers: {
+					"Content-Type": "application/json",
+				},
+				credentials: "include",
+				keepalive: true,
+			});
+			return true;
+		},
+		[id, username],
 	);
 
 	// Listen for postMessage from the game iframe
 	// Games should send: { type: "GAME_OVER", score: number, duration?: number }
 	useEffect(() => {
 		const handleMessage = (event: MessageEvent) => {
+			if (event.source !== gameContainerRef.current?.contentWindow) {
+				return;
+			}
+
 			const data = event.data;
-			if (data && data.type === "GAME_RESULT") {
-				trackResult({
+			if (data && data.type === "GAME_PROGRESS") {
+				const payload = buildAttemptPayload({
 					rawScore:
 						typeof data.rawScore === "number" ? data.rawScore : undefined,
 					maxRawScore:
 						typeof data.maxRawScore === "number" ? data.maxRawScore : undefined,
 					duration:
 						typeof data.duration === "number" ? data.duration : undefined,
-					completed: data.completed !== false,
-					resultMetrics:
+					completed: false,
+					metrics:
 						typeof data.metrics === "object" && data.metrics !== null
 							? data.metrics
 							: undefined,
@@ -108,6 +201,33 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 							? data.attemptType
 							: "STANDARD_HTML",
 				});
+
+				latestProgressRef.current = payload;
+				return;
+			}
+
+			if (data && data.type === "GAME_RESULT") {
+				trackResult(
+					buildAttemptPayload({
+						rawScore:
+							typeof data.rawScore === "number" ? data.rawScore : undefined,
+						maxRawScore:
+							typeof data.maxRawScore === "number"
+								? data.maxRawScore
+								: undefined,
+						duration:
+							typeof data.duration === "number" ? data.duration : undefined,
+						completed: data.completed !== false,
+						metrics:
+							typeof data.metrics === "object" && data.metrics !== null
+								? data.metrics
+								: undefined,
+						attemptType:
+							typeof data.attemptType === "string"
+								? data.attemptType
+								: "STANDARD_HTML",
+					}),
+				);
 			}
 			if (data && data.type === "GAME_OVER" && typeof data.score === "number") {
 				trackResult({ score: data.score, duration: data.duration });
@@ -115,26 +235,24 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 		};
 		window.addEventListener("message", handleMessage);
 		return () => window.removeEventListener("message", handleMessage);
-	}, [trackResult]);
+	}, [buildAttemptPayload, trackResult]);
 
-	// Track on page leave (unload / navigate away) as fallback
-	// If the game never sent GAME_OVER, record with score 0 and elapsed duration
+	// Track partial attempts on page leave. We only persist once the iframe has sent usable progress.
 	useEffect(() => {
 		const handleBeforeUnload = () => {
-			if (!tracked && username) {
-				const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
-				// Use sendBeacon for reliability on page unload
-				const params = new URLSearchParams({
-					userId: username,
-					score: "0",
-					duration: String(elapsed),
-				});
-				navigator.sendBeacon(`/api/games/${id}/play?${params.toString()}`);
-			}
+			submitPartialAttempt("BEFORE_UNLOAD");
 		};
+		const handlePageHide = () => {
+			submitPartialAttempt("PAGE_HIDE");
+		};
+
 		window.addEventListener("beforeunload", handleBeforeUnload);
-		return () => window.removeEventListener("beforeunload", handleBeforeUnload);
-	}, [id, username, tracked]);
+		window.addEventListener("pagehide", handlePageHide);
+		return () => {
+			window.removeEventListener("beforeunload", handleBeforeUnload);
+			window.removeEventListener("pagehide", handlePageHide);
+		};
+	}, [submitPartialAttempt]);
 
 	const loadGame = async () => {
 		try {
@@ -149,11 +267,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	};
 
 	const handleBack = () => {
-		// Track before navigating away if not already tracked
-		if (!tracked && username) {
-			const elapsed = Math.round((Date.now() - startTimeRef.current) / 1000);
-			trackResult({ score: 0, duration: elapsed });
-		}
+		submitPartialAttempt("BACK");
 		navigate({ to: "/games/$id", params: { id: String(id) } });
 	};
 

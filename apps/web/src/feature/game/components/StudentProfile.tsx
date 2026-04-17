@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { ChevronLeft, ChevronRight, UserPlus, UserMinus } from "lucide-react";
 import studentService, {
+	type PlayHistoryDetail,
 	type StudentProfile,
 	type PlayHistoryItem,
 } from "../services/studentService";
+import PlayHistoryDetailModal from "./PlayHistoryDetailModal";
 import {
 	useFollowStats,
 	useFollowUser,
@@ -17,6 +19,16 @@ interface StudentProfileViewProps {
 	onBack: () => void;
 }
 
+const getCurriculumSummary = (item: PlayHistoryItem) =>
+	[
+		item.bookTitle ?? item.bookCode,
+		typeof item.grade === "number" ? `Lớp ${item.grade}` : null,
+		item.topicLetter ? `Chủ đề ${item.topicLetter}` : null,
+		typeof item.part === "number" ? `Phần ${item.part}` : null,
+	]
+		.filter(Boolean)
+		.join(" • ");
+
 export default function StudentProfileView({
 	userId,
 	onBack,
@@ -27,6 +39,11 @@ export default function StudentProfileView({
 	const [totalPages, setTotalPages] = useState(0);
 	const [totalItems, setTotalItems] = useState(0);
 	const [loading, setLoading] = useState(true);
+	const [selectedHistory, setSelectedHistory] =
+		useState<PlayHistoryItem | null>(null);
+	const [selectedDetail, setSelectedDetail] =
+		useState<PlayHistoryDetail | null>(null);
+	const [detailLoading, setDetailLoading] = useState(false);
 
 	const { data: followStats } = useFollowStats(userId);
 	const followMutation = useFollowUser();
@@ -67,6 +84,23 @@ export default function StudentProfileView({
 			unfollowMutation.mutate(userId);
 		} else {
 			followMutation.mutate(userId);
+		}
+	};
+
+	const openHistoryDetail = async (item: PlayHistoryItem) => {
+		setSelectedHistory(item);
+		setSelectedDetail(null);
+		setDetailLoading(true);
+		try {
+			const detail = await studentService.getStudentPlayHistoryDetail(
+				userId,
+				item.id,
+			);
+			setSelectedDetail(detail);
+		} catch (error) {
+			console.error("Failed to load play history detail", error);
+		} finally {
+			setDetailLoading(false);
 		}
 	};
 
@@ -175,7 +209,8 @@ export default function StudentProfileView({
 								{playHistory.map((item) => (
 									<div
 										key={item.id}
-										className="bg-gray-800/50 rounded-lg overflow-hidden hover:bg-gray-800 transition-colors"
+										className="bg-gray-800/50 rounded-lg overflow-hidden hover:bg-gray-800 transition-colors cursor-pointer"
+										onClick={() => void openHistoryDetail(item)}
 									>
 										<div className="aspect-video bg-linear-to-br from-purple-600 to-blue-500 flex items-center justify-center">
 											{item.gameThumbnail ? (
@@ -192,7 +227,36 @@ export default function StudentProfileView({
 											<h3 className="font-bold mb-2 truncate">
 												{item.gameTitle}
 											</h3>
+											<p className="text-xs text-emerald-300 mb-2 truncate">
+												{getCurriculumSummary(item) ||
+													item.questionSetTitle ||
+													"Bài học chưa phân loại"}
+											</p>
 											<div className="text-sm text-gray-400 space-y-1">
+												<div className="flex justify-between">
+													<span>Trạng thái:</span>
+													<span
+														className={`font-bold ${
+															item.completed
+																? "text-emerald-400"
+																: "text-amber-400"
+														}`}
+													>
+														{item.completed ? "Hoàn thành" : "Chưa hoàn thành"}
+													</span>
+												</div>
+												<div className="flex justify-between">
+													<span>Accuracy:</span>
+													<span className="font-bold text-emerald-400">
+														{item.accuracy ?? 0}%
+													</span>
+												</div>
+												<div className="flex justify-between">
+													<span>Đúng / Sai:</span>
+													<span className="font-bold text-sky-400">
+														{item.correctCount ?? 0} / {item.wrongCount ?? 0}
+													</span>
+												</div>
 												<div className="flex justify-between">
 													<span>Score:</span>
 													<span className="font-bold text-yellow-500">
@@ -246,6 +310,16 @@ export default function StudentProfileView({
 					)}
 				</div>
 			</div>
+			<PlayHistoryDetailModal
+				open={selectedHistory !== null}
+				onClose={() => {
+					setSelectedHistory(null);
+					setSelectedDetail(null);
+				}}
+				item={selectedHistory}
+				detail={selectedDetail}
+				loading={detailLoading}
+			/>
 		</div>
 	);
 }

@@ -17,6 +17,7 @@ import {
 	useFollowStats,
 } from "../queries/useUser";
 import studentService, {
+	type PlayHistoryDetail,
 	type PlayHistoryItem,
 } from "@/feature/game/services/studentService";
 import type { StudentProfile } from "@/feature/game/services/studentService";
@@ -25,10 +26,21 @@ import { FaFacebook } from "react-icons/fa";
 import { useForumPostsByAuthor } from "@/feature/forum/queries/useForum";
 import ForumPostCard from "@/feature/app/components/ForumPostCard";
 import { Link } from "@tanstack/react-router";
+import PlayHistoryDetailModal from "@/feature/game/components/PlayHistoryDetailModal";
 
 interface PublicProfileContentProps {
 	username: string;
 }
+
+const getCurriculumSummary = (item: PlayHistoryItem) =>
+	[
+		item.bookTitle ?? item.bookCode,
+		typeof item.grade === "number" ? `Lớp ${item.grade}` : null,
+		item.topicLetter ? `Chủ đề ${item.topicLetter}` : null,
+		typeof item.part === "number" ? `Phần ${item.part}` : null,
+	]
+		.filter(Boolean)
+		.join(" • ");
 
 export const PublicProfileContent = ({
 	username,
@@ -51,6 +63,11 @@ export const PublicProfileContent = ({
 	const [totalPages, setTotalPages] = useState(0);
 	const [totalItems, setTotalItems] = useState(0);
 	const [historyLoading, setHistoryLoading] = useState(false);
+	const [selectedHistory, setSelectedHistory] =
+		useState<PlayHistoryItem | null>(null);
+	const [selectedDetail, setSelectedDetail] =
+		useState<PlayHistoryDetail | null>(null);
+	const [detailLoading, setDetailLoading] = useState(false);
 
 	useEffect(() => {
 		if (!userId) return;
@@ -73,6 +90,24 @@ export const PublicProfileContent = ({
 			.catch(() => {})
 			.finally(() => setHistoryLoading(false));
 	}, [userId, historyPage]);
+
+	const openHistoryDetail = async (item: PlayHistoryItem) => {
+		if (!userId) return;
+		setSelectedHistory(item);
+		setSelectedDetail(null);
+		setDetailLoading(true);
+		try {
+			const detail = await studentService.getStudentPlayHistoryDetail(
+				userId,
+				item.id,
+			);
+			setSelectedDetail(detail);
+		} catch {
+			setSelectedDetail(null);
+		} finally {
+			setDetailLoading(false);
+		}
+	};
 
 	if (isLoading) return <Loader />;
 	if (!userProfile)
@@ -243,7 +278,8 @@ export const PublicProfileContent = ({
 							{playHistory.map((item) => (
 								<div
 									key={item.id}
-									className="rounded-xl border border-slate-100 overflow-hidden hover:shadow-md transition-shadow"
+									className="rounded-xl border border-slate-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+									onClick={() => void openHistoryDetail(item)}
 								>
 									<div className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
 										{item.gameThumbnail ? (
@@ -260,15 +296,45 @@ export const PublicProfileContent = ({
 										<h4 className="font-semibold text-sm text-slate-800 truncate">
 											{item.gameTitle}
 										</h4>
-										<div className="flex justify-between text-xs text-slate-500 mt-2">
+										<div className="mt-1 truncate text-[11px] text-emerald-600">
+											{getCurriculumSummary(item) ||
+												item.questionSetTitle ||
+												"Bài học chưa phân loại"}
+										</div>
+										<div className="mt-2 flex justify-between text-xs text-slate-500">
 											<span>
-												Điểm:{" "}
-												<span className="font-bold text-yellow-600">
-													{item.score}
+												Accuracy:{" "}
+												<span className="font-bold text-emerald-600">
+													{item.accuracy ?? 0}%
 												</span>
 											</span>
 											<span>
 												{Math.floor(item.duration / 60)}m {item.duration % 60}s
+											</span>
+										</div>
+										<div className="mt-1 flex justify-between text-xs text-slate-500">
+											<span>
+												Đúng/Sai:{" "}
+												<span className="font-bold text-sky-600">
+													{item.correctCount ?? 0}/{item.wrongCount ?? 0}
+												</span>
+											</span>
+											<span>
+												<span
+													className={`font-bold ${
+														item.completed
+															? "text-emerald-600"
+															: "text-amber-600"
+													}`}
+												>
+													{item.completed ? "Hoàn thành" : "Chưa hoàn thành"}
+												</span>
+											</span>
+										</div>
+										<div className="mt-1 text-xs text-slate-500">
+											Điểm:{" "}
+											<span className="font-bold text-yellow-600">
+												{item.score}
 											</span>
 										</div>
 										<div className="text-[11px] text-slate-400 mt-1">
@@ -311,6 +377,16 @@ export const PublicProfileContent = ({
 					</div>
 				)}
 			</Card>
+			<PlayHistoryDetailModal
+				open={selectedHistory !== null}
+				onClose={() => {
+					setSelectedHistory(null);
+					setSelectedDetail(null);
+				}}
+				item={selectedHistory}
+				detail={selectedDetail}
+				loading={detailLoading}
+			/>
 		</div>
 	);
 };

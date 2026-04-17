@@ -23,6 +23,43 @@ export interface PlayHistoryItem {
 	leaderboardPoints: number;
 	duration: number;
 	completed: boolean;
+	attemptType?: string | null;
+	analyticsAvailable: boolean;
+	bookCode?: string | null;
+	bookTitle?: string | null;
+	grade?: number | null;
+	topicLetter?: string | null;
+	part?: number | null;
+	topicName?: string | null;
+	questionSetId?: string | null;
+	questionSetTitle?: string | null;
+	questionSetVersion?: string | null;
+	attemptState?: string | null;
+	exitReason?: string | null;
+	correctCount: number;
+	wrongCount: number;
+	timeoutCount: number;
+	totalCount: number;
+	answeredCount: number;
+	accuracy: number;
+}
+
+export interface PlayHistoryQuestionResult {
+	order: number;
+	questionId: string;
+	type: string;
+	prompt: string;
+	selectedAnswerText?: string | null;
+	selectedOptionIndex?: number | null;
+	correctAnswerText?: string | null;
+	correctOptionIndex?: number | null;
+	outcome: "correct" | "wrong" | "timeout";
+	durationMs: number;
+}
+
+export interface PlayHistoryDetail extends PlayHistoryItem {
+	resultMetrics?: Record<string, unknown> | null;
+	questionResults?: PlayHistoryQuestionResult[] | null;
 }
 
 export interface PaginatedPlayHistory {
@@ -61,6 +98,16 @@ const studentService = {
 			{
 				params: { page, size, sortBy, sortDirection },
 			},
+		);
+		return response.data;
+	},
+
+	getStudentPlayHistoryDetail: async (
+		userId: number,
+		historyId: number,
+	): Promise<PlayHistoryDetail> => {
+		const response = await api.get<PlayHistoryDetail>(
+			`/students/${userId}/play-history/${historyId}`,
 		);
 		return response.data;
 	},
