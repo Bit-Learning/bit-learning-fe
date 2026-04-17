@@ -1,4 +1,5 @@
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
+import { useUserProfile } from "@/feature/user/queries/useUser";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
@@ -28,6 +29,7 @@ interface DisplayInfo {
 const PaymentResultContent: React.FC = () => {
 	const navigate = useNavigate();
 	const searchParams = useSearch({ strict: false }) as Record<string, string>;
+	useUserProfile();
 
 	const [paymentStatus, setPaymentStatus] = useState<PaymentStatus>("loading");
 	const [displayInfo, setDisplayInfo] = useState<DisplayInfo>({
@@ -156,13 +158,11 @@ const PaymentResultContent: React.FC = () => {
 							</h2>
 							<div className="space-y-3">
 								{!isWallet && (
-									<>
-										<InfoRow
-											icon={<Package className="h-5 w-5" />}
-											label="Mã đơn hàng"
-											value={displayInfo.orderCode || "—"}
-										/>
-									</>
+									<InfoRow
+										icon={<Package className="h-5 w-5" />}
+										label="Mã đơn hàng"
+										value={displayInfo.orderCode || "—"}
+									/>
 								)}
 								<InfoRow
 									icon={<Calendar className="h-5 w-5" />}
