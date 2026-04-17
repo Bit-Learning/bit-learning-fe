@@ -219,18 +219,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
                     onProgressUpdate={handleProgressUpdate}
                   />
                 </div>
-                {hasAccess && !isCompleted && (
-                  <div className="flex justify-end px-6 pt-3">
-                    <button
-                      type="button"
-                      onClick={() => markAsCompleted(lectureId, { onSuccess: handleVideoComplete })}
-                      className="flex items-center gap-1.5 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                      Đánh dấu hoàn thành
-                    </button>
-                  </div>
-                )}
                 <div className="p-6">
                   <div className="mx-auto max-w-4xl">
                     <LectureQA lectureId={lectureId} />
@@ -248,19 +236,7 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
               </div>
             ) : currentLecture?.type === LectureType.TEXT ? (
               <div>
-                <TextContent lectureId={lectureId} onComplete={handleVideoComplete} />
-                {hasAccess && !isCompleted && (
-                  <div className="flex justify-end px-6 pb-2">
-                    <button
-                      type="button"
-                      onClick={() => markAsCompleted(lectureId, { onSuccess: handleVideoComplete })}
-                      className="flex items-center gap-1.5 rounded-md bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 transition-colors"
-                    >
-                      <CheckCircle className="h-4 w-4" />
-                      Đánh dấu hoàn thành
-                    </button>
-                  </div>
-                )}
+                <TextContent lectureId={lectureId} onComplete={handleVideoComplete} hasAccess={hasAccess} />
                 <div className="border-t border-gray-200 p-6">
                   <div className="mx-auto max-w-4xl">
                     <LectureQA lectureId={lectureId} />

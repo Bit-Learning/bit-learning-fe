@@ -8,9 +8,10 @@ import { useIsLectureCompleted, useMarkAsCompleted } from "../queries/useLearnin
 interface TextContentProps {
   lectureId: number;
   onComplete?: () => void;
+  hasAccess?: boolean;
 }
 
-const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
+const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete, hasAccess }) => {
   const { data, isLoading, error } = useLectureText(lectureId);
   const { data: isCompleted } = useIsLectureCompleted(lectureId);
   const { mutate: markAsCompleted, isPending } = useMarkAsCompleted();
@@ -177,7 +178,7 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete }) => {
 
         <div className="lecture-content" dangerouslySetInnerHTML={{ __html: content }} />
 
-        {!isCompleted && (
+        {!isCompleted && hasAccess && (
           <div className="mt-10 border-t border-gray-200 pt-6 text-right">
             <Button
               onPress={handleMarkComplete}
