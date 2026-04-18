@@ -1,4 +1,4 @@
-import { Award, Clock, FileText, HelpCircle, Infinity, Loader2, Play, Video } from "lucide-react";
+import { Award, BookOpen, Infinity, Loader2, Play } from "lucide-react";
 import type React from "react";
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
@@ -7,10 +7,7 @@ interface CoursePricingCardProps {
   hasAccess?: boolean;
   isPending: boolean;
   firstLectureId?: number;
-  totalHours?: number;
-  totalVideos?: number;
-  totalTexts?: number;
-  totalQuizzes?: number;
+  totalLectures?: number;
   onEnroll: () => void;
   onAddToCart: () => void;
   onBuyNow: () => void;
@@ -22,31 +19,16 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   hasAccess,
   isPending,
   firstLectureId,
-  totalHours,
-  totalVideos,
-  totalTexts,
-  totalQuizzes,
+  totalLectures,
   onEnroll,
   onAddToCart,
   onBuyNow,
   onStartLearning,
 }) => {
   const infoItems = [
-    totalHours && {
-      icon: <Clock className="h-4 w-4" />,
-      label: `${totalHours} giờ học`,
-    },
-    totalTexts && {
-      icon: <FileText className="h-4 w-4" />,
-      label: `${totalTexts} bài đọc`,
-    },
-    totalVideos && {
-      icon: <Video className="h-4 w-4" />,
-      label: `${totalVideos} video`,
-    },
-    totalQuizzes && {
-      icon: <HelpCircle className="h-4 w-4" />,
-      label: `${totalQuizzes} bài kiểm tra`,
+    totalLectures && {
+      icon: <BookOpen className="h-4 w-4" />,
+      label: `${totalLectures} bài học`,
     },
     { icon: <Infinity className="h-4 w-4" />, label: "Truy cập trọn đời" },
     {

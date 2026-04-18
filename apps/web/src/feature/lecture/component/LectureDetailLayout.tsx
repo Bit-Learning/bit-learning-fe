@@ -111,8 +111,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
 
   const sectionLectures = useMemo(() => currentSection?.lectures?.filter((l) => !l.isDeleted) ?? [], [currentSection]);
 
-  const currentSectionIndex = sectionLectures.findIndex((l) => l.id === lectureId);
-
   if (isLoading) {
     return (
       <div className="flex h-screen items-center justify-center bg-[#1a1f2e]">
@@ -166,20 +164,6 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
           </div>
 
           <div className="mx-1 h-5 w-px bg-gray-700" />
-
-          <Button
-            size="sm"
-            onClick={() =>
-              navigate({
-                to: "/courses/$id",
-                params: { id: String(courseId) },
-              })
-            }
-            className="h-8 gap-1.5 bg-blue-600 px-3 text-xs text-white hover:bg-blue-700"
-          >
-            <Edit className="h-3.5 w-3.5" />
-            Sửa bài
-          </Button>
         </div>
       </header>
 
