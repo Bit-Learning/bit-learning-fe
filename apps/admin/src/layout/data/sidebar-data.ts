@@ -16,6 +16,7 @@ import {
 	ToolboxIcon,
 	Tag,
 	CreditCard,
+	Mail,
 } from "lucide-react";
 import type { NavGroup } from "../types";
 
@@ -45,6 +46,7 @@ export const navGroups: NavGroup[] = [
 				url: "/templates",
 				icon: PresentationIcon,
 			},
+			{ title: "Mail templates", url: "/mail-templates", icon: Mail },
 			{ title: "Quản lý trò chơi", url: "/apps/games", icon: Gamepad2 },
 			{
 				title: "Analytics trò chơi",
