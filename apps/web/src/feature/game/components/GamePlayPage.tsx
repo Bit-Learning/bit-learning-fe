@@ -38,6 +38,7 @@ type IncomingGameMessage = {
 };
 
 const BRIDGE_SOURCE = "BIT_LEARNING_GAME";
+const LOG_PREFIX = "[GamePlayPage]";
 
 export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const navigate = useNavigate();
@@ -53,6 +54,22 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const trackedRef = useRef(false);
 	const latestProgressRef = useRef<AttemptPayload | null>(null);
 	const gameOriginRef = useRef<string | null>(null);
+
+	const logInfo = useCallback((message: string, details?: unknown) => {
+		if (details !== undefined) {
+			console.info(LOG_PREFIX, message, details);
+			return;
+		}
+		console.info(LOG_PREFIX, message);
+	}, []);
+
+	const logWarn = useCallback((message: string, details?: unknown) => {
+		if (details !== undefined) {
+			console.warn(LOG_PREFIX, message, details);
+			return;
+		}
+		console.warn(LOG_PREFIX, message);
+	}, []);
 
 	useEffect(() => {
 		loadGame();
@@ -73,11 +90,15 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				game.playUrl,
 				window.location.href,
 			).origin;
+			logInfo("Resolved game origin", {
+				playUrl: game.playUrl,
+				origin: gameOriginRef.current,
+			});
 		} catch (error) {
 			console.warn("Failed to resolve game origin", error);
 			gameOriginRef.current = null;
 		}
-	}, [game?.playUrl]);
+	}, [game?.playUrl, logInfo]);
 
 	useEffect(() => {
 		const handleFullscreenChange = () => {
@@ -91,12 +112,24 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const trackResult = useCallback(
 		async (payload: AttemptPayload | LegacyPayload) => {
 			const accessToken = getAccessToken();
-			if (!accessToken || trackedRef.current) return;
+			if (!accessToken) {
+				logWarn("trackResult skipped because access token is missing");
+				return;
+			}
+			if (trackedRef.current) {
+				logInfo("trackResult skipped because result was already tracked");
+				return;
+			}
 			trackedRef.current = true;
 			setTracked(true);
 			const elapsed =
 				("duration" in payload ? payload.duration : undefined) ??
 				Math.round((Date.now() - startTimeRef.current) / 1000);
+			logInfo("Submitting game result", {
+				gameId: id,
+				elapsed,
+				payload,
+			});
 			try {
 				if ("score" in payload) {
 					await gameService.submitAttempt(id, {
@@ -117,17 +150,22 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 					});
 				}
 				latestProgressRef.current = null;
+				logInfo("Game result saved successfully", {
+					gameId: id,
+					elapsed,
+				});
 				toast.success({
 					title: "Kết quả đã được ghi nhận",
 					description: `Thời gian: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
 				});
 			} catch (e) {
 				console.error("Tracking error", e);
+				logWarn("Game result submit failed", e);
 				trackedRef.current = false;
 				setTracked(false);
 			}
 		},
-		[id],
+		[id, logInfo, logWarn],
 	);
 
 	const buildAttemptPayload = useCallback(
@@ -152,7 +190,24 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const submitPartialAttempt = useCallback(
 		(reason: "BACK" | "BEFORE_UNLOAD" | "PAGE_HIDE") => {
 			const accessToken = getAccessToken();
-			if (!accessToken || trackedRef.current) return false;
+			if (!accessToken) {
+				logWarn(
+					"submitPartialAttempt skipped because access token is missing",
+					{
+						reason,
+					},
+				);
+				return false;
+			}
+			if (trackedRef.current) {
+				logInfo(
+					"submitPartialAttempt skipped because result was already tracked",
+					{
+						reason,
+					},
+				);
+				return false;
+			}
 
 			const progress = latestProgressRef.current;
 			const totalCount =
@@ -161,6 +216,11 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 					: (progress?.maxRawScore ?? 0);
 
 			if (!progress || totalCount <= 0) {
+				logWarn("submitPartialAttempt skipped because progress is empty", {
+					reason,
+					totalCount,
+					hasProgress: !!progress,
+				});
 				return false;
 			}
 
@@ -191,6 +251,12 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			const body = JSON.stringify(payload);
 			trackedRef.current = true;
 			setTracked(true);
+			logInfo("Submitting partial attempt", {
+				gameId: id,
+				reason,
+				url,
+				payload,
+			});
 
 			if (
 				navigator.sendBeacon &&
@@ -201,8 +267,16 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 					new Blob([body], { type: "application/json" }),
 				);
 				if (success) {
+					logInfo("Partial attempt sent via sendBeacon", {
+						gameId: id,
+						reason,
+					});
 					return true;
 				}
+				logWarn("sendBeacon returned false, falling back to fetch", {
+					gameId: id,
+					reason,
+				});
 			}
 
 			void fetch(url, {
@@ -218,10 +292,27 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				},
 				credentials: "include",
 				keepalive: true,
-			});
+			})
+				.then((response) => {
+					logInfo("Partial attempt fetch completed", {
+						gameId: id,
+						reason,
+						status: response.status,
+						ok: response.ok,
+					});
+				})
+				.catch((error) => {
+					logWarn("Partial attempt fetch failed", {
+						gameId: id,
+						reason,
+						error,
+					});
+					trackedRef.current = false;
+					setTracked(false);
+				});
 			return true;
 		},
-		[id],
+		[id, logInfo, logWarn],
 	);
 
 	const parseIncomingMessage = useCallback(
@@ -278,18 +369,29 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 		if (!iframeWindow) return;
 
 		try {
+			logInfo("Sending BITLEARNING_HOST_READY to iframe");
 			iframeWindow.postMessage({ type: "BITLEARNING_HOST_READY" }, "*");
 		} catch (error) {
 			console.warn("Failed to notify iframe host readiness", error);
 		}
-	}, []);
+	}, [logInfo]);
 
 	// Listen for postMessage from the game iframe
 	// Games should send: { type: "GAME_OVER", score: number, duration?: number }
 	useEffect(() => {
 		const handleMessage = (event: MessageEvent) => {
 			const data = parseIncomingMessage(event.data);
+			logInfo("window.message received", {
+				origin: event.origin,
+				sourceMatchesIframe:
+					event.source === gameContainerRef.current?.contentWindow,
+				type: data?.type,
+				source: data?.source,
+			});
 			if (!isMessageFromCurrentGame(event, data)) {
+				logInfo(
+					"Ignored window.message because it does not match current game",
+				);
 				return;
 			}
 
@@ -313,10 +415,12 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				});
 
 				latestProgressRef.current = payload;
+				logInfo("Stored latest GAME_PROGRESS payload", payload);
 				return;
 			}
 
 			if (data && data.type === "GAME_RESULT") {
+				logInfo("Received GAME_RESULT payload", data);
 				trackResult(
 					buildAttemptPayload({
 						rawScore:
@@ -340,6 +444,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				);
 			}
 			if (data && data.type === "GAME_OVER" && typeof data.score === "number") {
+				logInfo("Received legacy GAME_OVER payload", data);
 				trackResult({
 					score: data.score,
 					duration:
@@ -348,10 +453,12 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			}
 		};
 		window.addEventListener("message", handleMessage);
+		logInfo("Registered window.message listener for game tracking");
 		return () => window.removeEventListener("message", handleMessage);
 	}, [
 		buildAttemptPayload,
 		isMessageFromCurrentGame,
+		logInfo,
 		parseIncomingMessage,
 		trackResult,
 	]);
@@ -378,14 +485,21 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			setLoading(true);
 			const gameData = await gameService.getGameById(id);
 			setGame(gameData);
+			logInfo("Loaded game metadata", {
+				gameId: gameData.id,
+				title: gameData.title,
+				playUrl: gameData.playUrl,
+			});
 		} catch (e) {
 			console.error("Failed to load game", e);
+			logWarn("Failed to load game metadata", e);
 		} finally {
 			setLoading(false);
 		}
 	};
 
 	const handleBack = () => {
+		logInfo("Back button clicked, attempting partial submit");
 		submitPartialAttempt("BACK");
 		navigate({ to: "/games/$id", params: { id: String(id) } });
 	};
