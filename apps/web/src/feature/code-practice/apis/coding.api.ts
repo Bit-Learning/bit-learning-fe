@@ -1,37 +1,40 @@
 import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
-import {
-  type CreateProblemRequest,
-  type CreateProblemResponse,
-  type UpdateProblemRequest,
-  type CreateTestCaseRequest,
-  type CreateTestCaseResponse,
-  type UpdateTestCaseRequest,
-  type CreateCodeTemplateRequest,
-  type CreateCodeTemplateResponse,
-  type CodeTemplateResponse,
-  type ProblemBriefResponse,
-  type ProblemDetailResponse,
-  type ProblemStatisticsResponse,
-  type ToggleFavoriteResponse,
-  type SubmitCodeRequest,
-  type SubmitCodeResponse,
-  type SubmissionResultResponse,
-  type SubmissionBriefResponse,
-  type UserSubmissionStatsResponse,
-  type ProblemFilters,
-  type SubmissionFilters,
-  type Language,
-  type BulkCreateTestCaseRequest,
-  type BulkCreateTestCaseResponse,
-  type TestCaseResponse,
-  type GenerateCodeTemplatesRequest,
-  type GenerateCodeTemplatesResponse,
-  type RunCodeRequest,
-  type RunCodeResponse,
-  type DebugRequest,
-  type DebugResponse,
+import type {
+  CreateProblemRequest,
+  CreateProblemResponse,
+  UpdateProblemRequest,
+  CreateTestCaseRequest,
+  CreateTestCaseResponse,
+  UpdateTestCaseRequest,
+  CreateCodeTemplateRequest,
+  CreateCodeTemplateResponse,
+  CodeTemplateResponse,
+  ProblemBriefResponse,
+  ProblemDetailResponse,
+  ProblemStatisticsResponse,
+  ToggleFavoriteResponse,
+  SubmitCodeRequest,
+  SubmitCodeResponse,
+  SubmissionResultResponse,
+  SubmissionBriefResponse,
+  UserSubmissionStatsResponse,
+  ProblemFilters,
+  SubmissionFilters,
+  ApprovalFilters,
+  Language,
+  BulkCreateTestCaseRequest,
+  BulkCreateTestCaseResponse,
+  TestCaseResponse,
+  GenerateCodeTemplatesRequest,
+  GenerateCodeTemplatesResponse,
+  RunCodeRequest,
+  RunCodeResponse,
+  DebugRequest,
+  DebugResponse,
+  RequestPublishRequest,
+  ApproveRejectRequest,
 } from "../types/coding.type";
 
 export const problemApi = {
@@ -181,5 +184,27 @@ export const submissionApi = {
 
   debugCode(data: DebugRequest): Promise<AxiosResponse<ApiResponse<DebugResponse>>> {
     return api.post("/submissions/debug", data);
+  },
+};
+
+export const problemApprovalApi = {
+  requestPublish(data: RequestPublishRequest): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.post("/problems/request-publish", data);
+  },
+
+  getMyPublishRequests(filters?: ApprovalFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
+    return api.get("/problems/my-publish-requests", { params: filters });
+  },
+
+  getPendingProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
+    return api.get("/problems/pending-approval", { params: filters });
+  },
+
+  approve(data: ApproveRejectRequest): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.put("/problems/approve", data);
+  },
+
+  reject(data: ApproveRejectRequest): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.put("/problems/reject", data);
   },
 };
