@@ -43,7 +43,6 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const navigate = useNavigate();
 	const auth = useSelector((state: RootState) => state.auth);
 	const username = auth.userInfo?.username ?? null;
-	const isAuthenticated = Boolean(auth.isAuthenticated && getAccessToken());
 
 	const [game, setGame] = useState<Game | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
@@ -91,7 +90,8 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 
 	const trackResult = useCallback(
 		async (payload: AttemptPayload | LegacyPayload) => {
-			if (!isAuthenticated || trackedRef.current) return;
+			const accessToken = getAccessToken();
+			if (!accessToken || trackedRef.current) return;
 			trackedRef.current = true;
 			setTracked(true);
 			const elapsed =
@@ -127,7 +127,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				setTracked(false);
 			}
 		},
-		[id, isAuthenticated],
+		[id],
 	);
 
 	const buildAttemptPayload = useCallback(
@@ -151,7 +151,8 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 
 	const submitPartialAttempt = useCallback(
 		(reason: "BACK" | "BEFORE_UNLOAD" | "PAGE_HIDE") => {
-			if (!isAuthenticated || trackedRef.current) return false;
+			const accessToken = getAccessToken();
+			if (!accessToken || trackedRef.current) return false;
 
 			const progress = latestProgressRef.current;
 			const totalCount =
@@ -188,7 +189,6 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			);
 			const url = new URL(`games/${id}/attempts`, apiBaseUrl).toString();
 			const body = JSON.stringify(payload);
-			const accessToken = getAccessToken();
 			trackedRef.current = true;
 			setTracked(true);
 
@@ -221,7 +221,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 			});
 			return true;
 		},
-		[id, isAuthenticated],
+		[id],
 	);
 
 	const parseIncomingMessage = useCallback(
