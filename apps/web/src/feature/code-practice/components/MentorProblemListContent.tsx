@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Plus, Edit, Trash2, Eye, Code2, Send, CheckSquare, Square, ChevronDown } from "lucide-react";
+import { Search, Plus, Edit, Trash2, Eye, Code2, Send, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
@@ -78,7 +78,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
   const [approvalFilter, setApprovalFilter] = useState<string>("all");
   const [deletingProblem, setDeletingProblem] = useState<ProblemBriefResponse | null>(null);
   const [page, setPage] = useState(initialPage);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const size = 20;
 
@@ -101,24 +101,36 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
     return matchSearch && matchDifficulty && matchApproval;
   });
 
-  const allSelected = filteredProblems.length > 0 && filteredProblems.every((p) => selectedIds.has(p.id));
-  const someSelected = filteredProblems.some((p) => selectedIds.has(p.id));
+  const selectableProblems = filteredProblems.filter(
+    (p) => p.approvalStatus === ApprovalStatus.NONE || p.approvalStatus === ApprovalStatus.REJECTED,
+  );
+  const selectableIds = selectableProblems.map((p) => p.id);
+
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.includes(id));
+  const someSelected = selectableIds.some((id) => selectedIds.includes(id));
 
   const toggleSelectAll = () => {
-    allSelected ? setSelectedIds(new Set()) : setSelectedIds(new Set(filteredProblems.map((p) => p.id)));
+    if (allSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(selectableIds);
+    }
   };
 
-  const toggleSelect = (id: string) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  const handleSelectProblem = (id: string) => {
+    const problem = filteredProblems.find((p) => p.id === id);
+    if (
+      problem &&
+      (problem.approvalStatus === ApprovalStatus.NONE || problem.approvalStatus === ApprovalStatus.REJECTED)
+    ) {
+      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]));
+    }
   };
 
   const handleRequestPublish = async () => {
-    await requestPublishMutation.mutateAsync(Array.from(selectedIds));
-    setSelectedIds(new Set());
+    if (selectedIds.length === 0) return;
+    await requestPublishMutation.mutateAsync(selectedIds);
+    setSelectedIds([]);
   };
 
   const handleConfirmDelete = async () => {
@@ -130,27 +142,29 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="p-6 lg:p-8 mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-              Ngân hàng bài tập
+              Bài tập thực hành của tôi
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">Quản lý các thử thách lập trình cho học viên</p>
+            <p className="text-slate-500 dark:text-slate-400 text-lg mt-1">
+              Quản lý và theo dõi các bài tập thực hành đã tạo
+            </p>
           </div>
           <Button
             onClick={() => navigate({ to: "/mentor/problem/create" })}
-            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 shrink-0"
+            className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
           >
             <Plus className="w-4 h-4" />
             Tạo bài tập mới
           </Button>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-4">
+        <div className="flex flex-col md:flex-row gap-4 mb-5">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
-              className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm transition-all"
+              className="w-full pl-9 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm transition-all shadow-sm"
               placeholder="Tìm kiếm bài tập..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
@@ -161,7 +175,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
               <select
                 value={difficultyFilter}
                 onChange={(e) => setDifficultyFilter(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
               >
                 <option value="all">Độ khó: Tất cả</option>
                 <option value={Difficulty.EASY}>Dễ</option>
@@ -174,7 +188,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
               <select
                 value={approvalFilter}
                 onChange={(e) => setApprovalFilter(e.target.value)}
-                className="appearance-none pl-3 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
               >
                 <option value="all">Trạng thái: Tất cả</option>
                 <option value={ApprovalStatus.NONE}>Chưa gửi</option>
@@ -187,26 +201,35 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </div>
         </div>
 
-        {selectedIds.size > 0 && (
-          <div className="mb-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-xl px-4 py-3">
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-              Đã chọn <span className="font-bold">{selectedIds.size}</span> bài tập
+        {someSelected && (
+          <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+            <span className="text-sm text-blue-700 font-medium">
+              Đã chọn <span className="font-bold">{selectedIds.length}</span> bài tập
+              {selectedIds.length < selectableIds.length && (
+                <button
+                  onClick={toggleSelectAll}
+                  className="ml-2 underline hover:no-underline text-blue-600 font-semibold"
+                >
+                  Chọn tất cả {selectableIds.length} bài
+                </button>
+              )}
             </span>
-            <div className="flex-1" />
-            <button
-              onClick={() => setSelectedIds(new Set())}
-              className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
-            >
-              Bỏ chọn
-            </button>
-            <Button
-              onClick={handleRequestPublish}
-              isDisabled={requestPublishMutation.isPending}
-              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              {requestPublishMutation.isPending ? "Đang gửi..." : "Gửi yêu cầu duyệt"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedIds([])}
+                className="cursor-pointer text-sm text-blue-500 hover:text-blue-700 font-medium"
+              >
+                Bỏ chọn tất cả
+              </button>
+              <Button
+                onClick={handleRequestPublish}
+                isDisabled={requestPublishMutation.isPending}
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                {requestPublishMutation.isPending ? "Đang gửi..." : `Gửi yêu cầu duyệt (${selectedIds.length})`}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -220,34 +243,39 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
                       <th className="px-4 py-3.5 w-10">
-                        <button
-                          onClick={toggleSelectAll}
-                          className="text-slate-400 hover:text-blue-600 transition-colors"
-                        >
-                          {allSelected ? (
-                            <CheckSquare className="w-4 h-4 text-blue-600" />
-                          ) : someSelected ? (
-                            <div className="w-4 h-4 rounded border-2 border-blue-500 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                              <div className="w-2 h-0.5 bg-blue-600 rounded" />
-                            </div>
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
+                        <label className="relative flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            ref={(el) => {
+                              if (el) el.indeterminate = someSelected && !allSelected;
+                            }}
+                            onChange={toggleSelectAll}
+                            className="peer sr-only"
+                          />
+                          <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400">
+                            <svg
+                              className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <div className="absolute w-3 h-0.5 bg-white opacity-0 peer-indeterminate:opacity-100" />
+                          </div>
+                        </label>
                       </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Tiêu đề
-                      </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Tiêu đề</th>
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Độ khó
                       </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Trạng thái
                       </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Ngày tạo
-                      </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Ngày tạo</th>
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Thao tác
                       </th>
                     </tr>
@@ -269,8 +297,10 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                       </tr>
                     ) : (
                       filteredProblems.map((problem) => {
-                        const isSelected = selectedIds.has(problem.id);
-                        const isDisabled = problem.approvalStatus !== ApprovalStatus.NONE;
+                        const isSelected = selectedIds.includes(problem.id);
+                        const isDisabled =
+                          problem.approvalStatus === ApprovalStatus.PENDING ||
+                          problem.approvalStatus === ApprovalStatus.APPROVED;
 
                         return (
                           <tr
@@ -283,31 +313,41 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                                 : "hover:bg-slate-50/80 dark:hover:bg-slate-800/30",
                             )}
                           >
-                            <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
-                              <button
-                                onClick={() => toggleSelect(problem.id)}
-                                disabled={isDisabled}
-                                className="text-slate-400 hover:text-blue-600 transition-colors"
-                              >
-                                {isSelected ? (
-                                  <CheckSquare className="w-4 h-4 text-blue-600" />
-                                ) : (
-                                  <Square className="w-4 h-4" />
-                                )}
-                              </button>
+                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                              <label className="relative flex items-center cursor-pointer">
+                                <input
+                                  type="checkbox"
+                                  checked={isSelected}
+                                  onChange={() => handleSelectProblem(problem.id)}
+                                  onClick={(e) => e.stopPropagation()}
+                                  disabled={isDisabled}
+                                  className="peer sr-only"
+                                />
+                                <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
+                                  <svg
+                                    className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
+                                    fill="none"
+                                    viewBox="0 0 24 24"
+                                    stroke="currentColor"
+                                    strokeWidth={3}
+                                  >
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                  </svg>
+                                </div>
+                              </label>
                             </td>
                             <td className="px-4 py-3.5">
-                              <span className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                              <span className="text-md font-semibold text-blue-600 dark:text-blue-400 hover:underline">
                                 {problem.title}
                               </span>
-                              <p className="text-xs text-slate-400 mt-0.5 font-mono">
+                              <p className="text-xs text-slate-500 mt-0.5 font-mono">
                                 {problem.tags?.map((t) => t.name).join(", ") || problem.slug}
                               </p>
                             </td>
                             <td className="px-4 py-3.5 text-center">
                               <span
                                 className={cn(
-                                  "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
+                                  "inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium",
                                   difficultyConfig[problem.difficulty].className,
                                 )}
                               >
@@ -317,7 +357,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                             <td className="px-4 py-3.5 text-center">
                               <span
                                 className={cn(
-                                  "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
+                                  "inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium",
                                   approvalConfig[problem.approvalStatus].className,
                                 )}
                               >
@@ -331,24 +371,24 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                               <div className="flex justify-center gap-1">
                                 <button
                                   onClick={() => navigate({ to: `/mentor/problem/${problem.id}` })}
-                                  className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors"
+                                  className="cursor-pointer p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors"
                                   title="Xem chi tiết"
                                 >
-                                  <Eye className="w-4 h-4" />
+                                  <Eye className="w-6 h-6" />
                                 </button>
                                 <button
                                   onClick={() => navigate({ to: `/mentor/problem/${problem.id}/edit` })}
-                                  className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors"
+                                  className="cursor-pointer p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors"
                                   title="Chỉnh sửa"
                                 >
-                                  <Edit className="w-4 h-4" />
+                                  <Edit className="w-6 h-6" />
                                 </button>
                                 <button
                                   onClick={() => setDeletingProblem(problem)}
-                                  className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                                  className="cursor-pointer p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                                   title="Xóa"
                                 >
-                                  <Trash2 className="w-4 h-4" />
+                                  <Trash2 className="w-6 h-6" />
                                 </button>
                               </div>
                             </td>

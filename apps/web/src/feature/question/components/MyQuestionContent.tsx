@@ -13,7 +13,7 @@ import {
   AlertDialogTitle,
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
-import { useMyQuestionsAll, useDeleteQuestion, useRequestPublish, useMyQuestions } from "../queries/useQuestion";
+import { useDeleteQuestion, useRequestPublish, useMyQuestions } from "../queries/useQuestion";
 import { ApprovalStatus, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
@@ -141,39 +141,9 @@ const MyQuestionsContent: React.FC = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold text-gray-900">Danh sách câu hỏi của tôi</h1>
-              <p className="text-gray-600 text-lg mt-1">Chọn các câu hỏi để gửi yêu cầu đưa vào Question Bank</p>
+              <p className="text-gray-500 text-lg mt-1">Chọn các câu hỏi để gửi yêu cầu đưa vào Question Bank</p>
             </div>
             <div className="flex gap-3">
-              {selectedQuestions.length > 0 && (
-                <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-                  <AlertDialogTrigger asChild>
-                    <Button
-                      size="lg"
-                      className="cursor-pointer bg-blue-700 hover:bg-blue-500 text-white px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
-                    >
-                      <Send className="h-4 w-4" />
-                      Gửi phê duyệt ({selectedQuestions.length})
-                    </Button>
-                  </AlertDialogTrigger>
-                  <AlertDialogContent>
-                    <AlertDialogHeader>
-                      <AlertDialogTitle>Xác nhận gửi yêu cầu phê duyệt</AlertDialogTitle>
-                      <AlertDialogDescription>
-                        Bạn đang gửi <span className="font-semibold text-gray-900">{selectedQuestions.length}</span> câu
-                        hỏi để phê duyệt. Sau khi gửi, các câu hỏi sẽ được xem xét bởi quản trị viên trước khi được đưa
-                        vào Question Bank.
-                        <br />
-                        <br />
-                        Bạn có chắc chắn muốn tiếp tục?
-                      </AlertDialogDescription>
-                    </AlertDialogHeader>
-                    <AlertDialogFooter>
-                      <AlertDialogCancel>Hủy</AlertDialogCancel>
-                      <AlertDialogAction onClick={handleRequestPublish}>Gửi yêu cầu</AlertDialogAction>
-                    </AlertDialogFooter>
-                  </AlertDialogContent>
-                </AlertDialog>
-              )}
               <Button
                 onClick={() => navigate({ to: "/mentor/exam/generate-from-questions" })}
                 variant="outline"
@@ -207,7 +177,7 @@ const MyQuestionsContent: React.FC = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+              className="w-full pl-9 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm transition-all shadow-sm"
               placeholder="Tìm kiếm nội dung câu hỏi..."
               type="text"
               value={search}
@@ -217,7 +187,7 @@ const MyQuestionsContent: React.FC = () => {
           {/* <select
             value={difficultyFilter}
             onChange={handleFilterChange(setDifficultyFilter)}
-            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
           >
             <option value="all">Độ khó: Tất cả</option>
             <option value="EASY">Dễ</option>
@@ -227,7 +197,7 @@ const MyQuestionsContent: React.FC = () => {
           <select
             value={typeFilter}
             onChange={handleFilterChange(setTypeFilter)}
-            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
           >
             <option value="all">Loại: Tất cả</option>
             <option value="MCQ">Trắc nghiệm</option>
@@ -236,7 +206,7 @@ const MyQuestionsContent: React.FC = () => {
           <select
             value={statusFilter}
             onChange={handleFilterChange(setStatusFilter)}
-            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
           >
             <option value="all">Trạng thái: Tất cả</option>
             <option value={ApprovalStatus.NONE}>Chưa gửi</option>
@@ -307,12 +277,43 @@ const MyQuestionsContent: React.FC = () => {
                     </button>
                   )}
                 </span>
-                <button
-                  onClick={() => setSelectedQuestions([])}
-                  className="cursor-pointer text-sm text-blue-500 hover:text-blue-700 font-medium"
-                >
-                  Bỏ chọn tất cả
-                </button>
+                <div className="flex items-center gap-3">
+                  <button
+                    onClick={() => setSelectedQuestions([])}
+                    className="cursor-pointer text-sm text-blue-500 hover:text-blue-700 font-medium"
+                  >
+                    Bỏ chọn tất cả
+                  </button>
+                  {selectedQuestions.length > 0 && (
+                    <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+                      <AlertDialogTrigger asChild>
+                        <Button className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2">
+                          <Send className="w-4 h-4" />
+                          {requestPublish.isPending
+                            ? "Đang gửi..."
+                            : `Gửi yêu cầu duyệt (${setSelectedQuestions.length})`}
+                        </Button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>Xác nhận gửi yêu cầu phê duyệt</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Bạn đang gửi <span className="font-semibold text-gray-900">{selectedQuestions.length}</span>{" "}
+                            câu hỏi để phê duyệt. Sau khi gửi, các câu hỏi sẽ được xem xét bởi quản trị viên trước khi
+                            được đưa vào Question Bank.
+                            <br />
+                            <br />
+                            Bạn có chắc chắn muốn tiếp tục?
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Hủy</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleRequestPublish}>Gửi yêu cầu</AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
               </div>
             )}
 

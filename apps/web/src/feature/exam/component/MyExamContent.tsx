@@ -1,28 +1,15 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import {
-  Plus,
-  Search,
-  Eye,
-  Edit,
-  Trash2,
-  Clock,
-  FileText,
-  X,
-  Loader2,
-  CheckSquare,
-  Square,
-  Send,
-  ChevronDown,
-} from "lucide-react";
+import { Plus, Search, Eye, Edit, Trash2, Clock, FileText, Send, ChevronDown } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { Button } from "@workspace/ui/components/Button";
 import { Pagination } from "@/shared/components/Pagination";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { cn } from "@workspace/ui/lib/utils";
-import { useMyExams, useDeleteExam, useUpdateExam, useRequestPublishExam } from "../queries/useExam";
+import { useMyExams, useDeleteExam, useRequestPublishExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
-import type { ApprovalStatus, ExamBriefResponse, ExamType, ExamUpdateRequest } from "../types/exam.type";
+import type { ApprovalStatus, ExamBriefResponse, ExamType } from "../types/exam.type";
+import { EditExamModal } from "./EditExamModal";
 
 const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
   EXAM: {
@@ -69,149 +56,6 @@ function useDebounce<T>(value: T, delay: number): T {
   return debounced;
 }
 
-interface EditExamModalProps {
-  exam: ExamBriefResponse;
-  onClose: () => void;
-}
-
-const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
-  const { mutate: updateExam, isPending } = useUpdateExam();
-  const [name, setName] = useState(exam.name);
-  const [code, setCode] = useState(exam.code);
-  const [type, setType] = useState<ExamType>(exam.type ?? "EXAM");
-  const [durationInMinutes, setDurationInMinutes] = useState(exam.durationInMinutes);
-  const [totalScore, setTotalScore] = useState(exam.totalScore);
-  const [enrollKey, setEnrollKey] = useState(exam.enrollKey ?? "");
-
-  const handleSubmit = () => {
-    if (!name.trim() || !code.trim()) return;
-    const data: ExamUpdateRequest = {
-      name: name.trim(),
-      code: code.trim(),
-      type,
-      durationInMinutes,
-      totalScore,
-      enrollKey: enrollKey.trim() || undefined,
-    };
-    updateExam({ id: exam.id, data }, { onSuccess: onClose });
-  };
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Chỉnh sửa đề thi</h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <X className="h-5 w-5 text-slate-500" />
-          </button>
-        </div>
-        <div className="px-6 py-5 space-y-4">
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Tên đề thi <span className="text-red-500">*</span>
-            </label>
-            <input
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="Tên đề thi"
-            />
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Mã đề <span className="text-red-500">*</span>
-              </label>
-              <input
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm uppercase outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                value={code}
-                onChange={(e) => setCode(e.target.value.toUpperCase())}
-                placeholder="Mã đề"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Loại</label>
-              <div className="relative">
-                <select
-                  value={type}
-                  onChange={(e) => setType(e.target.value as ExamType)}
-                  className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
-                >
-                  <option value="EXAM">Chính thức</option>
-                  <option value="PRACTICE">Luyện tập</option>
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-              </div>
-            </div>
-          </div>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-                Thời gian (phút)
-              </label>
-              <input
-                type="number"
-                min={1}
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                value={durationInMinutes}
-                onChange={(e) => setDurationInMinutes(Number(e.target.value))}
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">Tổng điểm</label>
-              <input
-                type="number"
-                min={0}
-                step={0.5}
-                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-                value={totalScore}
-                onChange={(e) => setTotalScore(Number(e.target.value))}
-              />
-            </div>
-          </div>
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
-              Mật khẩu vào thi
-              {type === "EXAM" ? (
-                <span className="text-red-500 ml-1">*</span>
-              ) : (
-                <span className="text-slate-400 text-sm font-normal ml-1">(tuỳ chọn)</span>
-              )}
-            </label>
-            <input
-              className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all"
-              value={enrollKey}
-              onChange={(e) => setEnrollKey(e.target.value)}
-              placeholder={type === "EXAM" ? "Bắt buộc với đề chính thức" : "Để trống nếu không cần mật khẩu"}
-            />
-          </div>
-        </div>
-        <div className="flex items-center justify-end gap-3 px-6 py-4 border-t border-slate-200 dark:border-slate-700">
-          <button
-            onClick={onClose}
-            disabled={isPending}
-            className="px-4 py-2 text-sm font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white transition-colors disabled:opacity-50"
-          >
-            Hủy
-          </button>
-          <Button
-            onClick={handleSubmit}
-            isDisabled={isPending || !name.trim() || !code.trim() || (type === "EXAM" && !enrollKey.trim())}
-            className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-          >
-            {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
-            Lưu thay đổi
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
 const MyExamsContent: React.FC = () => {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
@@ -221,7 +65,7 @@ const MyExamsContent: React.FC = () => {
   const [page, setPage] = useState(0);
   const [editingExam, setEditingExam] = useState<ExamBriefResponse | null>(null);
   const [deletingExam, setDeletingExam] = useState<ExamBriefResponse | null>(null);
-  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const debouncedSearch = useDebounce(searchInput, 400);
   const { mutate: deleteExam, isPending: isDeleting } = useDeleteExam();
@@ -249,24 +93,31 @@ const MyExamsContent: React.FC = () => {
 
   const hasActiveFilter = !!searchInput || !!filterType || !!filterSubjectId || !!filterApproval;
 
-  const allSelected = exams.length > 0 && exams.every((e) => selectedIds.has(e.id));
-  const someSelected = exams.some((e) => selectedIds.has(e.id));
+  const selectableExams = exams.filter((e) => e.approvalStatus === "NONE" || e.approvalStatus === "REJECTED");
+  const selectableIds = selectableExams.map((e) => e.id);
+
+  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.includes(id));
+  const someSelected = selectableIds.some((id) => selectedIds.includes(id));
 
   const toggleSelectAll = () => {
-    allSelected ? setSelectedIds(new Set()) : setSelectedIds(new Set(exams.map((e) => e.id)));
+    if (allSelected) {
+      setSelectedIds([]);
+    } else {
+      setSelectedIds(selectableIds);
+    }
   };
 
-  const toggleSelect = (id: number) => {
-    setSelectedIds((prev) => {
-      const next = new Set(prev);
-      next.has(id) ? next.delete(id) : next.add(id);
-      return next;
-    });
+  const handleSelectExam = (id: number) => {
+    const exam = exams.find((e) => e.id === id);
+    if (exam && (exam.approvalStatus === "NONE" || exam.approvalStatus === "REJECTED")) {
+      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((eid) => eid !== id) : [...prev, id]));
+    }
   };
 
   const handleRequestPublish = async () => {
-    await requestPublishMutation.mutateAsync(Array.from(selectedIds));
-    setSelectedIds(new Set());
+    if (selectedIds.length === 0) return;
+    await requestPublishMutation.mutateAsync(selectedIds);
+    setSelectedIds([]);
   };
 
   const handleConfirmDelete = () => {
@@ -277,27 +128,27 @@ const MyExamsContent: React.FC = () => {
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="p-6 lg:p-8 mx-auto">
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
               Đề thi của tôi
             </h1>
-            <p className="text-slate-500 dark:text-slate-400 mt-1">Quản lý và theo dõi các đề thi đã tạo</p>
+            <p className="text-slate-500 text-lg dark:text-slate-400 mt-1">Quản lý và theo dõi các đề thi đã tạo</p>
           </div>
           <Button
             onClick={() => navigate({ to: "/mentor/exam/generate-from-questions" })}
-            className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white px-5 py-2.5 rounded-lg font-medium flex items-center gap-2 shrink-0"
+            className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
           >
             <Plus className="h-4 w-4" />
             Tạo đề thi mới
           </Button>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 mb-5 flex flex-col md:flex-row gap-3">
+        <div className="flex flex-col md:flex-row gap-4 mb-5">
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
-              className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm transition-all"
+              className="w-full pl-9 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm transition-all shadow-sm"
               placeholder="Tìm kiếm đề thi..."
               value={searchInput}
               onChange={(e) => {
@@ -314,7 +165,7 @@ const MyExamsContent: React.FC = () => {
                   setFilterType(e.target.value);
                   setPage(0);
                 }}
-                className="appearance-none pl-3 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
               >
                 <option value="">Loại: Tất cả</option>
                 <option value="EXAM">Đề thi</option>
@@ -330,7 +181,7 @@ const MyExamsContent: React.FC = () => {
                     setFilterSubjectId(e.target.value);
                     setPage(0);
                   }}
-                  className="appearance-none pl-3 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                  className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
                 >
                   <option value="">Môn: Tất cả</option>
                   {subjects.map((s: any) => (
@@ -349,7 +200,7 @@ const MyExamsContent: React.FC = () => {
                   setFilterApproval(e.target.value);
                   setPage(0);
                 }}
-                className="appearance-none pl-3 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
               >
                 <option value="">Duyệt: Tất cả</option>
                 <option value="NONE">Chưa gửi</option>
@@ -375,26 +226,35 @@ const MyExamsContent: React.FC = () => {
           </div>
         </div>
 
-        {selectedIds.size > 0 && (
-          <div className="mb-4 flex items-center gap-3 bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-900 rounded-xl px-4 py-3">
-            <span className="text-sm font-medium text-blue-700 dark:text-blue-400">
-              Đã chọn <span className="font-bold">{selectedIds.size}</span> đề thi
+        {someSelected && (
+          <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
+            <span className="text-sm text-blue-700 font-medium">
+              Đã chọn <span className="font-bold">{selectedIds.length}</span> đề thi
+              {selectedIds.length < selectableIds.length && (
+                <button
+                  onClick={toggleSelectAll}
+                  className="ml-2 underline hover:no-underline text-blue-600 font-semibold"
+                >
+                  Chọn tất cả {selectableIds.length} đề
+                </button>
+              )}
             </span>
-            <div className="flex-1" />
-            <button
-              onClick={() => setSelectedIds(new Set())}
-              className="text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-200 transition-colors"
-            >
-              Bỏ chọn
-            </button>
-            <Button
-              onClick={handleRequestPublish}
-              isDisabled={requestPublishMutation.isPending}
-              className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2"
-            >
-              <Send className="w-4 h-4" />
-              {requestPublishMutation.isPending ? "Đang gửi..." : "Gửi yêu cầu duyệt"}
-            </Button>
+            <div className="flex items-center gap-3">
+              <button
+                onClick={() => setSelectedIds([])}
+                className="text-sm text-blue-500 hover:text-blue-700 font-medium"
+              >
+                Bỏ chọn tất cả
+              </button>
+              <Button
+                onClick={handleRequestPublish}
+                isDisabled={requestPublishMutation.isPending}
+                className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2"
+              >
+                <Send className="w-4 h-4" />
+                {requestPublishMutation.isPending ? "Đang gửi..." : `Gửi yêu cầu duyệt (${selectedIds.length})`}
+              </Button>
+            </div>
           </div>
         )}
 
@@ -417,7 +277,7 @@ const MyExamsContent: React.FC = () => {
               {!hasActiveFilter && (
                 <Button
                   onClick={() => navigate({ to: "/mentor/exam/generate-from-questions" })}
-                  className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2.5 rounded-lg font-semibold flex items-center gap-2 mx-auto"
+                  className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
                 >
                   <Plus className="h-4 w-4" />
                   Tạo đề thi mới
@@ -431,44 +291,50 @@ const MyExamsContent: React.FC = () => {
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
                       <th className="px-4 py-3.5 w-10">
-                        <button
-                          onClick={toggleSelectAll}
-                          className="text-slate-400 hover:text-blue-600 transition-colors"
-                        >
-                          {allSelected ? (
-                            <CheckSquare className="w-4 h-4 text-blue-600" />
-                          ) : someSelected ? (
-                            <div className="w-4 h-4 rounded border-2 border-blue-500 bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center">
-                              <div className="w-2 h-0.5 bg-blue-600 rounded" />
-                            </div>
-                          ) : (
-                            <Square className="w-4 h-4" />
-                          )}
-                        </button>
+                        <label className="relative flex items-center cursor-pointer">
+                          <input
+                            type="checkbox"
+                            checked={allSelected}
+                            ref={(el) => {
+                              if (el) el.indeterminate = someSelected && !allSelected;
+                            }}
+                            onChange={toggleSelectAll}
+                            className="peer sr-only"
+                          />
+                          <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400">
+                            <svg
+                              className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                            <div className="absolute w-3 h-0.5 bg-white opacity-0 peer-indeterminate:opacity-100" />
+                          </div>
+                        </label>
                       </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                         Thông tin đề thi
                       </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Mã đề
-                      </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                        Thời gian
-                      </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Mã đề</th>
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Thời gian</th>
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Điểm
                       </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Trạng thái
                       </th>
-                      <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Thao tác
                       </th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {exams.map((exam) => {
-                      const isSelected = selectedIds.has(exam.id);
+                      const isSelected = selectedIds.includes(exam.id);
+                      const isDisabled = exam.approvalStatus === "PENDING" || exam.approvalStatus === "APPROVED";
                       const approval = APPROVAL_CONFIG[exam.approvalStatus];
                       const typeConf = TYPE_LABELS[exam.type];
                       return (
@@ -482,36 +348,44 @@ const MyExamsContent: React.FC = () => {
                               : "hover:bg-slate-50/80 dark:hover:bg-slate-800/30",
                           )}
                         >
-                          <td className="px-4 py-3.5" onClick={(e) => e.stopPropagation()}>
-                            <button
-                              onClick={() => toggleSelect(exam.id)}
-                              className="text-slate-400 hover:text-blue-600 transition-colors"
-                            >
-                              {isSelected ? (
-                                <CheckSquare className="w-4 h-4 text-blue-600" />
-                              ) : (
-                                <Square className="w-4 h-4" />
-                              )}
-                            </button>
+                          <td className="p-4" onClick={(e) => e.stopPropagation()}>
+                            <label className="relative flex items-center cursor-pointer">
+                              <input
+                                type="checkbox"
+                                checked={isSelected}
+                                onChange={() => handleSelectExam(exam.id)}
+                                onClick={(e) => e.stopPropagation()}
+                                disabled={isDisabled}
+                                className="peer sr-only"
+                              />
+                              <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
+                                <svg
+                                  className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={3}
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              </div>
+                            </label>
                           </td>
                           <td className="px-4 py-3.5">
-                            <p className="text-sm font-semibold text-slate-900 dark:text-slate-100 mb-1">{exam.name}</p>
+                            <p className="text-md font-semibold text-slate-900 dark:text-slate-100 mb-1">{exam.name}</p>
                             <div className="flex items-center gap-2 flex-wrap">
                               <span
                                 className={cn(
-                                  "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                                  "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium",
                                   typeConf.className,
                                 )}
                               >
                                 {typeConf.label}
                               </span>
-                              {exam.subject && (
-                                <span className="text-xs text-slate-400 dark:text-slate-500">{exam.subject.name}</span>
-                              )}
                             </div>
                           </td>
                           <td className="px-4 py-3.5">
-                            <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-xs font-semibold font-mono">
+                            <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-sm font-semibold font-mono">
                               {exam.code}
                             </span>
                           </td>
@@ -527,7 +401,7 @@ const MyExamsContent: React.FC = () => {
                           <td className="px-4 py-3.5 text-center">
                             <span
                               className={cn(
-                                "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
+                                "inline-flex items-center px-2.5 py-1 rounded-full text-sm font-medium",
                                 approval.className,
                               )}
                             >
@@ -538,24 +412,24 @@ const MyExamsContent: React.FC = () => {
                             <div className="flex items-center justify-center gap-1">
                               <button
                                 onClick={() => navigate({ to: `/mentor/exam/${exam.id}` })}
-                                className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors"
+                                className="cursor-pointer p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors"
                                 title="Xem"
                               >
-                                <Eye className="h-4 w-4" />
+                                <Eye className="h-6 w-6" />
                               </button>
                               <button
                                 onClick={() => setEditingExam(exam)}
-                                className="p-1.5 text-slate-400 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors"
+                                className="cursor-pointer p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors"
                                 title="Sửa"
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="h-6 w-6" />
                               </button>
                               <button
                                 onClick={() => setDeletingExam(exam)}
-                                className="p-1.5 text-slate-400 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
+                                className="cursor-pointer p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                                 title="Xóa"
                               >
-                                <Trash2 className="h-4 w-4" />
+                                <Trash2 className="h-6 w-6" />
                               </button>
                             </div>
                           </td>
