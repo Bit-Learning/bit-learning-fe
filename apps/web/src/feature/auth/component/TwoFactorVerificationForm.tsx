@@ -113,26 +113,17 @@ const TwoFactorVerificationForm: React.FC<TwoFactorVerificationFormProps> = ({
 	return (
 		<div className="w-full max-w-md">
 			{verifyMutation.isPending && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-					<div className="rounded-lg bg-white p-6 text-center">
-						<div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-						<p className="text-gray-600">Đang xác thực...</p>
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-white/55 backdrop-blur-sm">
+					<div className="rounded-2xl border border-slate-200 bg-white/95 px-8 py-6 text-center shadow-xl">
+						<div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+						<p className="text-sm font-medium text-slate-700">
+							Đang xác thực...
+						</p>
 					</div>
 				</div>
 			)}
 
 			<div className="rounded-2xl bg-white p-8">
-				<div className="mb-6 text-center">
-					<div className="mx-auto mb-4 flex items-center justify-center">
-						<img
-							src="/Logo.png"
-							alt="Bit Learning Logo"
-							className="h-10 w-36 object-contain"
-						/>
-					</div>
-					{/* <h1 className="mb-2 text-xl font-bold text-gray-900">Bit Learning</h1> */}
-				</div>
-
 				<Form {...form}>
 					<form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
 						<FormField

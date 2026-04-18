@@ -98,10 +98,12 @@ const LoginWith2FAForm: React.FC<LoginWith2FAFormProps> = ({
 	return (
 		<div className="flex h-full w-full flex-col lg:w-1/2">
 			{loginMutation.isPending && (
-				<div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-					<div className="rounded-lg bg-white p-6 text-center">
-						<div className="mx-auto mb-2 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
-						<p className="text-gray-600">Đang xác thực...</p>
+				<div className="fixed inset-0 z-50 flex items-center justify-center bg-white/55 backdrop-blur-sm">
+					<div className="rounded-2xl border border-slate-200 bg-white/95 px-8 py-6 text-center shadow-xl">
+						<div className="mx-auto mb-3 h-8 w-8 animate-spin rounded-full border-4 border-blue-600 border-t-transparent" />
+						<p className="text-sm font-medium text-slate-700">
+							Đang xác thực...
+						</p>
 					</div>
 				</div>
 			)}

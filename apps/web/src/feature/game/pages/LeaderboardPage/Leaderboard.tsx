@@ -175,7 +175,7 @@ function PodiumCard({
 					{entry.totalScore.toLocaleString("vi-VN")}
 				</div>
 				<div className="text-[11px] text-gray-500">
-					{entry.gamesPlayed} trận
+					{entry.totalAttempts} lượt chơi
 				</div>
 			</button>
 		</div>
@@ -276,9 +276,6 @@ export default function LeaderboardPage() {
 						Bảng xếp hạng
 					</span>
 				</h1>
-				<p className="text-sm text-gray-500 mt-3">
-					Tách riêng bảng xếp hạng theo từng loại game có tính điểm
-				</p>
 			</div>
 
 			<div className="mb-8 rounded-3xl border border-gray-200 bg-white/90 p-2 shadow-sm">
@@ -318,7 +315,7 @@ export default function LeaderboardPage() {
 				</div>
 			</div>
 
-			<div className="mb-8 rounded-3xl border border-amber-100 bg-amber-50 px-5 py-4 text-left">
+			{/* <div className="mb-8 rounded-3xl border border-amber-100 bg-amber-50 px-5 py-4 text-left">
 				<div className="text-xs font-bold uppercase tracking-[0.24em] text-amber-700">
 					Đang xem
 				</div>
@@ -329,7 +326,7 @@ export default function LeaderboardPage() {
 					{activeTab.description} Hệ thống không xếp hạng `TYPING` và `OTHER` vì
 					hai loại này đang được cấu hình không tính điểm.
 				</p>
-			</div>
+			</div> */}
 
 			{hasPodium && (
 				<div className="flex items-end justify-center gap-3 mb-10">
@@ -374,7 +371,7 @@ export default function LeaderboardPage() {
 									{entry.username}
 								</div>
 								<div className="text-xs text-gray-500">
-									{entry.gamesPlayed} trận đã chơi
+									{entry.totalAttempts} lượt chơi
 								</div>
 							</div>
 

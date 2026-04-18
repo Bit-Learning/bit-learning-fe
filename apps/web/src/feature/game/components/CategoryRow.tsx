@@ -73,8 +73,7 @@ export default function CategoryRow({
 				<div className="px-8">
 					<div className="bg-gray-800/30 rounded-lg p-8 text-center border border-gray-700/50">
 						<p className="text-gray-400 text-sm">
-							Hiện chưa có trò chơi nào trong danh mục này. Hãy quay lại sau
-							nhé!
+							Hiện chưa có trò chơi nào trong danh mục này.
 						</p>
 					</div>
 				</div>

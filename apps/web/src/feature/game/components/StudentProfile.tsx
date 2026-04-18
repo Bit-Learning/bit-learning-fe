@@ -1,5 +1,11 @@
 import { useEffect, useState } from "react";
-import { ChevronLeft, ChevronRight, UserPlus, UserMinus } from "lucide-react";
+import {
+	ChevronLeft,
+	ChevronRight,
+	Info,
+	UserPlus,
+	UserMinus,
+} from "lucide-react";
 import studentService, {
 	type PlayHistoryDetail,
 	type StudentProfile,
@@ -13,6 +19,11 @@ import {
 } from "@/feature/user/queries/useUser";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@workspace/ui/components/update/tooltip";
 
 interface StudentProfileViewProps {
 	userId: number;
@@ -28,6 +39,41 @@ const getCurriculumSummary = (item: PlayHistoryItem) =>
 	]
 		.filter(Boolean)
 		.join(" • ");
+
+function StatCard({
+	value,
+	label,
+	tooltip,
+}: {
+	value: string | number;
+	label: string;
+	tooltip?: string;
+}) {
+	return (
+		<div className="bg-black/30 rounded-lg px-6 py-3">
+			<div className="text-2xl font-bold">{value}</div>
+			<div className="mt-1 flex items-center gap-1 text-sm text-gray-400">
+				<span>{label}</span>
+				{tooltip ? (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<button
+								type="button"
+								className="text-gray-500 transition-colors hover:text-white"
+								aria-label={tooltip}
+							>
+								<Info className="h-3.5 w-3.5" />
+							</button>
+						</TooltipTrigger>
+						<TooltipContent sideOffset={8} className="max-w-56 text-left">
+							{tooltip}
+						</TooltipContent>
+					</Tooltip>
+				) : null}
+			</div>
+		</div>
+	);
+}
 
 export default function StudentProfileView({
 	userId,
@@ -52,32 +98,36 @@ export default function StudentProfileView({
 	const currentUserId = auth.userInfo?.id;
 
 	useEffect(() => {
-		fetchProfile();
-		fetchPlayHistory(currentPage);
+		const loadProfile = async () => {
+			try {
+				const data = await studentService.getStudentProfile(userId);
+				setProfile(data);
+			} catch (error) {
+				console.error("Failed to load profile", error);
+			}
+		};
+
+		const loadPlayHistory = async (page: number) => {
+			try {
+				setLoading(true);
+				const data = await studentService.getStudentPlayHistory(
+					userId,
+					page,
+					12,
+				);
+				setPlayHistory(data.content);
+				setTotalPages(data.totalPages);
+				setTotalItems(data.totalItems);
+			} catch (error) {
+				console.error("Failed to load play history", error);
+			} finally {
+				setLoading(false);
+			}
+		};
+
+		void loadProfile();
+		void loadPlayHistory(currentPage);
 	}, [userId, currentPage]);
-
-	const fetchProfile = async () => {
-		try {
-			const data = await studentService.getStudentProfile(userId);
-			setProfile(data);
-		} catch (error) {
-			console.error("Failed to load profile", error);
-		}
-	};
-
-	const fetchPlayHistory = async (page: number) => {
-		try {
-			setLoading(true);
-			const data = await studentService.getStudentPlayHistory(userId, page, 12);
-			setPlayHistory(data.content);
-			setTotalPages(data.totalPages);
-			setTotalItems(data.totalItems);
-		} catch (error) {
-			console.error("Failed to load play history", error);
-		} finally {
-			setLoading(false);
-		}
-	};
 
 	const handleFollowToggle = () => {
 		if (followStats?.isFollowing) {
@@ -116,6 +166,7 @@ export default function StudentProfileView({
 		<div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black text-white">
 			<div className="max-w-7xl mx-auto px-6 py-8">
 				<button
+					type="button"
 					onClick={onBack}
 					className="mb-6 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
 				>
@@ -133,6 +184,7 @@ export default function StudentProfileView({
 								<h1 className="text-4xl font-bold">{profile.username}</h1>
 								{currentUserId !== userId && (
 									<button
+										type="button"
 										onClick={handleFollowToggle}
 										disabled={
 											followMutation.isPending || unfollowMutation.isPending
@@ -157,38 +209,37 @@ export default function StudentProfileView({
 							</div>
 							<p className="text-gray-300 mb-4">{profile.email}</p>
 							<div className="flex gap-6">
-								<div className="bg-black/30 rounded-lg px-6 py-3">
-									<div className="text-2xl font-bold">{profile.totalScore}</div>
-									<div className="text-sm text-gray-400">Tổng điểm</div>
-								</div>
-								<div className="bg-black/30 rounded-lg px-6 py-3">
-									<div className="text-2xl font-bold">
-										{profile.gamesPlayed}
-									</div>
-									<div className="text-sm text-gray-400">Games Played</div>
-								</div>
+								<StatCard
+									value={profile.totalScore}
+									label="Điểm leaderboard"
+									tooltip="Tổng điểm tốt nhất theo từng game có tính điểm, không phải tổng của mọi lượt chơi."
+								/>
+								<StatCard
+									value={profile.gamesPlayed}
+									label="Game có điểm"
+									tooltip="Số game khác nhau đã có điểm được tính vào leaderboard."
+								/>
+								<StatCard
+									value={profile.totalAttempts}
+									label="Lượt chơi"
+									tooltip="Tổng số lượt chơi đã ghi nhận trong lịch sử."
+								/>
 								{followStats && (
 									<>
-										<div className="bg-black/30 rounded-lg px-6 py-3">
-											<div className="text-2xl font-bold">
-												{followStats.followersCount}
-											</div>
-											<div className="text-sm text-gray-400">Followers</div>
-										</div>
-										<div className="bg-black/30 rounded-lg px-6 py-3">
-											<div className="text-2xl font-bold">
-												{followStats.followingCount}
-											</div>
-											<div className="text-sm text-gray-400">Following</div>
-										</div>
+										<StatCard
+											value={followStats.followersCount}
+											label="Followers"
+										/>
+										<StatCard
+											value={followStats.followingCount}
+											label="Following"
+										/>
 									</>
 								)}
-								<div className="bg-black/30 rounded-lg px-6 py-3">
-									<div className="text-sm font-bold">
-										{new Date(profile.createdAt).toLocaleDateString()}
-									</div>
-									<div className="text-sm text-gray-400">Tham gia từ</div>
-								</div>
+								<StatCard
+									value={new Date(profile.createdAt).toLocaleDateString()}
+									label="Tham gia từ"
+								/>
 							</div>
 						</div>
 					</div>
@@ -197,7 +248,7 @@ export default function StudentProfileView({
 				{/* Play History */}
 				<div className="mb-8">
 					<h2 className="text-2xl font-bold mb-6">
-						Lịch sử chơi ({totalItems} game)
+						Lịch sử chơi ({totalItems} lượt)
 					</h2>
 					{loading ? (
 						<div className="text-center py-12">
@@ -207,8 +258,9 @@ export default function StudentProfileView({
 						<>
 							<div className="grid sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
 								{playHistory.map((item) => (
-									<div
+									<button
 										key={item.id}
+										type="button"
 										className="bg-gray-800/50 rounded-lg overflow-hidden hover:bg-gray-800 transition-colors cursor-pointer"
 										onClick={() => void openHistoryDetail(item)}
 									>
@@ -275,12 +327,13 @@ export default function StudentProfileView({
 												</div>
 											</div>
 										</div>
-									</div>
+									</button>
 								))}
 							</div>
 							{totalPages > 1 && (
 								<div className="flex justify-center items-center gap-4 mt-8">
 									<button
+										type="button"
 										onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
 										disabled={currentPage === 0}
 										className="bg-gray-800 hover:bg-gray-700 disabled:bg-gray-900 disabled:text-gray-600 px-4 py-2 rounded font-bold transition-colors"
@@ -291,6 +344,7 @@ export default function StudentProfileView({
 										Page {currentPage + 1} of {totalPages}
 									</span>
 									<button
+										type="button"
 										onClick={() =>
 											setCurrentPage((p) => Math.min(totalPages - 1, p + 1))
 										}
