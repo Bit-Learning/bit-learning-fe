@@ -52,6 +52,37 @@ export async function getRevenueDetailRows(
 	};
 }
 
+export async function getAllRevenueDetailRows(
+	filter: BusinessDashboardFilterParams,
+	size = 500,
+): Promise<BusinessDashboardRevenueDetailRow[]> {
+	const firstPage = await getRevenueDetailRows({
+		...filter,
+		page: 0,
+		size,
+	});
+
+	const totalPages = firstPage.page?.totalPages ?? 1;
+	if (totalPages <= 1) {
+		return firstPage.data;
+	}
+
+	const remainingPages = await Promise.all(
+		Array.from({ length: totalPages - 1 }, (_, index) =>
+			getRevenueDetailRows({
+				...filter,
+				page: index + 1,
+				size,
+			}),
+		),
+	);
+
+	return [
+		...firstPage.data,
+		...remainingPages.flatMap((response) => response.data),
+	];
+}
+
 export async function exportBusinessRevenueXlsx(
 	filter: BusinessDashboardFilterParams,
 ): Promise<Blob> {
