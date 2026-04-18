@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import { useState } from "react";
 import {
   Search,
   CheckSquare,
@@ -11,73 +11,62 @@ import {
   CheckCircle2,
   Loader2,
 } from "lucide-react";
+import { cn } from "@workspace/ui/lib/utils";
+import { useGetPendingExams, useApproveExam, useRejectExam } from "../queries/useExam";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import { Difficulty, ProblemBriefResponse } from "../types/problem.type";
-import { useApproveProblem, useGetPendingProblems, useRejectProblem } from "../queries/useProblem";
+import type { ExamBriefResponse, ExamSearchParams, ExamType } from "../types/exam.type";
 import { toast } from "@/components/Sonner";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
-import { cn } from "@/shared/lib/utils";
 import { Pagination } from "@/components/Pagination";
-import { DetailModal } from "../components/ProblemDetailModal";
+import { ExamDetailModal } from "../components/ExamDetailModal";
 
-const difficultyConfig: Record<Difficulty, { label: string; className: string }> = {
-  [Difficulty.EASY]: {
-    label: "Dễ",
+const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
+  EXAM: {
+    label: "Đề thi",
     className:
-      "bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-900/20 dark:text-emerald-400 dark:border-emerald-800",
+      "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800",
   },
-  [Difficulty.MEDIUM]: {
-    label: "Trung bình",
+  PRACTICE: {
+    label: "Luyện tập",
     className:
-      "bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-900/20 dark:text-amber-400 dark:border-amber-800",
-  },
-  [Difficulty.HARD]: {
-    label: "Khó",
-    className:
-      "bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-900/20 dark:text-rose-400 dark:border-rose-800",
+      "bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800",
   },
 };
-
-interface AdminProblemApprovalProps {
+interface AdminExamApprovalProps {
   initialPage?: number;
 }
 
-const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initialPage = 0 }) => {
+const AdminExamApprovalPage: React.FC<AdminExamApprovalProps> = ({ initialPage = 0 }) => {
   const [search, setSearch] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
+  const [filterType, setFilterType] = useState<string>("");
   const [page, setPage] = useState(initialPage);
-  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
-  const [detailProblemId, setDetailProblemId] = useState<string | null>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+  const [detailExamId, setDetailExamId] = useState<number | null>(null);
   const [showBatchRejectForm, setShowBatchRejectForm] = useState(false);
   const [batchRejectReason, setBatchRejectReason] = useState("");
 
-  const size = 20;
+  const params: ExamSearchParams = { page, size: 20, sort: "createdAt,desc", search: search || undefined };
 
-  const { data: response, isLoading } = useGetPendingProblems({ page, size, sort: "createdAt,desc" });
-  const approveMutation = useApproveProblem();
-  const rejectMutation = useRejectProblem();
+  const { data: response, isLoading } = useGetPendingExams(params);
+  const approveMutation = useApproveExam();
+  const rejectMutation = useRejectExam();
 
-  const problems: ProblemBriefResponse[] = response?.data || [];
+  const exams: ExamBriefResponse[] = response?.data || [];
   const totalPages: number = response?.page?.totalPages || 0;
   const totalElements: number = response?.page?.totalElements || 0;
 
-  const filteredProblems = problems.filter((p) => {
-    const matchSearch =
-      p.title.toLowerCase().includes(search.toLowerCase()) || p.slug.toLowerCase().includes(search.toLowerCase());
-    const matchDifficulty = difficultyFilter === "all" || p.difficulty === difficultyFilter;
-    return matchSearch && matchDifficulty;
-  });
+  const filteredExams = exams.filter((e) => !filterType || e.type === filterType);
 
-  const allSelected = filteredProblems.length > 0 && filteredProblems.every((p) => selectedIds.has(p.id));
-  const someSelected = filteredProblems.some((p) => selectedIds.has(p.id));
+  const allSelected = filteredExams.length > 0 && filteredExams.every((e) => selectedIds.has(e.id));
+  const someSelected = filteredExams.some((e) => selectedIds.has(e.id));
 
   const toggleSelectAll = () => {
-    allSelected ? setSelectedIds(new Set()) : setSelectedIds(new Set(filteredProblems.map((p) => p.id)));
+    allSelected ? setSelectedIds(new Set()) : setSelectedIds(new Set(filteredExams.map((e) => e.id)));
   };
 
-  const toggleSelect = (id: string) => {
+  const toggleSelect = (id: number) => {
     setSelectedIds((prev) => {
       const next = new Set(prev);
       next.has(id) ? next.delete(id) : next.add(id);
@@ -86,9 +75,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
   };
 
   const handleBatchApprove = () => {
-    approveMutation.mutate(Array.from(selectedIds), {
-      onSuccess: () => setSelectedIds(new Set()),
-    });
+    approveMutation.mutate(Array.from(selectedIds), { onSuccess: () => setSelectedIds(new Set()) });
   };
 
   const handleBatchReject = () => {
@@ -97,7 +84,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
       return;
     }
     rejectMutation.mutate(
-      { problemIds: Array.from(selectedIds), rejectReason: batchRejectReason.trim() },
+      { examIds: Array.from(selectedIds), rejectReason: batchRejectReason.trim() },
       {
         onSuccess: () => {
           setSelectedIds(new Set());
@@ -115,7 +102,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
           <div className="mb-8">
             <div className="flex items-center gap-3 mb-1">
               <h1 className="text-2xl lg:text-3xl font-bold text-slate-900 dark:text-white tracking-tight">
-                Phê duyệt bài tập
+                Phê duyệt đề thi
               </h1>
               {totalElements > 0 && (
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-amber-100 text-amber-700 dark:bg-amber-900/30 dark:text-amber-400">
@@ -123,7 +110,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
                 </span>
               )}
             </div>
-            <p className="text-slate-500 dark:text-slate-400">Xem xét và phê duyệt bài tập từ giảng viên</p>
+            <p className="text-slate-500 dark:text-slate-400">Xem xét và phê duyệt đề thi từ giảng viên</p>
           </div>
 
           <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-4 mb-5 flex flex-col md:flex-row gap-3">
@@ -131,34 +118,35 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
               <input
                 className="w-full pl-9 pr-4 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none text-sm transition-all"
-                placeholder="Tìm kiếm theo tên, slug..."
+                placeholder="Tìm kiếm đề thi..."
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setPage(0);
+                }}
               />
             </div>
             <div className="relative">
               <select
-                value={difficultyFilter}
-                onChange={(e) => setDifficultyFilter(e.target.value)}
+                value={filterType}
+                onChange={(e) => setFilterType(e.target.value)}
                 className="appearance-none pl-3 pr-8 py-2.5 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-blue-500 cursor-pointer"
               >
-                <option value="all">Độ khó: Tất cả</option>
-                <option value={Difficulty.EASY}>Dễ</option>
-                <option value={Difficulty.MEDIUM}>Trung bình</option>
-                <option value={Difficulty.HARD}>Khó</option>
+                <option value="">Loại: Tất cả</option>
+                <option value="EXAM">Đề thi</option>
+                <option value="PRACTICE">Luyện tập</option>
               </select>
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
           </div>
 
-          {/* Bulk action bar */}
           {selectedIds.size > 0 && (
             <div className="mb-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-xl px-4 py-3">
               {showBatchRejectForm ? (
                 <div className="space-y-3">
                   <p className="text-sm font-medium text-rose-700 dark:text-rose-400 flex items-center gap-2">
                     <AlertCircle className="w-4 h-4" />
-                    Từ chối {selectedIds.size} bài tập — nhập lý do:
+                    Từ chối {selectedIds.size} đề thi — nhập lý do:
                   </p>
                   <textarea
                     value={batchRejectReason}
@@ -194,7 +182,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
               ) : (
                 <div className="flex items-center gap-3">
                   <span className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Đã chọn <span className="text-blue-600 font-bold">{selectedIds.size}</span> bài tập
+                    Đã chọn <span className="text-blue-600 font-bold">{selectedIds.size}</span> đề thi
                   </span>
                   <div className="flex-1" />
                   <button
@@ -237,7 +225,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
                   >
                     <Skeleton className="h-4 w-4" />
                     <Skeleton className="h-4 flex-1" />
-                    <Skeleton className="h-6 w-16 rounded-full" />
+                    <Skeleton className="h-6 w-20 rounded-full" />
                     <Skeleton className="h-4 w-28" />
                     <Skeleton className="h-4 w-24" />
                     <Skeleton className="h-8 w-24 rounded" />
@@ -267,10 +255,10 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
                           </button>
                         </th>
                         <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
-                          Tiêu đề
+                          Đề thi
                         </th>
-                        <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider text-center">
-                          Độ khó
+                        <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
+                          Mã đề
                         </th>
                         <th className="px-4 py-3.5 text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider">
                           Tác giả
@@ -284,23 +272,24 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
                       </tr>
                     </thead>
                     <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                      {filteredProblems.length === 0 ? (
+                      {filteredExams.length === 0 ? (
                         <tr>
                           <td colSpan={6} className="px-6 py-16 text-center">
                             <CheckCircle2 className="w-12 h-12 mx-auto text-emerald-300 dark:text-emerald-700 mb-3" />
                             <p className="text-slate-500 dark:text-slate-400 font-medium">
-                              {search || difficultyFilter !== "all"
-                                ? "Không tìm thấy bài tập phù hợp"
-                                : "Không có bài tập nào chờ phê duyệt!"}
+                              {search || filterType
+                                ? "Không tìm thấy đề thi phù hợp"
+                                : "Không có đề thi nào chờ phê duyệt!"}
                             </p>
                           </td>
                         </tr>
                       ) : (
-                        filteredProblems.map((problem) => {
-                          const isSelected = selectedIds.has(problem.id);
+                        filteredExams.map((exam) => {
+                          const isSelected = selectedIds.has(exam.id);
+                          const typeConf = TYPE_LABELS[exam.type];
                           return (
                             <tr
-                              key={problem.id}
+                              key={exam.id}
                               className={cn(
                                 "transition-colors",
                                 isSelected
@@ -310,7 +299,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
                             >
                               <td className="px-4 py-3.5">
                                 <button
-                                  onClick={() => toggleSelect(problem.id)}
+                                  onClick={() => toggleSelect(exam.id)}
                                   className="text-slate-400 hover:text-blue-600 transition-colors"
                                 >
                                   {isSelected ? (
@@ -322,44 +311,47 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
                               </td>
                               <td className="px-4 py-3.5">
                                 <button
-                                  onClick={() => setDetailProblemId(problem.id)}
+                                  onClick={() => setDetailExamId(exam.id)}
                                   className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left"
                                 >
-                                  {problem.title}
+                                  {exam.name}
                                 </button>
-                                <p className="text-xs text-slate-400 mt-0.5 font-mono">
-                                  {problem.tags?.map((t) => t.name).join(", ") || problem.slug}
-                                </p>
+                                <div className="flex items-center gap-2 mt-1">
+                                  <span
+                                    className={cn(
+                                      "inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium",
+                                      typeConf.className,
+                                    )}
+                                  >
+                                    {typeConf.label}
+                                  </span>
+                                  {exam.subject && <span className="text-xs text-slate-400">{exam.subject.name}</span>}
+                                </div>
                               </td>
-                              <td className="px-4 py-3.5 text-center">
-                                <span
-                                  className={cn(
-                                    "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
-                                    difficultyConfig[problem.difficulty].className,
-                                  )}
-                                >
-                                  {difficultyConfig[problem.difficulty].label}
+                              <td className="px-4 py-3.5">
+                                <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-xs font-semibold font-mono">
+                                  {exam.code}
                                 </span>
                               </td>
                               <td className="px-4 py-3.5">
                                 <div className="text-sm text-slate-700 dark:text-slate-300">
-                                  {problem.createdBy?.firstName + " " + problem.createdBy?.lastName}
+                                  {exam.createdBy?.firstName + " " + exam.createdBy?.lastName}
                                 </div>
                               </td>
                               <td className="px-4 py-3.5 text-sm text-slate-500 dark:text-slate-400 whitespace-nowrap">
-                                {format(new Date(problem.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })}
+                                {format(new Date(exam.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })}
                               </td>
                               <td className="px-4 py-3.5 text-center">
                                 <div className="flex justify-center gap-1">
                                   <button
-                                    onClick={() => setDetailProblemId(problem.id)}
+                                    onClick={() => setDetailExamId(exam.id)}
                                     className="p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors"
                                     title="Xem chi tiết"
                                   >
                                     <Eye className="w-4 h-4" />
                                   </button>
                                   <button
-                                    onClick={() => approveMutation.mutate([problem.id])}
+                                    onClick={() => approveMutation.mutate([exam.id])}
                                     className="p-1.5 text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 dark:hover:bg-emerald-950/30 rounded-lg transition-colors"
                                     title="Phê duyệt"
                                   >
@@ -367,7 +359,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
                                   </button>
                                   <button
                                     onClick={() => {
-                                      setSelectedIds(new Set([problem.id]));
+                                      setSelectedIds(new Set([exam.id]));
                                       setShowBatchRejectForm(true);
                                     }}
                                     className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 dark:hover:bg-rose-950/30 rounded-lg transition-colors"
@@ -387,7 +379,7 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
 
                 {totalPages > 1 && (
                   <div className="px-4 py-3 border-t border-slate-200 dark:border-slate-800 flex justify-between items-center">
-                    <span className="text-sm text-slate-500">{totalElements} bài tập chờ duyệt</span>
+                    <span className="text-sm text-slate-500">{totalElements} đề thi chờ duyệt</span>
                     <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
                   </div>
                 )}
@@ -397,22 +389,22 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
         </div>
       </div>
 
-      <DetailModal
-        problemId={detailProblemId}
-        onClose={() => setDetailProblemId(null)}
+      <ExamDetailModal
+        examId={detailExamId}
+        onClose={() => setDetailExamId(null)}
         onApprove={(ids) =>
           approveMutation.mutate(ids, {
             onSuccess: () => {
-              setDetailProblemId(null);
+              setDetailExamId(null);
             },
           })
         }
         onReject={(ids, reason) =>
           rejectMutation.mutate(
-            { problemIds: ids, rejectReason: reason },
+            { examIds: ids, rejectReason: reason },
             {
               onSuccess: () => {
-                setDetailProblemId(null);
+                setDetailExamId(null);
               },
             },
           )
@@ -424,4 +416,4 @@ const AdminProblemApprovalPage: React.FC<AdminProblemApprovalProps> = ({ initial
   );
 };
 
-export default AdminProblemApprovalPage;
+export default AdminExamApprovalPage;

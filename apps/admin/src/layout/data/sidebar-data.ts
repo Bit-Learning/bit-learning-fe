@@ -16,6 +16,7 @@ import {
   Tag,
   CreditCard,
   Code,
+  FileText,
 } from "lucide-react";
 import type { NavGroup } from "../types";
 
@@ -34,6 +35,8 @@ export const navGroups: NavGroup[] = [
       { title: "Quản lý bài viết", url: "/posts", icon: MessageSquareText },
       { title: "Quản lý bài tập thực hành", url: "/problems", icon: Code },
       { title: "Quản lý câu hỏi", url: "/questions", icon: FileQuestion },
+      { title: "Quản lý đề thi", url: "/exams", icon: FileText },
+
       { title: "Quản lý cuộc thi", url: "/contests", icon: Trophy },
       {
         title: "Quản lý mẫu thuyết trình",
