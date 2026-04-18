@@ -210,3 +210,20 @@ export const useGetPendingProblems = (filters?: ProblemFilters) => {
     },
   });
 };
+
+export const usePublishProblem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, isPublic }: { id: string; isPublic: boolean }) => problemApi.publishProblem(id, isPublic),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.lists() });
+      toast.success({
+        title: "Thành công",
+        description: variables.isPublic ? "Đã công bố bài tập" : "Đã ẩn bài tập",
+      });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật trạng thái" });
+    },
+  });
+};

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getCoreRowModel, type OnChangeFn, type PaginationState, useReactTable } from "@tanstack/react-table";
-import { Eye, Trash2, Search as SearchIcon, ChevronDown, FileText, Clock } from "lucide-react";
+import { Search as SearchIcon, ChevronDown, FileText, Clock } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { DataTablePagination } from "@/components/data-table";
@@ -10,10 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import DeleteConfirmModal from "@/components/DeleteConfirmModal";
-import { useAllExams, useDeleteExam } from "../queries/useExam";
+import { useAllExams, usePublishExam } from "../queries/useExam";
 import type { ExamBriefResponse, ExamType } from "../types/exam.type";
 import { ExamDetailModal } from "./ExamDetailModal";
+import { TogglePublishConfirm } from "./TogglePublishConfirm";
 
 const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
   EXAM: { label: "Đề thi", className: "bg-blue-100 text-blue-700" },
@@ -42,9 +42,9 @@ export function ExamBankTab({
 
   const [searchValue, setSearchValue] = useState(keyword);
   const [viewExamId, setViewExamId] = useState<number | null>(null);
-  const [deleteExam, setDeleteExam] = useState<ExamBriefResponse | null>(null);
+  const [toggleExam, setToggleExam] = useState<ExamBriefResponse | null>(null);
 
-  const deleteExamMutation = useDeleteExam();
+  const publishExamMutation = usePublishExam();
 
   const { data: response, isLoading } = useAllExams({
     page,
@@ -77,11 +77,12 @@ export function ExamBankTab({
     onKeywordChange(searchValue.trim());
   };
 
-  const handleDelete = () => {
-    if (!deleteExam) return;
-    deleteExamMutation.mutate(deleteExam.id, {
-      onSuccess: () => setDeleteExam(null),
-    });
+  const handleTogglePublish = () => {
+    if (!toggleExam) return;
+    publishExamMutation.mutate(
+      { id: toggleExam.id, isPublished: !toggleExam.isPublished },
+      { onSuccess: () => setToggleExam(null) },
+    );
   };
 
   if (isLoading) {
@@ -151,7 +152,8 @@ export function ExamBankTab({
                 <TableHead>Thời gian</TableHead>
                 <TableHead>Tác giả</TableHead>
                 <TableHead>Ngày tạo</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -185,18 +187,35 @@ export function ExamBankTab({
                     <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                       {format(new Date(exam.createdAt), "dd/MM/yyyy", { locale: vi })}
                     </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex items-center justify-end gap-1">
-                        <Button variant="ghost" size="sm" onClick={() => setViewExamId(exam.id)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
+                    <TableCell>
+                      {exam.isPublished ? (
+                        <Badge className="bg-emerald-100 text-emerald-700">Hiển thị</Badge>
+                      ) : (
+                        <Badge className="bg-slate-100 text-slate-500">Đang ẩn</Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-left">
+                      <div className="flex items-center justify-start gap-2">
                         <Button
-                          variant="ghost"
+                          variant="outline"
                           size="sm"
-                          onClick={() => setDeleteExam(exam)}
-                          className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                          className="hover:bg-blue-100"
+                          onClick={() => setViewExamId(exam.id)}
                         >
-                          <Trash2 className="h-4 w-4" />
+                          Chi tiết
+                        </Button>
+
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setToggleExam(exam)}
+                          className={
+                            exam.isPublished
+                              ? "border-red-500 text-red-600 hover:bg-red-50"
+                              : "border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                          }
+                        >
+                          {exam.isPublished ? "Ẩn" : "Hiển thị"}
                         </Button>
                       </div>
                     </TableCell>
@@ -218,16 +237,13 @@ export function ExamBankTab({
         </div>
       )}
 
-      <ExamDetailModal examId={viewExamId} onClose={() => setViewExamId(null)} />
+      <ExamDetailModal examId={viewExamId} onClose={() => setViewExamId(null)} mode="view" />
 
-      <DeleteConfirmModal
-        open={!!deleteExam}
-        onClose={() => setDeleteExam(null)}
-        onConfirm={handleDelete}
-        title="Xác nhận xóa đề thi"
-        description={`Bạn có chắc chắn muốn xóa đề thi "${deleteExam?.name}"? Hành động này không thể hoàn tác.`}
-        isPending={deleteExamMutation.isPending}
-        confirmLabel="Xóa đề thi"
+      <TogglePublishConfirm
+        exam={toggleExam}
+        isPending={publishExamMutation.isPending}
+        onConfirm={handleTogglePublish}
+        onClose={() => setToggleExam(null)}
       />
     </div>
   );

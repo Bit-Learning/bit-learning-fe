@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getCoreRowModel, type OnChangeFn, type PaginationState, useReactTable } from "@tanstack/react-table";
-import { Eye, Trash2, Search as SearchIcon, ChevronDown, Code2 } from "lucide-react";
+import { Search as SearchIcon, ChevronDown, Code2 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { DataTablePagination } from "@/components/data-table";
@@ -10,10 +10,10 @@ import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
-import DeleteConfirmModal from "@/components/DeleteConfirmModal";
-import { useProblems } from "../queries/useProblem";
+import { useProblems, usePublishProblem } from "../queries/useProblem";
 import { Difficulty, type ProblemBriefResponse } from "../types/problem.type";
 import { DetailModal } from "./ProblemDetailModal";
+import { TogglePublishConfirm } from "./TogglePublishConfirm";
 
 const difficultyConfig: Record<Difficulty, { label: string; className: string }> = {
   [Difficulty.EASY]: { label: "Dễ", className: "bg-emerald-100 text-emerald-700" },
@@ -29,7 +29,6 @@ type ProblemBankTabProps = {
   onKeywordChange: (keyword: string) => void;
   onDifficultyChange: (difficulty: string) => void;
 };
-
 export function ProblemBankTab({
   keyword,
   difficulty,
@@ -43,7 +42,9 @@ export function ProblemBankTab({
 
   const [searchValue, setSearchValue] = useState(keyword);
   const [viewProblemId, setViewProblemId] = useState<string | null>(null);
-  const [deleteProblem, setDeleteProblem] = useState<ProblemBriefResponse | null>(null);
+  const [toggleProblem, setToggleProblem] = useState<ProblemBriefResponse | null>(null);
+
+  const publishProblemMutation = usePublishProblem();
 
   const { data: response, isLoading } = useProblems({
     page,
@@ -76,9 +77,12 @@ export function ProblemBankTab({
     onKeywordChange(searchValue.trim());
   };
 
-  const handleDelete = () => {
-    // deleteQuestionMutation.mutate(deleteProblem.id, { onSuccess: () => setDeleteProblem(null) });
-    setDeleteProblem(null);
+  const handleTogglePublish = () => {
+    if (!toggleProblem) return;
+    publishProblemMutation.mutate(
+      { id: toggleProblem.id, isPublic: !toggleProblem.isPublic },
+      { onSuccess: () => setToggleProblem(null) },
+    );
   };
 
   if (isLoading) {
@@ -100,7 +104,6 @@ export function ProblemBankTab({
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -145,10 +148,10 @@ export function ProblemBankTab({
               <TableRow>
                 <TableHead>Tiêu đề</TableHead>
                 <TableHead>Độ khó</TableHead>
-                <TableHead>Tags</TableHead>
                 <TableHead>Tác giả</TableHead>
                 <TableHead>Ngày tạo</TableHead>
-                <TableHead className="text-right">Thao tác</TableHead>
+                <TableHead>Trạng thái</TableHead>
+                <TableHead>Thao tác</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -164,20 +167,6 @@ export function ProblemBankTab({
                     </Badge>
                   </TableCell>
                   <TableCell>
-                    <div className="flex flex-wrap gap-1">
-                      {problem.tags?.slice(0, 3).map((t: any) => (
-                        <Badge key={t.id} variant="secondary" className="text-xs">
-                          {t.name}
-                        </Badge>
-                      ))}
-                      {(problem.tags?.length ?? 0) > 3 && (
-                        <Badge variant="outline" className="text-xs">
-                          +{problem.tags!.length - 3}
-                        </Badge>
-                      )}
-                    </div>
-                  </TableCell>
-                  <TableCell>
                     <span className="text-sm">
                       {problem.createdBy ? problem.createdBy.firstName + " " + problem.createdBy.lastName : "—"}
                     </span>
@@ -185,18 +174,35 @@ export function ProblemBankTab({
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
                     {format(new Date(problem.createdAt), "dd/MM/yyyy", { locale: vi })}
                   </TableCell>
-                  <TableCell className="text-right">
-                    <div className="flex items-center justify-end gap-1">
-                      <Button variant="ghost" size="sm" onClick={() => setViewProblemId(problem.id)}>
-                        <Eye className="h-4 w-4" />
-                      </Button>
+                  <TableCell>
+                    {problem.isPublic ? (
+                      <Badge className="bg-emerald-100 text-emerald-700">Hiển thị</Badge>
+                    ) : (
+                      <Badge className="bg-slate-100 text-slate-500">Đang ẩn</Badge>
+                    )}
+                  </TableCell>
+                  <TableCell className="text-left">
+                    <div className="flex items-center justify-start gap-2">
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        onClick={() => setDeleteProblem(problem)}
-                        className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                        className="hover:bg-blue-100"
+                        onClick={() => setViewProblemId(problem.id)}
                       >
-                        <Trash2 className="h-4 w-4" />
+                        Chi tiết
+                      </Button>
+
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => setToggleProblem(problem)}
+                        className={
+                          problem.isPublic
+                            ? "border-red-500 text-red-600 hover:bg-red-50"
+                            : "border-emerald-500 text-emerald-600 hover:bg-emerald-50"
+                        }
+                      >
+                        {problem.isPublic ? "Ẩn" : "Hiển thị"}
                       </Button>
                     </div>
                   </TableCell>
@@ -217,16 +223,13 @@ export function ProblemBankTab({
         </div>
       )}
 
-      <DetailModal problemId={viewProblemId} onClose={() => setViewProblemId(null)} />
+      <DetailModal problemId={viewProblemId} onClose={() => setViewProblemId(null)} mode="view" />
 
-      <DeleteConfirmModal
-        open={!!deleteProblem}
-        onClose={() => setDeleteProblem(null)}
-        onConfirm={handleDelete}
-        title="Xác nhận xóa bài tập"
-        description={`Bạn có chắc chắn muốn xóa bài tập "${deleteProblem?.title}"? Hành động này không thể hoàn tác.`}
-        isPending={false}
-        confirmLabel="Xóa bài tập"
+      <TogglePublishConfirm
+        problem={toggleProblem}
+        isPending={publishProblemMutation.isPending}
+        onConfirm={handleTogglePublish}
+        onClose={() => setToggleProblem(null)}
       />
     </div>
   );

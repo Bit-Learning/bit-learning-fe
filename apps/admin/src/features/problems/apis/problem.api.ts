@@ -87,4 +87,8 @@ export const problemApi = {
   reject(data: ApproveRejectRequest): Promise<AxiosResponse<ApiResponse<void>>> {
     return api.put("/problems/reject", data);
   },
+
+  publishProblem(id: string, isPublic: boolean): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
+    return api.put(`/problems/${id}/publish`, null, { params: { isPublic } });
+  },
 };

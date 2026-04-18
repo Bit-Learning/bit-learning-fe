@@ -24,6 +24,7 @@ const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
 
 interface DetailModalProps {
   examId: number | null;
+  mode?: "view" | "approval";
   onClose: () => void;
   onApprove?: (ids: number[]) => void;
   onReject?: (ids: number[], reason: string) => void;
@@ -34,6 +35,7 @@ interface DetailModalProps {
 export const ExamDetailModal: React.FC<DetailModalProps> = ({
   examId,
   onClose,
+  mode = "approval",
   onApprove,
   onReject,
   isApproving,
@@ -187,47 +189,49 @@ export const ExamDetailModal: React.FC<DetailModalProps> = ({
           <span className="text-xs text-slate-500">
             {exam && format(new Date(exam.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })}
           </span>
-          <div className="flex gap-2">
-            {showRejectForm ? (
-              <>
-                <button
-                  onClick={() => {
-                    setShowRejectForm(false);
-                    setRejectReason("");
-                  }}
-                  className="px-4 py-2 text-sm font-medium text-slate-600 bg-white dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
-                >
-                  Hủy
-                </button>
-                <Button
-                  onClick={handleRejectConfirm}
-                  disabled={isRejecting}
-                  className="cursor-pointer px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium flex items-center gap-2"
-                >
-                  {isRejecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
-                  Xác nhận từ chối
-                </Button>
-              </>
-            ) : (
-              <>
-                <Button
-                  onClick={() => setShowRejectForm(true)}
-                  className="cursor-pointer px-4 py-2 bg-white dark:bg-slate-700 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-sm font-medium flex items-center gap-2"
-                >
-                  <X className="w-4 h-4" />
-                  Từ chối
-                </Button>
-                <Button
-                  onClick={() => onApprove?.([examId])}
-                  disabled={isApproving}
-                  className="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium flex items-center gap-2"
-                >
-                  {isApproving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
-                  Phê duyệt
-                </Button>
-              </>
-            )}
-          </div>
+          {mode === "approval" && (
+            <div className="flex gap-2">
+              {showRejectForm ? (
+                <>
+                  <button
+                    onClick={() => {
+                      setShowRejectForm(false);
+                      setRejectReason("");
+                    }}
+                    className="px-4 py-2 text-sm font-medium text-slate-600 bg-white dark:bg-slate-700 dark:text-slate-300 border border-slate-200 dark:border-slate-600 rounded-lg hover:bg-slate-50 transition-colors"
+                  >
+                    Hủy
+                  </button>
+                  <Button
+                    onClick={handleRejectConfirm}
+                    disabled={isRejecting}
+                    className="cursor-pointer px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white text-sm font-medium flex items-center gap-2"
+                  >
+                    {isRejecting ? <Loader2 className="w-4 h-4 animate-spin" /> : <XCircle className="w-4 h-4" />}
+                    Xác nhận từ chối
+                  </Button>
+                </>
+              ) : (
+                <>
+                  <Button
+                    onClick={() => setShowRejectForm(true)}
+                    className="cursor-pointer px-4 py-2 bg-white dark:bg-slate-700 border border-rose-200 dark:border-rose-800 text-rose-600 dark:text-rose-400 hover:bg-rose-50 dark:hover:bg-rose-950/20 text-sm font-medium flex items-center gap-2"
+                  >
+                    <X className="w-4 h-4" />
+                    Từ chối
+                  </Button>
+                  <Button
+                    onClick={() => onApprove?.([examId])}
+                    disabled={isApproving}
+                    className="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium flex items-center gap-2"
+                  >
+                    {isApproving ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                    Phê duyệt
+                  </Button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
     </div>
