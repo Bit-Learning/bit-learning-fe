@@ -90,6 +90,24 @@ export default function TrackedGameFrame({
 		[logPrefix],
 	);
 
+	const logAttemptEvent = useCallback(
+		(
+			stage:
+				| "ATTEMPT_PROGRESS_STORED"
+				| "ATTEMPT_PARTIAL_SUBMIT_START"
+				| "ATTEMPT_PARTIAL_SUBMIT_SUCCESS"
+				| "ATTEMPT_PARTIAL_SUBMIT_FAILURE"
+				| "ATTEMPT_RESULT_SUBMIT_START"
+				| "ATTEMPT_RESULT_SUBMIT_SUCCESS"
+				| "ATTEMPT_RESULT_SUBMIT_FAILURE"
+				| "ATTEMPT_SUBMIT_SKIPPED",
+			details?: unknown,
+		) => {
+			logInfo(stage, details);
+		},
+		[logInfo],
+	);
+
 	useEffect(() => {
 		startTimeRef.current = Date.now();
 		trackedRef.current = false;
@@ -181,6 +199,17 @@ export default function TrackedGameFrame({
 				elapsed,
 				payload,
 			});
+			logAttemptEvent("ATTEMPT_RESULT_SUBMIT_START", {
+				gameId: game.id,
+				attemptState:
+					"score" in payload ? "LEGACY" : (payload.attemptState ?? "COMPLETED"),
+				scoringModel:
+					"score" in payload
+						? "LEGACY"
+						: (payload.scoringModel ?? game.scoringModel),
+				elapsed,
+				payload,
+			});
 
 			try {
 				if ("score" in payload) {
@@ -210,6 +239,11 @@ export default function TrackedGameFrame({
 					gameId: game.id,
 					elapsed,
 				});
+				logAttemptEvent("ATTEMPT_RESULT_SUBMIT_SUCCESS", {
+					gameId: game.id,
+					elapsed,
+					tracked: true,
+				});
 				toast.success({
 					title: "Kết quả đã được ghi nhận",
 					description: `Thời lượng: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
@@ -217,11 +251,15 @@ export default function TrackedGameFrame({
 			} catch (error) {
 				console.error("Tracking error", error);
 				logWarn("Game result submit failed", error);
+				logAttemptEvent("ATTEMPT_RESULT_SUBMIT_FAILURE", {
+					gameId: game.id,
+					error,
+				});
 				trackedRef.current = false;
 				setTracked(false);
 			}
 		},
-		[game.id, logInfo, logWarn],
+		[game.id, game.scoringModel, logAttemptEvent, logInfo, logWarn],
 	);
 
 	const submitPartialAttempt = useCallback(
@@ -234,6 +272,12 @@ export default function TrackedGameFrame({
 						reason,
 					},
 				);
+				logAttemptEvent("ATTEMPT_SUBMIT_SKIPPED", {
+					gameId: game.id,
+					kind: "PARTIAL",
+					reason,
+					skipReason: "MISSING_ACCESS_TOKEN",
+				});
 				return false;
 			}
 			if (trackedRef.current) {
@@ -241,6 +285,12 @@ export default function TrackedGameFrame({
 					"submitPartialAttempt skipped because result was already tracked",
 					{ reason },
 				);
+				logAttemptEvent("ATTEMPT_SUBMIT_SKIPPED", {
+					gameId: game.id,
+					kind: "PARTIAL",
+					reason,
+					skipReason: "ALREADY_TRACKED",
+				});
 				return false;
 			}
 
@@ -253,6 +303,14 @@ export default function TrackedGameFrame({
 			if (!progress || totalCount <= 0) {
 				logWarn("submitPartialAttempt skipped because progress is empty", {
 					reason,
+					totalCount,
+					hasProgress: !!progress,
+				});
+				logAttemptEvent("ATTEMPT_SUBMIT_SKIPPED", {
+					gameId: game.id,
+					kind: "PARTIAL",
+					reason,
+					skipReason: "EMPTY_PROGRESS",
 					totalCount,
 					hasProgress: !!progress,
 				});
@@ -297,6 +355,12 @@ export default function TrackedGameFrame({
 				url,
 				payload,
 			});
+			logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_START", {
+				gameId: game.id,
+				reason,
+				url,
+				payload,
+			});
 
 			if (
 				navigator.sendBeacon &&
@@ -310,6 +374,11 @@ export default function TrackedGameFrame({
 					logInfo("Partial attempt sent via sendBeacon", {
 						gameId: game.id,
 						reason,
+					});
+					logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_SUCCESS", {
+						gameId: game.id,
+						reason,
+						method: "sendBeacon",
 					});
 					return true;
 				}
@@ -336,11 +405,35 @@ export default function TrackedGameFrame({
 						status: response.status,
 						ok: response.ok,
 					});
+					if (response.ok) {
+						logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_SUCCESS", {
+							gameId: game.id,
+							reason,
+							method: "fetch",
+							status: response.status,
+						});
+						return;
+					}
+					logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_FAILURE", {
+						gameId: game.id,
+						reason,
+						method: "fetch",
+						status: response.status,
+						ok: response.ok,
+					});
+					trackedRef.current = false;
+					setTracked(false);
 				})
 				.catch((error) => {
 					logWarn("Partial attempt fetch failed", {
 						gameId: game.id,
 						reason,
+						error,
+					});
+					logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_FAILURE", {
+						gameId: game.id,
+						reason,
+						method: "fetch",
 						error,
 					});
 					trackedRef.current = false;
@@ -349,7 +442,7 @@ export default function TrackedGameFrame({
 
 			return true;
 		},
-		[game.id, logInfo, logWarn],
+		[game.id, game.scoringModel, logAttemptEvent, logInfo, logWarn],
 	);
 
 	const parseIncomingMessage = useCallback(
@@ -467,6 +560,26 @@ export default function TrackedGameFrame({
 				});
 				latestProgressRef.current = payload;
 				logInfo("Stored latest GAME_PROGRESS payload", payload);
+				logAttemptEvent("ATTEMPT_PROGRESS_STORED", {
+					gameId: game.id,
+					attemptState: payload.attemptState,
+					scoringModel: payload.scoringModel,
+					rawScore: payload.rawScore ?? 0,
+					maxRawScore: payload.maxRawScore ?? null,
+					duration: payload.duration ?? null,
+					totalCount:
+						typeof payload.resultMetrics?.totalCount === "number"
+							? payload.resultMetrics.totalCount
+							: null,
+					answeredCount:
+						typeof payload.resultMetrics?.answeredCount === "number"
+							? payload.resultMetrics.answeredCount
+							: null,
+					exitReason:
+						typeof payload.resultMetrics?.exitReason === "string"
+							? payload.resultMetrics.exitReason
+							: null,
+				});
 				return;
 			}
 
@@ -526,6 +639,7 @@ export default function TrackedGameFrame({
 		buildAttemptPayload,
 		game.id,
 		isMessageFromCurrentGame,
+		logAttemptEvent,
 		logInfo,
 		parseIncomingMessage,
 		trackResult,
