@@ -25,10 +25,10 @@ const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
 interface DetailModalProps {
   examId: number | null;
   onClose: () => void;
-  onApprove: (ids: number[]) => void;
-  onReject: (ids: number[], reason: string) => void;
-  isApproving: boolean;
-  isRejecting: boolean;
+  onApprove?: (ids: number[]) => void;
+  onReject?: (ids: number[], reason: string) => void;
+  isApproving?: boolean;
+  isRejecting?: boolean;
 }
 
 export const ExamDetailModal: React.FC<DetailModalProps> = ({
@@ -51,7 +51,7 @@ export const ExamDetailModal: React.FC<DetailModalProps> = ({
       toast.error({ title: "Lỗi", description: "Vui lòng nhập lý do từ chối" });
       return;
     }
-    onReject([examId], rejectReason.trim());
+    onReject?.([examId], rejectReason.trim());
   };
 
   return (
@@ -218,7 +218,7 @@ export const ExamDetailModal: React.FC<DetailModalProps> = ({
                   Từ chối
                 </Button>
                 <Button
-                  onClick={() => onApprove([examId])}
+                  onClick={() => onApprove?.([examId])}
                   disabled={isApproving}
                   className="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium flex items-center gap-2"
                 >

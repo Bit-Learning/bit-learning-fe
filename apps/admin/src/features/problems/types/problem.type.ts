@@ -506,6 +506,7 @@ export interface DebugResponse {
 }
 
 export interface ProblemFilters {
+  search?: string;
   page?: number;
   size?: number;
   sort?: string;

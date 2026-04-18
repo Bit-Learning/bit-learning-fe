@@ -30,10 +30,10 @@ const difficultyConfig: Record<Difficulty, { label: string; className: string }>
 interface DetailModalProps {
   problemId: string | null;
   onClose: () => void;
-  onApprove: (ids: string[]) => void;
-  onReject: (ids: string[], reason: string) => void;
-  isApproving: boolean;
-  isRejecting: boolean;
+  onApprove?: (ids: string[]) => void;
+  onReject?: (ids: string[], reason: string) => void;
+  isApproving?: boolean;
+  isRejecting?: boolean;
 }
 
 export const DetailModal: React.FC<DetailModalProps> = ({
@@ -58,7 +58,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({
       toast.error({ title: "Lỗi", description: "Vui lòng nhập lý do từ chối" });
       return;
     }
-    onReject([problemId], rejectReason.trim());
+    onReject?.([problemId], rejectReason.trim());
     setRejectReason("");
     setShowRejectForm(false);
   };
@@ -235,7 +235,7 @@ export const DetailModal: React.FC<DetailModalProps> = ({
                   Từ chối
                 </Button>
                 <Button
-                  onClick={() => onApprove([problemId])}
+                  onClick={() => onApprove?.([problemId])}
                   disabled={isApproving}
                   className="cursor-pointer px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white text-sm font-medium flex items-center gap-2"
                 >
