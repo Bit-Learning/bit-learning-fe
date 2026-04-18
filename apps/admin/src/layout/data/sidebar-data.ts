@@ -46,10 +46,10 @@ export const navGroups: NavGroup[] = [
 				url: "/templates",
 				icon: PresentationIcon,
 			},
-			{ title: "Mail templates", url: "/mail-templates", icon: Mail },
+			{ title: "Quản lý mẫu mail", url: "/mail-templates", icon: Mail },
 			{ title: "Quản lý trò chơi", url: "/apps/games", icon: Gamepad2 },
 			{
-				title: "Analytics trò chơi",
+				title: "Thống kê trò chơi",
 				url: "/apps/games/analytics",
 				icon: BarChart3,
 			},

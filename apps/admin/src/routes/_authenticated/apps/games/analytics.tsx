@@ -9,10 +9,7 @@ export const Route = createFileRoute("/_authenticated/apps/games/analytics")({
 function AnalyticsRoute() {
 	return (
 		<>
-			<Header
-				title="Analytics trò chơi"
-				subtitle="Theo dõi completion, accuracy, timeout và abandonment bằng dữ liệu play history thật"
-			/>
+			<Header />
 			<div className="flex flex-1 flex-col gap-6 p-6">
 				<GameAnalyticsDashboardPage />
 			</div>

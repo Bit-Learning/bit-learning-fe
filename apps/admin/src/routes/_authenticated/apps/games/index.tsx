@@ -9,10 +9,7 @@ export const Route = createFileRoute("/_authenticated/apps/games/")({
 function GamesRoute() {
 	return (
 		<>
-			<Header
-				title="Quản lý trò chơi"
-				subtitle="Workspace hợp nhất cho game thường và game nối khái niệm"
-			/>
+			<Header />
 			<div className="flex flex-1 flex-col gap-2 p-6 sm:gap-6">
 				<GamesCrudManager />
 			</div>
