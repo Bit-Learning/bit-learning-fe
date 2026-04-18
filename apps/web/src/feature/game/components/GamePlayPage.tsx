@@ -5,6 +5,7 @@ import type { RootState } from "@/shared/redux/store";
 import type { Game } from "../services/gameService";
 import gameService from "../services/gameService";
 import { toast } from "@/shared/components/Sonner";
+import { getAccessToken } from "@/shared/lib/cookies";
 
 interface GamePlayPageProps {
 	id: number;
@@ -24,10 +25,25 @@ interface LegacyPayload {
 	duration?: number;
 }
 
+type IncomingGameMessage = {
+	source?: string;
+	type?: string;
+	rawScore?: unknown;
+	maxRawScore?: unknown;
+	duration?: unknown;
+	completed?: unknown;
+	metrics?: Record<string, unknown> | null;
+	attemptType?: unknown;
+	score?: unknown;
+};
+
+const BRIDGE_SOURCE = "BIT_LEARNING_GAME";
+
 export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const navigate = useNavigate();
 	const auth = useSelector((state: RootState) => state.auth);
 	const username = auth.userInfo?.username ?? null;
+	const isAuthenticated = Boolean(auth.isAuthenticated && getAccessToken());
 
 	const [game, setGame] = useState<Game | null>(null);
 	const [isFullscreen, setIsFullscreen] = useState(false);
@@ -37,11 +53,32 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	const startTimeRef = useRef<number>(Date.now());
 	const trackedRef = useRef(false);
 	const latestProgressRef = useRef<AttemptPayload | null>(null);
+	const gameOriginRef = useRef<string | null>(null);
 
 	useEffect(() => {
 		loadGame();
 		startTimeRef.current = Date.now();
+		trackedRef.current = false;
+		latestProgressRef.current = null;
+		setTracked(false);
 	}, [id]);
+
+	useEffect(() => {
+		if (!game?.playUrl) {
+			gameOriginRef.current = null;
+			return;
+		}
+
+		try {
+			gameOriginRef.current = new URL(
+				game.playUrl,
+				window.location.href,
+			).origin;
+		} catch (error) {
+			console.warn("Failed to resolve game origin", error);
+			gameOriginRef.current = null;
+		}
+	}, [game?.playUrl]);
 
 	useEffect(() => {
 		const handleFullscreenChange = () => {
@@ -54,7 +91,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 
 	const trackResult = useCallback(
 		async (payload: AttemptPayload | LegacyPayload) => {
-			if (!username || trackedRef.current) return;
+			if (!isAuthenticated || trackedRef.current) return;
 			trackedRef.current = true;
 			setTracked(true);
 			const elapsed =
@@ -90,7 +127,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				setTracked(false);
 			}
 		},
-		[id, username],
+		[id, isAuthenticated],
 	);
 
 	const buildAttemptPayload = useCallback(
@@ -114,7 +151,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 
 	const submitPartialAttempt = useCallback(
 		(reason: "BACK" | "BEFORE_UNLOAD" | "PAGE_HIDE") => {
-			if (!username || trackedRef.current) return false;
+			if (!isAuthenticated || trackedRef.current) return false;
 
 			const progress = latestProgressRef.current;
 			const totalCount =
@@ -145,12 +182,20 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				},
 			};
 
-			const url = `/api/games/${id}/attempts`;
+			const apiBaseUrl = new URL(
+				import.meta.env.VITE_API_BASE_URL ?? "/api/",
+				window.location.href,
+			);
+			const url = new URL(`games/${id}/attempts`, apiBaseUrl).toString();
 			const body = JSON.stringify(payload);
+			const accessToken = getAccessToken();
 			trackedRef.current = true;
 			setTracked(true);
 
-			if (navigator.sendBeacon) {
+			if (
+				navigator.sendBeacon &&
+				new URL(url).origin === window.location.origin
+			) {
 				const success = navigator.sendBeacon(
 					url,
 					new Blob([body], { type: "application/json" }),
@@ -165,24 +210,89 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				body,
 				headers: {
 					"Content-Type": "application/json",
+					...(accessToken
+						? {
+								Authorization: `Bearer ${accessToken}`,
+							}
+						: {}),
 				},
 				credentials: "include",
 				keepalive: true,
 			});
 			return true;
 		},
-		[id, username],
+		[id, isAuthenticated],
 	);
+
+	const parseIncomingMessage = useCallback(
+		(rawData: unknown): IncomingGameMessage | null => {
+			if (!rawData) return null;
+			if (typeof rawData === "string") {
+				try {
+					const parsed = JSON.parse(rawData);
+					return parsed && typeof parsed === "object"
+						? (parsed as IncomingGameMessage)
+						: null;
+				} catch {
+					return null;
+				}
+			}
+			return typeof rawData === "object"
+				? (rawData as IncomingGameMessage)
+				: null;
+		},
+		[],
+	);
+
+	const isMessageFromCurrentGame = useCallback(
+		(event: MessageEvent, data: IncomingGameMessage | null) => {
+			if (!data?.type) return false;
+
+			const hasKnownType =
+				data.type === "GAME_PROGRESS" ||
+				data.type === "GAME_RESULT" ||
+				data.type === "GAME_OVER";
+			if (!hasKnownType) {
+				return false;
+			}
+
+			const iframeWindow = gameContainerRef.current?.contentWindow;
+			if (iframeWindow && event.source === iframeWindow) {
+				return true;
+			}
+
+			if (data.source === BRIDGE_SOURCE) {
+				const gameOrigin = gameOriginRef.current;
+				if (!gameOrigin || event.origin === gameOrigin) {
+					return true;
+				}
+			}
+
+			return false;
+		},
+		[],
+	);
+
+	const notifyGameHostReady = useCallback(() => {
+		const iframeWindow = gameContainerRef.current?.contentWindow;
+		if (!iframeWindow) return;
+
+		try {
+			iframeWindow.postMessage({ type: "BITLEARNING_HOST_READY" }, "*");
+		} catch (error) {
+			console.warn("Failed to notify iframe host readiness", error);
+		}
+	}, []);
 
 	// Listen for postMessage from the game iframe
 	// Games should send: { type: "GAME_OVER", score: number, duration?: number }
 	useEffect(() => {
 		const handleMessage = (event: MessageEvent) => {
-			if (event.source !== gameContainerRef.current?.contentWindow) {
+			const data = parseIncomingMessage(event.data);
+			if (!isMessageFromCurrentGame(event, data)) {
 				return;
 			}
 
-			const data = event.data;
 			if (data && data.type === "GAME_PROGRESS") {
 				const payload = buildAttemptPayload({
 					rawScore:
@@ -230,12 +340,21 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				);
 			}
 			if (data && data.type === "GAME_OVER" && typeof data.score === "number") {
-				trackResult({ score: data.score, duration: data.duration });
+				trackResult({
+					score: data.score,
+					duration:
+						typeof data.duration === "number" ? data.duration : undefined,
+				});
 			}
 		};
 		window.addEventListener("message", handleMessage);
 		return () => window.removeEventListener("message", handleMessage);
-	}, [buildAttemptPayload, trackResult]);
+	}, [
+		buildAttemptPayload,
+		isMessageFromCurrentGame,
+		parseIncomingMessage,
+		trackResult,
+	]);
 
 	// Track partial attempts on page leave. We only persist once the iframe has sent usable progress.
 	useEffect(() => {
@@ -309,7 +428,17 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 		);
 	}
 
-	const gameUrl = `${game.playUrl}?gameId=${game.id}&userId=${encodeURIComponent(username || "")}`;
+	let gameUrl = game.playUrl;
+	try {
+		const gameUrlObject = new URL(game.playUrl, window.location.href);
+		gameUrlObject.searchParams.set("gameId", String(game.id));
+		if (username) {
+			gameUrlObject.searchParams.set("userId", username);
+		}
+		gameUrl = gameUrlObject.toString();
+	} catch (error) {
+		console.warn("Failed to append tracking params to game URL", error);
+	}
 
 	return (
 		<div className="fixed inset-0 z-50 bg-black flex flex-col">
@@ -346,6 +475,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 					src={gameUrl}
 					className="w-full h-full border-none"
 					title="Game Play"
+					onLoad={notifyGameHostReady}
 				/>
 			</div>
 		</div>
