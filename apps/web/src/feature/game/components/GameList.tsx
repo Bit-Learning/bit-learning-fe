@@ -4,7 +4,7 @@ import { Link } from "@tanstack/react-router";
 import { ArrowUpRight, Flame, Heart, Sparkles } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { AnimatePresence, motion } from "framer-motion";
-import { useEffect, useMemo, useRef, useState, type ReactNode } from "react";
+import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type {
 	FeaturedGame,
 	FeaturedReason,
@@ -167,6 +167,7 @@ function CategoryRowSkeleton({
 }
 
 export default function GameList({ username }: Props) {
+	void username;
 	const [categoriesWithGames, setCategoriesWithGames] = useState<
 		GameCategoryWithGames[]
 	>([]);
@@ -176,12 +177,8 @@ export default function GameList({ username }: Props) {
 	);
 	const [isLoading, setIsLoading] = useState(true);
 	const [loadError, setLoadError] = useState<string | null>(null);
-	const [selectedGame, setSelectedGame] = useState<Game | null>(null);
 	const [searchTerm, setSearchTerm] = useState("");
 	const debouncedSearchTerm = useDebounce(searchTerm, 300);
-
-	const [isFullscreen, setIsFullscreen] = useState(false);
-	const gameContainerRef = useRef<HTMLIFrameElement>(null);
 
 	useEffect(() => {
 		const fetchCategoriesWithGames = async () => {
@@ -226,27 +223,8 @@ export default function GameList({ username }: Props) {
 
 		void fetchCategoriesWithGames();
 
-		const handleFullscreenChange = () => {
-			setIsFullscreen(!!document.fullscreenElement);
-		};
-		document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-		return () => {
-			document.removeEventListener("fullscreenchange", handleFullscreenChange);
-		};
+		return undefined;
 	}, []);
-
-	const toggleFullscreen = () => {
-		if (!gameContainerRef.current) return;
-
-		if (!document.fullscreenElement) {
-			gameContainerRef.current.requestFullscreen().catch((err) => {
-				console.error(`Error attempting to enable fullscreen: ${err.message}`);
-			});
-		} else {
-			document.exitFullscreen();
-		}
-	};
 
 	const matchingTargetsByGameId = useMemo(
 		() =>
@@ -261,47 +239,6 @@ export default function GameList({ username }: Props) {
 			),
 		[matchingMappings],
 	);
-
-	if (selectedGame) {
-		const gameUrl = `${selectedGame.playUrl}?gameId=${selectedGame.id}&userId=${encodeURIComponent(username || "")}`;
-
-		return (
-			<div className="fixed inset-0 z-50 flex flex-col bg-black">
-				<div className="flex items-center justify-between bg-gray-900 p-4 text-white shadow-lg">
-					<div className="flex items-center gap-4">
-						<button
-							type="button"
-							onClick={() => setSelectedGame(null)}
-							className="rounded bg-gray-800 px-6 py-2 font-bold transition-colors hover:bg-gray-700"
-						>
-							← Quay lại
-						</button>
-						<h2 className="text-lg font-bold">{selectedGame.title}</h2>
-						{!username && (
-							<span className="text-sm text-yellow-500">
-								⚠️ Chưa đăng nhập - tiến trình chơi sẽ không được lưu
-							</span>
-						)}
-					</div>
-					<button
-						type="button"
-						onClick={toggleFullscreen}
-						className="rounded bg-red-600 px-6 py-2 font-bold transition-colors hover:bg-red-700"
-					>
-						{isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
-					</button>
-				</div>
-				<div className="relative flex-1">
-					<iframe
-						ref={gameContainerRef}
-						src={gameUrl}
-						className="h-full w-full border-none"
-						title="Game Play"
-					/>
-				</div>
-			</div>
-		);
-	}
 
 	const normalizedSearch = debouncedSearchTerm.trim().toLowerCase();
 	const filteredCategoriesWithGames = normalizedSearch

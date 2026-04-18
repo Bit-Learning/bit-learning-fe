@@ -4,18 +4,11 @@ import {
 	Eye,
 	Heart,
 	ListChecks,
-	Maximize,
 	MessageCircle,
 	TrendingUp,
 	TriangleAlert,
 } from "lucide-react";
-import {
-	useCallback,
-	useEffect,
-	useRef,
-	useState,
-	type ReactNode,
-} from "react";
+import { useCallback, useEffect, useState, type ReactNode } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
@@ -27,6 +20,7 @@ import studentService, {
 	type UserGameAnalyticsSummary,
 } from "../services/studentService";
 import PlayHistoryDetailModal from "./PlayHistoryDetailModal";
+import TrackedGameFrame from "./TrackedGameFrame";
 import { Navbar } from "./Navbar/Navbar";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import Footer from "./Footer";
@@ -53,7 +47,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 	>({});
 	const [isLiked, setIsLiked] = useState(false);
 	const [loading, setLoading] = useState(true);
-	const [isFullscreen, setIsFullscreen] = useState(false);
 	const [historyLoading, setHistoryLoading] = useState(false);
 	const [historyStats, setHistoryStats] =
 		useState<UserGameAnalyticsSummary | null>(null);
@@ -63,7 +56,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 	const [selectedHistoryDetail, setSelectedHistoryDetail] =
 		useState<PlayHistoryDetail | null>(null);
 	const [historyDetailLoading, setHistoryDetailLoading] = useState(false);
-	const gameContainerRef = useRef<HTMLDivElement>(null);
 
 	const loadGameDetail = useCallback(async () => {
 		try {
@@ -119,17 +111,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 	useEffect(() => {
 		void loadCurrentUserGameHistory();
 	}, [loadCurrentUserGameHistory]);
-
-	useEffect(() => {
-		const handleFullscreenChange = () => {
-			setIsFullscreen(!!document.fullscreenElement);
-		};
-		document.addEventListener("fullscreenchange", handleFullscreenChange);
-
-		return () => {
-			document.removeEventListener("fullscreenchange", handleFullscreenChange);
-		};
-	}, []);
 
 	const handleLike = async () => {
 		if (!username) {
@@ -198,18 +179,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 				to: "/games/$id/play",
 				params: { id: String(detailGame.id) },
 			});
-		}
-	};
-
-	const toggleFullscreen = () => {
-		if (!gameContainerRef.current) return;
-
-		if (!document.fullscreenElement) {
-			gameContainerRef.current.requestFullscreen().catch((err) => {
-				console.error(`Error attempting to enable fullscreen: ${err.message}`);
-			});
-		} else {
-			document.exitFullscreen();
 		}
 	};
 
@@ -370,26 +339,13 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 				<div className="grid lg:grid-cols-3 gap-8">
 					{/* Left Column - Game Player */}
 					<div className="lg:col-span-2">
-						<div
-							ref={gameContainerRef}
-							className="bg-linear-to-br from-purple-900 to-blue-900 rounded-lg overflow-hidden shadow-2xl relative"
-						>
-							<div className="aspect-video">
-								<iframe
-									src={detailGame.playUrl}
-									className="w-full h-full border-none"
-									title="Game Preview"
-								/>
-							</div>
-							<button
-								type="button"
-								onClick={toggleFullscreen}
-								className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white p-2 rounded-lg transition-all backdrop-blur-sm"
-								title={isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-							>
-								<Maximize className="w-5 h-5" />
-							</button>
-						</div>
+						<TrackedGameFrame
+							game={detailGame}
+							username={username}
+							variant="embedded"
+							className="aspect-video rounded-lg shadow-2xl"
+							iframeClassName="h-full w-full border-none bg-black"
+						/>
 
 						<div className="mt-6 mb-6 flex items-center gap-4">
 							<button
@@ -397,7 +353,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 								onClick={handlePlayGame}
 								className="flex-1 bg-red-600 hover:bg-red-700 text-white font-bold py-3 px-6 rounded-lg transition-colors"
 							>
-								▶ Xem toàn màn hình
+								▶ Mở chế độ tập trung
 							</button>
 
 							<button
