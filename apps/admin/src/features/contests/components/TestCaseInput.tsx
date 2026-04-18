@@ -1,6 +1,6 @@
 import React, { useRef, useState } from "react";
 import { Plus, Trash2, Eye, EyeOff, FileText, Code2, Upload, CheckCircle2, XCircle, AlertCircle } from "lucide-react";
-import { CreateTestCaseRequest } from "../types/problem.type";
+import { CreateTestCaseRequest } from "../../problems/types/problem.type";
 import { cn } from "@/shared/lib/utils";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";

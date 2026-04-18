@@ -10,13 +10,13 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/shared/lib/utils";
-import { Difficulty, ParamType, ParamTypeInfo } from "../types/problem.type";
+import { Difficulty, ParamType, ParamTypeInfo } from "../../problems/types/problem.type";
 import {
   useCreateProblem,
   useGenerateCodeTemplates,
   useBulkCreateTestCases,
   useImportTestCasesFromFile,
-} from "../queries/useProblem";
+} from "../../problems/queries/useProblem";
 import { useAddProblem, useContestProblems } from "../queries/useContest";
 import TagMultiSelect from "./TagMultiSelect";
 import TestCaseInput, { defaultTestCaseInputState, resolveTestCases, TestCaseInputState } from "./TestCaseInput";

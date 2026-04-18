@@ -1,6 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
 import { Badge, Check, ChevronDown, X } from "lucide-react";
-import { useGetAllTags } from "../queries/useProblem";
+import { useGetAllTags } from "../../problems/queries/useProblem";
 import { cn } from "@/shared/lib/utils";
 
 interface TagMultiSelectProps {

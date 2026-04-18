@@ -1,10 +1,3 @@
-export interface TagResponse {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
-}
-
 export enum Difficulty {
   EASY = "EASY",
   MEDIUM = "MEDIUM",
@@ -26,6 +19,13 @@ export enum SubmissionStatus {
   TIME_LIMIT_EXCEEDED = "TIME_LIMIT_EXCEEDED",
   RUNTIME_ERROR = "RUNTIME_ERROR",
   COMPILE_ERROR = "COMPILE_ERROR",
+}
+
+export enum ApprovalStatus {
+  NONE = "NONE",
+  PENDING = "PENDING",
+  APPROVED = "APPROVED",
+  REJECTED = "REJECTED",
 }
 
 export enum ParamType {
@@ -216,9 +216,7 @@ export const ParamTypeInfo: Record<
 };
 
 export const isArrayType = (type: ParamType): boolean => type.includes("ARRAY");
-
 export const is2DArrayType = (type: ParamType): boolean => type.includes("2D_ARRAY");
-
 export const isPrimitiveType = (type: ParamType): boolean => !isArrayType(type);
 
 export const getTypeForLanguage = (type: ParamType, language: "java" | "python" | "cpp" | "js"): string => {
@@ -337,6 +335,14 @@ export interface CodeTemplateResponse {
   updatedAt: string;
 }
 
+export interface UserSummary {
+  id: number;
+  firstName: string;
+  lastName: string;
+  avatar: string;
+  role: string;
+}
+
 export interface ProblemBriefResponse {
   id: string;
   title: string;
@@ -348,6 +354,8 @@ export interface ProblemBriefResponse {
   isPublic: boolean;
   tags: TagResponse[];
   isFavorite: boolean;
+  createdBy?: UserSummary;
+  approvalStatus: ApprovalStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -366,6 +374,8 @@ export interface ProblemDetailResponse {
   sampleTestcases: TestCaseResponse[];
   codeTemplate: string;
   multifileEntryTemplate?: string;
+  createdBy?: UserSummary;
+  approvalStatus: ApprovalStatus;
   createdAt: string;
   updatedAt: string;
 }
@@ -510,6 +520,13 @@ export interface SubmissionFilters {
   sort?: string;
 }
 
+export interface ApprovalFilters {
+  status?: ApprovalStatus;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
 export interface FunctionParam {
   name: string;
   type: ParamType;
@@ -528,4 +545,20 @@ export interface GenerateCodeTemplatesResponse {
 export interface FormatError {
   line: number;
   message: string;
+}
+
+export interface RequestPublishRequest {
+  problemIds: string[];
+}
+
+export interface ApproveRejectRequest {
+  problemIds: string[];
+  rejectReason?: string;
+}
+
+export interface TagResponse {
+  id: string;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
 }
