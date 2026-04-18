@@ -16,6 +16,10 @@ export type GameRow = {
 	description?: string;
 	likes?: number;
 	views?: number;
+	attempts?: number;
+	completionRate?: number;
+	averageAccuracy?: number;
+	timeoutRate?: number;
 	standardId?: number;
 	matchingGameId?: number;
 	matchingGrade?: number;
@@ -163,6 +167,26 @@ export const createGamesColumns = ({
 			<span className="text-sm text-muted-foreground">
 				{row.original.difficultyOrGrade}
 			</span>
+		),
+	},
+	{
+		accessorKey: "attempts",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Tracking" />
+		),
+		cell: ({ row }) => (
+			<div className="space-y-1 text-sm">
+				<div className="font-medium text-foreground">
+					{row.original.attempts ?? 0} lượt chơi
+				</div>
+				<div className="text-xs text-muted-foreground">
+					Complete {row.original.completionRate ?? 0}% • Accuracy{" "}
+					{row.original.averageAccuracy ?? 0}%
+				</div>
+				<div className="text-xs text-muted-foreground">
+					Timeout {row.original.timeoutRate ?? 0}%
+				</div>
+			</div>
 		),
 	},
 	{

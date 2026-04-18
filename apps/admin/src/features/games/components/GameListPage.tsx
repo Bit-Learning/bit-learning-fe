@@ -20,6 +20,7 @@ import {
 	useAdminGamesList,
 	useGameCategories,
 } from "../queries/useAdminGamesCrud";
+import { useAdminGameAnalyticsDashboard } from "../queries/useAdminGameAnalytics";
 import {
 	useDeleteMatchingGame,
 	useMatchingGameMappings,
@@ -51,6 +52,7 @@ const getErrorMessage = (error: unknown, fallback: string) => {
 export const GamesCrudManager = () => {
 	const { data: games = [], isLoading: isLoadingGames } = useAdminGamesList();
 	const { data: categories = [] } = useGameCategories();
+	const { data: analytics } = useAdminGameAnalyticsDashboard(30);
 	const { data: mappings = [], isLoading: isLoadingMatching } =
 		useMatchingGameMappings();
 	const deleteGame = useDeleteGame();
@@ -65,33 +67,51 @@ export const GamesCrudManager = () => {
 
 	const standardRows: GameRow[] = games
 		.filter((game) => game.gameType !== "MATCHING")
-		.map((game) => ({
-			id: `standard-${game.id}`,
-			rowType: "standard",
-			displayId: `#${game.id}`,
-			title: game.title,
-			status: game.status,
-			categoryOrTopic: getCategoryName(game.categoryId),
-			difficultyOrGrade: game.difficulty ?? "MEDIUM",
-			description: game.description,
-			likes: game.likes,
-			views: game.views,
-			standardId: game.id,
-		}));
+		.map((game) => {
+			const performance = analytics?.gamePerformance.find(
+				(item) => item.gameId === game.id,
+			);
+			return {
+				id: `standard-${game.id}`,
+				rowType: "standard",
+				displayId: `#${game.id}`,
+				title: game.title,
+				status: game.status,
+				categoryOrTopic: getCategoryName(game.categoryId),
+				difficultyOrGrade: game.difficulty ?? "MEDIUM",
+				description: game.description,
+				likes: game.likes,
+				views: game.views,
+				attempts: performance?.attempts ?? 0,
+				completionRate: performance?.completionRate ?? 0,
+				averageAccuracy: performance?.averageAccuracy ?? 0,
+				timeoutRate: performance?.timeoutRate ?? 0,
+				standardId: game.id,
+			};
+		});
 
-	const matchingRows: GameRow[] = mappings.map((mapping) => ({
-		id: `matching-${mapping.gameId}`,
-		rowType: "matching",
-		displayId: `#${mapping.gameId}`,
-		title: mapping.gameTitle,
-		status: mapping.status,
-		categoryOrTopic: `Chủ đề ${mapping.topicCode}`,
-		difficultyOrGrade: `Lớp ${mapping.grade}`,
-		description: `Game nối khái niệm theo chương trình học · Lớp ${mapping.grade} · Chủ đề ${mapping.topicCode}`,
-		matchingGameId: mapping.gameId,
-		matchingGrade: mapping.grade,
-		matchingTopicCode: mapping.topicCode,
-	}));
+	const matchingRows: GameRow[] = mappings.map((mapping) => {
+		const performance = analytics?.gamePerformance.find(
+			(item) => item.gameId === mapping.gameId,
+		);
+		return {
+			id: `matching-${mapping.gameId}`,
+			rowType: "matching",
+			displayId: `#${mapping.gameId}`,
+			title: mapping.gameTitle,
+			status: mapping.status,
+			categoryOrTopic: `Chủ đề ${mapping.topicCode}`,
+			difficultyOrGrade: `Lớp ${mapping.grade}`,
+			description: `Game nối khái niệm theo chương trình học · Lớp ${mapping.grade} · Chủ đề ${mapping.topicCode}`,
+			attempts: performance?.attempts ?? 0,
+			completionRate: performance?.completionRate ?? 0,
+			averageAccuracy: performance?.averageAccuracy ?? 0,
+			timeoutRate: performance?.timeoutRate ?? 0,
+			matchingGameId: mapping.gameId,
+			matchingGrade: mapping.grade,
+			matchingTopicCode: mapping.topicCode,
+		};
+	});
 
 	const data = [...standardRows, ...matchingRows];
 
@@ -141,7 +161,7 @@ export const GamesCrudManager = () => {
 							trang chỉnh sửa chi tiết.
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="grid gap-4 pt-6 md:grid-cols-3">
+					<CardContent className="grid gap-4 pt-6 md:grid-cols-4">
 						<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
 							<div className="text-sm text-slate-300">Tổng số game</div>
 							<div className="mt-2 text-3xl font-semibold">{data.length}</div>
@@ -156,6 +176,16 @@ export const GamesCrudManager = () => {
 							<div className="text-sm text-slate-300">Game nối khái niệm</div>
 							<div className="mt-2 text-3xl font-semibold">
 								{matchingRows.length}
+							</div>
+						</div>
+						<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
+							<div className="text-sm text-slate-300">Attempt 30 ngày</div>
+							<div className="mt-2 text-3xl font-semibold">
+								{analytics?.overview.totalAttempts ?? 0}
+							</div>
+							<div className="mt-1 text-xs text-slate-400">
+								Accuracy {analytics?.overview.averageAccuracy ?? 0}% •
+								Completion {analytics?.overview.completionRate ?? 0}%
 							</div>
 						</div>
 					</CardContent>
@@ -203,6 +233,32 @@ export const GamesCrudManager = () => {
 							>
 								<Link to="/apps/games/matching/new">
 									Mở trang tạo matching game
+									<ArrowRight className="h-4 w-4" />
+								</Link>
+							</Button>
+						</CardContent>
+					</Card>
+
+					<Card className="border-slate-200/80">
+						<CardHeader>
+							<div className="flex items-center gap-2 text-sm font-medium text-slate-500">
+								<Sparkles className="h-4 w-4 text-amber-600" />
+								Analytics game
+							</div>
+							<CardTitle>Dashboard hiệu suất & abandonment</CardTitle>
+							<CardDescription>
+								Xem số lượt chơi theo ngày, completion rate, accuracy theo game
+								và top game timeout cao.
+							</CardDescription>
+						</CardHeader>
+						<CardContent>
+							<Button
+								asChild
+								variant="secondary"
+								className="w-full justify-between"
+							>
+								<Link to="/apps/games/analytics">
+									Mở dashboard analytics
 									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>

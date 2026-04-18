@@ -44,6 +44,8 @@ import {
 	type GameCategoryOption,
 	type UpsertGamePayload,
 } from "../queries/useAdminGamesCrud";
+import type { AdminRecentAttemptItem } from "../api/admin-games.api";
+import { useAdminGameDetailAnalytics } from "../queries/useAdminGameAnalytics";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
 	if (error instanceof Error && error.message) {
@@ -78,6 +80,9 @@ const getCategoryName = (
 	return cats.find((c) => c.id === categoryId)?.name ?? "Chưa phân loại";
 };
 
+const formatDuration = (seconds: number) =>
+	`${Math.floor(seconds / 60)}m ${seconds % 60}s`;
+
 export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 	gameId,
 }) => {
@@ -85,6 +90,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 	const isCreateMode = gameId === undefined;
 	const { data: games = [], isLoading: isLoadingGames } = useAdminGamesList();
 	const { data: categories = [] } = useGameCategories();
+	const { data: analyticsDetail } = useAdminGameDetailAnalytics(gameId, 30);
 	const upsertGame = useUpsertGame();
 	const deleteGame = useDeleteGame();
 	const approveGame = useApproveGame();
@@ -910,6 +916,109 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 							) : null}
 						</CardContent>
 					</Card>
+
+					{!isCreateMode && analyticsDetail?.summary ? (
+						<Card>
+							<CardHeader className="border-b">
+								<CardTitle>Tracking 30 ngày</CardTitle>
+								<CardDescription>
+									Số liệu thật lấy từ play history và result metrics của game.
+								</CardDescription>
+							</CardHeader>
+							<CardContent className="space-y-4 pt-6">
+								<div className="grid gap-3 rounded-xl border bg-muted/20 p-4 text-sm">
+									<div className="flex items-center justify-between">
+										<span className="text-muted-foreground">Attempts</span>
+										<span className="font-medium">
+											{analyticsDetail.summary.attempts}
+										</span>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-muted-foreground">Completion</span>
+										<span className="font-medium">
+											{analyticsDetail.summary.completionRate}%
+										</span>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-muted-foreground">Accuracy TB</span>
+										<span className="font-medium">
+											{analyticsDetail.summary.averageAccuracy}%
+										</span>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-muted-foreground">Timeout</span>
+										<span className="font-medium">
+											{analyticsDetail.summary.timeoutRate}%
+										</span>
+									</div>
+									<div className="flex items-center justify-between">
+										<span className="text-muted-foreground">Thời lượng TB</span>
+										<span className="font-medium">
+											{formatDuration(
+												analyticsDetail.summary.averageDurationSeconds,
+											)}
+										</span>
+									</div>
+								</div>
+
+								{analyticsDetail.exitReasons.length > 0 ? (
+									<div className="rounded-xl border border-amber-200 bg-amber-50 p-4">
+										<p className="text-xs font-semibold uppercase tracking-wide text-amber-900/80">
+											Lý do bỏ dở phổ biến
+										</p>
+										<div className="mt-3 space-y-2 text-sm text-amber-950">
+											{analyticsDetail.exitReasons.slice(0, 3).map((item) => (
+												<div
+													key={item.key}
+													className="flex items-center justify-between gap-3"
+												>
+													<span>{item.label}</span>
+													<span className="font-medium">
+														{item.count} lượt • {item.rate}%
+													</span>
+												</div>
+											))}
+										</div>
+									</div>
+								) : null}
+
+								{analyticsDetail.recentAttempts.length > 0 ? (
+									<div className="rounded-xl border p-4">
+										<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+											Attempt gần nhất
+										</p>
+										<div className="mt-3 space-y-3">
+											{analyticsDetail.recentAttempts
+												.slice(0, 3)
+												.map((attempt: AdminRecentAttemptItem) => (
+													<div
+														key={attempt.id}
+														className="rounded-lg bg-muted/40 p-3 text-sm"
+													>
+														<div className="flex items-center justify-between gap-3">
+															<span className="font-medium">
+																{new Date(attempt.playedAt).toLocaleString(
+																	"vi-VN",
+																)}
+															</span>
+															<span className="text-muted-foreground">
+																{attempt.completed ? "Hoàn thành" : "Bỏ dở"}
+															</span>
+														</div>
+														<div className="mt-2 text-xs text-muted-foreground">
+															Accuracy {attempt.accuracy ?? 0}% • Đúng{" "}
+															{attempt.correctCount ?? 0} • Sai{" "}
+															{attempt.wrongCount ?? 0} • Hết giờ{" "}
+															{attempt.timeoutCount ?? 0}
+														</div>
+													</div>
+												))}
+										</div>
+									</div>
+								) : null}
+							</CardContent>
+						</Card>
+					) : null}
 				</div>
 			</div>
 		</div>

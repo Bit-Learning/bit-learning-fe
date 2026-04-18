@@ -60,9 +60,124 @@ export interface UpdateGamePayload {
 	thumbnail?: File;
 }
 
+export interface AdminGameAnalyticsOverview {
+	rangeDays: number;
+	totalAttempts: number;
+	completedAttempts: number;
+	partialAttempts: number;
+	distinctGames: number;
+	distinctTopics: number;
+	completionRate: number;
+	partialRate: number;
+	averageAccuracy: number;
+	averageDurationSeconds: number;
+	timeoutRate: number;
+}
+
+export interface AdminGameDailyPlayPoint {
+	date: string;
+	plays: number;
+	completed: number;
+	partial: number;
+}
+
+export interface AdminGamePerformanceItem {
+	gameId: number;
+	gameTitle: string;
+	gameType?: string | null;
+	categoryName?: string | null;
+	attempts: number;
+	completedAttempts: number;
+	partialAttempts: number;
+	completionRate: number;
+	partialRate: number;
+	averageAccuracy: number;
+	averageDurationSeconds: number;
+	timeoutRate: number;
+	averageNormalizedScore: number;
+	averageLeaderboardPoints: number;
+	bestLeaderboardPoints: number;
+	totalQuestions: number;
+	totalCorrect: number;
+	totalWrong: number;
+	totalTimeout: number;
+	lastPlayedAt?: string | null;
+}
+
+export interface AdminTopicPerformanceItem {
+	key: string;
+	label: string;
+	bookCode?: string | null;
+	bookTitle?: string | null;
+	grade?: number | null;
+	topicLetter?: string | null;
+	topicName?: string | null;
+	attempts: number;
+	completionRate: number;
+	averageAccuracy: number;
+	averageDurationSeconds: number;
+	timeoutRate: number;
+	totalQuestions: number;
+	totalCorrect: number;
+	totalWrong: number;
+	totalTimeout: number;
+	lastPlayedAt?: string | null;
+}
+
+export interface AdminGameBreakdownItem {
+	key: string;
+	label: string;
+	count: number;
+	rate: number;
+}
+
+export interface AdminRecentAttemptItem {
+	id: number;
+	playedAt: string;
+	completed: boolean;
+	accuracy: number;
+	correctCount: number;
+	wrongCount: number;
+	timeoutCount: number;
+}
+
+export interface AdminGameAnalyticsDashboardDto {
+	overview: AdminGameAnalyticsOverview;
+	playsByDay: AdminGameDailyPlayPoint[];
+	gamePerformance: AdminGamePerformanceItem[];
+	topicPerformance: AdminTopicPerformanceItem[];
+	timeoutLeaders: AdminGamePerformanceItem[];
+}
+
+export interface AdminGameDetailAnalyticsDto {
+	summary: AdminGamePerformanceItem;
+	playsByDay: AdminGameDailyPlayPoint[];
+	attemptStates: AdminGameBreakdownItem[];
+	exitReasons: AdminGameBreakdownItem[];
+	questionOutcomes: AdminGameBreakdownItem[];
+	recentAttempts: AdminRecentAttemptItem[];
+}
+
 export const adminGamesApi = {
 	listGames: (): Promise<AxiosResponse<ApiResponse<AdminGameDto[]>>> => {
 		return api.get(ADMIN_GAMES_ENDPOINT);
+	},
+
+	getAnalytics: (
+		days = 30,
+	): Promise<AxiosResponse<ApiResponse<AdminGameAnalyticsDashboardDto>>> => {
+		return api.get(`${ADMIN_GAMES_ENDPOINT}/analytics`, {
+			params: { days },
+		});
+	},
+
+	getGameAnalytics: (
+		id: number,
+		days = 30,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDetailAnalyticsDto>>> => {
+		return api.get(`${ADMIN_GAMES_ENDPOINT}/${id}/analytics`, {
+			params: { days },
+		});
 	},
 
 	createGame: (

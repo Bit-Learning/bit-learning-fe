@@ -62,6 +62,28 @@ export interface PlayHistoryDetail extends PlayHistoryItem {
 	questionResults?: PlayHistoryQuestionResult[] | null;
 }
 
+export interface UserGameAnalyticsSummary {
+	gameId: number;
+	gameTitle: string;
+	totalAttempts: number;
+	completedAttempts: number;
+	partialAttempts: number;
+	completionRate: number;
+	partialRate: number;
+	averageAccuracy: number;
+	bestAccuracy: number;
+	averageDurationSeconds: number;
+	averageLeaderboardPoints: number;
+	bestLeaderboardPoints: number;
+	averageNormalizedScore: number;
+	timeoutRate: number;
+	totalQuestions: number;
+	totalCorrect: number;
+	totalWrong: number;
+	totalTimeout: number;
+	lastPlayedAt?: string | null;
+}
+
 export interface PaginatedPlayHistory {
 	content: PlayHistoryItem[];
 	currentPage: number;
@@ -108,6 +130,33 @@ const studentService = {
 	): Promise<PlayHistoryDetail> => {
 		const response = await api.get<PlayHistoryDetail>(
 			`/students/${userId}/play-history/${historyId}`,
+		);
+		return response.data;
+	},
+
+	getStudentGamePlayHistory: async (
+		userId: number,
+		gameId: number,
+		page: number = 0,
+		size: number = 6,
+		sortBy: string = "playedAt",
+		sortDirection: string = "DESC",
+	): Promise<PaginatedPlayHistory> => {
+		const response = await api.get<PaginatedPlayHistory>(
+			`/students/${userId}/games/${gameId}/play-history`,
+			{
+				params: { page, size, sortBy, sortDirection },
+			},
+		);
+		return response.data;
+	},
+
+	getStudentGameAnalytics: async (
+		userId: number,
+		gameId: number,
+	): Promise<UserGameAnalyticsSummary> => {
+		const response = await api.get<UserGameAnalyticsSummary>(
+			`/students/${userId}/games/${gameId}/analytics`,
 		);
 		return response.data;
 	},

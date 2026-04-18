@@ -1,11 +1,32 @@
 import PageMeta from "@/shared/components/seo/page-meta";
-import { Eye, Heart, MessageCircle, Maximize } from "lucide-react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import {
+	Clock3,
+	Eye,
+	Heart,
+	ListChecks,
+	Maximize,
+	MessageCircle,
+	TrendingUp,
+	TriangleAlert,
+} from "lucide-react";
+import {
+	useCallback,
+	useEffect,
+	useRef,
+	useState,
+	type ReactNode,
+} from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 import type { Comment, Game } from "../services/gameService";
 import gameService from "../services/gameService";
+import studentService, {
+	type PlayHistoryDetail,
+	type PlayHistoryItem,
+	type UserGameAnalyticsSummary,
+} from "../services/studentService";
+import PlayHistoryDetailModal from "./PlayHistoryDetailModal";
 import { Navbar } from "./Navbar/Navbar";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import Footer from "./Footer";
@@ -17,6 +38,7 @@ interface GameDetailPageProps {
 export default function GameDetailPage({ id }: GameDetailPageProps) {
 	const navigate = useNavigate();
 	const auth = useSelector((state: RootState) => state.auth);
+	const currentUserId = auth.userInfo?.id ?? null;
 	const username = auth.userInfo?.username ?? null;
 	const userEmail = auth.userInfo?.email ?? null;
 	const currentUserAvatar = auth.userInfo?.avatar ?? null;
@@ -32,6 +54,15 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 	const [isLiked, setIsLiked] = useState(false);
 	const [loading, setLoading] = useState(true);
 	const [isFullscreen, setIsFullscreen] = useState(false);
+	const [historyLoading, setHistoryLoading] = useState(false);
+	const [historyStats, setHistoryStats] =
+		useState<UserGameAnalyticsSummary | null>(null);
+	const [historyItems, setHistoryItems] = useState<PlayHistoryItem[]>([]);
+	const [selectedHistory, setSelectedHistory] =
+		useState<PlayHistoryItem | null>(null);
+	const [selectedHistoryDetail, setSelectedHistoryDetail] =
+		useState<PlayHistoryDetail | null>(null);
+	const [historyDetailLoading, setHistoryDetailLoading] = useState(false);
 	const gameContainerRef = useRef<HTMLDivElement>(null);
 
 	const loadGameDetail = useCallback(async () => {
@@ -60,6 +91,34 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 	useEffect(() => {
 		loadGameDetail();
 	}, [loadGameDetail]);
+
+	const loadCurrentUserGameHistory = useCallback(async () => {
+		if (!currentUserId) {
+			setHistoryStats(null);
+			setHistoryItems([]);
+			return;
+		}
+
+		try {
+			setHistoryLoading(true);
+			const [stats, history] = await Promise.all([
+				studentService.getStudentGameAnalytics(currentUserId, id),
+				studentService.getStudentGamePlayHistory(currentUserId, id, 0, 6),
+			]);
+			setHistoryStats(stats);
+			setHistoryItems(history.content ?? []);
+		} catch (error) {
+			console.error("Failed to load game play history", error);
+			setHistoryStats(null);
+			setHistoryItems([]);
+		} finally {
+			setHistoryLoading(false);
+		}
+	}, [currentUserId, id]);
+
+	useEffect(() => {
+		void loadCurrentUserGameHistory();
+	}, [loadCurrentUserGameHistory]);
 
 	useEffect(() => {
 		const handleFullscreenChange = () => {
@@ -151,6 +210,24 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 			});
 		} else {
 			document.exitFullscreen();
+		}
+	};
+
+	const openHistoryDetail = async (item: PlayHistoryItem) => {
+		if (!currentUserId) return;
+		setSelectedHistory(item);
+		setSelectedHistoryDetail(null);
+		setHistoryDetailLoading(true);
+		try {
+			const detail = await studentService.getStudentPlayHistoryDetail(
+				currentUserId,
+				item.id,
+			);
+			setSelectedHistoryDetail(detail);
+		} catch (error) {
+			console.error("Failed to load play history detail", error);
+		} finally {
+			setHistoryDetailLoading(false);
 		}
 	};
 
@@ -252,6 +329,9 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 		);
 	};
 
+	const formatDuration = (duration: number) =>
+		`${Math.floor(duration / 60)}m ${duration % 60}s`;
+
 	return (
 		<div className="min-h-screen bg-[#12080a] text-white">
 			<PageMeta
@@ -338,6 +418,171 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 								<span>{detailGame.views || 0}</span>
 							</div>
 						</div>
+
+						<section className="rounded-[28px] border border-white/10 bg-linear-to-br from-white/8 via-white/4 to-transparent p-6 shadow-[0_30px_80px_rgba(0,0,0,0.24)] backdrop-blur-sm">
+							<div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+								<div>
+									<p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200/80">
+										Lịch sử của bạn
+									</p>
+									<h2 className="mt-2 text-2xl font-bold">
+										Hiệu suất chơi trong game này
+									</h2>
+									<p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+										Xem lại các lần chơi gần đây, mức độ hoàn thành và những lần
+										sai/hết giờ để biết chính xác bạn đang vướng ở đâu.
+									</p>
+								</div>
+								{historyStats?.lastPlayedAt ? (
+									<div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-slate-300">
+										Lần chơi gần nhất:{" "}
+										<span className="font-semibold text-white">
+											{new Date(historyStats.lastPlayedAt).toLocaleString(
+												"vi-VN",
+											)}
+										</span>
+									</div>
+								) : null}
+							</div>
+
+							{!currentUserId ? (
+								<div className="mt-6 rounded-3xl border border-dashed border-white/15 bg-black/20 px-6 py-10 text-center">
+									<p className="text-lg font-semibold text-white">
+										Đăng nhập để xem lịch sử chơi cá nhân
+									</p>
+									<p className="mt-2 text-sm text-slate-400">
+										Khi có tài khoản, mỗi lần chơi sẽ được lưu lại cùng
+										accuracy, timeout và chi tiết câu hỏi sai.
+									</p>
+								</div>
+							) : historyLoading ? (
+								<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+									{Array.from({ length: 4 }).map((_, index) => (
+										<div
+											key={index}
+											className="h-28 animate-pulse rounded-3xl bg-white/6"
+										/>
+									))}
+								</div>
+							) : (
+								<>
+									<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+										<HistoryStatCard
+											icon={<ListChecks className="h-5 w-5" />}
+											label="Số lượt chơi"
+											value={String(historyStats?.totalAttempts ?? 0)}
+											subtitle={`${historyStats?.completedAttempts ?? 0} hoàn thành • ${historyStats?.partialAttempts ?? 0} bỏ dở`}
+										/>
+										<HistoryStatCard
+											icon={<TrendingUp className="h-5 w-5" />}
+											label="Accuracy trung bình"
+											value={`${historyStats?.averageAccuracy ?? 0}%`}
+											subtitle={`Best ${historyStats?.bestAccuracy ?? 0}% • Timeout ${historyStats?.timeoutRate ?? 0}%`}
+										/>
+										<HistoryStatCard
+											icon={<Clock3 className="h-5 w-5" />}
+											label="Thời lượng trung bình"
+											value={formatDuration(
+												historyStats?.averageDurationSeconds ?? 0,
+											)}
+											subtitle={`Completion ${historyStats?.completionRate ?? 0}% • Partial ${historyStats?.partialRate ?? 0}%`}
+										/>
+										<HistoryStatCard
+											icon={<TriangleAlert className="h-5 w-5" />}
+											label="Tổng câu sai / hết giờ"
+											value={`${historyStats?.totalWrong ?? 0} / ${historyStats?.totalTimeout ?? 0}`}
+											subtitle={`Tổng đúng ${historyStats?.totalCorrect ?? 0} trên ${historyStats?.totalQuestions ?? 0} câu`}
+										/>
+									</div>
+
+									<div className="mt-6">
+										<div className="mb-3 flex items-center justify-between">
+											<h3 className="text-lg font-semibold text-white">
+												6 lượt chơi gần nhất
+											</h3>
+											<p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+												Bấm vào một lượt để xem chi tiết từng câu
+											</p>
+										</div>
+
+										{historyItems.length > 0 ? (
+											<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+												{historyItems.map((item) => {
+													const isCompleted = item.completed;
+													return (
+														<button
+															type="button"
+															key={item.id}
+															onClick={() => void openHistoryDetail(item)}
+															className="rounded-3xl border border-white/10 bg-black/20 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-red-400/40 hover:bg-black/30"
+														>
+															<div className="flex items-start justify-between gap-3">
+																<div>
+																	<div className="text-sm font-semibold text-white">
+																		{new Date(item.playedAt).toLocaleString(
+																			"vi-VN",
+																		)}
+																	</div>
+																	<div className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
+																		{item.attemptState ??
+																			(isCompleted ? "COMPLETED" : "PARTIAL")}
+																	</div>
+																</div>
+																<span
+																	className={`rounded-full px-3 py-1 text-xs font-semibold ${
+																		isCompleted
+																			? "bg-emerald-500/15 text-emerald-300"
+																			: "bg-amber-500/15 text-amber-300"
+																	}`}
+																>
+																	{isCompleted ? "Hoàn thành" : "Bỏ dở"}
+																</span>
+															</div>
+
+															<div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+																<div className="rounded-2xl bg-white/5 p-3">
+																	<div className="text-slate-400">Accuracy</div>
+																	<div className="mt-1 text-lg font-bold text-white">
+																		{item.accuracy ?? 0}%
+																	</div>
+																</div>
+																<div className="rounded-2xl bg-white/5 p-3">
+																	<div className="text-slate-400">
+																		Thời gian
+																	</div>
+																	<div className="mt-1 text-lg font-bold text-white">
+																		{formatDuration(item.duration ?? 0)}
+																	</div>
+																</div>
+															</div>
+
+															<div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-300">
+																<span className="rounded-full bg-emerald-500/10 px-3 py-1">
+																	Đúng {item.correctCount ?? 0}
+																</span>
+																<span className="rounded-full bg-rose-500/10 px-3 py-1">
+																	Sai {item.wrongCount ?? 0}
+																</span>
+																<span className="rounded-full bg-amber-500/10 px-3 py-1">
+																	Hết giờ {item.timeoutCount ?? 0}
+																</span>
+																<span className="rounded-full bg-sky-500/10 px-3 py-1">
+																	Điểm {item.score ?? 0}
+																</span>
+															</div>
+														</button>
+													);
+												})}
+											</div>
+										) : (
+											<div className="rounded-3xl border border-dashed border-white/15 bg-black/20 px-6 py-10 text-center text-slate-400">
+												Bạn chưa có lượt chơi nào được ghi nhận cho game này.
+											</div>
+										)}
+									</div>
+								</>
+							)}
+						</section>
 
 						{/* Developer Card */}
 						{/* <section className={styles.devCard}>
@@ -585,7 +830,42 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 				</div>
 			</div>
 
+			<PlayHistoryDetailModal
+				open={selectedHistory !== null}
+				onClose={() => {
+					setSelectedHistory(null);
+					setSelectedHistoryDetail(null);
+				}}
+				item={selectedHistory}
+				detail={selectedHistoryDetail}
+				loading={historyDetailLoading}
+			/>
 			<Footer />
+		</div>
+	);
+}
+
+function HistoryStatCard({
+	icon,
+	label,
+	value,
+	subtitle,
+}: {
+	icon: ReactNode;
+	label: string;
+	value: string;
+	subtitle: string;
+}) {
+	return (
+		<div className="rounded-3xl border border-white/10 bg-black/20 p-5">
+			<div className="flex items-center justify-between gap-3">
+				<div className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+					{label}
+				</div>
+				<div className="rounded-2xl bg-white/8 p-2 text-amber-300">{icon}</div>
+			</div>
+			<div className="mt-4 text-3xl font-bold text-white">{value}</div>
+			<div className="mt-2 text-sm leading-6 text-slate-400">{subtitle}</div>
 		</div>
 	);
 }

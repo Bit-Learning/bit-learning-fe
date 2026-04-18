@@ -106,6 +106,9 @@ export default function MatchingGamePage() {
 	}, [playSound, stopSound]);
 
 	const handleComplete = (summary: MatchingGameResultSummary) => {
+		const resolvedGrade = summary.grade ?? grade;
+		const resolvedTopic = (summary.topic as TopicCode | undefined) ?? topic;
+
 		if (summary.gameId) {
 			void gameService.submitAttempt(summary.gameId, {
 				attemptType: "MATCHING",
@@ -119,6 +122,9 @@ export default function MatchingGamePage() {
 					mistakes: summary.mistakes,
 					completedStages: summary.completedStages,
 					stageCount: summary.stageCount,
+					grade: resolvedGrade,
+					topicLetter: resolvedTopic,
+					topicName: resolvedTopic ? `Chủ đề ${resolvedTopic}` : null,
 				},
 			});
 		}
@@ -131,8 +137,8 @@ export default function MatchingGamePage() {
 				time: summary.time,
 				title: summary.title,
 				gameId: summary.gameId ?? gameId,
-				grade: summary.grade ?? grade,
-				topic: (summary.topic as TopicCode | undefined) ?? topic,
+				grade: resolvedGrade,
+				topic: resolvedTopic,
 			},
 		});
 	};
