@@ -93,7 +93,7 @@ function toIsoDate(date?: Date): string | undefined {
 }
 
 function formatDateLabel(value?: string): string {
-	if (!value) return "N/A";
+	if (!value) return "Không có";
 	return new Date(`${value}T00:00:00`).toLocaleDateString("vi-VN");
 }
 
@@ -330,6 +330,8 @@ function RevenueTrendCard({
 	bestMonthLabel,
 	bestMonthRevenue,
 	rangeLabel,
+	filterControls,
+	granularityControls,
 }: {
 	data: Array<{ month: string; revenue: number; fullLabel: string }>;
 	deltaPct: number | null;
@@ -339,48 +341,59 @@ function RevenueTrendCard({
 	bestMonthLabel: string;
 	bestMonthRevenue: number;
 	rangeLabel: string;
+	filterControls?: React.ReactNode;
+	granularityControls?: React.ReactNode;
 }) {
 	const enhancedData = withMovingAverage(data);
 
 	return (
 		<PanelShell className="h-full">
-			<div className="relative flex flex-col gap-4 border-b border-slate-200/70 px-6 py-5 sm:flex-row sm:items-start sm:justify-between dark:border-slate-800/80">
-				<div>
-					<p className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-						Revenue Pulse
-					</p>
-					<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
-						Theo dõi doanh thu theo tháng cho khung thời gian {rangeLabel}.
-					</p>
-				</div>
+			<div className="relative border-b border-slate-200/70 px-6 py-5 dark:border-slate-800/80">
+				{(filterControls || granularityControls) && (
+					<div className="mb-5 grid gap-3 xl:grid-cols-[minmax(0,1fr)_240px]">
+						{filterControls}
+						{granularityControls}
+					</div>
+				)}
 
-				<div className="flex flex-wrap items-center gap-3">
-					<PanelLegend
-						items={[
-							{ color: "#10b981", label: "Revenue" },
-							{ color: "#6ee7b7", label: "Moving avg", soft: true },
-						]}
-					/>
-					<span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
-						{fmtCurrency(periodRevenue)}
-					</span>
-					{deltaPct !== null && (
-						<span
-							className={cn(
-								"inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
-								isUp
-									? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
-									: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
-							)}
-						>
-							{isUp ? (
-								<ArrowUpRight className="h-3.5 w-3.5" />
-							) : (
-								<ArrowDownRight className="h-3.5 w-3.5" />
-							)}
-							{Math.abs(deltaPct).toFixed(1)}% so với tháng trước
+				<div className="flex flex-col gap-4 xl:flex-row xl:items-start xl:justify-between">
+					<div className="min-w-0 flex-1">
+						<p className="text-lg font-semibold text-slate-950 dark:text-slate-50">
+							Nhịp doanh thu
+						</p>
+						<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
+							Theo dõi doanh thu theo tháng cho khung thời gian {rangeLabel}.
+						</p>
+					</div>
+
+					<div className="flex flex-wrap items-center gap-3 xl:justify-end">
+						<PanelLegend
+							items={[
+								{ color: "#10b981", label: "Doanh thu" },
+								{ color: "#6ee7b7", label: "Trung bình động", soft: true },
+							]}
+						/>
+						<span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
+							{fmtCurrency(periodRevenue)}
 						</span>
-					)}
+						{deltaPct !== null && (
+							<span
+								className={cn(
+									"inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
+									isUp
+										? "bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+										: "bg-rose-500/10 text-rose-700 dark:text-rose-300",
+								)}
+							>
+								{isUp ? (
+									<ArrowUpRight className="h-3.5 w-3.5" />
+								) : (
+									<ArrowDownRight className="h-3.5 w-3.5" />
+								)}
+								{Math.abs(deltaPct).toFixed(1)}% so với tháng trước
+							</span>
+						)}
+					</div>
 				</div>
 			</div>
 
@@ -458,7 +471,7 @@ function RevenueTrendCard({
 								<Area
 									type="monotone"
 									dataKey="revenue"
-									name="Revenue"
+									name="Doanh thu"
 									stroke="#10b981"
 									strokeWidth={3}
 									fill="url(#dashboard-revenue-fill)"
@@ -467,7 +480,7 @@ function RevenueTrendCard({
 								<Line
 									type="monotone"
 									dataKey="avgRevenue"
-									name="Moving avg"
+									name="Trung bình động"
 									stroke="#6ee7b7"
 									strokeWidth={2}
 									strokeDasharray="6 6"
@@ -543,7 +556,7 @@ function OperationsSnapshotCard({
 		<PanelShell className="h-full">
 			<div className="relative border-b border-slate-200/70 px-6 py-5 dark:border-slate-800/80">
 				<p className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-					Operations Snapshot
+					Tổng quan vận hành
 				</p>
 				<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
 					Tổng hợp các chỉ số vận hành quan trọng theo thời gian thực.
@@ -633,7 +646,7 @@ function BreakdownPie({
 	const centerLabel = titleLower.includes("đơn")
 		? "Tổng đơn"
 		: titleLower.includes("giao dịch")
-			? "Tổng GD"
+			? "Tổng giao dịch"
 			: "Tổng";
 
 	return (
@@ -769,7 +782,7 @@ function TransactionMixCard({
 		<PanelShell className="h-full">
 			<div className="relative border-b border-slate-200/70 px-6 py-5 dark:border-slate-800/80">
 				<p className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-					Transaction Mix
+					Cơ cấu giao dịch
 				</p>
 				<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
 					So sánh tỷ trọng theo từng loại giao dịch trên toàn hệ thống.
@@ -912,7 +925,7 @@ function SettingsPanel({ onClose }: { onClose: () => void }) {
 
 				<div className="mb-5">
 					<h3 className="text-lg font-semibold text-foreground">
-						Cài đặt Dashboard
+						Cài đặt bảng điều khiển
 					</h3>
 					<p className="mt-1 text-sm text-muted-foreground">
 						Tinh chỉnh chu kỳ đồng bộ và chế độ cập nhật tự động.
@@ -1100,7 +1113,7 @@ export function Dashboard() {
 		},
 		onError: (error: any) => {
 			toast.error(
-				error?.response?.data?.message || "Không thể export doanh thu",
+				error?.response?.data?.message || "Không thể xuất báo cáo doanh thu",
 			);
 		},
 	});
@@ -1109,7 +1122,7 @@ export function Dashboard() {
 		STUDENT: "Học viên",
 		MENTOR: "Giảng viên",
 		MANAGER: "Quản lý",
-		ADMIN: "Admin",
+		ADMIN: "Quản trị viên",
 	};
 	const orderStatusLabels: Record<string, string> = {
 		PENDING: "Đang chờ",
@@ -1180,7 +1193,7 @@ export function Dashboard() {
 	const recordMessage =
 		bestRevenueMonth && revenueChartData.length > 0
 			? `Mốc doanh thu tốt nhất trong kỳ đang rơi vào ${bestRevenueMonth.month} với ${fmtCurrency(bestRevenueMonth.revenue)}.`
-			: "Dashboard sẽ hiển thị insight doanh thu khi có dữ liệu trong khoảng thời gian đã chọn.";
+			: "Bảng điều khiển sẽ hiển thị nhận định doanh thu khi có dữ liệu trong khoảng thời gian đã chọn.";
 
 	const activeRangeLabel = data
 		? `${formatDateLabel(data.filter.fromDate)} - ${formatDateLabel(data.filter.toDate)}`
@@ -1205,7 +1218,7 @@ export function Dashboard() {
 							<div className="max-w-2xl">
 								<div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
 									<Sparkles className="h-3.5 w-3.5 text-sky-500" />
-									Business dashboard
+									Bảng điều khiển kinh doanh
 								</div>
 								<h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
 									Bảng thống kê
@@ -1257,39 +1270,7 @@ export function Dashboard() {
 									))}
 								</div>
 
-								<div className="grid w-full gap-2 sm:grid-cols-2 xl:w-[540px]">
-									<DatePicker
-										selected={customFromDate}
-										onSelect={setCustomFromDate}
-										placeholder="Từ ngày"
-									/>
-									<DatePicker
-										selected={customToDate}
-										onSelect={setCustomToDate}
-										placeholder="Đến ngày"
-									/>
-								</div>
-
 								<div className="flex w-full flex-wrap items-center gap-2 xl:justify-end">
-									<div className="w-full sm:w-[180px]">
-										<Select
-											value={granularity}
-											onValueChange={(value) =>
-												setGranularity(value as DashboardGranularity | "auto")
-											}
-										>
-											<SelectTrigger>
-												<SelectValue placeholder="Độ chi tiết" />
-											</SelectTrigger>
-											<SelectContent>
-												<SelectItem value="auto">Tự động</SelectItem>
-												<SelectItem value="day">Theo ngày</SelectItem>
-												<SelectItem value="week">Theo tuần</SelectItem>
-												<SelectItem value="month">Theo tháng</SelectItem>
-											</SelectContent>
-										</Select>
-									</div>
-
 									<Button
 										type="button"
 										variant="outline"
@@ -1311,7 +1292,7 @@ export function Dashboard() {
 										disabled={exportMutation.isPending || hasInvalidCustomRange}
 									>
 										<Download className="h-4 w-4" />
-										{exportMutation.isPending ? "Đang export..." : "Xuất Excel"}
+										{exportMutation.isPending ? "Đang xuất..." : "Xuất Excel"}
 									</Button>
 								</div>
 
@@ -1446,9 +1427,57 @@ export function Dashboard() {
 									isUp={isRevenueUp}
 									periodRevenue={totalPeriodRevenue}
 									averageRevenue={averageRevenue}
-									bestMonthLabel={bestRevenueMonth?.month ?? "N/A"}
+									bestMonthLabel={bestRevenueMonth?.month ?? "Không có"}
 									bestMonthRevenue={bestRevenueMonth?.revenue ?? 0}
 									rangeLabel={activeRangeLabel}
+									filterControls={
+										<div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/40">
+											<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+												Lọc theo thời gian
+											</p>
+											<div className="mt-2 grid gap-2 sm:grid-cols-2">
+												<DatePicker
+													selected={customFromDate}
+													onSelect={setCustomFromDate}
+													placeholder="Từ ngày"
+												/>
+												<DatePicker
+													selected={customToDate}
+													onSelect={setCustomToDate}
+													placeholder="Đến ngày"
+												/>
+											</div>
+										</div>
+									}
+									granularityControls={
+										<div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/40">
+											<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+												Hiển thị biểu đồ theo
+											</p>
+											<div className="mt-2">
+												<Select
+													value={granularity}
+													onValueChange={(value) =>
+														setGranularity(
+															value as DashboardGranularity | "auto",
+														)
+													}
+												>
+													<SelectTrigger>
+														<SelectValue placeholder="Chọn cách hiển thị biểu đồ" />
+													</SelectTrigger>
+													<SelectContent>
+														<SelectItem value="auto">Tự động</SelectItem>
+														<SelectItem value="day">Gộp theo ngày</SelectItem>
+														<SelectItem value="week">Gộp theo tuần</SelectItem>
+														<SelectItem value="month">
+															Gộp theo tháng
+														</SelectItem>
+													</SelectContent>
+												</Select>
+											</div>
+										</div>
+									}
 								/>
 							</div>
 
