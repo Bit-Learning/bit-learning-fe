@@ -80,11 +80,14 @@ export const GamesCrudManager = () => {
 				categoryOrTopic: getCategoryName(game.categoryId),
 				difficultyOrGrade: game.difficulty ?? "MEDIUM",
 				description: game.description,
+				scoringModel: performance?.scoringModel ?? game.scoringModel ?? null,
+				isScored: performance?.isScored ?? game.isScored ?? null,
 				likes: game.likes,
 				views: game.views,
 				attempts: performance?.attempts ?? 0,
 				completionRate: performance?.completionRate ?? 0,
 				averageAccuracy: performance?.averageAccuracy ?? 0,
+				averageRawScore: performance?.averageRawScore ?? 0,
 				timeoutRate: performance?.timeoutRate ?? 0,
 				standardId: game.id,
 			};
@@ -103,9 +106,12 @@ export const GamesCrudManager = () => {
 			categoryOrTopic: `Chủ đề ${mapping.topicCode}`,
 			difficultyOrGrade: `Lớp ${mapping.grade}`,
 			description: `Game nối khái niệm theo chương trình học · Lớp ${mapping.grade} · Chủ đề ${mapping.topicCode}`,
+			scoringModel: performance?.scoringModel ?? "FINITE_SCORE",
+			isScored: performance?.isScored ?? true,
 			attempts: performance?.attempts ?? 0,
 			completionRate: performance?.completionRate ?? 0,
 			averageAccuracy: performance?.averageAccuracy ?? 0,
+			averageRawScore: performance?.averageRawScore ?? 0,
 			timeoutRate: performance?.timeoutRate ?? 0,
 			matchingGameId: mapping.gameId,
 			matchingGrade: mapping.grade,
@@ -179,13 +185,13 @@ export const GamesCrudManager = () => {
 							</div>
 						</div>
 						<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-							<div className="text-sm text-slate-300">Attempt 30 ngày</div>
+							<div className="text-sm text-slate-300">Lượt chơi 30 ngày</div>
 							<div className="mt-2 text-3xl font-semibold">
 								{analytics?.overview.totalAttempts ?? 0}
 							</div>
 							<div className="mt-1 text-xs text-slate-400">
-								Accuracy {analytics?.overview.averageAccuracy ?? 0}% •
-								Completion {analytics?.overview.completionRate ?? 0}%
+								Có điểm {analytics?.overview.scoredAttemptRate ?? 0}% • Hoàn
+								thành {analytics?.overview.completionRate ?? 0}%
 							</div>
 						</div>
 					</CardContent>
@@ -198,7 +204,7 @@ export const GamesCrudManager = () => {
 								<Gamepad2 className="h-4 w-4 text-sky-600" />
 								Tạo game thường
 							</div>
-							<CardTitle>Upload game HTML hoặc ZIP</CardTitle>
+							<CardTitle>Tải lên game HTML hoặc ZIP</CardTitle>
 							<CardDescription>
 								Tạo một game mới với file chơi, thumbnail và metadata cơ bản.
 							</CardDescription>
@@ -243,12 +249,12 @@ export const GamesCrudManager = () => {
 						<CardHeader>
 							<div className="flex items-center gap-2 text-sm font-medium text-slate-500">
 								<Sparkles className="h-4 w-4 text-amber-600" />
-								Analytics game
+								Phân tích game
 							</div>
-							<CardTitle>Dashboard hiệu suất & abandonment</CardTitle>
+							<CardTitle>Bảng điều khiển hiệu suất và bỏ dở</CardTitle>
 							<CardDescription>
-								Xem số lượt chơi theo ngày, completion rate, accuracy theo game
-								và top game timeout cao.
+								Xem số lượt chơi theo ngày, tỷ lệ hoàn thành, độ chính xác theo
+								game và các game có tỷ lệ hết giờ cao.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -258,7 +264,7 @@ export const GamesCrudManager = () => {
 								className="w-full justify-between"
 							>
 								<Link to="/apps/games/analytics">
-									Mở dashboard analytics
+									Mở bảng điều khiển phân tích
 									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>

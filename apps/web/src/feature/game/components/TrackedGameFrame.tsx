@@ -11,6 +11,9 @@ interface AttemptPayload {
 	completed?: boolean;
 	resultMetrics?: Record<string, unknown>;
 	attemptType?: string;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	attemptState?: "PARTIAL" | "COMPLETED";
+	metricsVersion?: number;
 }
 
 interface LegacyPayload {
@@ -27,6 +30,9 @@ type IncomingGameMessage = {
 	completed?: unknown;
 	metrics?: Record<string, unknown> | null;
 	attemptType?: unknown;
+	scoringModel?: unknown;
+	attemptState?: unknown;
+	metricsVersion?: unknown;
 	score?: unknown;
 };
 
@@ -132,15 +138,23 @@ export default function TrackedGameFrame({
 			completed?: boolean;
 			metrics?: Record<string, unknown>;
 			attemptType?: string;
+			scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+			attemptState?: "PARTIAL" | "COMPLETED";
+			metricsVersion?: number;
 		}): AttemptPayload => ({
 			rawScore: data.rawScore ?? 0,
-			maxRawScore: data.maxRawScore ?? 0,
+			maxRawScore: data.maxRawScore,
 			duration: data.duration,
 			completed: data.completed,
 			resultMetrics: data.metrics,
 			attemptType: data.attemptType ?? "STANDARD_HTML",
+			scoringModel: data.scoringModel ?? game.scoringModel,
+			attemptState:
+				data.attemptState ??
+				(data.completed === false ? "PARTIAL" : "COMPLETED"),
+			metricsVersion: data.metricsVersion ?? 1,
 		}),
-		[],
+		[game.scoringModel],
 	);
 
 	const trackResult = useCallback(
@@ -180,10 +194,13 @@ export default function TrackedGameFrame({
 				} else {
 					await gameService.submitAttempt(game.id, {
 						attemptType: payload.attemptType ?? "STANDARD_HTML",
+						scoringModel: payload.scoringModel,
+						attemptState: payload.attemptState ?? "COMPLETED",
 						rawScore: payload.rawScore ?? 0,
-						maxRawScore: payload.maxRawScore ?? 100,
+						maxRawScore: payload.maxRawScore,
 						duration: elapsed,
 						completed: payload.completed ?? true,
+						metricsVersion: payload.metricsVersion ?? 1,
 						resultMetrics: payload.resultMetrics,
 					});
 				}
@@ -195,7 +212,7 @@ export default function TrackedGameFrame({
 				});
 				toast.success({
 					title: "Kết quả đã được ghi nhận",
-					description: `Thời gian: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
+					description: `Thời lượng: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
 				});
 			} catch (error) {
 				console.error("Tracking error", error);
@@ -244,16 +261,19 @@ export default function TrackedGameFrame({
 
 			const payload = {
 				attemptType: progress.attemptType ?? "STANDARD_HTML",
+				scoringModel: progress.scoringModel ?? game.scoringModel,
+				attemptState: "PARTIAL" as const,
 				rawScore: progress.rawScore ?? 0,
-				maxRawScore: Math.max(
-					progress.maxRawScore ?? totalCount,
-					totalCount,
-					1,
-				),
+				maxRawScore:
+					progress.scoringModel === "HIGH_SCORE" ||
+					progress.scoringModel === "NO_SCORE"
+						? (progress.maxRawScore ?? null)
+						: Math.max(progress.maxRawScore ?? totalCount, totalCount, 1),
 				duration:
 					progress.duration ??
 					Math.round((Date.now() - startTimeRef.current) / 1000),
 				completed: false,
+				metricsVersion: progress.metricsVersion ?? 1,
 				resultMetrics: {
 					...(progress.resultMetrics ?? {}),
 					attemptState: "PARTIAL",
@@ -431,6 +451,19 @@ export default function TrackedGameFrame({
 						typeof data.attemptType === "string"
 							? data.attemptType
 							: "STANDARD_HTML",
+					scoringModel:
+						typeof data.scoringModel === "string"
+							? (data.scoringModel as
+									| "FINITE_SCORE"
+									| "HIGH_SCORE"
+									| "NO_SCORE")
+							: game.scoringModel,
+					attemptState:
+						typeof data.attemptState === "string"
+							? (data.attemptState as "PARTIAL" | "COMPLETED")
+							: "PARTIAL",
+					metricsVersion:
+						typeof data.metricsVersion === "number" ? data.metricsVersion : 1,
 				});
 				latestProgressRef.current = payload;
 				logInfo("Stored latest GAME_PROGRESS payload", payload);
@@ -458,6 +491,19 @@ export default function TrackedGameFrame({
 							typeof data.attemptType === "string"
 								? data.attemptType
 								: "STANDARD_HTML",
+						scoringModel:
+							typeof data.scoringModel === "string"
+								? (data.scoringModel as
+										| "FINITE_SCORE"
+										| "HIGH_SCORE"
+										| "NO_SCORE")
+								: game.scoringModel,
+						attemptState:
+							typeof data.attemptState === "string"
+								? (data.attemptState as "PARTIAL" | "COMPLETED")
+								: "COMPLETED",
+						metricsVersion:
+							typeof data.metricsVersion === "number" ? data.metricsVersion : 1,
 					}),
 				);
 				return;
@@ -544,13 +590,13 @@ export default function TrackedGameFrame({
 								onClick={handleBack}
 								className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
 							>
-								← Back
+								← Quay lại
 							</button>
 						)}
 						<h2 className="font-bold text-lg">{game.title}</h2>
 						{!username && (
 							<span className="text-yellow-500 text-sm">
-								⚠️ Not logged in - game progress won't be tracked
+								⚠️ Chưa đăng nhập - tiến trình chơi sẽ không được ghi nhận
 							</span>
 						)}
 						{tracked && (
@@ -563,7 +609,7 @@ export default function TrackedGameFrame({
 						onClick={toggleFullscreen}
 						className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded font-bold transition-colors"
 					>
-						{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+						{isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
 					</button>
 				</div>
 				<div ref={containerRef} className="flex-1 relative">
@@ -571,7 +617,7 @@ export default function TrackedGameFrame({
 						ref={iframeRef}
 						src={gameUrl}
 						className="w-full h-full border-none"
-						title={`${game.title} Play`}
+						title={`${game.title} - Chơi game`}
 						onLoad={notifyGameHostReady}
 					/>
 				</div>
@@ -588,7 +634,7 @@ export default function TrackedGameFrame({
 				ref={iframeRef}
 				src={gameUrl}
 				className={iframeClassName}
-				title={`${game.title} Inline Play`}
+				title={`${game.title} - Chơi trong trang`}
 				onLoad={notifyGameHostReady}
 			/>
 			<div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4">

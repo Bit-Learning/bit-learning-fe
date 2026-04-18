@@ -55,6 +55,9 @@ export default function PlayHistoryDetailModal({
 }: PlayHistoryDetailModalProps) {
 	const resolved = detail ?? item;
 	const questionResults = detail?.questionResults ?? [];
+	const scoringModel = resolved?.scoringModel ?? "FINITE_SCORE";
+	const isFiniteScore = scoringModel === "FINITE_SCORE";
+	const isHighScore = scoringModel === "HIGH_SCORE";
 
 	return (
 		<AlertDialog
@@ -80,16 +83,38 @@ export default function PlayHistoryDetailModal({
 					<div className="space-y-5">
 						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
 							<SummaryCard
-								label="Accuracy"
-								value={`${resolved.accuracy ?? 0}%`}
+								label={
+									isFiniteScore
+										? "Độ chính xác"
+										: isHighScore
+											? "Điểm thô"
+											: "Trạng thái theo dõi"
+								}
+								value={
+									isFiniteScore
+										? `${resolved.accuracy ?? 0}%`
+										: isHighScore
+											? String(resolved.rawScore ?? 0)
+											: resolved.completed
+												? "Đã lưu"
+												: "Bỏ dở"
+								}
 							/>
 							<SummaryCard
-								label="Đúng / Sai"
-								value={`${resolved.correctCount ?? 0} / ${resolved.wrongCount ?? 0}`}
+								label={isFiniteScore ? "Đúng / Sai" : "Điểm xếp hạng"}
+								value={
+									isFiniteScore
+										? `${resolved.correctCount ?? 0} / ${resolved.wrongCount ?? 0}`
+										: String(resolved.leaderboardPoints ?? 0)
+								}
 							/>
 							<SummaryCard
-								label="Hết giờ"
-								value={String(resolved.timeoutCount ?? 0)}
+								label={isFiniteScore ? "Hết giờ" : "Kiểu tính điểm"}
+								value={
+									isFiniteScore
+										? String(resolved.timeoutCount ?? 0)
+										: scoringModel
+								}
 							/>
 							<SummaryCard
 								label="Thời gian"
@@ -99,7 +124,10 @@ export default function PlayHistoryDetailModal({
 
 						<div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
 							<div className="flex flex-wrap items-center gap-3">
-								<span>Attempt: {resolved.attemptType ?? "STANDARD_HTML"}</span>
+								<span>
+									Lần ghi nhận: {resolved.attemptType ?? "STANDARD_HTML"}
+								</span>
+								<span>Mô hình: {resolved.scoringModel ?? "FINITE_SCORE"}</span>
 								<span>
 									Trạng thái:{" "}
 									<span
@@ -110,8 +138,12 @@ export default function PlayHistoryDetailModal({
 										{resolved.completed ? "Hoàn thành" : "Chưa hoàn thành"}
 									</span>
 								</span>
-								<span>Tổng câu: {resolved.totalCount ?? 0}</span>
-								<span>Đã trả lời: {resolved.answeredCount ?? 0}</span>
+								{isFiniteScore ? (
+									<>
+										<span>Tổng câu: {resolved.totalCount ?? 0}</span>
+										<span>Đã trả lời: {resolved.answeredCount ?? 0}</span>
+									</>
+								) : null}
 								{resolved.exitReason && (
 									<span>Lý do thoát: {resolved.exitReason}</span>
 								)}
@@ -127,7 +159,7 @@ export default function PlayHistoryDetailModal({
 								<div className="rounded-xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
 									Đang tải chi tiết lượt chơi...
 								</div>
-							) : questionResults.length > 0 ? (
+							) : questionResults.length > 0 && isFiniteScore ? (
 								questionResults.map((question) => (
 									<div
 										key={`${question.questionId}-${question.order}`}

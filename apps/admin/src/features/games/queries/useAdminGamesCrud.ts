@@ -44,6 +44,10 @@ export interface UpsertGamePayload {
 	file?: File;
 	title: string;
 	desc: string;
+	gameType?: "QUIZ" | "TYPING" | "MATCHING" | "OTHER";
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	isScored?: boolean;
+	trackingConfig?: string;
 	difficulty?: string;
 	baseScoreMax?: number;
 	difficultyMultiplier?: number;

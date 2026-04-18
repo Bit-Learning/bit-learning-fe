@@ -13,6 +13,10 @@ export interface Game {
 	description: string;
 	playUrl: string;
 	minioObjectName: string;
+	gameType?: "QUIZ" | "TYPING" | "MATCHING" | "OTHER";
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	isScored?: boolean;
+	trackingConfig?: string | null;
 	instructions?: string;
 	dateAdded?: string;
 	likes?: number;
@@ -99,18 +103,26 @@ export interface LeaderboardEntry {
 
 export interface GameAttemptRequest {
 	attemptType?: string;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	attemptState?: "PARTIAL" | "COMPLETED";
+	scoreVisibility?: string;
 	rawScore?: number;
 	maxRawScore?: number;
 	duration?: number;
 	completed: boolean;
+	metricsVersion?: number;
 	resultMetrics?: Record<string, unknown>;
 }
 
 export interface GameAttemptResponse {
 	gameId: number;
+	attemptId?: number;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	attemptState?: "PARTIAL" | "COMPLETED";
+	isScored?: boolean;
 	rawScore: number;
-	maxRawScore: number;
-	normalizedScore: number;
+	maxRawScore: number | null;
+	normalizedScore: number | null;
 	leaderboardPoints: number;
 	duration: number;
 	completed: boolean;

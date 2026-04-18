@@ -236,7 +236,7 @@ export default function LeaderboardPage() {
 			const data = await gameService.getLeaderboard(page, size);
 			setLeaderboard(data);
 		} catch (error) {
-			console.error("Failed to load leaderboard", error);
+			console.error("Không thể tải bảng xếp hạng", error);
 		} finally {
 			setLoading(false);
 		}

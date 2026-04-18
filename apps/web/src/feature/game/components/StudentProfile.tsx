@@ -107,7 +107,7 @@ export default function StudentProfileView({
 	if (!profile) {
 		return (
 			<div className="min-h-screen bg-gradient-to-b from-black via-gray-900 to-black flex items-center justify-center">
-				<div className="text-white text-xl">Loading...</div>
+				<div className="text-white text-xl">Đang tải...</div>
 			</div>
 		);
 	}
@@ -119,7 +119,7 @@ export default function StudentProfileView({
 					onClick={onBack}
 					className="mb-6 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
 				>
-					← Back
+					← Quay lại
 				</button>
 
 				{/* Profile Header */}
@@ -159,7 +159,7 @@ export default function StudentProfileView({
 							<div className="flex gap-6">
 								<div className="bg-black/30 rounded-lg px-6 py-3">
 									<div className="text-2xl font-bold">{profile.totalScore}</div>
-									<div className="text-sm text-gray-400">Total Score</div>
+									<div className="text-sm text-gray-400">Tổng điểm</div>
 								</div>
 								<div className="bg-black/30 rounded-lg px-6 py-3">
 									<div className="text-2xl font-bold">
@@ -187,7 +187,7 @@ export default function StudentProfileView({
 									<div className="text-sm font-bold">
 										{new Date(profile.createdAt).toLocaleDateString()}
 									</div>
-									<div className="text-sm text-gray-400">Member Since</div>
+									<div className="text-sm text-gray-400">Tham gia từ</div>
 								</div>
 							</div>
 						</div>
@@ -197,11 +197,11 @@ export default function StudentProfileView({
 				{/* Play History */}
 				<div className="mb-8">
 					<h2 className="text-2xl font-bold mb-6">
-						Play History ({totalItems} games)
+						Lịch sử chơi ({totalItems} game)
 					</h2>
 					{loading ? (
 						<div className="text-center py-12">
-							<div className="text-gray-500">Loading...</div>
+							<div className="text-gray-500">Đang tải...</div>
 						</div>
 					) : playHistory.length > 0 ? (
 						<>
@@ -246,7 +246,7 @@ export default function StudentProfileView({
 													</span>
 												</div>
 												<div className="flex justify-between">
-													<span>Accuracy:</span>
+													<span>Độ chính xác:</span>
 													<span className="font-bold text-emerald-400">
 														{item.accuracy ?? 0}%
 													</span>
@@ -258,13 +258,13 @@ export default function StudentProfileView({
 													</span>
 												</div>
 												<div className="flex justify-between">
-													<span>Score:</span>
+													<span>Điểm:</span>
 													<span className="font-bold text-yellow-500">
 														{item.score}
 													</span>
 												</div>
 												<div className="flex justify-between">
-													<span>Duration:</span>
+													<span>Thời lượng:</span>
 													<span className="font-bold text-blue-500">
 														{Math.floor(item.duration / 60)}m{" "}
 														{item.duration % 60}s

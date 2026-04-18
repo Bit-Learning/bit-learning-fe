@@ -4,7 +4,8 @@ import type { ApiResponse } from "@/shared/api/api.type";
 
 const ADMIN_GAMES_ENDPOINT = "/admin/games";
 
-export type AdminGameType = "QUIZ" | "TYPING" | "MATCHING";
+export type AdminGameType = "QUIZ" | "TYPING" | "MATCHING" | "OTHER";
+export type AdminScoringModel = "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
 
 // This mirrors the backend Game entity JSON we actually use in admin.
 export interface AdminGameDto {
@@ -12,6 +13,9 @@ export interface AdminGameDto {
 	title: string;
 	description?: string;
 	gameType?: AdminGameType;
+	scoringModel?: AdminScoringModel;
+	isScored?: boolean;
+	trackingConfig?: string | null;
 	minioObjectName?: string;
 	thumbnailUrl?: string;
 	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
@@ -32,6 +36,10 @@ export interface CreateGamePayload {
 	file: File;
 	title: string;
 	desc: string;
+	gameType?: AdminGameType;
+	scoringModel?: AdminScoringModel;
+	isScored?: boolean;
+	trackingConfig?: string;
 	difficulty?: string;
 	baseScoreMax?: number;
 	difficultyMultiplier?: number;
@@ -48,6 +56,10 @@ export interface UpdateGamePayload {
 	file?: File;
 	title: string;
 	desc: string;
+	gameType?: AdminGameType;
+	scoringModel?: AdminScoringModel;
+	isScored?: boolean;
+	trackingConfig?: string;
 	difficulty?: string;
 	baseScoreMax?: number;
 	difficultyMultiplier?: number;
@@ -65,11 +77,14 @@ export interface AdminGameAnalyticsOverview {
 	totalAttempts: number;
 	completedAttempts: number;
 	partialAttempts: number;
+	scoredAttempts: number;
 	distinctGames: number;
 	distinctTopics: number;
 	completionRate: number;
 	partialRate: number;
+	scoredAttemptRate: number;
 	averageAccuracy: number;
+	averageRawScore: number;
 	averageDurationSeconds: number;
 	timeoutRate: number;
 }
@@ -85,13 +100,18 @@ export interface AdminGamePerformanceItem {
 	gameId: number;
 	gameTitle: string;
 	gameType?: string | null;
+	scoringModel?: AdminScoringModel | null;
+	isScored?: boolean | null;
 	categoryName?: string | null;
 	attempts: number;
 	completedAttempts: number;
 	partialAttempts: number;
 	completionRate: number;
 	partialRate: number;
+	scoredAttemptRate: number;
 	averageAccuracy: number;
+	averageRawScore: number;
+	bestRawScore: number;
 	averageDurationSeconds: number;
 	timeoutRate: number;
 	averageNormalizedScore: number;
@@ -135,7 +155,12 @@ export interface AdminRecentAttemptItem {
 	id: number;
 	playedAt: string;
 	completed: boolean;
+	attemptState?: string | null;
+	scoringModel?: AdminScoringModel | null;
+	isScored?: boolean | null;
 	accuracy: number;
+	rawScore?: number | null;
+	duration?: number | null;
 	correctCount: number;
 	wrongCount: number;
 	timeoutCount: number;
@@ -187,6 +212,18 @@ export const adminGamesApi = {
 		formData.append("file", payload.file);
 		formData.append("title", payload.title);
 		formData.append("desc", payload.desc);
+		if (payload.gameType) {
+			formData.append("gameType", payload.gameType);
+		}
+		if (payload.scoringModel) {
+			formData.append("scoringModel", payload.scoringModel);
+		}
+		if (payload.isScored !== undefined) {
+			formData.append("isScored", String(payload.isScored));
+		}
+		if (payload.trackingConfig) {
+			formData.append("trackingConfig", payload.trackingConfig);
+		}
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
 		}
@@ -239,6 +276,18 @@ export const adminGamesApi = {
 		}
 		formData.append("title", payload.title);
 		formData.append("desc", payload.desc);
+		if (payload.gameType) {
+			formData.append("gameType", payload.gameType);
+		}
+		if (payload.scoringModel) {
+			formData.append("scoringModel", payload.scoringModel);
+		}
+		if (payload.isScored !== undefined) {
+			formData.append("isScored", String(payload.isScored));
+		}
+		if (payload.trackingConfig !== undefined) {
+			formData.append("trackingConfig", payload.trackingConfig);
+		}
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
 		}
