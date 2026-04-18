@@ -101,6 +101,8 @@ export interface LeaderboardEntry {
 	totalAttempts: number;
 }
 
+export type LeaderboardGameType = "QUIZ" | "MATCHING";
+
 export interface GameAttemptRequest {
 	attemptType?: string;
 	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
@@ -256,11 +258,12 @@ const gameService = {
 	getLeaderboard: async (
 		page = 0,
 		size = 10,
+		gameType: LeaderboardGameType = "QUIZ",
 	): Promise<Page<LeaderboardEntry>> => {
 		const response = await api.get<ApiResponse<Page<LeaderboardEntry>>>(
 			"/games/leaderboard",
 			{
-				params: { page, size },
+				params: { page, size, gameType },
 			},
 		);
 		return response.data.data as Page<LeaderboardEntry>;

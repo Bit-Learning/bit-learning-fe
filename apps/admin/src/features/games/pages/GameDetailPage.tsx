@@ -95,18 +95,34 @@ const GAME_TYPE_DETAILS: Record<
 	TYPING: {
 		label: "Game gõ phím",
 		description:
-			"Phù hợp cho game đo tốc độ gõ, điểm tích lũy theo thời gian, combo hoặc survival score.",
+			"Phù hợp cho game gõ phím hoặc luyện phản xạ. Theo cấu hình hiện tại, loại này không tham gia bảng xếp hạng tổng.",
 	},
 	MATCHING: {
 		label: "Game ghép cặp",
 		description:
-			"Phù hợp cho game ghép cặp hoặc nối đáp án, thường có số cặp đúng trên tổng số cặp.",
+			"Phù hợp cho game ghép cặp hoặc nối đáp án, có điểm riêng để xếp hạng độc lập với quiz.",
 	},
 	OTHER: {
 		label: "Khác / tùy biến",
 		description:
-			"Dùng khi game không khớp rõ với quiz, typing hoặc matching. Hệ thống sẽ dựa nhiều hơn vào scoring model.",
+			"Dùng khi game không khớp rõ với quiz, typing hoặc matching. Theo cấu hình mặc định, loại này không tính điểm và không lên bảng xếp hạng.",
 	},
+};
+
+const getDefaultScoreConfigForGameType = (
+	gameType: NonNullable<UpsertGamePayload["gameType"]>,
+) => {
+	if (gameType === "QUIZ" || gameType === "MATCHING") {
+		return {
+			scoringModel: "FINITE_SCORE" as const,
+			isScored: true,
+		};
+	}
+
+	return {
+		scoringModel: "NO_SCORE" as const,
+		isScored: false,
+	};
 };
 
 const SCORING_MODEL_DETAILS: Record<
@@ -162,8 +178,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		title: "",
 		desc: "",
 		gameType: "QUIZ",
-		scoringModel: "FINITE_SCORE",
-		isScored: true,
+		...getDefaultScoreConfigForGameType("QUIZ"),
 		trackingConfig: "",
 		difficulty: "MEDIUM",
 		baseScoreMax: 100,
@@ -193,8 +208,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 				title: "",
 				desc: "",
 				gameType: "QUIZ",
-				scoringModel: "FINITE_SCORE",
-				isScored: true,
+				...getDefaultScoreConfigForGameType("QUIZ"),
 				trackingConfig: "",
 				difficulty: "MEDIUM",
 				baseScoreMax: 100,
@@ -629,10 +643,16 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 									<Select
 										value={form.gameType ?? "QUIZ"}
 										onValueChange={(value) =>
-											setForm((prev) => ({
-												...prev,
-												gameType: value as UpsertGamePayload["gameType"],
-											}))
+											setForm((prev) => {
+												const nextGameType = value as NonNullable<
+													UpsertGamePayload["gameType"]
+												>;
+												return {
+													...prev,
+													gameType: nextGameType,
+													...getDefaultScoreConfigForGameType(nextGameType),
+												};
+											})
 										}
 									>
 										<SelectTrigger>
