@@ -13,8 +13,10 @@ import {
 } from "@xyflow/react";
 import "@xyflow/react/dist/style.css";
 import { toPng } from "html-to-image";
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import type React from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { CurriculumChapterPicker } from "@/feature/matrix/components/CurriculumChapterPicker";
 import { toast } from "@/shared/components/Sonner";
 import { extractApiErrorMessage } from "@/shared/lib/api-error";
 import { Button } from "@workspace/ui/components/Button";
@@ -23,7 +25,6 @@ import {
 	Loader2,
 	Sparkles,
 	BookOpen,
-	Settings2,
 	ImageDown,
 	BookMarked,
 	Pencil,
@@ -36,7 +37,6 @@ import {
 import {
 	useGenerateMindMap,
 	useGetMindMapGallery,
-	useGetSavedMindMaps,
 	useRefineMindMap,
 	useSaveMindMapTree,
 } from "../queries/use-mindmap-queries";
@@ -102,15 +102,19 @@ import {
 } from "./GalleryPicker";
 
 type ActiveTab = "generate" | "saved";
+type GenerateMode = "topic" | "chapter";
 
 export default function MindMapView() {
 	const { t } = useTranslation();
 
+	const [mode, setMode] = useState<GenerateMode>("topic");
 	const [topic, setTopic] = useState("");
-	const [grade, setGrade] = useState(10);
+	const [curriculumId, setCurriculumId] = useState<number | null>(null);
+	const [subjectId, setSubjectId] = useState<number | null>(null);
+	const [chapterId, setChapterId] = useState<number | null>(null);
+	const [sourceError, setSourceError] = useState<string | null>(null);
 	const [maxDepth, setMaxDepth] = useState(3);
 	const [maxBranches, setMaxBranches] = useState(3);
-	const [showSettings, setShowSettings] = useState(false);
 	const [selectedStructureId, setSelectedStructureId] = useState<
 		number | undefined
 	>(undefined);
@@ -119,8 +123,8 @@ export default function MindMapView() {
 	);
 	const [nodeShape, setNodeShape] = useState<NodeShape>("rounded");
 	const nodeShapeRef = useRef<NodeShape>("rounded");
-	const addChildCallbackRef = useRef<(parentId: string) => void>(() => {});
-	const deleteNodeCallbackRef = useRef<(nodeId: string) => void>(() => {});
+	const addChildCallbackRef = useRef<(parentId: string) => void>(() => { });
+	const deleteNodeCallbackRef = useRef<(nodeId: string) => void>(() => { });
 
 	const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -186,10 +190,10 @@ export default function MindMapView() {
 	useEffect(() => {
 		if (!gallery) return;
 		if (selectedStructureId === undefined && gallery.structures.length > 0) {
-			setSelectedStructureId(gallery.structures[0]!.id);
+			setSelectedStructureId(gallery.structures[0]?.id);
 		}
 		if (selectedThemeId === undefined && gallery.themes.length > 0) {
-			setSelectedThemeId(gallery.themes[0]!.id);
+			setSelectedThemeId(gallery.themes[0]?.id);
 		}
 	}, [gallery, selectedStructureId, selectedThemeId]);
 
@@ -235,13 +239,20 @@ export default function MindMapView() {
 		return () => {
 			cancelled = true;
 		};
-		// eslint-disable-next-line react-hooks/exhaustive-deps
-	}, [selectedStructureId, selectedThemeId, isPreviewingVersion]);
+	}, [
+		selectedStructureId,
+		selectedThemeId,
+		isPreviewingVersion,
+		gallery,
+		setEdges,
+		setNodes,
+		withExtras,
+	]);
 
 	useEffect(() => {
 		nodeShapeRef.current = nodeShape;
-		setNodes((prev) =>
-			prev.map((n) => ({ ...n, data: { ...n.data, nodeShape } })),
+		setNodes((prev: Node[]) =>
+			prev.map((n: Node) => ({ ...n, data: { ...n.data, nodeShape } })),
 		);
 	}, [nodeShape, setNodes]);
 
@@ -384,37 +395,50 @@ export default function MindMapView() {
 
 	const handleGenerate = () => {
 		const trimmed = topic.trim();
-		if (!trimmed) return;
+		if (mode === "topic" && !trimmed) {
+			setSourceError("Vui lòng nhập chủ đề trước khi tạo mindmap.");
+			return;
+		}
 
-		generate(
-			{
-				topic: trimmed,
-				grade,
-				max_depth: maxDepth,
-				max_branches: maxBranches,
-				structure_id: selectedStructureId,
-				theme_id: selectedThemeId,
+		if (mode === "chapter" && !chapterId) {
+			setSourceError("Vui lòng chọn chương học trước khi tạo mindmap.");
+			return;
+		}
+
+		const request =
+			mode === "topic"
+				? {
+					topic: trimmed,
+					max_depth: maxDepth,
+					max_branches: maxBranches,
+					structure_id: selectedStructureId,
+					theme_id: selectedThemeId,
+				}
+				: {
+					chapter_id: chapterId as number,
+					max_depth: maxDepth,
+					max_branches: maxBranches,
+					structure_id: selectedStructureId,
+					theme_id: selectedThemeId,
+				};
+
+		generate(request, {
+			onSuccess: async (res) => {
+				const data = res.data.data;
+				if (!data) return;
+				setSourceError(null);
+				setIsPreviewingVersion(false);
+				setPreviewVersionNumber(null);
+				previewBackupRef.current = null;
+				await applyLayout(data);
 			},
-			{
-				onSuccess: async (res) => {
-					const data = res.data.data;
-					if (!data) return;
-					setIsPreviewingVersion(false);
-					setPreviewVersionNumber(null);
-					previewBackupRef.current = null;
-					await applyLayout(data);
-				},
-				onError: (error) => {
-					toast.error({
-						title: t("mindmap.generate.error", "Lỗi khi tạo mindmap"),
-						description: extractApiErrorMessage(
-							error,
-							"Không thể tạo mindmap.",
-						),
-					});
-				},
+			onError: (error) => {
+				toast.error({
+					title: t("mindmap.generate.error", "Lỗi khi tạo mindmap"),
+					description: extractApiErrorMessage(error, "Không thể tạo mindmap."),
+				});
 			},
-		);
+		});
 	};
 	const handleRefine = () => {
 		if (!currentMindMapId || !refineInstruction.trim()) return;
@@ -511,7 +535,12 @@ export default function MindMapView() {
 			);
 			setNodes(withExtras(rfNodes));
 			setEdges(rfEdges);
+			setMode("topic");
 			setTopic(detail.topic);
+			setCurriculumId(null);
+			setSubjectId(null);
+			setChapterId(null);
+			setSourceError(null);
 			setCurrentTitle(detail.title);
 			setCurrentMindMapId(detail.id);
 			setCurrentVersion(detail.current_version);
@@ -562,17 +591,17 @@ export default function MindMapView() {
 		if (currentTreeRef.current) {
 			currentTreeRef.current = updateTreeNode(currentTreeRef.current);
 		}
-		setNodes((prev) =>
-			prev.map((n) =>
+		setNodes((prev: Node[]) =>
+			prev.map((n: Node) =>
 				n.id === editingNode.id
 					? {
-							...n,
-							data: {
-								...n.data,
-								label: editingNode.label,
-								description: editingNode.description,
-							},
-						}
+						...n,
+						data: {
+							...n.data,
+							label: editingNode.label,
+							description: editingNode.description,
+						},
+					}
 					: n,
 			),
 		);
@@ -638,7 +667,11 @@ export default function MindMapView() {
 			});
 
 			const anchor = document.createElement("a");
-			const safeTopic = (topic.trim() || "mindmap")
+			const safeTopic = (
+				currentTitle.trim() ||
+				topic.trim() ||
+				`chapter-${chapterId ?? "mindmap"}`
+			)
 				.toLowerCase()
 				.replace(/[^a-z0-9\s-]/g, "")
 				.replace(/\s+/g, "-");
@@ -664,6 +697,20 @@ export default function MindMapView() {
 
 	const hasResult = nodes.length > 0;
 	const isPending = isGenerating || isApplyingLayout;
+
+	const handleModeChange = (nextMode: GenerateMode) => {
+		setMode(nextMode);
+		setSourceError(null);
+
+		if (nextMode === "topic") {
+			setCurriculumId(null);
+			setSubjectId(null);
+			setChapterId(null);
+			return;
+		}
+
+		setTopic("");
+	};
 
 	const activeNodeTypes = (() => {
 		const structure = gallery?.structures.find(
@@ -743,23 +790,23 @@ export default function MindMapView() {
 
 			<div className="flex gap-8 border-b border-slate-200 dark:border-slate-700">
 				<button
+					type="button"
 					onClick={() => setActiveTab("generate")}
-					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${
-						activeTab === "generate"
-							? "border-primary text-primary"
-							: "border-transparent text-slate-500 hover:text-slate-700"
-					}`}
+					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${activeTab === "generate"
+						? "border-primary text-primary"
+						: "border-transparent text-slate-500 hover:text-slate-700"
+						}`}
 				>
 					<Sparkles className="h-4 w-4" />
 					Tạo mindmap
 				</button>
 				<button
+					type="button"
 					onClick={() => setActiveTab("saved")}
-					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${
-						activeTab === "saved"
-							? "border-primary text-primary"
-							: "border-transparent text-slate-500 hover:text-slate-700"
-					}`}
+					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${activeTab === "saved"
+						? "border-primary text-primary"
+						: "border-transparent text-slate-500 hover:text-slate-700"
+						}`}
 				>
 					<BookMarked className="h-4 w-4" />
 					Đã lưu
@@ -769,19 +816,128 @@ export default function MindMapView() {
 			{activeTab === "generate" && (
 				<div className="flex flex-1 flex-col gap-3 overflow-hidden p-2">
 					<div className="flex flex-col gap-3">
-						<div className="flex flex-wrap gap-2">
-							<input
-								className="flex-1 pl-3 pr-4 py-2 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-1 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
-								placeholder={t("mindmap.topicPlaceholder")}
-								value={topic}
-								onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-									setTopic(e.target.value)
+						<div className="flex flex-wrap items-center gap-2">
+							<div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+								<label
+									htmlFor="mindmap-max-depth"
+									className="text-sm font-medium text-slate-700 dark:text-slate-300"
+								>
+									{t("mindmap.settings.maxDepth")}
+								</label>
+								<select
+									id="mindmap-max-depth"
+									value={maxDepth}
+									onChange={(e) => setMaxDepth(Number(e.target.value))}
+									disabled={isPending}
+									className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+								>
+									{[2, 3, 4].map((d) => (
+										<option key={d} value={d}>
+											{d}
+										</option>
+									))}
+								</select>
+							</div>
+
+							<div className="flex items-center gap-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 dark:border-slate-700 dark:bg-slate-800/60">
+								<label
+									htmlFor="mindmap-max-branches"
+									className="text-sm font-medium text-slate-700 dark:text-slate-300"
+								>
+									{t("mindmap.settings.maxBranches")}
+								</label>
+								<select
+									id="mindmap-max-branches"
+									value={maxBranches}
+									onChange={(e) => setMaxBranches(Number(e.target.value))}
+									disabled={isPending}
+									className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
+								>
+									{Array.from({ length: 7 }, (_, i) => i + 2).map((b) => (
+										<option key={b} value={b}>
+											{b}
+										</option>
+									))}
+								</select>
+							</div>
+
+
+
+							<div className="basis-full order-1" />
+
+							<button
+								type="button"
+								onClick={() => handleModeChange("topic")}
+								className={`order-2 rounded-md border px-4 py-2 text-sm font-semibold transition-all ${mode === "topic"
+									? "border-blue-600 bg-blue-50 text-blue-700"
+									: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+									}`}
+							>
+								Nhập chủ đề
+							</button>
+
+							<button
+								type="button"
+								onClick={() => handleModeChange("chapter")}
+								className={`order-2 rounded-md border px-4 py-2 text-sm font-semibold transition-all ${mode === "chapter"
+									? "border-blue-600 bg-blue-50 text-blue-700"
+									: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+									}`}
+							>
+								Chọn chương học
+							</button>
+
+							{mode === "topic" ? (
+								<input
+									className="order-2 min-w-[280px] flex-1 rounded-md border-2 border-gray-200 bg-white pl-3 pr-4 py-2 shadow-sm outline-none transition-all focus:border-transparent focus:ring-1 focus:ring-primary dark:border-slate-800 dark:bg-slate-900"
+									placeholder={t("mindmap.topicPlaceholder")}
+									value={topic}
+									onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
+										setTopic(e.target.value);
+										if (sourceError) {
+											setSourceError(null);
+										}
+									}}
+									onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+										if (e.key === "Enter" && !isPending) handleGenerate();
+									}}
+									disabled={isPending}
+								/>
+							) : (
+								<div className="order-2 min-w-[520px] flex-1 rounded-lg border border-slate-200 bg-white p-3 dark:border-slate-700 dark:bg-slate-900">
+									<CurriculumChapterPicker
+										curriculumId={curriculumId}
+										subjectId={subjectId}
+										chapterId={chapterId}
+										onCurriculumChange={setCurriculumId}
+										onSubjectChange={setSubjectId}
+										onChapterChange={(value) => {
+											setChapterId(value);
+											if (sourceError) {
+												setSourceError(null);
+											}
+										}}
+										error={sourceError ?? undefined}
+										disabled={isPending}
+									/>
+								</div>
+							)}
+							<Button
+								onPress={handleGenerate}
+								isDisabled={
+									isPending || (mode === "topic" ? !topic.trim() : !chapterId)
 								}
-								onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-									if (e.key === "Enter" && !isPending) handleGenerate();
-								}}
-								disabled={isPending}
-							/>
+								className="order-2 cursor-pointer bg-blue-700 text-md text-white shadow-sm shadow-blue-500/30 transition-all hover:border-blue-600 hover:bg-white hover:text-blue-600 rounded-lg py-5 font-medium flex items-center gap-2"
+							>
+								{isPending ? (
+									<Loader2 className="h-4 w-4 animate-spin" />
+								) : (
+									<Sparkles className="h-4 w-4" />
+								)}
+								{isPending
+									? t("mindmap.button.generating")
+									: t("mindmap.button.generate")}
+							</Button>
 
 							<StructurePicker
 								structures={gallery?.structures ?? []}
@@ -802,14 +958,6 @@ export default function MindMapView() {
 								onChange={setNodeShape}
 								disabled={isPending}
 							/>
-
-							<Button
-								variant="outline"
-								onPress={() => setShowSettings(!showSettings)}
-								className="shrink-0 py-5 border-blue-600"
-							>
-								<Settings2 className="h-4 w-4" />
-							</Button>
 
 							<Button
 								variant="outline"
@@ -847,78 +995,10 @@ export default function MindMapView() {
 									Lịch sử
 								</Button>
 							)}
-
-							<Button
-								onPress={handleGenerate}
-								isDisabled={isPending || !topic.trim()}
-								className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
-							>
-								{isPending ? (
-									<Loader2 className="h-4 w-4 animate-spin" />
-								) : (
-									<Sparkles className="h-4 w-4" />
-								)}
-								{isPending
-									? t("mindmap.button.generating")
-									: t("mindmap.button.generate")}
-							</Button>
 						</div>
 
-						{showSettings && (
-							<div className="flex flex-wrap items-center gap-4 rounded-lg border border-slate-200 bg-slate-50 p-3 dark:border-slate-700 dark:bg-slate-800/50">
-								<div className="flex items-center gap-2">
-									<label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-										{t("mindmap.settings.grade")}
-									</label>
-									<select
-										value={grade}
-										onChange={(e) => setGrade(Number(e.target.value))}
-										disabled={isPending}
-										className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-									>
-										{Array.from({ length: 10 }, (_, i) => i + 3).map((g) => (
-											<option
-												key={g}
-												value={g}
-											>{`${t("mindmap.settings.grade")} ${g}`}</option>
-										))}
-									</select>
-								</div>
-								<div className="flex items-center gap-2">
-									<label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-										{t("mindmap.settings.maxDepth")}
-									</label>
-									<select
-										value={maxDepth}
-										onChange={(e) => setMaxDepth(Number(e.target.value))}
-										disabled={isPending}
-										className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-									>
-										{[2, 3, 4].map((d) => (
-											<option key={d} value={d}>
-												{d}
-											</option>
-										))}
-									</select>
-								</div>
-								<div className="flex items-center gap-2">
-									<label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-										{t("mindmap.settings.maxBranches")}
-									</label>
-									<select
-										value={maxBranches}
-										onChange={(e) => setMaxBranches(Number(e.target.value))}
-										disabled={isPending}
-										className="rounded-md border border-slate-300 bg-white px-2.5 py-1.5 text-sm dark:border-slate-600 dark:bg-slate-800 dark:text-slate-200"
-									>
-										{Array.from({ length: 7 }, (_, i) => i + 2).map((b) => (
-											<option key={b} value={b}>
-												{b}
-											</option>
-										))}
-									</select>
-								</div>
-							</div>
+						{sourceError && mode === "topic" && (
+							<p className="text-sm text-red-600">{sourceError}</p>
 						)}
 					</div>
 
@@ -940,6 +1020,7 @@ export default function MindMapView() {
 											Chế độ xem — chưa khôi phục
 										</span>
 										<button
+											type="button"
 											onClick={handleCancelPreview}
 											className="ml-2 rounded-md px-2 py-1 text-sm font-medium text-amber-700 hover:bg-amber-100 dark:text-amber-300 dark:hover:bg-amber-900"
 										>
@@ -1085,10 +1166,14 @@ export default function MindMapView() {
 						</h2>
 						<div className="mt-4 flex flex-col gap-3">
 							<div>
-								<label className="mb-1 block text-md font-medium text-slate-700 dark:text-slate-300">
+								<label
+									htmlFor="mindmap-node-title"
+									className="mb-1 block text-md font-medium text-slate-700 dark:text-slate-300"
+								>
 									Tiêu đề
 								</label>
 								<Input
+									id="mindmap-node-title"
 									value={editingNode.label}
 									onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
 										setEditingNode({ ...editingNode, label: e.target.value })
@@ -1100,10 +1185,14 @@ export default function MindMapView() {
 								/>
 							</div>
 							<div>
-								<label className="mb-1 block text-md font-medium text-slate-700 dark:text-slate-300">
+								<label
+									htmlFor="mindmap-node-description"
+									className="mb-1 block text-md font-medium text-slate-700 dark:text-slate-300"
+								>
 									Mô tả
 								</label>
 								<textarea
+									id="mindmap-node-description"
 									value={editingNode.description}
 									onChange={(e) =>
 										setEditingNode({

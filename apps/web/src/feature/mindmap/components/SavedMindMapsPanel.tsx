@@ -131,13 +131,8 @@ export default function SavedMindMapsPanel({
 							className="flex flex-col rounded-md border border-slate-300 bg-white p-4 shadow-sm transition-shadow hover:shadow-md dark:border-slate-700 dark:bg-slate-900"
 						>
 							<p className="truncate text-md font-semibold text-slate-900 dark:text-white">
-								{item.name}
-							</p>
-
-							<p className="mt-0.5 truncate text-sm text-slate-500 dark:text-slate-400">
 								{item.title}
 							</p>
-
 							<div className="mt-3 flex flex-wrap gap-1.5">
 								<span className="rounded-md bg-indigo-50 px-2.5 py-0.5 text-sm font-medium text-indigo-700 dark:bg-indigo-950 dark:text-indigo-300">
 									{item.topic}
