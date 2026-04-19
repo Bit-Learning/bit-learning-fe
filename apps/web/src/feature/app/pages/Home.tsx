@@ -1,4 +1,4 @@
-import OnboardingTour from "@/feature/onboarding/components/OnboardingTour";
+// import OnboardingTour from "@/feature/onboarding/components/OnboardingTour";
 import PageMeta from "@/shared/components/seo/page-meta";
 import {
 	createOrganizationJsonLd,
@@ -28,7 +28,7 @@ const HomePage: React.FC = () => {
 				]}
 				jsonLd={[createOrganizationJsonLd(), createWebsiteJsonLd()]}
 			/>
-			<OnboardingTour />
+			{/* <OnboardingTour /> */}
 			<main className="max-w-7xl mx-auto px-6 lg:px-20 ">
 				<HeroSection />
 				<TechSlider />
