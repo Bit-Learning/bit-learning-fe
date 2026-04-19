@@ -16,6 +16,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@workspace/ui/components/alert-dialog";
+import { useNavigate } from "@tanstack/react-router";
 
 const PAGE_SIZE = 10;
 
@@ -66,88 +67,19 @@ const approvalConfig: Record<ApprovalStatus, { label: string; className: string 
   },
 };
 
-interface ProblemDetailModalProps {
-  problem: any;
-  onClose: () => void;
-}
-
-const ProblemDetailModal: React.FC<ProblemDetailModalProps> = ({ problem, onClose }) => {
-  const approval = approvalConfig[problem.approvalStatus as ApprovalStatus];
-  const difficulty = difficultyConfig[problem.difficulty as Difficulty];
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-900 rounded-xl shadow-2xl w-full max-w-lg border border-slate-200 dark:border-slate-700">
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-700">
-          <h2 className="text-lg font-bold text-slate-900 dark:text-white">Chi tiết bài tập</h2>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-          >
-            <X className="h-5 w-5 text-slate-500" />
-          </button>
-        </div>
-        <div className="px-6 py-5 space-y-4">
-          <div>
-            <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tiêu đề</p>
-            <p className="text-sm text-slate-900 dark:text-slate-100 font-medium">{problem.title}</p>
-          </div>
-          {problem.tags?.length > 0 && (
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Tags</p>
-              <p className="text-sm text-slate-500 font-mono">{problem.tags.map((t: any) => t.name).join(", ")}</p>
-            </div>
-          )}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Độ khó</p>
-              {difficulty && (
-                <span
-                  className={cn(
-                    "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
-                    difficulty.className,
-                  )}
-                >
-                  {difficulty.label}
-                </span>
-              )}
-            </div>
-            <div>
-              <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-1">Trạng thái</p>
-              {approval && (
-                <span
-                  className={cn(
-                    "inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium",
-                    approval.className,
-                  )}
-                >
-                  {approval.label}
-                </span>
-              )}
-            </div>
-          </div>
-          {problem.approvalStatus === ApprovalStatus.REJECTED && problem.rejectReason && (
-            <div className="bg-rose-50 dark:bg-rose-950/20 border border-rose-200 dark:border-rose-800 rounded-lg p-4">
-              <p className="text-xs font-semibold text-rose-600 uppercase tracking-wider mb-1">Lý do từ chối</p>
-              <p className="text-sm text-rose-700 dark:text-rose-400">{problem.rejectReason}</p>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-};
-
 export default function ProblemApprovalTableView() {
   const [page, setPage] = useState(0);
+  const navigate = useNavigate();
+
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedProblem, setSelectedProblem] = useState<any | null>(null);
   const [confirmProblem, setConfirmProblem] = useState<any | null>(null);
 
   const requestPublish = useRequestPublish();
 
   const filters: ApprovalFilters = {
+    page,
+    size: PAGE_SIZE,
     status: statusFilter !== "all" ? (statusFilter as ApprovalStatus) : undefined,
   };
 
@@ -157,8 +89,6 @@ export default function ProblemApprovalTableView() {
 
   const filteredProblems = useMemo(() => {
     return rawData.filter((p: any) => {
-      if (p.approvalStatus === ApprovalStatus.APPROVED) return false;
-
       if (!search) return true;
 
       return normalize(p.title).includes(normalize(search));
@@ -254,13 +184,11 @@ export default function ProblemApprovalTableView() {
                   const difficulty = difficultyConfig[problem.difficulty as Difficulty];
                   const approval = approvalConfig[problem.approvalStatus as ApprovalStatus];
                   return (
-                    <tr
-                      key={problem.id}
-                      onClick={() => setSelectedProblem(problem)}
-                      className="hover:bg-slate-50 transition-colors cursor-pointer"
-                    >
+                    <tr key={problem.id} className="hover:bg-slate-50 transition-colors cursor-pointer">
                       <td className="px-6 py-4">
-                        <p className="line-clamp-1 text-gray-900 text-md font-medium">{problem.title}</p>
+                        <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
+                          {problem.title}
+                        </span>
                         {problem.tags?.length > 0 && (
                           <p className="text-xs text-slate-400 mt-0.5 font-mono">
                             {problem.tags.map((t: any) => t.name).join(", ")}
@@ -293,12 +221,12 @@ export default function ProblemApprovalTableView() {
                       </td>
                       <td className="px-2 py-4">
                         <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          {problem.approvalStatus === ApprovalStatus.REJECTED && (
+                          {problem.approvalStatus === ApprovalStatus.REJECTED ? (
                             <>
                               <button
                                 title="Xem chi tiết lý do từ chối"
                                 className="cursor-pointer p-2 text-slate-500 hover:text-red-600 transition-colors rounded-lg hover:bg-red-50"
-                                onClick={() => setSelectedProblem(problem)}
+                                onClick={() => navigate({ to: `/mentor/problem/${problem.id}` })}
                               >
                                 <Eye className="h-6 w-6" />
                               </button>
@@ -311,12 +239,11 @@ export default function ProblemApprovalTableView() {
                                 Gửi lại
                               </button>
                             </>
-                          )}
-                          {problem.approvalStatus !== ApprovalStatus.REJECTED && (
+                          ) : (
                             <button
                               title="Xem chi tiết"
                               className="cursor-pointer p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
-                              onClick={() => setSelectedProblem(problem)}
+                              onClick={() => navigate({ to: `/mentor/problem/${problem.id}` })}
                             >
                               <Eye className="h-6 w-6" />
                             </button>
@@ -331,19 +258,11 @@ export default function ProblemApprovalTableView() {
           </div>
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-slate-600">
-              Hiển thị{" "}
-              <span className="font-semibold">
-                {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filteredProblems.length)}
-              </span>{" "}
-              trong <span className="font-semibold">{filteredProblems.length}</span> bài tập
-            </p>
+            <p className="text-sm text-slate-600"></p>
             {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
           </div>
         </>
       )}
-
-      {selectedProblem && <ProblemDetailModal problem={selectedProblem} onClose={() => setSelectedProblem(null)} />}
 
       <AlertDialog
         open={!!confirmProblem}

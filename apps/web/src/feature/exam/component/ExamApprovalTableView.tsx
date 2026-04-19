@@ -63,6 +63,8 @@ export default function ExamApprovalTableView() {
   const requestPublish = useRequestPublishExam();
 
   const filters: ExamApprovalFilters = {
+    page,
+    size: PAGE_SIZE,
     status: statusFilter !== "all" ? (statusFilter as any) : undefined,
   };
 
@@ -72,8 +74,6 @@ export default function ExamApprovalTableView() {
 
   const filteredExams = useMemo(() => {
     return rawData.filter((p: any) => {
-      if (p.approvalStatus === "APPROVED") return false;
-
       if (!search) return true;
 
       return normalize(p.title).includes(normalize(search));
@@ -177,7 +177,9 @@ export default function ExamApprovalTableView() {
                   return (
                     <tr key={exam.id} className="hover:bg-slate-50 transition-colors cursor-pointer">
                       <td className="px-6 py-4">
-                        <p className="line-clamp-1 text-gray-900 text-md font-medium">{exam.name}</p>
+                        <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
+                          {exam.name}
+                        </span>
                       </td>
                       <td className="p-4">
                         <span className="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 rounded-md text-sm font-semibold font-mono">
@@ -200,7 +202,7 @@ export default function ExamApprovalTableView() {
                       </td>
                       <td className="px-2 py-4">
                         <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                          {exam.approvalStatus === "REJECTED" && (
+                          {exam.approvalStatus === "REJECTED" ? (
                             <>
                               <button
                                 onClick={() => navigate({ to: `/mentor/exam/${exam.id}` })}
@@ -218,8 +220,7 @@ export default function ExamApprovalTableView() {
                                 Gửi lại
                               </button>
                             </>
-                          )}
-                          {exam.approvalStatus === "PENDING" && (
+                          ) : (
                             <button
                               onClick={() => navigate({ to: `/mentor/exam/${exam.id}` })}
                               className="cursor-pointer p-1.5 text-slate-400 hover:text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-950/30 rounded-lg transition-colors"

@@ -33,7 +33,7 @@ export const ProblemStatsCard: React.FC<ProblemStatsCardProps> = ({ problemId })
 
   return (
     <>
-      <span className={cn("font-bold text-lg text-right", rateColor)}>{rate.toFixed(1)}%</span>
+      <span className={cn("font-bold text-md text-right", rateColor)}>{rate.toFixed(1)}%</span>
     </>
   );
 };

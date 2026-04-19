@@ -19,15 +19,16 @@ import { Label } from "@workspace/ui/components/label";
 import { Checkbox } from "@workspace/ui/components/Checkbox";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@/shared/components/Sonner";
-import { useMyQuestionsAll, useSearchQuestionsAll } from "@/feature/question/queries/useQuestion";
+import { useMyQuestions, useSearchQuestions } from "@/feature/question/queries/useQuestion";
 import { useGenerateExamFromQuestions, useExam, useDownloadExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
-import { ApprovalStatus, type QuestionLevel } from "@/feature/question/types/question.type";
+import { ApprovalStatus } from "@/feature/question/types/question.type";
 import type { ExamType } from "../types/exam.type";
 import { getDifficultyBadge, getTypeBadge } from "@/feature/question/utils/question.utils";
 
 const DEFAULT_DURATION = 30;
 const DEFAULT_SCORE = 10;
+const PAGE_SIZE = 20;
 
 const GenerateExamFromQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -43,30 +44,40 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const [generatedExamId, setGeneratedExamId] = useState<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterSubjectId, setFilterSubjectId] = useState<number | "">("");
+  const [filterSubjectId, setFilterSubjectId] = useState<number | undefined>(undefined);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(0);
-  const pageSize = 20;
-
-  const { data: systemResponse, isLoading: systemLoading } = useSearchQuestionsAll();
-
-  const { data: userResponse, isLoading: userLoading } = useMyQuestionsAll();
 
   const { data: subjectsData } = useSubjectsList();
 
-  const rawQuestions =
-    (questionSource === "system"
-      ? (systemResponse || []).filter((q) => q.approvalStatus === ApprovalStatus.APPROVED)
-      : userResponse || []) || [];
+  const systemParams = {
+    page: currentPage,
+    size: PAGE_SIZE,
+    keyword: searchTerm || undefined,
+    subjectId: filterSubjectId,
+    approvalStatus: ApprovalStatus.APPROVED,
+  };
+
+  const userParams = {
+    page: currentPage,
+    size: PAGE_SIZE,
+    keyword: searchTerm || undefined,
+    subjectId: filterSubjectId,
+  };
+
+  const { data: systemData, isLoading: systemLoading } = useSearchQuestions(systemParams, {
+    enabled: questionSource === "system",
+  });
+
+  const { data: userData, isLoading: userLoading } = useMyQuestions(userParams, {
+    enabled: questionSource === "user",
+  });
+
   const isLoading = questionSource === "system" ? systemLoading : userLoading;
 
-  const questions = useMemo(() => {
-    if (!filterSubjectId) return rawQuestions;
-    return rawQuestions.filter((q) => q.subject?.id === filterSubjectId);
-  }, [rawQuestions, filterSubjectId]);
-
-  const totalPages = Math.ceil(questions.length / pageSize);
-  const pagedQuestions = questions.slice(currentPage * pageSize, (currentPage + 1) * pageSize);
+  const questions = questionSource === "system" ? (systemData?.data ?? []) : (userData?.data ?? []);
+  const totalPages =
+    questionSource === "system" ? (systemData?.page?.totalPages ?? 0) : (userData?.page?.totalPages ?? 0);
 
   const { data: examData } = useExam(generatedExamId!, { enabled: !!generatedExamId });
   const generateExam = useGenerateExamFromQuestions();
@@ -129,7 +140,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setQuestionSource(source);
     setSelectedQuestions(new Set());
     setCurrentPage(0);
-    setFilterSubjectId("");
+    setFilterSubjectId(undefined);
     setSearchTerm("");
   };
 
@@ -149,7 +160,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setEnrollKey("");
     setSelectedQuestions(new Set());
     setSearchTerm("");
-    setFilterSubjectId("");
+    setFilterSubjectId(undefined);
     setCurrentPage(0);
   };
 
@@ -229,15 +240,13 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
 
                 {!isExamGenerated && (
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleDeselectAll}
-                      className="cursor-pointer flex items-center gap-1 text-sm text-slate-500 hover:underline"
-                    >
-                      <Square className="h-4 w-4" />
-                      Bỏ chọn
-                    </button>
-                  </div>
+                  <button
+                    onClick={handleDeselectAll}
+                    className="cursor-pointer flex items-center gap-1 text-sm text-slate-500 hover:underline"
+                  >
+                    <Square className="h-4 w-4" />
+                    Bỏ chọn ({selectedQuestions.size})
+                  </button>
                 )}
               </div>
 
@@ -258,10 +267,11 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
 
                   {subjectsData && subjectsData.length > 0 && (
                     <select
-                      value={filterSubjectId}
+                      value={filterSubjectId ?? ""}
                       onChange={(e) => {
-                        setFilterSubjectId(e.target.value ? Number(e.target.value) : "");
+                        setFilterSubjectId(e.target.value ? Number(e.target.value) : undefined);
                         setSelectedQuestions(new Set());
+                        setCurrentPage(0);
                       }}
                       className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground outline-none focus:ring-2 focus:ring-primary min-w-37.5"
                     >
@@ -291,7 +301,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               ) : (
                 <div className="space-y-2">
-                  {pagedQuestions.map((question) => {
+                  {questions.map((question) => {
                     const isSelected = selectedQuestions.has(question.id);
                     return (
                       <div
@@ -314,18 +324,20 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                               {question.content}
                             </p>
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
-                              <span className={`text-xs`}>{getTypeBadge(question.questionType)}</span>
-                              <span className={`text-xs`}>{getDifficultyBadge(question.questionLevel)}</span>
-                              {question.subject && (
+                              <span className="text-xs">{getTypeBadge(question.questionType)}</span>
+                              <span className="text-xs">{getDifficultyBadge(question.questionLevel)}</span>
+                              {question.chapter && (
                                 <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                  {question.subject.name}
+                                  Chương: {question.chapter.name}
                                 </span>
                               )}
-                              <span className=" text-slate-400">●</span>
                               {question.lesson && (
-                                <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                  {question.lesson.name}
-                                </span>
+                                <>
+                                  <span className="text-slate-400">●</span>
+                                  <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
+                                    {question.lesson.name}
+                                  </span>
+                                </>
                               )}
                             </div>
                           </div>

@@ -337,7 +337,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                               </label>
                             </td>
                             <td className="px-4 py-3.5">
-                              <span className="text-md font-semibold text-blue-600 dark:text-blue-400 hover:underline">
+                              <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
                                 {problem.title}
                               </span>
                               <p className="text-xs text-slate-500 mt-0.5 font-mono">

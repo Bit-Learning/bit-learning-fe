@@ -197,7 +197,7 @@ const MyMatricesContent: React.FC = () => {
                         )}
                       </td>
                       <td className="p-4">
-                        <span className="font-mono text-sm text-gray-700 bg-gray-100 px-2 py-0.5 rounded">
+                        <span className="font-mono text-sm text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
                           {matrix.code}
                         </span>
                       </td>

@@ -120,3 +120,23 @@ export interface ApproveRejectDTO {
   questionIds: number[];
   rejectReason?: string;
 }
+
+export interface QuestionSearchParams {
+  keyword?: string;
+  subjectId?: number;
+  lessonId?: number;
+  questionType?: QuestionType;
+  questionLevel?: QuestionLevel;
+  approvalStatus?: ApprovalStatus;
+  isActive?: boolean;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface QuestionApprovalParams {
+  status?: ApprovalStatus;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
