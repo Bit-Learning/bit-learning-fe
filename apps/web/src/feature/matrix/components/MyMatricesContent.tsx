@@ -27,7 +27,7 @@ const MyMatricesContent: React.FC = () => {
   const [modal, setModal] = useState<{ open: boolean; data?: TMatrixResponse | null }>({ open: false });
   const [deletingMatrix, setDeletingMatrix] = useState<TMatrixResponse | null>(null);
 
-  const { data: response, isLoading } = useMyMatrices(0, 99999);
+  const { data: response, isLoading } = useMyMatrices(0, 1000);
   const deleteMatrix = useDeleteMatrix();
 
   const allMatrices = response?.data || [];

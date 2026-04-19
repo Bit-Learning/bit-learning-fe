@@ -251,13 +251,10 @@ const MyExamsContent: React.FC = () => {
               <h3 className="text-lg font-semibold mb-2 text-slate-900 dark:text-white">
                 {hasActiveFilter ? "Không tìm thấy đề thi" : "Chưa có đề thi nào"}
               </h3>
-              <p className="text-slate-500 dark:text-slate-400 mb-6">
-                {hasActiveFilter ? "Thử thay đổi bộ lọc" : "Bắt đầu bằng cách tạo đề thi đầu tiên"}
-              </p>
               {!hasActiveFilter && (
                 <Button
                   onClick={() => navigate({ to: "/mentor/exam/generate-from-questions" })}
-                  className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium flex items-center gap-2 transition-all shadow-sm shadow-blue-500/30"
+                  className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium gap-2 transition-all shadow-sm shadow-blue-500/30"
                 >
                   <Plus className="h-4 w-4" />
                   Tạo đề thi mới
