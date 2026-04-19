@@ -105,8 +105,8 @@ export interface SavedMindMapDto {
 	topic: string;
 	current_version: number; // @JsonProperty
 	treeData: MindMapTreeNode; // camelCase
-	structure_config: StructureConfig; // @JsonProperty
-	theme_config: ThemeConfig; // @JsonProperty
+	structure_config: StructureConfig | null; // @JsonProperty
+	theme_config: ThemeConfig | null; // @JsonProperty
 	metadata: MindMapMetadata | null;
 	createdAt: string; // camelCase
 	updatedAt: string; // camelCase
