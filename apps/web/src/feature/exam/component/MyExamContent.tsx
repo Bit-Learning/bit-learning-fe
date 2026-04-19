@@ -8,7 +8,7 @@ import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { cn } from "@workspace/ui/lib/utils";
 import { useMyExams, useDeleteExam, useRequestPublishExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
-import type { ApprovalStatus, ExamBriefResponse, ExamType } from "../types/exam.type";
+import type { ApprovalStatus, ExamBriefResponse, ExamSearchParams, ExamType } from "../types/exam.type";
 import { EditExamModal } from "./EditExamModal";
 
 const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
@@ -20,7 +20,7 @@ const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
   PRACTICE: {
     label: "Luyện tập",
     className:
-      "bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800",
+      "bg-blue-50 text-blue-700 border border-blue-200 dark:bg-blue-900/20 dark:text-blue-400 dark:border-blue-800",
   },
 };
 
@@ -59,9 +59,8 @@ function useDebounce<T>(value: T, delay: number): T {
 const MyExamsContent: React.FC = () => {
   const navigate = useNavigate();
   const [searchInput, setSearchInput] = useState("");
-  const [filterType, setFilterType] = useState<string>("");
-  const [filterSubjectId, setFilterSubjectId] = useState<string>("");
-  const [filterApproval, setFilterApproval] = useState<string>("");
+  const [filterSubjectId, setFilterSubjectId] = useState<number | undefined>(undefined);
+  const [filterApproval, setFilterApproval] = useState<ApprovalStatus | "">("");
   const [page, setPage] = useState(0);
   const [editingExam, setEditingExam] = useState<ExamBriefResponse | null>(null);
   const [deletingExam, setDeletingExam] = useState<ExamBriefResponse | null>(null);
@@ -74,24 +73,20 @@ const MyExamsContent: React.FC = () => {
   const { data: subjectsData } = useSubjectsList();
   const subjects = subjectsData || [];
 
-  const { data: examsData, isLoading } = useMyExams({
+  const params: ExamSearchParams = {
     page,
     size: 20,
-    sort: "createdAt,desc",
     search: debouncedSearch || undefined,
-  });
+    subjectId: filterSubjectId,
+    status: filterApproval || undefined,
+  };
 
-  const allExams: ExamBriefResponse[] = examsData?.data || [];
+  const { data: examsData, isLoading } = useMyExams(params);
+
+  const exams: ExamBriefResponse[] = examsData?.data || [];
   const pagination = examsData?.page;
 
-  const exams = allExams.filter((e) => {
-    const matchType = !filterType || e.type === filterType;
-    const matchSubject = !filterSubjectId || String(e.subject?.id) === filterSubjectId;
-    const matchApproval = !filterApproval || e.approvalStatus === filterApproval;
-    return matchType && matchSubject && matchApproval;
-  });
-
-  const hasActiveFilter = !!searchInput || !!filterType || !!filterSubjectId || !!filterApproval;
+  const hasActiveFilter = !!searchInput || !!filterSubjectId || !!filterApproval;
 
   const selectableExams = exams.filter((e) => e.approvalStatus === "NONE" || e.approvalStatus === "REJECTED");
   const selectableIds = selectableExams.map((e) => e.id);
@@ -158,34 +153,19 @@ const MyExamsContent: React.FC = () => {
             />
           </div>
           <div className="flex gap-3 flex-wrap">
-            <div className="relative">
-              <select
-                value={filterType}
-                onChange={(e) => {
-                  setFilterType(e.target.value);
-                  setPage(0);
-                }}
-                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
-              >
-                <option value="">Loại: Tất cả</option>
-                <option value="EXAM">Đề thi</option>
-                <option value="PRACTICE">Luyện tập</option>
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-            </div>
             {subjects.length > 0 && (
               <div className="relative">
                 <select
-                  value={filterSubjectId}
+                  value={filterSubjectId ?? ""}
                   onChange={(e) => {
-                    setFilterSubjectId(e.target.value);
+                    setFilterSubjectId(e.target.value ? Number(e.target.value) : undefined);
                     setPage(0);
                   }}
                   className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
                 >
                   <option value="">Môn: Tất cả</option>
                   {subjects.map((s: any) => (
-                    <option key={s.id} value={String(s.id)}>
+                    <option key={s.id} value={s.id}>
                       {s.name}
                     </option>
                   ))}
@@ -197,7 +177,7 @@ const MyExamsContent: React.FC = () => {
               <select
                 value={filterApproval}
                 onChange={(e) => {
-                  setFilterApproval(e.target.value);
+                  setFilterApproval(e.target.value as ApprovalStatus | "");
                   setPage(0);
                 }}
                 className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
@@ -214,9 +194,9 @@ const MyExamsContent: React.FC = () => {
               <button
                 onClick={() => {
                   setSearchInput("");
-                  setFilterType("");
-                  setFilterSubjectId("");
+                  setFilterSubjectId(undefined);
                   setFilterApproval("");
+                  setPage(0);
                 }}
                 className="text-sm text-slate-500 hover:text-red-500 transition-colors whitespace-nowrap underline"
               >
@@ -319,6 +299,7 @@ const MyExamsContent: React.FC = () => {
                         Thông tin đề thi
                       </th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Mã đề</th>
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Loại</th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Thời gian</th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Điểm
@@ -372,21 +353,23 @@ const MyExamsContent: React.FC = () => {
                             </label>
                           </td>
                           <td className="px-4 py-3.5">
-                            <p className="text-md font-semibold text-slate-900 dark:text-slate-100 mb-1">{exam.name}</p>
-                            <div className="flex items-center gap-2 flex-wrap">
-                              <span
-                                className={cn(
-                                  "inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium",
-                                  typeConf.className,
-                                )}
-                              >
-                                {typeConf.label}
-                              </span>
-                            </div>
+                            <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
+                              {exam.name}
+                            </span>
                           </td>
                           <td className="px-4 py-3.5">
                             <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-sm font-semibold font-mono">
                               {exam.code}
+                            </span>
+                          </td>
+                          <td className="px-4 py-3.5">
+                            <span
+                              className={cn(
+                                "inline-flex items-center px-2 py-0.5 rounded-md text-sm font-medium",
+                                typeConf.className,
+                              )}
+                            >
+                              {typeConf.label}
                             </span>
                           </td>
                           <td className="px-4 py-3.5 text-slate-600 dark:text-slate-400">

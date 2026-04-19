@@ -1,75 +1,41 @@
-import { useState, useMemo } from "react";
-import { FileText, Eye, Search, Edit } from "lucide-react";
+import { useState } from "react";
+import { FileText, Eye, Search, Edit, ChevronDown } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
-import { useMyPublishRequests, useMyPublishRequestsAll } from "../queries/useQuestion";
-import { QuestionType, ApprovalStatus, type QuestionResponse } from "../types/question.type";
+import { useMyPublishRequests } from "../queries/useQuestion";
+import { ApprovalStatus, QuestionApprovalParams, type QuestionResponse } from "../types/question.type";
 import { Pagination } from "@/shared/components/Pagination";
-import { getTypeBadge, getStatusBadge, getDifficultyBadge, levelColors, statusConfig } from "../utils/question.utils";
+import { getTypeBadge, getStatusBadge, getDifficultyBadge } from "../utils/question.utils";
 import { DetailModal } from "./DetailModal";
 import { EditAndResubmitModal } from "./EditAndResubmitModal";
-import { QuestionApprovalParams } from "../api/question.api";
 
 const PAGE_SIZE = 10;
 
-const normalize = (str: string) =>
-  str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+const selectCls =
+  "appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer";
 
 export default function QuestionApprovalTableView() {
   const [page, setPage] = useState(0);
   const [selectedQuestion, setSelectedQuestion] = useState<QuestionResponse | null>(null);
   const [editingQuestion, setEditingQuestion] = useState<QuestionResponse | null>(null);
   const [search, setSearch] = useState("");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
+  const [statusFilter, setStatusFilter] = useState<ApprovalStatus | "">("");
 
   const params: QuestionApprovalParams = {
     page,
     size: PAGE_SIZE,
-    status: statusFilter !== "all" ? (statusFilter as ApprovalStatus) : undefined,
+    status: statusFilter || undefined,
   };
 
   const { data, isLoading, refetch } = useMyPublishRequests(params);
-  const rawData = data?.data ?? [];
+  const questions: QuestionResponse[] = data?.data ?? [];
   const totalPages = data?.page?.totalPages ?? 0;
 
-  // const subjects = useMemo(() => {
-  //   const seen = new Map<number, { id: number; name: string }>();
-  //   rawData.forEach((q) => {
-  //     if (q.subject && !seen.has(q.subject.id)) seen.set(q.subject.id, { id: q.subject.id, name: q.subject.name });
-  //   });
-  //   return Array.from(seen.values());
-  // }, [rawData]);
-
-  const filteredQuestions = useMemo(() => {
-    return rawData.filter((p: any) => {
-      if (p.approvalStatus === ApprovalStatus.APPROVED) return false;
-
-      if (!search) return true;
-
-      return normalize(p.title).includes(normalize(search));
-    });
-  }, [rawData, search]);
-
-  const pagedQuestions = filteredQuestions;
+  const filtered = search ? questions.filter((q) => q.content.toLowerCase().includes(search.toLowerCase())) : questions;
 
   const resetPage = () => setPage(0);
-  const handleSubjectSelect = (id: number | undefined) => {
-    setSelectedSubjectId(id);
-    resetPage();
-  };
-  const handleFilterChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setter(e.target.value);
-    resetPage();
-  };
+
   const formatDate = (d: string) =>
     new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
-
-  const selectCls =
-    "px-3 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35";
 
   return (
     <div className="bg-slate-50 mx-auto p-8">
@@ -92,29 +58,23 @@ export default function QuestionApprovalTableView() {
             }}
           />
         </div>
-        {/* <select value={typeFilter} onChange={handleFilterChange(setTypeFilter)} className={selectCls}>
-          <option value="all">Loại: Tất cả</option>
-          <option value={QuestionType.MCQ}>Trắc nghiệm</option>
-          <option value={QuestionType.ESSAY}>Tự luận</option>
-        </select> */}
-        <select value={statusFilter} onChange={handleFilterChange(setStatusFilter)} className={selectCls}>
-          <option value="all">Trạng thái: Tất cả</option>
-          <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
-          <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
-          <option value={ApprovalStatus.REJECTED}>Từ chối</option>
-        </select>
-        {/* <select
-          value={selectedSubjectId?.toString() ?? "all"}
-          onChange={(e) => handleSubjectSelect(e.target.value === "all" ? undefined : Number(e.target.value))}
-          className={selectCls}
-        >
-          <option value="all">Tất cả môn học</option>
-          {subjects.map((s) => (
-            <option key={s.id} value={s.id}>
-              {s.name}
-            </option>
-          ))}
-        </select> */}
+
+        <div className="relative">
+          <select
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value as ApprovalStatus | "");
+              resetPage();
+            }}
+            className={selectCls}
+          >
+            <option value="">Trạng thái: Tất cả</option>
+            <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
+            <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
+            <option value={ApprovalStatus.REJECTED}>Từ chối</option>
+          </select>
+          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+        </div>
       </div>
 
       {isLoading ? (
@@ -123,14 +83,12 @@ export default function QuestionApprovalTableView() {
             <Skeleton key={i} className="h-16 w-full rounded-lg" />
           ))}
         </div>
-      ) : filteredQuestions.length === 0 ? (
+      ) : filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center h-64 text-center">
           <FileText className="w-16 h-16 text-slate-300 mb-4" />
           <h3 className="text-lg font-medium text-slate-900 mb-2">Không có câu hỏi nào</h3>
           <p className="text-sm text-slate-500">
-            {search || selectedSubjectId || typeFilter !== "all" || statusFilter !== "all"
-              ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác"
-              : "Chưa có yêu cầu phê duyệt nào"}
+            {search || statusFilter ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác" : "Chưa có yêu cầu phê duyệt nào"}
           </p>
         </div>
       ) : (
@@ -158,16 +116,16 @@ export default function QuestionApprovalTableView() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-slate-200">
-                {pagedQuestions.map((question: QuestionResponse) => (
+                {filtered.map((question: QuestionResponse) => (
                   <tr
                     key={question.id}
                     onClick={() => setSelectedQuestion(question)}
                     className="hover:bg-slate-50 transition-colors cursor-pointer"
                   >
                     <td className="px-6 py-4">
-                      <div className="min-w-0">
-                        <p className="line-clamp-1 text-gray-900 text-md">{question.content}</p>
-                      </div>
+                      <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
+                        {question.content}
+                      </span>
                     </td>
                     <td className="p-4 text-sm">{getDifficultyBadge(question.questionLevel)}</td>
                     <td className="p-4 text-sm text-gray-700">{getTypeBadge(question.questionType)}</td>
@@ -175,7 +133,7 @@ export default function QuestionApprovalTableView() {
                     <td className="p-4 text-sm">{getStatusBadge(question.approvalStatus)}</td>
                     <td className="px-2 py-4">
                       <div className="flex items-center justify-center gap-2" onClick={(e) => e.stopPropagation()}>
-                        {question.approvalStatus === ApprovalStatus.REJECTED && (
+                        {question.approvalStatus === ApprovalStatus.REJECTED ? (
                           <>
                             <button
                               title="Xem chi tiết lý do từ chối"
@@ -184,6 +142,7 @@ export default function QuestionApprovalTableView() {
                             >
                               <Eye className="h-6 w-6" />
                             </button>
+
                             <button
                               title="Sửa & Gửi lại"
                               onClick={() => setEditingQuestion(question)}
@@ -193,8 +152,7 @@ export default function QuestionApprovalTableView() {
                               Gửi lại
                             </button>
                           </>
-                        )}
-                        {question.approvalStatus === ApprovalStatus.PENDING && (
+                        ) : (
                           <button
                             title="Xem chi tiết"
                             className="cursor-pointer p-2 text-slate-500 hover:text-blue-600 transition-colors rounded-lg hover:bg-blue-50"
@@ -215,9 +173,9 @@ export default function QuestionApprovalTableView() {
             <p className="text-sm text-slate-600">
               Hiển thị{" "}
               <span className="font-semibold">
-                {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filteredQuestions.length)}
+                {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filtered.length)}
               </span>{" "}
-              trong <span className="font-semibold">{filteredQuestions.length}</span> câu hỏi
+              trong <span className="font-semibold">{filtered.length}</span> câu hỏi
             </p>
             {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
           </div>

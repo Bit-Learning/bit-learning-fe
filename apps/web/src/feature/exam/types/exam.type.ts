@@ -123,6 +123,8 @@ export interface ExamSearchParams {
   size?: number;
   sort?: string;
   search?: string;
+  subjectId?: number;
+  status?: ApprovalStatus;
 }
 
 export interface ExamApprovalFilters {

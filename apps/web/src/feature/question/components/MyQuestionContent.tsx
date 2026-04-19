@@ -1,5 +1,5 @@
 import { useState, useMemo } from "react";
-import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload, X } from "lucide-react";
+import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import {
@@ -14,40 +14,48 @@ import {
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
 import { useDeleteQuestion, useRequestPublish, useMyQuestions } from "../queries/useQuestion";
-import { ApprovalStatus, type QuestionResponse } from "../types/question.type";
+import {
+  ApprovalStatus,
+  QuestionLevel,
+  QuestionSearchParams,
+  QuestionType,
+  type QuestionResponse,
+} from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
 import { useNavigate } from "@tanstack/react-router";
 import { getDifficultyBadge, getStatusBadge, getTypeBadge } from "../utils/question.utils";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { DetailModal } from "./DetailModal";
-import { QuestionSearchParams } from "../api/question.api";
+import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 
 const PAGE_SIZE = 20;
 
-const normalize = (str: string) =>
-  str
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .toLowerCase();
+const selectCls =
+  "appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer";
 
 const MyQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
-  const [difficultyFilter, setDifficultyFilter] = useState("all");
-  const [typeFilter, setTypeFilter] = useState("all");
-  const [statusFilter, setStatusFilter] = useState("all");
-  const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
+  const [typeFilter, setTypeFilter] = useState<QuestionType | "">("");
+  const [statusFilter, setStatusFilter] = useState<ApprovalStatus | "">("");
+  const [subjectId, setSubjectId] = useState<number | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deletingQuestion, setDeletingQuestion] = useState<QuestionResponse | null>(null);
-  const [selectAllGlobal, setSelectAllGlobal] = useState(false);
   const [viewingQuestion, setViewingQuestion] = useState<QuestionResponse | null>(null);
+
+  const { data: subjectsData } = useSubjectsList();
+  const subjects = subjectsData || [];
+
   const params: QuestionSearchParams = {
     page,
     size: PAGE_SIZE,
     keyword: search || undefined,
+    questionType: typeFilter || undefined,
+    approvalStatus: statusFilter || undefined,
+    subjectId: subjectId,
   };
 
   const { data, isLoading, refetch } = useMyQuestions(params);
@@ -58,18 +66,6 @@ const MyQuestionsContent: React.FC = () => {
   const deleteQuestion = useDeleteQuestion();
   const requestPublish = useRequestPublish();
 
-  const subjects = useMemo(() => {
-    const seen = new Map<number, { id: number; name: string }>();
-    allQuestions.forEach((q) => {
-      if (q.subject && !seen.has(q.subject.id)) {
-        seen.set(q.subject.id, { id: q.subject.id, name: q.subject.name });
-      }
-    });
-    return Array.from(seen.values());
-  }, [allQuestions]);
-
-  const pagedQuestions = allQuestions;
-
   const allSelectable = allQuestions.filter(
     (q) => q.approvalStatus === ApprovalStatus.NONE || q.approvalStatus === ApprovalStatus.REJECTED,
   );
@@ -79,18 +75,8 @@ const MyQuestionsContent: React.FC = () => {
 
   const resetPage = () => setPage(0);
 
-  const handleSubjectSelect = (id: number | undefined) => {
-    setSelectedSubjectId(id);
-    resetPage();
-  };
-
   const handleSearchChange = (value: string) => {
     setSearch(value);
-    resetPage();
-  };
-
-  const handleFilterChange = (setter: (v: string) => void) => (e: React.ChangeEvent<HTMLSelectElement>) => {
-    setter(e.target.value);
     resetPage();
   };
 
@@ -107,11 +93,11 @@ const MyQuestionsContent: React.FC = () => {
   const handleSelectAll = () => {
     if (allSelected) {
       setSelectedQuestions([]);
-      setSelectAllGlobal(false);
     } else {
       setSelectedQuestions(allSelectableIds);
     }
   };
+
   const handleRequestPublish = () => {
     if (selectedQuestions.length === 0) return;
     requestPublish.mutate(
@@ -131,8 +117,6 @@ const MyQuestionsContent: React.FC = () => {
       onSuccess: () => setDeletingQuestion(null),
     });
   };
-
-  const selectedSubject = subjects.find((s) => s.id === selectedSubjectId);
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -173,8 +157,8 @@ const MyQuestionsContent: React.FC = () => {
           </div>
         </div>
 
-        <div className="flex flex-col md:flex-row gap-2">
-          <div className="relative flex-1">
+        <div className="flex flex-col md:flex-row gap-2 mb-4 flex-wrap">
+          <div className="relative flex-1 min-w-48">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
               className="w-full pl-9 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm transition-all shadow-sm"
@@ -184,61 +168,62 @@ const MyQuestionsContent: React.FC = () => {
               onChange={(e) => handleSearchChange(e.target.value)}
             />
           </div>
-          {/* <select
-            value={difficultyFilter}
-            onChange={handleFilterChange(setDifficultyFilter)}
-                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
-          >
-            <option value="all">Độ khó: Tất cả</option>
-            <option value="EASY">Dễ</option>
-            <option value="MEDIUM">Trung bình</option>
-            <option value="HARD">Khó</option>
-          </select>
-          <select
-            value={typeFilter}
-            onChange={handleFilterChange(setTypeFilter)}
-                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
-          >
-            <option value="all">Loại: Tất cả</option>
-            <option value="MCQ">Trắc nghiệm</option>
-            <option value="ESSAY">Tự luận</option>
-          </select>
-          <select
-            value={statusFilter}
-            onChange={handleFilterChange(setStatusFilter)}
-                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
-          >
-            <option value="all">Trạng thái: Tất cả</option>
-            <option value={ApprovalStatus.NONE}>Chưa gửi</option>
-            <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
-            <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
-            <option value={ApprovalStatus.REJECTED}>Từ chối</option>
-          </select>
-          <select
-            value={selectedSubjectId?.toString() ?? "all"}
-            onChange={(e) => handleSubjectSelect(e.target.value === "all" ? undefined : Number(e.target.value))}
-            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
-          >
-            <option value="all">Tất cả môn học</option>
-            {subjects.map((s) => (
-              <option key={s.id} value={s.id}>
-                {s.name}
-              </option>
-            ))}
-          </select> */}
-        </div>
 
-        {/* {selectedSubject && (
-          <div className="flex items-center gap-2 mt-3 flex-wrap">
-            <span className="text-xs text-gray-500">Đang lọc:</span>
-            <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
-              {selectedSubject.name}
-              <button onClick={() => handleSubjectSelect(undefined)} className="ml-0.5 hover:text-blue-600">
-                <X className="h-3 w-3" />
-              </button>
-            </span>
+          <div className="relative">
+            <select
+              value={typeFilter}
+              onChange={(e) => {
+                setTypeFilter(e.target.value as QuestionType | "");
+                resetPage();
+              }}
+              className={selectCls}
+            >
+              <option value="">Loại: Tất cả</option>
+              <option value={QuestionType.MCQ}>Trắc nghiệm</option>
+              <option value={QuestionType.ESSAY}>Tự luận</option>
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
-        )} */}
+
+          <div className="relative">
+            <select
+              value={statusFilter}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as ApprovalStatus | "");
+                resetPage();
+              }}
+              className={selectCls}
+            >
+              <option value="">Trạng thái: Tất cả</option>
+              <option value={ApprovalStatus.NONE}>Chưa gửi</option>
+              <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
+              <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
+              <option value={ApprovalStatus.REJECTED}>Từ chối</option>
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+
+          {subjects.length > 0 && (
+            <div className="relative">
+              <select
+                value={subjectId ?? ""}
+                onChange={(e) => {
+                  setSubjectId(e.target.value ? Number(e.target.value) : undefined);
+                  resetPage();
+                }}
+                className={selectCls}
+              >
+                <option value="">Môn học: Tất cả</option>
+                {subjects.map((s: any) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+          )}
+        </div>
 
         {isLoading ? (
           <div className="p-6 space-y-2">
@@ -252,11 +237,7 @@ const MyQuestionsContent: React.FC = () => {
               <Send className="h-16 w-16 text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Không tìm thấy câu hỏi</h3>
               <p className="text-gray-600 mb-6">
-                {search ||
-                selectedSubjectId ||
-                difficultyFilter !== "all" ||
-                typeFilter !== "all" ||
-                statusFilter !== "all"
+                {search || subjectId || typeFilter || statusFilter
                   ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác"
                   : "Bạn chưa có câu hỏi nào"}
               </p>
@@ -289,9 +270,7 @@ const MyQuestionsContent: React.FC = () => {
                       <AlertDialogTrigger asChild>
                         <Button className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2">
                           <Send className="w-4 h-4" />
-                          {requestPublish.isPending
-                            ? "Đang gửi..."
-                            : `Gửi yêu cầu duyệt (${setSelectedQuestions.length})`}
+                          {requestPublish.isPending ? "Đang gửi..." : `Gửi yêu cầu duyệt (${selectedQuestions.length})`}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
@@ -332,8 +311,7 @@ const MyQuestionsContent: React.FC = () => {
                           onChange={handleSelectAll}
                           className="peer sr-only"
                         />
-
-                        <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400 ">
+                        <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400">
                           <svg
                             className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
                             viewBox="0 0 24 24"
@@ -343,7 +321,6 @@ const MyQuestionsContent: React.FC = () => {
                           >
                             <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
                           </svg>
-
                           <div className="absolute w-3 h-0.5 bg-white opacity-0 peer-indeterminate:opacity-100" />
                         </div>
                       </label>
@@ -354,8 +331,10 @@ const MyQuestionsContent: React.FC = () => {
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-30">
                       MỨC ĐỘ
                     </th>
-                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">LOẠI</th>
-                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
+                      LOẠI
+                    </th>
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-60">
                       MÔN HỌC
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
@@ -367,9 +346,9 @@ const MyQuestionsContent: React.FC = () => {
                   </tr>
                 </thead>
                 <tbody className="bg-white">
-                  {pagedQuestions.map((question: QuestionResponse, index: number) => (
+                  {allQuestions.map((question: QuestionResponse) => (
                     <tr
-                      key={index}
+                      key={question.id}
                       className={cn(
                         "cursor-pointer border-b border-gray-200 last:border-b-0 hover:bg-gray-50 transition-colors",
                         selectedQuestions.includes(question.id) && "bg-blue-50",
@@ -388,7 +367,6 @@ const MyQuestionsContent: React.FC = () => {
                             }
                             className="peer sr-only"
                           />
-
                           <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
                             <svg
                               className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
@@ -404,7 +382,9 @@ const MyQuestionsContent: React.FC = () => {
                       </td>
                       <td className="p-4">
                         <div className="flex-1 min-w-0">
-                          <p className="line-clamp-1 text-gray-900 text-md">{question.content}</p>{" "}
+                          <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
+                            {question.content}
+                          </span>
                           <p className="text-sm text-gray-500 mt-1">
                             Cập nhật {new Date(question.updatedAt || question.createdAt).toLocaleDateString("vi-VN")}
                           </p>
@@ -424,7 +404,7 @@ const MyQuestionsContent: React.FC = () => {
                               setViewingQuestion(question);
                             }}
                           >
-                            <Eye className="h-6 w-6" />{" "}
+                            <Eye className="h-6 w-6" />
                           </button>
                           {question.approvalStatus !== ApprovalStatus.APPROVED && (
                             <>
@@ -433,9 +413,7 @@ const MyQuestionsContent: React.FC = () => {
                                 title="Chỉnh sửa"
                                 onClick={(e) => {
                                   e.stopPropagation();
-                                  navigate({
-                                    to: `/mentor/question/${question.id}/edit`,
-                                  });
+                                  navigate({ to: `/mentor/question/${question.id}/edit` });
                                 }}
                               >
                                 <Edit className="h-6 w-6" />

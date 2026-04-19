@@ -12,7 +12,7 @@ type TabKey = "my-problems" | "approval";
 const tabs: { key: TabKey; label: string; icon: React.ReactNode }[] = [
   {
     key: "my-problems",
-    label: "Ngân hàng bài tập",
+    label: "Bài tập của tôi",
     icon: <Code2 className="h-4 w-4" />,
   },
   {

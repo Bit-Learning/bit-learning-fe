@@ -7,21 +7,11 @@ import type {
   RequestPublishDTO,
   ApproveRejectDTO,
   ApprovalStatus,
+  QuestionType,
+  QuestionLevel,
+  QuestionSearchParams,
+  QuestionApprovalParams,
 } from "../types/question.type";
-
-export interface QuestionSearchParams {
-  keyword?: string;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
-
-export interface QuestionApprovalParams {
-  status?: ApprovalStatus;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
 
 export const questionApi = {
   importQuestions(file: File): Promise<AxiosResponse<ApiResponse<void>>> {

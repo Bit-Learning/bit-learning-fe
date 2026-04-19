@@ -6,14 +6,12 @@ import {
   Clock,
   Award,
   Check,
-  Share2,
   MoreVertical,
   AlertCircle,
   CheckCircle,
   BarChart3,
   Loader2,
   Search,
-  Eye,
   Lock,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
@@ -198,22 +196,6 @@ const ExamDetailContent: React.FC = () => {
       <div className="mx-auto px-6 bg-slate-50">
         <div className="flex gap-4">
           <div className="w-75 space-y-4 shrink-0">
-            {exam.isPublished ? (
-              <div className="bg-green-50 dark:bg-green-900/10 border border-green-400 dark:border-green-900/30 rounded-md p-4 flex items-start gap-3">
-                <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400 shrink-0 mt-0.5" />
-                <p className="text-sm text-green-800 dark:text-green-300">
-                  Đề thi đã được xuất bản thành công. Học sinh hiện có thể vào thi.
-                </p>
-              </div>
-            ) : (
-              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-400 dark:border-amber-900/30 rounded-md p-4 flex items-start gap-3">
-                <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 shrink-0 mt-0.5" />
-                <p className="text-sm text-amber-800 dark:text-amber-300">
-                  Đề thi chưa được công bố. Nhấn "Xuất bản" để học sinh có thể làm bài.
-                </p>
-              </div>
-            )}
-
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4 space-y-2">
               <button
                 onClick={() => handleDownload("pdf")}
@@ -267,38 +249,6 @@ const ExamDetailContent: React.FC = () => {
                 <span className="font-medium text-blue-600 dark:text-white">Tải đề + đáp án (.Docx)</span>
               </button>
             </div>
-            <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4">
-              <button
-                onClick={handleTogglePublish}
-                disabled={isPublishing}
-                className={`cursor-pointer w-full flex items-center gap-3 px-4 py-3 rounded-lg transition-colors text-left font-medium ${
-                  exam.isPublished
-                    ? "bg-red-50 dark:bg-red-900/10 hover:bg-red-100 dark:hover:bg-red-900/20 text-red-600 dark:text-red-400"
-                    : "bg-green-50 dark:bg-green-900/10 hover:bg-green-100 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400"
-                } disabled:opacity-50 disabled:cursor-not-allowed`}
-              >
-                {isPublishing ? (
-                  <Loader2 className="h-5 w-5 animate-spin" />
-                ) : exam.isPublished ? (
-                  <AlertCircle className="h-5 w-5" />
-                ) : (
-                  <CheckCircle className="h-5 w-5" />
-                )}
-                <span>{exam.isPublished ? "Ngưng xuất bản" : "Xuất bản đề thi"}</span>
-              </button>
-            </div>
-
-            {exam.isPublished && (
-              <div className="bg-amber-50 dark:bg-amber-900/10 border border-amber-400 dark:border-amber-900/30 rounded-md p-4">
-                <div className="flex items-start gap-2">
-                  <Lock className="text-amber-600 dark:text-amber-400 text-lg" />
-                  <p className="text-xs text-amber-800 dark:text-amber-300">
-                    Đang khóa (không thể chỉnh sửa khi đã xuất bản)
-                  </p>
-                </div>
-              </div>
-            )}
-
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4">
               <h3 className="font-bold text-slate-900 dark:text-white mb-4">THÔNG SỐ ĐỀ THI</h3>
               <div className="space-y-3">
