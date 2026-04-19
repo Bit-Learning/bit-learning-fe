@@ -15,6 +15,7 @@ import {
 	getAccessToken,
 	setAccessToken,
 } from "@/shared/lib/cookies";
+import { wsService } from "@/feature/notification/services/websocket.service";
 import store from "@/shared/redux/store";
 
 function createApiClient(): AxiosInstance {
@@ -146,6 +147,7 @@ function handleRefreshToken(): Promise<string> {
 			// Clear tokens and Redux state
 			clearAuthTokens();
 			clearDefaultAuthorizationHeader();
+			wsService.disconnect();
 			store.dispatch(setIsAuthenticatedAction(false));
 			store.dispatch(setUserInfoAction(null));
 

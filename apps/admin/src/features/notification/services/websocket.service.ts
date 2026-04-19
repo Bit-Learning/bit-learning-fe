@@ -12,21 +12,54 @@ class WebSocketService {
 	private readonly maxReconnectAttempts = 5;
 	private readonly reconnectDelay = 3000;
 	private isManualDisconnect = false;
+	private connectPromise: Promise<void> | null = null;
+	private reconnectTimeout: ReturnType<typeof setTimeout> | null = null;
+
+	private clearReconnectTimeout(): void {
+		if (this.reconnectTimeout) {
+			clearTimeout(this.reconnectTimeout);
+			this.reconnectTimeout = null;
+		}
+	}
 
 	connect(): Promise<void> {
-		return new Promise((resolve, reject) => {
-			if (this.client?.connected) {
+		if (this.client?.connected) {
+			return Promise.resolve();
+		}
+
+		if (this.connectPromise) {
+			return this.connectPromise;
+		}
+
+		const wsUrl = import.meta.env.VITE_WS_URL ?? "http://localhost:8080/ws";
+		const accessToken = getAccessToken();
+
+		if (!accessToken) {
+			this.disconnect();
+			return Promise.reject(new Error("No access token found. Please log in."));
+		}
+
+		this.clearReconnectTimeout();
+		this.isManualDisconnect = false;
+
+		this.connectPromise = new Promise((resolve, reject) => {
+			let settled = false;
+			const resolveOnce = () => {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				this.connectPromise = null;
 				resolve();
-				return;
-			}
-
-			const wsUrl = import.meta.env.VITE_WS_URL ?? "http://localhost:8080/ws";
-			const accessToken = getAccessToken();
-
-			if (!accessToken) {
-				reject(new Error("No access token found. Please log in."));
-				return;
-			}
+			};
+			const rejectOnce = (error: Error) => {
+				if (settled) {
+					return;
+				}
+				settled = true;
+				this.connectPromise = null;
+				reject(error);
+			};
 
 			this.client = new Client({
 				webSocketFactory: () => new SockJS(wsUrl) as WebSocket,
@@ -38,18 +71,24 @@ class WebSocketService {
 						console.log("[WebSocket Debug]", str);
 					}
 				},
-				reconnectDelay: this.reconnectDelay,
+				reconnectDelay: 0,
 				heartbeatIncoming: 4000,
 				heartbeatOutgoing: 4000,
 				onConnect: () => {
 					this.reconnectAttempts = 0;
 					this.isManualDisconnect = false;
-					resolve();
+					resolveOnce();
 				},
 				onStompError: (frame) => {
-					reject(new Error(frame.headers.message || "Connection failed"));
+					rejectOnce(new Error(frame.headers.message || "Connection failed"));
 				},
 				onWebSocketClose: () => {
+					this.connectPromise = null;
+
+					if (!settled) {
+						rejectOnce(new Error("WebSocket connection closed"));
+					}
+
 					if (!this.isManualDisconnect) {
 						this.handleReconnect();
 					}
@@ -61,9 +100,20 @@ class WebSocketService {
 
 			this.client.activate();
 		});
+
+		return this.connectPromise;
 	}
 
 	private handleReconnect(): void {
+		if (this.reconnectTimeout || this.connectPromise) {
+			return;
+		}
+
+		if (!getAccessToken()) {
+			this.disconnect();
+			return;
+		}
+
 		if (this.reconnectAttempts >= this.maxReconnectAttempts) {
 			console.error("[WebSocket] Max reconnection attempts reached.");
 			return;
@@ -72,7 +122,9 @@ class WebSocketService {
 		this.reconnectAttempts += 1;
 		const delay = this.reconnectDelay * this.reconnectAttempts;
 
-		setTimeout(() => {
+		this.reconnectTimeout = setTimeout(() => {
+			this.reconnectTimeout = null;
+
 			if (!this.isManualDisconnect) {
 				this.connect().catch((error) => {
 					console.error("[WebSocket] Reconnection failed:", error);
@@ -134,10 +186,17 @@ class WebSocketService {
 	}
 
 	disconnect(): void {
-		if (this.client?.connected) {
-			this.isManualDisconnect = true;
-			this.subscriptions.clear();
-			this.client.deactivate();
+		this.isManualDisconnect = true;
+		this.clearReconnectTimeout();
+		this.reconnectAttempts = 0;
+		this.connectPromise = null;
+		this.subscriptions.clear();
+
+		const client = this.client;
+		this.client = null;
+
+		if (client) {
+			void client.deactivate();
 		}
 	}
 

@@ -10,6 +10,7 @@ import {
 	getAccessToken,
 	setAccessToken,
 } from "@/shared/lib/cookies";
+import { wsService } from "@/features/notification/services/websocket.service";
 
 function createApiClient(): AxiosInstance {
 	return axios.create({
@@ -115,6 +116,7 @@ function handleRefreshToken(): Promise<string> {
 			failedRequestQueue = [];
 			clearAuthTokens();
 			clearDefaultAuthorizationHeader();
+			wsService.disconnect();
 			console.log("[Token Refresh] Redirecting to sign-in");
 			window.location.href = "/sign-in";
 			throw error;

@@ -1,5 +1,6 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
+import { wsService } from "@/feature/notification/services/websocket.service";
 import { clearAuthTokens, setAuthTokens } from "@/shared/lib/cookies";
 import { useAppDispatch } from "@/shared/redux/store";
 import { authApi } from "../api/auth.api";
@@ -322,6 +323,7 @@ export function useLogout() {
 		} catch (error) {
 			console.error("Logout API error:", error);
 		} finally {
+			wsService.disconnect();
 			clearAuthTokens();
 			dispatch(setIsAuthenticatedAction(false));
 			dispatch(setUserInfoAction(null));
