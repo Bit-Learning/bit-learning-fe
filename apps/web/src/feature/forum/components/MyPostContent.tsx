@@ -18,6 +18,8 @@ import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { useNavigate } from "@tanstack/react-router";
 import { Pagination } from "@/shared/components/Pagination";
 import { PostRow } from "./PostRow";
+import { PostBanAppealDialog } from "./PostBanAppealDialog";
+import type { Post } from "../types/forum.type";
 
 type TabType = "all" | "published" | "locked";
 
@@ -45,6 +47,7 @@ const MyPostContent: React.FC = () => {
 	const [activeTab, setActiveTab] = useState<TabType>("all");
 	const [searchQuery, setSearchQuery] = useState("");
 	const [page, setPage] = useState(0);
+	const [appealTargetPost, setAppealTargetPost] = useState<Post | null>(null);
 
 	const { userInfo } = useSelector(selectAuthStateInfo);
 	const authorId = userInfo?.id || 1;
@@ -287,6 +290,7 @@ const MyPostContent: React.FC = () => {
 											params: { id: String(post.id) },
 										})
 									}
+									onAppeal={() => setAppealTargetPost(post)}
 								/>
 							))
 						)}
@@ -303,6 +307,16 @@ const MyPostContent: React.FC = () => {
 					)}
 				</div>
 			</div>
+
+			<PostBanAppealDialog
+				post={appealTargetPost}
+				open={appealTargetPost != null}
+				onOpenChange={(open) => {
+					if (!open) {
+						setAppealTargetPost(null);
+					}
+				}}
+			/>
 		</div>
 	);
 };

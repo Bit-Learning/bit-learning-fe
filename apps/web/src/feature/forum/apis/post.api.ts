@@ -6,6 +6,7 @@ import type {
 	FilterByTagsParams,
 	PaginationParams,
 	Post,
+	PostBanAppealRequest,
 	PostFeedParams,
 	ReactionType,
 	UpdatePostRequest,
@@ -143,6 +144,14 @@ export const postApi = {
 
 	deletePost: async (id: number) => {
 		const response = await api.delete<ApiResponse<void>>(`/posts/${id}`);
+		return response.data;
+	},
+
+	appealPostBan: async (id: number, data: PostBanAppealRequest) => {
+		const response = await api.post<ApiResponse<void>>(
+			`/posts/${id}/appeal`,
+			data,
+		);
 		return response.data;
 	},
 

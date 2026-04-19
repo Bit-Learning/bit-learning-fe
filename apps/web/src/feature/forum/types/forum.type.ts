@@ -110,6 +110,10 @@ export interface UpdatePostRequest {
 	deletedAttachmentIds?: number[];
 }
 
+export interface PostBanAppealRequest {
+	message: string;
+}
+
 export interface CreateCommentRequest {
 	postId: number;
 	content: string;

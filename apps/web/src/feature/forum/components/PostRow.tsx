@@ -20,6 +20,7 @@ interface PostRowProps {
 	onEdit: () => void;
 	onDelete: () => void;
 	onView: () => void;
+	onAppeal?: () => void;
 }
 
 export const PostRow: React.FC<PostRowProps> = ({
@@ -29,6 +30,7 @@ export const PostRow: React.FC<PostRowProps> = ({
 	onEdit,
 	onDelete,
 	onView,
+	onAppeal,
 }) => {
 	const imageAttachments = post.attachments.filter(
 		(attachment) => attachment.type === AttachmentType.IMAGE,
@@ -128,30 +130,37 @@ export const PostRow: React.FC<PostRowProps> = ({
 								))}
 							</div>
 
-							{!post.isBanned ? (
-								<div className="flex shrink-0 items-center gap-2 transition-opacity">
+							<div className="flex shrink-0 items-center gap-2 transition-opacity">
+								<button
+									className="cursor-pointer rounded-md p-1.5 text-gray-400 transition-all hover:bg-blue-50 hover:text-blue-600"
+									onClick={onView}
+								>
+									<Eye className="h-5 w-5" />
+								</button>
+								{!post.isBanned && canEdit ? (
 									<button
 										className="cursor-pointer rounded-md p-1.5 text-gray-400 transition-all hover:bg-blue-50 hover:text-blue-600"
-										onClick={onView}
+										onClick={onEdit}
 									>
-										<Eye className="h-5 w-5" />
+										<Edit className="h-5 w-5" />
 									</button>
-									{canEdit ? (
-										<button
-											className="cursor-pointer rounded-md p-1.5 text-gray-400 transition-all hover:bg-blue-50 hover:text-blue-600"
-											onClick={onEdit}
-										>
-											<Edit className="h-5 w-5" />
-										</button>
-									) : null}
+								) : null}
+								{!post.isBanned ? (
 									<button
 										className="cursor-pointer rounded-md p-1.5 text-gray-400 transition-all hover:bg-red-50 hover:text-red-500"
 										onClick={onDelete}
 									>
 										<Trash2 className="h-5 w-5" />
 									</button>
-								</div>
-							) : null}
+								) : onAppeal ? (
+									<button
+										className="cursor-pointer rounded-md border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-all hover:bg-red-100"
+										onClick={onAppeal}
+									>
+										Khiếu nại
+									</button>
+								) : null}
+							</div>
 						</div>
 
 						<h3
@@ -231,9 +240,14 @@ export const PostRow: React.FC<PostRowProps> = ({
 						</div>
 
 						{post.isBanned ? (
-							<div className="mt-1.5 flex items-center gap-1.5 text-xs font-medium text-red-400">
-								<AlertCircle className="h-3.5 w-3.5" />
-								Vi phạm tiêu chuẩn cộng đồng
+							<div className="mt-2 rounded-xl border border-red-100 bg-white/70 px-3 py-2 text-xs text-red-700">
+								<div className="mb-1 flex items-center gap-1.5 font-semibold text-red-500">
+									<AlertCircle className="h-3.5 w-3.5" />
+									Lý do khóa
+								</div>
+								<p className="leading-5">
+									{post.banReason?.trim() || "Vi phạm tiêu chuẩn cộng đồng"}
+								</p>
 							</div>
 						) : null}
 					</div>

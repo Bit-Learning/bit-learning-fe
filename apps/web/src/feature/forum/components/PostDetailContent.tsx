@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
+	Lock,
 	ImageIcon,
 	Paperclip,
 	AtSign,
@@ -37,6 +38,7 @@ import { ShareBar } from "./ShareBar";
 import type { Post, ReactionSummary, ReactionType } from "../types/forum.type";
 import { toast } from "@/shared/components/Sonner";
 import { resolveAuthorUsername } from "../utils/author-profile";
+import { PostBanAppealDialog } from "./PostBanAppealDialog";
 
 const REACTIONS: { type: ReactionType; label: string; icon: string }[] = [
 	{ type: "LIKE", label: "Like", icon: "👍" },
@@ -153,9 +155,13 @@ const PostDetailContent: React.FC = () => {
 	const [replyingTo, setReplyingTo] = useState<number | null>(null);
 	const [lightboxImg, setLightboxImg] = useState<string | null>(null);
 	const [activeImageUrl, setActiveImageUrl] = useState<string | null>(null);
+	const [isAppealDialogOpen, setIsAppealDialogOpen] = useState(false);
 
-	const { data: postResponse, isLoading: isPostLoading } =
-		useForumPostById(postId);
+	const {
+		data: postResponse,
+		isLoading: isPostLoading,
+		isError: isPostError,
+	} = useForumPostById(postId);
 	const { data: commentsResponse, isLoading: isCommentsLoading } =
 		useForumComments(postId);
 	const { data: postsResponse } = useForumPosts({ page: 0, size: 20 });
@@ -176,7 +182,12 @@ const PostDetailContent: React.FC = () => {
 	const likeCommentMutation = useLikeForumComment();
 	const { userInfo } = useSelector(selectAuthStateInfo);
 
-	const canEdit = !!userInfo && selectedPost?.author?.id === userInfo.id;
+	const isBannedPost = !!selectedPost?.isBanned;
+	const canEdit =
+		!!userInfo && selectedPost?.author?.id === userInfo.id && !isBannedPost;
+	const canAppeal =
+		!!userInfo && selectedPost?.author?.id === userInfo.id && isBannedPost;
+	const isInteractionDisabled = isBannedPost;
 
 	const handleRequireAuthForComment = () => {
 		toast.error({ title: "Vui lòng đăng nhập để bình luận." });
@@ -184,6 +195,11 @@ const PostDetailContent: React.FC = () => {
 	};
 
 	const handleSubmitComment = () => {
+		if (isInteractionDisabled) {
+			toast.error({ title: "Bài viết đang bị khóa nên không thể bình luận." });
+			return;
+		}
+
 		if (!userInfo) {
 			handleRequireAuthForComment();
 			return;
@@ -203,6 +219,10 @@ const PostDetailContent: React.FC = () => {
 
 	const handleReact = (reactionType: ReactionType) => {
 		if (!selectedPost) return;
+		if (isInteractionDisabled) {
+			toast.error({ title: "Bài viết đang bị khóa nên không thể tương tác." });
+			return;
+		}
 		if (!userInfo) {
 			toast.error({ title: "Vui lòng đăng nhập để thả cảm xúc." });
 			navigate({ to: "/signin" });
@@ -272,6 +292,32 @@ const PostDetailContent: React.FC = () => {
 							/>
 						))}
 					</div>
+				</div>
+			</div>
+		);
+	}
+
+	if (isPostError) {
+		return (
+			<div className="min-h-screen bg-gray-50">
+				<div className="mx-auto flex max-w-3xl flex-col items-center justify-center px-6 py-24 text-center">
+					<div className="mb-4 rounded-full bg-slate-100 p-3 text-slate-500">
+						<Lock className="h-6 w-6" />
+					</div>
+					<h1 className="text-2xl font-bold text-slate-900">
+						Không thể mở bài viết này
+					</h1>
+					<p className="mt-3 max-w-xl text-sm leading-6 text-slate-500">
+						Bài viết có thể đã bị khóa và bạn không có quyền truy cập, hoặc liên
+						kết này không còn hợp lệ.
+					</p>
+					<button
+						type="button"
+						onClick={() => navigate({ to: "/forum" })}
+						className="mt-6 inline-flex items-center justify-center rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+					>
+						Quay lại diễn đàn
+					</button>
 				</div>
 			</div>
 		);
@@ -400,6 +446,40 @@ const PostDetailContent: React.FC = () => {
 						<h1 className="text-3xl font-extrabold text-gray-900 leading-tight tracking-tight mb-6">
 							{selectedPost.title}
 						</h1>
+
+						{isBannedPost && (
+							<div className="mb-6 rounded-2xl border border-red-200 bg-red-50/80 p-4">
+								<div className="flex flex-col gap-4 md:flex-row md:items-start md:justify-between">
+									<div className="flex items-start gap-3">
+										<div className="rounded-full bg-red-100 p-2 text-red-600">
+											<Lock className="h-4 w-4" />
+										</div>
+										<div className="space-y-2">
+											<p className="text-sm font-semibold uppercase tracking-[0.18em] text-red-500">
+												Bài viết đang bị khóa
+											</p>
+											<p className="text-sm leading-6 text-red-900">
+												{selectedPost.banReason?.trim() ||
+													"Quản trị viên chưa cung cấp lý do chi tiết cho quyết định khóa này."}
+											</p>
+											<p className="text-sm text-red-700">
+												Mọi tương tác mới trên bài viết này hiện đã được tạm
+												tắt.
+											</p>
+										</div>
+									</div>
+									{canAppeal ? (
+										<button
+											type="button"
+											onClick={() => setIsAppealDialogOpen(true)}
+											className="inline-flex shrink-0 items-center justify-center rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+										>
+											Gửi khiếu nại
+										</button>
+									) : null}
+								</div>
+							</div>
+						)}
 
 						{imageAttachments.length > 0 && (
 							<div className="mb-6 space-y-3 overflow-hidden rounded-md">
@@ -541,7 +621,7 @@ const PostDetailContent: React.FC = () => {
 							<ReactionButton
 								post={selectedPost as Post}
 								onReact={handleReact}
-								disabled={reactMutation.isPending}
+								disabled={reactMutation.isPending || isInteractionDisabled}
 							/>
 							<button
 								className="cursor-pointer flex items-center justify-center gap-2 rounded-full px-4 py-2 text-sm font-semibold text-gray-600 hover:bg-gray-50 transition-colors"
@@ -606,7 +686,7 @@ const PostDetailContent: React.FC = () => {
 											onSubmitReply={(content, id) =>
 												replyCommentMutation.mutate({ id, content })
 											}
-											isInteractionDisabled={!userInfo}
+											isInteractionDisabled={!userInfo || isInteractionDisabled}
 											onRequireAuth={handleRequireAuthForComment}
 										/>
 									</div>
@@ -686,12 +766,14 @@ const PostDetailContent: React.FC = () => {
 						{userInfo && <AuthorAvatar author={userInfo} size="lg" />}
 						<div className="flex-1 space-y-3">
 							<Textarea
-								disabled={!userInfo}
+								disabled={!userInfo || isInteractionDisabled}
 								className="min-h-60 bg-white border border-gray-200 rounded-md focus:border-blue-300 focus:ring-2 focus:ring-blue-100 resize-none text-sm transition-all shadow-sm disabled:cursor-not-allowed disabled:bg-slate-50 disabled:text-slate-500"
 								placeholder={
-									userInfo
-										? "Bạn nghĩ gì về bài viết này?"
-										: "Đăng nhập để viết bình luận"
+									isInteractionDisabled
+										? "Bài viết đang bị khóa nên không thể thêm bình luận mới"
+										: userInfo
+											? "Bạn nghĩ gì về bài viết này?"
+											: "Đăng nhập để viết bình luận"
 								}
 								value={comment}
 								onChange={(e) => setComment(e.target.value)}
@@ -723,12 +805,14 @@ const PostDetailContent: React.FC = () => {
 								<button
 									type="button"
 									className={`cursor-pointer px-5 py-3 rounded-md text-md font-bold transition-all ${
-										userInfo && comment.trim()
+										userInfo && comment.trim() && !isInteractionDisabled
 											? "bg-primary text-white shadow-sm"
 											: "bg-gray-100 text-gray-400 cursor-not-allowed"
 									}`}
 									onClick={handleSubmitComment}
-									disabled={!userInfo || !comment.trim()}
+									disabled={
+										!userInfo || !comment.trim() || isInteractionDisabled
+									}
 								>
 									Đăng bình luận
 								</button>
@@ -754,6 +838,12 @@ const PostDetailContent: React.FC = () => {
 				<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 text-center text-sm text-gray-500">
 					&copy; {new Date().getFullYear()} BIT Learning. All rights reserved.
 				</div>
+
+				<PostBanAppealDialog
+					post={selectedPost}
+					open={isAppealDialogOpen}
+					onOpenChange={setIsAppealDialogOpen}
+				/>
 			</div>
 		</div>
 	);

@@ -13,7 +13,7 @@ export const postApi = {
 		size = 10,
 	): Promise<AxiosResponse<ApiResponse<PostPreview[]>>> {
 		return api.get("/posts", {
-			params: { page, size },
+			params: { page, size, includeBanned: true },
 		});
 	},
 

@@ -24,6 +24,7 @@ import type {
 	FilterByAuthorParams,
 	ForumSubscriptionRequest,
 	PaginationParams,
+	PostBanAppealRequest,
 	PostFeedParams,
 	ReactionType,
 	UpdateCommentRequest,
@@ -252,6 +253,33 @@ export const useDeleteForumPost = () => {
 		},
 		onError: (error: any) => {
 			toast.error({ title: error.message || "Có lỗi xảy ra khi xóa bài viết" });
+		},
+	});
+};
+
+export const useAppealBannedForumPost = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ id, data }: { id: number; data: PostBanAppealRequest }) =>
+			postApi.appealPostBan(id, data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: ["forum-post"] });
+			queryClient.invalidateQueries({ queryKey: ["forum-post-slug"] });
+			queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
+			toast.success({
+				title: "Đã gửi khiếu nại",
+				description:
+					"Quản trị viên sẽ xem xét lại bài viết của bạn trong thời gian sớm nhất.",
+			});
+		},
+		onError: (error: any) => {
+			toast.error({
+				title:
+					error?.response?.data?.message ||
+					error?.message ||
+					"Không thể gửi khiếu nại cho bài viết này",
+			});
 		},
 	});
 };
