@@ -10,7 +10,6 @@ import {
 	PieChart,
 	ReferenceLine,
 	ResponsiveContainer,
-	Tooltip,
 	XAxis,
 	YAxis,
 } from "recharts";
@@ -19,6 +18,7 @@ import {
 	ArrowDownRight,
 	ArrowUpRight,
 	CalendarRange,
+	CircleHelp,
 	CreditCard,
 	Download,
 	DollarSign,
@@ -44,6 +44,11 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Header } from "@/layout/header";
 import { cn } from "@/shared/lib/utils";
 import {
@@ -2856,9 +2861,32 @@ export function Dashboard() {
 									}
 									granularityControls={
 										<div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/40">
-											<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-												Hiển thị biểu đồ theo
-											</p>
+											<div className="flex items-center gap-2">
+												<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+													Hiển thị biểu đồ theo
+												</p>
+												<Tooltip>
+													<TooltipTrigger asChild>
+														<button
+															type="button"
+															className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:text-slate-500 dark:hover:text-slate-200"
+															aria-label="Giải thích cách hiển thị biểu đồ"
+														>
+															<CircleHelp className="h-3.5 w-3.5" />
+														</button>
+													</TooltipTrigger>
+													<TooltipContent
+														side="top"
+														align="start"
+														sideOffset={8}
+														className="max-w-72 leading-5"
+													>
+														`Tự động` để backend tự chọn cách gộp theo độ dài
+														khoảng ngày. `Ngày`, `tuần`, `tháng` là cách gom dữ
+														liệu doanh thu thành từng kỳ trên biểu đồ.
+													</TooltipContent>
+												</Tooltip>
+											</div>
 											<div className="mt-2">
 												<Select
 													value={granularity}
