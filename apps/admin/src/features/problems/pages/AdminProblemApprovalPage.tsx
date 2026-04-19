@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import {
   Search,
   CheckCircle,
@@ -43,10 +43,13 @@ const AdminProblemApprovalPage: React.FC = () => {
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
+  const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [detailProblemId, setDetailProblemId] = useState<string | null>(null);
   const [showBatchRejectForm, setShowBatchRejectForm] = useState(false);
   const [batchRejectReason, setBatchRejectReason] = useState("");
+
+  // ref for indeterminate state on the "select all" checkbox
+  const selectAllRef = useRef<HTMLButtonElement>(null);
 
   // --- Bank tab state ---
   const [bankKeyword, setBankKeyword] = useState("");
@@ -72,6 +75,15 @@ const AdminProblemApprovalPage: React.FC = () => {
     return matchSearch && matchDifficulty;
   });
 
+  // Sync indeterminate state whenever selection or filtered list changes
+  useEffect(() => {
+    const el = selectAllRef.current as any;
+    if (!el) return;
+    const allSelected = filteredProblems.length > 0 && selectedIds.length === filteredProblems.length;
+    const someSelected = selectedIds.length > 0 && !allSelected;
+    el.indeterminate = someSelected;
+  }, [selectedIds, filteredProblems]);
+
   useEffect(() => {
     setSelectedIds([]);
   }, [page, activeTab]);
@@ -80,17 +92,16 @@ const AdminProblemApprovalPage: React.FC = () => {
     if (selectedIds.length === filteredProblems.length && filteredProblems.length > 0) {
       setSelectedIds([]);
     } else {
-      setSelectedIds(filteredProblems.map((p) => Number(p.id)));
+      setSelectedIds(filteredProblems.map((p) => p.id));
     }
   };
 
   const handleSelectOne = (id: string) => {
-    const numId = Number(id);
-    setSelectedIds((prev) => (prev.includes(numId) ? prev.filter((x) => x !== numId) : [...prev, numId]));
+    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
   };
 
   const handleBatchApprove = () => {
-    approveMutation.mutate(selectedIds.map(String), {
+    approveMutation.mutate(selectedIds, {
       onSuccess: () => setSelectedIds([]),
     });
   };
@@ -101,7 +112,7 @@ const AdminProblemApprovalPage: React.FC = () => {
       return;
     }
     rejectMutation.mutate(
-      { problemIds: selectedIds.map(String), rejectReason: batchRejectReason.trim() },
+      { problemIds: selectedIds, rejectReason: batchRejectReason.trim() },
       {
         onSuccess: () => {
           setSelectedIds([]);
@@ -275,6 +286,7 @@ const AdminProblemApprovalPage: React.FC = () => {
                     <TableRow>
                       <TableHead className="w-12">
                         <Checkbox
+                          ref={selectAllRef}
                           checked={filteredProblems.length > 0 && selectedIds.length === filteredProblems.length}
                           onCheckedChange={handleSelectAll}
                         />
@@ -288,7 +300,7 @@ const AdminProblemApprovalPage: React.FC = () => {
                   </TableHeader>
                   <TableBody>
                     {filteredProblems.map((problem) => {
-                      const isSelected = selectedIds.includes(Number(problem.id));
+                      const isSelected = selectedIds.includes(problem.id);
                       return (
                         <TableRow key={problem.id} className={cn(isSelected && "bg-muted/50")}>
                           <TableCell>
@@ -316,31 +328,12 @@ const AdminProblemApprovalPage: React.FC = () => {
                             </span>
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                            {format(new Date(problem.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })}
+                            {format(new Date(problem.updatedAt), "dd/MM/yyyy HH:mm", { locale: vi })}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
                               <Button variant="ghost" size="sm" onClick={() => setDetailProblemId(problem.id)}>
                                 <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => approveMutation.mutate([problem.id])}
-                                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                              >
-                                <CheckCircle className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedIds([Number(problem.id)]);
-                                  setShowBatchRejectForm(true);
-                                }}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <XCircle className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>

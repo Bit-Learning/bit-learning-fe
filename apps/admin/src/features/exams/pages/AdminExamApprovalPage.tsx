@@ -274,6 +274,7 @@ const AdminExamApprovalPage: React.FC = () => {
                       </TableHead>
                       <TableHead>Đề thi</TableHead>
                       <TableHead>Mã đề</TableHead>
+                      <TableHead>Môn học</TableHead>
                       <TableHead>Tác giả</TableHead>
                       <TableHead>Ngày gửi</TableHead>
                       <TableHead className="text-right">Thao tác</TableHead>
@@ -308,6 +309,9 @@ const AdminExamApprovalPage: React.FC = () => {
                             </span>
                           </TableCell>
                           <TableCell>
+                            <span className="text-sm">{exam.subject?.name || "Tin học"}</span>
+                          </TableCell>
+                          <TableCell>
                             <span className="text-sm">
                               {exam.createdBy?.firstName + " " + exam.createdBy?.lastName}
                             </span>
@@ -319,25 +323,6 @@ const AdminExamApprovalPage: React.FC = () => {
                             <div className="flex items-center justify-end gap-1">
                               <Button variant="ghost" size="sm" onClick={() => setDetailExamId(exam.id)}>
                                 <Eye className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => approveMutation.mutate([exam.id])}
-                                className="text-emerald-600 hover:text-emerald-700 hover:bg-emerald-50"
-                              >
-                                <CheckCircle className="h-4 w-4" />
-                              </Button>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => {
-                                  setSelectedIds([exam.id]);
-                                  setShowBatchRejectForm(true);
-                                }}
-                                className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                              >
-                                <XCircle className="h-4 w-4" />
                               </Button>
                             </div>
                           </TableCell>

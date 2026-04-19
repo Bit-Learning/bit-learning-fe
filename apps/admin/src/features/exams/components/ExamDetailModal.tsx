@@ -1,9 +1,21 @@
 import { useState } from "react";
-import { FileText, Clock, User, AlertCircle, CheckCircle2, XCircle, Loader2, X } from "lucide-react";
+import {
+  FileText,
+  Clock,
+  User,
+  AlertCircle,
+  CheckCircle2,
+  XCircle,
+  Loader2,
+  X,
+  ChevronDown,
+  CheckCircle,
+  Circle,
+} from "lucide-react";
 import { useExam } from "../queries/useExam";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
-import type { ExamType } from "../types/exam.type";
+import type { ExamType, ExamQuestionResponse } from "../types/exam.type";
 import { toast } from "@/components/Sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
@@ -20,6 +32,80 @@ const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
     className:
       "bg-violet-50 text-violet-700 border border-violet-200 dark:bg-violet-900/20 dark:text-violet-400 dark:border-violet-800",
   },
+};
+
+interface QuestionItemProps {
+  eq: ExamQuestionResponse;
+  index: number;
+}
+
+const QuestionItem: React.FC<QuestionItemProps> = ({ eq }) => {
+  const [expanded, setExpanded] = useState(false);
+  const q = eq.question;
+  const options = q?.options ?? [];
+
+  return (
+    <div className="border border-slate-200 dark:border-slate-700 rounded-lg overflow-hidden">
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="w-full flex items-start gap-3 px-4 py-3 bg-white dark:bg-slate-800/50 hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors text-left"
+      >
+        <span className="text-xs font-mono text-slate-400 shrink-0 mt-0.5 w-5">#{eq.questionNo}</span>
+        <p className="text-sm text-slate-700 dark:text-slate-300 flex-1 leading-relaxed">{q?.content || "—"}</p>
+        <div className="flex items-center gap-2 shrink-0">
+          <span className="text-xs font-semibold text-blue-600 dark:text-blue-400 whitespace-nowrap">{eq.score}đ</span>
+          <ChevronDown
+            className={cn("w-4 h-4 text-slate-400 transition-transform duration-200", expanded && "rotate-180")}
+          />
+        </div>
+      </button>
+
+      {expanded && options.length > 0 && (
+        <div className="px-4 pb-3 pt-1 bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50 space-y-1.5">
+          {options.map((opt, i) => (
+            <div
+              key={opt.id}
+              className={cn(
+                "flex items-start gap-2.5 px-3 py-2 rounded-lg text-sm transition-colors",
+                opt.isCorrect
+                  ? "bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800"
+                  : "bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700",
+              )}
+            >
+              {opt.isCorrect ? (
+                <CheckCircle className="w-4 h-4 text-emerald-500 shrink-0 mt-0.5" />
+              ) : (
+                <Circle className="w-4 h-4 text-slate-300 dark:text-slate-600 shrink-0 mt-0.5" />
+              )}
+              <span className="text-xs font-mono text-slate-400 shrink-0">
+                {opt.label || String.fromCharCode(65 + i)}.
+              </span>
+              <span
+                className={cn(
+                  "flex-1 leading-relaxed",
+                  opt.isCorrect
+                    ? "text-emerald-800 dark:text-emerald-300 font-medium"
+                    : "text-slate-600 dark:text-slate-400",
+                )}
+              >
+                {opt.content}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {expanded && options.length === 0 && q?.canonicalAnswer && (
+        <div className="px-4 pb-3 pt-2 bg-slate-50/80 dark:bg-slate-900/50 border-t border-slate-100 dark:border-slate-700/50">
+          <p className="text-xs text-slate-400 mb-1 font-medium uppercase tracking-wider">Đáp án</p>
+          <p className="text-sm text-emerald-700 dark:text-emerald-400 bg-emerald-50 dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800 rounded-lg px-3 py-2">
+            {q.canonicalAnswer}
+          </p>
+        </div>
+      )}
+    </div>
+  );
 };
 
 interface DetailModalProps {
@@ -59,7 +145,7 @@ export const ExamDetailModal: React.FC<DetailModalProps> = ({
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-700 overflow-hidden">
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-3xl max-h-[90vh] flex flex-col border border-slate-200 dark:border-slate-700 overflow-hidden">
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/50 shrink-0">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
@@ -117,11 +203,8 @@ export const ExamDetailModal: React.FC<DetailModalProps> = ({
               {exam.createdBy && (
                 <div className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-400">
                   <User className="w-4 h-4 shrink-0" />
-                  <span>
-                    <span className="font-medium text-slate-800 dark:text-slate-200">
-                      {exam.createdBy?.firstName + " " + exam.createdBy?.lastName}
-                    </span>
-                    {" · "}
+                  <span className="font-medium text-slate-800 dark:text-slate-200">
+                    {exam.createdBy.firstName + " " + exam.createdBy.lastName}
                   </span>
                 </div>
               )}
@@ -142,26 +225,12 @@ export const ExamDetailModal: React.FC<DetailModalProps> = ({
               {exam.examQuestions?.length > 0 && (
                 <div>
                   <p className="text-xs font-semibold text-slate-500 dark:text-slate-400 uppercase tracking-wider mb-2">
-                    Danh sách câu hỏi (3 câu đầu)
+                    Danh sách câu hỏi ({exam.examQuestions.length} câu)
                   </p>
                   <div className="space-y-2">
-                    {exam.examQuestions.slice(0, 3).map((eq) => (
-                      <div
-                        key={eq.id}
-                        className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 border border-slate-100 dark:border-slate-700"
-                      >
-                        <div className="flex items-start justify-between gap-2">
-                          <p className="text-xs font-mono text-slate-400 shrink-0">#{eq.questionNo}</p>
-                          <p className="text-xs text-slate-700 dark:text-slate-300 flex-1 line-clamp-2">
-                            {eq.question?.content || "—"}
-                          </p>
-                          <span className="text-xs font-medium text-slate-500 shrink-0">{eq.score}đ</span>
-                        </div>
-                      </div>
+                    {exam.examQuestions.map((eq, idx) => (
+                      <QuestionItem key={eq.id} eq={eq} index={idx} />
                     ))}
-                    {exam.examQuestions.length > 3 && (
-                      <p className="text-xs text-slate-400 text-center">+{exam.examQuestions.length - 3} câu khác</p>
-                    )}
                   </div>
                 </div>
               )}

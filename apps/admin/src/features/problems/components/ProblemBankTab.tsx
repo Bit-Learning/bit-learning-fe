@@ -172,7 +172,7 @@ export function ProblemBankTab({
                     </span>
                   </TableCell>
                   <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                    {format(new Date(problem.createdAt), "dd/MM/yyyy", { locale: vi })}
+                    {format(new Date(problem.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })}
                   </TableCell>
                   <TableCell>
                     {problem.isPublic ? (
