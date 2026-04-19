@@ -288,10 +288,10 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                           <p className="text-slate-500 dark:text-slate-400 mb-4 font-medium">Chưa có bài tập nào</p>
                           <Button
                             onClick={() => navigate({ to: "/mentor/problem/create" })}
-                            className="bg-blue-600 hover:bg-blue-700 text-white"
+                            className="cursor-pointer bg-blue-700 hover:bg-white hover:text-blue-600 hover:border-blue-600 text-white text-md px-5 py-5 rounded-lg font-medium gap-2 transition-all shadow-sm shadow-blue-500/30"
                           >
                             <Plus className="w-4 h-4 mr-2" />
-                            Tạo Problem đầu tiên
+                            Tạo bài tập đầu tiên
                           </Button>
                         </td>
                       </tr>

@@ -36,7 +36,7 @@ const problemSchema = z.object({
   timeLimitMs: z.number().min(100, "Thời gian tối thiểu 100ms").max(30000, "Thời gian tối đa 30000ms"),
   memoryLimitMb: z.number().min(8, "Bộ nhớ tối thiểu 8MB").max(512, "Bộ nhớ tối đa 512MB"),
   isPublic: z.boolean().default(false),
-  tags: z.array(z.string()).default([]),
+  tags: z.array(z.string()).min(1, "Vui lòng chọn ít nhất 1 thẻ"),
 });
 
 const generateTemplateSchema = z.object({
@@ -78,7 +78,7 @@ const SectionCard: React.FC<{
 );
 
 const FieldError: React.FC<{ message?: string }> = ({ message }) =>
-  message ? <p className="text-xs text-red-500 mt-1.5">{message}</p> : null;
+  message ? <p className="text-sm text-red-500 mt-1.5">{message}</p> : null;
 
 const inputCls =
   "h-11 text-sm w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-400";
@@ -267,7 +267,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                   <input
                     {...form.register("title")}
                     onChange={handleTitleChange}
-                    placeholder="Ví dụ: Two Sum"
+                    placeholder="Nhập tên bài tập..."
                     className={inputCls}
                   />
                   <FieldError message={form.formState.errors.title?.message} />
@@ -276,11 +276,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                   <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Slug <span className="text-red-500">*</span>
                   </Label>
-                  <input
-                    {...form.register("slug")}
-                    placeholder="two-sum"
-                    className={cn(inputCls, "font-mono text-xs")}
-                  />
+                  <input {...form.register("slug")} placeholder="" className={cn(inputCls, "font-mono text-xs")} />
                   <FieldError message={form.formState.errors.slug?.message} />
                 </div>
               </div>
@@ -349,8 +345,9 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                 <TagMultiSelect
                   value={form.watch("tags")}
                   onChange={(tags) => form.setValue("tags", tags)}
-                  placeholder="Chọn tags..."
+                  placeholder="Chọn thẻ..."
                 />
+                <FieldError message={form.formState.errors.tags?.message} />
               </div>
             </div>
           </SectionCard>
@@ -471,7 +468,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
               isDisabled={isPending}
               className="cursor-pointer px-6 py-5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg"
             >
-              {isPending ? "Đang xử lý..." : isEditMode ? "Cập nhật bài toán" : "Tạo bài toán"}
+              {isPending ? "Đang xử lý..." : isEditMode ? "Cập nhật bài tập" : "Tạo bài tập"}
             </Button>
           </div>
         </form>

@@ -166,10 +166,10 @@ export const useCreateProblem = () => {
     mutationFn: (data: CreateProblemRequest) => problemApi.createProblem(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: problemKeys.all });
-      toast.success({ title: "Thành công", description: "Tạo bài toán thành công" });
+      toast.success({ title: "Thành công", description: "Tạo bài tập thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể tạo bài toán" });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể tạo bài tập" });
     },
   });
 };
@@ -181,10 +181,10 @@ export const useUpdateProblem = () => {
       problemApi.updateProblem(problemId, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: problemKeys.all });
-      toast.success({ title: "Thành công", description: "Cập nhật bài toán thành công" });
+      toast.success({ title: "Thành công", description: "Cập nhật bài tập thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật bài toán" });
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật bài tập" });
     },
   });
 };
