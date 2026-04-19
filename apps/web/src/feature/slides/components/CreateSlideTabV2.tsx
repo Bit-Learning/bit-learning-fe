@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useState } from "react";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
 	AlertCircle,
 	BookOpen,
@@ -14,23 +15,31 @@ import {
 	Wand2,
 	X,
 } from "lucide-react";
+import { CurriculumChapterPicker } from "@/feature/matrix/components/CurriculumChapterPicker";
 import { toast } from "@/shared/components/Sonner";
 import { useGenerateSlide } from "../queries/useSlide";
 import { useTemplates } from "../queries/useTemplate";
-import { GRADE_OPTIONS } from "../types/slide.type";
 import type { SlideRequest } from "../types/slide.type";
 
+type GenerateMode = "topic" | "chapter";
+
 type FieldErrors = {
-	topic?: string;
+	chapter?: string;
+	slideCount?: string;
 	template?: string;
+	topic?: string;
 };
 
 export const CreateSlideTabV2: React.FC = () => {
 	const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
 		null,
 	);
+	const [mode, setMode] = useState<GenerateMode>("topic");
 	const [topic, setTopic] = useState("");
-	const [grade, setGrade] = useState(6);
+	const [curriculumId, setCurriculumId] = useState<number | null>(null);
+	const [subjectId, setSubjectId] = useState<number | null>(null);
+	const [chapterId, setChapterId] = useState<number | null>(null);
+	const [chapterLabel, setChapterLabel] = useState<string | null>(null);
 	const [slideCount, setSlideCount] = useState(10);
 	const [includeExamples, setIncludeExamples] = useState(true);
 	const [includeExercises, setIncludeExercises] = useState(false);
@@ -73,15 +82,38 @@ export const CreateSlideTabV2: React.FC = () => {
 		setShowPreviewModal(false);
 	};
 
+	const handleModeChange = (nextMode: GenerateMode) => {
+		setMode(nextMode);
+		setFieldErrors({});
+
+		if (nextMode === "topic") {
+			setCurriculumId(null);
+			setSubjectId(null);
+			setChapterId(null);
+			setChapterLabel(null);
+			return;
+		}
+
+		setTopic("");
+	};
+
 	const validateForm = () => {
 		const nextErrors: FieldErrors = {};
 
-		if (!topic.trim()) {
+		if (mode === "topic" && !topic.trim()) {
 			nextErrors.topic = "Vui lòng nhập chủ đề bài giảng.";
+		}
+
+		if (mode === "chapter" && !chapterId) {
+			nextErrors.chapter = "Vui lòng chọn chương học trước khi tạo slide.";
 		}
 
 		if (!selectedTemplateId) {
 			nextErrors.template = "Vui lòng chọn template trước khi tạo slide.";
+		}
+
+		if (slideCount < 1 || slideCount > 15) {
+			nextErrors.slideCount = "Số lượng slide phải từ 1 đến 15.";
 		}
 
 		setFieldErrors(nextErrors);
@@ -97,14 +129,16 @@ export const CreateSlideTabV2: React.FC = () => {
 			return;
 		}
 
-		const request: SlideRequest = {
-			topic: topic.trim(),
-			grade,
+		const sharedFields = {
 			template_id: selectedTemplateId as number,
 			slide_count: slideCount,
 			include_examples: includeExamples,
 			include_exercises: includeExercises,
 		};
+		const request: SlideRequest =
+			mode === "topic"
+				? { topic: topic.trim(), ...sharedFields }
+				: { chapter_id: chapterId as number, ...sharedFields };
 
 		generateSlide.mutate(request);
 	};
@@ -133,45 +167,48 @@ export const CreateSlideTabV2: React.FC = () => {
 									<h2 className="text-2xl font-bold text-slate-900 md:text-3xl">
 										Tạo bộ slide rõ cấu trúc ngay từ một màn hình
 									</h2>
-									<p className="mt-2 text-sm leading-6 text-slate-600 md:text-base">
-										Chọn chủ đề, mức lớp và template trình bày. Bố cục này ưu
-										tiên nhìn rõ quyết định trước khi bấm generate.
-									</p>
-								</div>
-
-								<div className="grid grid-cols-2 gap-3 sm:w-fit">
-									<div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm">
-										<p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-											Template
-										</p>
-										<p className="mt-1 text-lg font-semibold text-slate-900">
-											{templates.length}
-										</p>
-									</div>
-									<div className="rounded-2xl border border-slate-200 bg-white/80 px-4 py-3 shadow-sm">
-										<p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-											Mặc định
-										</p>
-										<p className="mt-1 text-lg font-semibold text-slate-900">
-											{slideCount} slide
-										</p>
-									</div>
 								</div>
 							</div>
 						</div>
 
 						<div className="space-y-8 px-6 py-6 md:px-8">
-							<div className="grid grid-cols-1 gap-5 lg:grid-cols-[minmax(0,1.4fr)_220px]">
+							<div className="flex flex-wrap gap-3">
+								<button
+									type="button"
+									onClick={() => handleModeChange("topic")}
+									className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${mode === "topic"
+										? "border-blue-600 bg-blue-50 text-blue-700"
+										: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
+										}`}
+								>
+									Nhập chủ đề
+								</button>
+								<button
+									type="button"
+									onClick={() => handleModeChange("chapter")}
+									className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${mode === "chapter"
+										? "border-blue-600 bg-blue-50 text-blue-700"
+										: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
+										}`}
+								>
+									Chọn chương học
+								</button>
+							</div>
+
+							{mode === "topic" ? (
 								<div>
-									<label className="mb-2 block text-sm font-semibold text-slate-800">
+									<label
+										htmlFor="slide-v2-topic-input"
+										className="mb-2 block text-sm font-semibold text-slate-800"
+									>
 										Chủ đề bài giảng
 									</label>
 									<input
-										className={`w-full rounded-2xl border bg-slate-50 px-4 py-3 text-slate-900 outline-none transition-all ${
-											fieldErrors.topic
-												? "border-red-300 ring-2 ring-red-100"
-												: "border-slate-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-										} disabled:opacity-50`}
+										id="slide-v2-topic-input"
+										className={`w-full rounded-2xl border bg-slate-50 px-4 py-3 text-slate-900 outline-none transition-all ${fieldErrors.topic
+											? "border-red-300 ring-2 ring-red-100"
+											: "border-slate-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+											} disabled:opacity-50`}
 										placeholder="Ví dụ: Mảng một chiều trong Pascal, thuật toán sắp xếp..."
 										type="text"
 										value={topic}
@@ -189,47 +226,53 @@ export const CreateSlideTabV2: React.FC = () => {
 										</p>
 									)}
 								</div>
-
-								<div>
-									<label className="mb-2 block text-sm font-semibold text-slate-800">
-										Lớp học
-									</label>
-									<select
-										className="w-full rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100 disabled:opacity-50"
-										value={grade}
-										onChange={(event) => setGrade(Number(event.target.value))}
-										disabled={generateSlide.isPending}
-									>
-										{GRADE_OPTIONS.filter((option) => option.value).map(
-											(option) => (
-												<option
-													key={option.value}
-													value={option.value.replace("Lớp ", "")}
-												>
-													{option.label}
-												</option>
-											),
-										)}
-									</select>
-								</div>
-							</div>
+							) : (
+								<CurriculumChapterPicker
+									curriculumId={curriculumId}
+									subjectId={subjectId}
+									chapterId={chapterId}
+									onCurriculumChange={setCurriculumId}
+									onSubjectChange={setSubjectId}
+									onChapterLabelChange={setChapterLabel}
+									onChapterChange={(value) => {
+										setChapterId(value);
+										if (fieldErrors.chapter) {
+											resetFieldError("chapter");
+										}
+									}}
+									error={fieldErrors.chapter}
+									disabled={generateSlide.isPending}
+								/>
+							)}
 
 							<div className="grid grid-cols-1 gap-4 rounded-3xl border border-slate-200 bg-slate-50/70 p-4 md:grid-cols-3 md:p-5">
 								<div className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
-									<label className="mb-2 block text-sm font-semibold text-slate-800">
+									<label
+										htmlFor="slide-v2-count-input"
+										className="mb-2 block text-sm font-semibold text-slate-800"
+									>
 										Số lượng slide
 									</label>
 									<input
+										id="slide-v2-count-input"
 										className="w-full rounded-xl border border-slate-200 bg-slate-50 px-4 py-3 text-slate-900 outline-none transition-all focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
 										max="15"
 										min="1"
 										type="number"
 										value={slideCount}
-										onChange={(event) =>
-											setSlideCount(Number(event.target.value))
-										}
+										onChange={(event) => {
+											setSlideCount(Number(event.target.value));
+											if (fieldErrors.slideCount) {
+												resetFieldError("slideCount");
+											}
+										}}
 										disabled={generateSlide.isPending}
 									/>
+									{fieldErrors.slideCount && (
+										<p className="mt-2 text-sm text-red-600">
+											{fieldErrors.slideCount}
+										</p>
+									)}
 								</div>
 
 								<label className="flex cursor-pointer items-center justify-between rounded-2xl border border-slate-200 bg-white p-4 shadow-sm">
@@ -278,12 +321,12 @@ export const CreateSlideTabV2: React.FC = () => {
 							<div>
 								<div className="mb-3 flex items-center justify-between gap-3">
 									<div>
-										<label className="block text-sm font-semibold text-slate-800">
+										<div className="block text-sm font-semibold text-slate-800">
 											Chọn template trình bày
-										</label>
+										</div>
 										<p className="mt-1 text-sm text-slate-500">
-											Chọn trước mẫu phù hợp để deck có nhịp và cảm giác thị
-											giác tốt hơn.
+											Template sẽ quyết định nhịp trình bày và cảm giác thị
+											giác.
 										</p>
 									</div>
 									<div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-500">
@@ -313,11 +356,10 @@ export const CreateSlideTabV2: React.FC = () => {
 													}
 												}}
 												disabled={generateSlide.isPending}
-												className={`group relative overflow-hidden rounded-3xl border text-left transition-all ${
-													isSelected
-														? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-500/10"
-														: "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
-												} disabled:opacity-60`}
+												className={`group relative overflow-hidden rounded-3xl border text-left transition-all ${isSelected
+													? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-500/10"
+													: "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+													} disabled:opacity-60`}
 											>
 												<div className="relative h-40 overflow-hidden">
 													{template.thumbnailUrl ? (
@@ -341,11 +383,10 @@ export const CreateSlideTabV2: React.FC = () => {
 
 													<div className="absolute right-3 top-3 flex items-center gap-2">
 														<span
-															className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
-																isSelected
-																	? "bg-blue-600 text-white"
-																	: "bg-white/90 text-slate-700"
-															}`}
+															className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${isSelected
+																? "bg-blue-600 text-white"
+																: "bg-white/90 text-slate-700"
+																}`}
 														>
 															<CheckCircle2 size={13} />
 															{isSelected ? "Đang chọn" : "Chọn mẫu"}
@@ -404,20 +445,24 @@ export const CreateSlideTabV2: React.FC = () => {
 						<div className="space-y-5 px-6 py-6">
 							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 								<p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-									Chủ đề
+									Nguồn nội dung
 								</p>
 								<p className="mt-2 text-base font-semibold text-slate-900">
-									{topic.trim() || "Chưa nhập chủ đề"}
+									{mode === "topic"
+										? topic.trim() || "Chưa nhập chủ đề"
+										: chapterLabel
+											? chapterLabel
+											: "Chưa chọn chapter"}
 								</p>
 							</div>
 
 							<div className="grid grid-cols-2 gap-3">
 								<div className="rounded-2xl border border-slate-200 p-4">
 									<p className="text-xs uppercase tracking-[0.18em] text-slate-400">
-										Lớp
+										Mode
 									</p>
 									<p className="mt-2 text-lg font-semibold text-slate-900">
-										{grade}
+										{mode === "topic" ? "Topic" : "Chapter"}
 									</p>
 								</div>
 								<div className="rounded-2xl border border-slate-200 p-4">
@@ -480,20 +525,25 @@ export const CreateSlideTabV2: React.FC = () => {
 									<BookOpen className="mt-0.5 text-blue-600" size={18} />
 									<div>
 										<p className="text-sm font-semibold text-blue-900">
-											Gợi ý để ra deck tốt hơn
+											Gợi ý để ra slide tốt hơn
 										</p>
 										<p className="mt-1 text-sm leading-6 text-blue-800/80">
-											Nên ghi chủ đề đủ cụ thể, ví dụ “Mảng một chiều trong
-											Pascal” thay vì chỉ “Pascal”.
+											Với chủ đề, nên ghi chủ đề đủ cụ thể. Với chương học
+											, hãy chọn đúng bài học từ chương trình thay vì nhập
+											tay.
 										</p>
 									</div>
 								</div>
 							</div>
 
 							<button
+								type="button"
 								className="flex w-full items-center justify-center gap-2 rounded-2xl bg-blue-600 px-6 py-4 text-base font-semibold text-white shadow-lg shadow-blue-500/20 transition hover:bg-blue-700 disabled:cursor-not-allowed disabled:opacity-50"
 								onClick={handleGenerate}
-								disabled={generateSlide.isPending}
+								disabled={
+									generateSlide.isPending ||
+									(mode === "topic" ? !topic.trim() : !chapterId)
+								}
 							>
 								{generateSlide.isPending ? (
 									<>
@@ -532,6 +582,7 @@ export const CreateSlideTabV2: React.FC = () => {
 								</div>
 							</div>
 							<button
+								type="button"
 								className="group flex h-9 w-9 items-center justify-center rounded-full text-slate-400 transition-all hover:bg-slate-100"
 								onClick={closePreviewModal}
 							>
@@ -571,12 +622,14 @@ export const CreateSlideTabV2: React.FC = () => {
 							</a>
 							<div className="flex gap-3">
 								<button
+									type="button"
 									className="rounded-2xl border border-slate-200 px-5 py-2.5 text-sm font-medium text-slate-600 transition-all hover:bg-slate-50"
 									onClick={closePreviewModal}
 								>
 									Đóng
 								</button>
 								<button
+									type="button"
 									className="flex items-center gap-2 rounded-2xl bg-blue-600 px-6 py-2.5 text-sm font-semibold text-white shadow-md transition-all hover:bg-blue-700"
 									onClick={() => {
 										setSelectedTemplateId(previewTemplateId);

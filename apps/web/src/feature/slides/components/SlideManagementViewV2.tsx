@@ -39,8 +39,7 @@ export const SlideManagementViewV2: React.FC = () => {
 								</h1>
 								<p className="mt-2 text-sm leading-6 text-slate-600 md:text-base">
 									Tạo deck mới với AI hoặc quay lại các bộ slide đã sinh trước
-									đó. Màn hình này chia rõ hai luồng chính để giảm nhiễu khi
-									thao tác.
+									đó. Với mỗi thao tác slide được tạo sẽ tốn 3000 BIT
 								</p>
 							</div>
 
@@ -64,21 +63,19 @@ export const SlideManagementViewV2: React.FC = () => {
 
 					<div className="flex gap-8 px-6 pt-5 md:px-8">
 						<button
-							className={`cursor-pointer border-b-2 pb-4 text-md font-semibold transition-colors ${
-								activeTab === "my-slides"
+							className={`cursor-pointer border-b-2 pb-4 text-md font-semibold transition-colors ${activeTab === "my-slides"
 									? "border-primary text-primary"
 									: "border-transparent text-slate-500 hover:text-slate-700"
-							}`}
+								}`}
 							onClick={() => setActiveTab("my-slides")}
 						>
 							Slide của tôi
 						</button>
 						<button
-							className={`cursor-pointer border-b-2 pb-4 text-md font-semibold transition-colors ${
-								activeTab === "create"
+							className={`cursor-pointer border-b-2 pb-4 text-md font-semibold transition-colors ${activeTab === "create"
 									? "border-primary text-primary"
 									: "border-transparent text-slate-500 hover:text-slate-700"
-							}`}
+								}`}
 							onClick={() => setActiveTab("create")}
 						>
 							Tạo slide mới
