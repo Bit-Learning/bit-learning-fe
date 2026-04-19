@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Card } from "@workspace/ui/components/Card";
 import { Cell, Pie, PieChart, ResponsiveContainer, Tooltip } from "recharts";
-import type { QuestionStatusData } from "../types/dashboard.type";
+import type { QuestionStatusData } from "../types/mentor.type";
 
 interface QuestionStatusChartProps {
   data: QuestionStatusData;

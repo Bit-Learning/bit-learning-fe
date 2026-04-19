@@ -1,6 +1,6 @@
 import { Card } from "@workspace/ui/components/Card";
 import { HelpCircle, FileText, BookOpen, PresentationIcon, Network, Wallet } from "lucide-react";
-import type { MentorDashboardStats } from "../types/dashboard.type";
+import type { MentorDashboardStats } from "../types/mentor.type";
 
 interface StatsCardsProps {
   stats: MentorDashboardStats;
@@ -69,20 +69,10 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
       valueColor: "text-[#0C447C]",
       descColor: "text-[#378ADD]",
     },
-    {
-      label: "SỐ TIỀN NẠP",
-      value: stats.totalDeposited.toLocaleString("vi-VN"),
-      desc: "BIT coins",
-      bg: "bg-[#FAEEDA]",
-      border: "border-[#EF9F27]",
-      labelColor: "text-[#854F0B]",
-      valueColor: "text-[#633806]",
-      descColor: "text-[#BA7517]",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-6">
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
       {cards.map((c) => (
         <Card key={c.label} className={`border ${c.bg} ${c.border} shadow-none gap-1 px-4 py-3`}>
           <div className={`text-[10px] font-semibold tracking-widest ${c.labelColor}`}>{c.label}</div>

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Card } from "@workspace/ui/components/Card";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { ContentMonthlyData } from "../types/dashboard.type";
+import type { ContentMonthlyData } from "../types/mentor.type";
 
 interface SlideChartProps {
   data: ContentMonthlyData[];

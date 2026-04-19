@@ -1,7 +1,7 @@
 // @ts-nocheck
 import { Card } from "@workspace/ui/components/Card";
 import { Bar, BarChart, CartesianGrid, Cell, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
-import type { MonthlyCount } from "../types/dashboard.type";
+import type { MonthlyCount } from "../types/mentor.type";
 
 interface ExamMonthlyChartProps {
   data: MonthlyCount[];

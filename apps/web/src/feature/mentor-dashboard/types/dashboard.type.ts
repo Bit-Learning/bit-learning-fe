@@ -1,27 +1,88 @@
-export interface MentorDashboardStats {
+// ─── Raw API Response Types (match Java DTOs exactly) ───────────────────────
+
+export interface QuestionStats {
   totalQuestions: number;
   pendingQuestions: number;
+  approvedQuestions: number;
   rejectedQuestions: number;
-  totalExams: number;
-  newExamsThisMonth: number;
-  totalPractices: number;
-  newPracticesThisMonth: number;
-  totalSlides: number;
-  newSlidesThisMonth: number;
-  totalMindMaps: number;
-  newMindMapsThisMonth: number;
-  totalDeposited: number;
 }
+
+export interface SubjectStats {
+  totalSubjects: number;
+  januarySubjects: number;
+  februarySubjects: number;
+  marchSubjects: number;
+  aprilSubjects: number;
+  maySubjects: number;
+  juneSubjects: number;
+  julySubjects: number;
+  augustSubjects: number;
+  septemberSubjects: number;
+  octoberSubjects: number;
+  novemberSubjects: number;
+  decemberSubjects: number;
+}
+
+export interface ProblemStats {
+  totalProblems: number;
+  pendingProblems: number;
+  approvedProblems: number;
+  rejectedProblems: number;
+}
+
+export interface SlideStats {
+  totalSlides: number;
+  januarySlides: number;
+  februarySlides: number;
+  marchSlides: number;
+  aprilSlides: number;
+  maySlides: number;
+  juneSlides: number;
+  julySlides: number;
+  augustSlides: number;
+  septemberSlides: number;
+  octoberSlides: number;
+  novemberSlides: number;
+  decemberSlides: number;
+}
+
+export interface MindMapStats {
+  totalMindMaps: number;
+  januaryMindMaps: number;
+  februaryMindMaps: number;
+  marchMindMaps: number;
+  aprilMindMaps: number;
+  mayMindMaps: number;
+  juneMindMaps: number;
+  julyMindMaps: number;
+  augustMindMaps: number;
+  septemberMindMaps: number;
+  octoberMindMaps: number;
+  novemberMindMaps: number;
+  decemberMindMaps: number;
+}
+
+/** Shape of GET /statistics/mentor → data field */
+export interface MentorDashboardStatsResponse {
+  questionStats: QuestionStats;
+  subjectStats: SubjectStats;
+  problemStats: ProblemStats;
+  slideStats: SlideStats;
+  mindMapStats: MindMapStats;
+}
+
+/** Generic API wrapper returned by ApiResponse<T> */
+export interface ApiResponse<T> {
+  success: boolean;
+  message: string;
+  data: T;
+}
+
+// ─── UI-layer derived types (used by components) ─────────────────────────────
 
 export interface MonthlyCount {
   month: string;
   count: number;
-}
-
-export interface QuestionStatusData {
-  approved: number;
-  pending: number;
-  rejected: number;
 }
 
 export interface ContentMonthlyData {
@@ -30,11 +91,122 @@ export interface ContentMonthlyData {
   mindmaps: number;
 }
 
-export interface RecentQuestion {
-  id: number;
-  student: string;
-  course: string;
-  question: string;
-  time: string;
-  status: "pending" | "answered";
+export interface QuestionStatusData {
+  approved: number;
+  pending: number;
+  rejected: number;
+}
+
+export interface MentorDashboardStats {
+  totalQuestions: number;
+  pendingQuestions: number;
+  rejectedQuestions: number;
+  totalExams: number; // mapped from subjectStats.totalSubjects
+  newExamsThisMonth: number;
+  totalPractices: number; // mapped from problemStats.totalProblems
+  newPracticesThisMonth: number;
+  totalSlides: number;
+  newSlidesThisMonth: number;
+  totalMindMaps: number;
+  newMindMapsThisMonth: number;
+  totalDeposited: number; // not in current API — kept for future / mock
+}
+
+// ─── Helper: transform API response → UI stats ───────────────────────────────
+
+const MONTHS_VI = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"];
+
+const SUBJECT_MONTH_KEYS: (keyof SubjectStats)[] = [
+  "januarySubjects",
+  "februarySubjects",
+  "marchSubjects",
+  "aprilSubjects",
+  "maySubjects",
+  "juneSubjects",
+  "julySubjects",
+  "augustSubjects",
+  "septemberSubjects",
+  "octoberSubjects",
+  "novemberSubjects",
+  "decemberSubjects",
+];
+
+const SLIDE_MONTH_KEYS: (keyof SlideStats)[] = [
+  "januarySlides",
+  "februarySlides",
+  "marchSlides",
+  "aprilSlides",
+  "maySlides",
+  "juneSlides",
+  "julySlides",
+  "augustSlides",
+  "septemberSlides",
+  "octoberSlides",
+  "novemberSlides",
+  "decemberSlides",
+];
+
+const MINDMAP_MONTH_KEYS: (keyof MindMapStats)[] = [
+  "januaryMindMaps",
+  "februaryMindMaps",
+  "marchMindMaps",
+  "aprilMindMaps",
+  "mayMindMaps",
+  "juneMindMaps",
+  "julyMindMaps",
+  "augustMindMaps",
+  "septemberMindMaps",
+  "octoberMindMaps",
+  "novemberMindMaps",
+  "decemberMindMaps",
+];
+
+export function transformMentorStats(raw: MentorDashboardStatsResponse): {
+  stats: MentorDashboardStats;
+  examMonthly: MonthlyCount[];
+  contentMonthly: ContentMonthlyData[];
+  questionStatus: QuestionStatusData;
+} {
+  const currentMonth = new Date().getMonth(); // 0-based
+
+  const examMonthly: MonthlyCount[] = MONTHS_VI.map((month, i) => {
+    const key = SUBJECT_MONTH_KEYS[i]!;
+    return {
+      month,
+      count: raw.subjectStats[key],
+    };
+  });
+
+  const contentMonthly: ContentMonthlyData[] = MONTHS_VI.map((month, i) => {
+    const slideKey = SLIDE_MONTH_KEYS[i]!;
+    const mindMapKey = MINDMAP_MONTH_KEYS[i]!;
+    return {
+      month,
+      slides: raw.slideStats[slideKey],
+      mindmaps: raw.mindMapStats[mindMapKey],
+    };
+  });
+
+  const questionStatus: QuestionStatusData = {
+    approved: raw.questionStats.approvedQuestions,
+    pending: raw.questionStats.pendingQuestions,
+    rejected: raw.questionStats.rejectedQuestions,
+  };
+
+  const stats: MentorDashboardStats = {
+    totalQuestions: raw.questionStats.totalQuestions,
+    pendingQuestions: raw.questionStats.pendingQuestions,
+    rejectedQuestions: raw.questionStats.rejectedQuestions,
+    totalExams: raw.subjectStats.totalSubjects,
+    newExamsThisMonth: raw.subjectStats[SUBJECT_MONTH_KEYS[currentMonth]!],
+    totalPractices: raw.problemStats.totalProblems,
+    newPracticesThisMonth: raw.problemStats.pendingProblems, // best available proxy
+    totalSlides: raw.slideStats.totalSlides,
+    newSlidesThisMonth: raw.slideStats[SLIDE_MONTH_KEYS[currentMonth]!],
+    totalMindMaps: raw.mindMapStats.totalMindMaps,
+    newMindMapsThisMonth: raw.mindMapStats[MINDMAP_MONTH_KEYS[currentMonth]!],
+    totalDeposited: 0, // API chưa có, giữ 0 hoặc dùng endpoint riêng
+  };
+
+  return { stats, examMonthly, contentMonthly, questionStatus };
 }
