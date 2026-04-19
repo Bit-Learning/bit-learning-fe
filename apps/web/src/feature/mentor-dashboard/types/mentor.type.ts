@@ -5,20 +5,20 @@ export interface QuestionStats {
   rejectedQuestions: number;
 }
 
-export interface SubjectStats {
-  totalSubjects: number;
-  januarySubjects: number;
-  februarySubjects: number;
-  marchSubjects: number;
-  aprilSubjects: number;
-  maySubjects: number;
-  juneSubjects: number;
-  julySubjects: number;
-  augustSubjects: number;
-  septemberSubjects: number;
-  octoberSubjects: number;
-  novemberSubjects: number;
-  decemberSubjects: number;
+export interface ExamStats {
+  totalExams: number;
+  januaryExams: number;
+  februaryExams: number;
+  marchExams: number;
+  aprilExams: number;
+  mayExams: number;
+  juneExams: number;
+  julyExams: number;
+  augustExams: number;
+  septemberExams: number;
+  octoberExams: number;
+  novemberExams: number;
+  decemberExams: number;
 }
 
 export interface ProblemStats {
@@ -62,25 +62,10 @@ export interface MindMapStats {
 
 export interface MentorDashboardStatsResponse {
   questionStats: QuestionStats;
-  subjectStats: SubjectStats;
+  examStats: ExamStats;
   problemStats: ProblemStats;
   slideStats: SlideStats;
   mindMapStats: MindMapStats;
-}
-
-export interface MentorDashboardStats {
-  totalQuestions: number;
-  pendingQuestions: number;
-  rejectedQuestions: number;
-  totalExams: number;
-  newExamsThisMonth: number;
-  totalPractices: number;
-  newPracticesThisMonth: number;
-  totalSlides: number;
-  newSlidesThisMonth: number;
-  totalMindMaps: number;
-  newMindMapsThisMonth: number;
-  totalDeposited: number;
 }
 
 export interface MonthlyCount {
@@ -100,33 +85,38 @@ export interface QuestionStatusData {
   rejected: number;
 }
 
-export interface RecentQuestion {
-  id: number;
-  student: string;
-  course: string;
-  question: string;
-  time: string;
-  status: "pending" | "answered";
+export interface MentorDashboardStats {
+  totalQuestions: number;
+  pendingQuestions: number;
+  rejectedQuestions: number;
+  totalExams: number;
+  newExamsThisMonth: number;
+  totalPractices: number;
+  newPracticesThisMonth: number;
+  totalSlides: number;
+  newSlidesThisMonth: number;
+  totalMindMaps: number;
+  newMindMapsThisMonth: number;
 }
 
 const MONTHS_VI = ["T1", "T2", "T3", "T4", "T5", "T6", "T7", "T8", "T9", "T10", "T11", "T12"];
 
-const SUBJECT_KEYS = [
-  "januarySubjects",
-  "februarySubjects",
-  "marchSubjects",
-  "aprilSubjects",
-  "maySubjects",
-  "juneSubjects",
-  "julySubjects",
-  "augustSubjects",
-  "septemberSubjects",
-  "octoberSubjects",
-  "novemberSubjects",
-  "decemberSubjects",
-] as const satisfies (keyof SubjectStats)[];
+const EXAM_MONTH_KEYS: (keyof ExamStats)[] = [
+  "januaryExams",
+  "februaryExams",
+  "marchExams",
+  "aprilExams",
+  "mayExams",
+  "juneExams",
+  "julyExams",
+  "augustExams",
+  "septemberExams",
+  "octoberExams",
+  "novemberExams",
+  "decemberExams",
+];
 
-const SLIDE_KEYS = [
+const SLIDE_MONTH_KEYS: (keyof SlideStats)[] = [
   "januarySlides",
   "februarySlides",
   "marchSlides",
@@ -139,9 +129,9 @@ const SLIDE_KEYS = [
   "octoberSlides",
   "novemberSlides",
   "decemberSlides",
-] as const satisfies (keyof SlideStats)[];
+];
 
-const MINDMAP_KEYS = [
+const MINDMAP_MONTH_KEYS: (keyof MindMapStats)[] = [
   "januaryMindMaps",
   "februaryMindMaps",
   "marchMindMaps",
@@ -154,7 +144,7 @@ const MINDMAP_KEYS = [
   "octoberMindMaps",
   "novemberMindMaps",
   "decemberMindMaps",
-] as const satisfies (keyof MindMapStats)[];
+];
 
 export interface TransformedMentorStats {
   stats: MentorDashboardStats;
@@ -162,38 +152,51 @@ export interface TransformedMentorStats {
   contentMonthly: ContentMonthlyData[];
   questionStatus: QuestionStatusData;
 }
-
-export function transformMentorStats(raw: MentorDashboardStatsResponse): TransformedMentorStats {
+export function transformMentorStats(raw: MentorDashboardStatsResponse): {
+  stats: MentorDashboardStats;
+  examMonthly: MonthlyCount[];
+  contentMonthly: ContentMonthlyData[];
+  questionStatus: QuestionStatusData;
+} {
   const currentMonth = new Date().getMonth();
 
-  return {
-    stats: {
-      totalQuestions: raw.questionStats.totalQuestions,
-      pendingQuestions: raw.questionStats.pendingQuestions,
-      rejectedQuestions: raw.questionStats.rejectedQuestions,
-      totalExams: raw.subjectStats.totalSubjects,
-      newExamsThisMonth: raw.subjectStats[SUBJECT_KEYS[currentMonth]!],
-      totalPractices: raw.problemStats.totalProblems,
-      newPracticesThisMonth: raw.problemStats.approvedProblems,
-      totalSlides: raw.slideStats.totalSlides,
-      newSlidesThisMonth: raw.slideStats[SLIDE_KEYS[currentMonth]!],
-      totalMindMaps: raw.mindMapStats.totalMindMaps,
-      newMindMapsThisMonth: raw.mindMapStats[MINDMAP_KEYS[currentMonth]!],
-      totalDeposited: 0,
-    },
-    examMonthly: MONTHS_VI.map((month, i) => ({
+  const examMonthly: MonthlyCount[] = MONTHS_VI.map((month, i) => {
+    const key = EXAM_MONTH_KEYS[i]!;
+    return {
       month,
-      count: raw.subjectStats[SUBJECT_KEYS[i]!],
-    })),
-    contentMonthly: MONTHS_VI.map((month, i) => ({
+      count: raw.examStats[key],
+    };
+  });
+
+  const contentMonthly: ContentMonthlyData[] = MONTHS_VI.map((month, i) => {
+    const slideKey = SLIDE_MONTH_KEYS[i]!;
+    const mindMapKey = MINDMAP_MONTH_KEYS[i]!;
+    return {
       month,
-      slides: raw.slideStats[SLIDE_KEYS[i]!],
-      mindmaps: raw.mindMapStats[MINDMAP_KEYS[i]!],
-    })),
-    questionStatus: {
-      approved: raw.questionStats.approvedQuestions,
-      pending: raw.questionStats.pendingQuestions,
-      rejected: raw.questionStats.rejectedQuestions,
-    },
+      slides: raw.slideStats[slideKey],
+      mindmaps: raw.mindMapStats[mindMapKey],
+    };
+  });
+
+  const questionStatus: QuestionStatusData = {
+    approved: raw.questionStats.approvedQuestions,
+    pending: raw.questionStats.pendingQuestions,
+    rejected: raw.questionStats.rejectedQuestions,
   };
+
+  const stats: MentorDashboardStats = {
+    totalQuestions: raw.questionStats.totalQuestions,
+    pendingQuestions: raw.questionStats.pendingQuestions,
+    rejectedQuestions: raw.questionStats.rejectedQuestions,
+    totalExams: raw.examStats.totalExams,
+    newExamsThisMonth: raw.examStats[EXAM_MONTH_KEYS[currentMonth]!],
+    totalPractices: raw.problemStats.totalProblems,
+    newPracticesThisMonth: raw.problemStats.pendingProblems,
+    totalSlides: raw.slideStats.totalSlides,
+    newSlidesThisMonth: raw.slideStats[SLIDE_MONTH_KEYS[currentMonth]!],
+    totalMindMaps: raw.mindMapStats.totalMindMaps,
+    newMindMapsThisMonth: raw.mindMapStats[MINDMAP_MONTH_KEYS[currentMonth]!],
+  };
+
+  return { stats, examMonthly, contentMonthly, questionStatus };
 }

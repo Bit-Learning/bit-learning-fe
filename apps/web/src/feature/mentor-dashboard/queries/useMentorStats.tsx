@@ -1,7 +1,6 @@
 import { useQuery } from "@tanstack/react-query";
 import { mentorStatsApi } from "../apis/mentor.api";
-import { transformMentorStats } from "../types/mentor.type";
-import type { TransformedMentorStats } from "../types/mentor.type";
+import { TransformedMentorStats, transformMentorStats } from "../types/mentor.type";
 
 export const mentorKeys = {
   all: ["mentor-stats"] as const,
