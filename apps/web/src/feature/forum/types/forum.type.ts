@@ -96,6 +96,20 @@ export interface Comment {
 	updatedAt: string;
 }
 
+export interface AuthorComment {
+	id: number;
+	content: string;
+	isBanned: boolean;
+	isEdited: boolean;
+	author: Author;
+	postId: number;
+	postTitle: string;
+	postSlug: string;
+	parentId?: number | null;
+	createdAt: string;
+	updatedAt: string;
+}
+
 export interface CreatePostRequest {
 	title: string;
 	content: string;

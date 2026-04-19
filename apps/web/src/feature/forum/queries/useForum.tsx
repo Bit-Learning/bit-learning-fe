@@ -160,6 +160,15 @@ export const useForumPostsByAuthor = (params: FilterByAuthorParams) => {
 	});
 };
 
+export const useForumCommentsByAuthor = (params: FilterByAuthorParams) => {
+	return useQuery({
+		queryKey: ["forum-comments-by-author", params],
+		queryFn: async () =>
+			commentApi.getCommentsByAuthor(params.authorId, params),
+		enabled: !!params.authorId,
+	});
+};
+
 export const useSubscribeToForumPosts = () =>
 	useMutation({
 		mutationFn: (data: ForumSubscriptionRequest) =>
@@ -189,6 +198,7 @@ function invalidateForumQueries(
 	queryClient.invalidateQueries({ queryKey: ["forum-post"] });
 	queryClient.invalidateQueries({ queryKey: ["forum-post-slug"] });
 	queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
+	queryClient.invalidateQueries({ queryKey: ["forum-comments-by-author"] });
 	queryClient.invalidateQueries({ queryKey: ["forum-featured-posts"] });
 	queryClient.invalidateQueries({ queryKey: ["forum-trending-posts"] });
 	queryClient.invalidateQueries({ queryKey: ["forum-recommended-posts"] });
@@ -439,6 +449,7 @@ export const useCreateForumComment = () => {
 		mutationFn: (data: CreateCommentRequest) => commentApi.createComment(data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
+			queryClient.invalidateQueries({ queryKey: ["forum-comments-by-author"] });
 			queryClient.invalidateQueries({ queryKey: ["forum-post"] });
 			toast.success({ title: "Bình luận thành công!" });
 		},
@@ -456,6 +467,7 @@ export const useUpdateForumComment = () => {
 			commentApi.updateComment(id, data),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
+			queryClient.invalidateQueries({ queryKey: ["forum-comments-by-author"] });
 			toast.success({ title: "Cập nhật bình luận thành công!" });
 		},
 		onError: (error: any) => {
@@ -473,6 +485,7 @@ export const useDeleteForumComment = () => {
 		mutationFn: (id: number) => commentApi.deleteComment(id),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
+			queryClient.invalidateQueries({ queryKey: ["forum-comments-by-author"] });
 			toast.success({ title: "Xóa bình luận thành công!" });
 		},
 		onError: (error: any) => {
@@ -491,6 +504,7 @@ export const useReplyForumComment = () => {
 			commentApi.replyComment(id, content),
 		onSuccess: () => {
 			queryClient.invalidateQueries({ queryKey: ["forum-comments"] });
+			queryClient.invalidateQueries({ queryKey: ["forum-comments-by-author"] });
 			toast.success({ title: "Trả lời bình luận thành công!" });
 		},
 		onError: (error: any) => {

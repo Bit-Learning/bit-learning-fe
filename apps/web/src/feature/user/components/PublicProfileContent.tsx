@@ -11,6 +11,7 @@ import {
 	FileText,
 	ArrowRight,
 	BookA,
+	MessageSquare,
 } from "lucide-react";
 import { Card } from "@workspace/ui/components/Card";
 import { useViewUserProfileByUsername } from "../queries/useUser";
@@ -22,6 +23,7 @@ import type { StudentProfile } from "@/feature/game/services/studentService";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { FaFacebook } from "react-icons/fa";
 import { useForumPostsByAuthor } from "@/feature/forum/queries/useForum";
+import { useForumCommentsByAuthor } from "@/feature/forum/queries/useForum";
 import ForumPostCard from "@/feature/app/components/ForumPostCard";
 import { Link } from "@tanstack/react-router";
 import PlayHistoryDetailModal from "@/feature/game/components/PlayHistoryDetailModal";
@@ -97,6 +99,12 @@ export const PublicProfileContent = ({
 			page: 0,
 			size: 6,
 		});
+	const { data: myCommentsResponse, isLoading: isCommentsLoading } =
+		useForumCommentsByAuthor({
+			authorId: userId ?? 0,
+			page: 0,
+			size: 5,
+		});
 
 	// Game metadata
 	const [gameProfile, setGameProfile] = useState<StudentProfile | null>(null);
@@ -162,6 +170,9 @@ export const PublicProfileContent = ({
 	const fullName =
 		`${userProfile.firstName || ""} ${userProfile.lastName || ""}`.trim();
 	const myPosts = myPostsResponse?.data ?? [];
+	const myComments = myCommentsResponse?.data ?? [];
+	const totalComments =
+		myCommentsResponse?.page?.totalElements ?? myComments.length;
 	const totalAttempts = gameProfile?.totalAttempts ?? totalItems;
 
 	return (
@@ -238,7 +249,7 @@ export const PublicProfileContent = ({
 			</Card>
 
 			{/* Stats Row */}
-			<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+			<div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
 				<StatCard
 					icon={Trophy}
 					value={gameProfile?.totalScore ?? 0}
@@ -265,6 +276,12 @@ export const PublicProfileContent = ({
 					value={myPosts.length}
 					label="Các bài viết"
 					iconClassName="text-green-500"
+				/>
+				<StatCard
+					icon={MessageSquare}
+					value={totalComments}
+					label="Bình luận"
+					iconClassName="text-rose-500"
 				/>
 			</div>
 
@@ -306,6 +323,89 @@ export const PublicProfileContent = ({
 					<div className="grid grid-cols-1 gap-6 xl:grid-cols-2">
 						{myPosts.map((post) => (
 							<ForumPostCard key={post.id} post={post} />
+						))}
+					</div>
+				)}
+			</Card>
+
+			<Card className="p-6 space-y-6">
+				<div className="flex items-center justify-between gap-4">
+					<div>
+						<h3 className="font-bold text-slate-900">
+							Bình luận gần đây của {fullName || "người dùng"}
+						</h3>
+						<p className="text-sm text-slate-500">
+							Những phản hồi mà người dùng này đã để lại trên diễn đàn
+						</p>
+					</div>
+					<Link
+						to="/forum"
+						search={{
+							authorId: userId ?? 0,
+						}}
+						className="inline-flex items-center gap-2 rounded-xl border border-slate-200 bg-white px-4 py-2 text-sm font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+					>
+						Xem bài viết
+						<ArrowRight className="h-4 w-4" />
+					</Link>
+				</div>
+
+				{isCommentsLoading ? (
+					<Loader />
+				) : myComments.length === 0 ? (
+					<div className="rounded-xl border border-dashed border-slate-200 p-10 text-center">
+						<MessageSquare className="mx-auto mb-3 h-10 w-10 text-slate-300" />
+						<h4 className="text-lg font-semibold text-slate-900">
+							Chưa có bình luận nào
+						</h4>
+						<p className="mt-2 text-sm text-slate-500">
+							Người dùng này chưa tham gia bình luận trên diễn đàn.
+						</p>
+					</div>
+				) : (
+					<div className="space-y-4">
+						{myComments.map((comment) => (
+							<div
+								key={comment.id}
+								className="rounded-2xl border border-slate-100 bg-slate-50/80 p-4 transition hover:border-slate-200 hover:bg-white"
+							>
+								<div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+									<div className="space-y-2">
+										<div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+											<Link
+												to="/forum/post/$id"
+												params={{ id: String(comment.postId) }}
+												className="font-semibold text-slate-900 hover:text-blue-600"
+											>
+												{comment.postTitle}
+											</Link>
+											<span>•</span>
+											<span>
+												{new Date(comment.createdAt).toLocaleString("vi-VN")}
+											</span>
+											{comment.isEdited ? (
+												<>
+													<span>•</span>
+													<span className="italic text-slate-400">
+														đã chỉnh sửa
+													</span>
+												</>
+											) : null}
+										</div>
+										<p className="text-sm leading-relaxed text-slate-700">
+											{comment.content}
+										</p>
+									</div>
+									<Link
+										to="/forum/post/$id"
+										params={{ id: String(comment.postId) }}
+										className="inline-flex shrink-0 items-center gap-2 self-start rounded-xl border border-slate-200 bg-white px-3 py-2 text-xs font-semibold text-slate-700 transition hover:border-slate-300 hover:bg-slate-50"
+									>
+										Xem bài gốc
+										<ArrowRight className="h-3.5 w-3.5" />
+									</Link>
+								</div>
+							</div>
 						))}
 					</div>
 				)}
