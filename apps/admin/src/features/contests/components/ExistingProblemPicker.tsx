@@ -15,8 +15,8 @@ import {
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Difficulty, ProblemBriefResponse } from "../types/problem.type";
-import { useProblems, useProblemDetail } from "../queries/useProblem";
+import { Difficulty, ProblemBriefResponse } from "../../problems/types/problem.type";
+import { useProblems, useProblemDetail } from "../../problems/queries/useProblem";
 import { useAddProblem, useRemoveProblem, useContestProblems } from "../queries/useContest";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";

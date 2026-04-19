@@ -4,19 +4,10 @@ import { useEffect, useRef, useState } from "react";
 import CourseCurriculum from "./CourseCurriculum";
 import CourseReviews from "./CourseReviews";
 import { CourseCertificate } from "./CourseCertificate";
+import { CourseDetail } from "../types/course.type";
 
 interface CourseTabsProps {
-  course: {
-    id: number;
-    description: string;
-    outcome: string;
-    requirement: string;
-    audience: string;
-    instructorName: string;
-    instructorId: number;
-    progressPercentage?: number;
-    title: string;
-  };
+  course: CourseDetail;
   hasAccess?: boolean;
 }
 

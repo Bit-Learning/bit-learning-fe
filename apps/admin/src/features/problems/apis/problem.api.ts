@@ -2,6 +2,7 @@ import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
 import {
+  ApproveRejectRequest,
   BulkCreateTestCaseRequest,
   BulkCreateTestCaseResponse,
   CreateCodeTemplateRequest,
@@ -17,7 +18,7 @@ import {
   ProblemFilters,
   TagResponse,
 } from "../types/problem.type";
-import { Language } from "../types/contest.type";
+import { Language } from "../../contests/types/contest.type";
 
 export const problemApi = {
   getProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
@@ -73,5 +74,21 @@ export const problemApi = {
 
   getAllTags(): Promise<AxiosResponse<ApiResponse<TagResponse[]>>> {
     return api.get("/coding/tags");
+  },
+
+  getPendingProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
+    return api.get("/problems/pending-approval", { params: filters });
+  },
+
+  approve(data: ApproveRejectRequest): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.put("/problems/approve", data);
+  },
+
+  reject(data: ApproveRejectRequest): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.put("/problems/reject", data);
+  },
+
+  publishProblem(id: string, isPublic: boolean): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
+    return api.put(`/problems/${id}/publish`, null, { params: { isPublic } });
   },
 };

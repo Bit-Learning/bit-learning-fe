@@ -1,10 +1,12 @@
 import { Button } from "@workspace/ui/components/Button";
 import { Textarea } from "@workspace/ui/components/Textarea";
-import { Loader2, MessageSquare, Send, Star } from "lucide-react";
+import { CheckCircle2, Loader2, MessageSquare, Send, Star } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
 import { useCourseReviews, usePostReview } from "../queries/useInteraction";
 import ReviewItem from "./ReviewItem";
+import { useSelector } from "react-redux";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 
 interface CourseReviewsProps {
   courseId: number;
@@ -22,10 +24,15 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId, hasAccess }) =>
   const { data, isLoading } = useCourseReviews(courseId, page, 5, "createdAt", "DESC");
   const { mutate: postReview, isPending: isPosting } = usePostReview();
 
+  const { userInfo } = useSelector(selectAuthStateInfo);
+
+  const existingReview = data?.content.find((r) => r.user.id === userInfo?.id);
+
   const handleSubmitReview = () => {
     if (rating === 0) return;
+    const trimmedComment = comment.trim();
     postReview(
-      { courseId, rating, comment: comment.trim() || undefined },
+      { courseId, rating, comment: trimmedComment || undefined },
       {
         onSuccess: () => {
           setRating(0);
@@ -41,88 +48,99 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId, hasAccess }) =>
 
   return (
     <div className="space-y-4">
-      <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
-        <div className="text-center border-b border-gray-200 bg-blue-50 px-6 py-4">
-          <h4 className="text-lg font-bold text-gray-900">Viết đánh giá của bạn</h4>
-          <p className="mt-0.5 text-sm text-gray-600">
-            Chia sẻ trải nghiệm giúp học viên khác đưa ra quyết định đúng đắn
-          </p>
+      {existingReview ? (
+        <div className="overflow-hidden rounded-2xl border border-green-200 bg-white shadow-sm">
+          <div className="flex flex-col items-center gap-3 py-5 px-6 text-center">
+            <div className="flex h-14 w-14 items-center justify-center rounded-full bg-green-50">
+              <CheckCircle2 className="h-7 w-7 text-green-600" />
+            </div>
+            <h4 className="text-lg font-bold text-gray-900">Bạn đã gửi đánh giá!</h4>
+          </div>
         </div>
+      ) : (
+        <div className="overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+          <div className="text-center border-b border-gray-200 bg-blue-50 px-6 py-4">
+            <h4 className="text-lg font-bold text-gray-900">Viết đánh giá của bạn</h4>
+            <p className="mt-0.5 text-sm text-gray-600">
+              Chia sẻ trải nghiệm giúp học viên khác đưa ra quyết định đúng đắn
+            </p>
+          </div>
 
-        <div className="p-6 space-y-5">
-          <div className="flex items-center gap-2">
-            <p className="ml-2 text-lg font-medium text-gray-700">Đánh giá của bạn:</p>
-            <div className="flex items-center gap-1">
-              {Array.from({ length: 5 }).map((_, i) => {
-                const val = i + 1;
-                return (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => (!hasAccess ? undefined : setRating(val))}
-                    onMouseEnter={() => (!hasAccess ? undefined : setHoverRating(val))}
-                    onMouseLeave={() => (!hasAccess ? undefined : setHoverRating(0))}
-                    disabled={!hasAccess}
-                    className="rounded-md p-1 transition-transform hover:scale-110 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
-                  >
-                    <Star
-                      className={`h-9 w-9 transition-colors ${
-                        val <= activeRating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
-                      }`}
-                    />
-                  </button>
-                );
-              })}
-              {activeRating > 0 && (
-                <span className="ml-2 rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700">
-                  {STAR_LABELS[activeRating]}
-                </span>
-              )}
+          <div className="p-6 space-y-5">
+            <div className="flex items-center gap-2">
+              <p className="ml-2 text-lg font-medium text-gray-700">Đánh giá của bạn:</p>
+              <div className="flex items-center gap-1">
+                {Array.from({ length: 5 }).map((_, i) => {
+                  const val = i + 1;
+                  return (
+                    <button
+                      key={i}
+                      type="button"
+                      onClick={() => (!hasAccess ? undefined : setRating(val))}
+                      onMouseEnter={() => (!hasAccess ? undefined : setHoverRating(val))}
+                      onMouseLeave={() => (!hasAccess ? undefined : setHoverRating(0))}
+                      disabled={!hasAccess}
+                      className="rounded-md p-1 transition-transform hover:scale-110 focus:outline-none disabled:cursor-not-allowed disabled:opacity-40"
+                    >
+                      <Star
+                        className={`h-9 w-9 transition-colors ${
+                          val <= activeRating ? "fill-yellow-400 text-yellow-400" : "text-gray-300"
+                        }`}
+                      />
+                    </button>
+                  );
+                })}
+                {activeRating > 0 && (
+                  <span className="ml-2 rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-700">
+                    {STAR_LABELS[activeRating]}
+                  </span>
+                )}
+              </div>
+            </div>
+
+            <div>
+              <label htmlFor="comment" className="px-2 mb-2 block text-md font-medium text-gray-700">
+                Nhận xét
+              </label>
+              <Textarea
+                id="comment"
+                value={comment}
+                onChange={(e) => setComment(e.target.value)}
+                placeholder={
+                  hasAccess
+                    ? "Khóa học này có điểm gì nổi bật? Bạn học được gì? Có điều gì cần cải thiện không?"
+                    : "Đăng ký khóa học để viết đánh giá"
+                }
+                disabled={!hasAccess}
+                className="min-h-28 resize-none rounded-xl border-gray-200 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
+              />
+              <p className="mt-1 text-right text-xs text-gray-400">{comment.length} ký tự</p>
+            </div>
+
+            <div className="flex items-center justify-between border-t border-gray-200 pt-4">
+              <p className="text-xs text-gray-500">* Đánh giá sao là bắt buộc</p>
+              <Button
+                onClick={handleSubmitReview}
+                size="lg"
+                isDisabled={!hasAccess || rating === 0 || isPosting}
+                className="gap-2 bg-blue-600 px-6 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              >
+                {isPosting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Đang gửi...
+                  </>
+                ) : (
+                  <>
+                    <Send className="h-4 w-4" />
+                    Gửi đánh giá
+                  </>
+                )}
+              </Button>
             </div>
           </div>
-
-          <div>
-            <label htmlFor="comment" className="px-2 mb-2 block text-md font-medium text-gray-700">
-              Nhận xét
-            </label>
-            <Textarea
-              id="comment"
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              placeholder={
-                hasAccess
-                  ? "Khóa học này có điểm gì nổi bật? Bạn học được gì? Có điều gì cần cải thiện không?"
-                  : "Đăng ký khóa học để viết đánh giá"
-              }
-              disabled={!hasAccess}
-              className="min-h-28 resize-none rounded-xl border-gray-200 text-sm focus:border-blue-500 focus:ring-blue-500 disabled:cursor-not-allowed disabled:opacity-50"
-            />
-            <p className="mt-1 text-right text-xs text-gray-400">{comment.length} ký tự</p>
-          </div>
-
-          <div className="flex items-center justify-between border-t border-gray-200 pt-4">
-            <p className="text-xs text-gray-500">* Đánh giá sao là bắt buộc</p>
-            <Button
-              onClick={handleSubmitReview}
-              size="lg"
-              isDisabled={!hasAccess || rating === 0 || isPosting}
-              className="gap-2 bg-blue-600 px-6 text-white hover:bg-blue-700 disabled:opacity-50 transition-colors"
-            >
-              {isPosting ? (
-                <>
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                  Đang gửi...
-                </>
-              ) : (
-                <>
-                  <Send className="h-4 w-4" />
-                  Gửi đánh giá
-                </>
-              )}
-            </Button>
-          </div>
         </div>
-      </div>
+      )}
 
       <div>
         <div className="mb-4 flex items-center justify-between">
@@ -153,7 +171,7 @@ const CourseReviews: React.FC<CourseReviewsProps> = ({ courseId, hasAccess }) =>
           </div>
         ) : (
           <>
-            <div className="divide-y divide-gray-200 overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-sm">
+            <div className="divide-y divide-gray-200 overflow-hidden rounded-xl border border-gray-200 bg-white shadow-sm">
               {reviews.map((review) => (
                 <div key={review.id} className="px-6 py-5 transition-colors hover:bg-gray-50">
                   <ReviewItem review={review} />

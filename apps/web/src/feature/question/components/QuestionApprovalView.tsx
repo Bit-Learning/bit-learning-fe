@@ -45,9 +45,13 @@ export default function QuestionApprovalTableView() {
   // }, [rawData]);
 
   const filteredQuestions = useMemo(() => {
-    if (!search) return rawData;
+    return rawData.filter((p: any) => {
+      if (p.approvalStatus === ApprovalStatus.APPROVED) return false;
 
-    return rawData.filter((q) => normalize(q.content).includes(normalize(search)));
+      if (!search) return true;
+
+      return normalize(p.title).includes(normalize(search));
+    });
   }, [rawData, search]);
 
   const pagedQuestions = filteredQuestions;
@@ -65,7 +69,7 @@ export default function QuestionApprovalTableView() {
     new Date(d).toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
 
   const selectCls =
-    "px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35";
+    "px-3 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35";
 
   return (
     <div className="bg-slate-50 mx-auto p-8">
@@ -78,7 +82,7 @@ export default function QuestionApprovalTableView() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
           <input
-            className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+            className="w-full pl-9 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm transition-all shadow-sm"
             placeholder="Tìm kiếm câu hỏi..."
             type="text"
             value={search}

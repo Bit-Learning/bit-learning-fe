@@ -1,8 +1,7 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
-import { toast } from "@/shared/components/Sonner";
 import type { ApiResponse } from "@/shared/api/api.type";
-import { examApi, examApprovalApi } from "../api/exam.api";
+import { examApi, examApprovalApi } from "../apis/exam.api";
 import type {
   ExamGenerateRequest,
   ExamGenerateFromUserQuestionsRequest,
@@ -11,6 +10,7 @@ import type {
   ExamSearchParams,
   ExamApprovalFilters,
 } from "../types/exam.type";
+import { toast } from "@/components/Sonner";
 
 export const examKeys = {
   all: ["exams"] as const,

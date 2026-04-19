@@ -1,4 +1,4 @@
-import { QuestionResponse } from "@/feature/question/types/question.type";
+import { QuestionResponse } from "@/features/questions/types/question.type";
 
 export type ExamType = "EXAM" | "PRACTICE";
 

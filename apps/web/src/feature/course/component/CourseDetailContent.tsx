@@ -106,20 +106,7 @@ const CourseDetailContent: React.FC = () => {
               onLike={handleLike}
               onShare={handleShare}
             />
-            <CourseTabs
-              course={{
-                id: course.id,
-                description: course.description,
-                outcome: course.outcome,
-                requirement: course.requirement,
-                audience: course.audience,
-                instructorName: course.instructorName,
-                instructorId: course.instructorId,
-                progressPercentage: course.progressPercentage,
-                title: course.title,
-              }}
-              hasAccess={hasAccess}
-            />
+            <CourseTabs course={course} hasAccess={hasAccess} />
           </div>
 
           <div className="space-y-4">
@@ -129,8 +116,7 @@ const CourseDetailContent: React.FC = () => {
                 hasAccess={hasAccess}
                 isPending={cartPending || enrollPending}
                 firstLectureId={course.sections?.[0]?.lectures?.[0]?.id}
-                totalHours={totalHours}
-                totalVideos={course.totalLectures}
+                totalLectures={course.totalLectures}
                 onEnroll={handleEnroll}
                 onAddToCart={handleAddToCart}
                 onBuyNow={handleBuyNow}

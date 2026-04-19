@@ -2,23 +2,24 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { toast } from "@/shared/components/Sonner";
 import type { ApiResponse } from "@/shared/api/api.type";
-import { problemApi, submissionApi } from "../apis/coding.api";
-import {
-  type CreateProblemRequest,
-  type UpdateProblemRequest,
-  type CreateTestCaseRequest,
-  type UpdateTestCaseRequest,
-  type CreateCodeTemplateRequest,
-  type SubmitCodeRequest,
-  type RunCodeRequest,
-  type DebugRequest,
-  type ProblemFilters,
-  type SubmissionFilters,
-  type Language,
-  type BulkCreateTestCaseRequest,
-  type GenerateCodeTemplatesRequest,
-  SubmissionStatus,
+import { problemApi, problemApprovalApi, submissionApi } from "../apis/coding.api";
+import type {
+  ApprovalFilters,
+  BulkCreateTestCaseRequest,
+  CreateCodeTemplateRequest,
+  CreateTestCaseRequest,
+  CreateProblemRequest,
+  DebugRequest,
+  GenerateCodeTemplatesRequest,
+  Language,
+  ProblemFilters,
+  RunCodeRequest,
+  SubmissionFilters,
+  SubmitCodeRequest,
+  UpdateProblemRequest,
+  UpdateTestCaseRequest,
 } from "../types/coding.type";
+import { SubmissionStatus } from "../types/coding.type";
 
 export const problemKeys = {
   all: ["problems"] as const,
@@ -33,6 +34,8 @@ export const problemKeys = {
   favorites: (filters?: ProblemFilters) => [...problemKeys.all, "favorites", filters] as const,
   templates: (id: string) => [...problemKeys.all, "templates", id] as const,
   testcases: (id: string) => [...problemKeys.all, "testcases", id] as const,
+  pendingApproval: (filters?: ProblemFilters) => [...problemKeys.all, "pending-approval", filters] as const,
+  myPublishRequests: (filters?: ApprovalFilters) => [...problemKeys.all, "my-publish-requests", filters] as const,
 };
 
 export const submissionKeys = {
@@ -134,6 +137,26 @@ export const useAllTestCases = (problemId: string, options?: { enabled?: boolean
       return response.data.data;
     },
     enabled: options?.enabled !== false && !!problemId,
+  });
+};
+
+export const useGetMyPublishRequests = (filters?: ApprovalFilters) => {
+  return useQuery({
+    queryKey: problemKeys.myPublishRequests(filters),
+    queryFn: async () => {
+      const response = await problemApprovalApi.getMyPublishRequests(filters);
+      return response.data;
+    },
+  });
+};
+
+export const useGetPendingProblems = (filters?: ProblemFilters) => {
+  return useQuery({
+    queryKey: problemKeys.pendingApproval(filters),
+    queryFn: async () => {
+      const response = await problemApprovalApi.getPendingProblems(filters);
+      return response.data;
+    },
   });
 };
 
@@ -240,10 +263,10 @@ export const useBulkCreateTestCases = () => {
   return useMutation({
     mutationFn: ({ problemId, data }: { problemId: string; data: BulkCreateTestCaseRequest }) =>
       problemApi.bulkCreateTestCases(problemId, data),
-    onSuccess: (response, variables) => {
+    onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: problemKeys.detail(variables.problemId) });
       queryClient.invalidateQueries({ queryKey: problemKeys.testcases(variables.problemId) });
-      toast.success({ title: "Thành công", description: `Đã tạo ${response.data.data?.createdCount || 0} test cases` });
+      toast.success({ title: "Thành công", description: "Tạo test cases hàng loạt thành công" });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
       toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể tạo test cases hàng loạt" });
@@ -341,6 +364,49 @@ export const useToggleFavorite = () => {
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
       toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật yêu thích" });
+    },
+  });
+};
+
+export const useRequestPublish = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (problemIds: string[]) => problemApprovalApi.requestPublish({ problemIds }),
+    onSuccess: (_, problemIds) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.all });
+      toast.success({ title: "Đã gửi yêu cầu", description: `${problemIds.length} bài tập đang chờ phê duyệt` });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể gửi yêu cầu phê duyệt" });
+    },
+  });
+};
+
+export const useApproveProblem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (problemIds: string[]) => problemApprovalApi.approve({ problemIds }),
+    onSuccess: (_, problemIds) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.all });
+      toast.success({ title: "Đã phê duyệt", description: `${problemIds.length} bài tập đã được phê duyệt` });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể phê duyệt bài tập" });
+    },
+  });
+};
+
+export const useRejectProblem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ problemIds, rejectReason }: { problemIds: string[]; rejectReason: string }) =>
+      problemApprovalApi.reject({ problemIds, rejectReason }),
+    onSuccess: (_, { problemIds }) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.all });
+      toast.success({ title: "Đã từ chối", description: `${problemIds.length} bài tập đã bị từ chối` });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể từ chối bài tập" });
     },
   });
 };

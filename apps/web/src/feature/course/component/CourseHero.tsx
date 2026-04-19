@@ -17,8 +17,6 @@ const LEVEL_LABEL: Record<string, string> = {
 };
 
 export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess }) => {
-  const totalHours = course.totalDuration ? Math.round(course.totalDuration / 3600) : null;
-
   return (
     <div className="overflow-hidden rounded-md bg-linear-to-l from-[#11498d] to-[#0E2643] text-white">
       <div className="block lg:hidden ">
@@ -52,16 +50,10 @@ export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess }) => 
           </div>
 
           <div className="flex flex-wrap gap-x-4 gap-y-2 text-sm text-white">
-            {totalHours != null && (
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-blue-400" />
-                {totalHours} giờ
-              </span>
-            )}
             {course.totalLectures != null && (
               <span className="flex items-center gap-1.5">
                 <BookOpen className="h-4 w-4 text-blue-400" />
-                {course.totalLectures} bài giảng
+                {course.totalLectures} bài học
               </span>
             )}
             <span className="flex items-center gap-1.5">
@@ -87,10 +79,6 @@ export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess }) => 
             ))}
             <span className="ml-1 font-semibold text-white">{(course.ratingStar ?? 5).toFixed(1)}</span>
             <span className="text-sm text-gray-400">({course.ratingCount ?? 0} đánh giá)</span>
-          </div>
-
-          <div className="text-xs text-gray-400">
-            Tác giả <span className="text-blue-400 font-medium">{course.instructorName}</span>
           </div>
 
           {hasAccess && (
@@ -127,16 +115,10 @@ export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess }) => 
           </div>
 
           <div className="flex flex-wrap gap-x-5 gap-y-2 text-sm text-white">
-            {totalHours != null && (
-              <span className="flex items-center gap-1.5">
-                <Clock className="h-4 w-4 text-blue-400" />
-                {totalHours} giờ
-              </span>
-            )}
             {course.totalLectures != null && (
               <span className="flex items-center gap-1.5">
                 <BookOpen className="h-4 w-4 text-blue-400" />
-                {course.totalLectures} bài giảng
+                {course.totalLectures} bài học
               </span>
             )}
             <span className="flex items-center gap-1.5">
@@ -162,10 +144,6 @@ export const CourseHero: React.FC<CourseHeroProps> = ({ course, hasAccess }) => 
             ))}
             <span className="ml-1 font-semibold text-white">{(course.ratingStar ?? 5).toFixed(1)}</span>
             <span className="text-sm text-gray-400">({course.ratingCount ?? 0} đánh giá)</span>
-          </div>
-
-          <div className="text-xs text-gray-400">
-            Tác giả <span className="text-blue-400 font-medium">{course.instructorName}</span>
           </div>
 
           {hasAccess && (

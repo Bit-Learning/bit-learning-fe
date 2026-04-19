@@ -25,6 +25,7 @@ export const problemKeys = {
   favorites: (filters?: ProblemFilters) => [...problemKeys.all, "favorites", filters] as const,
   templates: (id: string) => [...problemKeys.all, "templates", id] as const,
   testcases: (id: string) => [...problemKeys.all, "testcases", id] as const,
+  pendingApproval: (filters?: ProblemFilters) => [...problemKeys.all, "pending-approval", filters] as const,
 };
 
 export const submissionKeys = {
@@ -168,5 +169,61 @@ export const useGetAllTags = () => {
       return response.data.data;
     },
     staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useApproveProblem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (problemIds: string[]) => problemApi.approve({ problemIds }),
+    onSuccess: (_, problemIds) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.all });
+      toast.success({ title: "Đã phê duyệt", description: `${problemIds.length} bài tập đã được phê duyệt` });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể phê duyệt bài tập" });
+    },
+  });
+};
+
+export const useRejectProblem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ problemIds, rejectReason }: { problemIds: string[]; rejectReason: string }) =>
+      problemApi.reject({ problemIds, rejectReason }),
+    onSuccess: (_, { problemIds }) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.all });
+      toast.success({ title: "Đã từ chối", description: `${problemIds.length} bài tập đã bị từ chối` });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể từ chối bài tập" });
+    },
+  });
+};
+
+export const useGetPendingProblems = (filters?: ProblemFilters) => {
+  return useQuery({
+    queryKey: problemKeys.pendingApproval(filters),
+    queryFn: async () => {
+      const response = await problemApi.getPendingProblems(filters);
+      return response.data;
+    },
+  });
+};
+
+export const usePublishProblem = () => {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ id, isPublic }: { id: string; isPublic: boolean }) => problemApi.publishProblem(id, isPublic),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: problemKeys.lists() });
+      toast.success({
+        title: "Thành công",
+        description: variables.isPublic ? "Đã công bố bài tập" : "Đã ẩn bài tập",
+      });
+    },
+    onError: (error: AxiosError<ApiResponse<null>>) => {
+      toast.error({ title: "Lỗi", description: error.response?.data?.message || "Không thể cập nhật trạng thái" });
+    },
   });
 };

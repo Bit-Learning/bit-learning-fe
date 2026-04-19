@@ -429,21 +429,6 @@ const TestCaseInput: React.FC<TestCaseInputProps> = ({ state, onChange, error, j
 
   return (
     <div className="space-y-6">
-      <div className="border-b-2 border-gray-200 pb-4 flex items-center justify-between">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-900">
-            Test Cases <span className="text-red-500">*</span>
-          </h2>
-          <p className="text-md text-gray-600 mt-1">Chọn cách nhập test cases phù hợp</p>
-        </div>
-        {tcCount > 0 && (
-          <div className="flex items-center gap-1.5 bg-green-50 text-green-700 border border-green-200 rounded-full px-3 py-1 text-md font-semibold">
-            <CheckCircle2 className="w-4 h-4" />
-            {tcCount} test case{tcCount !== 1 ? "s" : ""}
-          </div>
-        )}
-      </div>
-
       <div className="flex gap-2 p-1 bg-gray-100 rounded-xl">
         {TABS.map((tab) => (
           <button

@@ -32,7 +32,7 @@ const DEFAULT_SCORE = 10;
 const GenerateExamFromQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
 
-  const [questionSource, setQuestionSource] = useState<"system" | "user">("system");
+  const [questionSource, setQuestionSource] = useState<"system" | "user">("user");
   const [examName, setExamName] = useState("");
   const [examCode, setExamCode] = useState("");
   const [durationInMinutes, setDurationInMinutes] = useState(DEFAULT_DURATION);
@@ -205,26 +205,26 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleSourceChange("system")}
-                    disabled={isExamGenerated}
-                    className={`cursor-pointer px-5 py-2 rounded-lg text-md font-medium transition-colors ${
-                      questionSource === "system"
-                        ? "bg-primary text-white"
-                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
-                    }`}
-                  >
-                    Ngân hàng hệ thống
-                  </button>
-                  <button
                     onClick={() => handleSourceChange("user")}
                     disabled={isExamGenerated}
-                    className={`cursor-pointer px-5 py-2 rounded-lg text-md font-medium transition-colors ${
+                    className={`cursor-pointer px-6 py-2.5 rounded-lg text-md font-medium transition-colors ${
                       questionSource === "user"
                         ? "bg-primary text-white"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
                     }`}
                   >
                     Câu hỏi của tôi
+                  </button>
+                  <button
+                    onClick={() => handleSourceChange("system")}
+                    disabled={isExamGenerated}
+                    className={`cursor-pointer px-6 py-2.5 rounded-lg text-md font-medium transition-colors ${
+                      questionSource === "system"
+                        ? "bg-primary text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                    }`}
+                  >
+                    Ngân hàng hệ thống
                   </button>
                 </div>
 

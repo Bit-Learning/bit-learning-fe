@@ -80,7 +80,7 @@ const MyMatricesContent: React.FC = () => {
   return (
     <main className="flex-1 p-8 min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="max-w-8xl mx-auto">
-        <div className="flex items-center justify-between mb-8">
+        <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Quản lý Ma trận đề thi</h1>
             <p className="text-slate-500 dark:text-slate-400 text-lg mt-1">Ngân hàng ma trận đề thi</p>
@@ -98,7 +98,7 @@ const MyMatricesContent: React.FC = () => {
           <div className="relative flex-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
             <input
-              className="w-full pl-12 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm"
+              className="w-full pl-9 pr-4 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none text-sm transition-all shadow-sm"
               type="text"
               placeholder="Tìm kiếm theo tên hoặc mã ma trận..."
               value={search}
@@ -111,7 +111,7 @@ const MyMatricesContent: React.FC = () => {
           <select
             value={activeFilter}
             onChange={handleFilterChange(setActiveFilter)}
-            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
+            className="px-3 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
           >
             <option value="all">Trạng thái: Tất cả</option>
             <option value="active">Đang hoạt động</option>
@@ -120,7 +120,7 @@ const MyMatricesContent: React.FC = () => {
           <select
             value={selectedSubjectId?.toString() ?? "all"}
             onChange={(e) => handleSubjectSelect(e.target.value === "all" ? undefined : Number(e.target.value))}
-            className="px-3 py-3.5 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-37.5"
+            className="px-3 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-37.5"
           >
             <option value="all">Tất cả môn học</option>
             {subjects.map((s) => (
