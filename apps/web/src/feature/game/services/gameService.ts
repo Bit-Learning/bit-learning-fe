@@ -13,6 +13,10 @@ export interface Game {
 	description: string;
 	playUrl: string;
 	minioObjectName: string;
+	gameType?: "QUIZ" | "TYPING" | "MATCHING" | "OTHER";
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	isScored?: boolean;
+	trackingConfig?: string | null;
 	instructions?: string;
 	dateAdded?: string;
 	likes?: number;
@@ -97,20 +101,30 @@ export interface LeaderboardEntry {
 	totalAttempts: number;
 }
 
+export type LeaderboardGameType = "QUIZ" | "MATCHING";
+
 export interface GameAttemptRequest {
 	attemptType?: string;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	attemptState?: "PARTIAL" | "COMPLETED";
+	scoreVisibility?: string;
 	rawScore?: number;
 	maxRawScore?: number;
 	duration?: number;
 	completed: boolean;
+	metricsVersion?: number;
 	resultMetrics?: Record<string, unknown>;
 }
 
 export interface GameAttemptResponse {
 	gameId: number;
+	attemptId?: number;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	attemptState?: "PARTIAL" | "COMPLETED";
+	isScored?: boolean;
 	rawScore: number;
-	maxRawScore: number;
-	normalizedScore: number;
+	maxRawScore: number | null;
+	normalizedScore: number | null;
 	leaderboardPoints: number;
 	duration: number;
 	completed: boolean;
@@ -244,11 +258,12 @@ const gameService = {
 	getLeaderboard: async (
 		page = 0,
 		size = 10,
+		gameType: LeaderboardGameType = "QUIZ",
 	): Promise<Page<LeaderboardEntry>> => {
 		const response = await api.get<ApiResponse<Page<LeaderboardEntry>>>(
 			"/games/leaderboard",
 			{
-				params: { page, size },
+				params: { page, size, gameType },
 			},
 		);
 		return response.data.data as Page<LeaderboardEntry>;

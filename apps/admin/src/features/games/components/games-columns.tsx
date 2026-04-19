@@ -14,11 +14,14 @@ export type GameRow = {
 	categoryOrTopic: string;
 	difficultyOrGrade: string;
 	description?: string;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE" | null;
+	isScored?: boolean | null;
 	likes?: number;
 	views?: number;
 	attempts?: number;
 	completionRate?: number;
 	averageAccuracy?: number;
+	averageRawScore?: number;
 	timeoutRate?: number;
 	standardId?: number;
 	matchingGameId?: number;
@@ -172,7 +175,7 @@ export const createGamesColumns = ({
 	{
 		accessorKey: "attempts",
 		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Tracking" />
+			<DataTableColumnHeader column={column} title="Theo dõi" />
 		),
 		cell: ({ row }) => (
 			<div className="space-y-1 text-sm">
@@ -180,11 +183,17 @@ export const createGamesColumns = ({
 					{row.original.attempts ?? 0} lượt chơi
 				</div>
 				<div className="text-xs text-muted-foreground">
-					Complete {row.original.completionRate ?? 0}% • Accuracy{" "}
-					{row.original.averageAccuracy ?? 0}%
+					Hoàn thành {row.original.completionRate ?? 0}% •{" "}
+					{row.original.scoringModel === "HIGH_SCORE"
+						? `Điểm TB ${row.original.averageRawScore ?? 0}`
+						: row.original.scoringModel === "NO_SCORE"
+							? `${row.original.isScored === false ? "Không điểm" : "Đã theo dõi"}`
+							: `Độ chính xác ${row.original.averageAccuracy ?? 0}%`}
 				</div>
 				<div className="text-xs text-muted-foreground">
-					Timeout {row.original.timeoutRate ?? 0}%
+					{row.original.scoringModel === "FINITE_SCORE"
+						? `Hết giờ ${row.original.timeoutRate ?? 0}%`
+						: (row.original.scoringModel ?? "FINITE_SCORE")}
 				</div>
 			</div>
 		),

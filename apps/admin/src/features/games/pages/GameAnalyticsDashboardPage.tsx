@@ -43,21 +43,44 @@ export function GameAnalyticsDashboardPage() {
 		() => (data?.timeoutLeaders ?? []).slice(0, 5),
 		[data?.timeoutLeaders],
 	);
+	const mixedTopGames = useMemo(
+		() =>
+			topGames.map((item) => ({
+				...item,
+				performanceValue:
+					item.scoringModel === "HIGH_SCORE"
+						? item.averageRawScore
+						: item.scoringModel === "NO_SCORE"
+							? item.completionRate
+							: item.averageAccuracy,
+			})),
+		[topGames],
+	);
+
+	const describeGamePerformance = (item: (typeof topGames)[number]) => {
+		if (item.scoringModel === "HIGH_SCORE") {
+			return `Điểm trung bình ${item.averageRawScore} • Cao nhất ${item.bestRawScore} • Hoàn thành ${item.completionRate}%`;
+		}
+		if (item.scoringModel === "NO_SCORE") {
+			return `Tập trung vào mức độ tham gia • Hoàn thành ${item.completionRate}% • Bỏ dở ${item.partialRate}%`;
+		}
+		return `Độ chính xác ${item.averageAccuracy}% • Hết giờ ${item.timeoutRate}% • Hoàn thành ${item.completionRate}%`;
+	};
 
 	return (
 		<div className="space-y-6">
 			<div className="flex flex-col gap-4 rounded-[28px] border border-slate-200/80 bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 p-6 text-white shadow-[0_24px_90px_rgba(15,23,42,0.22)] lg:flex-row lg:items-end lg:justify-between">
 				<div>
 					<p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-200/80">
-						Analytics dashboard
+						Bảng điều khiển phân tích
 					</p>
 					<h1 className="mt-2 text-3xl font-semibold">
 						Theo dõi hiệu suất game bằng dữ liệu lượt chơi thật
 					</h1>
 					<p className="mt-3 max-w-3xl text-sm leading-6 text-slate-300">
-						Tổng hợp số lượt chơi theo ngày, completion rate, accuracy trung
-						bình theo game/chủ đề, abandonment và những game có timeout cao để
-						quản trị nội dung sát hơn với hành vi người học.
+						Tổng hợp số lượt chơi theo ngày, tỷ lệ hoàn thành, điểm hoặc độ
+						chính xác theo từng kiểu tính điểm, mức độ bỏ dở và những game có tỷ
+						lệ hết giờ cao để quản trị nội dung sát hơn với hành vi người học.
 					</p>
 				</div>
 				<div className="flex flex-wrap gap-2">
@@ -77,27 +100,29 @@ export function GameAnalyticsDashboardPage() {
 			<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">
 				<KpiCard
 					icon={<ListChecks className="h-5 w-5" />}
-					label="Tổng attempt"
+					label="Tổng lượt chơi"
 					value={isLoading ? "..." : String(data?.overview.totalAttempts ?? 0)}
-					description={`${data?.overview.distinctGames ?? 0} game • ${data?.overview.distinctTopics ?? 0} chủ đề`}
+					description={`${data?.overview.distinctGames ?? 0} trò chơi • ${data?.overview.distinctTopics ?? 0} chủ đề`}
 				/>
 				<KpiCard
 					icon={<Target className="h-5 w-5" />}
-					label="Completion rate"
+					label="Tỷ lệ hoàn thành"
 					value={isLoading ? "..." : `${data?.overview.completionRate ?? 0}%`}
 					description={`${data?.overview.completedAttempts ?? 0} hoàn thành`}
 				/>
 				<KpiCard
 					icon={<TrendingUp className="h-5 w-5" />}
-					label="Accuracy TB"
-					value={isLoading ? "..." : `${data?.overview.averageAccuracy ?? 0}%`}
-					description="Tính trên toàn bộ attempts có metrics"
+					label="Tỷ lệ lượt có điểm"
+					value={
+						isLoading ? "..." : `${data?.overview.scoredAttemptRate ?? 0}%`
+					}
+					description={`Độ chính xác TB ${data?.overview.averageAccuracy ?? 0}% • Điểm thô TB ${data?.overview.averageRawScore ?? 0}`}
 				/>
 				<KpiCard
 					icon={<AlertTriangle className="h-5 w-5" />}
 					label="Bỏ dở"
 					value={isLoading ? "..." : `${data?.overview.partialRate ?? 0}%`}
-					description={`${data?.overview.partialAttempts ?? 0} attempts PARTIAL`}
+					description={`${data?.overview.partialAttempts ?? 0} lượt ở trạng thái bỏ dở`}
 				/>
 				<KpiCard
 					icon={<Clock3 className="h-5 w-5" />}
@@ -107,7 +132,7 @@ export function GameAnalyticsDashboardPage() {
 							? "..."
 							: formatDuration(data?.overview.averageDurationSeconds ?? 0)
 					}
-					description={`Timeout rate ${data?.overview.timeoutRate ?? 0}%`}
+					description={`Tỷ lệ hết giờ ${data?.overview.timeoutRate ?? 0}%`}
 				/>
 			</div>
 
@@ -158,7 +183,7 @@ export function GameAnalyticsDashboardPage() {
 
 				<Card className="rounded-[28px] border-slate-200/80">
 					<CardHeader>
-						<CardTitle>Top game timeout cao</CardTitle>
+						<CardTitle>Top game có tỷ lệ hết giờ cao</CardTitle>
 					</CardHeader>
 					<CardContent className="space-y-3">
 						{isLoading ? (
@@ -186,18 +211,17 @@ export function GameAnalyticsDashboardPage() {
 											<div className="text-lg font-bold text-amber-600">
 												{item.timeoutRate}%
 											</div>
-											<div className="text-xs text-slate-500">timeout</div>
+											<div className="text-xs text-slate-500">hết giờ</div>
 										</div>
 									</div>
 									<div className="mt-3 text-xs text-slate-600">
-										{item.attempts} attempts • Accuracy {item.averageAccuracy}%
-										• Completion {item.completionRate}%
+										{item.attempts} lượt chơi • {describeGamePerformance(item)}
 									</div>
 								</div>
 							))
 						) : (
 							<div className="rounded-2xl border border-dashed border-slate-200 p-8 text-center text-sm text-slate-500">
-								Chưa có dữ liệu timeout trong khoảng thời gian này.
+								Chưa có dữ liệu hết giờ trong khoảng thời gian này.
 							</div>
 						)}
 					</CardContent>
@@ -207,7 +231,7 @@ export function GameAnalyticsDashboardPage() {
 			<div className="grid gap-6 xl:grid-cols-2">
 				<Card className="rounded-[28px] border-slate-200/80">
 					<CardHeader>
-						<CardTitle>Accuracy trung bình theo game</CardTitle>
+						<CardTitle>Hiệu suất trung bình theo game</CardTitle>
 					</CardHeader>
 					<CardContent className="h-[420px]">
 						{isLoading ? (
@@ -215,7 +239,7 @@ export function GameAnalyticsDashboardPage() {
 						) : (
 							<ResponsiveContainer width="100%" height="100%">
 								<BarChart
-									data={topGames}
+									data={mixedTopGames}
 									layout="vertical"
 									margin={{ left: 12, right: 12 }}
 								>
@@ -233,7 +257,7 @@ export function GameAnalyticsDashboardPage() {
 									/>
 									<Tooltip />
 									<Bar
-										dataKey="averageAccuracy"
+										dataKey="performanceValue"
 										fill="#2563eb"
 										radius={[0, 10, 10, 0]}
 									/>
@@ -245,7 +269,7 @@ export function GameAnalyticsDashboardPage() {
 
 				<Card className="rounded-[28px] border-slate-200/80">
 					<CardHeader>
-						<CardTitle>Accuracy trung bình theo chủ đề</CardTitle>
+						<CardTitle>Độ chính xác trung bình theo chủ đề</CardTitle>
 					</CardHeader>
 					<CardContent className="h-[420px]">
 						{isLoading ? (

@@ -655,11 +655,7 @@ function StudentAuthSection() {
 	}
 
 	return (
-		<div
-			key="student-auth"
-			className="space-y-5"
-			style={{ animation: "auth-role-fade-in 320ms cubic-bezier(.22,1,.36,1)" }}
-		>
+		<div key="student-auth" className="space-y-5">
 			{/* <div className="space-y-2">
 				<h2 className="text-2xl font-bold tracking-[-0.03em] text-slate-900">
 					Đăng nhập học viên
@@ -1008,23 +1004,14 @@ function MentorAuthSection({
 
 	if (isRegisterMode) {
 		return (
-			<div
-				key="mentor-register"
-				style={{
-					animation: "auth-role-fade-in 320ms cubic-bezier(.22,1,.36,1)",
-				}}
-			>
+			<div key="mentor-register">
 				<MentorRegisterForm onBack={() => onRegisterModeChange(false)} />
 			</div>
 		);
 	}
 
 	return (
-		<div
-			key="mentor-auth"
-			className="space-y-5"
-			style={{ animation: "auth-role-fade-in 320ms cubic-bezier(.22,1,.36,1)" }}
-		>
+		<div key="mentor-auth" className="space-y-5">
 			{/* <div className="space-y-2">
 				<h2 className="text-2xl font-bold tracking-[-0.03em] text-slate-900">
 					Đăng nhập Mentor
@@ -1183,6 +1170,11 @@ const UnifiedLoginPage: React.FC<UnifiedLoginPageProps> = ({
 	const dispatch = useAppDispatch();
 	const [role, setRole] = React.useState<LoginRole>(defaultRole);
 	const [isMentorRegisterMode, setIsMentorRegisterMode] = React.useState(false);
+	const studentPanelRef = React.useRef<HTMLDivElement>(null);
+	const mentorPanelRef = React.useRef<HTMLDivElement>(null);
+	const [activePanelHeight, setActivePanelHeight] = React.useState<
+		number | null
+	>(null);
 	const isMentor = role === "MENTOR";
 	const isCompactMentorMode = isMentor && isMentorRegisterMode;
 	const copy = ROLE_COPY[role];
@@ -1203,6 +1195,37 @@ const UnifiedLoginPage: React.FC<UnifiedLoginPageProps> = ({
 		setIsMentorRegisterMode(false);
 	}, [defaultRole]);
 
+	React.useEffect(() => {
+		const studentNode = studentPanelRef.current;
+		const mentorNode = mentorPanelRef.current;
+
+		if (!studentNode || !mentorNode) {
+			return;
+		}
+
+		const updateHeight = () => {
+			const nextHeight = isMentor
+				? mentorNode.getBoundingClientRect().height
+				: studentNode.getBoundingClientRect().height;
+			setActivePanelHeight(nextHeight);
+		};
+
+		updateHeight();
+
+		const observer = new ResizeObserver(() => {
+			updateHeight();
+		});
+
+		observer.observe(studentNode);
+		observer.observe(mentorNode);
+		window.addEventListener("resize", updateHeight);
+
+		return () => {
+			observer.disconnect();
+			window.removeEventListener("resize", updateHeight);
+		};
+	}, [isMentor, isMentorRegisterMode]);
+
 	return (
 		<>
 			<style>{PANEL_ANIMATION_STYLES}</style>
@@ -1210,7 +1233,7 @@ const UnifiedLoginPage: React.FC<UnifiedLoginPageProps> = ({
 			<div className="relative h-svh overflow-hidden bg-slate-50 lg:bg-white">
 				<div
 					className={cn(
-						"absolute inset-y-0 z-10 flex w-full flex-col justify-center px-4 py-4 sm:px-6 lg:w-1/2 lg:px-8",
+						"absolute inset-y-0 z-10 flex w-full transform-gpu flex-col justify-center px-4 py-4 transition-transform duration-500 ease-in-out sm:px-6 lg:w-1/2 lg:px-8",
 						isMentor ? "lg:translate-x-full" : "lg:translate-x-0",
 					)}
 					style={{ willChange: "transform" }}
@@ -1231,7 +1254,7 @@ const UnifiedLoginPage: React.FC<UnifiedLoginPageProps> = ({
 
 						<div
 							className={cn(
-								"mt-3 rounded-[24px] border bg-white/95 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur",
+								"mt-3 rounded-[24px] border bg-white/95 shadow-[0_24px_70px_rgba(15,23,42,0.10)] backdrop-blur transition-[max-width,padding] duration-300 ease-out",
 								isCompactMentorMode
 									? "p-4 sm:p-5"
 									: "p-4 sm:mt-5 sm:rounded-[30px] sm:p-7",
@@ -1317,24 +1340,53 @@ const UnifiedLoginPage: React.FC<UnifiedLoginPageProps> = ({
 								</div>
 							</div>
 
-							{isMentor ? (
-								<MentorAuthSection
-									isRegisterMode={isMentorRegisterMode}
-									onRegisterModeChange={setIsMentorRegisterMode}
-								/>
-							) : (
-								<StudentAuthSection />
-							)}
+							<div
+								className="relative transition-[height] duration-300 ease-out"
+								style={
+									activePanelHeight
+										? { height: `${activePanelHeight}px` }
+										: undefined
+								}
+							>
+								<div
+									ref={studentPanelRef}
+									aria-hidden={isMentor}
+									className={cn(
+										"transition-opacity duration-220 ease-out",
+										isMentor
+											? "pointer-events-none absolute inset-0 opacity-0"
+											: "relative opacity-100",
+									)}
+								>
+									<StudentAuthSection />
+								</div>
+
+								<div
+									ref={mentorPanelRef}
+									aria-hidden={!isMentor}
+									className={cn(
+										"transition-opacity duration-220 ease-out",
+										isMentor
+											? "relative opacity-100"
+											: "pointer-events-none absolute inset-0 opacity-0",
+									)}
+								>
+									<MentorAuthSection
+										isRegisterMode={isMentorRegisterMode}
+										onRegisterModeChange={setIsMentorRegisterMode}
+									/>
+								</div>
+							</div>
 						</div>
 					</div>
 				</div>
 
 				<div
 					className={cn(
-						"absolute inset-y-0 hidden w-1/2 overflow-hidden transition-all duration-500 ease-in-out lg:block",
-						isMentor ? "left-0" : "left-1/2",
+						"absolute inset-y-0 left-0 hidden w-1/2 transform-gpu overflow-hidden transition-transform duration-500 ease-in-out lg:block",
+						isMentor ? "translate-x-0" : "translate-x-full",
 					)}
-					style={{ willChange: "left" }}
+					style={{ willChange: "transform" }}
 				>
 					<div
 						className={cn(

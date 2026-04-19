@@ -11,6 +11,9 @@ interface AttemptPayload {
 	completed?: boolean;
 	resultMetrics?: Record<string, unknown>;
 	attemptType?: string;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	attemptState?: "PARTIAL" | "COMPLETED";
+	metricsVersion?: number;
 }
 
 interface LegacyPayload {
@@ -27,6 +30,9 @@ type IncomingGameMessage = {
 	completed?: unknown;
 	metrics?: Record<string, unknown> | null;
 	attemptType?: unknown;
+	scoringModel?: unknown;
+	attemptState?: unknown;
+	metricsVersion?: unknown;
 	score?: unknown;
 };
 
@@ -84,6 +90,24 @@ export default function TrackedGameFrame({
 		[logPrefix],
 	);
 
+	const logAttemptEvent = useCallback(
+		(
+			stage:
+				| "ATTEMPT_PROGRESS_STORED"
+				| "ATTEMPT_PARTIAL_SUBMIT_START"
+				| "ATTEMPT_PARTIAL_SUBMIT_SUCCESS"
+				| "ATTEMPT_PARTIAL_SUBMIT_FAILURE"
+				| "ATTEMPT_RESULT_SUBMIT_START"
+				| "ATTEMPT_RESULT_SUBMIT_SUCCESS"
+				| "ATTEMPT_RESULT_SUBMIT_FAILURE"
+				| "ATTEMPT_SUBMIT_SKIPPED",
+			details?: unknown,
+		) => {
+			logInfo(stage, details);
+		},
+		[logInfo],
+	);
+
 	useEffect(() => {
 		startTimeRef.current = Date.now();
 		trackedRef.current = false;
@@ -132,15 +156,23 @@ export default function TrackedGameFrame({
 			completed?: boolean;
 			metrics?: Record<string, unknown>;
 			attemptType?: string;
+			scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+			attemptState?: "PARTIAL" | "COMPLETED";
+			metricsVersion?: number;
 		}): AttemptPayload => ({
 			rawScore: data.rawScore ?? 0,
-			maxRawScore: data.maxRawScore ?? 0,
+			maxRawScore: data.maxRawScore,
 			duration: data.duration,
 			completed: data.completed,
 			resultMetrics: data.metrics,
 			attemptType: data.attemptType ?? "STANDARD_HTML",
+			scoringModel: data.scoringModel ?? game.scoringModel,
+			attemptState:
+				data.attemptState ??
+				(data.completed === false ? "PARTIAL" : "COMPLETED"),
+			metricsVersion: data.metricsVersion ?? 1,
 		}),
-		[],
+		[game.scoringModel],
 	);
 
 	const trackResult = useCallback(
@@ -167,6 +199,17 @@ export default function TrackedGameFrame({
 				elapsed,
 				payload,
 			});
+			logAttemptEvent("ATTEMPT_RESULT_SUBMIT_START", {
+				gameId: game.id,
+				attemptState:
+					"score" in payload ? "LEGACY" : (payload.attemptState ?? "COMPLETED"),
+				scoringModel:
+					"score" in payload
+						? "LEGACY"
+						: (payload.scoringModel ?? game.scoringModel),
+				elapsed,
+				payload,
+			});
 
 			try {
 				if ("score" in payload) {
@@ -180,10 +223,13 @@ export default function TrackedGameFrame({
 				} else {
 					await gameService.submitAttempt(game.id, {
 						attemptType: payload.attemptType ?? "STANDARD_HTML",
+						scoringModel: payload.scoringModel,
+						attemptState: payload.attemptState ?? "COMPLETED",
 						rawScore: payload.rawScore ?? 0,
-						maxRawScore: payload.maxRawScore ?? 100,
+						maxRawScore: payload.maxRawScore,
 						duration: elapsed,
 						completed: payload.completed ?? true,
+						metricsVersion: payload.metricsVersion ?? 1,
 						resultMetrics: payload.resultMetrics,
 					});
 				}
@@ -193,18 +239,27 @@ export default function TrackedGameFrame({
 					gameId: game.id,
 					elapsed,
 				});
+				logAttemptEvent("ATTEMPT_RESULT_SUBMIT_SUCCESS", {
+					gameId: game.id,
+					elapsed,
+					tracked: true,
+				});
 				toast.success({
 					title: "Kết quả đã được ghi nhận",
-					description: `Thời gian: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
+					description: `Thời lượng: ${Math.floor(elapsed / 60)}m ${elapsed % 60}s`,
 				});
 			} catch (error) {
 				console.error("Tracking error", error);
 				logWarn("Game result submit failed", error);
+				logAttemptEvent("ATTEMPT_RESULT_SUBMIT_FAILURE", {
+					gameId: game.id,
+					error,
+				});
 				trackedRef.current = false;
 				setTracked(false);
 			}
 		},
-		[game.id, logInfo, logWarn],
+		[game.id, game.scoringModel, logAttemptEvent, logInfo, logWarn],
 	);
 
 	const submitPartialAttempt = useCallback(
@@ -217,6 +272,12 @@ export default function TrackedGameFrame({
 						reason,
 					},
 				);
+				logAttemptEvent("ATTEMPT_SUBMIT_SKIPPED", {
+					gameId: game.id,
+					kind: "PARTIAL",
+					reason,
+					skipReason: "MISSING_ACCESS_TOKEN",
+				});
 				return false;
 			}
 			if (trackedRef.current) {
@@ -224,6 +285,12 @@ export default function TrackedGameFrame({
 					"submitPartialAttempt skipped because result was already tracked",
 					{ reason },
 				);
+				logAttemptEvent("ATTEMPT_SUBMIT_SKIPPED", {
+					gameId: game.id,
+					kind: "PARTIAL",
+					reason,
+					skipReason: "ALREADY_TRACKED",
+				});
 				return false;
 			}
 
@@ -239,21 +306,32 @@ export default function TrackedGameFrame({
 					totalCount,
 					hasProgress: !!progress,
 				});
+				logAttemptEvent("ATTEMPT_SUBMIT_SKIPPED", {
+					gameId: game.id,
+					kind: "PARTIAL",
+					reason,
+					skipReason: "EMPTY_PROGRESS",
+					totalCount,
+					hasProgress: !!progress,
+				});
 				return false;
 			}
 
 			const payload = {
 				attemptType: progress.attemptType ?? "STANDARD_HTML",
+				scoringModel: progress.scoringModel ?? game.scoringModel,
+				attemptState: "PARTIAL" as const,
 				rawScore: progress.rawScore ?? 0,
-				maxRawScore: Math.max(
-					progress.maxRawScore ?? totalCount,
-					totalCount,
-					1,
-				),
+				maxRawScore:
+					progress.scoringModel === "HIGH_SCORE" ||
+					progress.scoringModel === "NO_SCORE"
+						? (progress.maxRawScore ?? null)
+						: Math.max(progress.maxRawScore ?? totalCount, totalCount, 1),
 				duration:
 					progress.duration ??
 					Math.round((Date.now() - startTimeRef.current) / 1000),
 				completed: false,
+				metricsVersion: progress.metricsVersion ?? 1,
 				resultMetrics: {
 					...(progress.resultMetrics ?? {}),
 					attemptState: "PARTIAL",
@@ -277,6 +355,12 @@ export default function TrackedGameFrame({
 				url,
 				payload,
 			});
+			logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_START", {
+				gameId: game.id,
+				reason,
+				url,
+				payload,
+			});
 
 			if (
 				navigator.sendBeacon &&
@@ -290,6 +374,11 @@ export default function TrackedGameFrame({
 					logInfo("Partial attempt sent via sendBeacon", {
 						gameId: game.id,
 						reason,
+					});
+					logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_SUCCESS", {
+						gameId: game.id,
+						reason,
+						method: "sendBeacon",
 					});
 					return true;
 				}
@@ -316,11 +405,35 @@ export default function TrackedGameFrame({
 						status: response.status,
 						ok: response.ok,
 					});
+					if (response.ok) {
+						logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_SUCCESS", {
+							gameId: game.id,
+							reason,
+							method: "fetch",
+							status: response.status,
+						});
+						return;
+					}
+					logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_FAILURE", {
+						gameId: game.id,
+						reason,
+						method: "fetch",
+						status: response.status,
+						ok: response.ok,
+					});
+					trackedRef.current = false;
+					setTracked(false);
 				})
 				.catch((error) => {
 					logWarn("Partial attempt fetch failed", {
 						gameId: game.id,
 						reason,
+						error,
+					});
+					logAttemptEvent("ATTEMPT_PARTIAL_SUBMIT_FAILURE", {
+						gameId: game.id,
+						reason,
+						method: "fetch",
 						error,
 					});
 					trackedRef.current = false;
@@ -329,7 +442,7 @@ export default function TrackedGameFrame({
 
 			return true;
 		},
-		[game.id, logInfo, logWarn],
+		[game.id, game.scoringModel, logAttemptEvent, logInfo, logWarn],
 	);
 
 	const parseIncomingMessage = useCallback(
@@ -431,9 +544,42 @@ export default function TrackedGameFrame({
 						typeof data.attemptType === "string"
 							? data.attemptType
 							: "STANDARD_HTML",
+					scoringModel:
+						typeof data.scoringModel === "string"
+							? (data.scoringModel as
+									| "FINITE_SCORE"
+									| "HIGH_SCORE"
+									| "NO_SCORE")
+							: game.scoringModel,
+					attemptState:
+						typeof data.attemptState === "string"
+							? (data.attemptState as "PARTIAL" | "COMPLETED")
+							: "PARTIAL",
+					metricsVersion:
+						typeof data.metricsVersion === "number" ? data.metricsVersion : 1,
 				});
 				latestProgressRef.current = payload;
 				logInfo("Stored latest GAME_PROGRESS payload", payload);
+				logAttemptEvent("ATTEMPT_PROGRESS_STORED", {
+					gameId: game.id,
+					attemptState: payload.attemptState,
+					scoringModel: payload.scoringModel,
+					rawScore: payload.rawScore ?? 0,
+					maxRawScore: payload.maxRawScore ?? null,
+					duration: payload.duration ?? null,
+					totalCount:
+						typeof payload.resultMetrics?.totalCount === "number"
+							? payload.resultMetrics.totalCount
+							: null,
+					answeredCount:
+						typeof payload.resultMetrics?.answeredCount === "number"
+							? payload.resultMetrics.answeredCount
+							: null,
+					exitReason:
+						typeof payload.resultMetrics?.exitReason === "string"
+							? payload.resultMetrics.exitReason
+							: null,
+				});
 				return;
 			}
 
@@ -458,6 +604,19 @@ export default function TrackedGameFrame({
 							typeof data.attemptType === "string"
 								? data.attemptType
 								: "STANDARD_HTML",
+						scoringModel:
+							typeof data.scoringModel === "string"
+								? (data.scoringModel as
+										| "FINITE_SCORE"
+										| "HIGH_SCORE"
+										| "NO_SCORE")
+								: game.scoringModel,
+						attemptState:
+							typeof data.attemptState === "string"
+								? (data.attemptState as "PARTIAL" | "COMPLETED")
+								: "COMPLETED",
+						metricsVersion:
+							typeof data.metricsVersion === "number" ? data.metricsVersion : 1,
 					}),
 				);
 				return;
@@ -480,6 +639,7 @@ export default function TrackedGameFrame({
 		buildAttemptPayload,
 		game.id,
 		isMessageFromCurrentGame,
+		logAttemptEvent,
 		logInfo,
 		parseIncomingMessage,
 		trackResult,
@@ -544,13 +704,13 @@ export default function TrackedGameFrame({
 								onClick={handleBack}
 								className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
 							>
-								← Back
+								← Quay lại
 							</button>
 						)}
 						<h2 className="font-bold text-lg">{game.title}</h2>
 						{!username && (
 							<span className="text-yellow-500 text-sm">
-								⚠️ Not logged in - game progress won't be tracked
+								⚠️ Chưa đăng nhập - tiến trình chơi sẽ không được ghi nhận
 							</span>
 						)}
 						{tracked && (
@@ -563,7 +723,7 @@ export default function TrackedGameFrame({
 						onClick={toggleFullscreen}
 						className="bg-red-600 hover:bg-red-700 px-6 py-2 rounded font-bold transition-colors"
 					>
-						{isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
+						{isFullscreen ? "Thoát toàn màn hình" : "Toàn màn hình"}
 					</button>
 				</div>
 				<div ref={containerRef} className="flex-1 relative">
@@ -571,7 +731,7 @@ export default function TrackedGameFrame({
 						ref={iframeRef}
 						src={gameUrl}
 						className="w-full h-full border-none"
-						title={`${game.title} Play`}
+						title={`${game.title} - Chơi game`}
 						onLoad={notifyGameHostReady}
 					/>
 				</div>
@@ -588,7 +748,7 @@ export default function TrackedGameFrame({
 				ref={iframeRef}
 				src={gameUrl}
 				className={iframeClassName}
-				title={`${game.title} Inline Play`}
+				title={`${game.title} - Chơi trong trang`}
 				onLoad={notifyGameHostReady}
 			/>
 			<div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4">

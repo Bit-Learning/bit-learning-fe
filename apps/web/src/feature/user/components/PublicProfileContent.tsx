@@ -5,6 +5,7 @@ import {
 	ChevronLeft,
 	ChevronRight,
 	Gamepad2,
+	Info,
 	Trophy,
 	Users,
 	FileText,
@@ -12,10 +13,7 @@ import {
 	BookA,
 } from "lucide-react";
 import { Card } from "@workspace/ui/components/Card";
-import {
-	useViewUserProfileByUsername,
-	useFollowStats,
-} from "../queries/useUser";
+import { useViewUserProfileByUsername } from "../queries/useUser";
 import studentService, {
 	type PlayHistoryDetail,
 	type PlayHistoryItem,
@@ -27,6 +25,11 @@ import { useForumPostsByAuthor } from "@/feature/forum/queries/useForum";
 import ForumPostCard from "@/feature/app/components/ForumPostCard";
 import { Link } from "@tanstack/react-router";
 import PlayHistoryDetailModal from "@/feature/game/components/PlayHistoryDetailModal";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@workspace/ui/components/update/tooltip";
 
 interface PublicProfileContentProps {
 	username: string;
@@ -42,13 +45,52 @@ const getCurriculumSummary = (item: PlayHistoryItem) =>
 		.filter(Boolean)
 		.join(" • ");
 
+function StatCard({
+	icon: Icon,
+	value,
+	label,
+	tooltip,
+	iconClassName,
+}: {
+	icon: typeof Trophy;
+	value: string | number;
+	label: string;
+	tooltip?: string;
+	iconClassName: string;
+}) {
+	return (
+		<Card className="p-5 text-center">
+			<Icon className={`mx-auto mb-2 h-6 w-6 ${iconClassName}`} />
+			<div className="text-3xl font-bold text-slate-900">{value}</div>
+			<div className="mt-1 flex items-center justify-center gap-1 text-xs text-slate-500">
+				<span>{label}</span>
+				{tooltip ? (
+					<Tooltip>
+						<TooltipTrigger asChild>
+							<button
+								type="button"
+								className="text-slate-400 transition-colors hover:text-slate-600"
+								aria-label={tooltip}
+							>
+								<Info className="h-3.5 w-3.5" />
+							</button>
+						</TooltipTrigger>
+						<TooltipContent sideOffset={8} className="max-w-56 text-left">
+							{tooltip}
+						</TooltipContent>
+					</Tooltip>
+				) : null}
+			</div>
+		</Card>
+	);
+}
+
 export const PublicProfileContent = ({
 	username,
 }: PublicProfileContentProps) => {
 	const { data: userProfile, isLoading } =
 		useViewUserProfileByUsername(username);
 	const userId = userProfile?.id;
-	const { data: followStats } = useFollowStats(userId ?? 0);
 	const { data: myPostsResponse, isLoading: isPostsLoading } =
 		useForumPostsByAuthor({
 			authorId: userId ?? 0,
@@ -120,6 +162,7 @@ export const PublicProfileContent = ({
 	const fullName =
 		`${userProfile.firstName || ""} ${userProfile.lastName || ""}`.trim();
 	const myPosts = myPostsResponse?.data ?? [];
+	const totalAttempts = gameProfile?.totalAttempts ?? totalItems;
 
 	return (
 		<div className="grow space-y-6 w-full">
@@ -195,28 +238,34 @@ export const PublicProfileContent = ({
 			</Card>
 
 			{/* Stats Row */}
-			<div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-				<Card className="p-5 text-center">
-					<Trophy className="w-6 h-6 text-yellow-500 mx-auto mb-2" />
-					<div className="text-3xl font-bold text-slate-900">
-						{gameProfile?.totalScore ?? 0}
-					</div>
-					<div className="text-xs text-slate-500 mt-1">Tổng điểm</div>
-				</Card>
-				<Card className="p-5 text-center">
-					<Gamepad2 className="w-6 h-6 text-blue-500 mx-auto mb-2" />
-					<div className="text-3xl font-bold text-slate-900">
-						{gameProfile?.gamesPlayed ?? 0}
-					</div>
-					<div className="text-xs text-slate-500 mt-1">Game đã chơi</div>
-				</Card>
-				<Card className="p-5 text-center">
-					<BookA className="w-6 h-6 text-green-500 mx-auto mb-2" />
-					<div className="text-3xl font-bold text-slate-900">
-						{myPosts.length}
-					</div>
-					<div className="text-xs text-slate-500 mt-1">Các bài viết</div>
-				</Card>
+			<div className="grid grid-cols-2 gap-4 xl:grid-cols-4">
+				<StatCard
+					icon={Trophy}
+					value={gameProfile?.totalScore ?? 0}
+					label="Tổng điểm leaderboard"
+					tooltip="Gồm tổng điểm tốt nhất của từng game có tính điểm trên toàn hệ thống, hiện là cả QUIZ và MATCHING. Không phải tổng của mọi lượt chơi, và không phải điểm của riêng một tab leaderboard."
+					iconClassName="text-yellow-500"
+				/>
+				<StatCard
+					icon={Users}
+					value={gameProfile?.gamesPlayed ?? 0}
+					label="Game có điểm"
+					tooltip="Số game khác nhau đã có điểm được tính vào leaderboard tổng, gồm các game QUIZ và MATCHING mà người dùng có best score hợp lệ."
+					iconClassName="text-blue-500"
+				/>
+				<StatCard
+					icon={Gamepad2}
+					value={totalAttempts}
+					label="Lượt chơi"
+					tooltip="Tổng số lượt chơi đã ghi nhận trong lịch sử. Con số này có thể lớn hơn số game có điểm vì một game có thể được chơi nhiều lần."
+					iconClassName="text-indigo-500"
+				/>
+				<StatCard
+					icon={BookA}
+					value={myPosts.length}
+					label="Các bài viết"
+					iconClassName="text-green-500"
+				/>
 			</div>
 
 			<Card className="p-6 space-y-6">
@@ -266,7 +315,7 @@ export const PublicProfileContent = ({
 			<Card className="p-6">
 				<div className="flex items-center gap-3 mb-6">
 					<h3 className="font-bold text-slate-900">
-						Lịch sử chơi ({totalItems})
+						Lịch sử chơi ({totalItems} lượt)
 					</h3>
 				</div>
 
@@ -276,9 +325,10 @@ export const PublicProfileContent = ({
 					<>
 						<div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
 							{playHistory.map((item) => (
-								<div
+								<button
+									type="button"
 									key={item.id}
-									className="rounded-xl border border-slate-100 overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
+									className="overflow-hidden rounded-xl border border-slate-100 text-left transition-shadow hover:shadow-md"
 									onClick={() => void openHistoryDetail(item)}
 								>
 									<div className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
@@ -341,7 +391,7 @@ export const PublicProfileContent = ({
 											{new Date(item.playedAt).toLocaleDateString("vi-VN")}
 										</div>
 									</div>
-								</div>
+								</button>
 							))}
 						</div>
 						{totalPages > 1 && (

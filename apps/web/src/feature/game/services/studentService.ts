@@ -15,6 +15,9 @@ export interface PlayHistoryItem {
 	gameId: number;
 	gameTitle: string;
 	gameThumbnail: string;
+	gameType?: "QUIZ" | "TYPING" | "MATCHING" | "OTHER" | null;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE" | null;
+	isScored?: boolean | null;
 	playedAt: string;
 	score: number;
 	rawScore: number;
@@ -65,13 +68,18 @@ export interface PlayHistoryDetail extends PlayHistoryItem {
 export interface UserGameAnalyticsSummary {
 	gameId: number;
 	gameTitle: string;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE" | null;
+	isScored?: boolean | null;
 	totalAttempts: number;
 	completedAttempts: number;
 	partialAttempts: number;
 	completionRate: number;
 	partialRate: number;
+	scoredAttemptRate: number;
 	averageAccuracy: number;
 	bestAccuracy: number;
+	averageRawScore: number;
+	bestRawScore: number;
 	averageDurationSeconds: number;
 	averageLeaderboardPoints: number;
 	bestLeaderboardPoints: number;

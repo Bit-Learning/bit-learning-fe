@@ -17,11 +17,11 @@ import {
   CreditCard,
   Code,
   FileText,
+  Mail,
 } from "lucide-react";
 import type { NavGroup } from "../types";
 
 const ADMIN_ONLY_URLS = ["/metrics", "/tools-metrics", "/system-prompt", "/users", "/transactions"];
-
 export const navGroups: NavGroup[] = [
   {
     title: "Chung",
@@ -44,6 +44,8 @@ export const navGroups: NavGroup[] = [
         icon: PresentationIcon,
       },
       { title: "Quản lý trò chơi", url: "/apps/games", icon: Gamepad2 },
+      { title: "Quản lý mẫu mail", url: "/mail-templates", icon: Mail },
+
       {
         title: "Analytics trò chơi",
         url: "/apps/games/analytics",

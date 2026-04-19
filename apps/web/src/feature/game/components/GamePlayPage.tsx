@@ -37,7 +37,7 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 	if (loading) {
 		return (
 			<div className="fixed inset-0 z-50 bg-black flex items-center justify-center">
-				<div className="text-white text-2xl">Loading game...</div>
+				<div className="text-white text-2xl">Đang tải trò chơi...</div>
 			</div>
 		);
 	}
@@ -48,13 +48,13 @@ export default function GamePlayPage({ id }: GamePlayPageProps) {
 				<div className="text-center text-white">
 					<div className="text-6xl mb-6">🎮</div>
 					<p className="text-2xl font-bold text-gray-400 mb-2">
-						Game not found
+						Không tìm thấy trò chơi
 					</p>
 					<button
 						onClick={() => navigate({ to: "/games" })}
 						className="mt-4 bg-red-600 hover:bg-red-700 px-6 py-2 rounded font-bold transition-colors"
 					>
-						← Back to Games
+						← Quay lại danh sách game
 					</button>
 				</div>
 			</div>

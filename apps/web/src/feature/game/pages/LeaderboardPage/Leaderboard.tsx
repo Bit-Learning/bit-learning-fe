@@ -1,24 +1,31 @@
 import { useEffect, useState } from "react";
 import gameService, {
 	type LeaderboardEntry,
+	type LeaderboardGameType,
 	type Page,
 } from "../../services/gameService";
-import {
-	ChevronLeft,
-	ChevronRight,
-	UserPlus,
-	UserMinus,
-	Eye,
-} from "lucide-react";
-import { useNavigate } from "@tanstack/react-router";
-import {
-	useFollowUser,
-	useUnfollowUser,
-	useFollowStats,
-} from "@/feature/user/queries/useUser";
-import { useSelector } from "react-redux";
-import type { RootState } from "@/shared/redux/store";
+import { ChevronLeft, ChevronRight, Eye } from "lucide-react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
+
+const DEFAULT_LEADERBOARD_TAB = {
+	value: "QUIZ" as const,
+	label: "Quiz",
+	description: "Xếp hạng theo tổng điểm quiz cao nhất của từng người chơi.",
+};
+
+const LEADERBOARD_TABS: Array<{
+	value: LeaderboardGameType;
+	label: string;
+	description: string;
+}> = [
+	DEFAULT_LEADERBOARD_TAB,
+	{
+		value: "MATCHING",
+		label: "Matching",
+		description: "Xếp hạng riêng cho game ghép cặp, không gộp với quiz.",
+	},
+];
 
 // ─── Avatar ────────────────────────────────────────────────────────────────
 const AVATAR_COLORS = [
@@ -91,48 +98,6 @@ function ScoreBar({
 	);
 }
 
-// ─── Follow Button ──────────────────────────────────────────────────────────
-function FollowButton({ userId }: { userId: number }) {
-	const { data: stats, isLoading } = useFollowStats(userId);
-	const followMutation = useFollowUser();
-	const unfollowMutation = useUnfollowUser();
-	const auth = useSelector((state: RootState) => state.auth);
-	const currentUserId = auth.userInfo?.id;
-
-	if (isLoading || currentUserId === userId) return null;
-
-	const isFollowing = stats?.isFollowing ?? false;
-
-	return (
-		<button
-			onClick={(e) => {
-				e.stopPropagation();
-				isFollowing
-					? unfollowMutation.mutate(userId)
-					: followMutation.mutate(userId);
-			}}
-			disabled={followMutation.isPending || unfollowMutation.isPending}
-			className={`flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold transition-all ${
-				isFollowing
-					? "bg-gray-100 text-gray-600 hover:bg-red-50 hover:text-red-500 border border-gray-200"
-					: "text-white hover:opacity-90 hover:scale-95"
-			}`}
-			style={
-				!isFollowing
-					? { background: "linear-gradient(135deg, #6366F1, #8B5CF6)" }
-					: undefined
-			}
-		>
-			{isFollowing ? (
-				<UserMinus className="w-3.5 h-3.5" />
-			) : (
-				<UserPlus className="w-3.5 h-3.5" />
-			)}
-			{isFollowing ? "Bỏ theo dõi" : "Theo dõi"}
-		</button>
-	);
-}
-
 // ─── Podium Card ────────────────────────────────────────────────────────────
 const PODIUM_STYLES = {
 	1: {
@@ -174,7 +139,8 @@ function PodiumCard({
 	const badge = PODIUM_BADGE_STYLES[rank];
 	return (
 		<div className={`flex-1 max-w-[200px] ${s.wrapper}`}>
-			<div
+			<button
+				type="button"
 				className={`relative rounded-2xl p-4 text-center cursor-pointer transition-transform hover:-translate-y-1 ${s.card}`}
 				onClick={onClick}
 			>
@@ -209,9 +175,9 @@ function PodiumCard({
 					{entry.totalScore.toLocaleString("vi-VN")}
 				</div>
 				<div className="text-[11px] text-gray-500">
-					{entry.gamesPlayed} trận
+					{entry.totalAttempts} lượt chơi
 				</div>
-			</div>
+			</button>
 		</div>
 	);
 }
@@ -219,6 +185,8 @@ function PodiumCard({
 // ─── Main Leaderboard ───────────────────────────────────────────────────────
 export default function LeaderboardPage() {
 	const navigate = useNavigate();
+	const search = useSearch({ from: "/_layout/leaderboard" });
+	const activeGameType = search.gameType ?? "QUIZ";
 	const [leaderboard, setLeaderboard] = useState<Page<LeaderboardEntry> | null>(
 		null,
 	);
@@ -227,25 +195,37 @@ export default function LeaderboardPage() {
 	const [loading, setLoading] = useState(true);
 
 	useEffect(() => {
-		fetchLeaderboard(currentPage, pageSize);
-	}, [currentPage, pageSize]);
+		const loadLeaderboard = async () => {
+			try {
+				setLoading(true);
+				const data = await gameService.getLeaderboard(
+					currentPage,
+					pageSize,
+					activeGameType,
+				);
+				setLeaderboard(data);
+			} catch (error) {
+				console.error("Không thể tải bảng xếp hạng", error);
+			} finally {
+				setLoading(false);
+			}
+		};
 
-	const fetchLeaderboard = async (page: number, size: number) => {
-		try {
-			setLoading(true);
-			const data = await gameService.getLeaderboard(page, size);
-			setLeaderboard(data);
-		} catch (error) {
-			console.error("Failed to load leaderboard", error);
-		} finally {
-			setLoading(false);
-		}
-	};
+		void loadLeaderboard();
+	}, [activeGameType, currentPage, pageSize]);
 
 	const handleViewProfile = (username: string) => {
 		navigate({
 			to: "/profile/$username",
 			params: { username },
+		});
+	};
+
+	const handleChangeGameType = (gameType: LeaderboardGameType) => {
+		setCurrentPage(0);
+		navigate({
+			to: "/leaderboard",
+			search: { gameType },
 		});
 	};
 
@@ -264,10 +244,26 @@ export default function LeaderboardPage() {
 	const tableEntries = hasPodium
 		? (leaderboard?.content.slice(3) ?? [])
 		: (leaderboard?.content ?? []);
+	const activeTab =
+		LEADERBOARD_TABS.find((tab) => tab.value === activeGameType) ??
+		DEFAULT_LEADERBOARD_TAB;
+	const orderedPodiumEntries = hasPodium
+		? [
+				{ entry: podiumEntries[1], rank: 2 as const },
+				{ entry: podiumEntries[0], rank: 1 as const },
+				{ entry: podiumEntries[2], rank: 3 as const },
+			].filter(
+				(
+					item,
+				): item is {
+					entry: LeaderboardEntry;
+					rank: 1 | 2 | 3;
+				} => Boolean(item.entry),
+			)
+		: [];
 
 	return (
 		<div className="min-h-screen max-w-3xl mx-auto px-4 py-8">
-			{/* Header */}
 			<div className="text-center mb-8">
 				<h1 className="text-4xl font-black tracking-tight text-gray-900">
 					<span
@@ -280,19 +276,61 @@ export default function LeaderboardPage() {
 						Bảng xếp hạng
 					</span>
 				</h1>
-				<p className="text-sm text-gray-500 mt-3">
-					Top người chơi xuất sắc nhất
-				</p>
 			</div>
 
-			{/* Podium — only when 3+ entries on page 0 */}
+			<div className="mb-8 rounded-3xl border border-gray-200 bg-white/90 p-2 shadow-sm">
+				<div className="grid grid-cols-2 gap-2">
+					{LEADERBOARD_TABS.map((tab) => {
+						const isActive = tab.value === activeGameType;
+						return (
+							<button
+								key={tab.value}
+								type="button"
+								onClick={() => handleChangeGameType(tab.value)}
+								className={`rounded-2xl px-4 py-3 text-left transition-all ${
+									isActive
+										? "text-white shadow-[0_12px_30px_rgba(239,68,68,0.18)]"
+										: "bg-gray-50 text-gray-600 hover:bg-gray-100"
+								}`}
+								style={
+									isActive
+										? {
+												background:
+													"linear-gradient(135deg, #F59E0B, #EF4444, #8B5CF6)",
+											}
+										: undefined
+								}
+							>
+								<div className="text-sm font-black">{tab.label}</div>
+								<div
+									className={`mt-1 text-xs leading-5 ${
+										isActive ? "text-white/80" : "text-gray-500"
+									}`}
+								>
+									{tab.description}
+								</div>
+							</button>
+						);
+					})}
+				</div>
+			</div>
+
+			{/* <div className="mb-8 rounded-3xl border border-amber-100 bg-amber-50 px-5 py-4 text-left">
+				<div className="text-xs font-bold uppercase tracking-[0.24em] text-amber-700">
+					Đang xem
+				</div>
+				<h2 className="mt-2 text-2xl font-black text-gray-900">
+					Bảng xếp hạng {activeTab.label}
+				</h2>
+				<p className="mt-2 text-sm leading-6 text-gray-600">
+					{activeTab.description} Hệ thống không xếp hạng `TYPING` và `OTHER` vì
+					hai loại này đang được cấu hình không tính điểm.
+				</p>
+			</div> */}
+
 			{hasPodium && (
 				<div className="flex items-end justify-center gap-3 mb-10">
-					{[
-						{ entry: podiumEntries[1]!, rank: 2 as const },
-						{ entry: podiumEntries[0]!, rank: 1 as const },
-						{ entry: podiumEntries[2]!, rank: 3 as const },
-					].map(({ entry, rank }) => (
+					{orderedPodiumEntries.map(({ entry, rank }) => (
 						<PodiumCard
 							key={entry.userId}
 							entry={entry}
@@ -303,14 +341,14 @@ export default function LeaderboardPage() {
 				</div>
 			)}
 
-			{/* Table rows */}
 			<div className="flex flex-col gap-2">
 				{tableEntries.map((entry, index) => {
 					const globalRank =
 						currentPage * pageSize + (hasPodium ? 3 : 0) + index;
 					return (
-						<div
+						<button
 							key={entry.userId}
+							type="button"
 							className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50 border border-gray-100 cursor-pointer transition-all hover:translate-x-1 hover:bg-white hover:shadow-md"
 							style={{ animationDelay: `${index * 0.04}s` }}
 							onClick={() => handleViewProfile(entry.username)}
@@ -333,7 +371,7 @@ export default function LeaderboardPage() {
 									{entry.username}
 								</div>
 								<div className="text-xs text-gray-500">
-									{entry.gamesPlayed} trận đã chơi
+									{entry.totalAttempts} lượt chơi
 								</div>
 							</div>
 
@@ -344,35 +382,30 @@ export default function LeaderboardPage() {
 								userId={entry.userId}
 							/>
 
-							{/* Actions */}
-							<div
-								className="flex items-center gap-2 flex-shrink-0"
-								onClick={(e) => e.stopPropagation()}
-							>
-								<button
-									onClick={() => handleViewProfile(entry.username)}
-									className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-gray-200 text-gray-600 hover:bg-gray-100 transition-colors"
-								>
+							<div className="flex items-center gap-2 flex-shrink-0">
+								<span className="flex items-center gap-1 px-3 py-1.5 rounded-lg text-xs font-bold bg-white border border-gray-200 text-gray-600">
 									<Eye className="w-3.5 h-3.5" />
 									Xem
-								</button>
-								{/* <FollowButton userId={entry.userId} /> */}
+								</span>
 							</div>
-						</div>
+						</button>
 					);
 				})}
 			</div>
 
-			{/* Empty state */}
 			{(!leaderboard || leaderboard.content.length === 0) && (
 				<div className="text-center py-16 text-gray-400">
 					<div className="text-5xl mb-3">🎮</div>
-					<p className="font-semibold">Chưa có người chơi nào.</p>
-					<p className="text-sm mt-1">Hãy là người đầu tiên!</p>
+					<p className="font-semibold">
+						Chưa có dữ liệu xếp hạng cho {activeTab.label}.
+					</p>
+					<p className="text-sm mt-1">
+						Khi có lượt chơi đủ điều kiện tính điểm, bảng xếp hạng sẽ xuất hiện
+						ở đây.
+					</p>
 				</div>
 			)}
 
-			{/* Pagination */}
 			{leaderboard && leaderboard.totalElements > 0 && (
 				<div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-100">
 					<p className="text-xs text-gray-500">
@@ -393,6 +426,7 @@ export default function LeaderboardPage() {
 
 					<div className="flex items-center gap-2">
 						<button
+							type="button"
 							onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
 							disabled={leaderboard.first}
 							className={`flex items-center gap-1 px-4 py-2 rounded-xl text-xs font-bold transition-all ${
@@ -416,6 +450,7 @@ export default function LeaderboardPage() {
 						</span>
 
 						<button
+							type="button"
 							onClick={() =>
 								setCurrentPage((p) =>
 									Math.min(leaderboard.totalPages - 1, p + 1),

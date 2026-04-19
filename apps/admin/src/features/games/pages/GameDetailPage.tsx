@@ -83,6 +83,85 @@ const getCategoryName = (
 const formatDuration = (seconds: number) =>
 	`${Math.floor(seconds / 60)}m ${seconds % 60}s`;
 
+const GAME_TYPE_DETAILS: Record<
+	NonNullable<UpsertGamePayload["gameType"]>,
+	{ label: string; description: string }
+> = {
+	QUIZ: {
+		label: "Game câu hỏi",
+		description:
+			"Phù hợp khi game có câu đúng, câu sai, tổng số câu hoặc cần phân tích độ chính xác.",
+	},
+	TYPING: {
+		label: "Game gõ phím",
+		description:
+			"Phù hợp cho game gõ phím hoặc luyện phản xạ. Theo cấu hình hiện tại, loại này không tham gia bảng xếp hạng tổng.",
+	},
+	MATCHING: {
+		label: "Game ghép cặp",
+		description:
+			"Phù hợp cho game ghép cặp hoặc nối đáp án, có điểm riêng để xếp hạng độc lập với quiz.",
+	},
+	OTHER: {
+		label: "Khác / tùy biến",
+		description:
+			"Dùng khi game không khớp rõ với quiz, typing hoặc matching. Theo cấu hình mặc định, loại này không tính điểm và không lên bảng xếp hạng.",
+	},
+};
+
+const getDefaultScoreConfigForGameType = (
+	gameType: NonNullable<UpsertGamePayload["gameType"]>,
+) => {
+	if (gameType === "QUIZ" || gameType === "MATCHING") {
+		return {
+			scoringModel: "FINITE_SCORE" as const,
+			isScored: true,
+		};
+	}
+
+	return {
+		scoringModel: "NO_SCORE" as const,
+		isScored: false,
+	};
+};
+
+const SCORING_MODEL_DETAILS: Record<
+	NonNullable<UpsertGamePayload["scoringModel"]>,
+	{ label: string; description: string; examples: string }
+> = {
+	FINITE_SCORE: {
+		label: "Điểm có thang tối đa",
+		description:
+			"Hệ thống kỳ vọng có `rawScore` và `maxRawScore`, nên có thể tính độ chính xác hoặc tỷ lệ hoàn thành rõ ràng.",
+		examples: "Ví dụ: 8/10 câu đúng, 15/20 cặp đúng.",
+	},
+	HIGH_SCORE: {
+		label: "Điểm càng cao càng tốt",
+		description:
+			"Hệ thống chỉ quan tâm điểm đạt được của mỗi lượt chơi, không ép phải có tổng điểm tối đa cố định.",
+		examples: "Ví dụ: điểm gõ phím, điểm arcade, điểm chạy vô tận.",
+	},
+	NO_SCORE: {
+		label: "Không chấm điểm",
+		description:
+			"Hệ thống chỉ theo dõi tham gia, thời lượng và trạng thái hoàn thành, không hiển thị điểm số.",
+		examples: "Ví dụ: luyện piano, sandbox, hoạt động khám phá.",
+	},
+};
+
+const SCORE_TRACKING_DETAILS = {
+	true: {
+		label: "Có điểm",
+		description:
+			"UI và analytics sẽ hiển thị điểm, bảng xếp hạng hoặc tóm tắt điểm nếu kiểu tính điểm hỗ trợ.",
+	},
+	false: {
+		label: "Không lấy điểm",
+		description:
+			"UI ưu tiên hiển thị tham gia và hoàn thành, tránh tạo cảm giác game có điểm khi thực tế không nên chấm.",
+	},
+};
+
 export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 	gameId,
 }) => {
@@ -98,6 +177,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 	const [form, setForm] = useState<UpsertGamePayload>({
 		title: "",
 		desc: "",
+		gameType: "QUIZ",
+		...getDefaultScoreConfigForGameType("QUIZ"),
+		trackingConfig: "",
 		difficulty: "MEDIUM",
 		baseScoreMax: 100,
 		difficultyMultiplier: 1.2,
@@ -125,6 +207,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 			setForm({
 				title: "",
 				desc: "",
+				gameType: "QUIZ",
+				...getDefaultScoreConfigForGameType("QUIZ"),
+				trackingConfig: "",
 				difficulty: "MEDIUM",
 				baseScoreMax: 100,
 				difficultyMultiplier: 1.2,
@@ -140,6 +225,10 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 			id: game.id,
 			title: game.title ?? "",
 			desc: game.description ?? "",
+			gameType: game.gameType ?? "QUIZ",
+			scoringModel: game.scoringModel ?? "FINITE_SCORE",
+			isScored: game.isScored ?? game.scoringModel !== "NO_SCORE",
+			trackingConfig: game.trackingConfig ?? "",
 			difficulty: game.difficulty ?? "MEDIUM",
 			baseScoreMax: game.scoringBaseScoreMax ?? 100,
 			difficultyMultiplier: game.scoringDifficultyMultiplier ?? 1.2,
@@ -205,7 +294,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 			? "Điểm đẩy thủ công hiện đang lớn hơn phần đóng góp từ lượt xem mẫu. Game có thể được đẩy spotlight quá mạnh so với tín hiệu thực tế."
 			: null,
 		isLikeWeightRisk
-			? "Trọng số lượt thích đang chênh rất lớn so với lượt xem. Spotlight sẽ nghiêng mạnh về số lượt thích."
+			? "Trọng số lượt thích đang chênh rất lớn so với lượt xem. Khu vực tâm điểm sẽ nghiêng mạnh về số lượt thích."
 			: null,
 	]
 		.filter(Boolean)
@@ -239,6 +328,66 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 				: {
 						label: "Rủi ro cao",
 						className: "border-orange-200 bg-orange-50 text-orange-700",
+					};
+	const scoringModeDescription =
+		form.scoringModel === "FINITE_SCORE"
+			? "Dùng mô hình điểm trên tổng điểm. Phù hợp cho quiz, matching hoặc mọi game có điểm tối đa rõ ràng."
+			: form.scoringModel === "HIGH_SCORE"
+				? "Dùng mô hình điểm càng cao càng tốt. Phù hợp cho arcade, typing hoặc game cộng điểm liên tục."
+				: "Chỉ theo dõi mức độ tham gia và hoàn thành, không ép game phải có điểm số.";
+	const selectedGameType = GAME_TYPE_DETAILS[form.gameType ?? "QUIZ"];
+	const selectedScoringModel =
+		SCORING_MODEL_DETAILS[form.scoringModel ?? "FINITE_SCORE"];
+	const selectedScoreTracking =
+		SCORE_TRACKING_DETAILS[form.isScored === false ? "false" : "true"];
+	const scoreTrackingWarning =
+		form.scoringModel === "NO_SCORE" && form.isScored !== false
+			? "Kiểu tính điểm hiện là không chấm điểm. Nên để chế độ hiển thị là không điểm để UI và analytics không hiểu nhầm đây là game có điểm."
+			: form.scoringModel !== "NO_SCORE" && form.isScored === false
+				? "Game này vẫn có kiểu tính điểm, nhưng bạn đang tắt hiển thị điểm. Chỉ dùng cấu hình này khi muốn lưu metrics nội bộ mà không muốn hiển thị điểm cho người học."
+				: null;
+	const behaviorSummaryLines =
+		form.scoringModel === "FINITE_SCORE"
+			? [
+					"Kết quả sẽ được hiểu theo dạng điểm trên tổng điểm.",
+					"Quản trị viên có thể xem độ chính xác, tỷ lệ hoàn thành và breakdown phù hợp cho quiz hoặc matching.",
+					"Người học sẽ thấy điểm kiểu 8/10 thay vì điểm kỷ lục.",
+				]
+			: form.scoringModel === "HIGH_SCORE"
+				? [
+						"Kết quả sẽ được hiểu theo dạng điểm càng cao càng tốt.",
+						"Quản trị viên sẽ ưu tiên điểm trung bình và điểm cao nhất thay vì độ chính xác.",
+						"Người học sẽ thấy điểm kỷ lục và thời lượng thay vì điểm trên tổng điểm.",
+					]
+				: [
+						"Kết quả sẽ được hiểu là activity không chấm điểm.",
+						"Quản trị viên sẽ ưu tiên mức độ tham gia, tỷ lệ hoàn thành và thời lượng.",
+						"Người học sẽ không bị hiển thị điểm giả hoặc độ chính xác giả.",
+					];
+	const analyticsScoringModel =
+		analyticsDetail?.summary.scoringModel ??
+		form.scoringModel ??
+		"FINITE_SCORE";
+	const analyticsModeSummary =
+		analyticsScoringModel === "HIGH_SCORE"
+			? {
+					primaryLabel: "Điểm trung bình",
+					primaryValue: String(analyticsDetail?.summary.averageRawScore ?? 0),
+					secondaryLabel: "Điểm cao nhất",
+					secondaryValue: String(analyticsDetail?.summary.bestRawScore ?? 0),
+				}
+			: analyticsScoringModel === "NO_SCORE"
+				? {
+						primaryLabel: "Tỷ lệ lượt có điểm",
+						primaryValue: `${analyticsDetail?.summary.scoredAttemptRate ?? 0}%`,
+						secondaryLabel: "Tỷ lệ hoàn thành",
+						secondaryValue: `${analyticsDetail?.summary.completionRate ?? 0}%`,
+					}
+				: {
+						primaryLabel: "Độ chính xác TB",
+						primaryValue: `${analyticsDetail?.summary.averageAccuracy ?? 0}%`,
+						secondaryLabel: "Tỷ lệ hết giờ",
+						secondaryValue: `${analyticsDetail?.summary.timeoutRate ?? 0}%`,
 					};
 
 	const handleSave = async () => {
@@ -390,7 +539,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 						<CardHeader className="border-b">
 							<CardTitle>Thông tin cơ bản</CardTitle>
 							<CardDescription>
-								Thiết lập tiêu đề, mô tả, độ khó và danh mục hiển thị của game.
+								Thiết lập tiêu đề, mô tả, độ khó và thông tin hiển thị của game.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-5 pt-6">
@@ -438,7 +587,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 								</div>
 
 								<div className="space-y-2">
-									<Label>Danh mục</Label>
+									<Label>Danh mục hiển thị</Label>
 									<Select
 										value={
 											form.categoryId !== undefined
@@ -465,7 +614,192 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 											))}
 										</SelectContent>
 									</Select>
+									<p className="text-xs leading-5 text-muted-foreground">
+										Dùng để nhóm game trong danh sách hoặc theo taxonomy nội
+										dung. Trường này không quyết định cách game được chấm điểm
+										hay phân tích.
+									</p>
 								</div>
+							</div>
+
+							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+								<div className="space-y-1">
+									<h3 className="text-sm font-semibold text-slate-900">
+										Phần dưới đây là metadata hành vi, không phải taxonomy hiển
+										thị
+									</h3>
+									<p className="text-sm text-slate-600">
+										`Danh mục hiển thị` dùng để nhóm game theo nội dung. `Loại
+										hành vi game`, `Kiểu tính điểm` và `Có hiển thị và phân tích
+										điểm không` dùng để backend, tracking host và analytics hiểu
+										game vận hành như thế nào.
+									</p>
+								</div>
+							</div>
+
+							<div className="grid gap-4 md:grid-cols-3">
+								<div className="space-y-2">
+									<Label>Loại hành vi game</Label>
+									<Select
+										value={form.gameType ?? "QUIZ"}
+										onValueChange={(value) =>
+											setForm((prev) => {
+												const nextGameType = value as NonNullable<
+													UpsertGamePayload["gameType"]
+												>;
+												return {
+													...prev,
+													gameType: nextGameType,
+													...getDefaultScoreConfigForGameType(nextGameType),
+												};
+											})
+										}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Chọn loại game" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="QUIZ">Quiz / câu hỏi</SelectItem>
+											<SelectItem value="TYPING">Typing / gõ phím</SelectItem>
+											<SelectItem value="MATCHING">
+												Matching / ghép cặp
+											</SelectItem>
+											<SelectItem value="OTHER">Other / tùy biến</SelectItem>
+										</SelectContent>
+									</Select>
+									<p className="text-xs leading-5 text-muted-foreground">
+										{selectedGameType.description} Trường này mô tả bản chất
+										gameplay để hệ thống chọn cách xử lý phù hợp, không phải
+										nhóm hiển thị.
+									</p>
+								</div>
+
+								<div className="space-y-2">
+									<Label>Kiểu tính điểm</Label>
+									<Select
+										value={form.scoringModel ?? "FINITE_SCORE"}
+										onValueChange={(value) =>
+											setForm((prev) => ({
+												...prev,
+												scoringModel:
+													value as UpsertGamePayload["scoringModel"],
+												isScored: value !== "NO_SCORE",
+											}))
+										}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Chọn kiểu tính điểm" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="FINITE_SCORE">
+												Điểm có thang tối đa
+											</SelectItem>
+											<SelectItem value="HIGH_SCORE">
+												Điểm càng cao càng tốt
+											</SelectItem>
+											<SelectItem value="NO_SCORE">Không chấm điểm</SelectItem>
+										</SelectContent>
+									</Select>
+									<p className="text-xs leading-5 text-muted-foreground">
+										{selectedScoringModel.description}
+									</p>
+									<p className="text-xs leading-5 text-muted-foreground">
+										{selectedScoringModel.examples}
+									</p>
+								</div>
+
+								<div className="space-y-2">
+									<Label>Có hiển thị và phân tích điểm không</Label>
+									<Select
+										value={form.isScored === false ? "false" : "true"}
+										onValueChange={(value) =>
+											setForm((prev) => ({
+												...prev,
+												isScored: value === "true",
+											}))
+										}
+									>
+										<SelectTrigger>
+											<SelectValue placeholder="Chọn chế độ hiển thị điểm" />
+										</SelectTrigger>
+										<SelectContent>
+											<SelectItem value="true">Có điểm</SelectItem>
+											<SelectItem value="false">Không điểm</SelectItem>
+										</SelectContent>
+									</Select>
+									<p className="text-xs leading-5 text-muted-foreground">
+										{selectedScoreTracking.description}
+									</p>
+								</div>
+							</div>
+
+							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+								<div className="space-y-3">
+									<div className="space-y-1">
+										<h3 className="text-sm font-semibold text-slate-900">
+											Hệ thống sẽ hiểu cấu hình này như thế nào
+										</h3>
+										<p className="text-sm text-slate-600">
+											Danh mục hiển thị hiện tại là{" "}
+											<span className="font-medium text-slate-900">
+												{getCategoryName(form.categoryId, categories)}
+											</span>
+											. Còn về mặt hành vi, game này được hiểu là{" "}
+											<span className="font-medium text-slate-900">
+												{selectedGameType.label}
+											</span>
+											; kiểu tính điểm là{" "}
+											<span className="font-medium text-slate-900">
+												{selectedScoringModel.label}
+											</span>
+											; và chế độ hiển thị là{" "}
+											<span className="font-medium text-slate-900">
+												{selectedScoreTracking.label}
+											</span>
+											.
+										</p>
+									</div>
+									<div className="grid gap-2 md:grid-cols-3">
+										{behaviorSummaryLines.map((line) => (
+											<div
+												key={line}
+												className="rounded-xl border border-slate-200 bg-white px-3 py-2 text-sm text-slate-700"
+											>
+												{line}
+											</div>
+										))}
+									</div>
+									{scoreTrackingWarning ? (
+										<div className="rounded-xl border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-800">
+											{scoreTrackingWarning}
+										</div>
+									) : null}
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<Label htmlFor="trackingConfig">Cấu hình theo dõi</Label>
+								<Textarea
+									id="trackingConfig"
+									value={form.trackingConfig ?? ""}
+									onChange={(e) =>
+										setForm((prev) => ({
+											...prev,
+											trackingConfig: e.target.value,
+										}))
+									}
+									className="min-h-28 font-mono text-xs"
+									placeholder='{"engine":"TURBOWARP","resultTrigger":"PROJECT_RUN_STOP"}'
+								/>
+								<p className="text-xs text-muted-foreground">
+									{scoringModeDescription}
+								</p>
+								<p className="text-xs text-muted-foreground">
+									Dùng khi game cần metadata kỹ thuật cho bridge hoặc engine, ví
+									dụ ` engine`, `scoreVariableNames`, `resultTrigger`. Nếu bạn
+									không chắc, có thể để trống và chỉ điền khi game integration
+									yêu cầu.
+								</p>
 							</div>
 
 							<div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-5">
@@ -928,27 +1262,31 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 							<CardContent className="space-y-4 pt-6">
 								<div className="grid gap-3 rounded-xl border bg-muted/20 p-4 text-sm">
 									<div className="flex items-center justify-between">
-										<span className="text-muted-foreground">Attempts</span>
+										<span className="text-muted-foreground">Lượt chơi</span>
 										<span className="font-medium">
 											{analyticsDetail.summary.attempts}
 										</span>
 									</div>
 									<div className="flex items-center justify-between">
-										<span className="text-muted-foreground">Completion</span>
+										<span className="text-muted-foreground">Hoàn thành</span>
 										<span className="font-medium">
 											{analyticsDetail.summary.completionRate}%
 										</span>
 									</div>
 									<div className="flex items-center justify-between">
-										<span className="text-muted-foreground">Accuracy TB</span>
+										<span className="text-muted-foreground">
+											{analyticsModeSummary.primaryLabel}
+										</span>
 										<span className="font-medium">
-											{analyticsDetail.summary.averageAccuracy}%
+											{analyticsModeSummary.primaryValue}
 										</span>
 									</div>
 									<div className="flex items-center justify-between">
-										<span className="text-muted-foreground">Timeout</span>
+										<span className="text-muted-foreground">
+											{analyticsModeSummary.secondaryLabel}
+										</span>
 										<span className="font-medium">
-											{analyticsDetail.summary.timeoutRate}%
+											{analyticsModeSummary.secondaryValue}
 										</span>
 									</div>
 									<div className="flex items-center justify-between">
@@ -985,7 +1323,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 								{analyticsDetail.recentAttempts.length > 0 ? (
 									<div className="rounded-xl border p-4">
 										<p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-											Attempt gần nhất
+											Lượt chơi gần nhất
 										</p>
 										<div className="mt-3 space-y-3">
 											{analyticsDetail.recentAttempts
@@ -1006,10 +1344,11 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 															</span>
 														</div>
 														<div className="mt-2 text-xs text-muted-foreground">
-															Accuracy {attempt.accuracy ?? 0}% • Đúng{" "}
-															{attempt.correctCount ?? 0} • Sai{" "}
-															{attempt.wrongCount ?? 0} • Hết giờ{" "}
-															{attempt.timeoutCount ?? 0}
+															{attempt.scoringModel === "HIGH_SCORE"
+																? `Điểm ${attempt.rawScore ?? 0} • Thời lượng ${formatDuration(attempt.duration ?? 0)}`
+																: attempt.scoringModel === "NO_SCORE"
+																	? `Đã ghi nhận tham gia • ${attempt.attemptState ?? (attempt.completed ? "COMPLETED" : "PARTIAL")}`
+																	: `Độ chính xác ${attempt.accuracy ?? 0}% • Đúng ${attempt.correctCount ?? 0} • Sai ${attempt.wrongCount ?? 0} • Hết giờ ${attempt.timeoutCount ?? 0}`}
 														</div>
 													</div>
 												))}

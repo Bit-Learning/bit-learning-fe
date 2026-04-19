@@ -4,8 +4,6 @@ import { ProfileContent } from "../components/ProfileContent";
 import { PublicProfileContent } from "../components/PublicProfileContent";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
-import { useViewUserProfileByUsername } from "../queries/useUser";
-import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 interface UserProfilePageProps {
 	viewUsername?: string;

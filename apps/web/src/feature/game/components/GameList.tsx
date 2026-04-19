@@ -208,14 +208,16 @@ export default function GameList({ username }: Props) {
 					setCategoriesWithGames([]);
 					setFeaturedGames([]);
 					setMatchingMappings([]);
-					setLoadError("Game data is unavailable right now.");
+					setLoadError("Dữ liệu trò chơi hiện chưa sẵn sàng.");
 				}
 			} catch (error) {
 				console.error("Failed to load categories with games", error);
 				setCategoriesWithGames([]);
 				setFeaturedGames([]);
 				setMatchingMappings([]);
-				setLoadError("Unable to load games right now. Please try again.");
+				setLoadError(
+					"Chưa thể tải danh sách trò chơi lúc này. Vui lòng thử lại.",
+				);
 			} finally {
 				setIsLoading(false);
 			}
@@ -343,10 +345,10 @@ export default function GameList({ username }: Props) {
 					<div className={styles.heroContent}>
 						<div className={styles.heroInner}>
 							<div className={styles.heroBadges}>
-								<span className={styles.badge}>Featured Game</span>
+								<span className={styles.badge}>Trò chơi nổi bật</span>
 								<span className={styles.badgeSub}>
 									{featuredGame
-										? `${featuredGame.categoryName} · trend ${formatCompactNumber(
+										? `${featuredGame.categoryName} · xu hướng ${formatCompactNumber(
 												featuredGame.trendScore,
 											)}`
 										: "Kho game Bit Learning"}
@@ -407,7 +409,7 @@ export default function GameList({ username }: Props) {
 									</>
 								) : (
 									<div className={styles.emptyHeroState}>
-										Chưa có game nào đủ dữ liệu để làm featured.
+										Chưa có game nào đủ dữ liệu để lên vị trí nổi bật.
 									</div>
 								)}
 							</div>
@@ -416,7 +418,7 @@ export default function GameList({ username }: Props) {
 							<div className={styles.asideCard}>
 								<div className={styles.asideLabel}>
 									<Sparkles size={16} />
-									Spotlight
+									Tâm điểm
 								</div>
 								<div className={styles.asideStats}>
 									<div>
@@ -450,14 +452,14 @@ export default function GameList({ username }: Props) {
 													<div className={styles.asideTitle}>{game.title}</div>
 													<div className={styles.asideMeta}>
 														{getFeaturedReasonLabel(game.featuredReason)} ·{" "}
-														{formatCompactNumber(game.trendScore)} trend
+														{formatCompactNumber(game.trendScore)} xu hướng
 													</div>
 												</div>
 											</GameNavigationLink>
 										))
 									) : (
 										<div className={styles.asideEmpty}>
-											Featured rail sẽ hiện khi có thêm game.
+											Dải trò chơi nổi bật sẽ hiện khi có thêm game.
 										</div>
 									)}
 								</div>
@@ -472,7 +474,7 @@ export default function GameList({ username }: Props) {
 					<section className={styles.spotlightSection}>
 						<div className={styles.spotlightHeader}>
 							<div>
-								<p className={styles.kicker}>Curated for momentum</p>
+								<p className={styles.kicker}>Được chọn để tạo đà</p>
 								<h2 className={styles.spotlightTitle}>Đang được chú ý nhất</h2>
 								<p className={styles.spotlightCopy}>
 									Xếp theo tổ hợp lượt xem và lượt yêu thích để hero không còn

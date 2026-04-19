@@ -14,12 +14,12 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
-		"@astral-sh/ruff-wasm-web": "^0.15.10",
+		"@astral-sh/ruff-wasm-web": "^0.15.11",
 		"@hookform/resolvers": "^5.2.2",
 		"@reduxjs/toolkit": "^2.9.1",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
-		"@tanstack/react-query": "^5.95.2",
+		"@tanstack/react-query": "^5.99.0",
 		"@tanstack/react-query-devtools": "^5.99.0",
 		"@tanstack/react-router": "^1.168.22",
 		"@tanstack/react-router-devtools": "^1.132.37",

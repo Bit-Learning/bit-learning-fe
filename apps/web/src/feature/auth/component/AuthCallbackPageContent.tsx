@@ -1,6 +1,5 @@
 import { cn } from "@workspace/ui/lib/utils";
 import { Loader2, XCircle } from "lucide-react";
-import Logo from "./Logo";
 
 interface Props {
 	hasError: string | boolean | null;
@@ -45,8 +44,6 @@ function AuthCallbackPageContent({
 	return (
 		<div className={wrapperClassName}>
 			<div className={cardClassName}>
-				<Logo compact />
-
 				{hasError ? (
 					<>
 						<div className="mb-5 flex justify-center">

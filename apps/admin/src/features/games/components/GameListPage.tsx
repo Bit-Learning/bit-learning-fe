@@ -80,11 +80,14 @@ export const GamesCrudManager = () => {
 				categoryOrTopic: getCategoryName(game.categoryId),
 				difficultyOrGrade: game.difficulty ?? "MEDIUM",
 				description: game.description,
+				scoringModel: performance?.scoringModel ?? game.scoringModel ?? null,
+				isScored: performance?.isScored ?? game.isScored ?? null,
 				likes: game.likes,
 				views: game.views,
 				attempts: performance?.attempts ?? 0,
 				completionRate: performance?.completionRate ?? 0,
 				averageAccuracy: performance?.averageAccuracy ?? 0,
+				averageRawScore: performance?.averageRawScore ?? 0,
 				timeoutRate: performance?.timeoutRate ?? 0,
 				standardId: game.id,
 			};
@@ -103,9 +106,12 @@ export const GamesCrudManager = () => {
 			categoryOrTopic: `Chủ đề ${mapping.topicCode}`,
 			difficultyOrGrade: `Lớp ${mapping.grade}`,
 			description: `Game nối khái niệm theo chương trình học · Lớp ${mapping.grade} · Chủ đề ${mapping.topicCode}`,
+			scoringModel: performance?.scoringModel ?? "FINITE_SCORE",
+			isScored: performance?.isScored ?? true,
 			attempts: performance?.attempts ?? 0,
 			completionRate: performance?.completionRate ?? 0,
 			averageAccuracy: performance?.averageAccuracy ?? 0,
+			averageRawScore: performance?.averageRawScore ?? 0,
 			timeoutRate: performance?.timeoutRate ?? 0,
 			matchingGameId: mapping.gameId,
 			matchingGrade: mapping.grade,
@@ -146,46 +152,97 @@ export const GamesCrudManager = () => {
 	return (
 		<div className="space-y-6">
 			<div className="grid gap-4 lg:grid-cols-[1.3fr_1fr]">
-				<Card className="overflow-hidden border-slate-200/80 bg-linear-to-br from-slate-950 via-slate-900 to-slate-800 text-slate-50">
-					<CardHeader className="border-b border-white/10">
-						<div className="flex items-center gap-2 text-sm font-medium text-sky-200">
+				<Card className="overflow-hidden border-slate-200/80 bg-linear-to-br from-slate-100 via-white to-slate-50 text-slate-800">
+					<CardHeader className="border-b border-slate-200/80 pb-5">
+						<div className="flex items-center gap-2 text-sm font-medium text-sky-700">
 							<Sparkles className="h-4 w-4" />
 							Workspace quản lý trò chơi
 						</div>
-						<CardTitle className="text-2xl text-white">
+						<CardTitle className="text-2xl text-slate-900">
 							Một bảng chung cho toàn bộ game trong hệ thống
 						</CardTitle>
-						<CardDescription className="max-w-2xl text-slate-300">
+						<CardDescription className="max-w-2xl text-slate-600">
 							Theo dõi game thường và game nối khái niệm trong cùng một luồng
 							quản trị, lọc nhanh theo loại, trạng thái và điều hướng thẳng tới
 							trang chỉnh sửa chi tiết.
 						</CardDescription>
 					</CardHeader>
-					<CardContent className="grid gap-4 pt-6 md:grid-cols-4">
-						<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-							<div className="text-sm text-slate-300">Tổng số game</div>
-							<div className="mt-2 text-3xl font-semibold">{data.length}</div>
-						</div>
-						<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-							<div className="text-sm text-slate-300">Game thường</div>
-							<div className="mt-2 text-3xl font-semibold">
-								{standardRows.length}
+					<CardContent className="grid gap-6 pt-6 lg:grid-cols-[1.15fr_0.85fr]">
+						<div className="space-y-4">
+							<div className="grid gap-3 sm:grid-cols-3">
+								<div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+									<div className="text-sm text-slate-500">Tổng số game</div>
+									<div className="mt-2 text-3xl font-semibold text-slate-900">
+										{data.length}
+									</div>
+								</div>
+								<div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+									<div className="text-sm text-slate-500">Game thường</div>
+									<div className="mt-2 text-3xl font-semibold text-slate-900">
+										{standardRows.length}
+									</div>
+								</div>
+								<div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+									<div className="text-sm text-slate-500">
+										Game nối khái niệm
+									</div>
+									<div className="mt-2 text-3xl font-semibold text-slate-900">
+										{matchingRows.length}
+									</div>
+								</div>
+							</div>
+
+							<div className="rounded-2xl border border-slate-200 bg-white/70 p-4">
+								<div className="flex items-center justify-between gap-4">
+									<div>
+										<div className="text-sm text-slate-500">
+											Lượt chơi 30 ngày
+										</div>
+										<div className="mt-1 text-2xl font-semibold text-slate-900">
+											{analytics?.overview.totalAttempts ?? 0}
+										</div>
+									</div>
+									<div className="rounded-full bg-sky-50 px-3 py-1 text-xs font-medium text-sky-700">
+										{analytics?.overview.scoredAttemptRate ?? 0}% có điểm
+									</div>
+								</div>
+								<div className="mt-3 h-2 rounded-full bg-slate-200">
+									<div
+										className="h-2 rounded-full bg-sky-500"
+										style={{
+											width: `${analytics?.overview.completionRate ?? 0}%`,
+										}}
+									/>
+								</div>
+								<div className="mt-2 text-xs text-slate-500">
+									Hoàn thành {analytics?.overview.completionRate ?? 0}%
+								</div>
 							</div>
 						</div>
-						<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-							<div className="text-sm text-slate-300">Game nối khái niệm</div>
-							<div className="mt-2 text-3xl font-semibold">
-								{matchingRows.length}
-							</div>
-						</div>
-						<div className="rounded-2xl border border-white/10 bg-white/5 p-4">
-							<div className="text-sm text-slate-300">Attempt 30 ngày</div>
-							<div className="mt-2 text-3xl font-semibold">
-								{analytics?.overview.totalAttempts ?? 0}
-							</div>
-							<div className="mt-1 text-xs text-slate-400">
-								Accuracy {analytics?.overview.averageAccuracy ?? 0}% •
-								Completion {analytics?.overview.completionRate ?? 0}%
+
+						<div className="grid gap-3">
+							<div className="rounded-2xl border border-slate-200 bg-white/80 p-4 shadow-sm">
+								<div className="text-sm font-medium text-slate-500">
+									Theo dõi nhanh
+								</div>
+								<div className="mt-3 grid gap-2 text-sm text-slate-600">
+									<div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+										<span>Loại game</span>
+										<span className="font-medium text-slate-900">2 nhóm</span>
+									</div>
+									<div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+										<span>Trạng thái</span>
+										<span className="font-medium text-slate-900">
+											Lọc theo bảng
+										</span>
+									</div>
+									<div className="flex items-center justify-between rounded-lg bg-slate-50 px-3 py-2">
+										<span>Hiệu suất</span>
+										<span className="font-medium text-slate-900">
+											30 ngày gần nhất
+										</span>
+									</div>
+								</div>
 							</div>
 						</div>
 					</CardContent>
@@ -198,7 +255,7 @@ export const GamesCrudManager = () => {
 								<Gamepad2 className="h-4 w-4 text-sky-600" />
 								Tạo game thường
 							</div>
-							<CardTitle>Upload game HTML hoặc ZIP</CardTitle>
+							<CardTitle>Tải lên game HTML hoặc ZIP</CardTitle>
 							<CardDescription>
 								Tạo một game mới với file chơi, thumbnail và metadata cơ bản.
 							</CardDescription>
@@ -243,12 +300,12 @@ export const GamesCrudManager = () => {
 						<CardHeader>
 							<div className="flex items-center gap-2 text-sm font-medium text-slate-500">
 								<Sparkles className="h-4 w-4 text-amber-600" />
-								Analytics game
+								Phân tích game
 							</div>
-							<CardTitle>Dashboard hiệu suất & abandonment</CardTitle>
+							<CardTitle>Bảng điều khiển hiệu suất và bỏ dở</CardTitle>
 							<CardDescription>
-								Xem số lượt chơi theo ngày, completion rate, accuracy theo game
-								và top game timeout cao.
+								Xem số lượt chơi theo ngày, tỷ lệ hoàn thành, độ chính xác theo
+								game và các game có tỷ lệ hết giờ cao.
 							</CardDescription>
 						</CardHeader>
 						<CardContent>
@@ -258,7 +315,7 @@ export const GamesCrudManager = () => {
 								className="w-full justify-between"
 							>
 								<Link to="/apps/games/analytics">
-									Mở dashboard analytics
+									Mở bảng điều khiển phân tích
 									<ArrowRight className="h-4 w-4" />
 								</Link>
 							</Button>
