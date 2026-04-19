@@ -34,6 +34,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 	const isReplying = replyingTo === comment.id;
 	const authorFullName =
 		`${comment.author.firstName} ${comment.author.lastName}`.trim();
+	const isMentorComment = comment.author.role?.toUpperCase() === "MENTOR";
 
 	const handleViewProfile = async () => {
 		const username = await resolveAuthorUsername(comment.author);
@@ -67,13 +68,20 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 			<div className="flex-1">
 				<div className="flex items-center justify-between mb-3">
 					<div className="flex items-center gap-3">
-						<button
-							type="button"
-							onClick={handleViewProfile}
-							className="cursor-pointer font-bold text-gray-900 transition-colors hover:text-gray-700"
-						>
-							{authorFullName}
-						</button>
+						<div className="flex flex-wrap items-center gap-2">
+							<button
+								type="button"
+								onClick={handleViewProfile}
+								className="cursor-pointer font-bold text-gray-900 transition-colors hover:text-gray-700"
+							>
+								{authorFullName}
+							</button>
+							{isMentorComment ? (
+								<span className="inline-flex items-center rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[11px] font-semibold text-emerald-700">
+									Mentor
+								</span>
+							) : null}
+						</div>
 						<span className="text-xs text-gray-500">
 							{formatDate(comment.createdAt)}
 						</span>

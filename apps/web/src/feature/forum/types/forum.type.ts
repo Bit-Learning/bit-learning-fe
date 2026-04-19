@@ -13,6 +13,7 @@ export interface Author {
 	name?: string;
 	avatar?: string;
 	email?: string;
+	role?: string;
 }
 
 export interface ForumCategory {
