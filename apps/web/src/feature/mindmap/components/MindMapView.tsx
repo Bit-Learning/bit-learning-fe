@@ -525,12 +525,22 @@ export default function MindMapView() {
 	};
 
 	const handleLoadSavedMindMap = async (detail: SavedMindMapDto) => {
+		const structure = detail.structure_config;
+		const theme = detail.theme_config;
+		if (!structure || !theme) {
+			toast.error({
+				title: "Không thể tải mindmap",
+				description: "Mindmap này chưa có cấu hình layout hợp lệ.",
+			});
+			return;
+		}
+
 		setIsApplyingLayout(true);
 		try {
 			const { nodes: rfNodes, edges: rfEdges } = await runElkLayout(
 				detail.treeData,
-				detail.structure_config,
-				detail.theme_config,
+				structure,
+				theme,
 				nodeShapeRef.current,
 			);
 			setNodes(withExtras(rfNodes));
@@ -545,11 +555,11 @@ export default function MindMapView() {
 			setCurrentMindMapId(detail.id);
 			setCurrentVersion(detail.current_version);
 			setMetadata(detail.metadata);
-			setCanvasBackground(detail.theme_config.background);
+			setCanvasBackground(theme.background);
 			currentTreeRef.current = detail.treeData;
 			skipPickerEffectRef.current = true;
-			setSelectedStructureId(detail.structure_config.id);
-			setSelectedThemeId(detail.theme_config.id);
+			setSelectedStructureId(structure.id);
+			setSelectedThemeId(theme.id);
 			setIsPreviewingVersion(false);
 			setPreviewVersionNumber(null);
 			previewBackupRef.current = null;
