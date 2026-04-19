@@ -8,7 +8,7 @@ import { useEffect, useMemo, useState, type ReactNode } from "react";
 import type {
 	FeaturedGame,
 	FeaturedReason,
-	Game,
+	GamePreview,
 	GameCategoryWithGames,
 } from "../services/gameService";
 import gameService from "../services/gameService";
@@ -82,6 +82,21 @@ function GameNavigationLink({
 	);
 }
 
+function convertCategorNameToDisplayName(categoryName: string) {
+	switch (categoryName) {
+		case "QUIZ":
+			return "Trắc nghiệm, chọn đáp án chính xác";
+		case "TYPING":
+			return "Gõ chữ, luyện phản xạ và tốc độ gõ phím";
+		case "MATCHING":
+			return "Ghép đôi, rèn luyện tư duy logic và phân loại";
+		case "OTHERS":
+			return "Trò chơi khác, đa dạng thể loại và cơ chế chơi";
+		default:
+			return categoryName;
+	}
+}
+
 function formatCompactNumber(value: number) {
 	return new Intl.NumberFormat("vi-VN", {
 		notation: "compact",
@@ -100,6 +115,12 @@ function getFeaturedReasonLabel(reason?: FeaturedReason | null) {
 		default:
 			return "Đang tăng nhiệt";
 	}
+}
+
+function resolveIsScored(game: GamePreview) {
+	if (typeof game.isScored === "boolean") return game.isScored;
+	if (game.scoringModel) return game.scoringModel !== "NO_SCORE";
+	return false;
 }
 
 export default function GameList({ username }: Props) {
@@ -200,6 +221,23 @@ export default function GameList({ username }: Props) {
 		: categoriesWithGames;
 
 	const isSearching = normalizedSearch.length > 0;
+	const groupedByScore = useMemo(() => {
+		const scored: GamePreview[] = [];
+		const notScored: GamePreview[] = [];
+
+		for (const category of filteredCategoriesWithGames) {
+			for (const game of category.games ?? []) {
+				if (resolveIsScored(game)) {
+					scored.push(game);
+				} else {
+					notScored.push(game);
+				}
+			}
+		}
+
+		return { scored, notScored };
+	}, [filteredCategoriesWithGames]);
+
 	const totalSearchResults = filteredCategoriesWithGames.reduce(
 		(sum, category) => sum + (category.games?.length ?? 0),
 		0,
@@ -470,6 +508,66 @@ export default function GameList({ username }: Props) {
 					</div>
 				)}
 
+				{!isLoading &&
+					(groupedByScore.scored.length > 0 ||
+						groupedByScore.notScored.length > 0) && (
+						<div className="mb-5 px-8">
+							<h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+								Phân loại theo cơ chế tính điểm
+							</h2>
+							<p className="mt-2 text-sm md:text-base text-slate-300">
+								Nhóm nhanh các trò chơi có cộng điểm và không cộng điểm.
+							</p>
+						</div>
+					)}
+
+				{!isLoading &&
+					(groupedByScore.scored.length > 0 ||
+						groupedByScore.notScored.length > 0) && (
+						<section className="space-y-10 mb-10">
+							{groupedByScore.scored.length > 0 && (
+								<motion.div
+									initial={{ opacity: 0, y: 10 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.2 }}
+								>
+									<CategoryRow
+										categoryName="Trò chơi có điểm số"
+										categoryDescription="Các trò chơi có điểm số được tính vào tiến trình hoặc bảng xếp hạng"
+										games={groupedByScore.scored}
+										matchingTargetsByGameId={matchingTargetsByGameId}
+									/>
+								</motion.div>
+							)}
+
+							{groupedByScore.notScored.length > 0 && (
+								<motion.div
+									initial={{ opacity: 0, y: 10 }}
+									animate={{ opacity: 1, y: 0 }}
+									transition={{ duration: 0.2 }}
+								>
+									<CategoryRow
+										categoryName="Trò chơi giải trí"
+										categoryDescription="Các trò chơi luyện tập giải trí, không cộng điểm vào bảng xếp hạng"
+										games={groupedByScore.notScored}
+										matchingTargetsByGameId={matchingTargetsByGameId}
+									/>
+								</motion.div>
+							)}
+						</section>
+					)}
+
+				{!isLoading && filteredCategoriesWithGames.length > 0 && (
+					<div className="mb-5 px-8">
+						<h2 className="text-3xl md:text-4xl font-extrabold tracking-tight text-white">
+							Tất cả game theo thể loại
+						</h2>
+						<p className="mt-2 text-sm md:text-base text-slate-300">
+							Danh sách đầy đủ theo từng danh mục hiện có.
+						</p>
+					</div>
+				)}
+
 				{isLoading ? (
 					<div className="space-y-10">
 						{CATEGORY_ROW_SKELETONS.map((row) => (
@@ -490,7 +588,7 @@ export default function GameList({ username }: Props) {
 								transition={{ duration: 0.2 }}
 							>
 								<CategoryRow
-									categoryName={category.name}
+									categoryName={convertCategorNameToDisplayName(category.name)}
 									categoryDescription={category.description}
 									games={category.games || []}
 									matchingTargetsByGameId={matchingTargetsByGameId}
@@ -500,7 +598,7 @@ export default function GameList({ username }: Props) {
 					</AnimatePresence>
 				) : isSearching ? (
 					<div className="px-8 text-sm text-slate-400">
-						Không tìm thấy game phù hợp.
+						Không tìm thấy trò chơi phù hợp.
 					</div>
 				) : loadError ? (
 					<div className="px-8">

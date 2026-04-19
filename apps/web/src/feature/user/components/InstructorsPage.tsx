@@ -252,7 +252,7 @@ function FeaturedInstructor({
 								khoá học
 							</span>
 						) : (
-							<span>Mentor nổi bật</span>
+							<span>Người hướng dẫn nổi bật</span>
 						)}
 					</div>
 
@@ -431,7 +431,7 @@ export default function InstructorsPage() {
 					<div className="mb-8 flex items-end justify-between gap-6">
 						<div>
 							<p className="text-sm font-medium uppercase tracking-[0.14em] text-blue-600">
-								Mentor nổi bật
+								Top nổi bật
 							</p>
 							<h2 className="mt-2 text-3xl font-semibold text-slate-900">
 								Gặp gỡ những người sẽ đồng hành cùng bạn

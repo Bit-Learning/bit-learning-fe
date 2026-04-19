@@ -39,6 +39,8 @@ export interface GamePreview {
 	likes?: number;
 	views?: number;
 	trendScore?: number;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+	isScored?: boolean;
 }
 
 export type FeaturedReason =

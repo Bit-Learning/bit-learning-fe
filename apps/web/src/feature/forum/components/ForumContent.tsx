@@ -273,11 +273,6 @@ const ForumContent: React.FC = () => {
 										Tạo bài viết
 									</button>
 								) : null}
-								<span className="rounded-full border border-slate-200 bg-white px-4 py-2 text-sm text-slate-600">
-									{isAuthenticated
-										? "Bạn đã đăng nhập. Chia sẻ ngay một bài viết mới cho cộng đồng."
-										: "Đăng nhập để mở nút tạo bài viết và tham gia thảo luận."}
-								</span>
 							</div>
 
 							<div className="relative max-w-2xl">
@@ -305,7 +300,7 @@ const ForumContent: React.FC = () => {
 												: "bg-white text-slate-600 hover:bg-slate-100"
 										}`}
 									>
-										All categories
+										Tất cả danh mục
 									</button>
 									{categoriesQuery.isLoading
 										? getSkeletonKeys("category-chip", 5).map((key) => (
