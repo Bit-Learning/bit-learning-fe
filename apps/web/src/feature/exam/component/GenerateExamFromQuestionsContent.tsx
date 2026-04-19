@@ -391,7 +391,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                   </Label>
                   <Input
                     id="examName"
-                    placeholder="VD: Đề thi HK1 - Đề số 1"
+                    placeholder="Nhập tên đề thi..."
                     value={examName}
                     onChange={(e) => setExamName(e.target.value)}
                     className="mt-1.5"
@@ -404,7 +404,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                   </Label>
                   <Input
                     id="examCode"
-                    placeholder="VD: DE-TOAN-10-HK1-01"
+                    placeholder="Nhập mã đề thi..."
                     value={examCode}
                     onChange={(e) => setExamCode(e.target.value)}
                     className="mt-1.5"
