@@ -1,6 +1,19 @@
 import React, { useState } from "react";
 import { useParams, useNavigate } from "@tanstack/react-router";
-import { Copy, Edit, Trash2, Clock, HardDrive, Globe, Tag, TrendingUp, Plus, ArrowLeft } from "lucide-react";
+import {
+  Copy,
+  Edit,
+  Trash2,
+  Clock,
+  HardDrive,
+  Globe,
+  Tag,
+  TrendingUp,
+  Plus,
+  ArrowLeft,
+  SendHorizonal,
+  X,
+} from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
 import { Card, CardContent } from "@workspace/ui/components/Card";
@@ -15,6 +28,7 @@ import {
   useDeleteTestCase,
   useAllTestCases,
 } from "../queries/useCoding";
+import { useRequestPublish } from "../queries/useCoding";
 import TestCaseModal from "./TestCaseModal";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
@@ -27,6 +41,21 @@ const MentorProblemDetailContent: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTestCase, setEditingTestCase] = useState<TestCaseResponse | null>(null);
   const [deletingTestCase, setDeletingTestCase] = useState<TestCaseResponse | null>(null);
+
+  const [showApprovalModal, setShowApprovalModal] = useState(false);
+
+  const requestPublish = useRequestPublish();
+
+  const handleSubmitApproval = () => {
+    if (!problemId) return;
+    requestPublish.mutate([problemId], {
+      onSuccess: () => {
+        setTimeout(() => {
+          setShowApprovalModal(false);
+        }, 1000);
+      },
+    });
+  };
 
   const { data: problem, isLoading } = useProblemDetail(problemId || "", selectedLanguage);
   const { data: statistics } = useProblemStatistics(problemId || "");
@@ -108,6 +137,13 @@ const MentorProblemDetailContent: React.FC = () => {
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Chi tiết bài tập: {problem.title}</h1>
           </div>
           <div className="flex items-center gap-3">
+            <button
+              onClick={() => setShowApprovalModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-semibold shadow-sm transition-all duration-150"
+            >
+              <SendHorizonal className="w-4 h-4" />
+              Gửi yêu cầu phê duyệt
+            </button>
             <Button
               onClick={() => navigate({ to: `/mentor/problem/${problemId}/edit` })}
               className="flex items-center gap-2 bg-blue-600 text-white p-5"
@@ -450,6 +486,84 @@ const MentorProblemDetailContent: React.FC = () => {
             : undefined
         }
       />
+
+      {/* Approval Modal */}
+      {showApprovalModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => !requestPublish.isPending && setShowApprovalModal(false)}
+          />
+          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+            {requestPublish.isSuccess ? (
+              <div className="flex flex-col items-center gap-3 py-4">
+                <div className="w-12 h-12 rounded-full bg-green-100 dark:bg-green-900/30 flex items-center justify-center">
+                  <svg
+                    className="w-6 h-6 text-green-600"
+                    fill="none"
+                    viewBox="0 0 24 24"
+                    stroke="currentColor"
+                    strokeWidth={2.5}
+                  >
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                  </svg>
+                </div>
+                <p className="text-base font-semibold text-gray-800 dark:text-slate-100">Gửi yêu cầu thành công!</p>
+                <p className="text-sm text-gray-500 dark:text-slate-400 text-center">
+                  Bài tập đã được gửi để chờ phê duyệt.
+                </p>
+              </div>
+            ) : (
+              <>
+                <div className="flex items-center justify-between mb-4">
+                  <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Gửi yêu cầu phê duyệt</h2>
+                  <button
+                    onClick={() => setShowApprovalModal(false)}
+                    disabled={requestPublish.isPending}
+                    className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
+                  >
+                    <X className="h-5 w-5" />
+                  </button>
+                </div>
+                <p className="text-sm text-gray-500 dark:text-slate-400 mb-5">
+                  Bài tập sẽ được gửi đến quản trị viên để xem xét và phê duyệt.
+                </p>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setShowApprovalModal(false)}
+                    disabled={requestPublish.isPending}
+                    className="flex-1 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+                  >
+                    Huỷ
+                  </button>
+                  <button
+                    onClick={handleSubmitApproval}
+                    disabled={requestPublish.isPending}
+                    className={cn(
+                      "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all",
+                      requestPublish.isPending
+                        ? "bg-blue-400 cursor-not-allowed"
+                        : "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]",
+                    )}
+                  >
+                    {requestPublish.isPending ? (
+                      <>
+                        <div className="h-4 w-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                        Đang gửi...
+                      </>
+                    ) : (
+                      <>
+                        <SendHorizonal className="h-4 w-4" />
+                        Gửi yêu cầu
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
+          </div>
+        </div>
+      )}
     </div>
   );
 };
