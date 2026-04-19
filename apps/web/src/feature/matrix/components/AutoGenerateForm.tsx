@@ -61,6 +61,52 @@ const NumericInput: React.FC<NumericInputProps> = ({
   );
 };
 
+// Hiển thị % (0-100), lưu dạng tỷ lệ (0-1)
+interface PercentInputProps {
+  value: number; // 0–1
+  onChange: (val: number) => void;
+  onBlur?: () => void;
+  className?: string;
+}
+
+const PercentInput: React.FC<PercentInputProps> = ({ value, onChange, onBlur, className = "" }) => {
+  const [display, setDisplay] = useState<string>(value === 0 ? "" : String(Math.round(value * 100)));
+
+  useState(() => {
+    setDisplay(value === 0 ? "" : String(Math.round(value * 100)));
+  });
+
+  return (
+    <div className="relative flex-1">
+      <input
+        type="number"
+        min={0}
+        max={100}
+        step={1}
+        placeholder="0"
+        className={className}
+        value={display}
+        onChange={(e) => {
+          const raw = e.target.value;
+          setDisplay(raw);
+          const parsed = parseFloat(raw);
+          onChange(isNaN(parsed) ? 0 : parseFloat((parsed / 100).toFixed(4)));
+        }}
+        onBlur={() => {
+          if (display !== "") {
+            const parsed = parseFloat(display);
+            const clamped = Math.min(100, Math.max(0, isNaN(parsed) ? 0 : parsed));
+            setDisplay(String(clamped));
+            onChange(parseFloat((clamped / 100).toFixed(4)));
+          }
+          onBlur?.();
+        }}
+      />
+      <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">%</span>
+    </div>
+  );
+};
+
 const formSchema = z.object({
   name: z.string().min(1, "Vui lòng nhập tên phiên bản"),
   notes: z.string().optional(),
@@ -125,17 +171,11 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
         </select>
       </div>
       <div className="col-span-2">
-        <div className="relative">
-          <NumericInput
-            value={value.weight}
-            onChange={(val) => onChange({ ...value, weight: val })}
-            min={0.01}
-            max={1}
-            step={0.01}
-            className="w-full px-3 py-2 pr-7 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500 text-center"
-          />
-          <span className="absolute right-2.5 top-1/2 -translate-y-1/2 text-sm text-slate-400">%</span>
-        </div>
+        <PercentInput
+          value={value.weight}
+          onChange={(val) => onChange({ ...value, weight: val })}
+          className="w-full px-3 py-2 pr-8 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500 text-center"
+        />
       </div>
       <div className="col-span-1 flex justify-center">
         <button type="button" onClick={onRemove} className="text-red-500 hover:text-red-700 transition-colors p-1">
@@ -145,6 +185,7 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
     </div>
   );
 };
+
 interface Props {
   matrixId: number;
   totalScore: number;
@@ -240,6 +281,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
     );
   };
 
+  // Hiển thị tổng dưới dạng % (0–100)
   const SumBadge = ({ sum, valid }: { sum: number; valid: boolean }) => (
     <span
       className={`text-sm font-bold px-2 py-0.5 rounded-full ${
@@ -248,7 +290,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
           : "bg-red-100 dark:bg-red-900/30 text-red-700 dark:text-red-400"
       }`}
     >
-      {valid ? "✓" : "✗"} Tổng: {sum.toFixed(2)}
+      {valid ? "✓" : "✗"} Tổng: {Math.round(sum * 100)}%
     </span>
   );
 
@@ -347,7 +389,7 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
           {!isWeightValid && lessons.length > 0 && (
             <div className="flex items-center gap-2 mt-2 text-sm text-amber-600 dark:text-amber-400">
               <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-              Tổng trọng số phải bằng 1.0 (hiện tại: {weightSum.toFixed(3)})
+              Tổng trọng số phải bằng 100% (hiện tại: {Math.round(weightSum * 100)}%)
             </div>
           )}
           {!hasValidLessons && lessons.some((l) => l.chapterId > 0) && (
@@ -378,14 +420,11 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
                     name={name}
                     control={control}
                     render={({ field }) => (
-                      <NumericInput
+                      <PercentInput
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-1.5 pr-8 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     )}
                   />
@@ -412,14 +451,11 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
                     name={name}
                     control={control}
                     render={({ field }) => (
-                      <NumericInput
+                      <PercentInput
                         value={field.value}
                         onChange={field.onChange}
                         onBlur={field.onBlur}
-                        min={0}
-                        max={1}
-                        step={0.01}
-                        className="flex-1 px-3 py-1.5 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
+                        className="w-full px-3 py-1.5 pr-8 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     )}
                   />
