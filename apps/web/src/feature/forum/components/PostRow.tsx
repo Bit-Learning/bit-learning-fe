@@ -21,6 +21,8 @@ interface PostRowProps {
 	onDelete: () => void;
 	onView: () => void;
 	onAppeal?: () => void;
+	appealLabel?: string;
+	isAppealSubmitted?: boolean;
 }
 
 export const PostRow: React.FC<PostRowProps> = ({
@@ -31,6 +33,8 @@ export const PostRow: React.FC<PostRowProps> = ({
 	onDelete,
 	onView,
 	onAppeal,
+	appealLabel,
+	isAppealSubmitted,
 }) => {
 	const imageAttachments = post.attachments.filter(
 		(attachment) => attachment.type === AttachmentType.IMAGE,
@@ -154,10 +158,14 @@ export const PostRow: React.FC<PostRowProps> = ({
 									</button>
 								) : onAppeal ? (
 									<button
-										className="cursor-pointer rounded-md border border-red-200 px-2.5 py-1.5 text-xs font-semibold text-red-600 transition-all hover:bg-red-100"
+										className={`cursor-pointer rounded-md border px-2.5 py-1.5 text-xs font-semibold transition-all ${
+											isAppealSubmitted
+												? "border-blue-200 text-blue-600 hover:bg-blue-50"
+												: "border-red-200 text-red-600 hover:bg-red-100"
+										}`}
 										onClick={onAppeal}
 									>
-										Khiếu nại
+										{appealLabel ?? "Khiếu nại"}
 									</button>
 								) : null}
 							</div>

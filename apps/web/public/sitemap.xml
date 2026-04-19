@@ -31,6 +31,9 @@
     <priority>0.8</priority>
   </url>
   <url>
+    <loc>https://bit-learning.lch.id.vn/forum/appeals</loc>
+  </url>
+  <url>
     <loc>https://bit-learning.lch.id.vn/games</loc>
     <changefreq>weekly</changefreq>
     <priority>0.7</priority>

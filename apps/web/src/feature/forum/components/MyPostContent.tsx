@@ -10,9 +10,14 @@ import {
 	TrendingUp,
 	ThumbsUp,
 	Inbox,
+	MessageSquare,
 } from "lucide-react";
 import { useSelector } from "react-redux";
-import { useForumPostsByAuthor, useDeleteForumPost } from "../queries/useForum";
+import {
+	useForumPostsByAuthor,
+	useDeleteForumPost,
+	useMyPostAppeals,
+} from "../queries/useForum";
 import { selectForumMyPosts } from "../stores/forum.store";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { useNavigate } from "@tanstack/react-router";
@@ -54,6 +59,12 @@ const MyPostContent: React.FC = () => {
 
 	const allPosts = useSelector(selectForumMyPosts);
 	const { data } = useForumPostsByAuthor({ authorId, page, size: 10 });
+	const { data: openAppealsResponse } = useMyPostAppeals(
+		0,
+		100,
+		"OPEN",
+		!!userInfo,
+	);
 	const deletePostMutation = useDeleteForumPost();
 	const pagination = data?.page;
 
@@ -89,6 +100,15 @@ const MyPostContent: React.FC = () => {
 		[allPosts],
 	);
 
+	const openAppealByPostId = useMemo(() => {
+		const entries =
+			openAppealsResponse?.content
+				?.filter((appeal) => appeal.post?.id != null)
+				.map((appeal) => [appeal.post!.id, appeal] as const) ?? [];
+
+		return new Map(entries);
+	}, [openAppealsResponse?.content]);
+
 	return (
 		<div className="min-h-screen bg-gray-50">
 			<div className="bg-white border-b border-gray-200 shadow-sm">
@@ -119,6 +139,13 @@ const MyPostContent: React.FC = () => {
 							<button className="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-md font-semibold text-primary bg-blue-50 text-left">
 								<PenSquare className="w-4 h-4" />
 								Bài viết của tôi
+							</button>
+							<button
+								className="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 rounded-md text-md font-medium text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-colors text-left"
+								onClick={() => navigate({ to: "/forum/appeals" })}
+							>
+								<MessageSquare className="w-4 h-4" />
+								Khiếu nại của tôi
 							</button>
 						</div>
 					</div>
@@ -271,28 +298,41 @@ const MyPostContent: React.FC = () => {
 								)}
 							</div>
 						) : (
-							displayPosts.map((post) => (
-								<PostRow
-									key={post.id}
-									post={post}
-									formatDate={formatDate}
-									canEdit={!post.isBanned}
-									onEdit={() =>
-										navigate({
-											to: "/forum/$id/edit",
-											params: { id: String(post.id) },
-										})
-									}
-									onDelete={() => deletePostMutation.mutate(post.id)}
-									onView={() =>
-										navigate({
-											to: "/forum/post/$id",
-											params: { id: String(post.id) },
-										})
-									}
-									onAppeal={() => setAppealTargetPost(post)}
-								/>
-							))
+							displayPosts.map((post) => {
+								const activeAppeal = openAppealByPostId.get(post.id);
+
+								return (
+									<PostRow
+										key={post.id}
+										post={post}
+										formatDate={formatDate}
+										canEdit={!post.isBanned}
+										onEdit={() =>
+											navigate({
+												to: "/forum/$id/edit",
+												params: { id: String(post.id) },
+											})
+										}
+										onDelete={() => deletePostMutation.mutate(post.id)}
+										onView={() =>
+											navigate({
+												to: "/forum/post/$id",
+												params: { id: String(post.id) },
+											})
+										}
+										onAppeal={() =>
+											activeAppeal
+												? navigate({
+														to: "/forum/appeals/$id",
+														params: { id: String(activeAppeal.id) },
+													})
+												: setAppealTargetPost(post)
+										}
+										appealLabel={activeAppeal ? "Xem khiếu nại" : undefined}
+										isAppealSubmitted={!!activeAppeal}
+									/>
+								);
+							})
 						)}
 					</div>
 

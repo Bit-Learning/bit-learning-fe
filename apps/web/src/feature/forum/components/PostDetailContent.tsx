@@ -26,6 +26,7 @@ import {
 	useReactToForumPost,
 	useLikeForumComment,
 	useForumPosts,
+	useMyPostAppeals,
 } from "../queries/useForum";
 import { CommentItem } from "./CommentItem";
 import { AuthorAvatar } from "./AuthorAvatar";
@@ -181,12 +182,22 @@ const PostDetailContent: React.FC = () => {
 	const reactMutation = useReactToForumPost();
 	const likeCommentMutation = useLikeForumComment();
 	const { userInfo } = useSelector(selectAuthStateInfo);
+	const { data: openAppealsResponse } = useMyPostAppeals(
+		0,
+		100,
+		"OPEN",
+		!!userInfo,
+	);
 
 	const isBannedPost = !!selectedPost?.isBanned;
 	const canEdit =
 		!!userInfo && selectedPost?.author?.id === userInfo.id && !isBannedPost;
 	const canAppeal =
 		!!userInfo && selectedPost?.author?.id === userInfo.id && isBannedPost;
+	const existingAppeal =
+		openAppealsResponse?.content?.find(
+			(appeal) => appeal.post?.id === selectedPost?.id,
+		) ?? null;
 	const isInteractionDisabled = isBannedPost;
 
 	const handleRequireAuthForComment = () => {
@@ -463,18 +474,30 @@ const PostDetailContent: React.FC = () => {
 													"Quản trị viên chưa cung cấp lý do chi tiết cho quyết định khóa này."}
 											</p>
 											<p className="text-sm text-red-700">
-												Mọi tương tác mới trên bài viết này hiện đã được tạm
-												tắt.
+												{existingAppeal
+													? "Bạn đã gửi khiếu nại cho bài viết này. Hãy theo dõi phản hồi từ quản trị viên trong inbox khiếu nại."
+													: "Mọi tương tác mới trên bài viết này hiện đã được tạm tắt."}
 											</p>
 										</div>
 									</div>
 									{canAppeal ? (
 										<button
 											type="button"
-											onClick={() => setIsAppealDialogOpen(true)}
-											className="inline-flex shrink-0 items-center justify-center rounded-full border border-red-200 bg-white px-4 py-2 text-sm font-semibold text-red-600 transition-colors hover:bg-red-100"
+											onClick={() =>
+												existingAppeal
+													? navigate({
+															to: "/forum/appeals/$id",
+															params: { id: String(existingAppeal.id) },
+														})
+													: setIsAppealDialogOpen(true)
+											}
+											className={`inline-flex shrink-0 items-center justify-center rounded-full border bg-white px-4 py-2 text-sm font-semibold transition-colors ${
+												existingAppeal
+													? "border-blue-200 text-blue-600 hover:bg-blue-50"
+													: "border-red-200 text-red-600 hover:bg-red-100"
+											}`}
 										>
-											Gửi khiếu nại
+											{existingAppeal ? "Xem khiếu nại" : "Gửi khiếu nại"}
 										</button>
 									) : null}
 								</div>

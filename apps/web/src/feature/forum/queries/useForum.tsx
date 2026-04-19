@@ -10,6 +10,7 @@ import { commentApi } from "../apis/comment.api";
 import { hashtagApi } from "../apis/hashtag.api";
 import { postApi } from "../apis/post.api";
 import { forumSubscriptionApi } from "../apis/subscription.api";
+import { ticketApi } from "../apis/ticket.api";
 import { toast } from "@/shared/components/Sonner";
 import {
 	setCommentsAction,
@@ -19,6 +20,7 @@ import {
 	setSelectedPostAction,
 } from "../stores/forum.store";
 import type {
+	AppealTicketStatus,
 	CreateCommentRequest,
 	CreatePostRequest,
 	FilterByAuthorParams,
@@ -196,6 +198,41 @@ function invalidateForumQueries(
 	queryClient.invalidateQueries({ queryKey: ["forum-popular-tags"] });
 }
 
+export const forumAppealKeys = {
+	all: ["forum-appeals"] as const,
+	list: (page: number, size: number, status?: AppealTicketStatus) =>
+		["forum-appeals", "list", page, size, status ?? "ALL"] as const,
+	detail: (id: number) => ["forum-appeals", "detail", id] as const,
+};
+
+export const useMyPostAppeals = (
+	page = 0,
+	size = 10,
+	status?: AppealTicketStatus,
+	enabled = true,
+) =>
+	useQuery({
+		queryKey: forumAppealKeys.list(page, size, status),
+		queryFn: async () => {
+			const response = await ticketApi.getMyPostAppeals(page, size, status);
+			return {
+				content: response.data.data ?? [],
+				page: response.data.page,
+			};
+		},
+		enabled,
+	});
+
+export const useMyPostAppealDetail = (id: number, enabled = true) =>
+	useQuery({
+		queryKey: forumAppealKeys.detail(id),
+		queryFn: async () => {
+			const response = await ticketApi.getMyPostAppealDetail(id);
+			return response.data.data;
+		},
+		enabled: enabled && !!id,
+	});
+
 export const useCreateForumPost = () => {
 	const queryClient = useQueryClient();
 
@@ -267,6 +304,7 @@ export const useAppealBannedForumPost = () => {
 			queryClient.invalidateQueries({ queryKey: ["forum-post"] });
 			queryClient.invalidateQueries({ queryKey: ["forum-post-slug"] });
 			queryClient.invalidateQueries({ queryKey: ["forum-posts-by-author"] });
+			queryClient.invalidateQueries({ queryKey: forumAppealKeys.all });
 			toast.success({
 				title: "Đã gửi khiếu nại",
 				description:
@@ -279,6 +317,57 @@ export const useAppealBannedForumPost = () => {
 					error?.response?.data?.message ||
 					error?.message ||
 					"Không thể gửi khiếu nại cho bài viết này",
+			});
+		},
+	});
+};
+
+export const useCommentOnMyPostAppeal = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: ({ id, content }: { id: number; content: string }) =>
+			ticketApi.commentOnAppeal(id, content),
+		onSuccess: (_response, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: forumAppealKeys.detail(variables.id),
+			});
+			queryClient.invalidateQueries({ queryKey: forumAppealKeys.all });
+			toast.success({ title: "Đã gửi phản hồi cho khiếu nại" });
+		},
+		onError: (error: any) => {
+			toast.error({
+				title:
+					error?.response?.data?.message ||
+					error?.message ||
+					"Không thể gửi phản hồi lúc này",
+			});
+		},
+	});
+};
+
+export const useReplyOnMyPostAppealComment = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (variables: {
+			ticketId: number;
+			ticketCommentId: number;
+			content: string;
+		}) => ticketApi.replyOnAppeal(variables.ticketCommentId, variables.content),
+		onSuccess: (_response, variables) => {
+			queryClient.invalidateQueries({
+				queryKey: forumAppealKeys.detail(variables.ticketId),
+			});
+			queryClient.invalidateQueries({ queryKey: forumAppealKeys.all });
+			toast.success({ title: "Đã gửi trả lời thành công" });
+		},
+		onError: (error: any) => {
+			toast.error({
+				title:
+					error?.response?.data?.message ||
+					error?.message ||
+					"Không thể gửi trả lời lúc này",
 			});
 		},
 	});
