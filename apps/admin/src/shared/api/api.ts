@@ -10,22 +10,51 @@ import {
 	getAccessToken,
 	setAccessToken,
 } from "@/shared/lib/cookies";
+import { wsService } from "@/features/notification/services/websocket.service";
 
-const api: AxiosInstance = axios.create({
-	baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/",
-	headers: {
-		"Content-Type": "application/json",
-		"Accept-Language": localStorage.getItem("i18nextLng") || "vi",
-	},
-	// Enable sending cookies (including HttpOnly refresh token) with all requests
-	withCredentials: true,
-});
+function createApiClient(): AxiosInstance {
+	return axios.create({
+		baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/",
+		headers: {
+			"Content-Type": "application/json",
+			"Accept-Language": localStorage.getItem("i18nextLng") || "vi",
+		},
+		// Enable sending cookies (including HttpOnly refresh token) with all requests
+		withCredentials: true,
+	});
+}
+
+const api: AxiosInstance = createApiClient();
+const refreshApi: AxiosInstance = createApiClient();
 
 let isRefreshing = false;
 let failedRequestQueue: Array<{
 	resolve: (value: any) => void;
 	reject: (reason?: any) => void;
 }> = [];
+
+function isRefreshTokenRequest(request?: { url?: string }): boolean {
+	return Boolean(request?.url?.includes("/auth/refresh-token"));
+}
+
+function removeAuthorizationHeader(headers?: unknown) {
+	if (!headers || typeof headers !== "object") {
+		return;
+	}
+
+	const mutableHeaders = headers as Record<string, unknown> & {
+		delete?: (header: string) => void;
+	};
+
+	if (typeof mutableHeaders.delete === "function") {
+		mutableHeaders.delete("Authorization");
+		mutableHeaders.delete("authorization");
+		return;
+	}
+
+	delete mutableHeaders.Authorization;
+	delete mutableHeaders.authorization;
+}
 
 function setAuthorizationHeader(params: {
 	request: AxiosRequestConfig;
@@ -37,20 +66,26 @@ function setAuthorizationHeader(params: {
 	}
 }
 
+function clearDefaultAuthorizationHeader() {
+	removeAuthorizationHeader(api.defaults.headers.common);
+}
+
 function handleRefreshToken(): Promise<string> {
 	console.log("[Token Refresh] Starting token refresh process");
 	isRefreshing = true;
 
-	return api
-		.post("/auth/refresh-token", {}, {
-			headers: {
-				"Content-Type": "application/json",
+	return refreshApi
+		.post(
+			"/auth/refresh-token",
+			{},
+			{
+				headers: {
+					"Content-Type": "application/json",
+				},
+				// Ensure cookies are sent (refresh token is HttpOnly cookie)
+				withCredentials: true,
 			},
-			// Skip auth interceptor for refresh token request
-			_retry: true,
-			// Ensure cookies are sent (refresh token is HttpOnly cookie)
-			withCredentials: true,
-		} as any)
+		)
 		.then((response: AxiosResponse) => {
 			console.log("[Token Refresh] Refresh successful");
 			const { accessToken } = response.data.data;
@@ -80,6 +115,8 @@ function handleRefreshToken(): Promise<string> {
 			failedRequestQueue.forEach(({ reject }) => void reject(error));
 			failedRequestQueue = [];
 			clearAuthTokens();
+			clearDefaultAuthorizationHeader();
+			wsService.disconnect();
 			console.log("[Token Refresh] Redirecting to sign-in");
 			window.location.href = "/sign-in";
 			throw error;
@@ -92,9 +129,16 @@ function handleRefreshToken(): Promise<string> {
 function onRequest(
 	config: InternalAxiosRequestConfig,
 ): InternalAxiosRequestConfig {
+	if (isRefreshTokenRequest(config)) {
+		removeAuthorizationHeader(config.headers);
+		return config;
+	}
+
 	const token = getAccessToken();
 	if (token) {
 		setAuthorizationHeader({ request: config, token });
+	} else {
+		removeAuthorizationHeader(config.headers);
 	}
 	return config;
 }
