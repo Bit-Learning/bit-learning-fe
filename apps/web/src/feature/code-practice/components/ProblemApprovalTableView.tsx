@@ -148,6 +148,8 @@ export default function ProblemApprovalTableView() {
   const requestPublish = useRequestPublish();
 
   const filters: ApprovalFilters = {
+    page,
+    size: PAGE_SIZE,
     status: statusFilter !== "all" ? (statusFilter as ApprovalStatus) : undefined,
   };
 
@@ -157,8 +159,6 @@ export default function ProblemApprovalTableView() {
 
   const filteredProblems = useMemo(() => {
     return rawData.filter((p: any) => {
-      if (p.approvalStatus === ApprovalStatus.APPROVED) return false;
-
       if (!search) return true;
 
       return normalize(p.title).includes(normalize(search));
@@ -331,13 +331,7 @@ export default function ProblemApprovalTableView() {
           </div>
 
           <div className="mt-4 flex items-center justify-between">
-            <p className="text-sm text-slate-600">
-              Hiển thị{" "}
-              <span className="font-semibold">
-                {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, filteredProblems.length)}
-              </span>{" "}
-              trong <span className="font-semibold">{filteredProblems.length}</span> bài tập
-            </p>
+            <p className="text-sm text-slate-600"></p>
             {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
           </div>
         </>

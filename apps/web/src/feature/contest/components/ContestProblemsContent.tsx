@@ -200,9 +200,9 @@ const ContestProblemsContent: React.FC = () => {
             </button>
             <button
               onClick={() => canSubmit && setActiveTab("submit")}
-              disabled={!canSubmit}
+              disabled={!canSubmit || !contest?.isRegistered}
               className={`py-4 text-md font-bold flex items-center gap-2 transition-colors ${
-                !canSubmit
+                !canSubmit || !contest?.isRegistered
                   ? "border-transparent text-slate-400 cursor-not-allowed opacity-50"
                   : activeTab === "submit"
                     ? "border-primary text-primary border-b-2 cursor-pointer"

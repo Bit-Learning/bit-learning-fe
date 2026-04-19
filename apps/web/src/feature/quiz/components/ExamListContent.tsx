@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Timer, HelpCircle } from "lucide-react";
+import { Search, Timer, HelpCircle, User } from "lucide-react";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
 import { useAllExams } from "@/feature/exam/queries/useExam";
@@ -152,8 +152,6 @@ const ExamListContent: React.FC = () => {
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredExams.map((exam) => {
-              const isPractice = exam.type === "PRACTICE";
-
               return (
                 <div
                   key={exam.id}
@@ -193,6 +191,15 @@ const ExamListContent: React.FC = () => {
                         <HelpCircle className={cn("w-4 h-4 shrink-0 text-blue-600")} />
                         <span>
                           Số câu: <span className="font-semibold text-slate-800">{exam.totalQuestions} câu</span>
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2.5 text-sm text-slate-600">
+                        <User className={cn("w-4 h-4 shrink-0 text-blue-600")} />
+                        <span>
+                          Giảng viên:{" "}
+                          <span className="font-semibold text-slate-800">
+                            {exam.createdBy?.firstName + " " + exam.createdBy?.lastName}
+                          </span>
                         </span>
                       </div>
                     </div>

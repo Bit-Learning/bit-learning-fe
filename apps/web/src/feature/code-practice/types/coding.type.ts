@@ -511,6 +511,8 @@ export interface ProblemFilters {
   page?: number;
   size?: number;
   sort?: string;
+  difficulty?: Difficulty;
+  approvalStatus?: ApprovalStatus;
 }
 
 export interface SubmissionFilters {

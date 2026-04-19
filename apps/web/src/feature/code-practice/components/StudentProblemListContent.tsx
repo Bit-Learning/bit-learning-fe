@@ -6,19 +6,27 @@ import { useProblems, useToggleFavorite } from "../queries/useCoding";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { Pagination } from "@/shared/components/Pagination";
 import { toast } from "@/shared/components/Sonner";
-import type { ProblemBriefResponse } from "../types/coding.type";
+import type { ProblemBriefResponse, Difficulty } from "../types/coding.type";
 import { ProblemStatsCard } from "./ProblemStatsCard";
 
 const DIFF_LABEL: Record<string, string> = {
   EASY: "Dễ",
-  MEDIUM: "Vừa",
+  MEDIUM: "Trung bình",
   HARD: "Khó",
 };
+
 const DIFF_COLOR: Record<string, string> = {
   EASY: "text-emerald-600",
   MEDIUM: "text-amber-500",
   HARD: "text-rose-500",
 };
+
+const difficultyOptions = [
+  { value: "all" as const, label: "Độ khó: Tất cả" },
+  { value: "EASY" as Difficulty, label: "Dễ" },
+  { value: "MEDIUM" as Difficulty, label: "Trung bình" },
+  { value: "HARD" as Difficulty, label: "Khó" },
+] satisfies Array<{ value: "all" | Difficulty; label: string }>;
 
 const TagPill: React.FC<{
   name: string;
@@ -29,7 +37,7 @@ const TagPill: React.FC<{
   <button
     onClick={onClick}
     className={cn(
-      "inline-flex items-center gap-2 px-2 py-1 text-lg font-medium whitespace-nowrap transition-colors cursor-pointer ",
+      "inline-flex items-center gap-2 px-2 py-1 text-md font-medium whitespace-nowrap transition-colors cursor-pointer",
       active ? "text-blue-500" : "text-slate-500 hover:text-blue-500",
     )}
   >
@@ -45,15 +53,9 @@ const TagPill: React.FC<{
   </button>
 );
 
-const InlineTag: React.FC<{ label: string }> = ({ label }) => (
-  <span className="px-2 py-0.5 text-sm rounded bg-slate-100 text-slate-500 border border-slate-200 whitespace-nowrap">
-    {label}
-  </span>
-);
-
 const StudentProblemListContent: React.FC = () => {
   const [search, setSearch] = useState("");
-  const [difficulty, setDifficulty] = useState<"all" | "EASY" | "MEDIUM" | "HARD">("all");
+  const [difficulty, setDifficulty] = useState<"all" | Difficulty>("all");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [showAllTags, setShowAllTags] = useState(false);
@@ -61,7 +63,13 @@ const StudentProblemListContent: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const { data: problemsData, isLoading } = useProblems({ page, size, sort: "createdAt,desc" });
+  const { data: problemsData, isLoading } = useProblems({
+    page,
+    size,
+    sort: "createdAt,desc",
+    difficulty: difficulty !== "all" ? difficulty : undefined,
+  });
+
   const toggleFavorite = useToggleFavorite();
 
   const problems: ProblemBriefResponse[] = problemsData?.data || [];
@@ -84,12 +92,11 @@ const StudentProblemListContent: React.FC = () => {
     () =>
       problems.filter((p) => {
         if (!p.isPublic) return false;
-        if (difficulty !== "all" && p.difficulty !== difficulty) return false;
         if (activeTag && !p.tags?.some((t) => t.name === activeTag)) return false;
         if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
         return true;
       }),
-    [problems, difficulty, activeTag, search],
+    [problems, activeTag, search],
   );
 
   const handleFavorite = (e: React.MouseEvent, problem: ProblemBriefResponse) => {
@@ -114,7 +121,8 @@ const StudentProblemListContent: React.FC = () => {
       <div className="relative overflow-hidden h-60 md:h-72 flex items-end">
         <img src="problem.png" alt="hero" className="absolute inset-0 w-full h-full object-cover" />
       </div>
-      <div className="bg-white border-b border-gray-200 shadow-sm mb-6 ">
+
+      <div className="bg-white border-b border-gray-200 shadow-sm mb-6">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex items-center">
           <nav className="text-md text-gray-500 flex items-center">
             <span onClick={() => navigate({ to: "/" })} className="hover:text-blue-600 cursor-pointer">
@@ -129,6 +137,7 @@ const StudentProblemListContent: React.FC = () => {
           </span>
         </div>
       </div>
+
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pb-16 space-y-8">
         {sortedTags.length > 0 && (
           <div className="flex items-center gap-2 flex-wrap">
@@ -153,7 +162,7 @@ const StudentProblemListContent: React.FC = () => {
           </div>
         )}
 
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-3 flex-wrap">
           <div className="relative flex-1 min-w-50">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500" />
             <input
@@ -167,109 +176,106 @@ const StudentProblemListContent: React.FC = () => {
             />
           </div>
 
-          <div className="flex bg-white border-2 rounded-md border-slate-200 overflow-hidden">
-            {(
-              [
-                { value: "all", label: "Tất cả" },
-                { value: "EASY", label: "Dễ" },
-                { value: "MEDIUM", label: "Vừa" },
-                { value: "HARD", label: "Khó" },
-              ] as const
-            ).map(({ value, label }) => {
-              const active = difficulty === value;
-              return (
-                <button
-                  key={value}
-                  onClick={() => {
-                    setDifficulty(value);
-                    setPage(0);
-                  }}
-                  className={cn(
-                    "px-3 py-3 text-md font-medium transition-colors cursor-pointer whitespace-nowrap border-r border-slate-200 last:border-r-0",
-                    active
-                      ? value === "EASY"
-                        ? "bg-emerald-50 text-emerald-600"
-                        : value === "MEDIUM"
-                          ? "bg-amber-50 text-amber-500"
-                          : value === "HARD"
-                            ? "bg-rose-50 text-rose-500"
-                            : "bg-slate-100 text-slate-700"
-                      : "text-slate-500 hover:text-slate-700 hover:bg-slate-50",
-                  )}
-                >
+          <div className="relative">
+            <select
+              value={difficulty}
+              onChange={(e) => {
+                setDifficulty(e.target.value as "all" | Difficulty);
+                setPage(0);
+              }}
+              className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
+            >
+              {difficultyOptions.map(({ value, label }) => (
+                <option key={value} value={value}>
                   {label}
-                </button>
-              );
-            })}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
         </div>
 
         <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
-          <div className="grid grid-cols-[40px_1fr_110px_100px_50px] items-center px-5 py-2.5 bg-slate-50 border-b border-slate-200 text-lg uppercase tracking-wider text-slate-600 font-medium">
-            <span>#</span>
-            <span>Bài tập</span>
-            <span className="text-center">Tỉ lệ đúng</span>
-            <span className="text-right">Độ khó</span>
-            <span />
-          </div>
-
-          {filtered.length === 0 ? (
-            <div className="text-center py-16 text-slate-400 text-sm">Không tìm thấy bài tập nào.</div>
-          ) : (
-            filtered.map((problem, idx) => (
-              <div
-                key={problem.id}
-                onClick={() => handleRowClick(problem.id)}
-                className={cn(
-                  "grid grid-cols-[40px_1fr_110px_100px_60px] items-center px-5 py-3.5 border-b border-slate-100 last:border-b-0 cursor-pointer transition-colors hover:bg-blue-50 group",
-                  idx % 2 === 0 ? "bg-white" : "bg-slate-50/50",
-                )}
-              >
-                <span className="text-lg text-slate-600">{idx + 1 + page * size}</span>
-
-                <div className="flex flex-col gap-1.5 min-w-0 pr-4">
-                  <span className="text-lg font-bold text-slate-800 group-hover:text-blue-500 transition-colors truncate">
-                    {problem.title}
-                  </span>
-                  {problem.tags && problem.tags.length > 0 && (
-                    <div className="flex gap-1 flex-wrap">
-                      {problem.tags.map((tag) => (
-                        <InlineTag key={tag.id} label={tag.name} />
-                      ))}
-                    </div>
-                  )}
-                </div>
-
-                <ProblemStatsCard problemId={problem.id} />
-                <span className={cn("text-lg font-medium text-right", DIFF_COLOR[problem.difficulty])}>
-                  {DIFF_LABEL[problem.difficulty] ?? problem.difficulty}
-                </span>
-
-                <div className="relative group">
-                  <button
-                    onClick={(e) => handleFavorite(e, problem)}
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="bg-slate-50 border-b border-slate-200 text-sm uppercase tracking-wider text-slate-500 font-medium">
+                <th className="px-4 py-3 text-left w-10">#</th>
+                <th className="px-4 py-3 text-left">Bài tập</th>
+                <th className="px-4 py-3 text-center w-48">Giảng viên</th>
+                <th className="px-4 py-3 text-center w-36">Tỉ lệ đúng</th>
+                <th className="px-4 py-3 text-right w-36">Độ khó</th>
+                <th className="px-4 py-3 w-12" />
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.length === 0 ? (
+                <tr>
+                  <td colSpan={6} className="text-center py-16 text-slate-400 text-sm">
+                    Không tìm thấy bài tập nào.
+                  </td>
+                </tr>
+              ) : (
+                filtered.map((problem, idx) => (
+                  <tr
+                    key={problem.id}
+                    onClick={() => handleRowClick(problem.id)}
                     className={cn(
-                      "cursor-pointer flex items-center justify-center w-10 h-10 ms-3 rounded transition-all",
-                      problem.isFavorite
-                        ? "text-rose-400 hover:text-rose-500"
-                        : "text-slate-300 hover:text-slate-400 opacity-0 group-hover:opacity-100",
+                      "border-b border-slate-100 last:border-b-0 cursor-pointer transition-colors hover:bg-blue-50 group",
+                      idx % 2 === 0 ? "bg-white" : "bg-slate-50/50",
                     )}
                   >
-                    <Heart className={cn("w-6 h-6", problem.isFavorite && "fill-rose-400")} />
-                  </button>
+                    <td className="px-4 py-3 text-sm text-slate-500">{idx + 1 + page * size}</td>
 
-                  <div
-                    className="absolute top-full mb-2 left-2 -translate-x-1/2
-                  whitespace-nowrap rounded bg-slate-800 text-white
-                  text-sm px-2 py-1 opacity-0 group-hover:opacity-100
-                  transition pointer-events-none"
-                  >
-                    {problem.isFavorite ? "Xóa khỏi yêu thích" : "Thêm vào yêu thích"}
-                  </div>
-                </div>
-              </div>
-            ))
-          )}
+                    <td className="px-4 py-3">
+                      <div className="flex flex-col gap-1 min-w-0">
+                        <span className="text-md font-semibold text-slate-800 group-hover:text-blue-500 transition-colors truncate">
+                          {problem.title}
+                        </span>
+                        <p className="text-xs text-slate-500 mt-0.5 font-mono">
+                          {problem.tags?.map((t) => t.name).join(", ") || problem.slug}
+                        </p>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3 text-center text-sm text-slate-600">
+                      {problem.createdBy ? (
+                        `${problem.createdBy.firstName} ${problem.createdBy.lastName}`.trim()
+                      ) : (
+                        <span className="text-slate-300">—</span>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <ProblemStatsCard problemId={problem.id} />
+                    </td>
+
+                    <td className={cn("px-4 py-3 text-sm font-medium text-right", DIFF_COLOR[problem.difficulty])}>
+                      {DIFF_LABEL[problem.difficulty] ?? problem.difficulty}
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <div className="relative group/fav flex justify-center">
+                        <button
+                          onClick={(e) => handleFavorite(e, problem)}
+                          className={cn(
+                            "cursor-pointer flex items-center justify-center w-8 h-8 rounded transition-all",
+                            problem.isFavorite
+                              ? "text-rose-400 hover:text-rose-500"
+                              : "text-slate-300 hover:text-slate-400 opacity-0 group-hover:opacity-100",
+                          )}
+                        >
+                          <Heart className={cn("w-5 h-5", problem.isFavorite && "fill-rose-400")} />
+                        </button>
+                        <div className="absolute bottom-full mb-1 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-slate-800 text-white text-xs px-2 py-1 opacity-0 group-hover/fav:opacity-100 transition pointer-events-none z-10">
+                          {problem.isFavorite ? "Yêu thích" : "Yêu thích"}
+                        </div>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
         </div>
 
         {totalPages > 1 && (
