@@ -20,12 +20,13 @@ import Footer from "./Footer";
 import styles from "./HomePage.module.css";
 import { Navbar } from "./Navbar/Navbar";
 import CategoryRow from "./CategoryRow";
+import { CategoryRowSkeleton } from "./CategoryRowSkeleton";
+import { GameHeroSkeleton } from "./GameHeroSkeleton";
 
 interface Props {
 	username: string | null;
 }
 
-const GAME_ROW_SKELETON_IDS = ["hero", "arcade", "focus", "speed"] as const;
 const CATEGORY_ROW_SKELETONS = [
 	{ id: "featured", descriptionWidth: "w-72" },
 	{ id: "puzzle", descriptionWidth: "w-80" },
@@ -99,71 +100,6 @@ function getFeaturedReasonLabel(reason?: FeaturedReason | null) {
 		default:
 			return "Đang tăng nhiệt";
 	}
-}
-
-function GameHeroSkeleton() {
-	return (
-		<section className={styles.hero}>
-			<div className="absolute inset-0 bg-[#1a0f12]" />
-			<div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,_rgba(236,19,55,0.12),_transparent_40%),radial-gradient(circle_at_left,_rgba(59,130,246,0.08),_transparent_35%)]" />
-			<div className={styles.heroContent}>
-				<div className={styles.heroInner}>
-					<div className="flex items-center gap-3">
-						<Skeleton className="h-6 w-28 rounded-full bg-white/12" />
-						<Skeleton className="h-5 w-32 rounded-full bg-white/10" />
-					</div>
-					<div className="space-y-3">
-						<Skeleton className="h-16 w-64 bg-white/12 sm:w-80" />
-						<Skeleton className="h-16 w-52 bg-white/10 sm:w-72" />
-						<Skeleton className="h-16 w-40 bg-white/10 sm:w-56" />
-					</div>
-					<div className="space-y-3">
-						<Skeleton className="h-5 w-full max-w-xl bg-white/10" />
-						<Skeleton className="h-5 w-full max-w-lg bg-white/10" />
-						<Skeleton className="h-5 w-3/4 max-w-md bg-white/10" />
-					</div>
-					<div className="flex flex-wrap gap-4 pt-4">
-						<Skeleton className="h-12 w-40 rounded-lg bg-white/12" />
-						<Skeleton className="h-12 w-36 rounded-lg bg-white/10" />
-					</div>
-				</div>
-			</div>
-		</section>
-	);
-}
-
-function CategoryRowSkeleton({
-	descriptionWidth,
-}: {
-	descriptionWidth: string;
-}) {
-	return (
-		<section className="space-y-5">
-			<div className="px-8">
-				<div className="flex items-start justify-between gap-4">
-					<div className="space-y-3">
-						<div className="flex items-center gap-3">
-							<Skeleton className="h-3 w-3 rounded-full bg-white/25" />
-							<Skeleton className="h-7 w-40 bg-white/15" />
-						</div>
-						<Skeleton className={`h-4 bg-white/10 ${descriptionWidth}`} />
-					</div>
-					<Skeleton className="hidden h-5 w-20 bg-white/10 md:block" />
-				</div>
-			</div>
-			<div className="flex gap-3 overflow-hidden px-8">
-				{GAME_ROW_SKELETON_IDS.map((cardId) => (
-					<div key={cardId} className="w-64 flex-none space-y-3">
-						<Skeleton className="aspect-video w-full rounded-md bg-white/10" />
-						<div className="space-y-2">
-							<Skeleton className="h-4 w-5/6 bg-white/10" />
-							<Skeleton className="h-3 w-2/3 bg-white/10" />
-						</div>
-					</div>
-				))}
-			</div>
-		</section>
-	);
 }
 
 export default function GameList({ username }: Props) {
