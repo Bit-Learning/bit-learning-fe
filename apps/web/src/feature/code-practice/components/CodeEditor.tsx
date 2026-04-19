@@ -18,6 +18,7 @@ import {
   Bug,
   FileCode2,
   Terminal,
+  HelpCircle,
 } from "lucide-react";
 import {
   Language,
@@ -113,6 +114,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   const [bottomTab, setBottomTab] = useState<BottomPanelTab>("submission");
   const [settingsOpen, setSettingsOpen] = useState(false);
   const settingsRef = useRef<HTMLDivElement>(null);
+  const [helpOpen, setHelpOpen] = useState(false);
+  const helpRef = useRef<HTMLDivElement>(null);
 
   const [bottomPanelHeight, setBottomPanelHeight] = useState<number>(280);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -523,7 +526,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </div>
           )}
         </div>
-        <div className="flex items-center gap-4 text-gray-400">
+        <div className="flex items-center gap-4 text-gray-300">
           <button
             onClick={handleFormat}
             disabled={isFormatting}
@@ -552,7 +555,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             </button>
             {settingsOpen && (
               <div className="absolute right-0 top-8 z-50 w-60 bg-gray-800 border border-gray-700 rounded-lg shadow-xl py-1 text-sm">
-                <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-500 font-semibold border-b border-gray-700">
+                <div className="px-3 py-2 text-[10px] uppercase tracking-wider text-gray-300 font-semibold border-b border-gray-700">
                   Cài đặt
                 </div>
 
@@ -569,7 +572,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                         }}
                         className={cn(
                           "cursor-pointer flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-semibold rounded-md transition-all",
-                          !isMultiFileMode ? "bg-gray-900 text-white shadow-sm" : "text-gray-400 hover:text-gray-200",
+                          !isMultiFileMode ? "bg-gray-900 text-white shadow-sm" : "text-gray-300 hover:text-gray-200",
                         )}
                       >
                         <FileCode2 className="w-3.5 h-3.5" />1 file
@@ -581,7 +584,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                         }}
                         className={cn(
                           "cursor-pointer flex-1 flex items-center justify-center gap-1.5 px-2 py-1.5 text-xs font-semibold rounded-md transition-all",
-                          isMultiFileMode ? "bg-gray-900 text-white shadow-sm" : "text-gray-400 hover:text-gray-200",
+                          isMultiFileMode ? "bg-gray-900 text-white shadow-sm" : "text-gray-300 hover:text-gray-200",
                         )}
                       >
                         <Plus className="w-3.5 h-3.5" />
@@ -600,7 +603,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     }}
                     className="cursor-pointer w-full flex items-center gap-2.5 px-3 py-2 text-gray-300 hover:bg-gray-700 hover:text-white transition-colors"
                   >
-                    <Plus className="w-4 h-4 text-gray-400" />
+                    <Plus className="w-4 h-4 text-gray-300" />
                     Thêm file mới
                   </button>
                 )}
@@ -611,9 +614,73 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               </div>
             )}
           </div>
-          <button className="cursor-pointer hover:text-white transition-colors">
-            <Maximize className="w-5 h-5" />
-          </button>
+          <div
+            ref={helpRef}
+            className="relative"
+            onMouseEnter={() => setHelpOpen(true)}
+            onMouseLeave={() => setHelpOpen(false)}
+          >
+            <button className="cursor-pointer hover:text-white transition-colors mt-1.5">
+              <HelpCircle className="w-5 h-5" />
+            </button>
+
+            {helpOpen && (
+              <div className="absolute right-0 top-8 z-50 w-72 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-4 text-sm">
+                <div className="text-sm uppercase tracking-wider text-white font-semibold mb-3">Hướng dẫn sử dụng</div>
+
+                <div className="flex flex-col gap-3">
+                  <div className="flex gap-3 items-start">
+                    <span className="mt-0.5 bg-green-950 rounded-md p-1.5 shrink-0">
+                      <Play className="w-3 h-3 text-green-400" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold text-green-200 mb-0.5">Chạy thử</p>
+                      <p className="text-xs text-gray-300 leading-relaxed">
+                        Chạy code với test cases mẫu. Xem ngay output mà không cần nộp bài.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 items-start">
+                    <span className="mt-0.5 bg-yellow-950 rounded-md p-1.5 shrink-0">
+                      <Bug className="w-3 h-3 text-yellow-400" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold text-yellow-200 mb-0.5">Debug</p>
+                      <p className="text-xs text-gray-300 leading-relaxed">
+                        Click vào số dòng để đặt breakpoint (chấm đỏ), rồi bấm Debug để kiểm tra giá trị biến từng bước.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 items-start">
+                    <span className="mt-0.5 bg-blue-950 rounded-md p-1.5 shrink-0">
+                      <Send className="w-3 h-3 text-blue-400" />
+                    </span>
+                    <div>
+                      <p className="text-xs font-semibold text-blue-200 mb-0.5">Nộp bài</p>
+                      <p className="text-xs text-gray-300 leading-relaxed">
+                        Nộp code để chấm với toàn bộ test cases ẩn. Kết quả hiển thị bên dưới.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-800 mt-1 pt-3 flex flex-col gap-1.5">
+                    <p className="text-xs text-gray-300">
+                      <kbd className="bg-gray-700 text-white text-xs px-1.5 py-0.5 rounded font-mono">Tab</kbd>
+                      {" / "}
+                      <kbd className="bg-gray-700 text-white text-xs px-1.5 py-0.5 rounded font-mono">Shift+Tab</kbd>
+                      {" để thụt lề"}
+                    </p>
+                    <p className="text-[11px] text-gray-300">
+                      <kbd className="bg-gray-700 text-white text-xs px-1.5 py-0.5 rounded font-mono">Ctrl+S</kbd>
+                      {" để format code tự động"}
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -651,7 +718,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     )}
                     style={{ top: "50%", transform: "translateY(-50%)" }}
                   />
-                  <span className={cn("text-xs", isBp ? "text-red-400" : "text-gray-500 group-hover:text-gray-300")}>
+                  <span className={cn("text-xs", isBp ? "text-red-400" : "text-gray-300 group-hover:text-gray-300")}>
                     {lineNum}
                   </span>
                 </div>
@@ -745,7 +812,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     "cursor-pointer flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2",
                     bottomTab === "submission"
                       ? "text-blue-400 border-blue-500"
-                      : "text-gray-500 border-transparent hover:text-gray-300",
+                      : "text-gray-300 border-transparent hover:text-gray-300",
                   )}
                 >
                   <Terminal className="w-3.5 h-3.5" />
@@ -759,7 +826,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     "cursor-pointer flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2",
                     bottomTab === "run"
                       ? "text-green-400 border-green-500"
-                      : "text-gray-500 border-transparent hover:text-gray-300",
+                      : "text-gray-300 border-transparent hover:text-gray-300",
                   )}
                 >
                   <Play className="w-3.5 h-3.5" />
@@ -773,7 +840,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                     "cursor-pointer flex items-center gap-1.5 px-3 py-2.5 text-xs font-semibold uppercase tracking-wider transition-colors border-b-2",
                     bottomTab === "debug"
                       ? "text-yellow-400 border-yellow-500"
-                      : "text-gray-500 border-transparent hover:text-gray-300",
+                      : "text-gray-300 border-transparent hover:text-gray-300",
                   )}
                 >
                   <Bug className="w-3.5 h-3.5" />
@@ -781,7 +848,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 </button>
               )}
             </div>
-            <button onClick={onCloseResult} className="cursor-pointer text-gray-500 hover:text-white p-1">
+            <button onClick={onCloseResult} className="cursor-pointer text-gray-300 hover:text-white p-1">
               <X className="w-4 h-4" />
             </button>
           </div>
@@ -791,7 +858,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
               <div className="p-4 space-y-2">
                 <div className="flex items-center gap-2 mb-3">
                   <SubmissionStatusBadge status={submissionResult.status} showIcon />
-                  <span className="text-gray-500">
+                  <span className="text-gray-300">
                     ({passedCount}/{totalCount} test cases passed)
                   </span>
                 </div>
@@ -802,7 +869,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                       <span className={cn("font-bold", isPass ? "text-green-500" : "text-red-500")}>
                         CASE {idx + 1}:
                       </span>
-                      <span className="text-gray-400">
+                      <span className="text-gray-300">
                         {result.executionTimeMs}ms | {result.memoryUsageMb}MB
                       </span>
                       <span className={isPass ? "text-green-400" : "text-red-400"}>
@@ -840,18 +907,18 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                         <span className={cn("font-bold", isPass ? "text-green-500" : "text-red-500")}>
                           Case {idx + 1}
                         </span>
-                        <span className="text-gray-500">
+                        <span className="text-gray-300">
                           {tc.executionTimeMs}ms | {tc.memoryUsageMb}MB
                         </span>
                       </div>
                       <div className="grid grid-cols-2 gap-2 text-xs">
                         <div>
-                          <div className="text-gray-500 mb-0.5">Input</div>
+                          <div className="text-gray-300 mb-0.5">Input</div>
                           <pre className="bg-gray-900 p-1.5 rounded text-gray-300 whitespace-pre-wrap">{tc.input}</pre>
                         </div>
                         {tc.expectedOutput && (
                           <div>
-                            <div className="text-gray-500 mb-0.5">Expected</div>
+                            <div className="text-gray-300 mb-0.5">Expected</div>
                             <pre className="bg-gray-900 p-1.5 rounded text-gray-300 whitespace-pre-wrap">
                               {tc.expectedOutput}
                             </pre>
@@ -887,7 +954,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       )}
 
       <div className="h-16 flex items-center justify-between px-6 bg-gray-900 border-t border-gray-800 shrink-0">
-        <div className="flex items-center gap-2 text-gray-400">
+        <div className="flex items-center gap-2 text-gray-300">
           <Clock className="w-4 h-4" />
           <span className="text-sm">{problem.timeLimitMs}ms</span>
           <div className="mx-2 h-4 w-px bg-gray-700" />
@@ -901,7 +968,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             className={cn(
               "px-4 py-2 rounded text-sm font-semibold border transition-all flex items-center gap-2 cursor-pointer",
               isRunning || !activeFile.content.trim()
-                ? "bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed"
+                ? "bg-gray-800 text-gray-300 border-gray-700 cursor-not-allowed"
                 : "bg-gray-800 text-green-400 border-green-700 hover:bg-green-900/30",
             )}
           >
@@ -925,7 +992,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             className={cn(
               "px-4 py-2 rounded text-sm font-semibold border transition-all flex items-center gap-2 cursor-pointer",
               isDebugging || !activeFile.content.trim() || parsedDebugLines.length === 0
-                ? "bg-gray-800 text-gray-500 border-gray-700 cursor-not-allowed"
+                ? "bg-gray-800 text-gray-300 border-gray-700 cursor-not-allowed"
                 : "bg-gray-800 text-yellow-400 border-yellow-700 hover:bg-yellow-900/30",
             )}
           >
@@ -975,7 +1042,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
       <div className="px-6 py-2 bg-gray-900 border-t border-gray-800 flex items-center gap-4 shrink-0 min-h-0">
         <div className="flex items-center gap-2 flex-wrap flex-1 min-w-0">
           <Bug className="w-3.5 h-3.5 text-yellow-500 shrink-0" />
-          <span className="text-xs text-gray-400 shrink-0">Breakpoints:</span>
+          <span className="text-xs text-gray-300 shrink-0">Breakpoints:</span>
           {activeBreakpoints.size === 0 ? (
             <span className="text-xs text-gray-600 italic">Click vào số dòng để đặt breakpoint</span>
           ) : (

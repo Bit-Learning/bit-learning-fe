@@ -1,6 +1,16 @@
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@workspace/ui/components/Button";
-import { CheckCircle, ChevronLeft, ChevronRight, Edit, Lock } from "lucide-react";
+import {
+  CheckCircle,
+  ChevronLeft,
+  ChevronRight,
+  ClipboardList,
+  Edit,
+  FileText,
+  HelpCircle,
+  Lock,
+  Video,
+} from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useQueryClient } from "@tanstack/react-query";
@@ -21,6 +31,7 @@ interface LectureDetailLayoutProps {
 
 const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lectureId }) => {
   const [lectureProgress, setLectureProgress] = useState<Record<number, number>>({});
+  const [helpOpen, setHelpOpen] = useState(false);
 
   const navigate = useNavigate();
   const queryClient = useQueryClient();
@@ -164,6 +175,67 @@ const LectureDetailLayout: React.FC<LectureDetailLayoutProps> = ({ courseId, lec
           </div>
 
           <div className="mx-1 h-5 w-px bg-gray-700" />
+
+          <div className="relative" onMouseEnter={() => setHelpOpen(true)} onMouseLeave={() => setHelpOpen(false)}>
+            <button className="cursor-pointer flex items-center justify-center text-gray-300 hover:text-white transition-colors">
+              <HelpCircle className="w-5 h-5" />
+            </button>
+
+            {helpOpen && (
+              <div className="absolute right-0 top-8 z-50 w-80 bg-gray-900 border border-gray-700 rounded-xl shadow-2xl p-4">
+                <div className="text-sm uppercase tracking-wider text-gray-300 font-semibold mb-3">
+                  Cách hoàn thành bài học
+                </div>
+
+                <div className="flex flex-col gap-3 text-sm">
+                  <div className="flex gap-3 items-start">
+                    <span className="mt-0.5 shrink-0 rounded-md p-1.5">
+                      <FileText className="w-3.5 h-3.5 text-blue-400" />
+                    </span>
+                    <div>
+                      <p className="font-semibold text-blue-400 mb-0.5">Bài đọc</p>
+                      <p className="text-gray-300 leading-relaxed">
+                        Đọc xong nội dung rồi nhấn nút{" "}
+                        <span className="text-white font-medium">"Đánh dấu hoàn thành"</span> ở cuối bài.
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex gap-3 items-start">
+                    <span className="mt-0.5 shrink-0 rounded-md p-1.5">
+                      <Video className="w-4 h-4 text-blue-400" />
+                    </span>
+                    <div>
+                      <p className="font-semibold text-blue-400 mb-0.5">Bài video</p>
+                      <p className="text-gray-300 leading-relaxed">
+                        Xem ít nhất <span className="text-white font-medium">90%</span> thời lượng video để tự động đánh
+                        dấu hoàn thành.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="flex gap-3 items-start">
+                    <span className="mt-0.5 shrink-0 rounded-md p-1.5">
+                      <ClipboardList className="w-3.5 h-3.5 text-blue-400" />
+                    </span>
+                    <div>
+                      <p className="font-semibold text-blue-400 mb-0.5">Bài quiz</p>
+                      <p className="text-gray-300 leading-relaxed">
+                        Trả lời đủ các câu hỏi và đạt <span className="text-white font-medium">điểm tối thiểu</span> yêu
+                        cầu khi nộp bài.
+                      </p>
+                    </div>
+                  </div>
+
+                  <div className="border-t border-gray-800 mt-1 pt-3">
+                    <p className="text-gray-300 flex items-center gap-1.5">
+                      <CheckCircle className="w-5 h-5 text-green-500 shrink-0" />
+                      Bài hoàn thành sẽ hiển thị dấu tích xanh trong danh sách.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
       </header>
 
