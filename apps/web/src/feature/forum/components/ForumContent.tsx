@@ -192,7 +192,7 @@ const ForumContent: React.FC = () => {
 		updateSearchState(navigate, {
 			q: search.q,
 			category: categorySlug === selectedCategory ? undefined : categorySlug,
-			tag: selectedTag,
+			tag: undefined,
 			sort: selectedSort,
 		});
 	};
@@ -577,48 +577,6 @@ const ForumContent: React.FC = () => {
 												{formatCompactNumber(category.postsCount ?? 0)} bài viết
 											</p>
 										</button>
-									))}
-								</div>
-							)}
-						</section>
-
-						<section className="space-y-4">
-							<div>
-								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
-									Tâm điểm kiến thức
-								</p>
-								<h2 className="text-2xl font-black text-slate-950">
-									Bài viết được đề xuất cho bạn
-								</h2>
-							</div>
-							{!canLoadRecommended ? (
-								<InlineStateCard
-									title="Đăng nhập để xem bài viết được đề xuất"
-									description="Danh sách này được cá nhân hóa theo hoạt động học tập của bạn. Bạn vẫn có thể đọc toàn bộ bài viết công khai ở các mục bên trên."
-									actionLabel="Đăng nhập"
-									onAction={() => navigate({ to: "/signin-role" })}
-								/>
-							) : recommendedQuery.isLoading ? (
-								<div className="grid gap-4 md:grid-cols-2">
-									{getSkeletonKeys("recommended-post", 4).map((key) => (
-										<PostCardSkeleton key={key} />
-									))}
-								</div>
-							) : recommendedQuery.isError ? (
-								<InlineStateCard
-									title="Recommended posts could not be loaded"
-									description={getErrorMessage(recommendedQuery.error)}
-									actionLabel="Retry"
-									onAction={() => recommendedQuery.refetch()}
-								/>
-							) : (
-								<div className="grid gap-4 md:grid-cols-2">
-									{recommendedPosts.map((post) => (
-										<ContentPostCard
-											key={post.id}
-											post={post}
-											onOpenPost={openPost}
-										/>
 									))}
 								</div>
 							)}

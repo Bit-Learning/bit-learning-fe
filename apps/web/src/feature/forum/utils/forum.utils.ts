@@ -1,5 +1,5 @@
-import { useNavigate } from "@tanstack/react-router";
-import { Post } from "../types/forum.type";
+import type { useNavigate } from "@tanstack/react-router";
+import type { Post } from "../types/forum.type";
 
 export function formatDate(date: string): string {
 	return new Date(date).toLocaleDateString("vi-VN", {
@@ -41,6 +41,8 @@ export function updateSearchState(
 ) {
 	navigate({
 		to: "/forum",
+		replace: true,
+		resetScroll: false,
 		search: {
 			q: nextSearch.q || undefined,
 			category: nextSearch.category || undefined,
