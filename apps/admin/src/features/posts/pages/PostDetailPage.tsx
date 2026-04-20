@@ -1,19 +1,4 @@
 /* biome-ignore-all lint/security/noDangerouslySetInnerHtml: backend stores authored rich HTML for forum posts. */
-import type React from "react";
-import { useState } from "react";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import {
-	ArrowLeft,
-	CalendarClock,
-	Eye,
-	File,
-	Flame,
-	MessageSquare,
-	Tag,
-	ThumbsDown,
-	ThumbsUp,
-} from "lucide-react";
-import { Header } from "@/layout/header";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -31,6 +16,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { Header } from "@/layout/header";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { ArrowLeft, CalendarClock, Eye, File, Tag } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 import { CommentItem } from "../components/CommentItem";
 import {
 	getAuthorInitials,
