@@ -65,6 +65,10 @@ const postSchema = z.object({
 
 type PostFormValues = z.infer<typeof postSchema>;
 
+function normalizeTag(value: string): string {
+	return value.trim().replace(/^#+/, "").replace(/\s+/g, " ").toLowerCase();
+}
+
 function formatFileSize(bytes: number): string {
 	if (bytes < 1024) return `${bytes} B`;
 	if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
@@ -287,9 +291,15 @@ const PostFormContent: React.FC = () => {
 	}, [attachments]);
 
 	const addTag = (value: string) => {
-		const trimmed = value.trim().replace(/^#/, "");
-		if (!trimmed || tags.includes(trimmed) || tags.length >= 10) return;
-		setValue("tags", [...tags, trimmed], {
+		const normalized = normalizeTag(value);
+		if (
+			!normalized ||
+			tags.some((tag) => normalizeTag(tag) === normalized) ||
+			tags.length >= 10
+		) {
+			return;
+		}
+		setValue("tags", [...tags, normalized], {
 			shouldDirty: true,
 			shouldValidate: true,
 		});
@@ -432,6 +442,9 @@ const PostFormContent: React.FC = () => {
 	const completedItems = writingChecklist.filter((item) => item.ready).length;
 
 	const onSubmit = (values: PostFormValues) => {
+		const normalizedTags = Array.from(
+			new Set(values.tags.map(normalizeTag).filter(Boolean)),
+		);
 		const selectedThumbnail =
 			imageFiles.find(
 				(file) => buildThumbnailKeyForFile(file) === selectedThumbnailKey,
@@ -442,7 +455,7 @@ const PostFormContent: React.FC = () => {
 			...documentFiles,
 		];
 
-		if (!isEditMode && values.tags.length === 0) {
+		if (!isEditMode && normalizedTags.length === 0) {
 			setError("tags", {
 				type: "manual",
 				message: "Vui lòng thêm ít nhất 1 thẻ",
@@ -464,7 +477,7 @@ const PostFormContent: React.FC = () => {
 				title: values.title,
 				content: values.content,
 				categorySlug: values.categorySlug,
-				tags: values.tags,
+				tags: normalizedTags,
 				deletedAttachmentIds: deletedAttachmentIds,
 			};
 			updatePostMutation.mutate(
@@ -476,7 +489,7 @@ const PostFormContent: React.FC = () => {
 				title: values.title,
 				content: values.content,
 				categorySlug: values.categorySlug,
-				tags: values.tags,
+				tags: normalizedTags,
 			};
 			createPostMutation.mutate(
 				{ data: postData, attachments: orderedAttachments },

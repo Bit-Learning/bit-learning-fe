@@ -23,10 +23,10 @@ import { useSelector } from "react-redux";
 import {
 	useFeaturedForumPosts,
 	useForumCategories,
+	useForumHashtags,
 	useInfiniteForumPosts,
 	useLatestForumList,
 	useMostViewedForumPosts,
-	usePopularForumTags,
 	useRecommendedForumPosts,
 	useSubscribeToForumPosts,
 	useTrendingForumPosts,
@@ -83,7 +83,7 @@ const ForumContent: React.FC = () => {
 	const trendingQuery = useTrendingForumPosts(8);
 	const recommendedQuery = useRecommendedForumPosts(6, canLoadRecommended);
 	const categoriesQuery = useForumCategories();
-	const popularTagsQuery = usePopularForumTags(16);
+	const allTagsQuery = useForumHashtags();
 	const sidebarMostViewedQuery = useMostViewedForumPosts(5);
 	const sidebarLatestQuery = useLatestForumList(5);
 	const subscribeMutation = useSubscribeToForumPosts();
@@ -100,7 +100,7 @@ const ForumContent: React.FC = () => {
 	const trendingPosts = trendingQuery.data?.data ?? [];
 	const recommendedPosts = recommendedQuery.data?.data ?? [];
 	const categories = categoriesQuery.data?.data ?? [];
-	const popularTags = popularTagsQuery.data?.data ?? [];
+	const allTags = allTagsQuery.data?.data ?? [];
 	const latestPosts = useMemo(
 		() => latestFeedQuery.data?.pages.flatMap((page) => page.data ?? []) ?? [],
 		[latestFeedQuery.data],
@@ -326,14 +326,14 @@ const ForumContent: React.FC = () => {
 							<div className="space-y-3">
 								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
 									<Tag className="h-4 w-4" />
-									Các thẻ thịnh hành
+									Tất cả thẻ
 								</div>
 								<div className="flex flex-wrap gap-2">
-									{popularTagsQuery.isLoading
+									{allTagsQuery.isLoading
 										? getSkeletonKeys("popular-tag-chip", 8).map((key) => (
 												<FilterChipSkeleton key={key} />
 											))
-										: popularTags.slice(0, 10).map((tag) => (
+										: allTags.map((tag) => (
 												<button
 													key={tag.id}
 													type="button"
@@ -661,15 +661,15 @@ const ForumContent: React.FC = () => {
 							<div className="mb-4 flex items-center gap-2 text-slate-900">
 								<Tag className="h-4 w-4 text-rose-500" />
 								<h3 className="text-sm font-black uppercase tracking-[0.2em]">
-									Từ khóa phổ biến
+									Tất cả tag
 								</h3>
 							</div>
 							<div className="flex flex-wrap gap-2">
-								{popularTagsQuery.isLoading
+								{allTagsQuery.isLoading
 									? getSkeletonKeys("sidebar-tag-chip", 10).map((key) => (
 											<FilterChipSkeleton key={key} />
 										))
-									: popularTags.map((tag) => (
+									: allTags.map((tag) => (
 											<button
 												key={tag.id}
 												type="button"
