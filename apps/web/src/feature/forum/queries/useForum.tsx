@@ -525,6 +525,16 @@ export const useLikeForumComment = () => {
 	});
 };
 
+export const useDislikeForumComment = () => {
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: (id: number) => commentApi.dislikeComment(id),
+		onSuccess: () =>
+			queryClient.invalidateQueries({ queryKey: ["forum-comments"] }),
+	});
+};
+
 export const useForumHashtags = () => {
 	const dispatch = useDispatch();
 

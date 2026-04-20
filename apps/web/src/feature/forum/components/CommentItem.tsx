@@ -13,25 +13,35 @@ interface CommentItemProps {
 	setReplyingTo: (id: number | null) => void;
 	onReply: (commentId: number) => void;
 	onLike: (commentId: number) => void;
+	onDislike: (commentId: number) => void;
 	onSubmitReply: (content: string, commentId: number) => void;
 	isInteractionDisabled?: boolean;
 	onRequireAuth?: () => void;
+	currentUserId?: number;
 }
 
 export const CommentItem: React.FC<CommentItemProps> = ({
 	comment,
 	onReply,
 	onLike,
+	onDislike,
 	replyingTo,
 	setReplyingTo,
 	onSubmitReply,
 	isInteractionDisabled = false,
 	onRequireAuth,
+	currentUserId,
 }) => {
 	const [replyContent, setReplyContent] = useState("");
 	const navigate = useNavigate();
 
 	const isReplying = replyingTo === comment.id;
+	const isLikedByCurrentUser =
+		!!currentUserId &&
+		(comment.userLikes?.some((user) => user.id === currentUserId) ?? false);
+	const isDislikedByCurrentUser =
+		!!currentUserId &&
+		(comment.userDislikes?.some((user) => user.id === currentUserId) ?? false);
 	const authorFullName =
 		`${comment.author.firstName} ${comment.author.lastName}`.trim();
 	const isMentorComment = comment.author.role?.toUpperCase() === "MENTOR";
@@ -102,7 +112,7 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="text-gray-500 hover:text-blue-600 h-auto p-0"
+							className={`h-auto p-0 ${isLikedByCurrentUser ? "text-blue-600" : "text-gray-500 hover:text-blue-600"}`}
 							isDisabled={isInteractionDisabled}
 							onClick={() => {
 								if (isInteractionDisabled) {
@@ -120,7 +130,15 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 						<Button
 							variant="ghost"
 							size="icon"
-							className="text-gray-500 h-auto p-0"
+							className={`h-auto p-0 ${isDislikedByCurrentUser ? "text-red-600" : "text-gray-500 hover:text-red-600"}`}
+							isDisabled={isInteractionDisabled}
+							onClick={() => {
+								if (isInteractionDisabled) {
+									onRequireAuth?.();
+									return;
+								}
+								onDislike(comment.id);
+							}}
 						>
 							<ThumbsDown className="w-5 h-5" />
 						</Button>
@@ -192,9 +210,11 @@ export const CommentItem: React.FC<CommentItemProps> = ({
 								setReplyingTo={setReplyingTo}
 								onReply={onReply}
 								onLike={onLike}
+								onDislike={onDislike}
 								onSubmitReply={onSubmitReply}
 								isInteractionDisabled={isInteractionDisabled}
 								onRequireAuth={onRequireAuth}
+								currentUserId={currentUserId}
 							/>
 						))}
 					</div>
