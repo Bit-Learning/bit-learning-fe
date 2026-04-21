@@ -494,7 +494,7 @@ function RevenueTrendCard({
 						<PanelLegend
 							items={[
 								{ color: "#10b981", label: "Doanh thu" },
-								{ color: "#6ee7b7", label: "Trung bình động", soft: true },
+								// { color: "#6ee7b7", label: "Trung bình động", soft: true },
 							]}
 						/>
 						<span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
@@ -601,7 +601,7 @@ function RevenueTrendCard({
 									fill="url(#dashboard-revenue-fill)"
 									activeDot={{ r: 5, fill: "#10b981", stroke: "var(--card)" }}
 								/>
-								<Line
+								{/* <Line
 									type="monotone"
 									dataKey="avgRevenue"
 									name="Trung bình động"
@@ -610,7 +610,7 @@ function RevenueTrendCard({
 									strokeDasharray="6 6"
 									dot={false}
 									isAnimationActive={false}
-								/>
+								/> */}
 							</AreaChart>
 						</ResponsiveContainer>
 
@@ -1422,7 +1422,7 @@ function TopSpendingCustomersCard({
 					</p>
 					<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
 						Xếp hạng người dùng chi tiêu nhiều nhất từ các giao dịch mua hàng và
-						AI đã hoàn tất trong khoảng thời gian {rangeLabel}.
+						yêu cầu AI đã hoàn tất trong khoảng thời gian {rangeLabel}.
 					</p>
 				</div>
 
@@ -2289,6 +2289,7 @@ export function Dashboard() {
 		DEPOSIT: "Nạp tiền",
 		AI_REQUEST: "Yêu cầu AI",
 		PURCHASE: "Mua hàng",
+		CONTEST_PRIZE: "Thưởng cuộc thi",
 	};
 
 	const rangeOptions: Array<{ id: DashboardPreset; label: string }> = [
@@ -2637,7 +2638,7 @@ export function Dashboard() {
 
 					<CardContent className="relative p-6">
 						<div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-							<div className="max-w-2xl">
+							<div className="max-w-5xl">
 								<div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
 									<Sparkles className="h-3.5 w-3.5 text-sky-500" />
 									Bảng điều khiển kinh doanh
@@ -2647,7 +2648,8 @@ export function Dashboard() {
 								</h2>
 								<p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
 									Theo dõi người dùng, đơn hàng và doanh thu với bộ lọc ngày
-									thực tế từ server thay vì chỉ cắt dữ liệu 12 tháng ở frontend.
+									thực tế, giúp bạn nắm bắt hiệu suất kinh doanh một cách trực
+									quan và kịp thời.
 								</p>
 
 								<div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -2662,7 +2664,7 @@ export function Dashboard() {
 										icon={CreditCard}
 									/>
 									<HeroMetric
-										label="Đơn hàng hoàn tất"
+										label="Đơn hàng hoàn thành"
 										value={`${orderCompletionRate}% đơn hàng`}
 										icon={ShoppingCart}
 									/>
@@ -2859,58 +2861,58 @@ export function Dashboard() {
 											</div>
 										</div>
 									}
-									granularityControls={
-										<div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/40">
-											<div className="flex items-center gap-2">
-												<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-													Hiển thị biểu đồ theo
-												</p>
-												<Tooltip>
-													<TooltipTrigger asChild>
-														<button
-															type="button"
-															className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:text-slate-500 dark:hover:text-slate-200"
-															aria-label="Giải thích cách hiển thị biểu đồ"
-														>
-															<CircleHelp className="h-3.5 w-3.5" />
-														</button>
-													</TooltipTrigger>
-													<TooltipContent
-														side="top"
-														align="start"
-														sideOffset={8}
-														className="max-w-72 leading-5"
-													>
-														`Tự động` để backend tự chọn cách gộp theo độ dài
-														khoảng ngày. `Ngày`, `tuần`, `tháng` là cách gom dữ
-														liệu doanh thu thành từng kỳ trên biểu đồ.
-													</TooltipContent>
-												</Tooltip>
-											</div>
-											<div className="mt-2">
-												<Select
-													value={granularity}
-													onValueChange={(value) =>
-														setGranularity(
-															value as DashboardGranularity | "auto",
-														)
-													}
-												>
-													<SelectTrigger>
-														<SelectValue placeholder="Chọn cách hiển thị biểu đồ" />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectItem value="auto">Tự động</SelectItem>
-														<SelectItem value="day">Gộp theo ngày</SelectItem>
-														<SelectItem value="week">Gộp theo tuần</SelectItem>
-														<SelectItem value="month">
-															Gộp theo tháng
-														</SelectItem>
-													</SelectContent>
-												</Select>
-											</div>
-										</div>
-									}
+									// granularityControls={
+									// 	<div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/40">
+									// 		<div className="flex items-center gap-2">
+									// 			<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+									// 				Hiển thị biểu đồ theo
+									// 			</p>
+									// 			<Tooltip>
+									// 				<TooltipTrigger asChild>
+									// 					<button
+									// 						type="button"
+									// 						className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:text-slate-500 dark:hover:text-slate-200"
+									// 						aria-label="Giải thích cách hiển thị biểu đồ"
+									// 					>
+									// 						<CircleHelp className="h-3.5 w-3.5" />
+									// 					</button>
+									// 				</TooltipTrigger>
+									// 				<TooltipContent
+									// 					side="top"
+									// 					align="start"
+									// 					sideOffset={8}
+									// 					className="max-w-72 leading-5"
+									// 				>
+									// 					`Tự động` để backend tự chọn cách gộp theo độ dài
+									// 					khoảng ngày. `Ngày`, `tuần`, `tháng` là cách gom dữ
+									// 					liệu doanh thu thành từng kỳ trên biểu đồ.
+									// 				</TooltipContent>
+									// 			</Tooltip>
+									// 		</div>
+									// 		<div className="mt-2">
+									// 			<Select
+									// 				value={granularity}
+									// 				onValueChange={(value) =>
+									// 					setGranularity(
+									// 						value as DashboardGranularity | "auto",
+									// 					)
+									// 				}
+									// 			>
+									// 				<SelectTrigger>
+									// 					<SelectValue placeholder="Chọn cách hiển thị biểu đồ" />
+									// 				</SelectTrigger>
+									// 				<SelectContent>
+									// 					<SelectItem value="auto">Tự động</SelectItem>
+									// 					<SelectItem value="day">Gộp theo ngày</SelectItem>
+									// 					<SelectItem value="week">Gộp theo tuần</SelectItem>
+									// 					<SelectItem value="month">
+									// 						Gộp theo tháng
+									// 					</SelectItem>
+									// 				</SelectContent>
+									// 			</Select>
+									// 		</div>
+									// 	</div>
+									// }
 								/>
 							</div>
 
@@ -2929,23 +2931,23 @@ export function Dashboard() {
 							</div>
 						</div>
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<CumulativeRevenueCard
 									data={revenueChartData}
 									rangeLabel={activeRangeLabel}
 								/>
 							</div>
-						</div>
+						</div> */}
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<RevenueDeltaCard
 									data={revenueChartData}
 									rangeLabel={activeRangeLabel}
 								/>
 							</div>
-						</div>
+						</div> */}
 
 						<div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-4">
@@ -2983,7 +2985,7 @@ export function Dashboard() {
 							</div>
 						</div>
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<PaymentMethodRevenueCard
 									data={paymentMethodChartData}
@@ -2992,7 +2994,7 @@ export function Dashboard() {
 									rangeLabel={activeRangeLabel}
 								/>
 							</div>
-						</div>
+						</div> */}
 
 						<div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
@@ -3019,7 +3021,7 @@ export function Dashboard() {
 							</div>
 						</div>
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<TransactionValueDistributionCard
 									data={transactionValueDistributionData.data}
@@ -3036,7 +3038,7 @@ export function Dashboard() {
 									}
 								/>
 							</div>
-						</div>
+						</div> */}
 					</div>
 				)}
 			</div>

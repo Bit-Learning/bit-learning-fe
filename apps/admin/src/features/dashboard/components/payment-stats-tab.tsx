@@ -301,6 +301,7 @@ function translateType(type: string): string {
 		DEPOSIT: "Nạp tiền",
 		AI_REQUEST: "AI Request",
 		PURCHASE: "Mua hàng",
+		CONTEST_PRIZE: "Thưởng cuộc thi",
 	};
 	return typeMap[type] || type;
 }
