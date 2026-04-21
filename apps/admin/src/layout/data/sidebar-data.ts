@@ -35,13 +35,11 @@ export const navGroups: NavGroup[] = [
 		title: "Chung",
 		items: [
 			{ title: "Bảng thống kê", url: "/", icon: LayoutDashboard },
-			{ title: "Tình trạng hệ thống", url: "/metrics", icon: Shield },
 			{ title: "Quản lý người dùng", url: "/users", icon: Users },
 			{ title: "Tra cứu giao dịch", url: "/transactions", icon: CreditCard },
 			{ title: "Quản lý khóa học", url: "/courses", icon: Book },
-			{ title: "Quản lý chương trình", url: "/curriculum", icon: School },
+			{ title: "Quản lý chương trình học", url: "/curriculum", icon: School },
 			{ title: "Quản lý bài viết", url: "/posts", icon: MessageSquareText },
-			{ title: "Khiếu nại bài viết", url: "/post-appeals", icon: ShieldAlert },
 			{ title: "Quản lý bài tập thực hành", url: "/problems", icon: Code },
 			{ title: "Quản lý câu hỏi", url: "/questions", icon: FileQuestion },
 			{ title: "Quản lý đề thi", url: "/exams", icon: FileText },
@@ -63,6 +61,8 @@ export const navGroups: NavGroup[] = [
 			{ title: "Quản lý sơ đồ tư duy", url: "/mindmap", icon: Network },
 			{ title: "Quản lý tags", url: "/tags", icon: Tag },
 			{ title: "Quản lý AI", url: "/system-prompt", icon: MessageCircle },
+			{ title: "Khiếu nại bài viết", url: "/post-appeals", icon: ShieldAlert },
+			{ title: "Tình trạng hệ thống", url: "/metrics", icon: Shield },
 			{
 				title: "Công cụ giám sát nâng cao",
 				url: "/tools-metrics",
