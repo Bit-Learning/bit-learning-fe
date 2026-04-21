@@ -28,11 +28,11 @@
 		"@radix-ui/react-tooltip": "^1.2.8",
 		"@tanstack/react-table": "^8.21.3",
 		"@xstate/store": "^3.17.1",
-		"axios": "^1.15.0",
+		"axios": "^1.15.1",
 		"class-variance-authority": "^0.7.1",
 		"clsx": "^2.1.1",
 		"cmdk": "^1.1.1",
-		"country-data-list": "^1.5.5",
+		"country-data-list": "^1.6.2",
 		"embla-carousel": "^8.6.0",
 		"embla-carousel-autoplay": "^8.6.0",
 		"embla-carousel-react": "^8.6.0",
@@ -58,7 +58,7 @@
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.12",
-		"@tailwindcss/postcss": "^4.2.2",
+		"@tailwindcss/postcss": "^4.2.3",
 		"@tailwindcss/typography": "^0.5.16",
 		"@turbo/gen": "^2.9.6",
 		"@types/lodash": "^4.17.24",
@@ -68,7 +68,7 @@
 		"@types/react-dom": "^19.1.7",
 		"@workspace/typescript-config": "workspace:*",
 		"daisyui": "^5.5.19",
-		"tailwindcss": "^4.2.2",
+		"tailwindcss": "^4.2.3",
 		"typescript": "^5.9.2"
 	},
 	"exports": {
