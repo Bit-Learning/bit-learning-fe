@@ -23,10 +23,6 @@ import CategoryRow from "./CategoryRow";
 import { CategoryRowSkeleton } from "./CategoryRowSkeleton";
 import { GameHeroSkeleton } from "./GameHeroSkeleton";
 
-interface Props {
-	username: string | null;
-}
-
 const CATEGORY_ROW_SKELETONS = [
 	{ id: "featured", descriptionWidth: "w-72" },
 	{ id: "puzzle", descriptionWidth: "w-80" },
@@ -123,8 +119,7 @@ function resolveIsScored(game: GamePreview) {
 	return false;
 }
 
-export default function GameList({ username }: Props) {
-	void username;
+export default function GameList() {
 	const [categoriesWithGames, setCategoriesWithGames] = useState<
 		GameCategoryWithGames[]
 	>([]);
@@ -320,13 +315,13 @@ export default function GameList({ username }: Props) {
 						<div className={styles.heroInner}>
 							<div className={styles.heroBadges}>
 								<span className={styles.badge}>Trò chơi nổi bật</span>
-								<span className={styles.badgeSub}>
+								{/* <span className={styles.badgeSub}>
 									{featuredGame
 										? `${featuredGame.categoryName} · xu hướng ${formatCompactNumber(
 												featuredGame.trendScore,
 											)}`
 										: "Kho game Bit Learning"}
-								</span>
+								</span> */}
 							</div>
 							<h1 className={styles.heroTitle}>
 								{featuredGame?.title ?? "Bit Learning Game Center"}
@@ -451,8 +446,9 @@ export default function GameList({ username }: Props) {
 								<p className={styles.kicker}>Được chọn để tạo đà</p>
 								<h2 className={styles.spotlightTitle}>Đang được chú ý nhất</h2>
 								<p className={styles.spotlightCopy}>
-									Xếp theo tổ hợp lượt xem và lượt yêu thích để hero không còn
-									là một banner tĩnh.
+									Xếp theo tổ hợp lượt xem và lượt yêu thích, những trò chơi này
+									đang được cộng đồng quan tâm nhiều nhất. Hãy thử trải nghiệm
+									và đánh giá để giúp chúng tôi cải thiện hơn nữa!
 								</p>
 							</div>
 						</div>
@@ -483,7 +479,7 @@ export default function GameList({ username }: Props) {
 									<div className={styles.spotlightBody}>
 										<div className={styles.spotlightTopLine}>
 											<span>{getFeaturedReasonLabel(game.featuredReason)}</span>
-											<span>{formatCompactNumber(game.trendScore)} trend</span>
+											{/* <span>{formatCompactNumber(game.trendScore)} trend</span> */}
 										</div>
 										<h3>{game.title}</h3>
 										<p>{game.description}</p>

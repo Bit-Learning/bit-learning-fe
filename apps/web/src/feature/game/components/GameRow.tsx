@@ -46,6 +46,7 @@ const GameCard = ({ game, categoryName, matchingTarget }: Props) => {
 				) : (
 					<div className={styles.mediaFallback}>🎮</div>
 				)}
+
 				<div className={styles.overlay}>
 					<div className={styles.statPill}>
 						👁 {views.toLocaleString("vi-VN")}
@@ -53,17 +54,14 @@ const GameCard = ({ game, categoryName, matchingTarget }: Props) => {
 					<div className={styles.statPill}>
 						❤ {likes.toLocaleString("vi-VN")}
 					</div>
+					{/* <div className={styles.statPill}>
+            {views + likes * 5 > 0 ? "Đang được chú ý" : "Mới lên kệ"}
+          </div> */}
 				</div>
 			</div>
 			<div className={styles.copy}>
 				<h3 className={styles.title}>{game.title}</h3>
 				<p className={styles.description}>{game.description}</p>
-				<div className={styles.footer}>
-					<span className={styles.categoryTag}>{categoryName}</span>
-					<span className={styles.trendText}>
-						{views + likes * 5 > 0 ? "Đang được chú ý" : "Mới lên kệ"}
-					</span>
-				</div>
 			</div>
 		</button>
 	);

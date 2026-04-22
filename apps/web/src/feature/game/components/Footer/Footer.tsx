@@ -16,13 +16,14 @@ const Footer = () => {
 						<span className={styles.footerLogoText}>BIT LEARNING</span>
 					</div>
 					<p className={styles.footerDesc}>
-						The #1 platform for educational typing games and competitive
-						keyboarding challenges worldwide.
+						Trung tâm đào tạo lập trình hàng đầu Việt Nam với hơn 5 năm kinh
+						nghiệm. Chúng tôi cam kết mang đến những khóa học chất lượng cao và
+						hỗ trợ học viên 24/7.
 					</p>
 				</div>
-				{[
+				{/* {[
 					{
-						heading: "Platform",
+						heading: "Platform", 
 						links: ["All Games", "Tournaments", "Rankings", "Store"],
 					},
 					{
@@ -47,7 +48,7 @@ const Footer = () => {
 							))}
 						</ul>
 					</div>
-				))}
+				))} */}
 				<div>
 					<h4 className={styles.footerHeading}>Follow Us</h4>
 					<div className={styles.socialRow}>
@@ -62,7 +63,7 @@ const Footer = () => {
 				</div>
 			</div>
 			<div className={styles.footerCopy}>
-				© 2024 BIT LEARNING Gaming. All rights reserved.
+				2026 ©Bit Learning. Tất cả quyền được bảo lưu
 			</div>
 		</footer>
 	);
