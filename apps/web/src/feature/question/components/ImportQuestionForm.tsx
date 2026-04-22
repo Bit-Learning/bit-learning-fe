@@ -2,7 +2,6 @@ import { useState, useRef, useEffect } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
   ArrowLeft,
-  Download,
   Upload,
   FileText,
   CheckCircle,
@@ -30,6 +29,10 @@ import {
 } from "../queries/useImportJob";
 import type { PreviewQuestionResponse, PreviewQuestionStatus } from "../types/import.type";
 import { getDifficultyBadge, getTypeBadge } from "../utils/question.utils";
+import { useCurriculumsList } from "@/feature/matrix/queries/useCurriculum";
+import { useSubjectsByCurriculum } from "@/feature/matrix/queries/useSubject";
+import { useChaptersBySubject } from "@/feature/matrix/queries/useChapter";
+import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
 
 type ImportStep = "upload" | "preview" | "processing" | "completed";
 
@@ -54,13 +57,21 @@ const ImportQuestionForm: React.FC = () => {
   const [previewData, setPreviewData] = useState<{
     totalQuestions: number;
     duplicatedCount: number;
-    errorCount: number;
-    hasErrors: boolean;
     questions: PreviewQuestionResponse[];
   } | null>(null);
 
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
   const [editState, setEditState] = useState<EditState>({ content: "", options: null });
+
+  const [selectedCurriculumId, setSelectedCurriculumId] = useState<number | null>(null);
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | null>(null);
+  const [selectedChapterId, setSelectedChapterId] = useState<number | null>(null);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | null>(null);
+
+  const { data: curriculums, isLoading: loadingCurriculums } = useCurriculumsList();
+  const { data: subjects, isLoading: loadingSubjects } = useSubjectsByCurriculum(selectedCurriculumId ?? undefined);
+  const { data: chapters, isLoading: loadingChapters } = useChaptersBySubject(selectedSubjectId ?? undefined);
+  const { data: lessons, isLoading: loadingLessons } = useLessonsByChapter(selectedChapterId ?? undefined);
 
   const { data: jobStatus } = useImportJobStatus(importJobId, {
     enabled: currentStep === "processing" && !!importJobId,
@@ -114,7 +125,7 @@ const ImportQuestionForm: React.FC = () => {
   };
 
   const handleUploadAndPreview = async () => {
-    if (!uploadedFile) return;
+    if (!uploadedFile || !selectedLessonId) return;
     setUploadProgress(0);
     const interval = setInterval(() => {
       setUploadProgress((prev) => {
@@ -127,24 +138,16 @@ const ImportQuestionForm: React.FC = () => {
     }, 200);
 
     try {
-      const response = await previewImport.mutateAsync(uploadedFile);
+      const response = await previewImport.mutateAsync({ file: uploadedFile, lessonId: selectedLessonId });
       clearInterval(interval);
       setUploadProgress(100);
       setImportJobId(response.data.data?.importJobId!);
       setPreviewData({
         totalQuestions: response.data.data?.totalQuestions!,
         duplicatedCount: response.data.data?.duplicatedCount!,
-        errorCount: response.data.data?.errorCount!,
-        hasErrors: response.data.data?.hasErrors!,
         questions: response.data.data?.questions!,
       });
       setCurrentStep("preview");
-      if (response.data.data?.hasErrors) {
-        toast.warning({
-          title: "Cảnh báo",
-          description: `Có ${response.data.data?.errorCount} câu hỏi lỗi. Vui lòng kiểm tra và sửa trước khi import.`,
-        });
-      }
     } catch {
       clearInterval(interval);
       setUploadProgress(0);
@@ -243,15 +246,7 @@ const ImportQuestionForm: React.FC = () => {
   const handleConfirmImport = async () => {
     if (!importJobId) return;
     const keepQuestions = previewData?.questions.filter((q) => q.status === "KEEP") || [];
-    const errorQuestions = keepQuestions.filter((q) => q.hasError);
 
-    if (errorQuestions.length > 0) {
-      toast.error({
-        title: "Không thể import",
-        description: `Còn ${errorQuestions.length} câu hỏi lỗi. Vui lòng sửa hoặc xóa trước khi import.`,
-      });
-      return;
-    }
     if (keepQuestions.length === 0) {
       toast.error({ title: "Không thể import", description: "Không có câu hỏi nào được chọn để import" });
       return;
@@ -271,13 +266,16 @@ const ImportQuestionForm: React.FC = () => {
     setImportJobId(null);
     setPreviewData(null);
     setCurrentStep("upload");
+    setSelectedCurriculumId(null);
+    setSelectedSubjectId(null);
+    setSelectedChapterId(null);
+    setSelectedLessonId(null);
     closeEdit();
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
   const getKeepCount = () => previewData?.questions.filter((q) => q.status === "KEEP").length || 0;
   const getDeleteCount = () => previewData?.questions.filter((q) => q.status === "DELETE").length || 0;
-  const getErrorKeepCount = () => previewData?.questions.filter((q) => q.status === "KEEP" && q.hasError).length || 0;
 
   const renderUploadStep = () => (
     <Card>
@@ -285,7 +283,7 @@ const ImportQuestionForm: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h2 className="text-xl font-semibold">Tải file câu hỏi</h2>
-            <p className="text-md text-muted-foreground mt-1"> Chọn file chứa câu hỏi</p>
+            <p className="text-md text-muted-foreground mt-1">Chọn bài học và file chứa câu hỏi</p>
           </div>
           <Button asChild variant="outline" className="mt-3">
             <a
@@ -299,34 +297,171 @@ const ImportQuestionForm: React.FC = () => {
           </Button>
         </div>
       </CardHeader>
-      <CardContent>
-        <div
-          className="relative rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-700 hover:border-primary transition-colors cursor-pointer p-8"
-          onClick={() => fileInputRef.current?.click()}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        >
-          <input ref={fileInputRef} type="file" accept=".docx,.doc" onChange={handleFileSelect} className="hidden" />
-          {!uploadedFile ? (
-            <div className="text-center">
-              <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
-                <FileSpreadsheet className="h-6 w-6 text-primary" />
+      <CardContent className="space-y-5">
+        <div className="space-y-1.5">
+          <label className="text-sm font-semibold">
+            Bộ sách / Chương trình <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full border rounded-lg px-3 py-2.5 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            value={selectedCurriculumId ?? ""}
+            disabled={loadingCurriculums}
+            onChange={(e) => {
+              const val = e.target.value ? Number(e.target.value) : null;
+              setSelectedCurriculumId(val);
+              setSelectedSubjectId(null);
+              setSelectedChapterId(null);
+              setSelectedLessonId(null);
+            }}
+          >
+            <option value="">{loadingCurriculums ? "Đang tải..." : "-- Chọn bộ sách --"}</option>
+            {curriculums?.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name} ({c.code})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={`text-sm font-semibold ${!selectedCurriculumId ? "text-muted-foreground" : ""}`}>
+            Môn học <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full border rounded-lg px-3 py-2.5 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            value={selectedSubjectId ?? ""}
+            disabled={!selectedCurriculumId || loadingSubjects}
+            onChange={(e) => {
+              const val = e.target.value ? Number(e.target.value) : null;
+              setSelectedSubjectId(val);
+              setSelectedChapterId(null);
+              setSelectedLessonId(null);
+            }}
+          >
+            <option value="">
+              {!selectedCurriculumId
+                ? "Vui lòng chọn bộ sách trước"
+                : loadingSubjects
+                  ? "Đang tải..."
+                  : subjects?.length === 0
+                    ? "Không có môn học nào"
+                    : "-- Chọn môn học --"}
+            </option>
+            {subjects?.map((s) => (
+              <option key={s.id} value={s.id}>
+                {s.name} ({s.code})
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={`text-sm font-semibold ${!selectedSubjectId ? "text-muted-foreground" : ""}`}>
+            Chương <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full border rounded-lg px-3 py-2.5 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            value={selectedChapterId ?? ""}
+            disabled={!selectedSubjectId || loadingChapters}
+            onChange={(e) => {
+              const val = e.target.value ? Number(e.target.value) : null;
+              setSelectedChapterId(val);
+              setSelectedLessonId(null);
+            }}
+          >
+            <option value="">
+              {!selectedSubjectId
+                ? "Vui lòng chọn môn học trước"
+                : loadingChapters
+                  ? "Đang tải..."
+                  : chapters?.length === 0
+                    ? "Không có chương nào"
+                    : "-- Chọn chương --"}
+            </option>
+            {chapters?.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="space-y-1.5">
+          <label className={`text-sm font-semibold ${!selectedChapterId ? "text-muted-foreground" : ""}`}>
+            Bài học <span className="text-red-500">*</span>
+          </label>
+          <select
+            className="w-full border rounded-lg px-3 py-2.5 bg-white dark:bg-gray-900 text-sm focus:outline-none focus:ring-2 focus:ring-primary disabled:opacity-50 disabled:cursor-not-allowed"
+            value={selectedLessonId ?? ""}
+            disabled={!selectedChapterId || loadingLessons}
+            onChange={(e) => {
+              const val = e.target.value ? Number(e.target.value) : null;
+              setSelectedLessonId(val);
+            }}
+          >
+            <option value="">
+              {!selectedChapterId
+                ? "Vui lòng chọn chương trước"
+                : loadingLessons
+                  ? "Đang tải..."
+                  : lessons?.length === 0
+                    ? "Không có bài học nào"
+                    : "-- Chọn bài học --"}
+            </option>
+            {lessons?.map((l) => (
+              <option key={l.id} value={l.id}>
+                {l.name}
+              </option>
+            ))}
+          </select>
+        </div>
+
+        <div className="border-t pt-4">
+          <p className="text-sm font-semibold mb-3">
+            File câu hỏi <span className="text-red-500">*</span>
+            {!selectedLessonId && (
+              <span className="ml-2 text-muted-foreground font-normal">(Vui lòng chọn bài học trước)</span>
+            )}
+          </p>
+          <div
+            className={`relative rounded-lg border-2 border-dashed transition-colors p-8 ${
+              !selectedLessonId
+                ? "border-gray-200 dark:border-gray-800 opacity-50 cursor-not-allowed"
+                : "border-gray-300 dark:border-gray-700 hover:border-primary cursor-pointer"
+            }`}
+            onClick={() => selectedLessonId && fileInputRef.current?.click()}
+            onDragOver={(e) => selectedLessonId && handleDragOver(e)}
+            onDrop={(e) => selectedLessonId && handleDrop(e)}
+          >
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".docx,.doc"
+              onChange={handleFileSelect}
+              className="hidden"
+              disabled={!selectedLessonId}
+            />
+            {!uploadedFile ? (
+              <div className="text-center">
+                <div className="mx-auto w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center mb-4">
+                  <FileSpreadsheet className="h-6 w-6 text-primary" />
+                </div>
+                <p className="font-medium text-lg mb-2">Click để chọn file hoặc kéo thả vào đây</p>
               </div>
-              <p className="font-medium text-lg mb-2">Click để chọn file hoặc kéo thả vào đây</p>
-            </div>
-          ) : (
-            <div className="text-center">
-              <div className="mx-auto w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-4">
-                <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            ) : (
+              <div className="text-center">
+                <div className="mx-auto w-12 h-12 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-4">
+                  <FileText className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                </div>
+                <p className="font-medium mb-1">{uploadedFile.name}</p>
+                <p className="text-md text-muted-foreground">{(uploadedFile.size / 1024).toFixed(2)} KB</p>
               </div>
-              <p className="font-medium mb-1">{uploadedFile.name}</p>
-              <p className="text-md text-muted-foreground">{(uploadedFile.size / 1024).toFixed(2)} KB</p>
-            </div>
-          )}
+            )}
+          </div>
         </div>
 
         {previewImport.isPending && (
-          <div className="mt-4 space-y-2">
+          <div className="space-y-2">
             <div className="flex justify-between text-md">
               <span className="text-muted-foreground">Đang xử lý file...</span>
               <span className="font-medium">{uploadProgress}%</span>
@@ -336,7 +471,7 @@ const ImportQuestionForm: React.FC = () => {
         )}
 
         {previewImport.isError && (
-          <div className="mt-4 flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
+          <div className="flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
             <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
             <div>
               <p className="text-md font-medium text-red-800 dark:text-red-200">Có lỗi xảy ra khi xử lý file</p>
@@ -345,10 +480,10 @@ const ImportQuestionForm: React.FC = () => {
           </div>
         )}
 
-        <div className="flex gap-2 mt-6">
+        <div className="flex gap-2">
           <Button
             onClick={handleUploadAndPreview}
-            isDisabled={!uploadedFile || previewImport.isPending}
+            isDisabled={!uploadedFile || !selectedLessonId || previewImport.isPending}
             className="gap-2 flex-1 p-5 text-md"
           >
             <Eye className="h-5 w-5" />
@@ -389,13 +524,6 @@ const ImportQuestionForm: React.FC = () => {
                   <span className="font-semibold text-yellow-600">{previewData?.duplicatedCount}</span>
                 </div>
               )}
-              {(previewData?.errorCount ?? 0) > 0 && (
-                <div className="flex items-center gap-1">
-                  <AlertTriangle className="h-4 w-4 text-red-600" />
-                  <span className="text-muted-foreground">Lỗi:</span>
-                  <span className="font-semibold text-red-600">{getErrorKeepCount()}</span>
-                </div>
-              )}
             </div>
           </div>
           <Button variant="outline" size="lg" onClick={handleReset}>
@@ -406,18 +534,6 @@ const ImportQuestionForm: React.FC = () => {
       </CardHeader>
 
       <CardContent>
-        {previewData?.hasErrors && getErrorKeepCount() > 0 && (
-          <div className="mb-4 flex items-start gap-2 p-3 rounded-lg bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
-            <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-            <div>
-              <p className="text-md font-medium text-red-800 dark:text-red-200">Có {getErrorKeepCount()} câu hỏi lỗi</p>
-              <p className="text-md text-red-700 dark:text-red-300 mt-1">
-                Vui lòng sửa hoặc xóa các câu hỏi có lỗi trước khi import
-              </p>
-            </div>
-          </div>
-        )}
-
         <div className="space-y-3 max-h-150 overflow-y-auto pr-2">
           {previewData?.questions.map((question, index) => {
             const isEditing = editingQuestionId === question.id;
@@ -428,13 +544,11 @@ const ImportQuestionForm: React.FC = () => {
                 className={`p-4 rounded-lg border transition-all ${
                   question.status === "DELETE"
                     ? "bg-gray-50 dark:bg-gray-900 border-gray-300 dark:border-gray-700 opacity-60"
-                    : question.hasError
-                      ? "bg-red-50 dark:bg-red-950/30 border-red-300 dark:border-red-700"
-                      : question.reused
-                        ? "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-300 dark:border-yellow-700"
-                        : question.duplicated
-                          ? "bg-orange-50 dark:bg-orange-950/30 border-orange-300 dark:border-orange-700"
-                          : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                    : question.reused
+                      ? "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-300 dark:border-yellow-700"
+                      : question.duplicated
+                        ? "bg-orange-50 dark:bg-orange-950/30 border-orange-300 dark:border-orange-700"
+                        : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                 }`}
               >
                 <div className="flex items-start justify-between mb-3">
@@ -454,12 +568,6 @@ const ImportQuestionForm: React.FC = () => {
                     {question.duplicated && !question.reused && (
                       <span className="px-2 py-0.5 rounded text-sm font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
                         Trùng lặp
-                      </span>
-                    )}
-                    {question.hasError && (
-                      <span className="px-2 py-0.5 rounded text-sm font-medium bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200 flex items-center gap-1">
-                        <AlertTriangle className="h-3 w-3" />
-                        Lỗi
                       </span>
                     )}
                     {question.status === "DELETE" && (
@@ -496,23 +604,6 @@ const ImportQuestionForm: React.FC = () => {
                       </Button>
                     )}
                   </div>
-                </div>
-
-                {question.hasError && question.errorMessage && (
-                  <div className="mb-3 flex items-start gap-2 p-2 rounded bg-red-100 dark:bg-red-900/30">
-                    <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-                    <p className="text-sm text-red-800 dark:text-red-200">{question.errorMessage}</p>
-                  </div>
-                )}
-
-                <div className="mb-2 flex items-center gap-2 text-sm text-muted-foreground">
-                  <span>{question.subjectCode}</span>
-                  <span>•</span>
-                  <span>Lớp {question.classLevel}</span>
-                  <span>•</span>
-                  <span>{question.curriculumCode}</span>
-                  <span>•</span>
-                  <span>{question.lessonCode}</span>
                 </div>
 
                 {isEditing ? (
@@ -642,7 +733,7 @@ const ImportQuestionForm: React.FC = () => {
         <div className="flex gap-2 mt-6">
           <Button
             onClick={handleConfirmImport}
-            isDisabled={confirmImport.isPending || getKeepCount() === 0 || getErrorKeepCount() > 0}
+            isDisabled={confirmImport.isPending || getKeepCount() === 0}
             className="gap-2 flex-1 text-md p-5"
           >
             <Upload className="h-4 w-4" />
@@ -739,8 +830,8 @@ const ImportQuestionForm: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-3 text-md">
               {[
-                "Tải file mẫu Word để xem định dạng yêu cầu",
-                "Upload file và xem trước danh sách câu hỏi",
+                "Chọn bộ sách, môn học, chương và bài học",
+                "Upload file Word và xem trước danh sách câu hỏi",
                 "Chỉnh sửa nội dung hoặc đáp án đúng nếu cần",
                 "Xác nhận và hệ thống sẽ tự động import",
               ].map((step, i) => (
@@ -767,7 +858,6 @@ const ImportQuestionForm: React.FC = () => {
               <p>• Level: EASY, MEDIUM, hoặc HARD</p>
               <p>• Kích thước file tối đa: 10MB</p>
               <p>• Câu hỏi trùng lặp sẽ được tái sử dụng</p>
-              <p>• Câu hỏi có lỗi phải được sửa hoặc xóa</p>
             </CardContent>
           </Card>
 
@@ -786,7 +876,6 @@ const ImportQuestionForm: React.FC = () => {
                     label: "Tái sử dụng: Câu hỏi đã tồn tại, sẽ thêm vào câu hỏi của bạn",
                   },
                   { color: "bg-orange-200 dark:bg-orange-800", label: "Trùng lặp: Phát hiện nội dung tương tự" },
-                  { color: "bg-red-200 dark:bg-red-800", label: "Lỗi: Cần sửa hoặc xóa trước khi import" },
                   { color: "bg-gray-200 dark:bg-gray-800", label: "Đã xóa: Sẽ không được import" },
                 ].map((item, i) => (
                   <div key={i} className="flex items-center gap-2">

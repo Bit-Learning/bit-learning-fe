@@ -77,6 +77,7 @@ export interface QuestionImportRequest {
   curriculumCode: string;
   lessonCode: string;
   content: string;
+  lessonId: number;
   canonicalAnswer?: string;
   questionType: QuestionType;
   questionLevel: QuestionLevel;

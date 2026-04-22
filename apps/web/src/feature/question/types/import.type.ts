@@ -21,10 +21,6 @@ export interface PreviewQuestionResponse {
   questionType: QuestionType;
   questionLevel: QuestionLevel;
   canonicalAnswer?: string;
-  subjectCode: string;
-  classLevel: number;
-  curriculumCode: string;
-  lessonCode: string;
   status: PreviewQuestionStatus;
   duplicated: boolean;
   reused: boolean;
@@ -35,8 +31,6 @@ export interface PreviewQuestionResponse {
     correct: boolean;
     orderNo: number;
   }>;
-  errorMessage?: string;
-  hasError: boolean;
 }
 
 export interface PreviewResponse {
@@ -44,8 +38,6 @@ export interface PreviewResponse {
   questions: PreviewQuestionResponse[];
   totalQuestions: number;
   duplicatedCount: number;
-  errorCount: number;
-  hasErrors: boolean;
 }
 
 export interface ImportJobResponse {
@@ -55,6 +47,7 @@ export interface ImportJobResponse {
   fileUrl: string;
   status: ImportStatus;
   errorMessage?: string;
+  lessonId: number;
   totalQuestions: number;
   importedQuestions: number;
   failedQuestions: number;

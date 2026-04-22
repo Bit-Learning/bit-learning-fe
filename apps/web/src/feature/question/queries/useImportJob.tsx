@@ -12,7 +12,7 @@ export const importJobKeys = {
 
 export const usePreviewImport = () => {
   return useMutation({
-    mutationFn: (file: File) => importJobApi.previewWord(file),
+    mutationFn: ({ file, lessonId }: { file: File; lessonId: number }) => importJobApi.previewWord(file, lessonId),
     onError: (error: AxiosError<ApiResponse<null>>) => {
       toast.error({
         title: "Lỗi",
