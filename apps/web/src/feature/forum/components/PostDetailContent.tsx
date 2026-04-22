@@ -25,6 +25,7 @@ import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
 import {
 	useCreateForumComment,
+	useDislikeForumComment,
 	useForumComments,
 	useForumPostById,
 	useForumPosts,
@@ -92,6 +93,7 @@ const PostDetailContent: React.FC = () => {
 	const replyCommentMutation = useReplyForumComment();
 	const reactMutation = useReactToForumPost();
 	const likeCommentMutation = useLikeForumComment();
+	const dislikeCommentMutation = useDislikeForumComment();
 	const { userInfo } = useSelector(selectAuthStateInfo);
 	const { data: openAppealsResponse } = useMyPostAppeals(
 		0,
@@ -617,11 +619,13 @@ const PostDetailContent: React.FC = () => {
 											setReplyingTo={setReplyingTo}
 											onReply={(id) => setReplyingTo(id)}
 											onLike={(id) => likeCommentMutation.mutate(id)}
+											onDislike={(id) => dislikeCommentMutation.mutate(id)}
 											onSubmitReply={(content, id) =>
 												replyCommentMutation.mutate({ id, content })
 											}
 											isInteractionDisabled={!userInfo || isInteractionDisabled}
 											onRequireAuth={handleRequireAuthForComment}
+											currentUserId={userInfo?.id}
 										/>
 									</div>
 								))}

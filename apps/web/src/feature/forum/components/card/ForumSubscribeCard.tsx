@@ -17,7 +17,7 @@ export function ForumSubscribeCard({
 			<div className="space-y-5">
 				<div className="space-y-2">
 					<p className="text-xs font-black uppercase tracking-[0.25em] text-blue-100/80">
-						Forum updates
+						ĐĂNG KÝ NHẬN BÀI VIẾT MỚI
 					</p>
 					<p className="max-w-4xl text-base leading-8 text-blue-50">
 						Nhận email khi cộng đồng Bit Learning có bài viết mới. Đăng ký để

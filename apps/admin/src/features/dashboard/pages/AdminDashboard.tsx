@@ -10,31 +10,28 @@ import {
 	PieChart,
 	ReferenceLine,
 	ResponsiveContainer,
-	Tooltip,
 	XAxis,
 	YAxis,
 } from "recharts";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
-	AlertTriangle,
 	ArrowDownRight,
 	ArrowUpRight,
 	CalendarRange,
+	CircleHelp,
 	CreditCard,
 	Download,
 	DollarSign,
 	Gauge,
 	RefreshCw,
-	Settings,
 	ShoppingCart,
 	Sparkles,
 	UserCheck,
 	UserPlus,
 	Users,
-	X,
 } from "lucide-react";
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 import { DatePicker } from "@/components/date-picker";
 import { Button } from "@/components/ui/button";
@@ -47,13 +44,13 @@ import {
 	SelectValue,
 } from "@/components/ui/select";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Header } from "@/layout/header";
 import { cn } from "@/shared/lib/utils";
-import {
-	getDashboardSettings,
-	triggerManualRefresh,
-	updateDashboardSettings,
-} from "../api/dashboard-api";
 import {
 	getAllRevenueDetailRows,
 	exportBusinessRevenueXlsx,
@@ -497,7 +494,7 @@ function RevenueTrendCard({
 						<PanelLegend
 							items={[
 								{ color: "#10b981", label: "Doanh thu" },
-								{ color: "#6ee7b7", label: "Trung bình động", soft: true },
+								// { color: "#6ee7b7", label: "Trung bình động", soft: true },
 							]}
 						/>
 						<span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
@@ -604,7 +601,7 @@ function RevenueTrendCard({
 									fill="url(#dashboard-revenue-fill)"
 									activeDot={{ r: 5, fill: "#10b981", stroke: "var(--card)" }}
 								/>
-								<Line
+								{/* <Line
 									type="monotone"
 									dataKey="avgRevenue"
 									name="Trung bình động"
@@ -613,7 +610,7 @@ function RevenueTrendCard({
 									strokeDasharray="6 6"
 									dot={false}
 									isAnimationActive={false}
-								/>
+								/> */}
 							</AreaChart>
 						</ResponsiveContainer>
 
@@ -1425,7 +1422,7 @@ function TopSpendingCustomersCard({
 					</p>
 					<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
 						Xếp hạng người dùng chi tiêu nhiều nhất từ các giao dịch mua hàng và
-						AI đã hoàn tất trong khoảng thời gian {rangeLabel}.
+						yêu cầu AI đã hoàn tất trong khoảng thời gian {rangeLabel}.
 					</p>
 				</div>
 
@@ -2175,172 +2172,8 @@ function TransactionValueDistributionCard({
 	);
 }
 
-function SettingsPanel({ onClose }: { onClose: () => void }) {
-	const qc = useQueryClient();
-	const { data: settings, isLoading } = useQuery({
-		queryKey: ["dashboard-settings"],
-		queryFn: getDashboardSettings,
-	});
-	const [interval, setInterval] = useState("");
-	const [autoRefresh, setAutoRefresh] = useState(true);
-
-	useEffect(() => {
-		if (!settings) return;
-		setInterval(settings.refresh_interval_minutes || "30");
-		setAutoRefresh(settings.auto_refresh_enabled !== "false");
-	}, [settings]);
-
-	const saveMutation = useMutation({
-		mutationFn: (updates: Record<string, string>) =>
-			updateDashboardSettings(updates),
-		onSuccess: () => {
-			qc.invalidateQueries({ queryKey: ["dashboard-settings"] });
-		},
-	});
-
-	const handleSave = () => {
-		saveMutation.mutate({
-			refresh_interval_minutes: interval,
-			auto_refresh_enabled: String(autoRefresh),
-		});
-	};
-
-	return (
-		<div className="fixed inset-0 z-50 flex items-center justify-center bg-black/55 p-4 backdrop-blur-sm">
-			<div className="relative w-full max-w-md rounded-3xl border border-border bg-card p-6 shadow-2xl">
-				<button
-					type="button"
-					onClick={onClose}
-					className="absolute right-4 top-4 rounded-xl p-2 text-muted-foreground transition hover:bg-muted hover:text-foreground"
-				>
-					<X className="h-5 w-5" />
-				</button>
-
-				<div className="mb-5">
-					<h3 className="text-lg font-semibold text-foreground">
-						Cài đặt bảng điều khiển
-					</h3>
-					<p className="mt-1 text-sm text-muted-foreground">
-						Tinh chỉnh chu kỳ đồng bộ và chế độ cập nhật tự động.
-					</p>
-				</div>
-
-				{isLoading ? (
-					<div className="space-y-3">
-						<Skeleton className="h-10 w-full" />
-						<Skeleton className="h-10 w-full" />
-					</div>
-				) : (
-					<div className="space-y-5">
-						<div>
-							<p className="mb-2 block text-sm font-medium text-foreground">
-								Chu kỳ tự động cập nhật (phút)
-							</p>
-							<input
-								type="number"
-								min={1}
-								max={1440}
-								value={interval}
-								onChange={(e) => setInterval(e.target.value)}
-								className="w-full rounded-2xl border border-border bg-background px-4 py-3 text-sm outline-none transition focus:border-primary focus:ring-2 focus:ring-primary/20"
-							/>
-							<p className="mt-2 text-xs text-muted-foreground">
-								Tối thiểu 1 phút, tối đa 1440 phút (24 giờ).
-							</p>
-						</div>
-
-						<div className="flex items-center justify-between rounded-2xl border border-border/60 bg-muted/20 px-4 py-4">
-							<div>
-								<p className="text-sm font-medium text-foreground">
-									Tự động cập nhật
-								</p>
-								<p className="mt-1 text-xs text-muted-foreground">
-									Bật hoặc tắt cron job đồng bộ dashboard.
-								</p>
-							</div>
-							<button
-								type="button"
-								onClick={() => setAutoRefresh((prev) => !prev)}
-								className={cn(
-									"relative h-6 w-11 rounded-full transition-colors",
-									autoRefresh ? "bg-primary" : "bg-muted",
-								)}
-							>
-								<span
-									className={cn(
-										"absolute left-0.5 top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform dark:bg-slate-100",
-										autoRefresh && "translate-x-5",
-									)}
-								/>
-							</button>
-						</div>
-
-						<button
-							type="button"
-							onClick={handleSave}
-							disabled={saveMutation.isPending}
-							className="w-full rounded-2xl bg-primary px-4 py-3 text-sm font-medium text-primary-foreground transition hover:opacity-90 disabled:opacity-50"
-						>
-							{saveMutation.isPending
-								? "Đang lưu..."
-								: saveMutation.isSuccess
-									? "✓ Đã lưu"
-									: "Lưu cài đặt"}
-						</button>
-					</div>
-				)}
-			</div>
-		</div>
-	);
-}
-
-function StaleBanner({
-	refreshedAt,
-	onRefresh,
-	isRefreshing,
-}: {
-	refreshedAt?: string;
-	onRefresh: () => void;
-	isRefreshing: boolean;
-}) {
-	if (!refreshedAt) return null;
-	const refreshedTime = new Date(refreshedAt);
-	const minutesAgo = Math.floor(
-		(Date.now() - refreshedTime.getTime()) / 60_000,
-	);
-	const isStale = minutesAgo > 30;
-
-	if (!isStale) return null;
-
-	return (
-		<div className="flex items-center gap-3 rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 dark:border-amber-900 dark:bg-amber-950/30">
-			<AlertTriangle className="h-5 w-5 shrink-0 text-amber-600" />
-			<div className="min-w-0 flex-1">
-				<p className="text-sm font-medium text-amber-800 dark:text-amber-200">
-					Dữ liệu đã cũ ({minutesAgo} phút trước)
-				</p>
-				<p className="text-xs text-amber-700 dark:text-amber-400">
-					Nhấn đồng bộ ngay để lấy dữ liệu mới nhất từ hệ thống.
-				</p>
-			</div>
-			<button
-				type="button"
-				onClick={onRefresh}
-				disabled={isRefreshing}
-				className="inline-flex shrink-0 items-center gap-1.5 rounded-xl bg-amber-600 px-4 py-2 text-xs font-semibold text-white transition hover:bg-amber-700 disabled:opacity-50"
-			>
-				<RefreshCw
-					className={cn("h-3.5 w-3.5", isRefreshing && "animate-spin")}
-				/>
-				{isRefreshing ? "Đang đồng bộ..." : "Đồng bộ ngay"}
-			</button>
-		</div>
-	);
-}
-
 export function Dashboard() {
 	const qc = useQueryClient();
-	const [showSettings, setShowSettings] = useState(false);
 	const [preset, setPreset] = useState<DashboardPreset>("12m");
 	const [customFromDate, setCustomFromDate] = useState<Date | undefined>();
 	const [customToDate, setCustomToDate] = useState<Date | undefined>();
@@ -2372,7 +2205,12 @@ export function Dashboard() {
 		],
 	);
 
-	const { data, isLoading, isError } = useQuery({
+	const {
+		data,
+		isLoading,
+		isError,
+		refetch: refetchOverview,
+	} = useQuery({
 		queryKey: ["business-dashboard-overview", filterParams],
 		queryFn: () => getBusinessDashboardOverview(filterParams),
 		staleTime: 5 * 60 * 1000,
@@ -2392,12 +2230,21 @@ export function Dashboard() {
 	});
 
 	const refreshMutation = useMutation({
-		mutationFn: triggerManualRefresh,
+		mutationFn: async () => {
+			await Promise.all([
+				refetchOverview(),
+				completedRevenueDetailsQuery.refetch(),
+			]);
+		},
 		onSuccess: () => {
-			setTimeout(() => {
-				qc.invalidateQueries({ queryKey: ["business-dashboard-overview"] });
-				qc.invalidateQueries({ queryKey: ["dashboard-stats"] });
-			}, 1500);
+			qc.invalidateQueries({ queryKey: ["business-dashboard-overview"] });
+			qc.invalidateQueries({
+				queryKey: ["business-dashboard-completed-revenue-details"],
+			});
+			toast.success("Đã làm mới dữ liệu dashboard");
+		},
+		onError: () => {
+			toast.error("Không thể làm mới dữ liệu dashboard");
 		},
 	});
 
@@ -2442,6 +2289,7 @@ export function Dashboard() {
 		DEPOSIT: "Nạp tiền",
 		AI_REQUEST: "Yêu cầu AI",
 		PURCHASE: "Mua hàng",
+		CONTEST_PRIZE: "Thưởng cuộc thi",
 	};
 
 	const rangeOptions: Array<{ id: DashboardPreset; label: string }> = [
@@ -2790,7 +2638,7 @@ export function Dashboard() {
 
 					<CardContent className="relative p-6">
 						<div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
-							<div className="max-w-2xl">
+							<div className="max-w-5xl">
 								<div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
 									<Sparkles className="h-3.5 w-3.5 text-sky-500" />
 									Bảng điều khiển kinh doanh
@@ -2800,7 +2648,8 @@ export function Dashboard() {
 								</h2>
 								<p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
 									Theo dõi người dùng, đơn hàng và doanh thu với bộ lọc ngày
-									thực tế từ server thay vì chỉ cắt dữ liệu 12 tháng ở frontend.
+									thực tế, giúp bạn nắm bắt hiệu suất kinh doanh một cách trực
+									quan và kịp thời.
 								</p>
 
 								<div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -2815,7 +2664,7 @@ export function Dashboard() {
 										icon={CreditCard}
 									/>
 									<HeroMetric
-										label="Đơn hàng hoàn tất"
+										label="Đơn hàng hoàn thành"
 										value={`${orderCompletionRate}% đơn hàng`}
 										icon={ShoppingCart}
 									/>
@@ -2875,7 +2724,9 @@ export function Dashboard() {
 									<Button
 										type="button"
 										onClick={() => refreshMutation.mutate()}
-										disabled={refreshMutation.isPending}
+										disabled={
+											refreshMutation.isPending || hasInvalidCustomRange
+										}
 										variant="outline"
 									>
 										<RefreshCw
@@ -2884,15 +2735,9 @@ export function Dashboard() {
 												refreshMutation.isPending && "animate-spin",
 											)}
 										/>
-										{refreshMutation.isPending ? "Đang đồng bộ..." : "Đồng bộ"}
-									</Button>
-									<Button
-										type="button"
-										onClick={() => setShowSettings(true)}
-										variant="outline"
-									>
-										<Settings className="h-4 w-4" />
-										Cài đặt
+										{refreshMutation.isPending
+											? "Đang làm mới..."
+											: "Làm mới dữ liệu"}
 									</Button>
 								</div>
 
@@ -2914,14 +2759,6 @@ export function Dashboard() {
 					<Card className="border-destructive/20 bg-destructive/5 p-4 text-sm text-destructive">
 						`Từ ngày` phải nhỏ hơn hoặc bằng `đến ngày`.
 					</Card>
-				)}
-
-				{data && (
-					<StaleBanner
-						refreshedAt={data.generatedAt}
-						onRefresh={() => refreshMutation.mutate()}
-						isRefreshing={refreshMutation.isPending}
-					/>
 				)}
 
 				{isLoading && (
@@ -3024,35 +2861,58 @@ export function Dashboard() {
 											</div>
 										</div>
 									}
-									granularityControls={
-										<div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/40">
-											<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
-												Hiển thị biểu đồ theo
-											</p>
-											<div className="mt-2">
-												<Select
-													value={granularity}
-													onValueChange={(value) =>
-														setGranularity(
-															value as DashboardGranularity | "auto",
-														)
-													}
-												>
-													<SelectTrigger>
-														<SelectValue placeholder="Chọn cách hiển thị biểu đồ" />
-													</SelectTrigger>
-													<SelectContent>
-														<SelectItem value="auto">Tự động</SelectItem>
-														<SelectItem value="day">Gộp theo ngày</SelectItem>
-														<SelectItem value="week">Gộp theo tuần</SelectItem>
-														<SelectItem value="month">
-															Gộp theo tháng
-														</SelectItem>
-													</SelectContent>
-												</Select>
-											</div>
-										</div>
-									}
+									// granularityControls={
+									// 	<div className="rounded-2xl border border-slate-200/70 bg-slate-50/70 p-3 dark:border-slate-800 dark:bg-slate-900/40">
+									// 		<div className="flex items-center gap-2">
+									// 			<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500 dark:text-slate-400">
+									// 				Hiển thị biểu đồ theo
+									// 			</p>
+									// 			<Tooltip>
+									// 				<TooltipTrigger asChild>
+									// 					<button
+									// 						type="button"
+									// 						className="inline-flex h-4 w-4 items-center justify-center rounded-full text-slate-400 transition hover:text-slate-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 dark:text-slate-500 dark:hover:text-slate-200"
+									// 						aria-label="Giải thích cách hiển thị biểu đồ"
+									// 					>
+									// 						<CircleHelp className="h-3.5 w-3.5" />
+									// 					</button>
+									// 				</TooltipTrigger>
+									// 				<TooltipContent
+									// 					side="top"
+									// 					align="start"
+									// 					sideOffset={8}
+									// 					className="max-w-72 leading-5"
+									// 				>
+									// 					`Tự động` để backend tự chọn cách gộp theo độ dài
+									// 					khoảng ngày. `Ngày`, `tuần`, `tháng` là cách gom dữ
+									// 					liệu doanh thu thành từng kỳ trên biểu đồ.
+									// 				</TooltipContent>
+									// 			</Tooltip>
+									// 		</div>
+									// 		<div className="mt-2">
+									// 			<Select
+									// 				value={granularity}
+									// 				onValueChange={(value) =>
+									// 					setGranularity(
+									// 						value as DashboardGranularity | "auto",
+									// 					)
+									// 				}
+									// 			>
+									// 				<SelectTrigger>
+									// 					<SelectValue placeholder="Chọn cách hiển thị biểu đồ" />
+									// 				</SelectTrigger>
+									// 				<SelectContent>
+									// 					<SelectItem value="auto">Tự động</SelectItem>
+									// 					<SelectItem value="day">Gộp theo ngày</SelectItem>
+									// 					<SelectItem value="week">Gộp theo tuần</SelectItem>
+									// 					<SelectItem value="month">
+									// 						Gộp theo tháng
+									// 					</SelectItem>
+									// 				</SelectContent>
+									// 			</Select>
+									// 		</div>
+									// 	</div>
+									// }
 								/>
 							</div>
 
@@ -3071,23 +2931,23 @@ export function Dashboard() {
 							</div>
 						</div>
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<CumulativeRevenueCard
 									data={revenueChartData}
 									rangeLabel={activeRangeLabel}
 								/>
 							</div>
-						</div>
+						</div> */}
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<RevenueDeltaCard
 									data={revenueChartData}
 									rangeLabel={activeRangeLabel}
 								/>
 							</div>
-						</div>
+						</div> */}
 
 						<div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-4">
@@ -3125,7 +2985,7 @@ export function Dashboard() {
 							</div>
 						</div>
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<PaymentMethodRevenueCard
 									data={paymentMethodChartData}
@@ -3134,7 +2994,7 @@ export function Dashboard() {
 									rangeLabel={activeRangeLabel}
 								/>
 							</div>
-						</div>
+						</div> */}
 
 						<div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
@@ -3161,7 +3021,7 @@ export function Dashboard() {
 							</div>
 						</div>
 
-						<div className="grid gap-4 xl:grid-cols-12">
+						{/* <div className="grid gap-4 xl:grid-cols-12">
 							<div className="xl:col-span-12">
 								<TransactionValueDistributionCard
 									data={transactionValueDistributionData.data}
@@ -3178,12 +3038,10 @@ export function Dashboard() {
 									}
 								/>
 							</div>
-						</div>
+						</div> */}
 					</div>
 				)}
 			</div>
-
-			{showSettings && <SettingsPanel onClose={() => setShowSettings(false)} />}
 		</>
 	);
 }

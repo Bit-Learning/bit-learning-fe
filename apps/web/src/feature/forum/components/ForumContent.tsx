@@ -23,10 +23,10 @@ import { useSelector } from "react-redux";
 import {
 	useFeaturedForumPosts,
 	useForumCategories,
+	useForumHashtags,
 	useInfiniteForumPosts,
 	useLatestForumList,
 	useMostViewedForumPosts,
-	usePopularForumTags,
 	useRecommendedForumPosts,
 	useSubscribeToForumPosts,
 	useTrendingForumPosts,
@@ -83,7 +83,7 @@ const ForumContent: React.FC = () => {
 	const trendingQuery = useTrendingForumPosts(8);
 	const recommendedQuery = useRecommendedForumPosts(6, canLoadRecommended);
 	const categoriesQuery = useForumCategories();
-	const popularTagsQuery = usePopularForumTags(16);
+	const allTagsQuery = useForumHashtags();
 	const sidebarMostViewedQuery = useMostViewedForumPosts(5);
 	const sidebarLatestQuery = useLatestForumList(5);
 	const subscribeMutation = useSubscribeToForumPosts();
@@ -100,7 +100,7 @@ const ForumContent: React.FC = () => {
 	const trendingPosts = trendingQuery.data?.data ?? [];
 	const recommendedPosts = recommendedQuery.data?.data ?? [];
 	const categories = categoriesQuery.data?.data ?? [];
-	const popularTags = popularTagsQuery.data?.data ?? [];
+	const allTags = allTagsQuery.data?.data ?? [];
 	const latestPosts = useMemo(
 		() => latestFeedQuery.data?.pages.flatMap((page) => page.data ?? []) ?? [],
 		[latestFeedQuery.data],
@@ -192,7 +192,7 @@ const ForumContent: React.FC = () => {
 		updateSearchState(navigate, {
 			q: search.q,
 			category: categorySlug === selectedCategory ? undefined : categorySlug,
-			tag: selectedTag,
+			tag: undefined,
 			sort: selectedSort,
 		});
 	};
@@ -326,14 +326,14 @@ const ForumContent: React.FC = () => {
 							<div className="space-y-3">
 								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
 									<Tag className="h-4 w-4" />
-									Các thẻ thịnh hành
+									Tất cả thẻ
 								</div>
 								<div className="flex flex-wrap gap-2">
-									{popularTagsQuery.isLoading
+									{allTagsQuery.isLoading
 										? getSkeletonKeys("popular-tag-chip", 8).map((key) => (
 												<FilterChipSkeleton key={key} />
 											))
-										: popularTags.slice(0, 10).map((tag) => (
+										: allTags.map((tag) => (
 												<button
 													key={tag.id}
 													type="button"
@@ -581,48 +581,6 @@ const ForumContent: React.FC = () => {
 								</div>
 							)}
 						</section>
-
-						<section className="space-y-4">
-							<div>
-								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
-									Tâm điểm kiến thức
-								</p>
-								<h2 className="text-2xl font-black text-slate-950">
-									Bài viết được đề xuất cho bạn
-								</h2>
-							</div>
-							{!canLoadRecommended ? (
-								<InlineStateCard
-									title="Đăng nhập để xem bài viết được đề xuất"
-									description="Danh sách này được cá nhân hóa theo hoạt động học tập của bạn. Bạn vẫn có thể đọc toàn bộ bài viết công khai ở các mục bên trên."
-									actionLabel="Đăng nhập"
-									onAction={() => navigate({ to: "/signin-role" })}
-								/>
-							) : recommendedQuery.isLoading ? (
-								<div className="grid gap-4 md:grid-cols-2">
-									{getSkeletonKeys("recommended-post", 4).map((key) => (
-										<PostCardSkeleton key={key} />
-									))}
-								</div>
-							) : recommendedQuery.isError ? (
-								<InlineStateCard
-									title="Recommended posts could not be loaded"
-									description={getErrorMessage(recommendedQuery.error)}
-									actionLabel="Retry"
-									onAction={() => recommendedQuery.refetch()}
-								/>
-							) : (
-								<div className="grid gap-4 md:grid-cols-2">
-									{recommendedPosts.map((post) => (
-										<ContentPostCard
-											key={post.id}
-											post={post}
-											onOpenPost={openPost}
-										/>
-									))}
-								</div>
-							)}
-						</section>
 					</div>
 
 					<aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
@@ -661,15 +619,15 @@ const ForumContent: React.FC = () => {
 							<div className="mb-4 flex items-center gap-2 text-slate-900">
 								<Tag className="h-4 w-4 text-rose-500" />
 								<h3 className="text-sm font-black uppercase tracking-[0.2em]">
-									Từ khóa phổ biến
+									Tất cả tag
 								</h3>
 							</div>
 							<div className="flex flex-wrap gap-2">
-								{popularTagsQuery.isLoading
+								{allTagsQuery.isLoading
 									? getSkeletonKeys("sidebar-tag-chip", 10).map((key) => (
 											<FilterChipSkeleton key={key} />
 										))
-									: popularTags.map((tag) => (
+									: allTags.map((tag) => (
 											<button
 												key={tag.id}
 												type="button"

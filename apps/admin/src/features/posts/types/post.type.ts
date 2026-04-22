@@ -78,7 +78,9 @@ export interface CommentDetail {
 	isEdited: boolean;
 	isEditAllowed: boolean;
 	likes: number;
+	userLikes?: Author[];
 	dislikes: number;
+	userDislikes?: Author[];
 	author: Author;
 	postId: number;
 	parentId?: number;

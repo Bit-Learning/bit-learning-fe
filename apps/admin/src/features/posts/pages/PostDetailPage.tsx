@@ -1,23 +1,4 @@
 /* biome-ignore-all lint/security/noDangerouslySetInnerHtml: backend stores authored rich HTML for forum posts. */
-import type React from "react";
-import { useState } from "react";
-import { useNavigate, useParams } from "@tanstack/react-router";
-import {
-	ArrowLeft,
-	Ban,
-	CalendarClock,
-	Eye,
-	File,
-	Flame,
-	MessageSquare,
-	Shield,
-	Star,
-	Tag,
-	ThumbsDown,
-	ThumbsUp,
-} from "lucide-react";
-import { Header } from "@/layout/header";
-import { Main } from "@/layout/main";
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -35,6 +16,11 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Separator } from "@/components/ui/separator";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Textarea } from "@/components/ui/textarea";
+import { Header } from "@/layout/header";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { ArrowLeft, CalendarClock, Eye, File, Tag } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
 import { CommentItem } from "../components/CommentItem";
 import {
 	getAuthorInitials,
@@ -69,7 +55,11 @@ export const PostDetailPage: React.FC = () => {
 	const [blockReasonError, setBlockReasonError] = useState("");
 
 	const { data: post, isLoading: postLoading } = useGetPostDetail(postId);
-	const { data: comments, isLoading: commentsLoading } = useGetComments(postId);
+	const { data: comments, isLoading: commentsLoading } = useGetComments(
+		postId,
+		Math.max(post?.commentsCount ?? 0, 10),
+		!!post,
+	);
 	const { mutate: banPost, isPending: banPending } = useBanPost();
 	const { mutate: featurePost, isPending: featurePending } = useFeaturePost();
 
@@ -153,7 +143,7 @@ export const PostDetailPage: React.FC = () => {
 									<div className="flex-1">
 										<div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
 											<span className="font-mono">#{post.id}</span>
-											<span className="font-mono">{post.slug}</span>
+											{/* <span className="font-mono">{post.slug}</span> */}
 											{post.category && (
 												<Badge variant="outline">{post.category.name}</Badge>
 											)}
@@ -270,27 +260,6 @@ export const PostDetailPage: React.FC = () => {
 										</div>
 									</>
 								)}
-
-								<Separator />
-
-								<div className="flex flex-wrap items-center gap-4">
-									<Button variant="outline" size="sm">
-										<ThumbsUp className="mr-2 h-4 w-4" />
-										{post.likes}
-									</Button>
-									<Button variant="outline" size="sm">
-										<ThumbsDown className="mr-2 h-4 w-4" />
-										{post.dislikes}
-									</Button>
-									<div className="flex items-center gap-2 text-sm text-muted-foreground">
-										<MessageSquare className="h-4 w-4" />
-										<span>{post.commentsCount} bình luận</span>
-									</div>
-									<div className="flex items-center gap-2 text-sm text-muted-foreground">
-										<Flame className="h-4 w-4" />
-										<span>{post.totalReactions} tổng phản ứng</span>
-									</div>
-								</div>
 							</CardContent>
 						</Card>
 
@@ -330,10 +299,10 @@ export const PostDetailPage: React.FC = () => {
 								<CardTitle>Thông tin</CardTitle>
 							</CardHeader>
 							<CardContent className="space-y-4">
-								<div className="flex justify-between">
+								{/* <div className="flex justify-between">
 									<span className="text-muted-foreground">Slug</span>
 									<span className="font-mono font-semibold">{post.slug}</span>
-								</div>
+								</div> */}
 								<div className="flex justify-between">
 									<span className="text-muted-foreground">Danh mục</span>
 									<span className="font-semibold">
@@ -351,7 +320,7 @@ export const PostDetailPage: React.FC = () => {
 									<span className="font-semibold">{post.commentsCount}</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-muted-foreground">Tổng phản ứng</span>
+									<span className="text-muted-foreground">Tổng reaction</span>
 									<span className="font-semibold">{post.totalReactions}</span>
 								</div>
 								<div className="flex justify-between">
@@ -371,7 +340,9 @@ export const PostDetailPage: React.FC = () => {
 									</span>
 								</div>
 								<div className="flex justify-between">
-									<span className="text-muted-foreground">Hashtags</span>
+									<span className="text-muted-foreground">
+										Số lượng hashtag
+									</span>
 									<span className="font-semibold">{tags.length}</span>
 								</div>
 								<div className="flex justify-between">

@@ -40,14 +40,14 @@ export const useGetPostDetail = (id: number) => {
 	});
 };
 
-export const useGetComments = (postId: number) => {
+export const useGetComments = (postId: number, size = 10, enabled = true) => {
 	return useQuery({
-		queryKey: postKeys.comments(postId),
+		queryKey: [...postKeys.comments(postId), size],
 		queryFn: async () => {
-			const response = await postApi.getCommentsOfPost(postId);
+			const response = await postApi.getCommentsOfPost(postId, 0, size);
 			return response.data.data;
 		},
-		enabled: !!postId,
+		enabled: !!postId && enabled,
 	});
 };
 

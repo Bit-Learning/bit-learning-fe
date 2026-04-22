@@ -139,14 +139,14 @@ const MyAppealContent: React.FC = () => {
 						</div>
 					</div>
 
-					<div className="rounded-md border border-gray-200 bg-white p-4">
+					{/* <div className="rounded-md border border-gray-200 bg-white p-4">
 						<p className="mb-2 text-sm font-semibold uppercase tracking-wider text-gray-400">
 							Inbox
 						</p>
 						<p className="text-sm leading-6 text-slate-500">
 							Theo dõi phản hồi từ quản trị viên với các bài viết đã bị khóa.
 						</p>
-					</div>
+					</div> */}
 				</aside>
 
 				<div className="min-w-0 flex-1 space-y-4">
@@ -291,7 +291,7 @@ const MyAppealContent: React.FC = () => {
 												</div>
 											</div>
 
-											<div className="flex shrink-0 items-center gap-2">
+											{/* <div className="flex shrink-0 items-center gap-2">
 												<button
 													type="button"
 													onClick={() =>
@@ -304,7 +304,7 @@ const MyAppealContent: React.FC = () => {
 												>
 													Xem chi tiết
 												</button>
-											</div>
+											</div> */}
 										</div>
 									</div>
 								);
