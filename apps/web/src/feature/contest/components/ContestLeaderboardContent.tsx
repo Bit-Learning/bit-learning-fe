@@ -161,9 +161,9 @@ const ContestLeaderboardContent: React.FC = () => {
     return "bg-yellow-500 text-white";
   };
 
-  const formatTime = (acTimeMs: number | null) => {
-    if (acTimeMs === null) return "--";
-    return `${Math.ceil(acTimeMs / 60000)}'`;
+  const formatTime = (minutes: number | null) => {
+    if (minutes === null) return "--";
+    return `${minutes}ms`;
   };
 
   if (isLoading) return <Loader />;
@@ -281,7 +281,7 @@ const ContestLeaderboardContent: React.FC = () => {
                             ) : (
                               <>
                                 +{result.wrongAttempts + 1}{" "}
-                                <span className="font-normal opacity-80">{formatTime(result.acTimeMs)}</span>
+                                <span className="font-normal opacity-80">{formatTime(result.acTimeMinutes)}</span>
                               </>
                             )}
                           </div>
