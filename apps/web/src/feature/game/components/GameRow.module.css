@@ -3,7 +3,9 @@
 }
 
 @media (min-width: 768px) {
-  .section { padding: 0 2rem; }
+  .section {
+    padding: 0 2rem;
+  }
 }
 
 .header {
@@ -25,7 +27,9 @@
 }
 
 @media (min-width: 768px) {
-  .title { font-size: 1.5rem; }
+  .title {
+    font-size: 1.5rem;
+  }
 }
 
 .accent {
@@ -44,7 +48,9 @@
   text-decoration: none;
 }
 
-.viewAll:hover { text-decoration: underline; }
+.viewAll:hover {
+  text-decoration: underline;
+}
 
 .row {
   display: flex;

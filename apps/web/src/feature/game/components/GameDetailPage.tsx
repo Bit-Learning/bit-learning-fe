@@ -380,7 +380,7 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 							</div>
 						</div>
 
-						<div className="mb-6 rounded-[24px] border border-white/10 bg-white/5 p-5">
+						{/* <div className="mb-6 rounded-[24px] border border-white/10 bg-white/5 p-5">
 							<p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200/80">
 								Cách game được chấm và theo dõi
 							</p>
@@ -396,247 +396,250 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 											: "Mức độ tham gia"}
 								</span>
 							</div>
-						</div>
+						</div> */}
 
-						<section className="rounded-[28px] border border-white/10 bg-linear-to-br from-white/8 via-white/4 to-transparent p-6 shadow-[0_30px_80px_rgba(0,0,0,0.24)] backdrop-blur-sm">
-							<div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
-								<div>
-									<p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200/80">
-										Lịch sử của bạn
-									</p>
-									<h2 className="mt-2 text-2xl font-bold">
-										Hiệu suất chơi trong game này
-									</h2>
-									<p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-										{isFiniteScore
-											? "Xem lại các lần chơi gần đây, mức độ hoàn thành và những lần sai/hết giờ để biết chính xác bạn đang vướng ở đâu."
-											: isHighScore
-												? "Theo dõi điểm số, thời lượng và các lượt chơi nổi bật để xem tiến bộ của bạn theo thời gian."
-												: "Theo dõi mức độ tham gia, thời lượng và số phiên chơi cho dạng game không chấm điểm."}
-									</p>
-								</div>
-								{historyStats?.lastPlayedAt ? (
-									<div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-slate-300">
-										Lần chơi gần nhất:{" "}
-										<span className="font-semibold text-white">
-											{new Date(historyStats.lastPlayedAt).toLocaleString(
-												"vi-VN",
-											)}
-										</span>
+						{!isNoScore && (
+							<section className="rounded-[28px] border border-white/10 bg-linear-to-br from-white/8 via-white/4 to-transparent p-6 shadow-[0_30px_80px_rgba(0,0,0,0.24)] backdrop-blur-sm">
+								<div className="flex flex-col gap-3 lg:flex-row lg:items-end lg:justify-between">
+									<div>
+										<p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-200/80">
+											Hoạt động của bạn
+										</p>
+										<h2 className="mt-2 text-2xl font-bold">
+											Mức độ tham gia chơi trong game này
+										</h2>
+										<p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
+											{isFiniteScore
+												? "Xem lại các lần chơi gần đây, mức độ hoàn thành và những lần sai/hết giờ để biết chính xác bạn đang vướng ở đâu."
+												: isHighScore
+													? "Theo dõi điểm số, thời lượng và các lượt chơi nổi bật để xem tiến bộ của bạn theo thời gian."
+													: "Theo dõi mức độ tham gia, thời lượng và số phiên chơi cho dạng game không chấm điểm."}
+										</p>
 									</div>
-								) : null}
-							</div>
+									{historyStats?.lastPlayedAt ? (
+										<div className="rounded-2xl border border-white/10 bg-black/20 px-4 py-3 text-sm text-slate-300">
+											Lần chơi gần nhất:{" "}
+											<span className="font-semibold text-white">
+												{new Date(historyStats.lastPlayedAt).toLocaleString(
+													"vi-VN",
+												)}
+											</span>
+										</div>
+									) : null}
+								</div>
 
-							{!currentUserId ? (
-								<div className="mt-6 rounded-3xl border border-dashed border-white/15 bg-black/20 px-6 py-10 text-center">
-									<p className="text-lg font-semibold text-white">
-										Đăng nhập để xem lịch sử chơi cá nhân
-									</p>
-									<p className="mt-2 text-sm text-slate-400">
-										{isFiniteScore
-											? "Khi có tài khoản, mỗi lần chơi sẽ được lưu lại cùng độ chính xác, số lần hết giờ và chi tiết câu hỏi sai."
-											: isHighScore
-												? "Khi có tài khoản, mỗi lần chơi sẽ được lưu lại cùng điểm số, thời lượng và trạng thái hoàn thành."
-												: "Khi có tài khoản, mỗi lần tương tác sẽ được lưu lại để theo dõi mức độ tham gia và hoàn thành."}
-									</p>
-								</div>
-							) : historyLoading ? (
-								<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-									{Array.from({ length: 4 }).map((_, index) => (
-										<div
-											key={index}
-											className="h-28 animate-pulse rounded-3xl bg-white/6"
-										/>
-									))}
-								</div>
-							) : (
-								<>
+								{!currentUserId ? (
+									<div className="mt-6 rounded-3xl border border-dashed border-white/15 bg-black/20 px-6 py-10 text-center">
+										<p className="text-lg font-semibold text-white">
+											Đăng nhập để xem lịch sử chơi cá nhân
+										</p>
+										<p className="mt-2 text-sm text-slate-400">
+											{isFiniteScore
+												? "Khi có tài khoản, mỗi lần chơi sẽ được lưu lại cùng độ chính xác, số lần hết giờ và chi tiết câu hỏi sai."
+												: isHighScore
+													? "Khi có tài khoản, mỗi lần chơi sẽ được lưu lại cùng điểm số, thời lượng và trạng thái hoàn thành."
+													: "Khi có tài khoản, mỗi lần tương tác sẽ được lưu lại để theo dõi mức độ tham gia và hoàn thành."}
+										</p>
+									</div>
+								) : historyLoading ? (
 									<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-										<HistoryStatCard
-											icon={<ListChecks className="h-5 w-5" />}
-											label="Số lượt chơi"
-											value={String(historyStats?.totalAttempts ?? 0)}
-											subtitle={`${historyStats?.completedAttempts ?? 0} hoàn thành • ${historyStats?.partialAttempts ?? 0} bỏ dở`}
-										/>
-										<HistoryStatCard
-											icon={<TrendingUp className="h-5 w-5" />}
-											label={
-												isFiniteScore
-													? "Độ chính xác trung bình"
-													: isHighScore
-														? "Điểm trung bình"
-														: "Tỷ lệ được ghi nhận"
-											}
-											value={
-												isFiniteScore
-													? `${historyStats?.averageAccuracy ?? 0}%`
-													: isHighScore
-														? String(historyStats?.averageRawScore ?? 0)
-														: `${historyStats?.scoredAttemptRate ?? 0}%`
-											}
-											subtitle={
-												isFiniteScore
-													? `Tốt nhất ${historyStats?.bestAccuracy ?? 0}% • Hết giờ ${historyStats?.timeoutRate ?? 0}%`
-													: isHighScore
-														? `Cao nhất ${historyStats?.bestRawScore ?? 0} • Hoàn thành ${historyStats?.completionRate ?? 0}%`
-														: `Hoàn thành ${historyStats?.completionRate ?? 0}% • Bỏ dở ${historyStats?.partialRate ?? 0}%`
-											}
-										/>
-										<HistoryStatCard
-											icon={<Clock3 className="h-5 w-5" />}
-											label="Thời lượng trung bình"
-											value={formatDuration(
-												historyStats?.averageDurationSeconds ?? 0,
-											)}
-											subtitle={`Hoàn thành ${historyStats?.completionRate ?? 0}% • Bỏ dở ${historyStats?.partialRate ?? 0}%`}
-										/>
-										<HistoryStatCard
-											icon={<TriangleAlert className="h-5 w-5" />}
-											label={
-												isFiniteScore
-													? "Tổng câu sai / hết giờ"
-													: isHighScore
-														? "Điểm xếp hạng tốt nhất"
-														: "Phiên hoàn thành"
-											}
-											value={
-												isFiniteScore
-													? `${historyStats?.totalWrong ?? 0} / ${historyStats?.totalTimeout ?? 0}`
-													: isHighScore
-														? String(historyStats?.bestLeaderboardPoints ?? 0)
-														: String(historyStats?.completedAttempts ?? 0)
-											}
-											subtitle={
-												isFiniteScore
-													? `Tổng đúng ${historyStats?.totalCorrect ?? 0} trên ${historyStats?.totalQuestions ?? 0} câu`
-													: isHighScore
-														? `Điểm xếp hạng TB ${historyStats?.averageLeaderboardPoints ?? 0}`
-														: `Tổng phiên ${historyStats?.totalAttempts ?? 0}`
-											}
-										/>
+										{Array.from({ length: 4 }).map((_, index) => (
+											<div
+												key={index}
+												className="h-28 animate-pulse rounded-3xl bg-white/6"
+											/>
+										))}
 									</div>
-
-									<div className="mt-6">
-										<div className="mb-3 flex items-center justify-between">
-											<h3 className="text-lg font-semibold text-white">
-												6 lượt chơi gần nhất
-											</h3>
-											<p className="text-xs uppercase tracking-[0.18em] text-slate-500">
-												{isFiniteScore
-													? "Bấm vào một lượt để xem chi tiết từng câu"
-													: "Bấm vào một lượt để xem chi tiết phiên chơi"}
-											</p>
+								) : (
+									<>
+										<div className="mt-6 grid gap-4 md:grid-cols-2 xl:grid-cols-4">
+											<HistoryStatCard
+												icon={<ListChecks className="h-5 w-5" />}
+												label="Số lượt chơi"
+												value={String(historyStats?.totalAttempts ?? 0)}
+												subtitle={`${historyStats?.completedAttempts ?? 0} hoàn thành • ${historyStats?.partialAttempts ?? 0} chưa hoàn thành`}
+											/>
+											<HistoryStatCard
+												icon={<TrendingUp className="h-5 w-5" />}
+												label={
+													isFiniteScore
+														? "Độ chính xác trung bình"
+														: isHighScore
+															? "Điểm trung bình"
+															: "Tỷ lệ hoàn thành"
+												}
+												value={
+													isFiniteScore
+														? `${historyStats?.averageAccuracy ?? 0}%`
+														: isHighScore
+															? String(historyStats?.averageRawScore ?? 0)
+															: `${historyStats?.scoredAttemptRate ?? 0}%`
+												}
+												subtitle={
+													isFiniteScore
+														? `Tốt nhất ${historyStats?.bestAccuracy ?? 0}% • Hết giờ ${historyStats?.timeoutRate ?? 0}%`
+														: isHighScore
+															? `Cao nhất ${historyStats?.bestRawScore ?? 0} • Hoàn thành ${historyStats?.completionRate ?? 0}%`
+															: `Hoàn thành ${historyStats?.completionRate ?? 0}% • Chưa hoàn thành ${historyStats?.partialRate ?? 0}%`
+												}
+											/>
+											<HistoryStatCard
+												icon={<Clock3 className="h-5 w-5" />}
+												label="Thời lượng trung bình"
+												value={formatDuration(
+													historyStats?.averageDurationSeconds ?? 0,
+												)}
+												subtitle={`Hoàn thành ${historyStats?.completionRate ?? 0}% • Chưa hoàn thành ${historyStats?.partialRate ?? 0}%`}
+											/>
+											<HistoryStatCard
+												icon={<TriangleAlert className="h-5 w-5" />}
+												label={
+													isFiniteScore
+														? "Tổng câu sai / hết giờ"
+														: isHighScore
+															? "Điểm xếp hạng tốt nhất"
+															: "Số phiên hoàn thành"
+												}
+												value={
+													isFiniteScore
+														? `${historyStats?.totalWrong ?? 0} / ${historyStats?.totalTimeout ?? 0}`
+														: isHighScore
+															? String(historyStats?.bestLeaderboardPoints ?? 0)
+															: String(historyStats?.completedAttempts ?? 0)
+												}
+												subtitle={
+													isFiniteScore
+														? `Tổng đúng ${historyStats?.totalCorrect ?? 0} trên ${historyStats?.totalQuestions ?? 0} câu`
+														: isHighScore
+															? `Điểm xếp hạng TB ${historyStats?.averageLeaderboardPoints ?? 0}`
+															: `Tổng phiên ${historyStats?.totalAttempts ?? 0}`
+												}
+											/>
 										</div>
 
-										{historyItems.length > 0 ? (
-											<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
-												{historyItems.map((item) => {
-													const isCompleted = item.completed;
-													return (
-														<button
-															type="button"
-															key={item.id}
-															onClick={() => void openHistoryDetail(item)}
-															className="rounded-3xl border border-white/10 bg-black/20 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-red-400/40 hover:bg-black/30"
-														>
-															<div className="flex items-start justify-between gap-3">
-																<div>
-																	<div className="text-sm font-semibold text-white">
-																		{new Date(item.playedAt).toLocaleString(
-																			"vi-VN",
-																		)}
-																	</div>
-																	<div className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
-																		{item.attemptState ??
-																			(isCompleted ? "COMPLETED" : "PARTIAL")}
-																	</div>
-																</div>
-																<span
-																	className={`rounded-full px-3 py-1 text-xs font-semibold ${
-																		isCompleted
-																			? "bg-emerald-500/15 text-emerald-300"
-																			: "bg-amber-500/15 text-amber-300"
-																	}`}
-																>
-																	{isCompleted ? "Hoàn thành" : "Bỏ dở"}
-																</span>
-															</div>
+										<div className="mt-6">
+											<div className="mb-3 flex items-center justify-between">
+												<h3 className="text-lg font-semibold text-white">
+													6 lượt chơi gần nhất
+												</h3>
+												<p className="text-xs uppercase tracking-[0.18em] text-slate-500">
+													{isFiniteScore
+														? "Bấm vào một lượt để xem chi tiết từng câu"
+														: "Bấm vào một lượt để xem chi tiết phiên chơi"}
+												</p>
+											</div>
 
-															<div className="mt-4 grid grid-cols-2 gap-3 text-sm">
-																<div className="rounded-2xl bg-white/5 p-3">
-																	<div className="text-slate-400">
-																		{isFiniteScore
-																			? "Độ chính xác"
-																			: isHighScore
-																				? "Điểm"
-																				: "Theo dõi"}
+											{historyItems.length > 0 ? (
+												<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+													{historyItems.map((item) => {
+														const isCompleted = item.completed;
+														return (
+															<button
+																type="button"
+																key={item.id}
+																onClick={() => void openHistoryDetail(item)}
+																className="rounded-3xl border border-white/10 bg-black/20 p-5 text-left transition-all hover:-translate-y-0.5 hover:border-red-400/40 hover:bg-black/30"
+															>
+																<div className="flex items-start justify-between gap-3">
+																	<div>
+																		<div className="text-sm font-semibold text-white">
+																			{new Date(item.playedAt).toLocaleString(
+																				"vi-VN",
+																			)}
+																		</div>
+																		<div className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
+																			{item.attemptState ??
+																				(isCompleted ? "COMPLETED" : "PARTIAL")}
+																		</div>
 																	</div>
-																	<div className="mt-1 text-lg font-bold text-white">
-																		{isFiniteScore
-																			? `${item.accuracy ?? 0}%`
-																			: isHighScore
-																				? String(item.rawScore ?? 0)
-																				: item.completed
-																					? "Đã lưu"
-																					: "Bỏ dở"}
-																	</div>
-																</div>
-																<div className="rounded-2xl bg-white/5 p-3">
-																	<div className="text-slate-400">
-																		Thời gian
-																	</div>
-																	<div className="mt-1 text-lg font-bold text-white">
-																		{formatDuration(item.duration ?? 0)}
-																	</div>
-																</div>
-															</div>
-
-															<div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-300">
-																{isFiniteScore ? (
-																	<>
-																		<span className="rounded-full bg-emerald-500/10 px-3 py-1">
-																			Đúng {item.correctCount ?? 0}
-																		</span>
-																		<span className="rounded-full bg-rose-500/10 px-3 py-1">
-																			Sai {item.wrongCount ?? 0}
-																		</span>
-																		<span className="rounded-full bg-amber-500/10 px-3 py-1">
-																			Hết giờ {item.timeoutCount ?? 0}
-																		</span>
-																		<span className="rounded-full bg-sky-500/10 px-3 py-1">
-																			Điểm {item.score ?? 0}
-																		</span>
-																	</>
-																) : isHighScore ? (
-																	<>
-																		<span className="rounded-full bg-sky-500/10 px-3 py-1">
-																			Điểm thô {item.rawScore ?? 0}
-																		</span>
-																		<span className="rounded-full bg-fuchsia-500/10 px-3 py-1">
-																			Điểm xếp hạng{" "}
-																			{item.leaderboardPoints ?? 0}
-																		</span>
-																	</>
-																) : (
-																	<span className="rounded-full bg-white/10 px-3 py-1">
-																		Đã ghi nhận tham gia
+																	<span
+																		className={`rounded-full px-3 py-1 text-xs font-semibold ${
+																			isCompleted
+																				? "bg-emerald-500/15 text-emerald-300"
+																				: "bg-amber-500/15 text-amber-300"
+																		}`}
+																	>
+																		{isCompleted
+																			? "Hoàn thành"
+																			: "Chưa hoàn thành"}
 																	</span>
-																)}
-															</div>
-														</button>
-													);
-												})}
-											</div>
-										) : (
-											<div className="rounded-3xl border border-dashed border-white/15 bg-black/20 px-6 py-10 text-center text-slate-400">
-												Bạn chưa có lượt chơi nào được ghi nhận cho game này.
-											</div>
-										)}
-									</div>
-								</>
-							)}
-						</section>
+																</div>
 
+																<div className="mt-4 grid grid-cols-2 gap-3 text-sm">
+																	<div className="rounded-2xl bg-white/5 p-3">
+																		<div className="text-slate-400">
+																			{isFiniteScore
+																				? "Độ chính xác"
+																				: isHighScore
+																					? "Điểm"
+																					: "Theo dõi"}
+																		</div>
+																		<div className="mt-1 text-lg font-bold text-white">
+																			{isFiniteScore
+																				? `${item.accuracy ?? 0}%`
+																				: isHighScore
+																					? String(item.rawScore ?? 0)
+																					: item.completed
+																						? "Đã lưu"
+																						: "Chưa hoàn thành"}
+																		</div>
+																	</div>
+																	<div className="rounded-2xl bg-white/5 p-3">
+																		<div className="text-slate-400">
+																			Thời gian
+																		</div>
+																		<div className="mt-1 text-lg font-bold text-white">
+																			{formatDuration(item.duration ?? 0)}
+																		</div>
+																	</div>
+																</div>
+
+																<div className="mt-4 flex flex-wrap gap-2 text-xs text-slate-300">
+																	{isFiniteScore ? (
+																		<>
+																			<span className="rounded-full bg-emerald-500/10 px-3 py-1">
+																				Đúng {item.correctCount ?? 0}
+																			</span>
+																			<span className="rounded-full bg-rose-500/10 px-3 py-1">
+																				Sai {item.wrongCount ?? 0}
+																			</span>
+																			<span className="rounded-full bg-amber-500/10 px-3 py-1">
+																				Hết giờ {item.timeoutCount ?? 0}
+																			</span>
+																			<span className="rounded-full bg-sky-500/10 px-3 py-1">
+																				Điểm {item.score ?? 0}
+																			</span>
+																		</>
+																	) : isHighScore ? (
+																		<>
+																			<span className="rounded-full bg-sky-500/10 px-3 py-1">
+																				Điểm thô {item.rawScore ?? 0}
+																			</span>
+																			<span className="rounded-full bg-fuchsia-500/10 px-3 py-1">
+																				Điểm xếp hạng{" "}
+																				{item.leaderboardPoints ?? 0}
+																			</span>
+																		</>
+																	) : (
+																		<span className="rounded-full bg-white/10 px-3 py-1">
+																			Đã ghi nhận tham gia
+																		</span>
+																	)}
+																</div>
+															</button>
+														);
+													})}
+												</div>
+											) : (
+												<div className="rounded-3xl border border-dashed border-white/15 bg-black/20 px-6 py-10 text-center text-slate-400">
+													Bạn chưa có lượt chơi nào được ghi nhận cho game này.
+												</div>
+											)}
+										</div>
+									</>
+								)}
+							</section>
+						)}
 						{/* Developer Card */}
 						{/* <section className={styles.devCard}>
 							<div className={styles.devAvatarWrap}>

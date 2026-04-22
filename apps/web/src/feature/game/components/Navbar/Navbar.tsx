@@ -57,7 +57,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 								Trang chủ
 							</Link>
 						</li>
-						<li>
+						{/* <li>
 							<Link
 								to="/leaderboard"
 								className={styles.link}
@@ -65,7 +65,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 							>
 								Bảng xếp hạng
 							</Link>
-						</li>
+						</li> */}
 					</ul>
 				</div>
 				<div className={styles.right}>

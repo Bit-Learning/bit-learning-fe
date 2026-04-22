@@ -36,8 +36,38 @@ export interface MetricsSummary {
 export interface HealthComponent {
 	name: string;
 	status: string;
-	details?: Record<string, unknown>;
+	details?: HealthComponentDetails;
 }
+
+export interface DbHealthDetails {
+	database?: string;
+	validationQuery?: string;
+}
+
+export interface RedisHealthDetails {
+	version?: string;
+}
+
+export interface DiskSpaceHealthDetails {
+	total: number;
+	free: number;
+	threshold?: number;
+	path?: string;
+	exists?: boolean;
+}
+
+export interface SslHealthDetails {
+	expiringChains?: unknown[];
+	invalidChains?: unknown[];
+	validChains?: unknown[];
+}
+
+export type HealthComponentDetails =
+	| Record<string, unknown>
+	| DbHealthDetails
+	| RedisHealthDetails
+	| DiskSpaceHealthDetails
+	| SslHealthDetails;
 
 export interface MetricsHealth {
 	status: string;

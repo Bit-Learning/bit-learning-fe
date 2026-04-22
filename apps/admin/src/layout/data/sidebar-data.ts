@@ -35,7 +35,6 @@ export const navGroups: NavGroup[] = [
 		title: "Chung",
 		items: [
 			{ title: "Bảng thống kê", url: "/", icon: LayoutDashboard },
-			{ title: "Quản lý người dùng", url: "/users", icon: Users },
 			{ title: "Tra cứu giao dịch", url: "/transactions", icon: CreditCard },
 			{ title: "Quản lý khóa học", url: "/courses", icon: Book },
 			{ title: "Quản lý chương trình học", url: "/curriculum", icon: School },
@@ -50,15 +49,16 @@ export const navGroups: NavGroup[] = [
 				url: "/templates",
 				icon: PresentationIcon,
 			},
+			{ title: "Quản lý sơ đồ tư duy", url: "/mindmap", icon: Network },
+			{ title: "Quản lý người dùng", url: "/users", icon: Users },
 			{ title: "Quản lý trò chơi", url: "/apps/games", icon: Gamepad2 },
 			{ title: "Quản lý mẫu mail", url: "/mail-templates", icon: Mail },
 
 			{
-				title: "Analytics trò chơi",
+				title: "Thống kê trò chơi",
 				url: "/apps/games/analytics",
 				icon: BarChart3,
 			},
-			{ title: "Quản lý sơ đồ tư duy", url: "/mindmap", icon: Network },
 			{ title: "Quản lý tags", url: "/tags", icon: Tag },
 			{ title: "Quản lý AI", url: "/system-prompt", icon: MessageCircle },
 			{ title: "Khiếu nại bài viết", url: "/post-appeals", icon: ShieldAlert },

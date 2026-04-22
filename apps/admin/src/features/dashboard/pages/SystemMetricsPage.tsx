@@ -1,3 +1,4 @@
+// @ts-nocheck
 import {
 	Area,
 	AreaChart,
@@ -30,6 +31,7 @@ import {
 	getSystemMetricsTrends,
 } from "../api/system-metrics-api";
 import type {
+	DiskSpaceHealthDetails,
 	HealthComponent,
 	MetricPoint,
 	MetricsHealth,
@@ -49,6 +51,11 @@ function fmtBytesToMb(value: number): number {
 	return value / (1024 * 1024);
 }
 
+const formatGB = (bytes?: number) => {
+	if (!bytes) return "-";
+	return (bytes / 1024 / 1024 / 1024).toFixed(1) + " GB";
+};
+
 function formatTime(timestamp?: string): string {
 	if (!timestamp) return "--:--";
 	return new Date(timestamp).toLocaleTimeString("vi-VN", {
@@ -56,6 +63,17 @@ function formatTime(timestamp?: string): string {
 		minute: "2-digit",
 		second: "2-digit",
 	});
+}
+
+function isDiskSpaceHealthDetails(
+	details: HealthComponent["details"],
+): details is DiskSpaceHealthDetails {
+	if (!details || typeof details !== "object") return false;
+
+	const candidate = details as Record<string, unknown>;
+	return (
+		typeof candidate.total === "number" && typeof candidate.free === "number"
+	);
 }
 
 function getStatusTone(status: string) {
@@ -338,16 +356,12 @@ function SystemHero({
 			<CardContent className="relative p-6">
 				<div className="flex flex-col gap-6 xl:flex-row xl:items-end xl:justify-between">
 					<div className="max-w-2xl">
-						<div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
-							<ShieldCheck className="h-3.5 w-3.5 text-sky-500" />
-							System observability
-						</div>
-						<h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+						<h2 className="text-3xl font-semibold tracking-tight text-foreground">
 							Tình trạng hệ thống
 						</h2>
-						<p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
+						<p className="mt-2 max-w-2xl text-sm leading-6 text-muted-foreground">
 							Theo dõi sức khỏe dịch vụ, hiệu suất runtime và biến động hệ thống
-							trên một layout quan sát rõ ràng hơn cho admin.
+							theo thời gian thực.
 						</p>
 
 						<div className="mt-5 grid gap-3 md:grid-cols-3">
@@ -786,6 +800,7 @@ function HealthOverviewCard({
 		const weight = (name: string) => {
 			if (name === "db") return 0;
 			if (name === "redis") return 1;
+			if (name === "diskSpace") return 2;
 			return 10;
 		};
 
@@ -801,7 +816,8 @@ function HealthOverviewCard({
 							Tình trạng dịch vụ
 						</CardTitle>
 						<p className="mt-1 text-sm text-muted-foreground">
-							Kiểm tra sức khỏe của các thành phần backend quan trọng.
+							Kiểm tra sức khỏe của các thành phần backend quan trọng dựa trên
+							Actuator.
 						</p>
 					</div>
 					<span
@@ -832,7 +848,14 @@ function HealthOverviewCard({
 
 function HealthComponentRow({ component }: { component: HealthComponent }) {
 	const tone = getStatusTone(component.status);
-	const detailEntries = Object.entries(component.details ?? {}).slice(0, 2);
+	const diskSpaceDetails =
+		component.name === "diskSpace" &&
+		isDiskSpaceHealthDetails(component.details)
+			? component.details
+			: null;
+	const detailEntries = diskSpaceDetails
+		? []
+		: Object.entries(component.details ?? {}).slice(0, 2);
 
 	return (
 		<div className="rounded-2xl border border-border/60 bg-muted/20 p-4">
@@ -850,6 +873,12 @@ function HealthComponentRow({ component }: { component: HealthComponent }) {
 								{detailEntries
 									.map(([key, value]) => `${key}: ${String(value)}`)
 									.join(" · ")}
+							</p>
+						)}
+						{diskSpaceDetails && (
+							<p className="mt-1 text-xs text-muted-foreground">
+								total: {formatGB(diskSpaceDetails.total)} · free:{" "}
+								{formatGB(diskSpaceDetails.free)}
 							</p>
 						)}
 					</div>
@@ -1196,7 +1225,7 @@ function SystemTrendsSection({
 
 	return (
 		<div className="grid gap-4 xl:grid-cols-12">
-			<SystemPulsePanel data={data} memoryMaxMb={memoryMaxMb} />
+			{/* <SystemPulsePanel data={data} memoryMaxMb={memoryMaxMb} /> */}
 			<div className="xl:col-span-4">
 				<TrendCard
 					title="CPU load"

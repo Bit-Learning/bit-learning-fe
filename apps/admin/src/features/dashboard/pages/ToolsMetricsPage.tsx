@@ -41,13 +41,6 @@ const TOOL_ICONS: Record<string, IconConfig> = {
 		bg: "#E6F1FB",
 		color: "#185FA5",
 	},
-	Netdata: {
-		type: "favicon",
-		url: "https://canada1.discourse-cdn.com/flex029/uploads/netdata2/original/2X/3/34b9a2582d6ce9ab36dd9e69de9e9180c149520e.png",
-		fallback: "ND",
-		bg: "#E1F5EE",
-		color: "#005c24",
-	},
 };
 
 function ToolIcon({ title }: { title: string }) {
@@ -122,7 +115,7 @@ function AdvancedMetricsLinksPanel({
 											Mô tả
 										</th>
 										<th className="hidden h-11 px-4 text-left align-middle text-xs font-semibold text-muted-foreground md:table-cell">
-											Endpoint
+											Đường dẫn truy cập
 										</th>
 										<th className="h-11 px-4 text-right align-middle text-xs font-semibold text-muted-foreground">
 											Hành động

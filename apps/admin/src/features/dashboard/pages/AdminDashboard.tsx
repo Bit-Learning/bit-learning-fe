@@ -166,9 +166,9 @@ function KpiCard({
 						{label}
 					</p>
 				</div>
-				<div className={cn("rounded-2xl p-2.5", styles.iconWrap)}>
+				{/* <div className={cn("rounded-2xl p-2.5", styles.iconWrap)}>
 					<Icon className={cn("h-4.5 w-4.5", styles.icon)} />
-				</div>
+				</div> */}
 			</CardHeader>
 
 			<CardContent className="relative pt-0">
@@ -500,7 +500,7 @@ function RevenueTrendCard({
 						<span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
 							{fmtCurrency(periodRevenue)}
 						</span>
-						{deltaPct !== null && (
+						{/* {deltaPct !== null && (
 							<span
 								className={cn(
 									"inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
@@ -516,7 +516,7 @@ function RevenueTrendCard({
 								)}
 								{Math.abs(deltaPct).toFixed(1)}% so với tháng trước
 							</span>
-						)}
+						)} */}
 					</div>
 				</div>
 			</div>
@@ -663,7 +663,7 @@ function OperationsSnapshotCard({
 			color: "bg-indigo-500",
 		},
 		{
-			label: "Đơn hàng hoàn thành",
+			label: "Đơn hàng mua hàng hoàn tất",
 			value: completedOrders,
 			total: totalOrders,
 			color: "bg-sky-500",
@@ -1789,8 +1789,8 @@ function TransactionMixCard({
 							</BarChart>
 						</ResponsiveContainer>
 
-						<div className="mt-6 grid gap-3 sm:grid-cols-3">
-							{chartData.slice(0, 3).map((item) => (
+						<div className="mt-6 grid gap-3 sm:grid-cols-4">
+							{chartData.slice(0, 4).map((item) => (
 								<div
 									key={item.key}
 									className="rounded-2xl border border-border/60 bg-muted/20 px-4 py-3"
@@ -1847,7 +1847,7 @@ function TransactionHeatmapCard({
 			<div className="relative flex flex-col gap-4 border-b border-slate-200/70 px-6 py-5 sm:flex-row sm:items-start sm:justify-between dark:border-slate-800/80">
 				<div>
 					<p className="text-lg font-semibold text-slate-950 dark:text-slate-50">
-						Heatmap giao dịch theo giờ/ngày
+						Bản đồ nhiệt giao dịch theo giờ/ngày
 					</p>
 					<p className="mt-1 text-sm text-slate-500 dark:text-slate-400">
 						Mật độ giao dịch hoàn tất theo ngày trong tuần và khung giờ trong
@@ -2639,11 +2639,7 @@ export function Dashboard() {
 					<CardContent className="relative p-6">
 						<div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
 							<div className="max-w-5xl">
-								<div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground backdrop-blur-sm">
-									<Sparkles className="h-3.5 w-3.5 text-sky-500" />
-									Bảng điều khiển kinh doanh
-								</div>
-								<h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
+								<h2 className="text-3xl font-semibold tracking-tight text-foreground">
 									Bảng thống kê
 								</h2>
 								<p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
@@ -2971,7 +2967,7 @@ export function Dashboard() {
 									data={data.userRoleBreakdown || {}}
 									labels={roleLabels}
 									title="Vai trò người dùng"
-									description="Cơ cấu người dùng theo từng nhóm quyền trong nền tảng."
+									description="Cơ cấu người dùng theo từng nhóm quyền trong hệ thống."
 								/>
 							</div>
 						</div>

@@ -174,9 +174,10 @@ export function TransactionsPage() {
 							trạng thái, thời gian và mã giao dịch.
 						</p>
 					</div>
-					<div className="text-muted-foreground flex items-center gap-2 text-sm">
+					<div className="flex items-center gap-2 text-lg">
 						<span>
-							{pageInfo?.totalElements?.toLocaleString("vi-VN") ?? 0} giao dịch
+							Tổng {pageInfo?.totalElements?.toLocaleString("vi-VN") ?? 0} giao
+							dịch
 						</span>
 						{transactionsQuery.isFetching ? (
 							<span className="inline-flex items-center gap-1 rounded-full border px-3 py-1">
