@@ -339,7 +339,13 @@ const FileTab: React.FC<FileTabProps> = ({ parsedTestCases, onFileParsed }) => {
         )}
         onClick={() => fileInputRef.current?.click()}
       >
-        <input ref={fileInputRef} type="file" accept=".txt,.json" className="hidden" onChange={handleFileChange} />
+        <input
+          ref={fileInputRef}
+          type="file"
+          accept=".json,application/json,text/plain"
+          className="hidden"
+          onChange={handleFileChange}
+        />
         {fileName && parsedTestCases.length > 0 ? (
           <div className="flex flex-col items-center gap-2">
             <CheckCircle2 className="w-10 h-10 text-green-500" />
@@ -359,8 +365,7 @@ const FileTab: React.FC<FileTabProps> = ({ parsedTestCases, onFileParsed }) => {
         ) : (
           <div className="flex flex-col items-center gap-3">
             <Upload className="w-10 h-10 text-gray-300" />
-            <p className="font-semibold text-gray-600">Kéo thả hoặc nhấn để chọn file</p>
-            <p className="text-sm text-gray-400">.txt hoặc .json</p>
+            <p className="font-semibold text-gray-600">Kéo thả hoặc nhấn để chọn file json</p>
           </div>
         )}
       </div>
@@ -372,32 +377,32 @@ const FileTab: React.FC<FileTabProps> = ({ parsedTestCases, onFileParsed }) => {
         </p>
       )}
 
-      {parsedTestCases.length > 0 && (
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <p className="text-md font-semibold text-gray-700">Xem trước ({parsedTestCases.length} test cases)</p>
-            <p className="text-sm text-gray-400">
-              {isJson ? `isSample giữ nguyên từ file` : `Tất cả mặc định là "Ẩn", có thể chỉnh sau khi tạo bài`}
-            </p>
+      {parsedTestCases.map((tc, i) => (
+        <div key={i} className="border border-gray-200 rounded-lg bg-white text-sm font-mono overflow-hidden">
+          <div className="flex items-center justify-between px-3 py-1.5 bg-gray-50 border-b border-gray-200">
+            <span className="font-sans text-xs font-semibold text-gray-500">Test Case #{i + 1}</span>
+            <span
+              className={cn(
+                "flex items-center gap-1 px-2 py-0.5 rounded-full text-xs font-semibold font-sans border",
+                tc.isSample
+                  ? "bg-emerald-100 text-emerald-700 border-emerald-300"
+                  : "bg-slate-100 text-slate-600 border-slate-300",
+              )}
+            >
+              {tc.isSample ? <Eye className="w-3 h-3" /> : <EyeOff className="w-3 h-3" />}
+              {tc.isSample ? "Công khai" : "Ẩn"}
+            </span>
           </div>
-          <div className="max-h-72 overflow-y-auto space-y-2 pr-1">
-            {parsedTestCases.map((tc, i) => (
-              <div key={i} className="border border-gray-200 rounded-lg bg-white text-sm font-mono overflow-hidden">
-                <div className="grid grid-cols-2 divide-x divide-gray-200">
-                  {(["input", "expectedOutput"] as const).map((field) => (
-                    <div key={field} className="p-3">
-                      <p className="text-gray-400 font-sans font-semibold mb-1">
-                        {field === "input" ? "Input" : "Output"}
-                      </p>
-                      <pre className="whitespace-pre-wrap text-gray-700">{tc[field]}</pre>
-                    </div>
-                  ))}
-                </div>
+          <div className="grid grid-cols-2 divide-x divide-gray-200">
+            {(["input", "expectedOutput"] as const).map((field) => (
+              <div key={field} className="p-3">
+                <p className="text-gray-400 font-sans font-semibold mb-1">{field === "input" ? "Input" : "Output"}</p>
+                <pre className="whitespace-pre-wrap text-gray-700">{tc[field]}</pre>
               </div>
             ))}
           </div>
         </div>
-      )}
+      ))}
     </div>
   );
 };
