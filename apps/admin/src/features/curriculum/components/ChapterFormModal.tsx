@@ -32,7 +32,7 @@ const ChapterFormModal: React.FC<Props> = ({ open, onClose, data, subjectId, nex
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", description: "", chapterNo: 1 },
+    defaultValues: { name: "", description: "", chapterNo: nextChapterNo },
   });
 
   const { mutate: create, isPending: creating } = useCreateChapter();
