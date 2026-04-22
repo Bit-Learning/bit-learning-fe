@@ -6,7 +6,7 @@ import { Button } from "@workspace/ui/components/Button";
 import { Pagination } from "@/shared/components/Pagination";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { cn } from "@workspace/ui/lib/utils";
-import { useMyExams, useDeleteExam, useRequestPublishExam } from "../queries/useExam";
+import { useMyExams, useDeleteExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import type { ApprovalStatus, ExamBriefResponse, ExamSearchParams, ExamType } from "../types/exam.type";
 import { EditExamModal } from "./EditExamModal";
@@ -64,11 +64,9 @@ const MyExamsContent: React.FC = () => {
   const [page, setPage] = useState(0);
   const [editingExam, setEditingExam] = useState<ExamBriefResponse | null>(null);
   const [deletingExam, setDeletingExam] = useState<ExamBriefResponse | null>(null);
-  const [selectedIds, setSelectedIds] = useState<number[]>([]);
 
   const debouncedSearch = useDebounce(searchInput, 400);
   const { mutate: deleteExam, isPending: isDeleting } = useDeleteExam();
-  const requestPublishMutation = useRequestPublishExam();
 
   const { data: subjectsData } = useSubjectsList();
   const subjects = subjectsData || [];
@@ -87,33 +85,6 @@ const MyExamsContent: React.FC = () => {
   const pagination = examsData?.page;
 
   const hasActiveFilter = !!searchInput || !!filterSubjectId || !!filterApproval;
-
-  const selectableExams = exams.filter((e) => e.approvalStatus === "NONE" || e.approvalStatus === "REJECTED");
-  const selectableIds = selectableExams.map((e) => e.id);
-
-  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.includes(id));
-  const someSelected = selectableIds.some((id) => selectedIds.includes(id));
-
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(selectableIds);
-    }
-  };
-
-  const handleSelectExam = (id: number) => {
-    const exam = exams.find((e) => e.id === id);
-    if (exam && (exam.approvalStatus === "NONE" || exam.approvalStatus === "REJECTED")) {
-      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((eid) => eid !== id) : [...prev, id]));
-    }
-  };
-
-  const handleRequestPublish = async () => {
-    if (selectedIds.length === 0) return;
-    await requestPublishMutation.mutateAsync(selectedIds);
-    setSelectedIds([]);
-  };
 
   const handleConfirmDelete = () => {
     if (!deletingExam) return;
@@ -206,38 +177,6 @@ const MyExamsContent: React.FC = () => {
           </div>
         </div>
 
-        {someSelected && (
-          <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-            <span className="text-sm text-blue-700 font-medium">
-              Đã chọn <span className="font-bold">{selectedIds.length}</span> đề thi
-              {selectedIds.length < selectableIds.length && (
-                <button
-                  onClick={toggleSelectAll}
-                  className="ml-2 underline hover:no-underline text-blue-600 font-semibold"
-                >
-                  Chọn tất cả {selectableIds.length} đề
-                </button>
-              )}
-            </span>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSelectedIds([])}
-                className="text-sm text-blue-500 hover:text-blue-700 font-medium"
-              >
-                Bỏ chọn tất cả
-              </button>
-              <Button
-                onClick={handleRequestPublish}
-                isDisabled={requestPublishMutation.isPending}
-                className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                {requestPublishMutation.isPending ? "Đang gửi..." : `Gửi yêu cầu duyệt (${selectedIds.length})`}
-              </Button>
-            </div>
-          </div>
-        )}
-
         <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden">
           {isLoading ? (
             <div className="p-4 space-y-2">
@@ -267,31 +206,6 @@ const MyExamsContent: React.FC = () => {
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
-                      <th className="px-4 py-3.5 w-10">
-                        <label className="relative flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={allSelected}
-                            ref={(el) => {
-                              if (el) el.indeterminate = someSelected && !allSelected;
-                            }}
-                            onChange={toggleSelectAll}
-                            className="peer sr-only"
-                          />
-                          <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400">
-                            <svg
-                              className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <div className="absolute w-3 h-0.5 bg-white opacity-0 peer-indeterminate:opacity-100" />
-                          </div>
-                        </label>
-                      </th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                         Thông tin đề thi
                       </th>
@@ -311,8 +225,6 @@ const MyExamsContent: React.FC = () => {
                   </thead>
                   <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
                     {exams.map((exam) => {
-                      const isSelected = selectedIds.includes(exam.id);
-                      const isDisabled = exam.approvalStatus === "PENDING" || exam.approvalStatus === "APPROVED";
                       const approval = APPROVAL_CONFIG[exam.approvalStatus];
                       const typeConf = TYPE_LABELS[exam.type];
                       return (
@@ -320,35 +232,9 @@ const MyExamsContent: React.FC = () => {
                           key={exam.id}
                           onClick={() => navigate({ to: `/mentor/exam/${exam.id}` })}
                           className={cn(
-                            "cursor-pointer transition-colors",
-                            isSelected
-                              ? "bg-blue-50/60 dark:bg-blue-950/20"
-                              : "hover:bg-slate-50/80 dark:hover:bg-slate-800/30",
+                            "cursor-pointer transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30",
                           )}
                         >
-                          <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                            <label className="relative flex items-center cursor-pointer">
-                              <input
-                                type="checkbox"
-                                checked={isSelected}
-                                onChange={() => handleSelectExam(exam.id)}
-                                onClick={(e) => e.stopPropagation()}
-                                disabled={isDisabled}
-                                className="peer sr-only"
-                              />
-                              <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
-                                <svg
-                                  className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
-                                  fill="none"
-                                  viewBox="0 0 24 24"
-                                  stroke="currentColor"
-                                  strokeWidth={3}
-                                >
-                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                </svg>
-                              </div>
-                            </label>
-                          </td>
                           <td className="px-4 py-3.5">
                             <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
                               {exam.name}

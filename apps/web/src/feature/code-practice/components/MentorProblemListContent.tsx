@@ -5,7 +5,7 @@ import { Button } from "@workspace/ui/components/Button";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { cn } from "@workspace/ui/lib/utils";
 import { ApprovalStatus, Difficulty, type ProblemBriefResponse } from "../types/coding.type";
-import { useDeleteProblem, useGetMyProblems, useRequestPublish } from "../queries/useCoding";
+import { useDeleteProblem, useGetMyProblems } from "../queries/useCoding";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Pagination } from "@/shared/components/Pagination";
@@ -78,7 +78,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
   const [approvalFilter, setApprovalFilter] = useState<string>("all");
   const [deletingProblem, setDeletingProblem] = useState<ProblemBriefResponse | null>(null);
   const [page, setPage] = useState(initialPage);
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
 
   const size = 20;
 
@@ -88,7 +87,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
     sort: "createdAt,desc",
   });
   const deleteMutation = useDeleteProblem();
-  const requestPublishMutation = useRequestPublish();
 
   const problems: ProblemBriefResponse[] = problemsResponse?.data || [];
   const totalPages: number = problemsResponse?.page?.totalPages || 0;
@@ -100,38 +98,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
     const matchApproval = approvalFilter === "all" || p.approvalStatus === approvalFilter;
     return matchSearch && matchDifficulty && matchApproval;
   });
-
-  const selectableProblems = filteredProblems.filter(
-    (p) => p.approvalStatus === ApprovalStatus.NONE || p.approvalStatus === ApprovalStatus.REJECTED,
-  );
-  const selectableIds = selectableProblems.map((p) => p.id);
-
-  const allSelected = selectableIds.length > 0 && selectableIds.every((id) => selectedIds.includes(id));
-  const someSelected = selectableIds.some((id) => selectedIds.includes(id));
-
-  const toggleSelectAll = () => {
-    if (allSelected) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(selectableIds);
-    }
-  };
-
-  const handleSelectProblem = (id: string) => {
-    const problem = filteredProblems.find((p) => p.id === id);
-    if (
-      problem &&
-      (problem.approvalStatus === ApprovalStatus.NONE || problem.approvalStatus === ApprovalStatus.REJECTED)
-    ) {
-      setSelectedIds((prev) => (prev.includes(id) ? prev.filter((pid) => pid !== id) : [...prev, id]));
-    }
-  };
-
-  const handleRequestPublish = async () => {
-    if (selectedIds.length === 0) return;
-    await requestPublishMutation.mutateAsync(selectedIds);
-    setSelectedIds([]);
-  };
 
   const handleConfirmDelete = async () => {
     if (!deletingProblem) return;
@@ -201,38 +167,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
           </div>
         </div>
 
-        {someSelected && (
-          <div className="mb-4 px-4 py-2.5 bg-blue-50 border border-blue-200 rounded-lg flex items-center justify-between">
-            <span className="text-sm text-blue-700 font-medium">
-              Đã chọn <span className="font-bold">{selectedIds.length}</span> bài tập
-              {selectedIds.length < selectableIds.length && (
-                <button
-                  onClick={toggleSelectAll}
-                  className="ml-2 underline hover:no-underline text-blue-600 font-semibold"
-                >
-                  Chọn tất cả {selectableIds.length} bài
-                </button>
-              )}
-            </span>
-            <div className="flex items-center gap-3">
-              <button
-                onClick={() => setSelectedIds([])}
-                className="cursor-pointer text-sm text-blue-500 hover:text-blue-700 font-medium"
-              >
-                Bỏ chọn tất cả
-              </button>
-              <Button
-                onClick={handleRequestPublish}
-                isDisabled={requestPublishMutation.isPending}
-                className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2"
-              >
-                <Send className="w-4 h-4" />
-                {requestPublishMutation.isPending ? "Đang gửi..." : `Gửi yêu cầu duyệt (${selectedIds.length})`}
-              </Button>
-            </div>
-          </div>
-        )}
-
         <div className="bg-white my-6 rounded-md border border-slate-300 overflow-hidden">
           {isLoading ? (
             <TableSkeleton />
@@ -242,31 +176,6 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                 <table className="w-full text-left">
                   <thead>
                     <tr className="border-b border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-slate-800/50">
-                      <th className="px-4 py-3.5 w-10">
-                        <label className="relative flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={allSelected}
-                            ref={(el) => {
-                              if (el) el.indeterminate = someSelected && !allSelected;
-                            }}
-                            onChange={toggleSelectAll}
-                            className="peer sr-only"
-                          />
-                          <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400">
-                            <svg
-                              className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                            <div className="absolute w-3 h-0.5 bg-white opacity-0 peer-indeterminate:opacity-100" />
-                          </div>
-                        </label>
-                      </th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Tiêu đề</th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Độ khó
@@ -297,45 +206,14 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                       </tr>
                     ) : (
                       filteredProblems.map((problem) => {
-                        const isSelected = selectedIds.includes(problem.id);
-                        const isDisabled =
-                          problem.approvalStatus === ApprovalStatus.PENDING ||
-                          problem.approvalStatus === ApprovalStatus.APPROVED;
-
                         return (
                           <tr
                             key={problem.id}
                             onClick={() => navigate({ to: `/mentor/problem/${problem.id}/` })}
                             className={cn(
-                              "cursor-pointer transition-colors",
-                              isSelected
-                                ? "bg-blue-50/60 dark:bg-blue-950/20"
-                                : "hover:bg-slate-50/80 dark:hover:bg-slate-800/30",
+                              "cursor-pointer transition-colors hover:bg-slate-50/80 dark:hover:bg-slate-800/30",
                             )}
                           >
-                            <td className="p-4" onClick={(e) => e.stopPropagation()}>
-                              <label className="relative flex items-center cursor-pointer">
-                                <input
-                                  type="checkbox"
-                                  checked={isSelected}
-                                  onChange={() => handleSelectProblem(problem.id)}
-                                  onClick={(e) => e.stopPropagation()}
-                                  disabled={isDisabled}
-                                  className="peer sr-only"
-                                />
-                                <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
-                                  <svg
-                                    className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    stroke="currentColor"
-                                    strokeWidth={3}
-                                  >
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                                  </svg>
-                                </div>
-                              </label>
-                            </td>
                             <td className="px-4 py-3.5">
                               <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
                                 {problem.title}
