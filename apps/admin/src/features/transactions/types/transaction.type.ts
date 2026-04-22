@@ -61,7 +61,7 @@ export const transactionStatusOptions: Array<{
 	value: TransactionStatus;
 }> = [
 	{ label: "Chờ xử lý", value: "PENDING" },
-	{ label: "Hoàn thành", value: "COMPLETED" },
+	{ label: "Hoàn tất", value: "COMPLETED" },
 	{ label: "Thất bại", value: "FAILED" },
 ];
 

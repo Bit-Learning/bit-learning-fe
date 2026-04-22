@@ -500,7 +500,7 @@ function RevenueTrendCard({
 						<span className="rounded-full border border-emerald-500/20 bg-emerald-500/10 px-3 py-1 text-xs font-semibold text-emerald-700 dark:text-emerald-300">
 							{fmtCurrency(periodRevenue)}
 						</span>
-						{deltaPct !== null && (
+						{/* {deltaPct !== null && (
 							<span
 								className={cn(
 									"inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold",
@@ -516,7 +516,7 @@ function RevenueTrendCard({
 								)}
 								{Math.abs(deltaPct).toFixed(1)}% so với tháng trước
 							</span>
-						)}
+						)} */}
 					</div>
 				</div>
 			</div>
@@ -663,7 +663,7 @@ function OperationsSnapshotCard({
 			color: "bg-indigo-500",
 		},
 		{
-			label: "Đơn hàng hoàn thành",
+			label: "Đơn hàng mua hàng hoàn tất",
 			value: completedOrders,
 			total: totalOrders,
 			color: "bg-sky-500",
@@ -2967,7 +2967,7 @@ export function Dashboard() {
 									data={data.userRoleBreakdown || {}}
 									labels={roleLabels}
 									title="Vai trò người dùng"
-									description="Cơ cấu người dùng theo từng nhóm quyền trong nền tảng."
+									description="Cơ cấu người dùng theo từng nhóm quyền trong hệ thống."
 								/>
 							</div>
 						</div>
