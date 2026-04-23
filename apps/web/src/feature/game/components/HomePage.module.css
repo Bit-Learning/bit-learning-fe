@@ -70,8 +70,15 @@
 }
 
 @keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 .heroBadges {
@@ -109,7 +116,9 @@
   text-wrap: balance;
 }
 
-.heroAccent { color: #f97316; }
+.heroAccent {
+  color: #f97316;
+}
 
 .heroDesc {
   font-size: 1.08rem;
@@ -165,11 +174,17 @@
   box-shadow: 0 16px 30px rgba(249, 115, 22, 0.3);
 }
 
-.btnPlay:hover { transform: translateY(-2px); box-shadow: 0 22px 38px rgba(249, 115, 22, 0.36); }
-.btnPlay:active { transform: scale(0.98); }
+.btnPlay:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 22px 38px rgba(249, 115, 22, 0.36);
+}
+
+.btnPlay:active {
+  transform: scale(0.98);
+}
 
 .btnInfo {
-  background: rgba(255,255,255,0.1);
+  background: rgba(255, 255, 255, 0.1);
   color: white;
   padding: 0.95rem 1.4rem;
   border-radius: 999px;
@@ -177,7 +192,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  border: 1px solid rgba(255,255,255,0.12);
+  border: 1px solid rgba(255, 255, 255, 0.12);
   cursor: pointer;
   font-family: var(--font);
   font-size: 0.95rem;
@@ -187,7 +202,7 @@
 }
 
 .btnInfo:hover {
-  background: rgba(255,255,255,0.16);
+  background: rgba(255, 255, 255, 0.16);
   transform: translateY(-2px);
 }
 
@@ -479,9 +494,15 @@
   }
 }
 
-.footerBrand { grid-column: span 2; }
+.footerBrand {
+  grid-column: span 2;
+}
 
-@media (min-width: 768px) { .footerBrand { grid-column: span 1; } }
+@media (min-width: 768px) {
+  .footerBrand {
+    grid-column: span 1;
+  }
+}
 
 .footerLogo {
   display: flex;
@@ -508,7 +529,9 @@
   font-style: italic;
 }
 
-.footerLogoAccent { color: #ec1337; }
+.footerLogoAccent {
+  color: #ec1337;
+}
 
 .footerTagline {
   color: #64748b;
@@ -541,7 +564,9 @@
   transition: color 0.15s;
 }
 
-.footerLink:hover { color: #ec1337; }
+.footerLink:hover {
+  color: #ec1337;
+}
 
 .socialRow {
   display: flex;
@@ -561,13 +586,16 @@
   transition: background 0.15s, color 0.15s;
 }
 
-.socialBtn:hover { background: #ec1337; color: white; }
+.socialBtn:hover {
+  background: #ec1337;
+  color: white;
+}
 
 .footerBottom {
   max-width: 1536px;
   margin: 0 auto;
   padding: 1.5rem 1rem;
-  border-top: 1px solid rgba(255,255,255,0.05);
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
   display: flex;
   flex-direction: column;
   gap: 1rem;
@@ -600,4 +628,6 @@
   transition: color 0.15s;
 }
 
-.footerLegalLink:hover { color: #ec1337; }
+.footerLegalLink:hover {
+  color: #ec1337;
+}

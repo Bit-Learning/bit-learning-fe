@@ -10,7 +10,7 @@ import { Route } from "@/routes/matching/game";
 import PageMeta from "@/shared/components/seo/page-meta";
 import MatchingGamePlayer, {
 	type MatchingGameResultSummary,
-} from "@workspace/ui/components/MatchingGamePlayer";
+} from "@/feature/game/components/MatchingGamePlayer";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 
 const getMatchingGameLoadErrorMessage = ({
@@ -201,7 +201,6 @@ export default function MatchingGamePage() {
 						<ThemeToggle />
 					</>
 				}
-				footerNote="Phần học dành cho học sinh Lớp 3-5"
 				exitLabel="Quay lại chọn bài học"
 			/>
 		</>

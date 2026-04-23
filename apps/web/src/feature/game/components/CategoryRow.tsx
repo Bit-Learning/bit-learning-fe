@@ -8,14 +8,16 @@ import GameCard from "./GameRow";
 import styles from "./GameRow.module.css";
 
 interface CategoryRowProps {
-	categoryName: string;
+	categoryKey: string;
+	categoryLabel: string;
 	categoryDescription: string;
 	games: GamePreview[];
 	matchingTargetsByGameId?: ReadonlyMap<number, MatchingGameLinkTarget>;
 }
 
 export default function CategoryRow({
-	categoryName,
+	categoryKey,
+	categoryLabel,
 	categoryDescription,
 	games,
 	matchingTargetsByGameId,
@@ -25,7 +27,7 @@ export default function CategoryRow({
 	const { playSound } = useAudio();
 
 	const handleViewMore = () => {
-		switch (categoryName) {
+		switch (categoryKey) {
 			case "MATCHING":
 				// Start background music on explicit user action
 				playSound("game-background-music", { loop: true });
@@ -56,7 +58,7 @@ export default function CategoryRow({
 				<h2 className="text-xl font-bold text-white px-8 flex flex-col items-start gap-2">
 					<div className="flex items-center gap-2">
 						<span className={styles.accent} />
-						{categoryName}
+						{categoryLabel}
 					</div>
 					<span className="text-gray-300 text-sm">{categoryDescription}</span>
 				</h2>
@@ -66,7 +68,7 @@ export default function CategoryRow({
 					onClick={() => handleViewMore()}
 				>
 					{" "}
-					Xem tất cả{" "}
+					Xem thêm{" "}
 				</button>
 			</div>
 			{games.length === 0 ? (
@@ -101,7 +103,7 @@ export default function CategoryRow({
 						{games.map((game) => (
 							<GameCard
 								game={game}
-								categoryName={categoryName}
+								categoryKey={categoryKey}
 								matchingTarget={matchingTargetsByGameId?.get(game.id)}
 								key={game.id}
 							/>

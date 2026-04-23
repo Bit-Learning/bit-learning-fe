@@ -31,19 +31,19 @@ const CATEGORY_ROW_SKELETONS = [
 
 function GameNavigationLink({
 	gameId,
-	categoryName,
+	categoryKey,
 	matchingTargetsByGameId,
 	className,
 	children,
 }: {
 	gameId: number;
-	categoryName?: string | null;
+	categoryKey?: string | null;
 	matchingTargetsByGameId: ReadonlyMap<number, MatchingGameLinkTarget>;
 	className?: string;
 	children: ReactNode;
 }) {
 	const matchingTarget =
-		categoryName === "MATCHING"
+		categoryKey === "MATCHING"
 			? matchingTargetsByGameId.get(gameId)
 			: undefined;
 
@@ -63,7 +63,7 @@ function GameNavigationLink({
 		);
 	}
 
-	if (categoryName === "MATCHING") {
+	if (categoryKey === "MATCHING") {
 		return (
 			<Link to="/matching/game" search={{ gameId }} className={className}>
 				{children}
@@ -280,7 +280,7 @@ export default function GameList() {
 	return (
 		<div className={styles.pageShell}>
 			<PageMeta
-				title="Bit Learning Game Center"
+				title="Bit Learning Game Center - Kho trò chơi học tập cho học sinh"
 				description="Khám phá kho trò chơi học tập giúp học sinh luyện tư duy logic, tin học và phản xạ trên Bit Learning."
 			/>
 			<link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -359,7 +359,7 @@ export default function GameList() {
 									<>
 										<GameNavigationLink
 											gameId={featuredGame.id}
-											categoryName={featuredGame.categoryName}
+											categoryKey={featuredGame.categoryName}
 											matchingTargetsByGameId={matchingTargetsByGameId}
 											className={styles.btnPlay}
 										>
@@ -368,7 +368,7 @@ export default function GameList() {
 										</GameNavigationLink>
 										<GameNavigationLink
 											gameId={featuredGame.id}
-											categoryName={featuredGame.categoryName}
+											categoryKey={featuredGame.categoryName}
 											matchingTargetsByGameId={matchingTargetsByGameId}
 											className={styles.btnInfo}
 										>
@@ -392,7 +392,7 @@ export default function GameList() {
 								<div className={styles.asideStats}>
 									<div>
 										<strong>{formatCompactNumber(totalGames)}</strong>
-										<span>game đang mở</span>
+										<span>trò chơi</span>
 									</div>
 									<div>
 										<strong>{formatCompactNumber(totalViews)}</strong>
@@ -410,7 +410,7 @@ export default function GameList() {
 											<GameNavigationLink
 												key={game.id}
 												gameId={game.id}
-												categoryName={game.categoryName}
+												categoryKey={game.categoryName}
 												matchingTargetsByGameId={matchingTargetsByGameId}
 												className={styles.asideItem}
 											>
@@ -420,8 +420,8 @@ export default function GameList() {
 												<div>
 													<div className={styles.asideTitle}>{game.title}</div>
 													<div className={styles.asideMeta}>
-														{getFeaturedReasonLabel(game.featuredReason)} ·{" "}
-														{formatCompactNumber(game.trendScore)} xu hướng
+														{/* {getFeaturedReasonLabel(game.featuredReason)} ·{" "} */}
+														{/* {formatCompactNumber(game.trendScore)} xu hướng */}
 													</div>
 												</div>
 											</GameNavigationLink>
@@ -457,7 +457,7 @@ export default function GameList() {
 								<GameNavigationLink
 									key={game.id}
 									gameId={game.id}
-									categoryName={game.categoryName}
+									categoryKey={game.categoryName}
 									matchingTargetsByGameId={matchingTargetsByGameId}
 									className={styles.spotlightCard}
 								>
@@ -512,7 +512,8 @@ export default function GameList() {
 								Phân loại theo cơ chế tính điểm
 							</h2>
 							<p className="mt-2 text-sm md:text-base text-slate-300">
-								Nhóm nhanh các trò chơi có cộng điểm và không cộng điểm.
+								Nhóm nhanh các trò chơi có cộng điểm và giải trí, giúp bạn dễ
+								dàng chọn lựa theo sở thích.
 							</p>
 						</div>
 					)}
@@ -528,8 +529,9 @@ export default function GameList() {
 									transition={{ duration: 0.2 }}
 								>
 									<CategoryRow
-										categoryName="Trò chơi có điểm số"
-										categoryDescription="Các trò chơi có điểm số được tính vào tiến trình hoặc bảng xếp hạng"
+										categoryKey="SCORING"
+										categoryLabel="Trò chơi có điểm số"
+										categoryDescription=""
 										games={groupedByScore.scored}
 										matchingTargetsByGameId={matchingTargetsByGameId}
 									/>
@@ -543,8 +545,9 @@ export default function GameList() {
 									transition={{ duration: 0.2 }}
 								>
 									<CategoryRow
-										categoryName="Trò chơi giải trí"
-										categoryDescription="Các trò chơi luyện tập giải trí, không cộng điểm vào bảng xếp hạng"
+										categoryKey="ENTERTAIN"
+										categoryLabel="Trò chơi giải trí"
+										categoryDescription=""
 										games={groupedByScore.notScored}
 										matchingTargetsByGameId={matchingTargetsByGameId}
 									/>
@@ -584,7 +587,8 @@ export default function GameList() {
 								transition={{ duration: 0.2 }}
 							>
 								<CategoryRow
-									categoryName={convertCategorNameToDisplayName(category.name)}
+									categoryKey={category.name}
+									categoryLabel={convertCategorNameToDisplayName(category.name)}
 									categoryDescription={category.description}
 									games={category.games || []}
 									matchingTargetsByGameId={matchingTargetsByGameId}

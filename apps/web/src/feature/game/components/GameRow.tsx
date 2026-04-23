@@ -5,11 +5,11 @@ import styles from "./GameRow.module.css";
 
 interface Props {
 	game: GamePreview;
-	categoryName: string;
+	categoryKey: string;
 	matchingTarget?: MatchingGameLinkTarget;
 }
 
-const GameCard = ({ game, categoryName, matchingTarget }: Props) => {
+const GameCard = ({ game, categoryKey, matchingTarget }: Props) => {
 	const navigate = useNavigate();
 	const likes = game.likes ?? 0;
 	const views = game.views ?? 0;
@@ -18,7 +18,7 @@ const GameCard = ({ game, categoryName, matchingTarget }: Props) => {
 		<button
 			type="button"
 			onClick={() => {
-				if (categoryName === "MATCHING") {
+				if (matchingTarget || categoryKey === "MATCHING") {
 					navigate({
 						to: "/matching/game",
 						search: {
