@@ -1,20 +1,3 @@
-import type React from "react";
-import { useEffect, useMemo, useState } from "react";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
-import {
-	ArrowLeft,
-	Archive,
-	ExternalLink,
-	Eye,
-	FileImage,
-	FileUp,
-	Gamepad2,
-	Heart,
-	Loader2,
-	Save,
-	Send,
-} from "lucide-react";
-import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
 	Card,
@@ -34,6 +17,25 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { MINIO_GAME_URL } from "@/shared/constants/endpoints";
+import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import {
+	Archive,
+	ArrowLeft,
+	ExternalLink,
+	Eye,
+	FileImage,
+	FileUp,
+	Gamepad2,
+	Heart,
+	Loader2,
+	Save,
+	Send,
+} from "lucide-react";
+import type React from "react";
+import { useEffect, useMemo, useState } from "react";
+import { toast } from "sonner";
+import type { AdminRecentAttemptItem } from "../api/admin-games.api";
+import { useAdminGameDetailAnalytics } from "../queries/useAdminGameAnalytics";
 import {
 	useAdminGamesList,
 	useApproveGame,
@@ -44,8 +46,6 @@ import {
 	type GameCategoryOption,
 	type UpsertGamePayload,
 } from "../queries/useAdminGamesCrud";
-import type { AdminRecentAttemptItem } from "../api/admin-games.api";
-import { useAdminGameDetailAnalytics } from "../queries/useAdminGameAnalytics";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
 	if (error instanceof Error && error.message) {
@@ -178,7 +178,8 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		title: "",
 		desc: "",
 		gameType: "QUIZ",
-		...getDefaultScoreConfigForGameType("QUIZ"),
+		scoringModel: "NO_SCORE",
+		isScored: false,
 		trackingConfig: "",
 		difficulty: "MEDIUM",
 		baseScoreMax: 100,
@@ -208,7 +209,8 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 				title: "",
 				desc: "",
 				gameType: "QUIZ",
-				...getDefaultScoreConfigForGameType("QUIZ"),
+				scoringModel: "NO_SCORE",
+				isScored: false,
 				trackingConfig: "",
 				difficulty: "MEDIUM",
 				baseScoreMax: 100,
@@ -226,7 +228,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 			title: game.title ?? "",
 			desc: game.description ?? "",
 			gameType: game.gameType ?? "QUIZ",
-			scoringModel: game.scoringModel ?? "FINITE_SCORE",
+			scoringModel: game.scoringModel ?? "NO_SCORE",
 			isScored: game.isScored ?? game.scoringModel !== "NO_SCORE",
 			trackingConfig: game.trackingConfig ?? "",
 			difficulty: game.difficulty ?? "MEDIUM",
@@ -337,7 +339,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 				: "Chỉ theo dõi mức độ tham gia và hoàn thành, không ép game phải có điểm số.";
 	const selectedGameType = GAME_TYPE_DETAILS[form.gameType ?? "QUIZ"];
 	const selectedScoringModel =
-		SCORING_MODEL_DETAILS[form.scoringModel ?? "FINITE_SCORE"];
+		SCORING_MODEL_DETAILS[form.scoringModel ?? "NO_SCORE"];
 	const selectedScoreTracking =
 		SCORE_TRACKING_DETAILS[form.isScored === false ? "false" : "true"];
 	const scoreTrackingWarning =
@@ -365,9 +367,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 						"Người học sẽ không bị hiển thị điểm giả hoặc độ chính xác giả.",
 					];
 	const analyticsScoringModel =
-		analyticsDetail?.summary.scoringModel ??
-		form.scoringModel ??
-		"FINITE_SCORE";
+		analyticsDetail?.summary.scoringModel ?? form.scoringModel ?? "NO_SCORE";
 	const analyticsModeSummary =
 		analyticsScoringModel === "HIGH_SCORE"
 			? {
@@ -566,7 +566,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 								/>
 							</div>
 
-							<div className="grid gap-4 md:grid-cols-2">
+							<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
 								<div className="space-y-2">
 									<Label>Độ khó</Label>
 									<Select
@@ -614,30 +614,8 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 											))}
 										</SelectContent>
 									</Select>
-									<p className="text-xs leading-5 text-muted-foreground">
-										Dùng để nhóm game trong danh sách hoặc theo taxonomy nội
-										dung. Trường này không quyết định cách game được chấm điểm
-										hay phân tích.
-									</p>
 								</div>
-							</div>
 
-							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
-								<div className="space-y-1">
-									<h3 className="text-sm font-semibold text-slate-900">
-										Phần dưới đây là metadata hành vi, không phải taxonomy hiển
-										thị
-									</h3>
-									<p className="text-sm text-slate-600">
-										`Danh mục hiển thị` dùng để nhóm game theo nội dung. `Loại
-										hành vi game`, `Kiểu tính điểm` và `Có hiển thị và phân tích
-										điểm không` dùng để backend, tracking host và analytics hiểu
-										game vận hành như thế nào.
-									</p>
-								</div>
-							</div>
-
-							<div className="grid gap-4 md:grid-cols-3">
 								<div className="space-y-2">
 									<Label>Loại hành vi game</Label>
 									<Select
@@ -677,7 +655,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 								<div className="space-y-2">
 									<Label>Kiểu tính điểm</Label>
 									<Select
-										value={form.scoringModel ?? "FINITE_SCORE"}
+										value={form.scoringModel ?? "NO_SCORE"}
 										onValueChange={(value) =>
 											setForm((prev) => ({
 												...prev,
@@ -707,33 +685,48 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 										{selectedScoringModel.examples}
 									</p>
 								</div>
-
-								<div className="space-y-2">
-									<Label>Có hiển thị và phân tích điểm không</Label>
-									<Select
-										value={form.isScored === false ? "false" : "true"}
-										onValueChange={(value) =>
-											setForm((prev) => ({
-												...prev,
-												isScored: value === "true",
-											}))
-										}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Chọn chế độ hiển thị điểm" />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="true">Có điểm</SelectItem>
-											<SelectItem value="false">Không điểm</SelectItem>
-										</SelectContent>
-									</Select>
-									<p className="text-xs leading-5 text-muted-foreground">
-										{selectedScoreTracking.description}
-									</p>
-								</div>
 							</div>
 
-							<div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+							{/* <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+								<div className="space-y-1">
+									<h3 className="text-sm font-semibold text-slate-900">
+										Phần dưới đây là metadata hành vi, không phải taxonomy hiển
+										thị
+									</h3>
+									<p className="text-sm text-slate-600">
+										`Danh mục hiển thị` dùng để nhóm game theo nội dung. `Loại
+										hành vi game`, `Kiểu tính điểm` và `Có hiển thị và phân tích
+										điểm không` dùng để backend, tracking host và analytics hiểu
+										game vận hành như thế nào.
+									</p>
+								</div>
+							</div> */}
+
+							{/* <div className="space-y-2">
+								<Label>Có hiển thị và phân tích điểm không</Label>
+								<Select
+									value={form.isScored === false ? "false" : "true"}
+									onValueChange={(value) =>
+										setForm((prev) => ({
+											...prev,
+											isScored: value === "true",
+										}))
+									}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Chọn chế độ hiển thị điểm" />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="true">Có điểm</SelectItem>
+										<SelectItem value="false">Không điểm</SelectItem>
+									</SelectContent>
+								</Select>
+								<p className="text-xs leading-5 text-muted-foreground">
+									{selectedScoreTracking.description}
+								</p>
+							</div> */}
+
+							{/* <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
 								<div className="space-y-3">
 									<div className="space-y-1">
 										<h3 className="text-sm font-semibold text-slate-900">
@@ -775,9 +768,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 										</div>
 									) : null}
 								</div>
-							</div>
+							</div> */}
 
-							<div className="space-y-2">
+							{/* <div className="space-y-2">
 								<Label htmlFor="trackingConfig">Cấu hình theo dõi</Label>
 								<Textarea
 									id="trackingConfig"
@@ -800,9 +793,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 									không chắc, có thể để trống và chỉ điền khi game integration
 									yêu cầu.
 								</p>
-							</div>
+							</div> */}
 
-							<div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-5">
+							{/* <div className="rounded-2xl border border-sky-200 bg-sky-50/60 p-5">
 								<div className="mb-4 space-y-1">
 									<div className="flex flex-wrap items-center justify-between gap-3">
 										<div className="flex flex-wrap items-center gap-2">
@@ -944,7 +937,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 										</div>
 									</div>
 								) : null}
-							</div>
+							</div> */}
 
 							<div className="rounded-2xl border border-amber-200 bg-amber-50/60 p-5">
 								<div className="mb-4 space-y-1">
@@ -953,11 +946,11 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 											<h3 className="text-sm font-semibold text-amber-950">
 												Thiết lập spotlight
 											</h3>
-											<span
+											{/* <span
 												className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${spotlightStatus.className}`}
 											>
 												{spotlightStatus.label}
-											</span>
+											</span> */}
 										</div>
 										<Button
 											type="button"
@@ -1187,7 +1180,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 									</span>
 								</div>
 								<div className="flex items-center justify-between">
-									<span className="text-muted-foreground">Trend score</span>
+									<span className="text-muted-foreground">Điểm Trending</span>
 									<span className="font-medium">{game?.trendScore ?? 0}</span>
 								</div>
 							</div>

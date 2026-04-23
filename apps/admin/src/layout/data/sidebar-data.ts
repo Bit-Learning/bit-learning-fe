@@ -53,12 +53,6 @@ export const navGroups: NavGroup[] = [
 			{ title: "Quản lý người dùng", url: "/users", icon: Users },
 			{ title: "Quản lý trò chơi", url: "/apps/games", icon: Gamepad2 },
 			{ title: "Quản lý mẫu mail", url: "/mail-templates", icon: Mail },
-
-			{
-				title: "Thống kê trò chơi",
-				url: "/apps/games/analytics",
-				icon: BarChart3,
-			},
 			{ title: "Quản lý tags", url: "/tags", icon: Tag },
 			{ title: "Quản lý AI", url: "/system-prompt", icon: MessageCircle },
 			{ title: "Khiếu nại bài viết", url: "/post-appeals", icon: ShieldAlert },

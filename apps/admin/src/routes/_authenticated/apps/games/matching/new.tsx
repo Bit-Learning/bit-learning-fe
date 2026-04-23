@@ -11,10 +11,7 @@ export const Route = createFileRoute("/_authenticated/apps/games/matching/new")(
 function NewMatchingGameRoute() {
 	return (
 		<>
-			<Header
-				title="Tạo matching game"
-				subtitle="Tạo game nối khái niệm bằng trình biên tập full-page"
-			/>
+			<Header />
 			<div className="flex flex-1 flex-col gap-2 p-6 sm:gap-6">
 				<MatchingGameEditorPage mode="create" />
 			</div>

@@ -9,10 +9,7 @@ export const Route = createFileRoute("/_authenticated/apps/games/new")({
 function NewGameRoute() {
 	return (
 		<>
-			<Header
-				title="Tạo game thường"
-				subtitle="Upload file chơi và metadata trong một trang biên tập đầy đủ"
-			/>
+			<Header />
 			<div className="flex flex-1 flex-col gap-2 p-6 sm:gap-6">
 				<StandardGameEditorPage />
 			</div>
