@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { getCoreRowModel, type OnChangeFn, type PaginationState, useReactTable } from "@tanstack/react-table";
-import { CheckCircle, XCircle, Eye, Calendar } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Calendar, X, Loader2 } from "lucide-react";
 import { DataTablePagination } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -26,6 +26,76 @@ import { QuestionBankTab } from "../components/QuestionBankTab";
 
 const route = getRouteApi("/_authenticated/questions/");
 
+function ApproveConfirmModal({
+  open,
+  count,
+  isPending,
+  onClose,
+  onConfirm,
+}: {
+  open: boolean;
+  count: number;
+  isPending: boolean;
+  onClose: () => void;
+  onConfirm: () => void;
+}) {
+  if (!open) return null;
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center">
+      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" onClick={() => !isPending && onClose()} />
+      <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-lg font-bold text-gray-900 dark:text-slate-100">Xác nhận phê duyệt</h2>
+          <button
+            onClick={onClose}
+            disabled={isPending}
+            className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors disabled:opacity-40"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex items-center gap-3 p-3.5 rounded-xl bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-700/40 mb-5">
+          <p className="text-md text-green-800 dark:text-green-300">
+            Bạn đang phê duyệt <span className="font-bold">{count} câu hỏi</span>. Sau khi phê duyệt, các câu hỏi sẽ
+            được thêm vào ngân hàng câu hỏi và hiển thị với giáo viên.
+          </p>
+        </div>
+
+        <div className="flex gap-3">
+          <button
+            onClick={onClose}
+            disabled={isPending}
+            className="flex-1 px-4 py-2.5 rounded-xl border border-gray-200 dark:border-slate-700 text-sm font-semibold text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
+          >
+            Huỷ
+          </button>
+          <button
+            onClick={onConfirm}
+            disabled={isPending}
+            className={cn(
+              "flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-sm font-bold text-white transition-all",
+              isPending ? "bg-green-400 cursor-not-allowed" : "bg-green-600 hover:bg-green-700 active:scale-[0.98]",
+            )}
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                <CheckCircle className="h-4 w-4" />
+                Phê duyệt
+              </>
+            )}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export function QuestionApprovalList() {
   const searchParams = route.useSearch();
   const navigate = route.useNavigate();
@@ -33,6 +103,8 @@ export function QuestionApprovalList() {
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [viewQuestion, setViewQuestion] = useState<QuestionResponse | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
+  const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+
   const { pagination: tablePagination, onPaginationChange } = useTableUrlState({
     search: searchParams,
     navigate,
@@ -96,9 +168,7 @@ export function QuestionApprovalList() {
   const pendingTable = useReactTable({
     data: questions,
     columns: [],
-    state: {
-      pagination: tablePagination,
-    },
+    state: { pagination: tablePagination },
     onPaginationChange: pendingPaginationChange,
     getCoreRowModel: getCoreRowModel(),
     manualPagination: true,
@@ -117,12 +187,15 @@ export function QuestionApprovalList() {
     }
   };
 
-  const handleApprove = () => {
+  const handleApproveConfirm = () => {
     if (selectedQuestions.length === 0) return;
     approveQuestions.mutate(
       { questionIds: selectedQuestions },
       {
-        onSuccess: () => setSelectedQuestions([]),
+        onSuccess: () => {
+          setSelectedQuestions([]);
+          setApproveDialogOpen(false);
+        },
       },
     );
   };
@@ -143,10 +216,7 @@ export function QuestionApprovalList() {
   const getDifficultyBadge = (level: QuestionLevel) => {
     const config = {
       [QuestionLevel.EASY]: { variant: "default" as const, label: "Dễ" },
-      [QuestionLevel.MEDIUM]: {
-        variant: "secondary" as const,
-        label: "Trung bình",
-      },
+      [QuestionLevel.MEDIUM]: { variant: "secondary" as const, label: "Trung bình" },
       [QuestionLevel.HARD]: { variant: "destructive" as const, label: "Khó" },
     };
     const { variant, label } = config[level];
@@ -165,7 +235,6 @@ export function QuestionApprovalList() {
     return (
       <>
         <Header />
-
         <div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
           <Card>
             <CardHeader>
@@ -197,7 +266,7 @@ export function QuestionApprovalList() {
           </div>
           {activeTab === "pending" && selectedQuestions.length > 0 && (
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={handleApprove} className="gap-2">
+              <Button variant="outline" onClick={() => setApproveDialogOpen(true)} className="gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Phê duyệt ({selectedQuestions.length})
               </Button>
@@ -218,7 +287,6 @@ export function QuestionApprovalList() {
                 {questionsAll?.page?.totalElements}
               </Badge>
             </TabsTrigger>
-
             <TabsTrigger value="bank" className="gap-2 px-6 py-3 text-base font-medium">
               <Eye className="h-4 w-4" />
               Ngân hàng câu hỏi
@@ -263,11 +331,9 @@ export function QuestionApprovalList() {
                           />
                         </TableCell>
                         <TableCell>
-                          <div>
-                            <p className="font-medium line-clamp-1">
-                              {index + 1}: {question.content}
-                            </p>
-                          </div>
+                          <p className="font-medium line-clamp-1">
+                            {index + 1}: {question.content}
+                          </p>
                         </TableCell>
                         <TableCell>{getDifficultyBadge(question.questionLevel)}</TableCell>
                         <TableCell>
@@ -325,6 +391,14 @@ export function QuestionApprovalList() {
           onOpenChange={setRejectDialogOpen}
           onConfirm={handleReject}
           count={selectedQuestions.length}
+        />
+
+        <ApproveConfirmModal
+          open={approveDialogOpen}
+          count={selectedQuestions.length}
+          isPending={approveQuestions.isPending}
+          onClose={() => setApproveDialogOpen(false)}
+          onConfirm={handleApproveConfirm}
         />
       </div>
     </>

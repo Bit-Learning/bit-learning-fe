@@ -1,23 +1,11 @@
 import React, { useEffect, useRef, useState } from "react";
-import {
-  Search,
-  CheckCircle,
-  XCircle,
-  Eye,
-  ChevronDown,
-  AlertCircle,
-  CheckCircle2,
-  Loader2,
-  Code2,
-} from "lucide-react";
+import { Search, CheckCircle, Eye, ChevronDown, CheckCircle2, Code2 } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Difficulty, type ProblemBriefResponse } from "../types/problem.type";
 import { useApproveProblem, useGetPendingProblems, useRejectProblem } from "../queries/useProblem";
-import { toast } from "@/components/Sonner";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Checkbox } from "@/components/ui/checkbox";
 import { Skeleton } from "@/components/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
 import { Pagination } from "@/components/Pagination";
@@ -39,19 +27,14 @@ const PENDING_PAGE_SIZE = 20;
 const AdminProblemApprovalPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"pending" | "bank">("pending");
 
-  // --- Pending tab state ---
   const [search, setSearch] = useState("");
   const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [detailProblemId, setDetailProblemId] = useState<string | null>(null);
-  const [showBatchRejectForm, setShowBatchRejectForm] = useState(false);
-  const [batchRejectReason, setBatchRejectReason] = useState("");
 
-  // ref for indeterminate state on the "select all" checkbox
   const selectAllRef = useRef<HTMLButtonElement>(null);
 
-  // --- Bank tab state ---
   const [bankKeyword, setBankKeyword] = useState("");
   const [bankDifficulty, setBankDifficulty] = useState("");
   const [bankPagination, setBankPagination] = useState({ pageIndex: 0, pageSize: 10 });
@@ -75,7 +58,6 @@ const AdminProblemApprovalPage: React.FC = () => {
     return matchSearch && matchDifficulty;
   });
 
-  // Sync indeterminate state whenever selection or filtered list changes
   useEffect(() => {
     const el = selectAllRef.current as any;
     if (!el) return;
@@ -87,41 +69,6 @@ const AdminProblemApprovalPage: React.FC = () => {
   useEffect(() => {
     setSelectedIds([]);
   }, [page, activeTab]);
-
-  const handleSelectAll = () => {
-    if (selectedIds.length === filteredProblems.length && filteredProblems.length > 0) {
-      setSelectedIds([]);
-    } else {
-      setSelectedIds(filteredProblems.map((p) => p.id));
-    }
-  };
-
-  const handleSelectOne = (id: string) => {
-    setSelectedIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
-  };
-
-  const handleBatchApprove = () => {
-    approveMutation.mutate(selectedIds, {
-      onSuccess: () => setSelectedIds([]),
-    });
-  };
-
-  const handleBatchReject = () => {
-    if (!batchRejectReason.trim()) {
-      toast.error({ title: "Lỗi", description: "Vui lòng nhập lý do từ chối" });
-      return;
-    }
-    rejectMutation.mutate(
-      { problemIds: selectedIds, rejectReason: batchRejectReason.trim() },
-      {
-        onSuccess: () => {
-          setSelectedIds([]);
-          setShowBatchRejectForm(false);
-          setBatchRejectReason("");
-        },
-      },
-    );
-  };
 
   const handleTabChange = (tab: string) => {
     if (tab !== "pending" && tab !== "bank") return;
@@ -163,67 +110,7 @@ const AdminProblemApprovalPage: React.FC = () => {
             <h1 className="text-2xl font-bold mb-2">Quản lý bài tập lập trình</h1>
             <p className="text-muted-foreground text-sm">Phê duyệt bài tập mới và quản lý kho bài tập hiện có</p>
           </div>
-
-          {activeTab === "pending" && selectedIds.length > 0 && !showBatchRejectForm && (
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                onClick={handleBatchApprove}
-                className="gap-2"
-                disabled={approveMutation.isPending}
-              >
-                {approveMutation.isPending ? (
-                  <Loader2 className="h-4 w-4 animate-spin" />
-                ) : (
-                  <CheckCircle className="h-4 w-4" />
-                )}
-                Phê duyệt ({selectedIds.length})
-              </Button>
-              <Button variant="destructive" onClick={() => setShowBatchRejectForm(true)} className="gap-2">
-                <XCircle className="h-4 w-4" />
-                Từ chối ({selectedIds.length})
-              </Button>
-            </div>
-          )}
         </div>
-
-        {showBatchRejectForm && selectedIds.length > 0 && (
-          <div className="rounded-xl border border-rose-200 dark:border-rose-800 bg-rose-50 dark:bg-rose-950/20 p-4 space-y-3">
-            <p className="text-sm font-medium text-rose-700 dark:text-rose-400 flex items-center gap-2">
-              <AlertCircle className="w-4 h-4" />
-              Từ chối {selectedIds.length} bài tập — nhập lý do:
-            </p>
-            <textarea
-              value={batchRejectReason}
-              onChange={(e) => setBatchRejectReason(e.target.value)}
-              placeholder="Mô tả lý do từ chối..."
-              rows={2}
-              className="w-full text-sm rounded-lg border border-rose-200 dark:border-rose-800 bg-white dark:bg-slate-800 px-3 py-2 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-2 focus:ring-rose-400 resize-none placeholder:text-slate-400"
-            />
-            <div className="flex gap-2 justify-end">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setShowBatchRejectForm(false);
-                  setBatchRejectReason("");
-                }}
-              >
-                Hủy
-              </Button>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleBatchReject}
-                disabled={rejectMutation.isPending}
-                className="gap-2"
-              >
-                {rejectMutation.isPending && <Loader2 className="w-4 h-4 animate-spin" />}
-                Xác nhận từ chối
-              </Button>
-            </div>
-          </div>
-        )}
 
         <Tabs value={activeTab} onValueChange={handleTabChange} className="space-y-4">
           <TabsList>
@@ -242,7 +129,6 @@ const AdminProblemApprovalPage: React.FC = () => {
             </TabsTrigger>
           </TabsList>
 
-          {/* ── PENDING TAB ── */}
           <TabsContent value="pending" className="space-y-4">
             <div className="flex flex-col sm:flex-row gap-3">
               <div className="relative flex-1">
@@ -284,16 +170,9 @@ const AdminProblemApprovalPage: React.FC = () => {
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead className="w-12">
-                        <Checkbox
-                          ref={selectAllRef}
-                          checked={filteredProblems.length > 0 && selectedIds.length === filteredProblems.length}
-                          onCheckedChange={handleSelectAll}
-                        />
-                      </TableHead>
                       <TableHead>Tiêu đề</TableHead>
                       <TableHead>Độ khó</TableHead>
-                      <TableHead>Tác giả</TableHead>
+                      <TableHead>Giảng viên</TableHead>
                       <TableHead>Ngày gửi</TableHead>
                       <TableHead className="text-right">Thao tác</TableHead>
                     </TableRow>
@@ -303,9 +182,6 @@ const AdminProblemApprovalPage: React.FC = () => {
                       const isSelected = selectedIds.includes(problem.id);
                       return (
                         <TableRow key={problem.id} className={cn(isSelected && "bg-muted/50")}>
-                          <TableCell>
-                            <Checkbox checked={isSelected} onCheckedChange={() => handleSelectOne(problem.id)} />
-                          </TableCell>
                           <TableCell>
                             <button
                               onClick={() => setDetailProblemId(problem.id)}
