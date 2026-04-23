@@ -28,12 +28,12 @@ export const ProblemStatsCard: React.FC<ProblemStatsCardProps> = ({ problemId })
     );
   }
 
-  const rate = stats.acceptanceRate || 0;
+  const rate = stats.acceptanceRate || 100;
   const rateColor = rate >= 60 ? "text-green-600" : rate >= 30 ? "text-orange-500" : "text-red-500";
 
   return (
     <>
-      <span className={cn("font-bold text-md text-right", rateColor)}>{rate.toFixed(1)}%</span>
+      <span className={cn("font-medium text-md text-right", rateColor)}>{rate.toFixed(1)}%</span>
     </>
   );
 };

@@ -517,6 +517,8 @@ export interface ProblemFilters {
   sort?: string;
   difficulty?: Difficulty;
   approvalStatus?: ApprovalStatus;
+  classLevel?: number;
+  createdById?: number;
 }
 
 export interface SubmissionFilters {

@@ -56,6 +56,8 @@ const TagPill: React.FC<{
 const StudentProblemListContent: React.FC = () => {
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState<"all" | Difficulty>("all");
+  const [classLevel, setClassLevel] = useState<number | "all">("all");
+  const [createdById, setCreatedById] = useState<number | "all">("all");
   const [activeTag, setActiveTag] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [showAllTags, setShowAllTags] = useState(false);
@@ -68,6 +70,8 @@ const StudentProblemListContent: React.FC = () => {
     size,
     sort: "createdAt,desc",
     difficulty: difficulty !== "all" ? difficulty : undefined,
+    classLevel: classLevel !== "all" ? classLevel : undefined,
+    createdById: createdById !== "all" ? createdById : undefined,
   });
 
   const toggleFavorite = useToggleFavorite();
@@ -76,6 +80,16 @@ const StudentProblemListContent: React.FC = () => {
   const pageInfo = problemsData?.page;
   const totalPages = pageInfo?.totalPages || 0;
   const totalElements = pageInfo?.totalElements || 0;
+
+  const creators = useMemo(() => {
+    const map = new Map<number, string>();
+    problems.forEach((p) => {
+      if (p.createdBy) {
+        map.set(p.createdBy.id, `${p.createdBy.firstName} ${p.createdBy.lastName}`.trim());
+      }
+    });
+    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
+  }, [problems]);
 
   const tagMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -94,6 +108,7 @@ const StudentProblemListContent: React.FC = () => {
         if (!p.isPublic) return false;
         if (activeTag && !p.tags?.some((t) => t.name === activeTag)) return false;
         if (search && !p.title.toLowerCase().includes(search.toLowerCase())) return false;
+        if (createdById !== "all" && p.createdBy?.id !== createdById) return false;
         return true;
       }),
     [problems, activeTag, search],
@@ -193,6 +208,46 @@ const StudentProblemListContent: React.FC = () => {
             </select>
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
+
+          <div className="relative">
+            <select
+              value={classLevel}
+              onChange={(e) => {
+                setClassLevel(e.target.value === "all" ? "all" : Number(e.target.value));
+                setPage(0);
+              }}
+              className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
+            >
+              <option value="all">Lớp: Tất cả</option>
+              {[6, 7, 8, 9, 10, 11, 12].map((lvl) => (
+                <option key={lvl} value={lvl}>
+                  Lớp {lvl}
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
+
+          {creators.length > 0 && (
+            <div className="relative">
+              <select
+                value={createdById}
+                onChange={(e) => {
+                  setCreatedById(e.target.value === "all" ? "all" : Number(e.target.value));
+                  setPage(0);
+                }}
+                className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
+              >
+                <option value="all">Giảng viên: Tất cả</option>
+                {creators.map(({ id, name }) => (
+                  <option key={id} value={id}>
+                    {name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
+          )}
         </div>
 
         <div className="rounded-md border border-slate-200 overflow-hidden bg-white shadow-sm">
@@ -201,6 +256,7 @@ const StudentProblemListContent: React.FC = () => {
               <tr className="bg-slate-50 border-b border-slate-200 text-sm uppercase tracking-wider text-slate-500 font-medium">
                 <th className="px-4 py-3 text-left w-10">#</th>
                 <th className="px-4 py-3 text-left">Bài tập</th>
+                <th className="px-4 py-3 text-center w-48">Lớp</th>
                 <th className="px-4 py-3 text-center w-48">Giảng viên</th>
                 <th className="px-4 py-3 text-center w-36">Tỉ lệ đúng</th>
                 <th className="px-4 py-3 text-right w-36">Độ khó</th>
@@ -236,8 +292,13 @@ const StudentProblemListContent: React.FC = () => {
                         </p>
                       </div>
                     </td>
+                    <td className="px-4 py-3 text-center">
+                      <span className="text-md font-semibold text-slate-800 group-hover:text-blue-500 transition-colors truncate">
+                        {problem.classLevel}
+                      </span>
+                    </td>
 
-                    <td className="px-4 py-3 text-center text-sm text-slate-600">
+                    <td className="px-4 py-3 text-center text-sm text-blue-600">
                       {problem.createdBy ? (
                         `${problem.createdBy.firstName} ${problem.createdBy.lastName}`.trim()
                       ) : (
@@ -249,7 +310,7 @@ const StudentProblemListContent: React.FC = () => {
                       <ProblemStatsCard problemId={problem.id} />
                     </td>
 
-                    <td className={cn("px-4 py-3 text-sm font-medium text-right", DIFF_COLOR[problem.difficulty])}>
+                    <td className={cn("px-4 py-3 text-md font-medium text-right", DIFF_COLOR[problem.difficulty])}>
                       {DIFF_LABEL[problem.difficulty] ?? problem.difficulty}
                     </td>
 

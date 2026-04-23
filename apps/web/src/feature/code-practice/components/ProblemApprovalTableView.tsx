@@ -171,6 +171,7 @@ export default function ProblemApprovalTableView() {
                   <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-48 ">
                     ĐỘ KHÓ
                   </th>
+                  <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-left">Lớp</th>
                   <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
                     TRẠNG THÁI
                   </th>
@@ -206,6 +207,9 @@ export default function ProblemApprovalTableView() {
                             {difficulty.label}
                           </span>
                         )}
+                      </td>
+                      <td className="p-4 text-md text-slate-700 dark:text-slate-400 whitespace-nowrap">
+                        {problem.classLevel}
                       </td>
                       <td className="p-4 text-sm">
                         {approval && (

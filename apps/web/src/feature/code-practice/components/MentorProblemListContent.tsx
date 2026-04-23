@@ -180,6 +180,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Độ khó
                       </th>
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Lớp</th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
                         Trạng thái
                       </th>
@@ -231,6 +232,9 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                               >
                                 {difficultyConfig[problem.difficulty].label}
                               </span>
+                            </td>
+                            <td className="px-4 py-3.5 text-md text-slate-700 dark:text-slate-400 whitespace-nowrap">
+                              {problem.classLevel}
                             </td>
                             <td className="px-4 py-3.5 text-center">
                               <span
