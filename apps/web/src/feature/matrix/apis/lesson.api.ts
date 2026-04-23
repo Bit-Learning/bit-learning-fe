@@ -23,4 +23,7 @@ export const lessonApi = {
   getByChapter(chapterId: number): Promise<AxiosResponse<ApiResponse<TLessonResponse[]>>> {
     return api.get(`/lessons/chapter/${chapterId}`);
   },
+  getById(id: number): Promise<AxiosResponse<ApiResponse<TLessonResponse>>> {
+    return api.get(`/lessons/${id}`);
+  },
 };

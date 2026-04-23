@@ -8,6 +8,7 @@ export const lessonKeys = {
   bySubject: (subjectId: number, params?: LessonParams) =>
     [...lessonKeys.all, "by-subject", subjectId, params] as const,
   byChapter: (chapterId: number) => ["lessons", "chapter", chapterId] as const,
+  detail: (id: number) => ["lessons", "detail", id] as const,
 };
 
 export const useLessons = (params?: LessonParams) => {
@@ -48,6 +49,20 @@ export const useLessonsBySubject = (
       return response.data.data;
     },
     enabled: options?.enabled !== false && !!subjectId,
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
+export const useLessonDetail = (id?: number) => {
+  return useQuery({
+    queryKey: lessonKeys.detail(id ?? 0),
+    queryFn: async () => {
+      if (!id) return null;
+      const response = await lessonApi.getById(id);
+      return response.data.data;
+    },
+    enabled: !!id,
     staleTime: 5 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
   });

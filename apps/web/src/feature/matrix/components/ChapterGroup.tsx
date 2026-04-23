@@ -101,7 +101,7 @@ const ChapterGroup: React.FC<GroupProps> = ({
           <option value={0}>-- Chọn chương --</option>
           {chapters?.map((chapter: TChapterBriefResponse, index: number) => (
             <option key={index} value={chapter.id}>
-              Chương {index + 1}: {chapter.name}
+              {chapter.name}
             </option>
           ))}
         </select>

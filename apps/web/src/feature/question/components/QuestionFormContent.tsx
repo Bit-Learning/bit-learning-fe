@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
 import { ArrowLeft, Plus, Trash2, AlertCircle, Check, Save, ChevronDown } from "lucide-react";
 import { z } from "zod";
@@ -11,8 +11,9 @@ import { toast } from "@/shared/components/Sonner";
 import { useCreateQuestion, useUpdateQuestion, useQuestion } from "../queries/useQuestion";
 import { QuestionRequest, QuestionType, QuestionLevel } from "../types/question.type";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
-import { useChaptersBySubject } from "@/feature/matrix/queries/useChapter";
+import { useChaptersBySubject, useChapterDetail } from "@/feature/matrix/queries/useChapter";
 import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
+import { useLessonDetail } from "@/feature/matrix/queries/useLesson";
 import MediaUploadPanel from "./MediaUploadPanel";
 
 const optionSchema = z.object({
@@ -37,11 +38,7 @@ const formSchema = z
     if (data.questionType === "MCQ") {
       const hasCorrect = data.options?.some((o) => o.isCorrect);
       if (!hasCorrect) {
-        ctx.addIssue({
-          code: z.ZodIssueCode.custom,
-          path: ["options"],
-          message: "Phải chọn ít nhất 1 đáp án đúng",
-        });
+        ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["options"], message: "Phải chọn ít nhất 1 đáp án đúng" });
       }
     }
     if (data.questionType === "ESSAY") {
@@ -57,10 +54,10 @@ const formSchema = z
 
 type FormValues = z.infer<typeof formSchema>;
 
-const label = "block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2";
-const select =
+const labelCls = "block text-md font-semibold text-slate-700 dark:text-slate-300 mb-2";
+const selectCls =
   "w-full appearance-none px-4 py-3 pr-10 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-base text-slate-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all disabled:opacity-50 disabled:cursor-not-allowed";
-const textarea =
+const textareaCls =
   "w-full px-4 py-3 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-900 text-base text-slate-900 dark:text-white placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all resize-none";
 
 interface Props {
@@ -74,13 +71,20 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
 
   const [chapterId, setChapterId] = useState<number | undefined>(undefined);
   const [createdQuestionId, setCreatedQuestionId] = useState<number | null>(null);
+  const originalSubjectIdRef = useRef<number | undefined>(undefined);
+  const isInitialized = useRef(false);
 
   const createQuestion = useCreateQuestion();
   const updateQuestion = useUpdateQuestion();
+
   const { data: existingQuestion, isLoading: loadingQuestion } = useQuestion(questionId!, {
     enabled: mode === "edit" && !!questionId,
   });
   const { data: subjects } = useSubjectsList();
+
+  const { data: existingLessonDetail } = useLessonDetail(mode === "edit" ? existingQuestion?.lesson?.id : undefined);
+
+  const { data: chapterDetail } = useChapterDetail(mode === "edit" ? existingLessonDetail?.chapterId : undefined);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -100,41 +104,66 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   });
 
   const { fields, append, remove } = useFieldArray({ control: form.control, name: "options" });
-
   const questionType = form.watch("questionType");
   const subjectId = form.watch("subjectId");
 
   const { data: chapters } = useChaptersBySubject(subjectId);
-  const { data: lessons } = useLessonsByChapter(chapterId);
+
+  const { data: lessonsByChapter } = useLessonsByChapter(chapterId);
+
+  const lessons = lessonsByChapter ?? chapterDetail?.lessons ?? [];
 
   useEffect(() => {
-    if (mode === "edit" && existingQuestion) {
-      form.reset({
-        content: existingQuestion.content,
-        canonicalAnswer: existingQuestion.canonicalAnswer || "",
-        questionType: existingQuestion.questionType,
-        questionLevel: existingQuestion.questionLevel,
-        subjectId: existingQuestion.subject?.id,
-        lessonId: existingQuestion.lesson?.id,
-        tagIds: existingQuestion.tags?.map((t) => t.id) || [],
-        options:
-          existingQuestion.options?.map((opt) => ({
-            label: opt.label || "",
-            content: opt.content,
-            isCorrect: opt.isCorrect,
-            orderNo: opt.orderNo,
-          })) || [],
-      });
-    }
-  }, [mode, existingQuestion]);
+    if (mode !== "edit" || !existingQuestion || isInitialized.current) return;
+
+    originalSubjectIdRef.current = existingQuestion.subject?.id;
+    isInitialized.current = true;
+
+    form.reset({
+      content: existingQuestion.content,
+      canonicalAnswer: existingQuestion.canonicalAnswer || "",
+      questionType: existingQuestion.questionType,
+      questionLevel: existingQuestion.questionLevel,
+      subjectId: existingQuestion.subject?.id,
+      lessonId: existingQuestion.lesson?.id,
+      tagIds: existingQuestion.tags?.map((t) => t.id) || [],
+      options:
+        existingQuestion.options?.map((opt) => ({
+          label: opt.label || "",
+          content: opt.content,
+          isCorrect: opt.isCorrect,
+          orderNo: opt.orderNo,
+        })) || [],
+    });
+  }, [existingQuestion]);
 
   useEffect(() => {
+    if (mode !== "edit" || !chapterDetail) return;
+    setChapterId(chapterDetail.id);
+  }, [chapterDetail]);
+
+  useEffect(() => {
+    if (mode !== "edit" || !lessons.length || !existingQuestion?.lesson?.id) return;
+    form.setValue("lessonId", existingQuestion.lesson.id);
+  }, [lessons]);
+
+  useEffect(() => {
+    if (!isInitialized.current) return;
+    if (subjectId === originalSubjectIdRef.current) return;
     setChapterId(undefined);
     form.setValue("lessonId", undefined);
   }, [subjectId]);
 
+  const prevChapterIdRef = useRef<number | undefined>(undefined);
   useEffect(() => {
-    form.setValue("lessonId", undefined);
+    if (!isInitialized.current) {
+      prevChapterIdRef.current = chapterId;
+      return;
+    }
+    if (chapterId !== prevChapterIdRef.current) {
+      form.setValue("lessonId", undefined);
+    }
+    prevChapterIdRef.current = chapterId;
   }, [chapterId]);
 
   const addOption = () => {
@@ -164,7 +193,6 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
       ...data,
       options: data.questionType === "MCQ" ? data.options : undefined,
     };
-
     if (mode === "edit" && questionId) {
       updateQuestion.mutate(
         { id: questionId, data: requestData },
@@ -174,11 +202,8 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
       createQuestion.mutate(requestData, {
         onSuccess: (response) => {
           const newId = response.data.data?.id;
-          if (newId) {
-            setCreatedQuestionId(newId);
-          } else {
-            navigate({ to: "/mentor/question/my" });
-          }
+          if (newId) setCreatedQuestionId(newId);
+          else navigate({ to: "/mentor/question/my" });
         },
       });
     }
@@ -201,9 +226,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
             Bạn có thể đính kèm ảnh hoặc video minh họa cho câu hỏi, hoặc bỏ qua để hoàn thành.
           </p>
         </div>
-
         <MediaUploadPanel questionId={createdQuestionId} currentMediaUrl={null} currentMediaType={null} />
-
         <div className="flex justify-end gap-3 pt-6">
           <Button
             type="button"
@@ -243,6 +266,10 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     );
   }
 
+  const subjectChanged = isInitialized.current && subjectId !== originalSubjectIdRef.current;
+  const chapterDisabled = !subjectId;
+  const lessonDisabled = !subjectId || !chapterId;
+
   return (
     <div className="container mx-auto p-6 max-w-6xl">
       <div className="mb-8">
@@ -272,14 +299,14 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
           <CardContent className="space-y-5">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className={label}>
+                <label className={labelCls}>
                   Loại câu hỏi <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
                     value={form.watch("questionType")}
                     onChange={(e) => form.setValue("questionType", e.target.value as QuestionType)}
-                    className={select}
+                    className={selectCls}
                   >
                     <option value="MCQ">Trắc nghiệm (MCQ)</option>
                     <option value="ESSAY">Tự luận (Essay)</option>
@@ -293,16 +320,15 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                   </p>
                 )}
               </div>
-
               <div>
-                <label className={label}>
+                <label className={labelCls}>
                   Độ khó <span className="text-red-500">*</span>
                 </label>
                 <div className="relative">
                   <select
                     value={form.watch("questionLevel")}
                     onChange={(e) => form.setValue("questionLevel", e.target.value as QuestionLevel)}
-                    className={select}
+                    className={selectCls}
                   >
                     <option value="EASY">Dễ</option>
                     <option value="MEDIUM">Trung bình</option>
@@ -320,17 +346,17 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
             </div>
 
             <div>
-              <label className={label}>Môn học</label>
+              <label className={labelCls}>Môn học</label>
               <div className="relative">
                 <select
                   value={form.watch("subjectId") || ""}
                   onChange={(e) => form.setValue("subjectId", e.target.value ? Number(e.target.value) : undefined)}
-                  className={select}
+                  className={selectCls}
                 >
                   <option value="">-- Chọn môn học --</option>
-                  {subjects?.map((subject) => (
-                    <option key={subject.id} value={subject.id}>
-                      {subject.name}
+                  {subjects?.map((s) => (
+                    <option key={s.id} value={s.id}>
+                      {s.name}
                     </option>
                   ))}
                 </select>
@@ -340,18 +366,18 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div>
-                <label className={label}>Chương</label>
+                <label className={`${labelCls} ${chapterDisabled ? "opacity-50" : ""}`}>Chương</label>
                 <div className="relative">
                   <select
                     value={chapterId || ""}
                     onChange={(e) => setChapterId(e.target.value ? Number(e.target.value) : undefined)}
-                    disabled={!subjectId}
-                    className={select}
+                    disabled={chapterDisabled}
+                    className={selectCls}
                   >
                     <option value="">-- Chọn chương --</option>
-                    {chapters?.map((chapter, index) => (
-                      <option key={chapter.id} value={chapter.id}>
-                        Chương {index + 1}: {chapter.name}
+                    {chapters?.map((c, i) => (
+                      <option key={i} value={c.id}>
+                        {c.name}
                       </option>
                     ))}
                   </select>
@@ -361,24 +387,25 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
               </div>
 
               <div>
-                <label className={label}>Bài học</label>
+                <label className={`${labelCls} ${lessonDisabled ? "opacity-50" : ""}`}>Bài học</label>
                 <div className="relative">
                   <select
                     value={form.watch("lessonId") || ""}
                     onChange={(e) => form.setValue("lessonId", e.target.value ? Number(e.target.value) : undefined)}
-                    disabled={!chapterId}
-                    className={select}
+                    disabled={lessonDisabled}
+                    className={selectCls}
                   >
                     <option value="">-- Chọn bài học --</option>
-                    {lessons?.map((lesson) => (
-                      <option key={lesson.id} value={lesson.id}>
-                        {lesson.name}
+                    {lessons.map((l) => (
+                      <option key={l.id} value={l.id}>
+                        {l.name}
                       </option>
                     ))}
                   </select>
                   <ChevronDown className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                 </div>
-                {!chapterId && <p className="text-xs text-slate-400 mt-1.5">Vui lòng chọn chương trước</p>}
+                {!subjectId && <p className="text-xs text-slate-400 mt-1.5">Vui lòng chọn môn học trước</p>}
+                {subjectId && !chapterId && <p className="text-xs text-slate-400 mt-1.5">Vui lòng chọn chương trước</p>}
                 {form.formState.errors.lessonId && (
                   <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
                     <AlertCircle className="h-3 w-3" />
@@ -397,14 +424,14 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
           </CardHeader>
           <CardContent className="space-y-5">
             <div>
-              <label className={label}>
+              <label className={labelCls}>
                 Câu hỏi <span className="text-red-500">*</span>
               </label>
               <textarea
                 rows={4}
                 placeholder="Nhập nội dung câu hỏi..."
                 {...form.register("content")}
-                className={textarea}
+                className={textareaCls}
               />
               {form.formState.errors.content && (
                 <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
@@ -413,9 +440,8 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                 </p>
               )}
             </div>
-
             <div>
-              <label className={label}>
+              <label className={labelCls}>
                 Đáp án / Hướng dẫn giải
                 {form.watch("questionType") === "ESSAY" && <span className="text-red-500"> *</span>}
               </label>
@@ -423,7 +449,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                 rows={5}
                 placeholder="Nhập đáp án chi tiết hoặc hướng dẫn giải..."
                 {...form.register("canonicalAnswer")}
-                className={textarea}
+                className={textareaCls}
               />
               {form.formState.errors.canonicalAnswer && (
                 <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
@@ -454,25 +480,19 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                   Chỉ được chọn <strong>1 đáp án đúng</strong> duy nhất bằng cách tick vào checkbox.
                 </p>
               </div>
-
               {(form.formState.errors.options as any)?.message && (
                 <p className="text-xs text-red-500 mt-1.5 flex items-center gap-1">
                   <AlertCircle className="h-3 w-3" />
                   {(form.formState.errors.options as any).message}
                 </p>
               )}
-
               <div className="space-y-3">
                 {fields.map((field, index) => {
                   const isCorrect = form.watch(`options.${index}.isCorrect`);
                   return (
                     <div
                       key={field.id}
-                      className={`flex items-center gap-3 px-4 py-3.5 rounded-lg border transition-all ${
-                        isCorrect
-                          ? "border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-700"
-                          : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"
-                      }`}
+                      className={`flex items-center gap-3 px-4 py-3.5 rounded-lg border transition-all ${isCorrect ? "border-green-400 bg-green-50 dark:bg-green-900/20 dark:border-green-700" : "border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900"}`}
                     >
                       <input
                         type="checkbox"
@@ -488,11 +508,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
                       <input
                         {...form.register(`options.${index}.content`)}
                         placeholder={`Nhập nội dung đáp án ${field.label}...`}
-                        className={`flex-1 px-3 py-2.5 rounded-md border text-base outline-none transition-all ${
-                          isCorrect
-                            ? "border-green-300 bg-green-50 dark:bg-green-900/10 dark:border-green-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-green-400"
-                            : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"
-                        }`}
+                        className={`flex-1 px-3 py-2.5 rounded-md border text-base outline-none transition-all ${isCorrect ? "border-green-300 bg-green-50 dark:bg-green-900/10 dark:border-green-700 text-slate-900 dark:text-white focus:ring-2 focus:ring-green-400" : "border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-blue-500"}`}
                       />
                       {isCorrect && (
                         <span className="flex items-center gap-1 text-xs font-bold text-green-700 dark:text-green-400 shrink-0">

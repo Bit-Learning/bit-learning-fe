@@ -61,7 +61,6 @@ const NumericInput: React.FC<NumericInputProps> = ({
   );
 };
 
-// Hiển thị % (0-100), lưu dạng tỷ lệ (0-1)
 interface PercentInputProps {
   value: number; // 0–1
   onChange: (val: number) => void;
@@ -149,8 +148,8 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
         >
           <option value={0}>-- Chọn chương --</option>
           {chapters?.map((ch: any, i: number) => (
-            <option key={ch.id} value={ch.id}>
-              Chương {i + 1}: {ch.name}
+            <option key={i} value={ch.id}>
+              {ch.name}
             </option>
           ))}
         </select>
