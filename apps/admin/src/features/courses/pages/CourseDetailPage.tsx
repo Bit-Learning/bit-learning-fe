@@ -31,6 +31,7 @@ import { LectureDetail } from "../types/lecture.type";
 import { SectionDetail } from "../types/section.type";
 import { Header } from "@/layout/header";
 import { convertLevelToVietnamese } from "../utils/courses.utils";
+import PublishConfirmModal from "../components/PublishConfirmModal";
 
 type ModalState =
   | { type: "none" }
@@ -51,9 +52,8 @@ export const CourseDetailPage: React.FC = () => {
   const courseId = Number(id);
   const [expandedSections, setExpandedSections] = useState<Set<number>>(new Set());
   const [modalState, setModalState] = useState<ModalState>({ type: "none" });
-  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({
-    type: "none",
-  });
+  const [deleteModal, setDeleteModal] = useState<DeleteModalState>({ type: "none" });
+  const [showPublishModal, setShowPublishModal] = useState(false);
 
   const navigate = useNavigate();
 
@@ -83,21 +83,14 @@ export const CourseDetailPage: React.FC = () => {
   const handleConfirmDelete = async () => {
     if (deleteModal.type === "section") {
       try {
-        await hideSectionMutation.mutateAsync({
-          id: deleteModal.id,
-          isHidden: true,
-        });
+        await hideSectionMutation.mutateAsync({ id: deleteModal.id, isHidden: true });
         closeDeleteModal();
       } catch (error) {
         console.error("Failed to delete section:", error);
       }
     } else if (deleteModal.type === "lecture") {
       try {
-        await hideLectureMutation.mutateAsync({
-          courseId,
-          id: deleteModal.id,
-          isHidden: true,
-        });
+        await hideLectureMutation.mutateAsync({ courseId, id: deleteModal.id, isHidden: true });
         closeDeleteModal();
       } catch (error) {
         console.error("Failed to delete lecture:", error);
@@ -149,7 +142,7 @@ export const CourseDetailPage: React.FC = () => {
     }
   };
 
-  const handleTogglePublish = async () => {
+  const handleConfirmPublish = async () => {
     if (!course) return;
     try {
       await validateCourseMutation.mutateAsync({
@@ -157,6 +150,7 @@ export const CourseDetailPage: React.FC = () => {
         isAccepted: course.status !== "PUBLISHED",
       });
       refetchCourse();
+      setShowPublishModal(false);
     } catch (error) {
       console.error("Failed to toggle publish status:", error);
     }
@@ -240,22 +234,12 @@ export const CourseDetailPage: React.FC = () => {
           <div className="flex gap-2">
             {canTogglePublish && !isPublished && (
               <Button
-                onClick={handleTogglePublish}
+                onClick={() => setShowPublishModal(true)}
                 size="lg"
-                disabled={validateCourseMutation.isPending}
                 className="gap-2 bg-emerald-600 hover:bg-emerald-700"
               >
-                {validateCourseMutation.isPending ? (
-                  <>
-                    <div className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                    Đang xử lý...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircle className="h-4 w-4" />
-                    Xuất bản
-                  </>
-                )}
+                <CheckCircle className="h-4 w-4" />
+                Xuất bản
               </Button>
             )}
             <Button
@@ -364,7 +348,6 @@ export const CourseDetailPage: React.FC = () => {
                           <Trash2 className="h-4 w-4 text-red-500" />
                         </Button>
                       )}
-
                       {expandedSections.has(section.id) ? (
                         <ChevronUp className="h-5 w-5 text-gray-600" />
                       ) : (
@@ -379,12 +362,7 @@ export const CourseDetailPage: React.FC = () => {
                         variant="outline"
                         size="sm"
                         className="w-full hover:bg-primary hover:text-slate-100"
-                        onClick={() =>
-                          setModalState({
-                            type: "create-lecture",
-                            sectionId: section.id,
-                          })
-                        }
+                        onClick={() => setModalState({ type: "create-lecture", sectionId: section.id })}
                       >
                         <Plus className="mr-2 h-4 w-4" />
                         Thêm bài học
@@ -474,7 +452,6 @@ export const CourseDetailPage: React.FC = () => {
         </Card>
 
         {modalState.type === "add-section" && <SectionModal mode="create" courseId={courseId} onClose={closeModal} />}
-
         {modalState.type === "create-lecture" && (
           <LectureModal
             mode="create"
@@ -484,21 +461,26 @@ export const CourseDetailPage: React.FC = () => {
             onClose={closeModal}
           />
         )}
-
         {modalState.type === "view-lecture" && (
           <LectureDetailModal lecture={modalState.lecture} onClose={closeModal} onEdit={handleEditFromView} />
         )}
-
         {modalState.type === "edit-lecture" && (
           <LectureModal mode="edit" lecture={modalState.lecture} courseId={courseId} onClose={closeModal} />
         )}
-
         {modalState.type === "edit-section" && (
           <SectionModal mode="edit" section={modalState.section} courseId={courseId} onClose={closeModal} />
         )}
-
         {modalState.type === "edit-course" && (
           <EditCourseModal course={course} onClose={closeModal} onSuccess={refetchCourse} />
+        )}
+
+        {showPublishModal && (
+          <PublishConfirmModal
+            course={course}
+            isPending={validateCourseMutation.isPending}
+            onConfirm={handleConfirmPublish}
+            onClose={() => setShowPublishModal(false)}
+          />
         )}
 
         <DeleteConfirmModal
