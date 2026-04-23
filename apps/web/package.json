@@ -19,9 +19,9 @@
 		"@reduxjs/toolkit": "^2.9.1",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
-		"@tanstack/react-query": "^5.99.0",
-		"@tanstack/react-query-devtools": "^5.99.0",
-		"@tanstack/react-router": "^1.168.22",
+		"@tanstack/react-query": "^5.99.2",
+		"@tanstack/react-query-devtools": "^5.99.2",
+		"@tanstack/react-router": "^1.168.23",
 		"@tanstack/react-router-devtools": "^1.132.37",
 		"@tanstack/router-plugin": "^1.167.22",
 		"@types/prismjs": "^1.26.6",
@@ -29,11 +29,11 @@
 		"@workspace/lib": "workspace:*",
 		"@workspace/ui": "workspace:*",
 		"@xyflow/react": "^12.10.2",
-		"axios": "^1.15.0",
+		"axios": "^1.15.2",
 		"clsx": "^2.1.1",
 		"date-fns": "^4.1.0",
 		"docx": "^9.6.1",
-		"dompurify": "^3.4.0",
+		"dompurify": "^3.4.1",
 		"echarts": "^6.0.0",
 		"echarts-for-react": "^3.0.5",
 		"elkjs": "^0.11.1",
@@ -68,14 +68,14 @@
 		"shiki": "^4.0.2",
 		"sockjs-client": "^1.6.1",
 		"sonner": "^2.0.7",
-		"styled-components": "^6.4.0",
+		"styled-components": "^6.4.1",
 		"tailwind-merge": "^3.5.0",
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.12",
 		"@codecov/vite-plugin": "^1.9.1",
-		"@tailwindcss/postcss": "^4.2.2",
+		"@tailwindcss/postcss": "^4.2.4",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.0",
 		"@testing-library/user-event": "^14.6.1",
@@ -93,6 +93,6 @@
 		"typescript": "^5.9.2",
 		"vite": "^7.3.2",
 		"vite-plugin-imagemin": "^0.6.1",
-		"vitest": "^4.1.4"
+		"vitest": "^4.1.5"
 	}
 }
