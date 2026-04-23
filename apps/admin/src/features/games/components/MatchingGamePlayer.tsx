@@ -1,5 +1,6 @@
 import { type ReactNode, useEffect, useRef, useState } from "react";
-
+import { cn } from "../../../../../../packages/ui/src/lib/utils";
+import { useNavigate } from "@tanstack/react-router";
 export type MatchingGameItemType = "text" | "image" | "audio";
 export type MatchingGameLayoutType = "match" | "media-quiz";
 export type MatchingGameSound =
@@ -153,7 +154,7 @@ export default function MatchingGamePlayer({
 	onComplete,
 	onPlaySound,
 	headerActions,
-	footerNote = "Phần học dành cho học sinh Lớp 3-5",
+	footerNote = "",
 	exitLabel = "Thoát preview",
 }: MatchingGamePlayerProps) {
 	const startTimeRef = useRef<number>(Date.now());
@@ -180,6 +181,7 @@ export default function MatchingGamePlayer({
 	const [shuffledRightIds, setShuffledRightIds] = useState<string[]>(() =>
 		currentStage?.config?.shuffle ? shuffle(rightIds) : rightIds,
 	);
+	const navigate = useNavigate();
 
 	useEffect(() => {
 		if (!currentStage) {
@@ -549,10 +551,14 @@ export default function MatchingGamePlayer({
 				<div className="flex items-center gap-3">
 					<button
 						type="button"
-						className="bg-primary/10 p-2 rounded-lg text-primary cursor-pointer"
+						className="text-primary cursor-pointer"
 						onClick={onExit}
 					>
-						<span className="material-symbols-outlined text-2xl">school</span>
+						<img
+							src="/logo/icon-192.png"
+							alt="Bit Learning"
+							className={cn("object-contain transition-all duration-300 h-10")}
+						/>
 					</button>
 					<h1 className="text-xl font-bold tracking-tight">
 						{gameData.meta.title}
@@ -776,9 +782,17 @@ export default function MatchingGamePlayer({
 			</main>
 
 			<footer className="w-full bg-white dark:bg-slate-900 border-t border-slate-200 dark:border-slate-800 p-6 flex justify-between items-center">
-				<div className="flex items-center gap-2 text-slate-500">
-					<span className="material-symbols-outlined">info</span>
-					<span className="text-sm font-medium">{footerNote}</span>
+				<div
+					onClick={() => {
+						navigate({ to: "/" });
+					}}
+					className="flex items-center gap-2 text-slate-500 hover:cursor-pointer"
+				>
+					<img
+						src="/Logo.png"
+						alt="Bit Learning"
+						className={cn("object-contain transition-all duration-300 h-10")}
+					/>
 				</div>
 				<div className="flex gap-3">
 					<button

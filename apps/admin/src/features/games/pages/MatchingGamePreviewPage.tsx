@@ -1,11 +1,12 @@
 import { useMemo } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import { Loader2 } from "lucide-react";
-import MatchingGamePlayer, {
-	type MatchingGamePlayerData,
-} from "@workspace/ui/components/MatchingGamePlayer";
+
 import type { MatchingGameFullDto } from "../api/admin-matching-game.api";
 import { useMatchingGameDetail } from "../queries/useAdminMatchingGame";
+import MatchingGamePlayer, {
+	MatchingGamePlayerData,
+} from "../components/MatchingGamePlayer";
 
 type MatchingGamePreviewPageProps = {
 	gameId?: number;

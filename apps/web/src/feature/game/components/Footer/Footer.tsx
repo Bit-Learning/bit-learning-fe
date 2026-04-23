@@ -23,7 +23,7 @@ const Footer = () => {
 				</div>
 				{/* {[
 					{
-						heading: "Platform", 
+						heading: "Platform",
 						links: ["All Games", "Tournaments", "Rankings", "Store"],
 					},
 					{
@@ -50,7 +50,7 @@ const Footer = () => {
 					</div>
 				))} */}
 				<div>
-					<h4 className={styles.footerHeading}>Follow Us</h4>
+					<h4 className={styles.footerHeading}>Theo dõi chúng tôi</h4>
 					<div className={styles.socialRow}>
 						{["facebook", "alternate_email", "movie"].map((icon) => (
 							<a key={icon} href="#" className={styles.socialBtn}>
