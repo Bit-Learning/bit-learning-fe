@@ -172,6 +172,7 @@ const AdminProblemApprovalPage: React.FC = () => {
                     <TableRow>
                       <TableHead>Tiêu đề</TableHead>
                       <TableHead>Độ khó</TableHead>
+                      <TableHead>Lớp</TableHead>
                       <TableHead>Giảng viên</TableHead>
                       <TableHead>Ngày gửi</TableHead>
                       <TableHead className="text-right">Thao tác</TableHead>
@@ -197,6 +198,9 @@ const AdminProblemApprovalPage: React.FC = () => {
                             <Badge className={difficultyConfig[problem.difficulty].className}>
                               {difficultyConfig[problem.difficulty].label}
                             </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <span className="text-sm">{problem.classLevel}</span>
                           </TableCell>
                           <TableCell>
                             <span className="text-sm">

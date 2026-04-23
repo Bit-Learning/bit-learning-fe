@@ -30,14 +30,23 @@ const schema = z.object({
   description: z.string().min(1, "Mô tả không được để trống"),
   constraints: z.string().optional(),
   difficulty: z.nativeEnum(Difficulty),
-  timeLimitMs: z.number().min(100).max(30000),
-  memoryLimitMb: z.number().min(8).max(512),
+  timeLimitMs: z.number().min(100, "Thời gian tối thiểu 100ms").max(30000, "Thời gian tối đa 30000ms"),
+  memoryLimitMb: z.number().min(8, "Bộ nhớ tối thiểu 8MB").max(512, "Bộ nhớ tối đa 512MB"),
+  classLevel: z.number().min(6, "Lớp tối thiểu là 6").max(12, "Lớp tối đa là 12"),
   functionName: z
     .string()
     .min(1, "Tên hàm không được để trống")
     .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, "Tên hàm không hợp lệ"),
+  tags: z.array(z.string()).min(1, "Vui lòng chọn ít nhất 1 thẻ"),
   returnType: z.nativeEnum(ParamType),
-  parameters: z.array(z.object({ name: z.string().min(1, "Bắt buộc"), type: z.nativeEnum(ParamType) })).min(1),
+  parameters: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Tên tham số không được để trống"),
+        type: z.nativeEnum(ParamType),
+      }),
+    )
+    .min(1, "Cần ít nhất 1 tham số"),
   isPublic: z.boolean().default(false),
 });
 
@@ -71,10 +80,11 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
       difficulty: Difficulty.EASY,
       timeLimitMs: 2000,
       memoryLimitMb: 256,
-      functionName: "solution",
+      classLevel: 10,
+      functionName: "",
       returnType: ParamType.INT,
       isPublic: false,
-      parameters: [{ name: "nums", type: ParamType.INT }],
+      parameters: [{ name: "", type: ParamType.INT }],
     },
   });
 
@@ -117,6 +127,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
         difficulty: data.difficulty,
         timeLimitMs: data.timeLimitMs,
         memoryLimitMb: data.memoryLimitMb,
+        classLevel: data.classLevel,
         isPublic: false,
         tags: selectedTagIds,
       });
@@ -239,7 +250,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
               />
             </FieldGroup>
 
-            <div className="grid grid-cols-3 gap-5">
+            <div className="grid grid-cols-2 gap-5">
               <FieldGroup label="Độ khó" required>
                 <div className="flex gap-2">
                   {difficultyOptions.map((opt) => (
@@ -258,6 +269,19 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
                     </button>
                   ))}
                 </div>
+              </FieldGroup>
+
+              <FieldGroup label="Khối lớp" required error={form.formState.errors.classLevel?.message}>
+                <select
+                  {...form.register("classLevel", { valueAsNumber: true })}
+                  className="h-11 w-full rounded-md border-2 border-gray-300 px-3 text-sm focus:border-primary focus:outline-none"
+                >
+                  {[6, 7, 8, 9, 10, 11, 12].map((lvl) => (
+                    <option key={lvl} value={lvl}>
+                      Lớp {lvl}
+                    </option>
+                  ))}
+                </select>
               </FieldGroup>
 
               <FieldGroup label="Giới hạn thời gian (ms)" required error={form.formState.errors.timeLimitMs?.message}>

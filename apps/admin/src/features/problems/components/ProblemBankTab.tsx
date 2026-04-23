@@ -148,6 +148,7 @@ export function ProblemBankTab({
               <TableRow>
                 <TableHead>Tiêu đề</TableHead>
                 <TableHead>Độ khó</TableHead>
+                <TableHead>Lớp</TableHead>
                 <TableHead>Tác giả</TableHead>
                 <TableHead>Ngày tạo</TableHead>
                 <TableHead>Trạng thái</TableHead>
@@ -165,6 +166,9 @@ export function ProblemBankTab({
                     <Badge className={difficultyConfig[problem.difficulty].className}>
                       {difficultyConfig[problem.difficulty].label}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">{problem.classLevel}</span>
                   </TableCell>
                   <TableCell>
                     <span className="text-sm">

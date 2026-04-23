@@ -108,6 +108,9 @@ export const DetailModal: React.FC<DetailModalProps> = ({
                   {difficultyConfig[problem.difficulty].label}
                 </span>
                 <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
+                  Lớp: {problem.classLevel}
+                </span>
+                <span className="inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400">
                   <Clock className="w-3 h-3" />
                   {problem.timeLimitMs}ms
                 </span>
