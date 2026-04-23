@@ -31,6 +31,7 @@ import { QuestionLevel, QuestionType, ApprovalStatus } from "@/feature/question/
 import { useQuizAttemptsByExam } from "@/feature/quiz/queries/useQuiz";
 import { QuizAttemptStatus } from "@/feature/quiz/types/quiz.type";
 import { Pagination } from "@/shared/components/Pagination";
+import ApprovalModal from "@/shared/components/ApprovalModal";
 
 const QUESTIONS_PER_PAGE = 10;
 const ATTEMPTS_PER_PAGE = 10;
@@ -716,72 +717,15 @@ const ExamDetailContent: React.FC = () => {
         </div>
       </div>
 
-      {showApprovalModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center">
-          <div
-            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
-            onClick={() => !requestPublishExam.isPending && setShowApprovalModal(false)}
-          />
-          <div className="relative bg-white dark:bg-slate-900 rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6">
-            {requestPublishExam.isSuccess ? (
-              <div className="flex flex-col items-center gap-3 py-4">
-                <CheckCircle className="h-12 w-12 text-green-500" />
-                <p className="text-base font-semibold text-gray-800 dark:text-slate-100">Gửi yêu cầu thành công!</p>
-                <p className="text-sm text-gray-500 dark:text-slate-400 text-center">
-                  Đề thi đã được gửi để chờ phê duyệt.
-                </p>
-              </div>
-            ) : (
-              <>
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-lg font-semibold text-gray-900 dark:text-slate-100">Gửi yêu cầu phê duyệt</h2>
-                  <button
-                    onClick={() => setShowApprovalModal(false)}
-                    disabled={requestPublishExam.isPending}
-                    className="p-1 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 dark:hover:bg-slate-800 transition-colors"
-                  >
-                    <X className="h-5 w-5" />
-                  </button>
-                </div>
-                <p className="text-sm text-gray-500 dark:text-slate-400 mb-5">
-                  Đề thi sẽ được gửi đến quản trị viên để xem xét và phê duyệt.
-                </p>
-                <div className="flex gap-3">
-                  <button
-                    onClick={() => setShowApprovalModal(false)}
-                    disabled={requestPublishExam.isPending}
-                    className="cursor-pointer flex-1 px-4 py-2.5 rounded-lg border border-gray-200 dark:border-slate-700 text-sm font-medium text-gray-600 dark:text-slate-300 hover:bg-gray-50 dark:hover:bg-slate-800 transition-colors disabled:opacity-50"
-                  >
-                    Huỷ
-                  </button>
-                  <button
-                    onClick={handleSubmitApproval}
-                    disabled={requestPublishExam.isPending}
-                    className={cn(
-                      "cursor-pointer flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg text-sm font-semibold text-white transition-all",
-                      requestPublishExam.isPending
-                        ? "bg-blue-400 cursor-not-allowed"
-                        : "bg-blue-600 hover:bg-blue-700 active:scale-[0.98]",
-                    )}
-                  >
-                    {requestPublishExam.isPending ? (
-                      <>
-                        <Loader2 className="h-4 w-4 animate-spin" />
-                        Đang gửi...
-                      </>
-                    ) : (
-                      <>
-                        <SendHorizonal className="h-4 w-4" />
-                        Gửi yêu cầu
-                      </>
-                    )}
-                  </button>
-                </div>
-              </>
-            )}
-          </div>
-        </div>
-      )}
+      <ApprovalModal
+        open={showApprovalModal}
+        onClose={() => setShowApprovalModal(false)}
+        onConfirm={handleSubmitApproval}
+        isPending={requestPublishExam.isPending}
+        isSuccess={requestPublishExam.isSuccess}
+        itemName={exam.name}
+        type="exam"
+      />
     </main>
   );
 };

@@ -285,6 +285,7 @@ const MyExamsContent: React.FC = () => {
                               </button>
                               <button
                                 onClick={() => setEditingExam(exam)}
+                                disabled={exam.approvalStatus === "PENDING"}
                                 className="cursor-pointer p-1.5 text-slate-500 hover:text-amber-600 hover:bg-amber-50 dark:hover:bg-amber-950/30 rounded-lg transition-colors"
                                 title="Sửa"
                               >
@@ -292,6 +293,7 @@ const MyExamsContent: React.FC = () => {
                               </button>
                               <button
                                 onClick={() => setDeletingExam(exam)}
+                                disabled={exam.approvalStatus === "PENDING"}
                                 className="cursor-pointer p-1.5 text-slate-500 hover:text-red-600 hover:bg-red-50 dark:hover:bg-red-950/30 rounded-lg transition-colors"
                                 title="Xóa"
                               >
