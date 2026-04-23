@@ -5,7 +5,7 @@ import * as z from "zod";
 import { Button } from "@workspace/ui/components/Button";
 import { Textarea } from "@workspace/ui/components/Textarea";
 import { Label } from "@workspace/ui/components/label";
-import { ArrowLeft, ChevronDown, Globe, Lock, Plus, Trash2 } from "lucide-react";
+import { ArrowLeft, ChevronDown, Plus, Trash2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@workspace/ui/lib/utils";
 import { Difficulty, ParamType, ParamTypeInfo } from "../types/coding.type";
@@ -23,6 +23,7 @@ import TestCaseInput, {
   resolveTestCases,
   type TestCaseInputState,
 } from "../components/TestCaseInput";
+import { removeVietnameseTones } from "@/shared/lib/string-utils";
 
 const problemSchema = z.object({
   title: z.string().min(1, "Tiêu đề không được để trống"),
@@ -35,6 +36,7 @@ const problemSchema = z.object({
   difficulty: z.nativeEnum(Difficulty),
   timeLimitMs: z.number().min(100, "Thời gian tối thiểu 100ms").max(30000, "Thời gian tối đa 30000ms"),
   memoryLimitMb: z.number().min(8, "Bộ nhớ tối thiểu 8MB").max(512, "Bộ nhớ tối đa 512MB"),
+  classLevel: z.number().min(6, "Lớp tối thiểu là 6").max(12, "Lớp tối đa là 12"),
   isPublic: z.boolean().default(false),
   tags: z.array(z.string()).min(1, "Vui lòng chọn ít nhất 1 thẻ"),
 });
@@ -119,11 +121,12 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       difficulty: Difficulty.EASY,
       timeLimitMs: 2000,
       memoryLimitMb: 256,
+      classLevel: 10,
       isPublic: false,
       tags: [],
-      functionName: "solution",
+      functionName: "",
       returnType: ParamType.INT,
-      parameters: [{ name: "nums", type: ParamType.INT }],
+      parameters: [{ name: "", type: ParamType.INT }],
     },
   });
 
@@ -137,6 +140,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
     form.setValue("difficulty", problemData.difficulty);
     form.setValue("timeLimitMs", problemData.timeLimitMs);
     form.setValue("memoryLimitMb", problemData.memoryLimitMb);
+    form.setValue("classLevel", problemData.classLevel ?? 10);
     form.setValue("isPublic", problemData.isPublic);
     form.setValue("constraints", problemData.constraints ?? "");
     form.setValue(
@@ -151,10 +155,13 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const title = e.target.value;
     form.setValue("title", title);
+
     if (!isEditMode) {
+      const noAccent = removeVietnameseTones(title);
+
       form.setValue(
         "slug",
-        title
+        noAccent
           .toLowerCase()
           .replace(/[^a-z0-9\s-]/g, "")
           .replace(/\s+/g, "-")
@@ -175,6 +182,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       difficulty: data.difficulty,
       timeLimitMs: data.timeLimitMs,
       memoryLimitMb: data.memoryLimitMb,
+      classLevel: data.classLevel,
       isPublic: data.isPublic,
       tags: data.tags,
     };
@@ -223,6 +231,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
     updateProblemMutation.isPending ||
     generateTemplatesMutation.isPending ||
     bulkCreateTestCasesMutation.isPending;
+
   if (isEditMode && isProblemLoading) {
     return (
       <div className="min-h-screen bg-white dark:bg-slate-800 flex items-center justify-center">
@@ -233,6 +242,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
       </div>
     );
   }
+
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
@@ -302,7 +312,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Độ khó <span className="text-red-500">*</span>
@@ -316,6 +326,25 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
                     <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
                   </div>
                 </div>
+                <div>
+                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    Khối lớp <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <select {...form.register("classLevel", { valueAsNumber: true })} className={selectCls}>
+                      {[6, 7, 8, 9, 10, 11, 12].map((lvl) => (
+                        <option key={lvl} value={lvl}>
+                          Lớp {lvl}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                  <FieldError message={form.formState.errors.classLevel?.message} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
                     Thời gian (ms) <span className="text-red-500">*</span>

@@ -260,6 +260,7 @@ export interface CreateProblemRequest {
   description: string;
   constraints?: string;
   difficulty: Difficulty;
+  classLevel: number;
   timeLimitMs: number;
   memoryLimitMb: number;
   isPublic?: boolean;
@@ -272,6 +273,7 @@ export interface UpdateProblemRequest {
   description: string;
   constraints?: string;
   difficulty: Difficulty;
+  classLevel: number;
   timeLimitMs: number;
   memoryLimitMb: number;
   isPublic?: boolean;
@@ -354,6 +356,7 @@ export interface ProblemBriefResponse {
   timeLimitMs: number;
   memoryLimitMb: number;
   isPublic: boolean;
+  classLevel: number;
   tags: TagResponse[];
   isFavorite: boolean;
   createdBy?: UserSummary;
@@ -371,6 +374,7 @@ export interface ProblemDetailResponse {
   difficulty: Difficulty;
   timeLimitMs: number;
   memoryLimitMb: number;
+  classLevel: number;
   isPublic: boolean;
   tags: TagResponse[];
   sampleTestcases: TestCaseResponse[];
