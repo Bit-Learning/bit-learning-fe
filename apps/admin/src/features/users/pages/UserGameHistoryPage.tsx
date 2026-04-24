@@ -52,6 +52,25 @@ function formatDuration(seconds: number | null) {
 	return `${minutes}m ${remainSeconds}s`;
 }
 
+const ATTEMPT_STATE_LABELS: Record<string, string> = {
+	COMPLETED: "Hoàn thành",
+	PARTIAL: "Chưa hoàn thành",
+	IN_PROGRESS: "Đang chơi",
+	ABANDONED: "Đã thoát",
+	TIMEOUT: "Hết giờ",
+};
+
+function getAttemptStateLabel(
+	attemptState: string | null,
+	completed: boolean | null,
+) {
+	if (attemptState) {
+		return ATTEMPT_STATE_LABELS[attemptState] ?? attemptState;
+	}
+
+	return completed ? "Hoàn thành" : "Chưa hoàn thành";
+}
+
 export function UserGameHistoryPage() {
 	const search = route.useSearch();
 	const navigate = route.useNavigate();
@@ -214,8 +233,10 @@ export function UserGameHistoryPage() {
 													<Badge
 														variant={item.completed ? "default" : "secondary"}
 													>
-														{item.attemptState ??
-															(item.completed ? "COMPLETED" : "PARTIAL")}
+														{getAttemptStateLabel(
+															item.attemptState,
+															item.completed,
+														)}
 													</Badge>
 												</TableCell>
 											</TableRow>
