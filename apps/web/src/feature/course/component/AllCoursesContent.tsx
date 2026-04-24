@@ -202,7 +202,7 @@ const AllCoursesContent: React.FC = () => {
   const { selectLevel, setSortBy, resetFilters } = useCourseActions();
 
   const currentUser = useSelector(selectAuthStateInfo);
-  const studentGrade: number | null = currentUser?.userInfo?.grade ?? 10;
+  const studentGrade: number | null = currentUser?.userInfo?.grade ?? null;
   const isLoggedIn = !!currentUser;
 
   const [showAll, setShowAll] = useState(false);
