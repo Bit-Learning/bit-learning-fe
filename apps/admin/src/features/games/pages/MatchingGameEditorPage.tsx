@@ -827,10 +827,6 @@ export function MatchingGameEditorPage({
 							<h2 className="text-3xl font-bold tracking-tight">
 								{isCreateMode ? "Tạo game nối khái niệm" : titlePreview}
 							</h2>
-							<p className="mt-1 text-sm text-muted-foreground">
-								Cấu hình metadata, stage và từng cặp ghép trong một trình biên
-								tập full-page.
-							</p>
 						</div>
 					</div>
 				</div>
@@ -846,7 +842,7 @@ export function MatchingGameEditorPage({
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-5 pt-6">
-							<div className="grid gap-4 md:grid-cols-3">
+							<div className="grid gap-4 md:grid-cols-2">
 								<div className="space-y-2">
 									<Label>Lớp</Label>
 									<Select
@@ -859,7 +855,7 @@ export function MatchingGameEditorPage({
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
-											{Array.from({ length: 9 }, (_, index) => index + 3).map(
+											{Array.from({ length: 10 }, (_, index) => index + 3).map(
 												(level) => (
 													<SelectItem key={level} value={String(level)}>
 														Lớp {level}
@@ -919,24 +915,24 @@ export function MatchingGameEditorPage({
 										/>
 									) : null}
 								</div>
+							</div>
 
-								<div className="space-y-2">
-									<Label>Ngôn ngữ</Label>
-									<Select
-										value={form.metaLanguage}
-										onValueChange={(value) =>
-											setForm((prev) => ({ ...prev, metaLanguage: value }))
-										}
-									>
-										<SelectTrigger>
-											<SelectValue />
-										</SelectTrigger>
-										<SelectContent>
-											<SelectItem value="vi">Tiếng Việt</SelectItem>
-											<SelectItem value="en">English</SelectItem>
-										</SelectContent>
-									</Select>
-								</div>
+							<div className="space-y-2">
+								<Label>Ngôn ngữ</Label>
+								<Select
+									value={form.metaLanguage}
+									onValueChange={(value) =>
+										setForm((prev) => ({ ...prev, metaLanguage: value }))
+									}
+								>
+									<SelectTrigger>
+										<SelectValue />
+									</SelectTrigger>
+									<SelectContent>
+										<SelectItem value="vi">Tiếng Việt</SelectItem>
+										<SelectItem value="en">English</SelectItem>
+									</SelectContent>
+								</Select>
 							</div>
 
 							<div className="space-y-2">
@@ -1001,8 +997,7 @@ export function MatchingGameEditorPage({
 						<CardHeader className="border-b">
 							<CardTitle>Xuất bản</CardTitle>
 							<CardDescription>
-								Lưu nhanh metadata, stage và điều hướng lại đúng detail sau khi
-								tạo mới hoặc đổi khóa định danh.
+								Xem trước, duyệt và quản lý trạng thái xuất bản của trò chơi.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-4 pt-6">
@@ -1050,7 +1045,7 @@ export function MatchingGameEditorPage({
 								{upsertGame.isPending
 									? "Đang lưu..."
 									: isCreateMode
-										? "Tạo matching game"
+										? "Tạo trò chơi"
 										: "Lưu thay đổi"}
 							</Button>
 

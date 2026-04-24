@@ -453,7 +453,7 @@ export const PublicProfileContent = ({
 										</div>
 										<div className="mt-2 flex justify-between text-xs text-slate-500">
 											<span>
-												Accuracy:{" "}
+												Độ chính xác:{" "}
 												<span className="font-bold text-emerald-600">
 													{item.accuracy ?? 0}%
 												</span>
@@ -487,9 +487,9 @@ export const PublicProfileContent = ({
 												{item.score}
 											</span>
 										</div>
-										<div className="text-[11px] text-slate-400 mt-1">
+										{/* <div className="text-[11px] text-slate-400 mt-1">
 											{new Date(item.playedAt).toLocaleDateString("vi-VN")}
-										</div>
+										</div> */}
 									</div>
 								</button>
 							))}

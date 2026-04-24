@@ -19,10 +19,7 @@ function MatchingGameRoute() {
 
 	return (
 		<>
-			<Header
-				title="Matching game"
-				subtitle="Biên tập game nối khái niệm theo lớp và chủ đề"
-			/>
+			<Header />
 			<div className="flex flex-1 flex-col gap-2 p-6 sm:gap-6">
 				<MatchingGameEditorPage
 					mode="edit"

@@ -108,6 +108,11 @@ function renderItemContent(
 	return <span className={textClassName}>{item.value}</span>;
 }
 
+function countEffectivePairs(stage: MatchingGameStage): number {
+	const layoutType = stage.config?.layoutType ?? "match";
+	return layoutType === "media-quiz" ? 1 : stage.pairs.length;
+}
+
 function buildResultSummary(params: {
 	gameData: MatchingGamePlayerData;
 	startTimeMs: number;
@@ -128,7 +133,7 @@ function buildResultSummary(params: {
 	} = params;
 	const elapsed = Math.round((Date.now() - startTimeMs) / 1000);
 	const totalPairs = gameData.stages.reduce(
-		(sum, stage) => sum + stage.pairs.length,
+		(sum, stage) => sum + countEffectivePairs(stage),
 		0,
 	);
 	const totalCorrect = completedPairCount + matchedPairIds.length;
@@ -379,9 +384,9 @@ export default function MatchingGamePlayer({
 	};
 
 	const handleNextStage = () => {
-		if (isLastStage) return;
+		if (isLastStage || !currentStage) return;
 		onPlaySound?.("anime-wow");
-		setCompletedPairCount((prev) => prev + matchedPairIds.length);
+		setCompletedPairCount((prev) => prev + countEffectivePairs(currentStage));
 		setCompletedStagesCount((prev) => prev + 1);
 		setTotalMistakesCount((prev) => prev + mistakesCount);
 		setStageIndex((prev) => Math.min(prev + 1, gameData.stages.length - 1));
