@@ -1,5 +1,4 @@
-import { LectureDetail } from "@/feature/lecture/types/lecture.type";
-import { SectionDetail } from "@/feature/lecture/types/section.type";
+import type { SectionDetail } from "@/feature/lecture/types/section.type";
 
 export enum CourseLevel {
   BEGINNING = "BEGINNING",
@@ -98,4 +97,13 @@ export interface VerifyCertificateResponse {
   studentName?: string;
   courseName?: string;
   completedAt?: string;
+}
+
+export interface SearchCourseRequest {
+  title?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  level?: CourseLevel;
+  minGrade?: number;
+  maxGrade?: number;
 }
