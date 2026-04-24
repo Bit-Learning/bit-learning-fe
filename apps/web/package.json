@@ -86,7 +86,7 @@
 		"@types/sockjs-client": "^1.5.4",
 		"@vitejs/plugin-react": "^4.3.4",
 		"@vitest/browser-playwright": "4.0.16",
-		"@vitest/coverage-v8": "^4.0.14",
+		"@vitest/coverage-v8": "^4.1.5",
 		"@workspace/typescript-config": "workspace:*",
 		"fast-check": "^4.7.0",
 		"jsdom": "^27.2.0",
