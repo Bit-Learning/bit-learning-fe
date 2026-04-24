@@ -30,11 +30,30 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
 
   const iconColor = isRunning ? "text-green-600" : isUpcoming ? "text-blue-600" : "text-slate-400";
 
-  const contestHref = `/contests/${contest.contestId}/info`;
-
   return (
     <Link to="/contests/$id/info" params={{ id: contest.contestId }}>
       <div className="bg-white border rounded-md p-6 group transition-all shadow-sm hover:shadow-md hover:border-blue-200 flex flex-col gap-4 cursor-pointer h-full">
+        <div className="flex items-center gap-2">
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-sm font-semibold",
+              isRunning
+                ? "bg-green-100 text-green-700"
+                : isUpcoming
+                  ? "bg-blue-100 text-blue-700"
+                  : "bg-slate-100 text-slate-500",
+            )}
+          >
+            <span
+              className={cn(
+                "w-1.5 h-1.5 rounded-full",
+                isRunning ? "bg-green-500 animate-pulse" : isUpcoming ? "bg-blue-500" : "bg-slate-400",
+              )}
+            />
+            {isRunning ? "Đang diễn ra" : isUpcoming ? "Sắp diễn ra" : "Đã kết thúc"}
+          </span>
+        </div>
+
         <h3
           className={cn(
             "text-xl font-bold leading-snug transition-colors",
@@ -90,7 +109,7 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
           </div>
         )}
 
-        {isUpcoming && contest.countdown && (
+        {isUpcoming && contest.countdown && contest.problemCount > 0 && (
           <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
             <p className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">Bắt đầu sau</p>
             <div className="flex items-baseline gap-2 text-blue-600 font-black text-xl">
