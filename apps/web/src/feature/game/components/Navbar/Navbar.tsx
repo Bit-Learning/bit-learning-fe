@@ -57,6 +57,15 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 								Trang chủ
 							</Link>
 						</li>
+						<li>
+							<Link
+								to="/matching/history"
+								className={styles.link}
+								activeProps={{ className: styles.linkActive }}
+							>
+								Lịch sử Matching
+							</Link>
+						</li>
 						{/* <li>
 							<Link
 								to="/leaderboard"

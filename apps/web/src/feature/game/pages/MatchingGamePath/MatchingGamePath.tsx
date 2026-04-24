@@ -52,6 +52,16 @@ export default function PathPage() {
 									)}
 								/>
 							</button>
+							<button
+								type="button"
+								onClick={() => navigate({ to: "/matching/history" })}
+								className="inline-flex items-center gap-2 rounded-lg border border-slate-200 dark:border-slate-700 px-3 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+							>
+								<span className="material-symbols-outlined text-base">
+									history
+								</span>
+								Lịch sử chơi
+							</button>
 						</div>
 						<ThemeToggle />
 					</div>
