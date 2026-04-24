@@ -20,7 +20,7 @@ const GameCard = ({ game, categoryKey, matchingTarget }: Props) => {
 			onClick={() => {
 				if (matchingTarget || categoryKey === "MATCHING") {
 					navigate({
-						to: "/matching/game",
+						to: "/matching/detail",
 						search: {
 							gameId: game.id,
 							grade: matchingTarget?.grade,

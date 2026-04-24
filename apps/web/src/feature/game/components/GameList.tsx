@@ -50,7 +50,7 @@ function GameNavigationLink({
 	if (matchingTarget) {
 		return (
 			<Link
-				to="/matching/game"
+				to="/matching/detail"
 				search={{
 					gameId,
 					grade: matchingTarget.grade,
@@ -65,7 +65,7 @@ function GameNavigationLink({
 
 	if (categoryKey === "MATCHING") {
 		return (
-			<Link to="/matching/game" search={{ gameId }} className={className}>
+			<Link to="/matching/detail" search={{ gameId }} className={className}>
 				{children}
 			</Link>
 		);

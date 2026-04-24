@@ -156,7 +156,7 @@ export default function PathPage() {
 																isPlayable
 																onClick={() => {
 																	navigate({
-																		to: "/matching/game",
+																		to: "/matching/detail",
 																		search: {
 																			gameId: mapping.gameId,
 																			grade: mapping.grade,

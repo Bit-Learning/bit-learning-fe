@@ -136,11 +136,10 @@ export default function TrackedGameFrame({
 		const handleFullscreenChange = () => {
 			const fullscreenElement = document.fullscreenElement;
 			setIsFullscreen(
-				Boolean(
-					fullscreenElement &&
-						containerRef.current &&
-						containerRef.current.contains(fullscreenElement),
-				) || fullscreenElement === containerRef.current,
+				Boolean(fullscreenElement) &&
+					(fullscreenElement === iframeRef.current ||
+						fullscreenElement === containerRef.current ||
+						Boolean(containerRef.current?.contains(fullscreenElement))),
 			);
 		};
 		document.addEventListener("fullscreenchange", handleFullscreenChange);
@@ -668,10 +667,13 @@ export default function TrackedGameFrame({
 	};
 
 	const toggleFullscreen = () => {
-		if (!containerRef.current) return;
-
 		if (!document.fullscreenElement) {
-			containerRef.current.requestFullscreen().catch((error) => {
+			// Prefer requesting fullscreen on the iframe itself so the game
+			// owns the fullscreen context and ESC is handled by the game,
+			// not intercepted by the React app's document.
+			const target = iframeRef.current ?? containerRef.current;
+			if (!target) return;
+			target.requestFullscreen().catch((error) => {
 				logWarn("Failed to enter fullscreen", error);
 			});
 			return;
@@ -733,6 +735,8 @@ export default function TrackedGameFrame({
 						className="w-full h-full border-none"
 						title={`${game.title} - Chơi game`}
 						onLoad={notifyGameHostReady}
+						allow="fullscreen; autoplay; gamepad"
+						allowFullScreen
 					/>
 				</div>
 			</div>
@@ -750,6 +754,8 @@ export default function TrackedGameFrame({
 				className={iframeClassName}
 				title={`${game.title} - Chơi trong trang`}
 				onLoad={notifyGameHostReady}
+				allow="fullscreen; autoplay; gamepad"
+				allowFullScreen
 			/>
 			<div className="pointer-events-none absolute inset-x-0 top-0 flex items-start justify-between p-4">
 				<div className="flex flex-col gap-2">

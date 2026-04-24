@@ -315,4 +315,15 @@ export function setupInterceptors(axiosInstance: AxiosInstance): AxiosInstance {
 	return axiosInstance;
 }
 
-export default setupInterceptors(api);
+const configuredApi = setupInterceptors(api);
+
+/**
+ * Set the Authorization header immediately on the axios instance.
+ * Call this right after storing a new access token to avoid race conditions
+ * where requests fire before the cookie is read by the interceptor.
+ */
+export function setApiAuthorizationHeader(token: string) {
+	configuredApi.defaults.headers.common.Authorization = `Bearer ${token}`;
+}
+
+export default configuredApi;
