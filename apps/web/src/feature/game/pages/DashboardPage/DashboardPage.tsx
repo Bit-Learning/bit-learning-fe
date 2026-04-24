@@ -139,7 +139,7 @@ export default function DashboardPage() {
 									className="flex items-center justify-center gap-2 rounded-xl border-2 border-primary px-8 py-4 text-primary font-bold text-lg hover:bg-primary/5 transition-all active:scale-95 sm:min-w-[180px]"
 								>
 									<span className="material-symbols-outlined">replay</span>
-									Làm lại
+									Chơi lại
 								</button>
 								<button
 									type="button"
