@@ -57,7 +57,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 								Trang chủ
 							</Link>
 						</li>
-						<li>
+						{/* <li>
 							<Link
 								to="/matching/history"
 								className={styles.link}
@@ -65,7 +65,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 							>
 								Lịch sử Matching
 							</Link>
-						</li>
+						</li> */}
 						{/* <li>
 							<Link
 								to="/leaderboard"

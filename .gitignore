@@ -59,3 +59,5 @@ storybook-static
 infra/.vault_pass
 apps/admin/src/routeTree.gen.ts
 apps/web/src/routeTree.gen.ts
+
+.kiro
