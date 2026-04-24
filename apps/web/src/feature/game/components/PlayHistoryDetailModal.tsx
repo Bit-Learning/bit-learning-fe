@@ -124,10 +124,10 @@ export default function PlayHistoryDetailModal({
 
 						<div className="rounded-xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
 							<div className="flex flex-wrap items-center gap-3">
-								<span>
+								{/* <span>
 									Lần ghi nhận: {resolved.attemptType ?? "STANDARD_HTML"}
 								</span>
-								<span>Mô hình: {resolved.scoringModel ?? "FINITE_SCORE"}</span>
+								<span>Mô hình: {resolved.scoringModel ?? "FINITE_SCORE"}</span> */}
 								<span>
 									Trạng thái:{" "}
 									<span
