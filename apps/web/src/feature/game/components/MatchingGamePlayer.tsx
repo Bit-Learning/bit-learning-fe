@@ -384,7 +384,7 @@ export default function MatchingGamePlayer({
 	};
 
 	const handleNextStage = () => {
-		if (isLastStage) return;
+		if (isLastStage || !currentStage) return;
 		onPlaySound?.("anime-wow");
 		setCompletedPairCount((prev) => prev + countEffectivePairs(currentStage));
 		setCompletedStagesCount((prev) => prev + 1);
