@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import {
 	CheckCircle2,
 	CreditCard,
+	History,
 	ShieldX,
 	Trash2,
 	UserPen,
@@ -163,6 +164,21 @@ export function DataTableRowActions({ row }: DataTableRowActionsProps) {
 						{isDisabledUser ? "Mở người dùng" : "Xóa mềm người dùng"}
 						<DropdownMenuShortcut>
 							<Trash2 size={16} />
+						</DropdownMenuShortcut>
+					</DropdownMenuItem>
+					<DropdownMenuItem
+						onClick={() => {
+							navigate({
+								to: "/users/$userId/game-history",
+								params: {
+									userId: String(user.id),
+								},
+							});
+						}}
+					>
+						Xem lịch sử chơi game
+						<DropdownMenuShortcut>
+							<History size={16} />
 						</DropdownMenuShortcut>
 					</DropdownMenuItem>
 				</DropdownMenuContent>
