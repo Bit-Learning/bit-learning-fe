@@ -431,7 +431,7 @@ export const PublicProfileContent = ({
 									className="overflow-hidden rounded-xl border border-slate-100 text-left transition-shadow hover:shadow-md"
 									onClick={() => void openHistoryDetail(item)}
 								>
-									<div className="aspect-video bg-gradient-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
+									<div className="aspect-video bg-linear-to-br from-blue-100 to-indigo-100 flex items-center justify-center">
 										{item.gameThumbnail ? (
 											<img
 												src={item.gameThumbnail}

@@ -15,19 +15,24 @@ export type TLoginRequest = {
   email: string;
   password: string;
 };
+
 export type TRegisterRequest = {
   email: string;
   password: string;
   firstName: string;
   lastName: string;
   role: string;
-  // Mentor-specific optional fields
+  grade?: number;
+  oauthProvider?: string;
+  oauthId?: string;
+  avatar?: string;
   specialties?: string[];
   yearsOfExperience?: number;
   company?: string;
   studentsCount?: number;
   coursesCount?: number;
 };
+
 export type TForgotPasswordRequest = {
   email: string;
 };
@@ -49,15 +54,21 @@ export type TSocialProfile = {
   website?: string;
 };
 
+export type TWalletInfo = {
+  balance: number;
+};
+
 export type TUserProfile = {
   id: number;
   username: string;
   firstName: string;
   lastName: string;
   avatar: string;
+  grade: number;
   coverImage?: string;
   pronouns?: string;
   email: string;
+  recoveryEmail?: string | null;
   activated: boolean;
   role: string;
   activationKey: string | null;
@@ -67,27 +78,32 @@ export type TUserProfile = {
   createdAt: string;
   updatedAt: string;
   wallet: TWalletInfo;
-  oauthProvider: string | null;
-  oauthId: string | null;
-  mfaEnabled: boolean;
   bio?: string;
   phoneNumber?: string;
   location?: string;
   socialProfile?: TSocialProfile;
   jobTitle?: string;
-  grade: number;
-  // Mentor-related fields
+  mfaEnabled: boolean;
   mentorApprovalStatus?: "PENDING" | "APPROVED" | "REJECTED" | null;
   isExternalMentor?: boolean | null;
   mentorRejectionReason?: string | null;
+  accountStatus?: string | null;
+  accountStatusReason?: string | null;
+  accountStatusUpdatedAt?: string | null;
+  accountStatusUpdatedBy?: number | null;
+  specialties?: string[] | null;
+  yearsOfExperience?: number | null;
+  company?: string | null;
+  featured?: boolean | null;
+  studentsCount?: number | null;
+  coursesCount?: number | null;
 };
 
-export type TWalletInfo = {
-  id: number;
-  balance: number;
+export type TLoginResponse = {
+  accessToken: string;
+  user: TUserProfile;
 };
 
-// MFA Types
 export type TTwoFactorAuthResponse = {
   secret: string;
   qrCodeUrl: string;
