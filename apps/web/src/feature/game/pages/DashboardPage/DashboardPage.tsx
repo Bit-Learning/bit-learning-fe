@@ -1,6 +1,8 @@
 import { ThemeToggle } from "@/feature/game/components/ThemeToggle";
 import { Route } from "@/routes/matching/dashboard";
+import { Link } from "@tanstack/react-router";
 import { useNavigate } from "@tanstack/react-router";
+import { cn } from "@workspace/ui/lib/utils";
 
 export default function DashboardPage() {
 	const navigate = useNavigate();
@@ -36,24 +38,18 @@ export default function DashboardPage() {
 				{/* Header */}
 				<header className="flex items-center justify-between border-b border-primary/10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md px-6 py-4 lg:px-20 sticky top-0 z-50">
 					<div className="flex items-center gap-3">
-						<div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary text-white">
-							<span className="material-symbols-outlined text-2xl">
-								computer
-							</span>
-						</div>
-						<h2 className="text-xl font-bold tracking-tight text-primary">
-							Bit Learning
-						</h2>
+						<Link to="/" className="flex items-center relative z-50">
+							<img
+								src="/Logo.png"
+								alt="Bit Learning"
+								className={cn(
+									"object-contain transition-all duration-300 h-10",
+								)}
+							/>
+						</Link>
 					</div>
 					<div className="flex items-center gap-4">
 						<ThemeToggle />
-						<div className="h-10 w-10 rounded-full bg-primary/20 border-2 border-primary/30 overflow-hidden">
-							<div className="h-full w-full bg-primary/30 flex items-center justify-center">
-								<span className="material-symbols-outlined text-primary text-xl">
-									person
-								</span>
-							</div>
-						</div>
 					</div>
 				</header>
 
@@ -66,11 +62,6 @@ export default function DashboardPage() {
 
 							{/* Header */}
 							<div className="mb-8">
-								<div className="inline-flex h-24 w-24 items-center justify-center rounded-full bg-yellow-100 dark:bg-yellow-900/30 text-yellow-500 mb-6">
-									<span className="material-symbols-outlined text-6xl">
-										emoji_events
-									</span>
-								</div>
 								<h1 className="text-3xl lg:text-4xl font-bold text-slate-900 dark:text-white mb-3">
 									{isPerfect
 										? "Chúc mừng bạn đã hoàn thành!"
@@ -152,11 +143,11 @@ export default function DashboardPage() {
 								</button>
 								<button
 									type="button"
-									onClick={() => navigate({ to: "/matching/path" })}
+									onClick={() => navigate({ to: "/games" })}
 									className="flex items-center justify-center gap-2 rounded-xl bg-primary px-8 py-4 text-white font-bold text-lg hover:bg-primary/90 shadow-lg shadow-primary/20 transition-all active:scale-95 sm:min-w-[180px]"
 								>
 									<span className="material-symbols-outlined">menu_book</span>
-									Quay về bài học
+									Quay về trung tâm trò chơi
 								</button>
 							</div>
 						</div>
