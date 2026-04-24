@@ -77,8 +77,6 @@ const CourseDetailContent: React.FC = () => {
     );
   }
 
-  const totalHours = course.totalDuration ? Math.round(course.totalDuration / 3600) : undefined;
-
   return (
     <div className="min-h-screen bg-slate-50">
       <div className="bg-white border-b border-gray-200 shadow-sm">

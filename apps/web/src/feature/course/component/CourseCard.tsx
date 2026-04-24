@@ -234,10 +234,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onClick, onMouseEnter }
 
   const handleAddToCart = () => {
     if (!course.id) return;
-    addToCart(course.id, {
-      onSuccess: () => toast.success({ title: "Đã thêm vào giỏ hàng" }),
-      onError: () => toast.error({ title: "Thêm vào giỏ thất bại, thử lại sau" }),
-    });
+    addToCart(course.id, {});
   };
 
   const handleBuyNow = () => {
