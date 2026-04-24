@@ -1,3 +1,23 @@
+import { Post } from "@/feature/forum/types/forum.type";
+
+export interface UserSummaryResponse {
+  id: string;
+  firstName: string;
+  lastName: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface MentorWithViewsResponse extends UserSummaryResponse {
+  totalViews: number;
+  topPosts: Post[];
+}
+
+export interface MentorWithReactionsResponse extends UserSummaryResponse {
+  totalReactions: number;
+  topPosts: Post[];
+}
+
 export interface QuestionStats {
   totalQuestions: number;
   pendingQuestions: number;
