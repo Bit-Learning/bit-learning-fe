@@ -46,6 +46,7 @@ export interface MatchingMetaDto {
 	title: string;
 	version?: string;
 	language?: string;
+	thumbnailUrl?: string;
 	baseScoreMax?: number;
 	difficultyMultiplier?: number;
 	passingThreshold?: number;
@@ -107,4 +108,12 @@ export const adminMatchingGameApi = {
 	/** Admin: delete matching game by curriculum slot */
 	deleteGame: (gameId: number): Promise<AxiosResponse<ApiResponse<void>>> =>
 		api.delete(MATCHING_ADMIN_BASE, { params: { gameId } }),
+	/** Admin: upload image or audio media for matching game pair items */
+	uploadMedia: (file: File): Promise<AxiosResponse<ApiResponse<string>>> => {
+		const formData = new FormData();
+		formData.append("file", file);
+		return api.post(`${MATCHING_ADMIN_BASE}/upload-media`, formData, {
+			headers: { "Content-Type": "multipart/form-data" },
+		});
+	},
 };

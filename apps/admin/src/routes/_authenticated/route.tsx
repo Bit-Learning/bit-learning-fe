@@ -1,9 +1,9 @@
 import { createFileRoute, redirect } from "@tanstack/react-router";
 import { AuthenticatedLayout } from "@/layout/authenticated-layout";
 import { getAccessToken } from "@/shared/lib/cookies";
-import { useAuthStore } from "@/shared/stores/auth-store";
+// import { useAuthStore } from "@/shared/stores/auth-store";
 
-const ALLOWED_ROLES = ["ADMIN", "MANAGER"];
+// const ALLOWED_ROLES = ["ADMIN", "MANAGER"];
 
 export const Route = createFileRoute("/_authenticated")({
 	beforeLoad: async ({ location }) => {
@@ -18,17 +18,17 @@ export const Route = createFileRoute("/_authenticated")({
 			});
 		}
 
-		const { user } = useAuthStore.getState().auth;
+		// const { user } = useAuthStore.getState().auth;
 
-		if (
-			!user ||
-			!user.role ||
-			!user.role.some((r) => ALLOWED_ROLES.includes(r))
-		) {
-			throw redirect({
-				to: "/sign-in",
-			});
-		}
+		// if (
+		// 	!user ||
+		// 	!user.role ||
+		// 	!user.role.some((r) => ALLOWED_ROLES.includes(r))
+		// ) {
+		// 	throw redirect({
+		// 		to: "/sign-in",
+		// 	});
+		// }
 	},
 	component: AuthenticatedLayout,
 });

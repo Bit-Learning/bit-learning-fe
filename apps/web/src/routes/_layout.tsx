@@ -2,7 +2,7 @@ import Footer from "@/layouts/footer";
 import Header from "@/layouts/header";
 import ScrollToTop from "@/layouts/scroll-to-top";
 import BotStatusWidget from "@/shared/components/BotStatusWidget";
-import { requireStudentOrMentorRole } from "@/shared/lib/auth-utils";
+// import { requireStudentOrMentorRole } from "@/shared/lib/auth-utils";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 
 function LayoutComponent() {
@@ -22,8 +22,8 @@ function LayoutComponent() {
 }
 
 export const Route = createFileRoute("/_layout")({
-	beforeLoad: ({ location }) => {
-		requireStudentOrMentorRole(location);
-	},
+	// beforeLoad: ({ location }) => {
+	// 	requireStudentOrMentorRole(location);
+	// },
 	component: LayoutComponent,
 });
