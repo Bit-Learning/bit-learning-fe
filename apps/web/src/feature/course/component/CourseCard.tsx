@@ -79,6 +79,11 @@ const CoursePopup: React.FC<{
               <span className="text-sm px-2.5 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 font-medium">
                 Khóa học
               </span>
+              {course.grade != null && (
+                <span className="text-sm px-2.5 py-1 rounded-md font-medium bg-blue-100 dark:bg-blue-900/40 text-blue-700 dark:text-blue-300">
+                  Lớp {course.grade}
+                </span>
+              )}
               {level && (
                 <span className={`text-sm px-2.5 py-1 rounded-md font-medium text-white ${level.badgeClass}`}>
                   {level.label}
@@ -256,6 +261,11 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onClick, onMouseEnter }
           alt={course.title}
           className="h-full w-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
+        {course.grade != null && (
+          <span className="absolute top-2 right-2 text-sm font-semibold px-2 py-0.5 rounded-md bg-blue-600/90 text-white backdrop-blur-sm">
+            Lớp {course.grade}
+          </span>
+        )}
         <div className="absolute inset-0 flex items-center justify-center opacity-0 transition-opacity duration-300 group-hover:opacity-100">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-white/90 shadow-lg">
             <Play className="ml-1 h-5 w-5 text-gray-800" />
