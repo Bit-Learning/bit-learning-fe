@@ -1,6 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useQueryClient } from "@tanstack/react-query";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
 	ArrowLeft,
 	BookOpen,
@@ -8,12 +8,15 @@ import {
 	ChevronUp,
 	ExternalLink,
 	FileImage,
+	Loader2 as Loader2Icon,
 	LayoutGrid,
 	Loader2,
+	Music,
 	PlusCircle,
 	Save,
 	Send,
 	Trash2,
+	Upload,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -52,6 +55,7 @@ import type {
 } from "../api/admin-matching-game.api";
 import { useApproveGame, useRejectGame } from "../queries/useAdminGamesCrud";
 import { adminGamesApi } from "../api/admin-games.api";
+import { adminMatchingGameApi } from "../api/admin-matching-game.api";
 import {
 	MATCHING_GAME_KEYS,
 	useDeleteMatchingGame,
@@ -261,6 +265,159 @@ interface PairEditorProps {
 	canRemove: boolean;
 }
 
+// Reusable media item editor: handles text / image (url+upload) / audio (url+upload)
+const MediaItemEditor = ({
+	label,
+	type,
+	value,
+	onTypeChange,
+	onValueChange,
+}: {
+	label: string;
+	type: PairForm["leftType"];
+	value: string;
+	onTypeChange: (t: PairForm["leftType"]) => void;
+	onValueChange: (v: string) => void;
+}) => {
+	const [uploading, setUploading] = useState(false);
+	const fileInputRef = useRef<HTMLInputElement>(null);
+
+	const handleFileUpload = async (file: File) => {
+		setUploading(true);
+		try {
+			const res = await adminMatchingGameApi.uploadMedia(file);
+			const url = res.data.data;
+			if (url) onValueChange(url);
+		} catch {
+			toast.error("Không thể tải file lên");
+		} finally {
+			setUploading(false);
+		}
+	};
+
+	const itemTypeOptions = (
+		<>
+			<SelectItem value="text">Văn bản</SelectItem>
+			<SelectItem value="image">Hình ảnh</SelectItem>
+			<SelectItem value="audio">Âm thanh</SelectItem>
+		</>
+	);
+
+	return (
+		<div className="space-y-2">
+			<Label className="text-xs">{label}</Label>
+			<Select
+				value={type}
+				onValueChange={(v) => onTypeChange(v as PairForm["leftType"])}
+			>
+				<SelectTrigger className="text-xs">
+					<SelectValue />
+				</SelectTrigger>
+				<SelectContent>{itemTypeOptions}</SelectContent>
+			</Select>
+
+			{type === "text" ? (
+				<Textarea
+					className="min-h-20 text-xs"
+					placeholder="Nội dung văn bản..."
+					value={value}
+					onChange={(e) => onValueChange(e.target.value)}
+				/>
+			) : type === "image" ? (
+				<div className="space-y-2">
+					<Input
+						className="text-xs"
+						placeholder="https://example.com/image.png"
+						value={value}
+						onChange={(e) => onValueChange(e.target.value)}
+					/>
+					<div className="flex items-center gap-2">
+						<input
+							ref={fileInputRef}
+							type="file"
+							accept="image/*"
+							className="hidden"
+							onChange={(e) => {
+								const file = e.target.files?.[0];
+								if (file) void handleFileUpload(file);
+								e.target.value = "";
+							}}
+						/>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							className="h-7 gap-1 text-xs"
+							disabled={uploading}
+							onClick={() => fileInputRef.current?.click()}
+						>
+							{uploading ? (
+								<Loader2Icon className="h-3 w-3 animate-spin" />
+							) : (
+								<Upload className="h-3 w-3" />
+							)}
+							{uploading ? "Đang tải..." : "Tải ảnh lên"}
+						</Button>
+					</div>
+					{value ? (
+						<div className="overflow-hidden rounded-lg border bg-muted/20">
+							<img
+								src={value}
+								alt="preview"
+								className="h-28 w-full object-contain"
+								onError={(e) => {
+									(e.currentTarget as HTMLImageElement).style.display = "none";
+								}}
+							/>
+						</div>
+					) : null}
+				</div>
+			) : (
+				<div className="space-y-2">
+					<Input
+						className="text-xs"
+						placeholder="https://example.com/audio.mp3"
+						value={value}
+						onChange={(e) => onValueChange(e.target.value)}
+					/>
+					<div className="flex items-center gap-2">
+						<input
+							ref={fileInputRef}
+							type="file"
+							accept="audio/*"
+							className="hidden"
+							onChange={(e) => {
+								const file = e.target.files?.[0];
+								if (file) void handleFileUpload(file);
+								e.target.value = "";
+							}}
+						/>
+						<Button
+							type="button"
+							variant="outline"
+							size="sm"
+							className="h-7 gap-1 text-xs"
+							disabled={uploading}
+							onClick={() => fileInputRef.current?.click()}
+						>
+							{uploading ? (
+								<Loader2Icon className="h-3 w-3 animate-spin" />
+							) : (
+								<Music className="h-3 w-3" />
+							)}
+							{uploading ? "Đang tải..." : "Tải audio lên"}
+						</Button>
+					</div>
+					{value ? (
+						// biome-ignore lint/a11y/useMediaCaption: preview only
+						<audio controls src={value} className="w-full" />
+					) : null}
+				</div>
+			)}
+		</div>
+	);
+};
+
 const PairEditor = ({
 	pair,
 	index,
@@ -268,14 +425,6 @@ const PairEditor = ({
 	onRemove,
 	canRemove,
 }: PairEditorProps) => {
-	const itemTypeOptions = (
-		<>
-			<SelectItem value="text">Văn bản</SelectItem>
-			<SelectItem value="image">Hình ảnh (URL)</SelectItem>
-			<SelectItem value="audio">Âm thanh (URL)</SelectItem>
-		</>
-	);
-
 	return (
 		<div className="space-y-3 rounded-xl border bg-muted/30 p-4">
 			<div className="flex items-center justify-between">
@@ -296,55 +445,24 @@ const PairEditor = ({
 			</div>
 
 			<div className="grid gap-3 md:grid-cols-2">
-				<div className="space-y-2">
-					<Label className="text-xs">Nội dung bên trái</Label>
-					<Select
-						value={pair.leftType}
-						onValueChange={(value) =>
-							onUpdate({ ...pair, leftType: value as PairForm["leftType"] })
-						}
-					>
-						<SelectTrigger className="text-xs">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>{itemTypeOptions}</SelectContent>
-					</Select>
-					<Textarea
-						className="min-h-20 text-xs"
-						placeholder={
-							pair.leftType === "text"
-								? "Nội dung văn bản..."
-								: "URL hình ảnh/âm thanh..."
-						}
-						value={pair.leftValue}
-						onChange={(e) => onUpdate({ ...pair, leftValue: e.target.value })}
-					/>
-				</div>
-
-				<div className="space-y-2">
-					<Label className="text-xs">Nội dung bên phải</Label>
-					<Select
-						value={pair.rightType}
-						onValueChange={(value) =>
-							onUpdate({ ...pair, rightType: value as PairForm["rightType"] })
-						}
-					>
-						<SelectTrigger className="text-xs">
-							<SelectValue />
-						</SelectTrigger>
-						<SelectContent>{itemTypeOptions}</SelectContent>
-					</Select>
-					<Textarea
-						className="min-h-20 text-xs"
-						placeholder={
-							pair.rightType === "text"
-								? "Nội dung văn bản..."
-								: "URL hình ảnh/âm thanh..."
-						}
-						value={pair.rightValue}
-						onChange={(e) => onUpdate({ ...pair, rightValue: e.target.value })}
-					/>
-				</div>
+				<MediaItemEditor
+					label="Nội dung bên trái"
+					type={pair.leftType}
+					value={pair.leftValue}
+					onTypeChange={(t) =>
+						onUpdate({ ...pair, leftType: t, leftValue: "" })
+					}
+					onValueChange={(v) => onUpdate({ ...pair, leftValue: v })}
+				/>
+				<MediaItemEditor
+					label="Nội dung bên phải"
+					type={pair.rightType}
+					value={pair.rightValue}
+					onTypeChange={(t) =>
+						onUpdate({ ...pair, rightType: t, rightValue: "" })
+					}
+					onValueChange={(v) => onUpdate({ ...pair, rightValue: v })}
+				/>
 			</div>
 
 			<div className="space-y-2">
