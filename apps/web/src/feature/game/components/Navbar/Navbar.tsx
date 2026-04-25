@@ -57,24 +57,15 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 								Trang chủ
 							</Link>
 						</li>
-						{/* <li>
+						<li>
 							<Link
-								to="/matching/history"
+								to="/games/curriculum"
 								className={styles.link}
 								activeProps={{ className: styles.linkActive }}
 							>
-								Lịch sử Matching
+								Theo chương trình học
 							</Link>
-						</li> */}
-						{/* <li>
-							<Link
-								to="/leaderboard"
-								className={styles.link}
-								activeProps={{ className: styles.linkActive }}
-							>
-								Bảng xếp hạng
-							</Link>
-						</li> */}
+						</li>
 					</ul>
 				</div>
 				<div className={styles.right}>

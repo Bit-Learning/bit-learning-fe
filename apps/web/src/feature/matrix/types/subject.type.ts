@@ -1,5 +1,11 @@
 import type { TCurriculumBriefResponse } from "./curriculum.type";
 
+export type TChapterBriefResponse = {
+	id: number;
+	name: string;
+	chapterNo: number;
+};
+
 export type TSubjectResponse = {
 	id: number;
 	name: string;
@@ -9,6 +15,7 @@ export type TSubjectResponse = {
 	curriculum?: TCurriculumBriefResponse;
 	createdAt: string;
 	updatedAt: string;
+	chapters?: TChapterBriefResponse[];
 };
 
 export type TSubjectBriefResponse = {
