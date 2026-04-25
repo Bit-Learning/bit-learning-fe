@@ -46,6 +46,7 @@ export interface MatchingMetaDto {
 	title: string;
 	version?: string;
 	language?: string;
+	thumbnailUrl?: string;
 	baseScoreMax?: number;
 	difficultyMultiplier?: number;
 	passingThreshold?: number;

@@ -7,6 +7,7 @@ import {
 	ChevronDown,
 	ChevronUp,
 	ExternalLink,
+	FileImage,
 	LayoutGrid,
 	Loader2,
 	PlusCircle,
@@ -50,6 +51,7 @@ import type {
 	MatchingStageDto,
 } from "../api/admin-matching-game.api";
 import { useApproveGame, useRejectGame } from "../queries/useAdminGamesCrud";
+import { adminGamesApi } from "../api/admin-games.api";
 import {
 	MATCHING_GAME_KEYS,
 	useDeleteMatchingGame,
@@ -95,6 +97,7 @@ interface GameForm {
 	topicName: string;
 	metaVersion: string;
 	metaLanguage: string;
+	thumbnailUrl: string;
 	stages: StageForm[];
 }
 
@@ -135,6 +138,7 @@ const defaultForm = (): GameForm => ({
 	topicName: "",
 	metaVersion: "1.0.0",
 	metaLanguage: "vi",
+	thumbnailUrl: "",
 	stages: [defaultStage()],
 });
 
@@ -178,6 +182,7 @@ const apiToForm = (
 		topicName: parseTopicName(rawTitle, grade, topicCode),
 		metaVersion: data?.meta?.version ?? "1.0.0",
 		metaLanguage: data?.meta?.language ?? "vi",
+		thumbnailUrl: data?.meta?.thumbnailUrl ?? "",
 		stages: (data?.stages ?? []).map((stage) => ({
 			id: stage.id,
 			title: stage.title,
@@ -605,6 +610,9 @@ export function MatchingGameEditorPage({
 	const approveGame = useApproveGame();
 	const rejectGame = useRejectGame();
 	const [form, setForm] = useState<GameForm>(defaultForm());
+	const [thumbnailFile, setThumbnailFile] = useState<File | undefined>(
+		undefined,
+	);
 	const matchingGameId = data?.meta?.gameId ?? gameId;
 	const resolvedGrade = data?.meta?.grade ?? grade;
 	const resolvedTopicCode =
@@ -662,19 +670,40 @@ export function MatchingGameEditorPage({
 					title: buildTitle(form.grade, nextTopicCode, form.topicName),
 					version: form.metaVersion || "1.0.0",
 					language: form.metaLanguage || "vi",
+					thumbnailUrl: form.thumbnailUrl || undefined,
 				},
 				stages: formToStages(form.stages),
 			});
+
+			// Upload thumbnail file if provided (uses /admin/games/{id} multipart endpoint)
+			const savedGameId = savedGame.meta.gameId;
+			if (thumbnailFile && savedGameId !== undefined) {
+				try {
+					await adminGamesApi.updateGame(savedGameId, {
+						title:
+							savedGame.meta.title ??
+							buildTitle(form.grade, nextTopicCode, form.topicName),
+						desc: "",
+						thumbnail: thumbnailFile,
+					});
+					setThumbnailFile(undefined);
+				} catch {
+					toast.warning(
+						"Lưu game thành công nhưng không thể tải thumbnail lên",
+					);
+				}
+			}
+
 			toast.success(
 				isCreateMode
 					? "Tạo matching game thành công"
 					: "Cập nhật matching game thành công",
 			);
-			if (savedGame.meta.gameId !== undefined) {
+			if (savedGameId !== undefined) {
 				navigate({
 					to: "/apps/games/matching",
 					search: {
-						gameId: savedGame.meta.gameId,
+						gameId: savedGameId,
 						grade: savedGame.meta.grade ?? form.grade,
 						topic: savedGame.meta.topicCode ?? nextTopicCode,
 					},
@@ -956,6 +985,57 @@ export function MatchingGameEditorPage({
 										Tiêu đề đầy đủ:{" "}
 										<span className="font-medium">{titlePreview}</span>
 									</div>
+								</div>
+							</div>
+
+							<div className="space-y-2">
+								<Label>Thumbnail</Label>
+								<div className="space-y-3">
+									<Input
+										placeholder="https://example.com/thumbnail.png"
+										value={form.thumbnailUrl}
+										onChange={(e) =>
+											setForm((prev) => ({
+												...prev,
+												thumbnailUrl: e.target.value,
+											}))
+										}
+									/>
+									<p className="text-xs text-muted-foreground">
+										Nhập URL ảnh có sẵn, hoặc tải ảnh mới bên dưới (ảnh tải lên
+										sẽ được ưu tiên).
+									</p>
+									<div className="rounded-xl border border-dashed p-4">
+										<div className="mb-3 flex items-center gap-2 text-sm font-medium">
+											<FileImage className="h-4 w-4 text-sky-600" />
+											Tải ảnh thumbnail
+										</div>
+										<Input
+											type="file"
+											accept="image/*"
+											onChange={(e) =>
+												setThumbnailFile(e.target.files?.[0] ?? undefined)
+											}
+										/>
+										{thumbnailFile ? (
+											<p className="mt-2 text-xs text-muted-foreground">
+												Đã chọn: {thumbnailFile.name}
+											</p>
+										) : null}
+									</div>
+									{form.thumbnailUrl && !thumbnailFile ? (
+										<div className="overflow-hidden rounded-lg border bg-muted/20">
+											<img
+												src={form.thumbnailUrl}
+												alt="Thumbnail preview"
+												className="h-40 w-full object-cover"
+												onError={(e) => {
+													(e.currentTarget as HTMLImageElement).style.display =
+														"none";
+												}}
+											/>
+										</div>
+									) : null}
 								</div>
 							</div>
 						</CardContent>
