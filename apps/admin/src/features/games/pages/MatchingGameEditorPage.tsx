@@ -62,17 +62,27 @@ import {
 	useMatchingGameDetail,
 	useUpsertMatchingGame,
 } from "../queries/useAdminMatchingGame";
+import { useSubjectsWithChapters } from "@/features/curriculum/queries/useSubject";
 
-const TOPIC_TITLES_PRIMARY: Record<string, string> = {
-	A: "MÁY TÍNH VÀ EM",
-	B: "MẠNG MÁY TÍNH VÀ INTERNET",
-	C: "TỔ CHỨC LƯU TRỮ, TÌM KIẾM VÀ TRAO ĐỔI THÔNG TIN",
-	D: "ĐẠO ĐỨC, PHÁP LUẬT VỀ VĂN HÓA TRONG MÔI TRƯỜNG SỐ",
-	E: "ỨNG DỤNG TIN HỌC",
-	F: "GIẢI QUYẾT VẤN ĐỀ VỚI SỰ TRỢ GIÚP CỦA MÁY TÍNH",
+// Extract topic code from chapter name, e.g. "Chủ đề A: ..." → "A"
+const extractTopicCodeFromChapterName = (name: string): string => {
+	const match = name.match(/[Cc]hủ\s+đề\s+([A-Z0-9]+)\s*[:\-]/);
+	if (match?.[1]) return match[1].toUpperCase();
+	// fallback: first word that looks like a single uppercase letter
+	const fallback = name.match(/\b([A-F])\b/);
+	return fallback?.[1] ?? "";
 };
 
-const KNOWN_TOPIC_CODES = Object.keys(TOPIC_TITLES_PRIMARY);
+// Extract topic name (part after the colon)
+const extractTopicNameFromChapterName = (name: string): string => {
+	const colonIdx = name.indexOf(":");
+	return colonIdx >= 0
+		? name
+				.slice(colonIdx + 1)
+				.trim()
+				.toUpperCase()
+		: name.toUpperCase();
+};
 
 interface PairForm {
 	id?: string;
@@ -96,6 +106,9 @@ interface StageForm {
 }
 
 interface GameForm {
+	curriculumId: number | null;
+	subjectId: number | null;
+	chapterId: number | null;
 	grade: number;
 	topicCode: string;
 	topicName: string;
@@ -137,6 +150,9 @@ const defaultStage = (): StageForm => ({
 });
 
 const defaultForm = (): GameForm => ({
+	curriculumId: null,
+	subjectId: null,
+	chapterId: null,
 	grade: 3,
 	topicCode: "A",
 	topicName: "",
@@ -181,6 +197,9 @@ const apiToForm = (
 ): GameForm => {
 	const rawTitle = data?.meta?.title ?? "";
 	return {
+		curriculumId: null,
+		subjectId: null,
+		chapterId: null,
 		grade,
 		topicCode,
 		topicName: parseTopicName(rawTitle, grade, topicCode),
@@ -731,6 +750,46 @@ export function MatchingGameEditorPage({
 	const [thumbnailFile, setThumbnailFile] = useState<File | undefined>(
 		undefined,
 	);
+
+	// Fetch all subjects (includes chapters and curriculum info)
+	const { data: allSubjects = [] } = useSubjectsWithChapters();
+
+	// Derive unique curriculums from subjects list
+	const curriculums = useMemo(() => {
+		const map = new Map<number, { id: number; name: string; code: string }>();
+		for (const s of allSubjects) {
+			if (s.curriculum) {
+				map.set(s.curriculum.id, s.curriculum);
+			}
+		}
+		return Array.from(map.values()).sort((a, b) =>
+			a.name.localeCompare(b.name),
+		);
+	}, [allSubjects]);
+
+	// Subjects filtered by selected curriculum
+	const filteredSubjects = useMemo(
+		() =>
+			form.curriculumId
+				? allSubjects
+						.filter((s) => s.curriculum?.id === form.curriculumId)
+						.sort((a, b) => a.classLevel - b.classLevel)
+				: [],
+		[allSubjects, form.curriculumId],
+	);
+
+	// Chapters of selected subject
+	const selectedSubject = useMemo(
+		() => allSubjects.find((s) => s.id === form.subjectId) ?? null,
+		[allSubjects, form.subjectId],
+	);
+	const chapters = useMemo(
+		() =>
+			(selectedSubject?.chapters ?? [])
+				.slice()
+				.sort((a, b) => a.chapterNo - b.chapterNo),
+		[selectedSubject],
+	);
 	const matchingGameId = data?.meta?.gameId ?? gameId;
 	const resolvedGrade = data?.meta?.grade ?? grade;
 	const resolvedTopicCode =
@@ -985,101 +1044,159 @@ export function MatchingGameEditorPage({
 						<CardHeader className="border-b">
 							<CardTitle>Thông tin chương trình học</CardTitle>
 							<CardDescription>
-								Xác định lớp, mã chủ đề và metadata hiển thị cho matching game.
+								Chọn bộ sách, môn học và chương để xác định vị trí của matching
+								game trong chương trình.
 							</CardDescription>
 						</CardHeader>
 						<CardContent className="space-y-5 pt-6">
+							{/* Step 1: Bộ sách */}
+							<div className="space-y-2">
+								<Label>Bộ sách</Label>
+								<Select
+									value={form.curriculumId ? String(form.curriculumId) : ""}
+									onValueChange={(value) =>
+										setForm((prev) => ({
+											...prev,
+											curriculumId: Number(value),
+											subjectId: null,
+											chapterId: null,
+											topicCode: "",
+											topicName: "",
+										}))
+									}
+								>
+									<SelectTrigger>
+										<SelectValue placeholder="Chọn bộ sách..." />
+									</SelectTrigger>
+									<SelectContent>
+										{curriculums.map((c) => (
+											<SelectItem key={c.id} value={String(c.id)}>
+												{c.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							{/* Step 2: Môn học (lớp) */}
+							<div className="space-y-2">
+								<Label>Môn học (Lớp)</Label>
+								<Select
+									value={form.subjectId ? String(form.subjectId) : ""}
+									disabled={!form.curriculumId}
+									onValueChange={(value) => {
+										const subject = allSubjects.find(
+											(s) => s.id === Number(value),
+										);
+										setForm((prev) => ({
+											...prev,
+											subjectId: Number(value),
+											chapterId: null,
+											grade: subject?.classLevel ?? prev.grade,
+											topicCode: "",
+											topicName: "",
+										}));
+									}}
+								>
+									<SelectTrigger>
+										<SelectValue
+											placeholder={
+												form.curriculumId
+													? "Chọn môn học..."
+													: "Chọn bộ sách trước"
+											}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										{filteredSubjects.map((s) => (
+											<SelectItem key={s.id} value={String(s.id)}>
+												Lớp {s.classLevel} · {s.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							{/* Step 3: Chương (chủ đề) */}
+							<div className="space-y-2">
+								<Label>Chương / Chủ đề</Label>
+								<Select
+									value={form.chapterId ? String(form.chapterId) : ""}
+									disabled={!form.subjectId}
+									onValueChange={(value) => {
+										const chapter = chapters.find(
+											(c) => c.id === Number(value),
+										);
+										const code = chapter
+											? extractTopicCodeFromChapterName(chapter.name)
+											: "";
+										const name = chapter
+											? extractTopicNameFromChapterName(chapter.name)
+											: "";
+										setForm((prev) => ({
+											...prev,
+											chapterId: Number(value),
+											topicCode: code || String(chapter?.chapterNo ?? ""),
+											topicName: name,
+										}));
+									}}
+								>
+									<SelectTrigger>
+										<SelectValue
+											placeholder={
+												form.subjectId ? "Chọn chương..." : "Chọn môn học trước"
+											}
+										/>
+									</SelectTrigger>
+									<SelectContent>
+										{chapters.map((c) => (
+											<SelectItem key={c.id} value={String(c.id)}>
+												{c.name}
+											</SelectItem>
+										))}
+									</SelectContent>
+								</Select>
+							</div>
+
+							{/* Summary badge */}
+							{form.subjectId && form.chapterId ? (
+								<div className="inline-flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-sm text-muted-foreground">
+									<BookOpen className="h-4 w-4" />
+									Lớp {form.grade} · Chủ đề {form.topicCode || "?"}
+								</div>
+							) : null}
+
 							<div className="grid gap-4 md:grid-cols-2">
 								<div className="space-y-2">
-									<Label>Lớp</Label>
+									<Label>Mã chủ đề</Label>
+									<Input
+										placeholder="Ví dụ: A, B, C..."
+										value={form.topicCode}
+										onChange={(e) =>
+											setForm((prev) => ({
+												...prev,
+												topicCode: e.target.value.toUpperCase(),
+											}))
+										}
+									/>
+								</div>
+								<div className="space-y-2">
+									<Label>Ngôn ngữ</Label>
 									<Select
-										value={String(form.grade)}
+										value={form.metaLanguage}
 										onValueChange={(value) =>
-											setForm((prev) => ({ ...prev, grade: Number(value) }))
+											setForm((prev) => ({ ...prev, metaLanguage: value }))
 										}
 									>
 										<SelectTrigger>
 											<SelectValue />
 										</SelectTrigger>
 										<SelectContent>
-											{Array.from({ length: 10 }, (_, index) => index + 3).map(
-												(level) => (
-													<SelectItem key={level} value={String(level)}>
-														Lớp {level}
-													</SelectItem>
-												),
-											)}
+											<SelectItem value="vi">Tiếng Việt</SelectItem>
+											<SelectItem value="en">English</SelectItem>
 										</SelectContent>
 									</Select>
 								</div>
-
-								<div className="space-y-2">
-									<Label>Mã chủ đề</Label>
-									<Select
-										value={
-											KNOWN_TOPIC_CODES.includes(form.topicCode)
-												? form.topicCode
-												: "__custom__"
-										}
-										onValueChange={(value) => {
-											if (value === "__custom__") {
-												setForm((prev) => ({ ...prev, topicCode: "" }));
-												return;
-											}
-											setForm((prev) => ({
-												...prev,
-												topicCode: value,
-												topicName:
-													TOPIC_TITLES_PRIMARY[value] ?? prev.topicName,
-											}));
-										}}
-									>
-										<SelectTrigger>
-											<SelectValue placeholder="Chọn chủ đề..." />
-										</SelectTrigger>
-										<SelectContent>
-											{Object.entries(TOPIC_TITLES_PRIMARY).map(
-												([code, title]) => (
-													<SelectItem key={code} value={code}>
-														{code} · {title}
-													</SelectItem>
-												),
-											)}
-											<SelectItem value="__custom__">Tự nhập</SelectItem>
-										</SelectContent>
-									</Select>
-									{!KNOWN_TOPIC_CODES.includes(form.topicCode) ? (
-										<Input
-											placeholder="Nhập mã chủ đề..."
-											maxLength={3}
-											value={form.topicCode}
-											onChange={(e) =>
-												setForm((prev) => ({
-													...prev,
-													topicCode: e.target.value.toUpperCase(),
-												}))
-											}
-										/>
-									) : null}
-								</div>
-							</div>
-
-							<div className="space-y-2">
-								<Label>Ngôn ngữ</Label>
-								<Select
-									value={form.metaLanguage}
-									onValueChange={(value) =>
-										setForm((prev) => ({ ...prev, metaLanguage: value }))
-									}
-								>
-									<SelectTrigger>
-										<SelectValue />
-									</SelectTrigger>
-									<SelectContent>
-										<SelectItem value="vi">Tiếng Việt</SelectItem>
-										<SelectItem value="en">English</SelectItem>
-									</SelectContent>
-								</Select>
 							</div>
 
 							<div className="space-y-2">
