@@ -1,6 +1,6 @@
 import Header from "@/layouts/header";
 import ScrollToTop from "@/layouts/scroll-to-top";
-import { requireStudentOrMentorRole } from "@/shared/lib/auth-utils";
+// import { requireStudentOrMentorRole } from "@/shared/lib/auth-utils";
 import { createFileRoute, Outlet } from "@tanstack/react-router";
 import { motion } from "framer-motion";
 
@@ -23,8 +23,8 @@ function HeaderOnlyLayoutComponent() {
 }
 
 export const Route = createFileRoute("/_headerOnly")({
-	beforeLoad: ({ location }) => {
-		requireStudentOrMentorRole(location);
-	},
+	// beforeLoad: ({ location }) => {
+	// 	requireStudentOrMentorRole(location);
+	// },
 	component: HeaderOnlyLayoutComponent,
 });
