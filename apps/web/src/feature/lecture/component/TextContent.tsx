@@ -1,15 +1,67 @@
 import { Button } from "@workspace/ui/components/Button";
-import { CheckCircle } from "lucide-react";
+import { BookOpen, CheckCircle, Code2 } from "lucide-react";
 import type React from "react";
 import { useRef } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useLectureText } from "../queries/useLecture";
 import { useIsLectureCompleted, useMarkAsCompleted } from "../queries/useLearning";
+import { useProblemDetail } from "@/feature/code-practice/queries/useCoding";
+import { DifficultyBadge } from "@/feature/code-practice/components/DifficultyBadge";
 
 interface TextContentProps {
   lectureId: number;
   onComplete?: () => void;
   hasAccess?: boolean;
 }
+
+const LinkedProblemCard: React.FC<{ problemId: string }> = ({ problemId }) => {
+  const { data: problem, isLoading } = useProblemDetail(problemId);
+  const navigate = useNavigate();
+
+  if (isLoading) {
+    return (
+      <div className="animate-pulse rounded-xl border border-blue-100 bg-blue-50 p-4">
+        <div className="mb-2 h-3 w-32 rounded bg-blue-100" />
+        <div className="h-5 w-64 rounded bg-blue-100" />
+      </div>
+    );
+  }
+
+  if (!problem) return null;
+
+  return (
+    <div className="rounded-xl border border-blue-200 bg-blue-50 p-4">
+      <p className="mb-2 text-sm font-semibold uppercase tracking-wide text-blue-400">Bài tập thực hành</p>
+      <div className="flex items-center justify-between gap-4">
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-base font-semibold text-gray-800">{problem.title}</p>
+          <div className="mt-1.5 flex flex-wrap items-center gap-2">
+            <DifficultyBadge difficulty={problem.difficulty} />
+            {problem.classLevel && (
+              <span className="flex items-center gap-1 rounded border border-indigo-200 bg-indigo-50 px-2 py-0.5 text-xs font-semibold text-indigo-600">
+                <BookOpen className="h-3 w-3" />
+                Lớp {problem.classLevel}
+              </span>
+            )}
+            {problem.tags?.slice(0, 3).map((t) => (
+              <span key={t.id} className="rounded border border-gray-200 bg-white px-2 py-0.5 text-xs text-gray-500">
+                {t.name}
+              </span>
+            ))}
+          </div>
+        </div>
+
+        <button
+          type="button"
+          onClick={() => navigate({ to: "/problem/$id", params: { id: problem.id } })}
+          className="cursor-pointer flex shrink-0 items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-semibold text-white transition-colors hover:bg-blue-700"
+        >
+          Làm bài
+        </button>
+      </div>
+    </div>
+  );
+};
 
 const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete, hasAccess }) => {
   const { data, isLoading, error } = useLectureText(lectureId);
@@ -51,7 +103,7 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete, hasAcc
     );
   }
 
-  const { lecture, content } = data;
+  const { lecture, content, problemId } = data;
 
   return (
     <div ref={contentRef} className="min-h-full bg-white">
@@ -177,6 +229,12 @@ const TextContent: React.FC<TextContentProps> = ({ lectureId, onComplete, hasAcc
         />
 
         <div className="lecture-content" dangerouslySetInnerHTML={{ __html: content }} />
+
+        {problemId && (
+          <div className="mt-8">
+            <LinkedProblemCard problemId={problemId} />
+          </div>
+        )}
 
         {!isCompleted && hasAccess && (
           <div className="mt-10 border-t border-gray-200 pt-6 text-right">
