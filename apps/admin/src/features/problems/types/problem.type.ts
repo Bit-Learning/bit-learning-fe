@@ -511,6 +511,10 @@ export interface DebugResponse {
 
 export interface ProblemFilters {
   search?: string;
+  difficulty?: Difficulty;
+  approvalStatus?: ApprovalStatus;
+  classLevel?: number;
+  createdById?: number;
   page?: number;
   size?: number;
   sort?: string;

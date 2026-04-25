@@ -58,11 +58,13 @@ export interface CreateLectureTextRequest {
   lecture: CreateLectureRequest;
   content: string;
   duration?: number;
+  problemId?: string;
 }
 
 export interface UpdateLectureTextRequest {
   content: string;
   duration?: number;
+  problemId?: string;
 }
 
 export enum LectureType {
@@ -88,6 +90,7 @@ export interface LectureDetail {
 export interface LectureTextDetail {
   lecture: LectureDetail;
   content: string;
+  problemId: string;
 }
 
 export interface AnswerDetail {

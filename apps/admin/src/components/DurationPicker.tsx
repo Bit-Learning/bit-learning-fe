@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Clock } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { Label } from "./ui/label";
 
 interface DurationPickerProps {
   value?: number;
@@ -69,8 +69,7 @@ export const DurationPicker: React.FC<DurationPickerProps> = ({
   return (
     <div className={cn("space-y-2", className)}>
       <div className="flex items-center gap-1.5">
-        <Clock className="h-4 w-4 text-gray-500" />
-        <span className="text-sm font-medium text-gray-700">{label}</span>
+        <Label className="text-base">{label}</Label>
       </div>
 
       <div

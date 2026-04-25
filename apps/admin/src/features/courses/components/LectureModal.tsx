@@ -23,6 +23,7 @@ import {
 import type { LectureDetail } from "../types/lecture.type";
 import { HtmlPasteButton } from "@/components/HtmlPasteButton";
 import DurationPicker from "@/components/DurationPicker";
+import ProblemPicker from "./ProblemPicker";
 
 interface LectureModalProps {
   mode: "create" | "edit";
@@ -45,6 +46,7 @@ const lectureBaseSchema = z.object({
 const textLectureSchema = lectureBaseSchema.extend({
   content: z.string().min(1, "Nội dung là bắt buộc"),
   duration: z.number().min(1, "Thời lượng phải lớn hơn 0"),
+  problemId: z.string().optional(),
 });
 
 type VideoFormValues = z.infer<typeof lectureBaseSchema>;
@@ -99,6 +101,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
       isPreviewable: lecture?.isPreviewable || false,
       content: "",
       duration: 600,
+      problemId: undefined,
     },
   });
 
@@ -149,6 +152,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         isPreviewable: lecture?.isPreviewable || false,
         content: textData.content,
         duration: 600,
+        problemId: textData.problemId || undefined,
       });
     }
   }, [textData]);
@@ -246,7 +250,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         await updateTextMutation.mutateAsync({
           courseId: courseId!,
           id: lecture.id,
-          data: { content: data.content, duration: data.duration },
+          data: { content: data.content, duration: data.duration, problemId: data.problemId },
         });
       } else if (mode === "create" && sectionId) {
         await createTextMutation.mutateAsync({
@@ -261,6 +265,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
             },
             content: data.content,
             duration: data.duration,
+            problemId: data.problemId,
           },
         });
       }
@@ -280,15 +285,17 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="flex max-h-[90vh] w-full max-w-3xl flex-col overflow-hidden">
-        <div className="flex items-center justify-between border-b p-4">
-          <h2 className="text-xl font-bold">{mode === "create" ? "Thêm bài học mới" : "Chỉnh sửa bài học"}</h2>
+      <Card className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden py-0">
+        <div className="flex items-center justify-between border-b px-6 py-4">
+          <h2 className="text-xl font-bold text-gray-900">
+            {mode === "create" ? "Thêm bài học mới" : "Chỉnh sửa bài học"}
+          </h2>
           <Button variant="outline" size="sm" onClick={onClose}>
             <X className="h-4 w-4" />
           </Button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-4">
+        <div className="flex-1 overflow-y-auto px-6">
           {mode === "create" && !lectureType && (
             <div className="grid grid-cols-3 gap-4">
               <Card
@@ -296,65 +303,72 @@ const LectureModal: React.FC<LectureModalProps> = ({
                 onClick={() => setLectureType("VIDEO")}
               >
                 <Video className="mx-auto mb-3 h-12 w-12 text-blue-600" />
-                <h3 className="mb-1 font-semibold">Video</h3>
-                <p className="text-sm text-gray-600">Tải lên video bài giảng</p>
+                <h3 className="mb-1 text-base font-semibold">Video</h3>
+                <p className="text-sm text-gray-500">Tải lên video bài giảng</p>
               </Card>
               <Card
                 className="cursor-pointer p-6 text-center transition-all hover:border-green-400 hover:shadow-lg"
                 onClick={() => setLectureType("TEXT")}
               >
                 <FileText className="mx-auto mb-3 h-12 w-12 text-green-600" />
-                <h3 className="mb-1 font-semibold">Văn bản</h3>
-                <p className="text-sm text-gray-600">Thêm nội dung văn bản</p>
+                <h3 className="mb-1 text-base font-semibold">Văn bản</h3>
+                <p className="text-sm text-gray-500">Thêm nội dung văn bản</p>
               </Card>
               <Card
                 className="cursor-pointer p-6 text-center transition-all hover:border-purple-400 hover:shadow-lg"
                 onClick={handleQuizClick}
               >
                 <HelpCircle className="mx-auto mb-3 h-12 w-12 text-purple-600" />
-                <h3 className="mb-1 font-semibold">Bài kiểm tra</h3>
-                <p className="text-sm text-gray-600">Tạo bài kiểm tra</p>
+                <h3 className="mb-1 text-base font-semibold">Bài kiểm tra</h3>
+                <p className="text-sm text-gray-500">Tạo bài kiểm tra</p>
               </Card>
             </div>
           )}
 
           {lectureType === "VIDEO" && (
-            <form id="lecture-form" onSubmit={videoForm.handleSubmit(handleVideoSubmit)} className="space-y-4">
+            <form id="lecture-form" onSubmit={videoForm.handleSubmit(handleVideoSubmit)} className="space-y-5">
               <div className="flex items-center gap-2 text-blue-600">
                 <Video className="h-5 w-5" />
-                <span className="font-medium">
+                <span className="text-base font-semibold">
                   {mode === "create" ? "Tạo bài học Video" : "Chỉnh sửa bài học Video"}
                 </span>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="video-title">Tên bài học *</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="video-title" className="text-base">
+                  Tên bài học *
+                </Label>
                 <Input
                   id="video-title"
                   {...videoForm.register("title")}
                   placeholder="VD: Bài 1: Giới thiệu"
-                  className={videoForm.formState.errors.title ? "border-red-500" : ""}
+                  className={`text-base h-11 ${videoForm.formState.errors.title ? "border-red-500" : ""}`}
                 />
                 {videoForm.formState.errors.title && (
                   <p className="text-sm text-red-500">{videoForm.formState.errors.title.message}</p>
                 )}
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="video-description">Mô tả</Label>
+              <div className="space-y-1.5">
+                <Label htmlFor="video-description" className="text-base">
+                  Mô tả
+                </Label>
                 <Textarea
                   id="video-description"
                   {...videoForm.register("description")}
                   rows={3}
+                  className="text-base"
                   placeholder="Mô tả ngắn về bài học"
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="video">{mode === "create" ? "Upload video *" : "Thay đổi video (tùy chọn)"}</Label>
-                <div className="rounded-lg border-2 border-dashed p-4 text-center">
+              <div className="space-y-1.5">
+                <Label htmlFor="video" className="text-base">
+                  {mode === "create" ? "Upload video *" : "Thay đổi video (tùy chọn)"}
+                </Label>
+                <div className="rounded-xl border-2 border-dashed p-5 text-center">
                   <Upload className="mx-auto mb-2 h-8 w-8 text-gray-400" />
-                  <p className="mb-2 text-sm text-gray-600">
+                  <p className="mb-2 text-base text-gray-600">
                     {videoFile
                       ? videoFile.name
                       : mode === "create"
@@ -377,7 +391,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
                   checked={videoIsPreviewable}
                   onCheckedChange={(checked) => videoForm.setValue("isPreviewable", !!checked)}
                 />
-                <Label htmlFor="video-previewable" className="font-medium">
+                <Label htmlFor="video-previewable" className="text-base font-medium">
                   Cho phép xem trước
                 </Label>
               </div>
@@ -398,38 +412,43 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
           {lectureType === "TEXT" &&
             (mode === "edit" && textLoading ? (
-              <div className="py-8 text-center">
+              <div className="py-10 text-center">
                 <Loader2 className="mx-auto h-8 w-8 animate-spin text-green-600" />
-                <p className="mt-2 text-gray-600">Đang tải nội dung...</p>
+                <p className="mt-2 text-base text-gray-500">Đang tải nội dung...</p>
               </div>
             ) : (
-              <form id="lecture-form" onSubmit={textForm.handleSubmit(handleTextSubmit)} className="space-y-4">
+              <form id="lecture-form" onSubmit={textForm.handleSubmit(handleTextSubmit)} className="space-y-5">
                 <div className="flex items-center gap-2 text-green-600">
                   <FileText className="h-5 w-5" />
-                  <span className="font-medium">
+                  <span className="text-base font-semibold">
                     {mode === "create" ? "Tạo bài học Văn bản" : "Chỉnh sửa bài học Văn bản"}
                   </span>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="text-title">Tên bài học *</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="text-title" className="text-base">
+                    Tên bài học *
+                  </Label>
                   <Input
                     id="text-title"
                     {...textForm.register("title")}
                     placeholder="VD: Bài 1: Giới thiệu"
-                    className={textForm.formState.errors.title ? "border-red-500" : ""}
+                    className={`text-base h-11 ${textForm.formState.errors.title ? "border-red-500" : ""}`}
                   />
                   {textForm.formState.errors.title && (
                     <p className="text-sm text-red-500">{textForm.formState.errors.title.message}</p>
                   )}
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="text-description">Mô tả</Label>
+                <div className="space-y-1.5">
+                  <Label htmlFor="text-description" className="text-base">
+                    Mô tả
+                  </Label>
                   <Textarea
                     id="text-description"
                     {...textForm.register("description")}
                     rows={3}
+                    className="text-base"
                     placeholder="Mô tả ngắn về bài học"
                   />
                 </div>
@@ -442,14 +461,21 @@ const LectureModal: React.FC<LectureModalProps> = ({
                       value={field.value}
                       onChange={field.onChange}
                       label="Thời lượng đọc *"
+                      className="text-base"
                       error={textForm.formState.errors.duration?.message}
                     />
                   )}
                 />
 
-                <div className="space-y-2">
+                <Controller
+                  control={textForm.control}
+                  name="problemId"
+                  render={({ field }) => <ProblemPicker value={field.value} onChange={field.onChange} />}
+                />
+
+                <div className="space-y-1.5">
                   <div className="flex items-center justify-between">
-                    <Label>Nội dung *</Label>
+                    <Label className="text-base">Nội dung *</Label>
                     <HtmlPasteButton onInsert={handleInsertHtml(textContentRef, textForm.setValue, "content")} />
                   </div>
                   <div className={textForm.formState.errors.content ? "rounded-lg border-2 border-red-500" : ""}>
@@ -481,7 +507,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
                     checked={textIsPreviewable}
                     onCheckedChange={(checked) => textForm.setValue("isPreviewable", !!checked)}
                   />
-                  <Label htmlFor="text-previewable" className="font-medium">
+                  <Label htmlFor="text-previewable" className="text-base font-medium">
                     Cho phép xem trước
                   </Label>
                 </div>
@@ -502,7 +528,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
         </div>
 
         {mode === "create" && lectureType && (
-          <div className="flex justify-end gap-3 border-t bg-gray-50 p-4">
+          <div className="flex justify-end gap-3 border-t bg-gray-50 px-6 py-4">
             <Button type="button" size="lg" variant="outline" onClick={handleBack} disabled={isLoading}>
               Quay lại
             </Button>
