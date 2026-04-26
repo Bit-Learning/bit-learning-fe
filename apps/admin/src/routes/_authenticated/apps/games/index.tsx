@@ -2,8 +2,15 @@ import { GamesCrudManager } from "@/features/games/components/GameListPage";
 import { Header } from "@/layout/header";
 import { TopNav } from "@/layout/top-nav";
 import { createFileRoute } from "@tanstack/react-router";
+import { z } from "zod";
+
+const gamesSearchSchema = z.object({
+	status: z.string().optional(),
+	rowType: z.string().optional(),
+});
 
 export const Route = createFileRoute("/_authenticated/apps/games/")({
+	validateSearch: gamesSearchSchema,
 	component: GamesRoute,
 });
 

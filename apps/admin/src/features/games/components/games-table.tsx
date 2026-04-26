@@ -6,6 +6,7 @@ import {
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type ColumnFiltersState,
 	type SortingState,
 	useReactTable,
 } from "@tanstack/react-table";
@@ -28,6 +29,8 @@ type GamesTableProps = {
 	onDeleteMatching: (gameId: number) => void;
 	isDeletingStandard?: boolean;
 	isDeletingMatching?: boolean;
+	initialColumnFilters?: ColumnFiltersState;
+	onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
 };
 
 export function GamesTable({
@@ -36,8 +39,12 @@ export function GamesTable({
 	onDeleteStandard,
 	isDeletingMatching = false,
 	isDeletingStandard = false,
+	initialColumnFilters = [],
+	onColumnFiltersChange,
 }: GamesTableProps) {
 	const [sorting, setSorting] = useState<SortingState>([]);
+	const [columnFilters, setColumnFilters] =
+		useState<ColumnFiltersState>(initialColumnFilters);
 
 	// eslint-disable-next-line react-hooks/incompatible-library
 	const table = useReactTable<GameRow>({
@@ -50,8 +57,15 @@ export function GamesTable({
 		}),
 		state: {
 			sorting,
+			columnFilters,
 		},
 		onSortingChange: setSorting,
+		onColumnFiltersChange: (updater) => {
+			const next =
+				typeof updater === "function" ? updater(columnFilters) : updater;
+			setColumnFilters(next);
+			onColumnFiltersChange?.(next);
+		},
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),

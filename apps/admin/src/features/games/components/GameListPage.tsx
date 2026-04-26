@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import {
 	ArrowRight,
 	Gamepad2,
@@ -27,6 +27,7 @@ import {
 } from "../queries/useAdminMatchingGame";
 import { GamesTable } from "./games-table";
 import type { GameRow } from "./games-columns";
+import type { ColumnFiltersState } from "@tanstack/react-table";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
 	if (error instanceof Error && error.message) {
@@ -57,6 +58,27 @@ export const GamesCrudManager = () => {
 		useMatchingGameMappings();
 	const deleteGame = useDeleteGame();
 	const deleteMatchingGame = useDeleteMatchingGame();
+	const navigate = useNavigate({ from: "/apps/games/" });
+	const search = useSearch({ from: "/_authenticated/apps/games/" });
+
+	const initialColumnFilters: ColumnFiltersState = [
+		...(search.status ? [{ id: "status", value: [search.status] }] : []),
+		...(search.rowType ? [{ id: "rowType", value: [search.rowType] }] : []),
+	];
+
+	const handleColumnFiltersChange = (filters: ColumnFiltersState) => {
+		const statusFilter = filters.find((f) => f.id === "status");
+		const rowTypeFilter = filters.find((f) => f.id === "rowType");
+		const statusValues = statusFilter?.value as string[] | undefined;
+		const rowTypeValues = rowTypeFilter?.value as string[] | undefined;
+		navigate({
+			search: {
+				status: statusValues?.[0],
+				rowType: rowTypeValues?.[0],
+			},
+			replace: true,
+		});
+	};
 
 	const getCategoryName = (categoryId?: number | null) => {
 		if (!categoryId) return "Chưa phân loại";
@@ -266,6 +288,8 @@ export const GamesCrudManager = () => {
 							onDeleteMatching={handleDeleteMatching}
 							isDeletingStandard={deleteGame.isPending}
 							isDeletingMatching={deleteMatchingGame.isPending}
+							initialColumnFilters={initialColumnFilters}
+							onColumnFiltersChange={handleColumnFiltersChange}
 						/>
 					)}
 				</CardContent>
