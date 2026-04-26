@@ -41,6 +41,18 @@ const STATUS_CONFIG: Record<
 	},
 };
 
+type GradeLevel = "all" | "primary" | "secondary" | "high";
+
+const GRADE_LEVEL_CONFIG: Record<
+	GradeLevel,
+	{ label: string; grades: number[] }
+> = {
+	all: { label: "Tất cả", grades: [] },
+	primary: { label: "Tiểu học (3-5)", grades: [3, 4, 5] },
+	secondary: { label: "THCS (6-9)", grades: [6, 7, 8, 9] },
+	high: { label: "THPT (10-12)", grades: [10, 11, 12] },
+};
+
 type MappingWithStatus = CurriculumMapping & { status?: string };
 
 function ChapterRow({
@@ -187,6 +199,8 @@ export default function CurriculumBrowsePage() {
 	const [selectedCurriculumId, setSelectedCurriculumId] = useState<
 		number | null
 	>(null);
+	const [selectedGradeLevel, setSelectedGradeLevel] =
+		useState<GradeLevel>("all");
 	const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
 	// Derive unique curriculums
@@ -210,13 +224,17 @@ export default function CurriculumBrowsePage() {
 			);
 	}, [allSubjects, userGrade]);
 
-	// Subjects filtered by curriculum
+	// Subjects filtered by curriculum + grade level
 	const filteredSubjects = useMemo(() => {
-		const base = selectedCurriculumId
+		let base = selectedCurriculumId
 			? allSubjects.filter((s) => s.curriculum?.id === selectedCurriculumId)
 			: allSubjects;
+		const levelGrades = GRADE_LEVEL_CONFIG[selectedGradeLevel].grades;
+		if (levelGrades.length > 0) {
+			base = base.filter((s) => levelGrades.includes(s.classLevel));
+		}
 		return base.slice().sort((a, b) => a.classLevel - b.classLevel);
-	}, [allSubjects, selectedCurriculumId]);
+	}, [allSubjects, selectedCurriculumId, selectedGradeLevel]);
 
 	// Available grades for current filter
 	const availableGrades = useMemo(
@@ -346,32 +364,62 @@ export default function CurriculumBrowsePage() {
 
 				{/* Filters */}
 				<div className={styles.filterBar}>
-					<div className={styles.tabs}>
-						<button
-							type="button"
-							className={`${styles.tab} ${!selectedCurriculumId ? styles.tabActive : ""}`}
-							onClick={() => {
-								setSelectedCurriculumId(null);
-								setSelectedGrade(null);
-							}}
-						>
-							Tất cả
-						</button>
-						{curriculums.map((c) => (
+					{/* Grade level */}
+					<div className={styles.filterGroup}>
+						<span className={styles.filterGroupLabel}>Khối lớp</span>
+						<div className={styles.tabs}>
+							{(
+								Object.entries(GRADE_LEVEL_CONFIG) as [
+									GradeLevel,
+									{ label: string },
+								][]
+							).map(([key, { label }]) => (
+								<button
+									key={key}
+									type="button"
+									className={`${styles.tab} ${selectedGradeLevel === key ? styles.tabActive : ""}`}
+									onClick={() => {
+										setSelectedGradeLevel(key);
+										setSelectedGrade(null);
+									}}
+								>
+									{label}
+								</button>
+							))}
+						</div>
+					</div>
+
+					{/* Curriculum */}
+					<div className={styles.filterGroup}>
+						<span className={styles.filterGroupLabel}>Bộ sách</span>
+						<div className={styles.tabs}>
 							<button
-								key={c.id}
 								type="button"
-								className={`${styles.tab} ${selectedCurriculumId === c.id ? styles.tabActive : ""}`}
+								className={`${styles.tab} ${!selectedCurriculumId ? styles.tabActive : ""}`}
 								onClick={() => {
-									setSelectedCurriculumId(c.id);
+									setSelectedCurriculumId(null);
 									setSelectedGrade(null);
 								}}
 							>
-								{c.name}
+								Tất cả
 							</button>
-						))}
+							{curriculums.map((c) => (
+								<button
+									key={c.id}
+									type="button"
+									className={`${styles.tab} ${selectedCurriculumId === c.id ? styles.tabActive : ""}`}
+									onClick={() => {
+										setSelectedCurriculumId(c.id);
+										setSelectedGrade(null);
+									}}
+								>
+									{c.name}
+								</button>
+							))}
+						</div>
 					</div>
 
+					{/* Grade pills */}
 					{availableGrades.length > 0 && (
 						<div className={styles.gradePills}>
 							<span className={styles.gradeLabel}>Lớp:</span>
