@@ -4,6 +4,7 @@ import {
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type ColumnFiltersState,
 	type PaginationState,
 	type SortingState,
 	useReactTable,
@@ -30,7 +31,9 @@ type PostsTableProps = {
 	totalPages?: number;
 	pageIndex: number;
 	pageSize: number;
+	initialColumnFilters?: ColumnFiltersState;
 	onPaginationChange: (pagination: PaginationState) => void;
+	onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
 };
 
 export function PostsTable({
@@ -39,9 +42,13 @@ export function PostsTable({
 	totalPages,
 	pageIndex,
 	pageSize,
+	initialColumnFilters = [],
 	onPaginationChange,
+	onColumnFiltersChange,
 }: PostsTableProps) {
 	const [sorting, setSorting] = useState<SortingState>([]);
+	const [columnFilters, setColumnFilters] =
+		useState<ColumnFiltersState>(initialColumnFilters);
 	const [pagination, setPagination] = useState<PaginationState>({
 		pageIndex,
 		pageSize,
@@ -57,9 +64,16 @@ export function PostsTable({
 		columns: postsColumns,
 		state: {
 			sorting,
+			columnFilters,
 			pagination,
 		},
 		onSortingChange: setSorting,
+		onColumnFiltersChange: (updater) => {
+			const next =
+				typeof updater === "function" ? updater(columnFilters) : updater;
+			setColumnFilters(next);
+			onColumnFiltersChange?.(next);
+		},
 		onPaginationChange: (updater) => {
 			const nextPagination =
 				typeof updater === "function" ? updater(pagination) : updater;
@@ -118,6 +132,14 @@ export function PostsTable({
 						options: [
 							{ label: "Đang hoạt động", value: "false" },
 							{ label: "Bị khóa", value: "true" },
+						],
+					},
+					{
+						columnId: "isFeatured",
+						title: "Nổi bật",
+						options: [
+							{ label: "Nổi bật", value: "true" },
+							{ label: "Không nổi bật", value: "false" },
 						],
 					},
 				]}

@@ -132,6 +132,15 @@ export const postsColumns: ColumnDef<PostPreview>[] = [
 		meta: { className: "min-w-[100px]" },
 	},
 	{
+		accessorKey: "isFeatured",
+		header: () => null,
+		cell: () => null,
+		filterFn: (row, id, value) => value.includes(String(row.getValue(id))),
+		enableSorting: false,
+		enableHiding: true,
+		meta: { className: "hidden" },
+	},
+	{
 		id: "actions",
 		header: () => <div>Hành động</div>,
 		cell: PostsRowActions,
