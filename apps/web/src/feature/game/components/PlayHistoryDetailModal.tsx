@@ -81,7 +81,7 @@ export default function PlayHistoryDetailModal({
 
 				{resolved ? (
 					<div className="space-y-5">
-						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
+						<div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
 							<SummaryCard
 								label={
 									isFiniteScore
@@ -108,14 +108,14 @@ export default function PlayHistoryDetailModal({
 										: String(resolved.leaderboardPoints ?? 0)
 								}
 							/>
-							<SummaryCard
+							{/* <SummaryCard
 								label={isFiniteScore ? "Hết giờ" : "Kiểu tính điểm"}
 								value={
 									isFiniteScore
 										? String(resolved.timeoutCount ?? 0)
 										: scoringModel
 								}
-							/>
+							/> */}
 							<SummaryCard
 								label="Thời gian"
 								value={formatDuration(resolved.duration ?? 0)}

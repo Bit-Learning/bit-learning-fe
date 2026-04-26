@@ -359,11 +359,11 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 			/>
 			<Navbar />
 
-			<div className="min-h-screen max-w-7xl mx-auto px-6 py-16 mt-10">
+			<div className="min-h-screen max-w-[90rem] mx-auto px-6 py-16 mt-10">
 				<button
 					type="button"
 					onClick={() => navigate({ to: "/games" })}
-					className="mb-10 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
+					className="mb-10 px-6 py-2 rounded font-bold transition-colors hover:cursor-pointer"
 				>
 					← Quay lại
 				</button>
@@ -574,10 +574,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 																				"vi-VN",
 																			)}
 																		</div>
-																		<div className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
-																			{item.attemptState ??
-																				(isCompleted ? "COMPLETED" : "PARTIAL")}
-																		</div>
 																	</div>
 																	<span
 																		className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -630,12 +626,12 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 																			<span className="rounded-full bg-rose-500/10 px-3 py-1">
 																				Sai {item.wrongCount ?? 0}
 																			</span>
-																			<span className="rounded-full bg-amber-500/10 px-3 py-1">
+																			{/* <span className="rounded-full bg-amber-500/10 px-3 py-1">
 																				Hết giờ {item.timeoutCount ?? 0}
 																			</span>
 																			<span className="rounded-full bg-sky-500/10 px-3 py-1">
 																				Điểm {item.score ?? 0}
-																			</span>
+																			</span> */}
 																		</>
 																	) : isHighScore ? (
 																		<>

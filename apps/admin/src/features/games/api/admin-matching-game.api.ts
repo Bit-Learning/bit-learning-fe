@@ -44,12 +44,19 @@ export interface MatchingMetaDto {
 	grade?: number;
 	topicCode?: string;
 	title: string;
+	description?: string;
 	version?: string;
 	language?: string;
 	thumbnailUrl?: string;
 	baseScoreMax?: number;
 	difficultyMultiplier?: number;
 	passingThreshold?: number;
+	// Curriculum context returned by backend
+	subjectId?: number | null;
+	chapterId?: number | null;
+	curriculumId?: number | null;
+	curriculumName?: string | null;
+	curriculumCode?: string | null;
 }
 
 export interface MatchingGameFullDto {
@@ -63,6 +70,8 @@ export interface MatchingUpsertRequest {
 	topicCode: string;
 	meta: MatchingMetaDto;
 	stages: MatchingStageDto[];
+	subjectId?: number | null;
+	chapterId?: number | null;
 }
 
 export interface CurriculumMappingDto {

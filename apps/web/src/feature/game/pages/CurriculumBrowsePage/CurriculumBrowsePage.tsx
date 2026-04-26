@@ -22,6 +22,10 @@ function extractTopicCode(name: string): string {
 	return fallback?.[1] ?? "";
 }
 
+function constructFullname(firstName?: string, lastName?: string): string {
+	return firstName + " " + lastName;
+}
+
 const STATUS_CONFIG: Record<
 	string,
 	{ label: string; color: string; dot: string }
@@ -448,6 +452,14 @@ export default function CurriculumBrowsePage() {
 			<section className={styles.hero}>
 				<div className={styles.heroGlow} />
 				<div className={styles.heroContent}>
+					<button
+						type="button"
+						onClick={() => navigate({ to: "/games" })}
+						className="w-35 px-6 py-2 font-bold hover:cursor-pointer"
+					>
+						← Quay lại
+					</button>
+
 					<span className={styles.heroBadge}>
 						<span className="material-icons" style={{ fontSize: 14 }}>
 							school
@@ -459,7 +471,7 @@ export default function CurriculumBrowsePage() {
 					</h1>
 					<p className={styles.heroDesc}>
 						{userGrade
-							? `Chào ${userInfo?.firstName ?? "bạn"}! Dưới đây là game dành riêng cho Lớp ${userGrade} của bạn.`
+							? `Chào ${constructFullname(userInfo?.firstName, userInfo?.lastName)}! Dưới đây là game dành riêng cho Lớp ${userGrade} của bạn.`
 							: "Chọn bộ sách và lớp học để tìm trò chơi ghép cặp phù hợp với chương trình Tin học."}
 					</p>
 					<div className={styles.heroStats}>
