@@ -1,11 +1,19 @@
 import type React from "react";
 import { useState } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
-import { FileText, ShieldOff, Star, TrendingUp } from "lucide-react";
+import { FileText, Info, ShieldOff, Star, TrendingUp } from "lucide-react";
 import { Header } from "@/layout/header";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { PostsTable } from "../components/posts-table";
+import { TrendingConfigDialog } from "../components/TrendingConfigDialog";
 import { useGetPosts } from "../queries/usePost";
+import { useGetTrendingConfig } from "../queries/useTrendingConfig";
 import type { ColumnFiltersState } from "@tanstack/react-table";
 
 export const PostListPage: React.FC = () => {
@@ -16,6 +24,7 @@ export const PostListPage: React.FC = () => {
 	const search = useSearch({ from: "/_authenticated/posts/" });
 
 	const { data, isLoading, isError } = useGetPosts(page, size);
+	const { data: trendingConfig } = useGetTrendingConfig();
 
 	const posts = data?.content ?? [];
 
@@ -58,7 +67,10 @@ export const PostListPage: React.FC = () => {
 		<>
 			<Header />
 			<div className="flex flex-1 flex-col gap-6 p-6">
-				<h1 className="text-2xl font-bold">Quản lý bài viết</h1>
+				<div className="flex items-center justify-between">
+					<h1 className="text-2xl font-bold">Quản lý bài viết</h1>
+					<TrendingConfigDialog />
+				</div>
 
 				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
 					<Card>
@@ -108,7 +120,43 @@ export const PostListPage: React.FC = () => {
 							<CardTitle className="text-sm font-medium text-muted-foreground">
 								Trending
 							</CardTitle>
-							<TrendingUp className="h-4 w-4 text-amber-500" />
+							<div className="flex items-center gap-1.5">
+								<TrendingUp className="h-4 w-4 text-amber-500" />
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Info className="h-3.5 w-3.5 cursor-help text-muted-foreground/60 hover:text-muted-foreground" />
+										</TooltipTrigger>
+										<TooltipContent
+											side="left"
+											className="max-w-64 space-y-2 p-3"
+										>
+											<p className="font-semibold">Cách tính Trending</p>
+											<p className="text-xs leading-relaxed">
+												Bài viết được đánh dấu trending nếu được tạo trong{" "}
+												<span className="font-semibold">
+													{trendingConfig?.lookbackDays ?? 14} ngày gần nhất
+												</span>{" "}
+												và đạt điểm tối thiểu{" "}
+												<span className="font-semibold">
+													{trendingConfig?.minScore ?? 5}
+												</span>
+												.
+											</p>
+											<div className="rounded-md bg-muted/60 px-2.5 py-2 font-mono text-xs">
+												score = bình luận × {trendingConfig?.commentWeight ?? 4}{" "}
+												+ reaction × {trendingConfig?.reactionWeight ?? 3} +
+												lượt xem × {trendingConfig?.viewWeight ?? 0.1}
+											</div>
+											<p className="text-xs text-muted-foreground">
+												Ví dụ: 1 bình luận ={" "}
+												{trendingConfig?.commentWeight ?? 4} điểm, 2 reaction ={" "}
+												{(trendingConfig?.reactionWeight ?? 3) * 2} điểm.
+											</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</div>
 						</CardHeader>
 						<CardContent>
 							<div className="text-2xl font-bold text-amber-600">
