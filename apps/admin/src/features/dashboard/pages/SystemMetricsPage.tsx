@@ -1,30 +1,27 @@
-// @ts-nocheck
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { Header } from "@/layout/header";
+import { cn } from "@/shared/lib/utils";
+import { useQuery } from "@tanstack/react-query";
+import { Activity, Cpu, HardDrive, Info, Layers3, Server } from "lucide-react";
+import type React from "react";
 import {
 	Area,
 	AreaChart,
 	CartesianGrid,
 	Line,
 	LineChart,
+	Tooltip as RechartsTooltip,
 	ResponsiveContainer,
-	Tooltip,
 	XAxis,
 	YAxis,
 } from "recharts";
-import { useQuery } from "@tanstack/react-query";
-import {
-	Activity,
-	Cpu,
-	HardDrive,
-	Layers3,
-	Server,
-	ShieldCheck,
-} from "lucide-react";
-import type React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Header } from "@/layout/header";
-import { Main } from "@/layout/main";
-import { cn } from "@/shared/lib/utils";
 import {
 	getSystemMetricsHealth,
 	getSystemMetricsSummary,
@@ -38,6 +35,12 @@ import type {
 	MetricsSummary,
 	MetricsTrends,
 } from "../types/system-metrics.types";
+type RechartsPayloadEntry = {
+	color?: string;
+	name?: string;
+	value?: number;
+	payload?: Record<string, unknown>;
+};
 
 function fmt(n: number): string {
 	return n.toLocaleString("vi-VN");
@@ -74,6 +77,34 @@ function isDiskSpaceHealthDetails(
 	return (
 		typeof candidate.total === "number" && typeof candidate.free === "number"
 	);
+}
+
+function getHealthLabel(
+	value: number,
+	thresholds = { warn: 70, critical: 90 },
+) {
+	if (value >= thresholds.critical) {
+		return {
+			label: "Nguy hiểm",
+			textClass: "text-rose-600 dark:text-rose-400",
+			dotClass: "bg-rose-500",
+			barClass: "bg-rose-500",
+		};
+	}
+	if (value >= thresholds.warn) {
+		return {
+			label: "Cần chú ý",
+			textClass: "text-amber-600 dark:text-amber-400",
+			dotClass: "bg-amber-500",
+			barClass: "bg-amber-500",
+		};
+	}
+	return {
+		label: "Bình thường",
+		textClass: "text-emerald-600 dark:text-emerald-400",
+		dotClass: "bg-emerald-500",
+		barClass: null, // use caller's default color
+	};
 }
 
 function getStatusTone(status: string) {
@@ -189,6 +220,24 @@ function getSeriesStats(points: { time: string; value: number }[]) {
 	return { current, average, peak };
 }
 
+function MetricTooltip({ content }: { content: string }) {
+	return (
+		<TooltipProvider delayDuration={200}>
+			<Tooltip>
+				<TooltipTrigger asChild>
+					<Info className="h-3.5 w-3.5 cursor-help text-muted-foreground/60 hover:text-muted-foreground transition-colors" />
+				</TooltipTrigger>
+				<TooltipContent
+					side="top"
+					className="max-w-[240px] text-xs leading-relaxed"
+				>
+					{content}
+				</TooltipContent>
+			</Tooltip>
+		</TooltipProvider>
+	);
+}
+
 function SummarySkeleton() {
 	return (
 		<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
@@ -218,6 +267,8 @@ function MetricKpiCard({
 	meta,
 	icon: Icon,
 	tone,
+	healthLabel,
+	tooltip,
 }: {
 	title: string;
 	value: string;
@@ -225,6 +276,8 @@ function MetricKpiCard({
 	meta: string;
 	icon: React.ElementType;
 	tone: "sky" | "emerald" | "indigo" | "violet" | "amber";
+	healthLabel?: ReturnType<typeof getHealthLabel>;
+	tooltip?: string;
 }) {
 	const toneMap = {
 		sky: {
@@ -274,9 +327,12 @@ function MetricKpiCard({
 			/>
 			<CardHeader className="relative flex flex-row items-start justify-between space-y-0 pb-3">
 				<div>
-					<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-						{title}
-					</p>
+					<div className="flex items-center gap-1.5">
+						<p className="text-[11px] font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+							{title}
+						</p>
+						{tooltip && <MetricTooltip content={tooltip} />}
+					</div>
 					<p className="mt-2 text-xs text-muted-foreground">{description}</p>
 				</div>
 				<div className={cn("rounded-2xl p-2.5", toneMap.iconWrap)}>
@@ -287,6 +343,19 @@ function MetricKpiCard({
 				<div className="text-2xl font-semibold tracking-tight text-foreground">
 					{value}
 				</div>
+				{healthLabel && (
+					<div
+						className={cn(
+							"mt-1.5 flex items-center gap-1.5 text-xs font-medium",
+							healthLabel.textClass,
+						)}
+					>
+						<span
+							className={cn("h-1.5 w-1.5 rounded-full", healthLabel.dotClass)}
+						/>
+						{healthLabel.label}
+					</div>
+				)}
 				<p className="mt-1.5 text-xs text-muted-foreground">{meta}</p>
 			</CardContent>
 		</Card>
@@ -298,25 +367,46 @@ function SignalBar({
 	value,
 	max,
 	colorClass,
+	thresholds,
+	tooltip,
 }: {
 	label: string;
 	value: number;
 	max: number;
 	colorClass: string;
+	thresholds?: { warn: number; critical: number };
+	tooltip?: string;
 }) {
 	const progress = max > 0 ? Math.min((value / max) * 100, 100) : 0;
+	const percent = max > 0 ? (value / max) * 100 : value;
+	const health = getHealthLabel(percent, thresholds);
+	const activeBarClass = health.barClass ?? colorClass;
 
 	return (
 		<div className="space-y-2 rounded-2xl border border-border/60 bg-muted/20 p-4">
 			<div className="flex items-center justify-between gap-3">
-				<p className="text-sm font-medium text-foreground">{label}</p>
-				<p className="text-sm font-semibold text-foreground">
-					{fmtNumber(value)}%
-				</p>
+				<div className="flex items-center gap-1.5">
+					<p className="text-sm font-medium text-foreground">{label}</p>
+					{tooltip && <MetricTooltip content={tooltip} />}
+				</div>
+				<div className="flex items-center gap-2">
+					<span
+						className={cn(
+							"flex items-center gap-1 text-xs font-medium",
+							health.textClass,
+						)}
+					>
+						<span className={cn("h-1.5 w-1.5 rounded-full", health.dotClass)} />
+						{health.label}
+					</span>
+					<p className="text-sm font-semibold text-foreground">
+						{fmtNumber(value)}%
+					</p>
+				</div>
 			</div>
 			<div className="h-2 rounded-full bg-muted">
 				<div
-					className={cn("h-full rounded-full transition-all", colorClass)}
+					className={cn("h-full rounded-full transition-all", activeBarClass)}
 					style={{ width: `${progress}%` }}
 				/>
 			</div>
@@ -467,6 +557,9 @@ function SummaryCards({
 			meta: "Throughput tích lũy",
 			icon: Activity,
 			tone: "sky" as const,
+			healthLabel: undefined,
+			tooltip:
+				"Tổng số HTTP request mà server đã xử lý kể từ lần khởi động gần nhất. Con số này chỉ tăng, không reset theo thời gian thực.",
 		},
 		{
 			title: "CPU hiện tại",
@@ -475,6 +568,9 @@ function SummaryCards({
 			meta: "Tải runtime hiện tại",
 			icon: Cpu,
 			tone: "emerald" as const,
+			healthLabel: getHealthLabel(cpuPercent, { warn: 70, critical: 90 }),
+			tooltip:
+				"Phần trăm CPU mà ứng dụng đang dùng. Trên 70% là cần chú ý, trên 90% có thể gây chậm hoặc timeout. Nếu cao liên tục, cần kiểm tra tác vụ nặng hoặc tăng tài nguyên.",
 		},
 		{
 			title: "Heap memory",
@@ -483,6 +579,9 @@ function SummaryCards({
 			meta: `Đang sử dụng ${fmtNumber(memPercent)}%`,
 			icon: HardDrive,
 			tone: "indigo" as const,
+			healthLabel: getHealthLabel(memPercent, { warn: 75, critical: 90 }),
+			tooltip:
+				"Bộ nhớ heap là vùng RAM mà JVM dùng để lưu dữ liệu ứng dụng. Nếu vượt 90% liên tục, JVM sẽ chạy Garbage Collection liên tục và có thể gây OutOfMemoryError.",
 		},
 		{
 			title: "JVM threads",
@@ -494,6 +593,15 @@ function SummaryCards({
 					: "Theo dõi thread runtime",
 			icon: Layers3,
 			tone: "violet" as const,
+			healthLabel:
+				maxConns > 0
+					? getHealthLabel((activeConns / maxConns) * 100, {
+							warn: 80,
+							critical: 95,
+						})
+					: undefined,
+			tooltip:
+				"Số luồng xử lý đang chạy trong JVM. Tăng đột biến có thể là dấu hiệu bottleneck hoặc thread leak. DB pool cho biết số kết nối database đang dùng — nếu đầy, request mới sẽ phải chờ.",
 		},
 	];
 
@@ -575,18 +683,24 @@ function RuntimeSignalsCard({ summary }: { summary?: MetricsSummary }) {
 					value={cpu}
 					max={100}
 					colorClass="bg-emerald-500"
+					thresholds={{ warn: 70, critical: 90 }}
+					tooltip="Mức CPU ứng dụng đang tiêu thụ. Trên 70% cần theo dõi, trên 90% có nguy cơ gây chậm hệ thống."
 				/>
 				<SignalBar
 					label="Heap pressure"
 					value={memoryPercent}
 					max={100}
 					colorClass="bg-indigo-500"
+					thresholds={{ warn: 75, critical: 90 }}
+					tooltip="Tỉ lệ bộ nhớ heap JVM đã dùng. Nếu liên tục trên 90%, JVM sẽ chạy Garbage Collection liên tục và có thể gây lỗi OutOfMemory."
 				/>
 				<SignalBar
 					label="DB pool usage"
 					value={dbPercent}
 					max={100}
 					colorClass="bg-amber-500"
+					thresholds={{ warn: 80, critical: 95 }}
+					tooltip="Tỉ lệ kết nối database đang được sử dụng trong pool. Nếu đầy (100%), các request mới sẽ phải xếp hàng chờ kết nối."
 				/>
 
 				<div className="grid gap-3 sm:grid-cols-3">
@@ -693,18 +807,12 @@ function SystemPulsePanel({
 								tick={{ fill: "var(--muted-foreground)" }}
 								tickFormatter={(value) => fmt(Number(value))}
 							/>
-							<Tooltip
+							<RechartsTooltip
 								content={({ active, payload }) => (
 									<MultiSeriesTooltip
 										active={active}
-										payload={
-											payload as Array<{
-												color?: string;
-												name?: string;
-												value?: number;
-												payload?: { time?: string };
-											}>
-										}
+										payload={payload as unknown as RechartsPayloadEntry[]}
+										unit=""
 									/>
 								)}
 							/>
@@ -993,18 +1101,11 @@ function TrendCard({
 											`${Number(value).toFixed(0)}${unit}`
 										}
 									/>
-									<Tooltip
+									<RechartsTooltip
 										content={({ active, payload }) => (
 											<MultiSeriesTooltip
 												active={active}
-												payload={
-													payload as Array<{
-														color?: string;
-														name?: string;
-														value?: number;
-														payload?: { time?: string; value?: number };
-													}>
-												}
+												payload={payload as unknown as RechartsPayloadEntry[]}
 												unit={unit}
 											/>
 										)}
@@ -1055,18 +1156,11 @@ function TrendCard({
 											`${Number(value).toFixed(0)}${unit}`
 										}
 									/>
-									<Tooltip
+									<RechartsTooltip
 										content={({ active, payload }) => (
 											<MultiSeriesTooltip
 												active={active}
-												payload={
-													payload as Array<{
-														color?: string;
-														name?: string;
-														value?: number;
-														payload?: { time?: string; value?: number };
-													}>
-												}
+												payload={payload as unknown as RechartsPayloadEntry[]}
 												unit={unit}
 											/>
 										)}
@@ -1109,20 +1203,15 @@ function TrendCard({
 function MultiSeriesTooltip({
 	active,
 	payload,
-	unit,
+	unit = "",
 }: {
 	active?: boolean;
-	payload?: Array<{
-		color?: string;
-		name?: string;
-		value?: number;
-		payload?: { time?: string; value?: number };
-	}>;
-	unit: string;
+	payload?: RechartsPayloadEntry[];
+	unit?: string;
 }) {
 	if (!active || !payload?.length) return null;
 
-	const item = payload[0]?.payload;
+	const item = payload[0]?.payload as { time?: string } | undefined;
 
 	return (
 		<div className="rounded-2xl border border-slate-200/80 bg-white/95 px-4 py-3 shadow-xl backdrop-blur-sm dark:border-slate-800 dark:bg-slate-950/95">
