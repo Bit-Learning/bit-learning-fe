@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
@@ -57,6 +57,59 @@ const GRADE_LEVEL_CONFIG: Record<
 
 type MappingWithStatus = CurriculumMapping & { status?: string };
 
+/** Dropdown that appears on hover showing extra static games */
+function StaticGamesDropdown({
+	games,
+}: {
+	games: StaticGameSummaryResponse[];
+}) {
+	const [open, setOpen] = useState(false);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const show = () => {
+		if (timerRef.current) clearTimeout(timerRef.current);
+		setOpen(true);
+	};
+	const hide = () => {
+		timerRef.current = setTimeout(() => setOpen(false), 120);
+	};
+
+	if (games.length === 0) return null;
+
+	return (
+		<div
+			className={styles.staticDropdownWrap}
+			onMouseEnter={show}
+			onMouseLeave={hide}
+		>
+			<button type="button" className={styles.moreBtn}>
+				<span className="material-icons" style={{ fontSize: 14 }}>
+					videogame_asset
+				</span>
+				+{games.length}
+			</button>
+			{open && (
+				<div className={styles.staticDropdown}>
+					<p className={styles.dropdownLabel}>Game gợi ý</p>
+					{games.map((game) => (
+						<Link
+							key={game.gameId}
+							to="/games/$id"
+							params={{ id: String(game.gameId) }}
+							className={styles.dropdownItem}
+						>
+							<span className="material-icons" style={{ fontSize: 14 }}>
+								play_circle
+							</span>
+							<span className={styles.dropdownItemTitle}>{game.title}</span>
+						</Link>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 function ChapterRow({
 	chapter,
 	grade,
@@ -78,15 +131,23 @@ function ChapterRow({
 
 	const hasAnyGame = mapping || staticGames.length > 0;
 
+	// When no matching game, first static game is the primary CTA; rest go in dropdown
+	const primaryStatic =
+		!mapping && staticGames.length > 0 ? staticGames[0] : null;
+	const extraStatics = !mapping ? staticGames.slice(1) : staticGames;
+
 	return (
 		<div className={styles.chapterRow}>
 			<div className={styles.chapterInfo}>
 				<span className={styles.chapterNo}>{chapter.chapterNo}</span>
-				<span className={styles.chapterName}>{chapter.name}</span>
+				<span className={styles.chapterName} title={chapter.name}>
+					{chapter.name}
+				</span>
 			</div>
 			<div className={styles.chapterAction}>
 				{hasAnyGame ? (
 					<>
+						{/* Status badge for matching game */}
 						{mapping && statusCfg && (
 							<span
 								className={styles.statusBadge}
@@ -99,6 +160,8 @@ function ChapterRow({
 								{statusCfg.label}
 							</span>
 						)}
+
+						{/* Primary CTA: matching game */}
 						{mapping && (
 							<Link
 								to="/matching/detail"
@@ -115,19 +178,23 @@ function ChapterRow({
 								Chơi
 							</Link>
 						)}
-						{staticGames.map((game) => (
+
+						{/* Primary CTA: first static game (only when no matching) */}
+						{primaryStatic && (
 							<Link
-								key={game.gameId}
 								to="/games/$id"
-								params={{ id: String(game.gameId) }}
+								params={{ id: String(primaryStatic.gameId) }}
 								className={styles.playBtn}
 							>
 								<span className="material-icons" style={{ fontSize: 16 }}>
 									play_arrow
 								</span>
-								{game.title}
+								Chơi
 							</Link>
-						))}
+						)}
+
+						{/* Extra static games revealed on hover */}
+						<StaticGamesDropdown games={extraStatics} />
 					</>
 				) : (
 					<span className={styles.noGame}>Chưa có game</span>
@@ -229,19 +296,20 @@ function SubjectCard({
 							</span>
 						</div>
 						<div className={styles.chapterAction}>
-							{subjectLevelStaticGames.map((game) => (
+							{/* First game as primary CTA, rest in dropdown */}
+							{subjectLevelStaticGames[0] && (
 								<Link
-									key={game.gameId}
 									to="/games/$id"
-									params={{ id: String(game.gameId) }}
+									params={{ id: String(subjectLevelStaticGames[0].gameId) }}
 									className={styles.playBtn}
 								>
 									<span className="material-icons" style={{ fontSize: 16 }}>
 										play_arrow
 									</span>
-									{game.title}
+									Chơi
 								</Link>
-							))}
+							)}
+							<StaticGamesDropdown games={subjectLevelStaticGames.slice(1)} />
 						</div>
 					</div>
 				)}
