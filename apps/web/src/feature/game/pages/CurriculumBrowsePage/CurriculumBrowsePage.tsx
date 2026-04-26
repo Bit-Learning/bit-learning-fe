@@ -1,5 +1,5 @@
-import { useMemo, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { useMemo } from "react";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import matchingGameService, {
@@ -185,7 +185,41 @@ function SubjectCard({
 
 export default function CurriculumBrowsePage() {
 	const { userInfo } = useSelector(selectAuthStateInfo);
-	const userGrade = userInfo?.grade ?? null;
+	const userGrade =
+		userInfo?.grade && userInfo.grade > 0 ? userInfo.grade : null;
+
+	const navigate = useNavigate({ from: "/games/curriculum" });
+	const search = useSearch({ from: "/games/curriculum" });
+
+	// Filter state from URL
+	const selectedGradeLevel: GradeLevel = search.level ?? "all";
+	const selectedCurriculumId: number | null = search.curriculum ?? null;
+	const selectedGrade: number | null = search.grade ?? null;
+
+	const setFilter = (patch: {
+		level?: GradeLevel;
+		curriculum?: number | null;
+		grade?: number | null;
+	}) => {
+		void navigate({
+			search: (prev) => ({
+				...prev,
+				level:
+					"level" in patch
+						? patch.level === "all"
+							? undefined
+							: patch.level
+						: prev.level,
+				curriculum:
+					"curriculum" in patch
+						? (patch.curriculum ?? undefined)
+						: prev.curriculum,
+				grade: "grade" in patch ? (patch.grade ?? undefined) : prev.grade,
+			}),
+			replace: true,
+			resetScroll: false,
+		});
+	};
 
 	const { data: allSubjects = [], isLoading: isLoadingSubjects } =
 		useSubjectsList();
@@ -195,13 +229,6 @@ export default function CurriculumBrowsePage() {
 		queryFn: () => matchingGameService.getCurriculumMappings(),
 		staleTime: 5 * 60 * 1000,
 	});
-
-	const [selectedCurriculumId, setSelectedCurriculumId] = useState<
-		number | null
-	>(null);
-	const [selectedGradeLevel, setSelectedGradeLevel] =
-		useState<GradeLevel>("all");
-	const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
 
 	// Derive unique curriculums
 	const curriculums = useMemo(() => {
@@ -334,7 +361,7 @@ export default function CurriculumBrowsePage() {
 							<button
 								type="button"
 								className={styles.filterGradeBtn}
-								onClick={() => setSelectedGrade(userGrade)}
+								onClick={() => setFilter({ grade: userGrade })}
 							>
 								Xem tất cả lớp {userGrade}
 								<span className="material-icons" style={{ fontSize: 16 }}>
@@ -378,10 +405,7 @@ export default function CurriculumBrowsePage() {
 									key={key}
 									type="button"
 									className={`${styles.tab} ${selectedGradeLevel === key ? styles.tabActive : ""}`}
-									onClick={() => {
-										setSelectedGradeLevel(key);
-										setSelectedGrade(null);
-									}}
+									onClick={() => setFilter({ level: key, grade: null })}
 								>
 									{label}
 								</button>
@@ -396,10 +420,7 @@ export default function CurriculumBrowsePage() {
 							<button
 								type="button"
 								className={`${styles.tab} ${!selectedCurriculumId ? styles.tabActive : ""}`}
-								onClick={() => {
-									setSelectedCurriculumId(null);
-									setSelectedGrade(null);
-								}}
+								onClick={() => setFilter({ curriculum: null, grade: null })}
 							>
 								Tất cả
 							</button>
@@ -408,10 +429,7 @@ export default function CurriculumBrowsePage() {
 									key={c.id}
 									type="button"
 									className={`${styles.tab} ${selectedCurriculumId === c.id ? styles.tabActive : ""}`}
-									onClick={() => {
-										setSelectedCurriculumId(c.id);
-										setSelectedGrade(null);
-									}}
+									onClick={() => setFilter({ curriculum: c.id, grade: null })}
 								>
 									{c.name}
 								</button>
@@ -426,7 +444,7 @@ export default function CurriculumBrowsePage() {
 							<button
 								type="button"
 								className={`${styles.gradePill} ${!selectedGrade ? styles.gradePillActive : ""}`}
-								onClick={() => setSelectedGrade(null)}
+								onClick={() => setFilter({ grade: null })}
 							>
 								Tất cả
 							</button>
@@ -435,7 +453,7 @@ export default function CurriculumBrowsePage() {
 									key={g}
 									type="button"
 									className={`${styles.gradePill} ${selectedGrade === g ? styles.gradePillActive : ""}`}
-									onClick={() => setSelectedGrade(g)}
+									onClick={() => setFilter({ grade: g })}
 								>
 									{g}
 								</button>
