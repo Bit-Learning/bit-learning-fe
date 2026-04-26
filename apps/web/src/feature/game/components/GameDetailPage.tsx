@@ -8,8 +8,14 @@ import {
 	TrendingUp,
 	TriangleAlert,
 } from "lucide-react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+	type ReactNode,
+} from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 import type { Comment, Game } from "../services/gameService";
@@ -199,6 +205,27 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 			setHistoryDetailLoading(false);
 		}
 	};
+
+	const curriculumLinks = detailGame?.curriculumLinks ?? [];
+	const isMatchingGame = detailGame?.gameType === "MATCHING";
+
+	const groupedLinks = useMemo(() => {
+		const map = new Map<number, { curriculumName: string; grades: number[] }>();
+		for (const link of curriculumLinks) {
+			const existing = map.get(link.curriculumId);
+			if (existing) {
+				if (!existing.grades.includes(link.classLevel)) {
+					existing.grades.push(link.classLevel);
+				}
+			} else {
+				map.set(link.curriculumId, {
+					curriculumName: link.curriculumName,
+					grades: [link.classLevel],
+				});
+			}
+		}
+		return map;
+	}, [curriculumLinks]);
 
 	if (loading) {
 		return <Loader />;
@@ -882,6 +909,40 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 								)}
 							</div>
 						</div>
+
+						{!isMatchingGame && groupedLinks.size > 0 && (
+							<div className="bg-gray-800/50 rounded-lg p-6">
+								<h3 className="font-bold mb-4">Phù hợp với chương trình</h3>
+								<div className="space-y-3">
+									{Array.from(groupedLinks.entries()).map(
+										([curriculumId, { curriculumName, grades }]) => (
+											<div key={curriculumId}>
+												<span className="text-gray-300 text-sm font-semibold">
+													{curriculumName}:{" "}
+												</span>
+												{grades.map((grade, index) => (
+													<span key={grade}>
+														{index > 0 && (
+															<span className="text-gray-500 mx-1">·</span>
+														)}
+														<Link
+															to="/games/curriculum"
+															search={{
+																curriculum: curriculumId,
+																grade: grade,
+															}}
+															className="text-red-400 hover:text-red-300 text-sm transition-colors"
+														>
+															Lớp {grade}
+														</Link>
+													</span>
+												))}
+											</div>
+										),
+									)}
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

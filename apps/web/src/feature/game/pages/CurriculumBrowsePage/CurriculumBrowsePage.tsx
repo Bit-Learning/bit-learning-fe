@@ -10,6 +10,8 @@ import { Navbar } from "@/feature/game/components/Navbar/Navbar";
 import Footer from "@/feature/game/components/Footer";
 import PageMeta from "@/shared/components/seo/page-meta";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { useStaticGamesBySubject } from "@/feature/game/queries/useStaticGamesBySubject";
+import type { StaticGameSummaryResponse } from "@/feature/game/services/curriculumLinkService";
 import styles from "./CurriculumBrowsePage.module.css";
 
 // Extract topic code from chapter name "Chủ đề A: ..." → "A"
@@ -59,10 +61,12 @@ function ChapterRow({
 	chapter,
 	grade,
 	mappingLookup,
+	staticGames,
 }: {
 	chapter: { id: number; name: string; chapterNo: number };
 	grade: number;
 	mappingLookup: Map<string, CurriculumMapping>;
+	staticGames: StaticGameSummaryResponse[];
 }) {
 	const topicCode = extractTopicCode(chapter.name);
 	const mapping = mappingLookup.get(`${grade}-${topicCode}`) as
@@ -72,6 +76,8 @@ function ChapterRow({
 		? (STATUS_CONFIG[mapping.status ?? "PUBLISHED"] ?? STATUS_CONFIG.PUBLISHED)
 		: null;
 
+	const hasAnyGame = mapping || staticGames.length > 0;
+
 	return (
 		<div className={styles.chapterRow}>
 			<div className={styles.chapterInfo}>
@@ -79,9 +85,9 @@ function ChapterRow({
 				<span className={styles.chapterName}>{chapter.name}</span>
 			</div>
 			<div className={styles.chapterAction}>
-				{mapping ? (
+				{hasAnyGame ? (
 					<>
-						{statusCfg && (
+						{mapping && statusCfg && (
 							<span
 								className={styles.statusBadge}
 								style={{ background: statusCfg.color }}
@@ -93,20 +99,35 @@ function ChapterRow({
 								{statusCfg.label}
 							</span>
 						)}
-						<Link
-							to="/matching/detail"
-							search={{
-								gameId: mapping.gameId,
-								grade: mapping.grade,
-								topic: mapping.topicCode,
-							}}
-							className={styles.playBtn}
-						>
-							<span className="material-icons" style={{ fontSize: 16 }}>
-								play_arrow
-							</span>
-							Chơi
-						</Link>
+						{mapping && (
+							<Link
+								to="/matching/detail"
+								search={{
+									gameId: mapping.gameId,
+									grade: mapping.grade,
+									topic: mapping.topicCode,
+								}}
+								className={styles.playBtn}
+							>
+								<span className="material-icons" style={{ fontSize: 16 }}>
+									play_arrow
+								</span>
+								Chơi
+							</Link>
+						)}
+						{staticGames.map((game) => (
+							<Link
+								key={game.gameId}
+								to="/games/$id"
+								params={{ id: String(game.gameId) }}
+								className={styles.playBtn}
+							>
+								<span className="material-icons" style={{ fontSize: 16 }}>
+									play_arrow
+								</span>
+								{game.title}
+							</Link>
+						))}
 					</>
 				) : (
 					<span className={styles.noGame}>Chưa có game</span>
@@ -135,9 +156,27 @@ function SubjectCard({
 		.slice()
 		.sort((a, b) => a.chapterNo - b.chapterNo);
 
-	const gameCount = chapters.filter((c) =>
+	const { data: staticGames = [] } = useStaticGamesBySubject(subject.id);
+
+	// Index static games by chapterId (null = subject-level)
+	const staticGamesByChapter = useMemo(() => {
+		const map = new Map<number | null, StaticGameSummaryResponse[]>();
+		for (const game of staticGames) {
+			const key = game.chapterId ?? null;
+			const existing = map.get(key) ?? [];
+			map.set(key, [...existing, game]);
+		}
+		return map;
+	}, [staticGames]);
+
+	const subjectLevelStaticGames = staticGamesByChapter.get(null) ?? [];
+
+	const matchingGameCount = chapters.filter((c) =>
 		mappingLookup.has(`${subject.classLevel}-${extractTopicCode(c.name)}`),
 	).length;
+
+	const staticGameCount = staticGames.length;
+	const gameCount = matchingGameCount + staticGameCount;
 
 	return (
 		<div className={`${styles.card} ${highlight ? styles.cardHighlight : ""}`}>
@@ -175,8 +214,36 @@ function SubjectCard({
 							chapter={chapter}
 							grade={subject.classLevel}
 							mappingLookup={mappingLookup}
+							staticGames={staticGamesByChapter.get(chapter.id) ?? []}
 						/>
 					))
+				)}
+				{subjectLevelStaticGames.length > 0 && (
+					<div className={styles.chapterRow}>
+						<div className={styles.chapterInfo}>
+							<span
+								className={styles.chapterName}
+								style={{ fontStyle: "italic", color: "#94a3b8" }}
+							>
+								Game môn học
+							</span>
+						</div>
+						<div className={styles.chapterAction}>
+							{subjectLevelStaticGames.map((game) => (
+								<Link
+									key={game.gameId}
+									to="/games/$id"
+									params={{ id: String(game.gameId) }}
+									className={styles.playBtn}
+								>
+									<span className="material-icons" style={{ fontSize: 16 }}>
+										play_arrow
+									</span>
+									{game.title}
+								</Link>
+							))}
+						</div>
+					</div>
 				)}
 			</div>
 		</div>

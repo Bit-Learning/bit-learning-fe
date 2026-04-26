@@ -7,6 +7,19 @@ export interface GameCategory {
 	description: string;
 }
 
+export interface CurriculumLinkResponse {
+	linkId: number;
+	subjectId: number;
+	subjectName: string;
+	classLevel: number;
+	curriculumId: number;
+	curriculumName: string;
+	curriculumCode: string;
+	chapterId: number | null;
+	chapterName: string | null;
+	displayOrder: number;
+}
+
 export interface Game {
 	id: number;
 	title: string;
@@ -29,6 +42,7 @@ export interface Game {
 	scoringPassingThreshold?: number;
 	category: GameCategory;
 	createdBy?: string;
+	curriculumLinks?: CurriculumLinkResponse[];
 }
 
 export interface GamePreview {

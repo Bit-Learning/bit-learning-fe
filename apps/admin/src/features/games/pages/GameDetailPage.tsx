@@ -35,6 +35,7 @@ import type React from "react";
 import { useEffect, useMemo, useState } from "react";
 import { toast } from "sonner";
 import type { AdminRecentAttemptItem } from "../api/admin-games.api";
+import { CurriculumLinkSection } from "../components/CurriculumLinkSection";
 import { useAdminGameDetailAnalytics } from "../queries/useAdminGameAnalytics";
 import {
 	useAdminGamesList,
@@ -1147,6 +1148,13 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 							</div>
 						</CardContent>
 					</Card>
+
+					{!isCreateMode && gameId && form.gameType !== "MATCHING" ? (
+						<CurriculumLinkSection
+							gameId={gameId}
+							gameType={form.gameType ?? "QUIZ"}
+						/>
+					) : null}
 				</div>
 
 				<div className="space-y-6">
