@@ -345,4 +345,11 @@ export const adminGamesApi = {
 	): Promise<AxiosResponse<ApiResponse<AdminGameDto>>> => {
 		return api.post(`${ADMIN_GAMES_ENDPOINT}/${id}/reject`);
 	},
+
+	bulkUpdateStatus: (
+		ids: number[],
+		status: "PUBLISHED" | "DRAFT",
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto[]>>> => {
+		return api.post(`${ADMIN_GAMES_ENDPOINT}/bulk-status`, { ids, status });
+	},
 };

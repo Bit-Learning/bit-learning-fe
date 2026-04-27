@@ -4,6 +4,7 @@ import { Gamepad2, LayoutGrid, Trash2 } from "lucide-react";
 import { DataTableColumnHeader } from "@/components/data-table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 export type GameRow = {
 	id: string;
@@ -71,6 +72,30 @@ export const createGamesColumns = ({
 	isDeletingStandard = false,
 }: CreateGamesColumnsOptions): ColumnDef<GameRow>[] => [
 	{
+		id: "select",
+		header: ({ table }) => (
+			<Checkbox
+				checked={
+					table.getIsAllPageRowsSelected() ||
+					(table.getIsSomePageRowsSelected() && "indeterminate")
+				}
+				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+				aria-label="Chọn tất cả"
+				className="ms-3"
+			/>
+		),
+		cell: ({ row }) => (
+			<Checkbox
+				checked={row.getIsSelected()}
+				onCheckedChange={(value) => row.toggleSelected(!!value)}
+				aria-label="Chọn hàng"
+				className="ms-3"
+			/>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
 		accessorKey: "displayId",
 		header: ({ column }) => (
 			<DataTableColumnHeader column={column} title="Định danh" />
@@ -88,13 +113,15 @@ export const createGamesColumns = ({
 		cell: ({ row }) => {
 			const isMatching = row.original.rowType === "matching";
 			return (
-				<Badge variant="outline" className="gap-1.5">
-					{isMatching ? (
-						<LayoutGrid className="h-3.5 w-3.5" />
-					) : (
-						<Gamepad2 className="h-3.5 w-3.5" />
-					)}
-					{isMatching ? "Nối khái niệm" : "Game thường"}
+				<Badge
+					variant="outline"
+					className={`gap-1.5 ${
+						isMatching
+							? "border-orange-500 text-orange-500"
+							: "border-blue-500 text-blue-500"
+					}`}
+				>
+					{isMatching ? "Nối" : "Thường"}
 				</Badge>
 			);
 		},
@@ -150,54 +177,54 @@ export const createGamesColumns = ({
 			return status ? value.includes(status) : false;
 		},
 	},
-	{
-		accessorKey: "categoryOrTopic",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Phân loại" />
-		),
-		cell: ({ row }) => (
-			<span className="text-sm text-muted-foreground">
-				{row.original.categoryOrTopic}
-			</span>
-		),
-	},
-	{
-		accessorKey: "difficultyOrGrade",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Thông tin" />
-		),
-		cell: ({ row }) => (
-			<span className="text-sm text-muted-foreground">
-				{row.original.difficultyOrGrade}
-			</span>
-		),
-	},
-	{
-		accessorKey: "attempts",
-		header: ({ column }) => (
-			<DataTableColumnHeader column={column} title="Theo dõi" />
-		),
-		cell: ({ row }) => (
-			<div className="space-y-1 text-sm">
-				<div className="font-medium text-foreground">
-					{row.original.attempts ?? 0} lượt chơi
-				</div>
-				<div className="text-xs text-muted-foreground">
-					Hoàn thành {row.original.completionRate ?? 0}% •{" "}
-					{row.original.scoringModel === "HIGH_SCORE"
-						? `Điểm TB ${row.original.averageRawScore ?? 0}`
-						: row.original.scoringModel === "NO_SCORE"
-							? `${row.original.isScored === false ? "Không điểm" : "Đã theo dõi"}`
-							: `Độ chính xác ${row.original.averageAccuracy ?? 0}%`}
-				</div>
-				<div className="text-xs text-muted-foreground">
-					{row.original.scoringModel === "FINITE_SCORE"
-						? `Hết giờ ${row.original.timeoutRate ?? 0}%`
-						: (row.original.scoringModel ?? "FINITE_SCORE")}
-				</div>
-			</div>
-		),
-	},
+	// {
+	// 	accessorKey: "categoryOrTopic",
+	// 	header: ({ column }) => (
+	// 		<DataTableColumnHeader column={column} title="Phân loại" />
+	// 	),
+	// 	cell: ({ row }) => (
+	// 		<span className="text-sm text-muted-foreground">
+	// 			{row.original.categoryOrTopic}
+	// 		</span>
+	// 	),
+	// },
+	// {
+	// 	accessorKey: "difficultyOrGrade",
+	// 	header: ({ column }) => (
+	// 		<DataTableColumnHeader column={column} title="Thông tin" />
+	// 	),
+	// 	cell: ({ row }) => (
+	// 		<span className="text-sm text-muted-foreground">
+	// 			{row.original.difficultyOrGrade}
+	// 		</span>
+	// 	),
+	// },
+	// {
+	// 	accessorKey: "attempts",
+	// 	header: ({ column }) => (
+	// 		<DataTableColumnHeader column={column} title="Theo dõi" />
+	// 	),
+	// 	cell: ({ row }) => (
+	// 		<div className="space-y-1 text-sm">
+	// 			<div className="font-medium text-foreground">
+	// 				{row.original.attempts ?? 0} lượt chơi
+	// 			</div>
+	// 			<div className="text-xs text-muted-foreground">
+	// 				Hoàn thành {row.original.completionRate ?? 0}% •{" "}
+	// 				{row.original.scoringModel === "HIGH_SCORE"
+	// 					? `Điểm TB ${row.original.averageRawScore ?? 0}`
+	// 					: row.original.scoringModel === "NO_SCORE"
+	// 						? `${row.original.isScored === false ? "Không điểm" : "Đã theo dõi"}`
+	// 						: `Độ chính xác ${row.original.averageAccuracy ?? 0}%`}
+	// 			</div>
+	// 			<div className="text-xs text-muted-foreground">
+	// 				{row.original.scoringModel === "FINITE_SCORE"
+	// 					? `Hết giờ ${row.original.timeoutRate ?? 0}%`
+	// 					: (row.original.scoringModel ?? "FINITE_SCORE")}
+	// 			</div>
+	// 		</div>
+	// 	),
+	// },
 	{
 		id: "actions",
 		header: () => (
