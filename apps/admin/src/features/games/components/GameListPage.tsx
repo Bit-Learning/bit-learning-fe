@@ -77,6 +77,7 @@ export const GamesCrudManager = () => {
 				rowType: rowTypeValues?.[0],
 			},
 			replace: true,
+			resetScroll: false,
 		});
 	};
 

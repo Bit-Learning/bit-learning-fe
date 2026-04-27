@@ -17,7 +17,12 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { MINIO_GAME_URL } from "@/shared/constants/endpoints";
-import { Link, useNavigate, useParams } from "@tanstack/react-router";
+import {
+	Link,
+	useCanGoBack,
+	useNavigate,
+	useParams,
+} from "@tanstack/react-router";
 import {
 	Archive,
 	ArrowLeft,
@@ -47,6 +52,7 @@ import {
 	type GameCategoryOption,
 	type UpsertGamePayload,
 } from "../queries/useAdminGamesCrud";
+import { useRouter } from "@tanstack/react-router";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
 	if (error instanceof Error && error.message) {
@@ -175,6 +181,9 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 	const deleteGame = useDeleteGame();
 	const approveGame = useApproveGame();
 	const rejectGame = useRejectGame();
+	const router = useRouter();
+	// Trả về boolean xem có thể quay lại an toàn mà không bị thoát app hay không
+	const canGoBack = useCanGoBack();
 	const [form, setForm] = useState<UpsertGamePayload>({
 		title: "",
 		desc: "",
@@ -190,6 +199,15 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		featuredLikeWeight: 5,
 		featuredManualBoost: 0,
 	});
+
+	const handleBack = () => {
+		if (canGoBack) {
+			router.history.back();
+		} else {
+			// Fallback: Nếu không có lịch sử, ép chuyển hướng về trang danh sách mặc định
+			navigate({ to: "/apps/games" });
+		}
+	};
 
 	const game = useMemo(
 		() => (isCreateMode ? undefined : games.find((item) => item.id === gameId)),
@@ -494,10 +512,10 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		<div className="space-y-6">
 			<div className="space-y-2">
 				<Button asChild variant="link" className="px-0">
-					<Link to="/apps/games">
+					<button onClick={handleBack}>
 						<ArrowLeft className="mr-2 h-4 w-4" />
 						Quay lại danh sách
-					</Link>
+					</button>
 				</Button>
 				<div className="flex flex-wrap items-start justify-between gap-4">
 					<div className="space-y-2">
