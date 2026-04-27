@@ -42,6 +42,7 @@ const TOOL_ICONS: Record<string, IconConfig> = {
 		bg: "#E1F5EE",
 		color: "#005c24",
 	},
+	k6: { type: "devicon", name: "k6", variant: "original" },
 };
 
 export function ToolIcon({ title }: { title: string }) {
