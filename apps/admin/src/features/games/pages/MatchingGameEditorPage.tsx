@@ -866,7 +866,7 @@ export function MatchingGameEditorPage({
 						title:
 							savedGame.meta.title ??
 							buildTitle(form.grade, nextTopicCode, form.topicName),
-						desc: "",
+						desc: form.description ?? "",
 						thumbnail: thumbnailFile,
 					});
 					setThumbnailFile(undefined);
