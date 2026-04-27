@@ -316,7 +316,7 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 			</CardHeader>
 			<CardContent className="space-y-6 pt-6">
 				{/* Cascading dropdowns */}
-				<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
+				<div className="grid gap-3 sm:grid-cols-2">
 					<div className="space-y-2">
 						<Label>Bộ sách</Label>
 						<Select
@@ -384,7 +384,7 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 					</div>
 
 					<div className="space-y-2">
-						<Label>Chương (tùy chọn)</Label>
+						<Label>Chương</Label>
 						<Select
 							value={
 								selectedChapterId !== null
