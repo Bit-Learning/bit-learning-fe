@@ -56,7 +56,7 @@ jobs:
                   tags: |
                       ${{ env.WEB_IMAGE }}:prod-latest
                   cache-from: type=registry,ref=${{ env.WEB_IMAGE }}:prod-cache
-                  cache-to: type=registry,ref=${{ env.WEB_IMAGE }}:prod-cache,mode=max
+                  cache-to: type=registry,ref=${{ env.WEB_IMAGE }}:prod-cache,mode=min
 
     build-admin:
         name: Build & Push Admin (PROD)
@@ -83,7 +83,7 @@ jobs:
                   tags: |
                       ${{ env.ADMIN_IMAGE }}:prod-latest
                   cache-from: type=registry,ref=${{ env.ADMIN_IMAGE }}:prod-cache
-                  cache-to: type=registry,ref=${{ env.ADMIN_IMAGE }}:prod-cache,mode=max
+                  cache-to: type=registry,ref=${{ env.ADMIN_IMAGE }}:prod-cache,mode=min
 
     # ─────────────────────────────────────────────
     # 2. Deploy via Ansible
