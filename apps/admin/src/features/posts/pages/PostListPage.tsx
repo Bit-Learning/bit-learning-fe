@@ -15,6 +15,7 @@ import { TrendingConfigDialog } from "../components/TrendingConfigDialog";
 import { useGetPosts } from "../queries/usePost";
 import { useGetTrendingConfig } from "../queries/useTrendingConfig";
 import type { ColumnFiltersState } from "@tanstack/react-table";
+import { TopNav } from "@/layout/top-nav";
 
 export const PostListPage: React.FC = () => {
 	const [page, setPage] = useState(0);
@@ -73,6 +74,22 @@ export const PostListPage: React.FC = () => {
 	return (
 		<>
 			<Header />
+			<div className="border-b px-6 py-2">
+				<TopNav
+					links={[
+						{
+							title: "Trang chủ",
+							href: "/posts",
+							isActive: true,
+						},
+						{
+							title: "Quản lý khiếu nại",
+							href: "/post-appeals",
+							isActive: false,
+						},
+					]}
+				/>
+			</div>
 			<div className="flex flex-1 flex-col gap-6 p-6">
 				<div className="flex items-center justify-between">
 					<h1 className="text-2xl font-bold">Quản lý bài viết</h1>

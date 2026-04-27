@@ -55,7 +55,6 @@ export const navGroups: NavGroup[] = [
 			{ title: "Quản lý mẫu mail", url: "/mail-templates", icon: Mail },
 			{ title: "Quản lý tags", url: "/tags", icon: Tag },
 			{ title: "Quản lý AI", url: "/system-prompt", icon: MessageCircle },
-			{ title: "Khiếu nại bài viết", url: "/post-appeals", icon: ShieldAlert },
 			{ title: "Tình trạng hệ thống", url: "/metrics", icon: Shield },
 			{
 				title: "Công cụ giám sát nâng cao",
