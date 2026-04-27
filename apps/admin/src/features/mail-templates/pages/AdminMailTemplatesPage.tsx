@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import {
+	ArrowLeft,
 	ArrowUpRight,
 	Eye,
 	FileCode2,
@@ -39,6 +40,7 @@ import {
 	upsertAdminMailTemplateDraft,
 } from "../api/admin-mail-template.api";
 import type { MailTemplateSource } from "../types/admin-mail-template.types";
+import { useNavigate } from "@tanstack/react-router";
 
 const previewSources: Array<{ value: MailTemplateSource; label: string }> = [
 	{ value: "EFFECTIVE", label: "Nguồn đang hiệu lực" },
@@ -250,21 +252,28 @@ export function AdminMailTemplatesPage() {
 		},
 	});
 
+	const navigate = useNavigate();
+
 	return (
 		<>
 			<Header fixed />
-
+			<div className="mt-5 ml-3">
+				<Button
+					variant="link"
+					className="justify-start"
+					onClick={() => navigate({ to: "/metrics" })}
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Quay lại
+				</Button>
+			</div>
 			<div className="flex flex-1 flex-col gap-6 p-6">
 				<Card className="overflow-hidden border border-border/70 bg-linear-to-br from-amber-50 via-white to-rose-50/60 shadow-sm">
 					<CardContent className="p-6">
 						<div className="flex flex-col gap-5 xl:flex-row xl:items-end xl:justify-between">
 							<div className="max-w-2xl">
-								<div className="inline-flex items-center gap-2 rounded-full border border-border/70 bg-background/80 px-3 py-1 text-xs font-medium text-muted-foreground">
-									<Sparkles className="h-3.5 w-3.5 text-amber-500" />
-									Admin mail templates
-								</div>
 								<h2 className="mt-4 text-3xl font-semibold tracking-tight text-foreground">
-									Quản lý email templates
+									Quản lý mẫu email
 								</h2>
 								<p className="mt-2 max-w-xl text-sm leading-6 text-muted-foreground">
 									Quản lý bản classpath hiện tại, draft trên MinIO và bản

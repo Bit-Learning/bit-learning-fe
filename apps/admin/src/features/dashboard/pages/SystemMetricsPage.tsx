@@ -35,6 +35,7 @@ import type {
 	MetricsSummary,
 	MetricsTrends,
 } from "../types/system-metrics.types";
+import { TopNav } from "@/layout/top-nav";
 type RechartsPayloadEntry = {
 	color?: string;
 	name?: string;
@@ -1394,6 +1395,27 @@ export function Dashboard() {
 	return (
 		<>
 			<Header fixed />
+			<div className="border-b px-6 py-2">
+				<TopNav
+					links={[
+						{
+							title: "Trang chủ",
+							href: "/metrics",
+							isActive: true,
+						},
+						{
+							title: "Công cụ giám sát nâng cao",
+							href: "/tools-metrics",
+							isActive: false,
+						},
+						{
+							title: "Quản lý mẫu email",
+							href: "/mail-templates",
+							isActive: false,
+						},
+					]}
+				/>
+			</div>
 
 			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<SystemHero summary={sysSummary} health={sysHealth} />
