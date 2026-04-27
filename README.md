@@ -311,7 +311,7 @@ The `Jenkinsfile` provides an alternative CI/CD path:
 - PR builds on `develop` branch
 - Docker image build & push on `main` branch
 - Discord webhook notifications for build/deploy status
-- Images pushed to Docker Hub: `lcaohoanq/bitlearning-web` and `lcaohoanq/bitlearning-admin`
+- Images pushed to Docker Hub: `hoangclw/bitlearning-web` and `hoangclw/bitlearning-admin`
 
 ### Deployment Flow
 
