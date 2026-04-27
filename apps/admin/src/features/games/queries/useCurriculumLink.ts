@@ -50,3 +50,17 @@ export const useDeleteCurriculumLink = (gameId: number) => {
 		},
 	});
 };
+
+export const useReorderCurriculumLinks = (gameId: number) => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async (items: { linkId: number; displayOrder: number }[]) => {
+			await curriculumLinkApi.reorderLinks(gameId, items);
+		},
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: CURRICULUM_LINK_KEYS.list(gameId),
+			});
+		},
+	});
+};

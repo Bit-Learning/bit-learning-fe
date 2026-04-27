@@ -19,14 +19,31 @@ import {
 import { useChaptersBySubject } from "@/features/curriculum/queries/useChapter";
 import { useCurriculumsList } from "@/features/curriculum/queries/useCurriculum";
 import { useSubjectsList } from "@/features/curriculum/queries/useSubject";
-import { BookOpen, Loader2, Plus, X } from "lucide-react";
+import {
+	DndContext,
+	PointerSensor,
+	closestCenter,
+	useSensor,
+	useSensors,
+	type DragEndEvent,
+} from "@dnd-kit/core";
+import {
+	SortableContext,
+	arrayMove,
+	rectSortingStrategy,
+	useSortable,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { BookOpen, GripVertical, Loader2, Plus, X } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import {
 	useCreateCurriculumLink,
 	useCurriculumLinks,
 	useDeleteCurriculumLink,
+	useReorderCurriculumLinks,
 } from "../queries/useCurriculumLink";
+import type { CurriculumLinkResponse } from "../api/curriculum-link.api";
 
 interface CurriculumLinkSectionProps {
 	gameId: number;
@@ -54,6 +71,80 @@ const getErrorMessage = (error: unknown, fallback: string): string => {
 	return fallback;
 };
 
+// ── Sortable chip ────────────────────────────────────────────────────────────
+function SortableLinkChip({
+	link,
+	onDelete,
+	isDeleting,
+}: {
+	link: CurriculumLinkResponse;
+	onDelete: (id: number) => void;
+	isDeleting: boolean;
+}) {
+	const {
+		attributes,
+		listeners,
+		setNodeRef,
+		transform,
+		transition,
+		isDragging,
+	} = useSortable({ id: link.linkId });
+
+	const style = {
+		transform: CSS.Transform.toString(transform),
+		transition,
+		opacity: isDragging ? 0.5 : 1,
+		zIndex: isDragging ? 50 : undefined,
+	};
+
+	const label = [
+		link.curriculumName,
+		`Lớp ${link.classLevel}`,
+		link.subjectName,
+		link.chapterName,
+	]
+		.filter(Boolean)
+		.join(" · ");
+
+	return (
+		<div ref={setNodeRef} style={style}>
+			<Badge
+				variant="secondary"
+				className="flex items-center gap-1 py-1 pl-1 pr-1 text-sm select-none"
+			>
+				{/* drag handle */}
+				<button
+					type="button"
+					{...attributes}
+					{...listeners}
+					className="cursor-grab rounded p-0.5 text-muted-foreground hover:text-foreground active:cursor-grabbing"
+					aria-label="Kéo để sắp xếp"
+				>
+					<GripVertical className="h-3.5 w-3.5" />
+				</button>
+				<span className="mr-1 flex h-5 w-5 items-center justify-center rounded-full bg-muted-foreground/20 text-xs font-bold">
+					{link.displayOrder}
+				</span>
+				<span>{label}</span>
+				<button
+					type="button"
+					onClick={() => onDelete(link.linkId)}
+					disabled={isDeleting}
+					className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 disabled:opacity-50"
+					aria-label={`Xóa liên kết ${label}`}
+				>
+					{isDeleting ? (
+						<Loader2 className="h-3 w-3 animate-spin" />
+					) : (
+						<X className="h-3 w-3" />
+					)}
+				</button>
+			</Badge>
+		</div>
+	);
+}
+
+// ── Main component ───────────────────────────────────────────────────────────
 export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 	gameId,
 	gameType,
@@ -72,22 +163,43 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 	const [addError, setAddError] = useState<string | null>(null);
 	const [deleteError, setDeleteError] = useState<string | null>(null);
 
+	// local optimistic order — mirrors server order, updated on drag
+	const [localLinks, setLocalLinks] = useState<CurriculumLinkResponse[] | null>(
+		null,
+	);
+
 	const { data: curriculums = [], isLoading: isLoadingCurriculums } =
 		useCurriculumsList();
 	const { data: allSubjects = [], isLoading: isLoadingSubjects } =
 		useSubjectsList();
 	const { data: chapters = [], isLoading: isLoadingChapters } =
 		useChaptersBySubject(selectedSubjectId ?? undefined);
-	const { data: links = [], isLoading: isLoadingLinks } =
+	const { data: serverLinks = [], isLoading: isLoadingLinks } =
 		useCurriculumLinks(gameId);
 	const createLink = useCreateCurriculumLink(gameId);
 	const deleteLink = useDeleteCurriculumLink(gameId);
+	const reorderLinks = useReorderCurriculumLinks(gameId);
 
-	// Grades available for the selected curriculum (3-12 that have subjects)
+	// use local order while dragging / saving, fall back to server data
+	const links =
+		localLinks ??
+		[...serverLinks].sort((a, b) => a.displayOrder - b.displayOrder);
+
+	// sync local state when server data changes (e.g. after add/delete)
+	// reset local override whenever server data refreshes (unless we're mid-drag)
+	// we do this lazily: if localLinks is set and matches server length, clear it
+	if (localLinks !== null && localLinks.length !== serverLinks.length) {
+		setLocalLinks(null);
+	}
+
+	const sensors = useSensors(
+		useSensor(PointerSensor, { activationConstraint: { distance: 5 } }),
+	);
+
 	const availableGrades = useMemo(() => {
 		if (!selectedCurriculumId) return [];
 		const grades = new Set<number>();
-		for (const subject of allSubjects ?? []) {
+		for (const subject of allSubjects) {
 			if (
 				subject.curriculum?.id === selectedCurriculumId &&
 				subject.classLevel >= 3 &&
@@ -99,10 +211,9 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 		return Array.from(grades).sort((a, b) => a - b);
 	}, [selectedCurriculumId, allSubjects]);
 
-	// Subjects filtered by selected curriculum + grade
 	const filteredSubjects = useMemo(() => {
 		if (!selectedCurriculumId || !selectedGrade) return [];
-		return (allSubjects ?? []).filter(
+		return allSubjects.filter(
 			(s) =>
 				s.curriculum?.id === selectedCurriculumId &&
 				s.classLevel === selectedGrade,
@@ -115,18 +226,15 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 		setSelectedSubjectId(null);
 		setSelectedChapterId(null);
 	};
-
 	const handleGradeChange = (value: string) => {
 		setSelectedGrade(Number(value));
 		setSelectedSubjectId(null);
 		setSelectedChapterId(null);
 	};
-
 	const handleSubjectChange = (value: string) => {
 		setSelectedSubjectId(Number(value));
 		setSelectedChapterId(null);
 	};
-
 	const handleChapterChange = (value: string) => {
 		setSelectedChapterId(value === "__none__" ? null : Number(value));
 	};
@@ -140,12 +248,12 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 				chapterId: selectedChapterId ?? null,
 				displayOrder,
 			});
-			// Reset form after success
 			setSelectedCurriculumId(null);
 			setSelectedGrade(null);
 			setSelectedSubjectId(null);
 			setSelectedChapterId(null);
 			setDisplayOrder(0);
+			setLocalLinks(null);
 		} catch (error: unknown) {
 			setAddError(getErrorMessage(error, "Không thể thêm liên kết"));
 		}
@@ -155,8 +263,38 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 		setDeleteError(null);
 		try {
 			await deleteLink.mutateAsync(linkId);
+			setLocalLinks(null);
 		} catch (error: unknown) {
 			setDeleteError(getErrorMessage(error, "Không thể xóa liên kết"));
+		}
+	};
+
+	const handleDragEnd = async (event: DragEndEvent) => {
+		const { active, over } = event;
+		if (!over || active.id === over.id) return;
+
+		const oldIndex = links.findIndex((l) => l.linkId === active.id);
+		const newIndex = links.findIndex((l) => l.linkId === over.id);
+		if (oldIndex === -1 || newIndex === -1) return;
+
+		const reordered = arrayMove(links, oldIndex, newIndex).map((link, idx) => ({
+			...link,
+			displayOrder: idx,
+		}));
+
+		// optimistic update
+		setLocalLinks(reordered);
+
+		try {
+			await reorderLinks.mutateAsync(
+				reordered.map((l) => ({
+					linkId: l.linkId,
+					displayOrder: l.displayOrder,
+				})),
+			);
+		} catch {
+			// revert on error
+			setLocalLinks(null);
 		}
 	};
 
@@ -179,7 +317,6 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 			<CardContent className="space-y-6 pt-6">
 				{/* Cascading dropdowns */}
 				<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-4">
-					{/* Curriculum dropdown */}
 					<div className="space-y-2">
 						<Label>Bộ sách</Label>
 						<Select
@@ -195,7 +332,7 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 								<SelectValue placeholder="Chọn bộ sách" />
 							</SelectTrigger>
 							<SelectContent>
-								{(curriculums ?? []).map((c) => (
+								{curriculums.map((c) => (
 									<SelectItem key={c.id} value={String(c.id)}>
 										{c.name}
 									</SelectItem>
@@ -204,7 +341,6 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 						</Select>
 					</div>
 
-					{/* Grade dropdown */}
 					<div className="space-y-2">
 						<Label>Lớp</Label>
 						<Select
@@ -225,7 +361,6 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 						</Select>
 					</div>
 
-					{/* Subject dropdown */}
 					<div className="space-y-2">
 						<Label>Môn học</Label>
 						<Select
@@ -248,7 +383,6 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 						</Select>
 					</div>
 
-					{/* Chapter dropdown (optional) */}
 					<div className="space-y-2">
 						<Label>Chương (tùy chọn)</Label>
 						<Select
@@ -305,7 +439,7 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 					<p className="text-sm text-destructive">{addError}</p>
 				) : null}
 
-				{/* Existing links as chips */}
+				{/* Existing links — drag-and-drop */}
 				{isLoadingLinks ? (
 					<div className="flex items-center gap-2 text-sm text-muted-foreground">
 						<Loader2 className="h-4 w-4 animate-spin" />
@@ -313,41 +447,40 @@ export const CurriculumLinkSection: React.FC<CurriculumLinkSectionProps> = ({
 					</div>
 				) : links.length > 0 ? (
 					<div className="space-y-2">
-						<Label>Liên kết hiện có</Label>
-						<div className="flex flex-wrap gap-2">
-							{links.map((link) => {
-								const label = [
-									link.curriculumName,
-									`Lớp ${link.classLevel}`,
-									link.subjectName,
-									link.chapterName,
-								]
-									.filter(Boolean)
-									.join(" · ");
-								return (
-									<Badge
-										key={link.linkId}
-										variant="secondary"
-										className="flex items-center gap-1 py-1 pl-3 pr-1 text-sm"
-									>
-										<span>{label}</span>
-										<button
-											type="button"
-											onClick={() => handleDeleteLink(link.linkId)}
-											disabled={deleteLink.isPending}
-											className="ml-1 rounded-full p-0.5 hover:bg-muted-foreground/20 disabled:opacity-50"
-											aria-label={`Xóa liên kết ${label}`}
-										>
-											{deleteLink.isPending ? (
-												<Loader2 className="h-3 w-3 animate-spin" />
-											) : (
-												<X className="h-3 w-3" />
-											)}
-										</button>
-									</Badge>
-								);
-							})}
+						<div className="flex items-center justify-between">
+							<Label>Liên kết hiện có</Label>
+							<span className="text-xs text-muted-foreground">
+								Kéo <GripVertical className="inline h-3 w-3" /> để thay đổi thứ
+								tự
+							</span>
 						</div>
+						<DndContext
+							sensors={sensors}
+							collisionDetection={closestCenter}
+							onDragEnd={handleDragEnd}
+						>
+							<SortableContext
+								items={links.map((l) => l.linkId)}
+								strategy={rectSortingStrategy}
+							>
+								<div className="flex flex-wrap gap-2">
+									{links.map((link) => (
+										<SortableLinkChip
+											key={link.linkId}
+											link={link}
+											onDelete={handleDeleteLink}
+											isDeleting={deleteLink.isPending}
+										/>
+									))}
+								</div>
+							</SortableContext>
+						</DndContext>
+						{reorderLinks.isPending && (
+							<p className="flex items-center gap-1.5 text-xs text-muted-foreground">
+								<Loader2 className="h-3 w-3 animate-spin" />
+								Đang lưu thứ tự...
+							</p>
+						)}
 					</div>
 				) : (
 					<p className="text-sm text-muted-foreground">
