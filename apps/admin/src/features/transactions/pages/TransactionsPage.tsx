@@ -16,6 +16,7 @@ import { TransactionsMultiSelect } from "../components/TransactionsMultiSelect";
 import { TransactionsTable } from "../components/TransactionsTable";
 import { UserLookupCombobox } from "../components/UserLookupCombobox";
 import {
+	formatCurrency,
 	transactionStatusOptions,
 	transactionTypeOptions,
 } from "../types/transaction.type";
@@ -123,6 +124,11 @@ export function TransactionsPage() {
 	const transactions = transactionsQuery.data?.data ?? [];
 	const pageInfo = transactionsQuery.data?.page;
 
+	const pageTotal = useMemo(
+		() => transactions.reduce((sum, t) => sum + t.amount, 0),
+		[transactions],
+	);
+
 	const fromDate = parseSearchDate(search.fromDate);
 	const toDate = parseSearchDate(search.toDate);
 
@@ -174,17 +180,25 @@ export function TransactionsPage() {
 							trạng thái, thời gian và mã giao dịch.
 						</p>
 					</div>
-					<div className="flex items-center gap-2 text-lg">
-						<span>
-							Tổng {pageInfo?.totalElements?.toLocaleString("vi-VN") ?? 0} giao
-							dịch
-						</span>
-						{transactionsQuery.isFetching ? (
-							<span className="inline-flex items-center gap-1 rounded-full border px-3 py-1">
-								<LoaderCircle className="size-3.5 animate-spin" />
-								Đang cập nhật
+					<div className="flex flex-col items-end gap-1">
+						<div className="flex items-center gap-2 text-lg">
+							<span>
+								Tổng {pageInfo?.totalElements?.toLocaleString("vi-VN") ?? 0}{" "}
+								giao dịch
 							</span>
-						) : null}
+							{transactionsQuery.isFetching ? (
+								<span className="inline-flex items-center gap-1 rounded-full border px-3 py-1">
+									<LoaderCircle className="size-3.5 animate-spin" />
+									Đang cập nhật
+								</span>
+							) : null}
+						</div>
+						<p className="text-muted-foreground text-sm">
+							Tổng tiền trang này:{" "}
+							<span className="text-foreground font-semibold">
+								{formatCurrency(pageTotal)}
+							</span>
+						</p>
 					</div>
 				</div>
 

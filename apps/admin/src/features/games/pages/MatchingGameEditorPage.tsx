@@ -848,7 +848,7 @@ export function MatchingGameEditorPage({
 				meta: {
 					gameId: matchingGameId,
 					title: buildTitle(form.grade, nextTopicCode, form.topicName),
-					description: form.description || undefined,
+					description: form.description,
 					version: form.metaVersion || "1.0.0",
 					language: form.metaLanguage || "vi",
 					thumbnailUrl: form.thumbnailUrl || undefined,
@@ -866,7 +866,7 @@ export function MatchingGameEditorPage({
 						title:
 							savedGame.meta.title ??
 							buildTitle(form.grade, nextTopicCode, form.topicName),
-						desc: "",
+						desc: form.description ?? "",
 						thumbnail: thumbnailFile,
 					});
 					setThumbnailFile(undefined);

@@ -129,3 +129,27 @@ export const useRejectGame = () => {
 		},
 	});
 };
+
+export const useBulkUpdateGameStatus = () => {
+	const queryClient = useQueryClient();
+	return useMutation({
+		mutationFn: async ({
+			ids,
+			status,
+		}: {
+			ids: number[];
+			status: "PUBLISHED" | "DRAFT";
+		}) => {
+			const res = await adminGamesApi.bulkUpdateStatus(ids, status);
+			return res.data.data as AdminGameDto[];
+		},
+		onSuccess: () => {
+			void queryClient.invalidateQueries({
+				queryKey: ADMIN_GAMES_CRUD_KEYS.list(),
+			});
+			void queryClient.invalidateQueries({
+				queryKey: ["matching-game"],
+			});
+		},
+	});
+};

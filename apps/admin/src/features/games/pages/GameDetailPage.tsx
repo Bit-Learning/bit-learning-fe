@@ -1270,7 +1270,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 						</CardContent>
 					</Card>
 
-					{!isCreateMode && analyticsDetail?.summary ? (
+					{/* {!isCreateMode && analyticsDetail?.summary ? (
 						<Card>
 							<CardHeader className="border-b">
 								<CardTitle>Tracking 30 ngày</CardTitle>
@@ -1376,7 +1376,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 								) : null}
 							</CardContent>
 						</Card>
-					) : null}
+					) : null} */}
 				</div>
 			</div>
 		</div>

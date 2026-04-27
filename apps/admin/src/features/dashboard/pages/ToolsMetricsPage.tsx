@@ -1,9 +1,11 @@
 import { Main } from "@/layout/main";
 import { Header } from "@/layout/header";
-import { ExternalLink } from "lucide-react";
+import { ArrowLeft, ExternalLink } from "lucide-react";
 import { useState } from "react";
 import { advancedMetricsLinks } from "../data/metrics-links";
 import { AdvancedMetricsLink } from "../types/system-metrics.types";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "@tanstack/react-router";
 
 // ── Icon config ──
 const CDN = "https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons";
@@ -88,8 +90,19 @@ function AdvancedMetricsLinksPanel({
 }: {
 	links: AdvancedMetricsLink[];
 }) {
+	const navigate = useNavigate();
+
 	return (
 		<section className="text-card-foreground">
+			<Button
+				variant="link"
+				className="justify-start"
+				onClick={() => navigate({ to: "/metrics" })}
+			>
+				<ArrowLeft className="mr-2 h-4 w-4" />
+				Quay lại
+			</Button>
+
 			<div className="">
 				<h2 className="text-lg font-semibold">Công cụ giám sát nâng cao</h2>
 				<p className="mt-1 text-sm text-muted-foreground">

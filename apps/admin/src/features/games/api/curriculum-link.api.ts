@@ -48,4 +48,14 @@ export const curriculumLinkApi = {
 			`${ADMIN_GAMES_ENDPOINT}/${gameId}/curriculum-links/${linkId}`,
 		);
 	},
+
+	reorderLinks: (
+		gameId: number,
+		items: { linkId: number; displayOrder: number }[],
+	): Promise<AxiosResponse<ApiResponse<void>>> => {
+		return api.patch(
+			`${ADMIN_GAMES_ENDPOINT}/${gameId}/curriculum-links/reorder`,
+			{ items },
+		);
+	},
 };

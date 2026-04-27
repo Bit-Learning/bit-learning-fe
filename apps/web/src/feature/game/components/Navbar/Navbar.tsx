@@ -40,11 +40,8 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 			<div className={styles.inner}>
 				<div className={styles.left}>
 					<Link to="/games" className={styles.logo}>
-						<span className={styles.logoIcon}>
-							<span className="material-icons">videogame_asset</span>
-						</span>
 						<span className={styles.logoText}>
-							Bit Learning<span className={styles.logoAccent}>Play</span>
+							Bit Learning <span className={styles.logoAccent}>Play</span>
 						</span>
 					</Link>
 					<ul className={styles.links}>
@@ -57,7 +54,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 								Trang chủ
 							</Link>
 						</li>
-						<li>
+						{/* <li>
 							<Link
 								to="/games/curriculum"
 								className={styles.link}
@@ -65,7 +62,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 							>
 								Theo chương trình học
 							</Link>
-						</li>
+						</li> */}
 					</ul>
 				</div>
 				<div className={styles.right}>
