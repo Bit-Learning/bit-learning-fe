@@ -90,7 +90,7 @@ export function TrendingConfigDialog() {
 				) : (
 					<form onSubmit={handleSubmit} className="space-y-4">
 						<div className="rounded-md bg-muted/50 px-3 py-2 font-mono text-xs text-muted-foreground">
-							score = bình luận × {form.commentWeight} + reaction ×{" "}
+							điểm = bình luận × {form.commentWeight} + reaction ×{" "}
 							{form.reactionWeight} + lượt xem × {form.viewWeight}
 						</div>
 

@@ -40,6 +40,13 @@ export const PostListPage: React.FC = () => {
 			: []),
 	];
 
+	const commentWeight = trendingConfig?.commentWeight ?? 4;
+	const reactionWeight = trendingConfig?.reactionWeight ?? 3;
+	const viewWeight = trendingConfig?.viewWeight ?? 0.1;
+
+	const exampleScore =
+		1 * commentWeight + 2 * reactionWeight + 100 * viewWeight;
+
 	const handleColumnFiltersChange = (filters: ColumnFiltersState) => {
 		const statusFilter = filters.find((f) => f.id === "isBanned");
 		const featuredFilter = filters.find((f) => f.id === "isFeatured");
@@ -148,10 +155,10 @@ export const PostListPage: React.FC = () => {
 												+ reaction × {trendingConfig?.reactionWeight ?? 3} +
 												lượt xem × {trendingConfig?.viewWeight ?? 0.1}
 											</div>
-											<p className="text-xs text-muted-foreground">
-												Ví dụ: 1 bình luận ={" "}
-												{trendingConfig?.commentWeight ?? 4} điểm, 2 reaction ={" "}
-												{(trendingConfig?.reactionWeight ?? 3) * 2} điểm.
+											<p className="text-xs text-white/80">
+												Ví dụ: 1 bình luận ({commentWeight}đ) + 2 reaction (
+												{reactionWeight * 2}đ) + 100 lượt xem (
+												{viewWeight * 100}đ) = {exampleScore} điểm.
 											</p>
 										</TooltipContent>
 									</Tooltip>
