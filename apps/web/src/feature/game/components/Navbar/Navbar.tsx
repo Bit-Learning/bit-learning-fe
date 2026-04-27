@@ -57,7 +57,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 								Trang chủ
 							</Link>
 						</li>
-						<li>
+						{/* <li>
 							<Link
 								to="/games/curriculum"
 								className={styles.link}
@@ -65,7 +65,7 @@ export function Navbar({ searchTerm, onSearchChange }: NavbarProps) {
 							>
 								Theo chương trình học
 							</Link>
-						</li>
+						</li> */}
 					</ul>
 				</div>
 				<div className={styles.right}>
