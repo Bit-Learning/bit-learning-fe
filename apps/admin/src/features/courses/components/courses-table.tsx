@@ -132,8 +132,8 @@ export function CoursesTable({
 						columnId: "grade",
 						title: "Lớp",
 						options: [
-							{ label: "Lớp 1", value: "1" },
-							{ label: "Lớp 2", value: "2" },
+							// { label: "Lớp 1", value: "1" },
+							// { label: "Lớp 2", value: "2" },
 							{ label: "Lớp 3", value: "3" },
 							{ label: "Lớp 4", value: "4" },
 							{ label: "Lớp 5", value: "5" },
