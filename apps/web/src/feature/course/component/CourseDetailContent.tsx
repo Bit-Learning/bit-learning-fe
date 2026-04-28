@@ -4,6 +4,8 @@ import { toast } from "@/shared/components/Sonner";
 import { BookOpen, ChevronLeft } from "lucide-react";
 import type React from "react";
 import { useState } from "react";
+import { useSelector } from "react-redux";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { useCourseDetail } from "../queries/useCourse";
 import { useCourseAccess, useEnrollCourse } from "../queries/useEnroll";
 import { useAddToCart } from "@/feature/order/queries/useCart";
@@ -15,9 +17,12 @@ const CourseDetailContent: React.FC = () => {
   const navigate = useNavigate();
   const [isLiked, setIsLiked] = useState(false);
 
+  const currentUser = useSelector(selectAuthStateInfo);
+  const isAuthenticated = !!currentUser?.isAuthenticated;
+
   const { data: course, isLoading, error } = useCourseDetail();
-  const { data: enrollAccess } = useCourseAccess(course?.id || 0);
-  const hasAccess = enrollAccess;
+  const { data: enrollAccess } = useCourseAccess(course?.id || 0, isAuthenticated);
+  const hasAccess = isAuthenticated && enrollAccess;
 
   const { mutate: enroll, isPending: enrollPending } = useEnrollCourse();
   const { mutate: addToCart, isPending: cartPending } = useAddToCart();
