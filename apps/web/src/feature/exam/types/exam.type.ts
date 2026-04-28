@@ -127,6 +127,7 @@ export interface ExamSearchParams {
   search?: string;
   subjectId?: number;
   status?: ApprovalStatus;
+  grade: number;
 }
 
 export interface ExamApprovalFilters {

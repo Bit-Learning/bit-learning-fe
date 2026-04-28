@@ -22,6 +22,8 @@ import { toast } from "@/shared/components/Sonner";
 import { useMyQuestions, useSearchQuestions } from "@/feature/question/queries/useQuestion";
 import { useGenerateExamFromQuestions, useExam, useDownloadExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
+import { useChaptersBySubject } from "@/feature/matrix/queries/useChapter";
+import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
 import { ApprovalStatus } from "@/feature/question/types/question.type";
 import type { ExamType } from "../types/exam.type";
 import { getDifficultyBadge, getTypeBadge } from "@/feature/question/utils/question.utils";
@@ -45,16 +47,22 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
 
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
+  const [selectedChapterId, setSelectedChapterId] = useState<number | undefined>(undefined);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | undefined>(undefined);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(0);
 
   const { data: subjectsData } = useSubjectsList();
+  const { data: chapters, isLoading: loadingChapters } = useChaptersBySubject(selectedSubjectId ?? undefined);
+  const { data: lessons, isLoading: loadingLessons } = useLessonsByChapter(selectedChapterId ?? undefined);
 
   const systemParams = {
     page: currentPage,
     size: PAGE_SIZE,
     keyword: searchTerm || undefined,
     subjectId: selectedSubjectId,
+    chapterId: selectedChapterId,
+    lessonId: selectedLessonId,
     approvalStatus: ApprovalStatus.APPROVED,
   };
 
@@ -63,6 +71,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     size: PAGE_SIZE,
     keyword: searchTerm || undefined,
     subjectId: selectedSubjectId,
+    chapterId: selectedChapterId,
+    lessonId: selectedLessonId,
   };
 
   const { data: systemData, isLoading: systemLoading } = useSearchQuestions(systemParams, {
@@ -146,7 +156,24 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setSelectedQuestions(new Set());
     setCurrentPage(0);
     setSelectedSubjectId(undefined);
+    setSelectedChapterId(undefined);
+    setSelectedLessonId(undefined);
     setSearchTerm("");
+  };
+
+  const handleSubjectChange = (subjectId: number | undefined) => {
+    setSelectedSubjectId(subjectId);
+    setSelectedChapterId(undefined);
+    setSelectedLessonId(undefined);
+    setSelectedQuestions(new Set());
+    setCurrentPage(0);
+    setSearchTerm("");
+  };
+
+  const handleChapterChange = (chapterId: number | undefined) => {
+    setSelectedChapterId(chapterId);
+    setSelectedLessonId(undefined);
+    setCurrentPage(0);
   };
 
   const handleDownload = (format: "pdf" | "docx") => {
@@ -166,6 +193,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setSelectedQuestions(new Set());
     setSearchTerm("");
     setSelectedSubjectId(undefined);
+    setSelectedChapterId(undefined);
+    setSelectedLessonId(undefined);
     setCurrentPage(0);
   };
 
@@ -256,8 +285,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
               </div>
 
               {!isExamGenerated && (
-                <div className="flex gap-2 mt-3">
-                  <div className="relative flex-1">
+                <div className="flex flex-col gap-2 mt-3 w-full min-w-0">
+                  <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                       placeholder="Tìm kiếm câu hỏi..."
@@ -270,6 +299,41 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                       disabled={!selectedSubjectId}
                     />
                   </div>
+
+                  {selectedSubjectId && (
+                    <div className="grid grid-cols-2 gap-2 w-full min-w-0">
+                      <select
+                        value={selectedChapterId ?? ""}
+                        onChange={(e) => handleChapterChange(e.target.value ? Number(e.target.value) : undefined)}
+                        disabled={loadingChapters}
+                        className="w-full min-w-0 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none disabled:opacity-50"
+                      >
+                        <option value="">-- Tất cả chương --</option>
+                        {chapters?.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={selectedLessonId ?? ""}
+                        onChange={(e) => {
+                          setSelectedLessonId(e.target.value ? Number(e.target.value) : undefined);
+                          setCurrentPage(0);
+                        }}
+                        disabled={!selectedChapterId || loadingLessons}
+                        className="w-full min-w-0 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none disabled:opacity-50"
+                      >
+                        <option value="">-- Tất cả bài học --</option>
+                        {lessons?.map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {l.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  )}
                 </div>
               )}
             </CardHeader>
@@ -385,13 +449,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                   <select
                     id="subjectId"
                     value={selectedSubjectId ?? ""}
-                    onChange={(e) => {
-                      const newId = e.target.value ? Number(e.target.value) : undefined;
-                      setSelectedSubjectId(newId);
-                      setSelectedQuestions(new Set());
-                      setCurrentPage(0);
-                      setSearchTerm("");
-                    }}
+                    onChange={(e) => handleSubjectChange(e.target.value ? Number(e.target.value) : undefined)}
                     className="w-full mt-1.5 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none"
                   >
                     <option value="">-- Chọn môn học --</option>

@@ -111,6 +111,7 @@ export interface ApproveRejectDTO {
 export interface QuestionSearchParams {
   keyword?: string;
   subjectId?: number;
+  chapterId?: number;
   lessonId?: number;
   questionType?: QuestionType;
   questionLevel?: QuestionLevel;
