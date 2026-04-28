@@ -13,11 +13,11 @@ import {
   Trash2,
   X,
   Save,
-  AlertTriangle,
   RefreshCw,
   BookOpen,
   ChevronRight,
   Download,
+  Ban,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
@@ -43,6 +43,8 @@ interface EditState {
   content: string;
   options: { label: string; content: string; orderNo: number; correct: boolean }[] | null;
 }
+
+const isSkipped = (q: PreviewQuestionResponse) => q.duplicated && !q.reused;
 
 const GuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   if (!open) return null;
@@ -105,7 +107,7 @@ const GuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
               <p>
                 • Kích thước file tối đa: <span className="font-medium text-foreground">10MB</span>
               </p>
-              <p>• Câu hỏi trùng lặp sẽ được tái sử dụng tự động</p>
+              <p>• Câu hỏi trùng lặp sẽ bị bỏ qua tự động</p>
             </div>
           </div>
 
@@ -370,7 +372,7 @@ const ImportQuestionForm: React.FC = () => {
 
   const handleConfirmImport = async () => {
     if (!importJobId) return;
-    const keepQuestions = previewData?.questions.filter((q) => q.status === "KEEP") || [];
+    const keepQuestions = previewData?.questions.filter((q) => q.status === "KEEP" && !isSkipped(q)) || [];
     if (keepQuestions.length === 0) {
       toast.error({ title: "Không thể import", description: "Không có câu hỏi nào được chọn để import" });
       return;
@@ -398,8 +400,11 @@ const ImportQuestionForm: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const getKeepCount = () => previewData?.questions.filter((q) => q.status === "KEEP").length || 0;
+  const getKeepCount = () => previewData?.questions.filter((q) => q.status === "KEEP" && !isSkipped(q)).length || 0;
+
   const getDeleteCount = () => previewData?.questions.filter((q) => q.status === "DELETE").length || 0;
+
+  const getSkippedCount = () => previewData?.questions.filter((q) => isSkipped(q)).length || 0;
 
   return (
     <div className="mx-auto p-6 min-h-screen bg-gray-50 dark:bg-slate-950">
@@ -649,23 +654,33 @@ const ImportQuestionForm: React.FC = () => {
                 <div className="flex items-center justify-between">
                   <div>
                     <h2 className="text-base font-semibold">Xem trước câu hỏi</h2>
-                    <div className="flex items-center gap-4 mt-2 text-sm">
+                    <div className="flex items-center gap-4 mt-2 text-sm flex-wrap">
                       <div className="flex items-center gap-1.5">
                         <span className="text-muted-foreground">Tổng:</span>
                         <span className="font-semibold">{previewData?.totalQuestions}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-green-500" />
-                        <span className="font-semibold text-green-600">{getKeepCount()} giữ lại</span>
+                        <span className="font-semibold text-green-600">{getKeepCount()} sẽ import</span>
                       </div>
-                      <div className="flex items-center gap-1.5">
-                        <div className="w-2 h-2 rounded-full bg-red-400" />
-                        <span className="font-semibold text-red-500">{getDeleteCount()} xóa</span>
-                      </div>
-                      {(previewData?.duplicatedCount ?? 0) > 0 && (
+                      {getDeleteCount() > 0 && (
                         <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 rounded-full bg-orange-400" />
-                          <span className="font-semibold text-orange-500">{previewData?.duplicatedCount} trùng</span>
+                          <div className="w-2 h-2 rounded-full bg-red-400" />
+                          <span className="font-semibold text-red-500">{getDeleteCount()} đã xóa</span>
+                        </div>
+                      )}
+                      {getSkippedCount() > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full bg-gray-400" />
+                          <span className="font-semibold text-gray-500">{getSkippedCount()} trùng (bỏ qua)</span>
+                        </div>
+                      )}
+                      {(previewData?.questions.filter((q) => q.reused).length ?? 0) > 0 && (
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-2 h-2 rounded-full bg-yellow-400" />
+                          <span className="font-semibold text-yellow-600">
+                            {previewData?.questions.filter((q) => q.reused).length} tái sử dụng
+                          </span>
                         </div>
                       )}
                     </div>
@@ -675,22 +690,34 @@ const ImportQuestionForm: React.FC = () => {
                     Chọn file khác
                   </Button>
                 </div>
+
+                {getSkippedCount() > 0 && (
+                  <div className="mt-3 flex items-start gap-2.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
+                    <Ban className="h-4 w-4 text-gray-500 shrink-0 mt-0.5" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400">
+                      <span className="font-semibold">{getSkippedCount()} câu hỏi trùng lặp</span> đã tồn tại trong hệ
+                      thống và sẽ không được import lại.
+                    </p>
+                  </div>
+                )}
               </CardHeader>
 
               <CardContent>
                 <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 -mr-1">
                   {previewData?.questions.map((question, index) => {
                     const isEditing = editingQuestionId === question.id;
+                    const skipped = isSkipped(question);
+
                     return (
                       <div
                         key={question.id}
                         className={`p-4 rounded-xl border transition-all ${
-                          question.status === "DELETE"
-                            ? "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60"
-                            : question.reused
-                              ? "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-700"
-                              : question.duplicated
-                                ? "bg-orange-50 dark:bg-orange-950/30 border-orange-200 dark:border-orange-700"
+                          skipped
+                            ? "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-700 opacity-55"
+                            : question.status === "DELETE"
+                              ? "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60"
+                              : question.reused
+                                ? "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-700"
                                 : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
                         }`}
                       >
@@ -708,52 +735,56 @@ const ImportQuestionForm: React.FC = () => {
                                 Tái sử dụng
                               </span>
                             )}
-                            {question.duplicated && !question.reused && (
-                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200">
-                                Trùng lặp
+                            {skipped && (
+                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center gap-1">
+                                <Ban className="h-3 w-3" />
+                                Trùng — bỏ qua
                               </span>
                             )}
-                            {question.status === "DELETE" && (
-                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-900 text-gray-600 dark:text-gray-400">
+                            {question.status === "DELETE" && !skipped && (
+                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400">
                                 Đã xóa
                               </span>
                             )}
                           </div>
-                          <div className="flex items-center gap-1 shrink-0">
-                            {!isEditing && question.status !== "DELETE" && (
-                              <>
+
+                          {!skipped && (
+                            <div className="flex items-center gap-1 shrink-0">
+                              {!isEditing && question.status !== "DELETE" && (
+                                <>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => openEdit(question)}
+                                  >
+                                    <Edit2 className="h-3.5 w-3.5" />
+                                  </Button>
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => handleDeleteQuestion(question.id)}
+                                  >
+                                    <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                                  </Button>
+                                </>
+                              )}
+                              {question.status === "DELETE" && (
                                 <Button
                                   size="sm"
                                   variant="ghost"
                                   className="h-7 w-7 p-0"
-                                  onClick={() => openEdit(question)}
+                                  onClick={() => handleToggleQuestionStatus(question.id, question.status)}
                                 >
-                                  <Edit2 className="h-3.5 w-3.5" />
+                                  <RefreshCw className="h-3.5 w-3.5 text-green-600" />
                                 </Button>
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => handleDeleteQuestion(question.id)}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5 text-red-500" />
-                                </Button>
-                              </>
-                            )}
-                            {question.status === "DELETE" && (
-                              <Button
-                                size="sm"
-                                variant="ghost"
-                                className="h-7 w-7 p-0"
-                                onClick={() => handleToggleQuestionStatus(question.id, question.status)}
-                              >
-                                <RefreshCw className="h-3.5 w-3.5 text-green-600" />
-                              </Button>
-                            )}
-                          </div>
+                              )}
+                            </div>
+                          )}
                         </div>
 
-                        {isEditing ? (
+                        {isEditing && !skipped ? (
                           <div className="space-y-4">
                             <div className="space-y-1.5">
                               <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">

@@ -17,4 +17,5 @@ export type TSubjectBriefResponse = {
   id: number;
   name: string;
   code: string;
+  classLevel: number;
 };
