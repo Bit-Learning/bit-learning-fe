@@ -63,6 +63,7 @@ export interface ExamGenerateFromQuestionsRequest {
   code: string;
   shuffleOptions?: boolean;
   durationInMinutes: number;
+  subjectId: number;
   totalScore: number;
   enrollKey?: string;
   type: ExamType;
@@ -73,6 +74,7 @@ export interface ExamUpdateRequest {
   code?: string;
   type?: ExamType;
   durationInMinutes?: number;
+  subjectId: number;
   totalScore?: number;
   enrollKey?: string;
   openTime?: string;

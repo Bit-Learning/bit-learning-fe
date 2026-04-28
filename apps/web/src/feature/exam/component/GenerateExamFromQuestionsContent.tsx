@@ -44,7 +44,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const [generatedExamId, setGeneratedExamId] = useState<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterSubjectId, setFilterSubjectId] = useState<number | undefined>(undefined);
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -54,7 +54,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     page: currentPage,
     size: PAGE_SIZE,
     keyword: searchTerm || undefined,
-    subjectId: filterSubjectId,
+    subjectId: selectedSubjectId,
     approvalStatus: ApprovalStatus.APPROVED,
   };
 
@@ -62,15 +62,15 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     page: currentPage,
     size: PAGE_SIZE,
     keyword: searchTerm || undefined,
-    subjectId: filterSubjectId,
+    subjectId: selectedSubjectId,
   };
 
   const { data: systemData, isLoading: systemLoading } = useSearchQuestions(systemParams, {
-    enabled: questionSource === "system",
+    enabled: questionSource === "system" && !!selectedSubjectId,
   });
 
   const { data: userData, isLoading: userLoading } = useMyQuestions(userParams, {
-    enabled: questionSource === "user",
+    enabled: questionSource === "user" && !!selectedSubjectId,
   });
 
   const isLoading = questionSource === "system" ? systemLoading : userLoading;
@@ -88,6 +88,10 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const handleGenerate = () => {
     if (!examName.trim() || !examCode.trim()) {
       toast.error({ title: "Lỗi", description: "Vui lòng nhập tên và mã đề thi" });
+      return;
+    }
+    if (!selectedSubjectId) {
+      toast.error({ title: "Lỗi", description: "Vui lòng chọn môn học" });
       return;
     }
     if (examType === "EXAM" && !enrollKey.trim()) {
@@ -108,6 +112,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
         shuffleOptions,
         durationInMinutes,
         totalScore,
+        subjectId: selectedSubjectId!,
         type: examType,
         enrollKey: enrollKey.trim() || undefined,
       },
@@ -140,7 +145,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setQuestionSource(source);
     setSelectedQuestions(new Set());
     setCurrentPage(0);
-    setFilterSubjectId(undefined);
+    setSelectedSubjectId(undefined);
     setSearchTerm("");
   };
 
@@ -160,7 +165,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setEnrollKey("");
     setSelectedQuestions(new Set());
     setSearchTerm("");
-    setFilterSubjectId(undefined);
+    setSelectedSubjectId(undefined);
     setCurrentPage(0);
   };
 
@@ -262,33 +267,21 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                         setCurrentPage(0);
                       }}
                       className="pl-9"
+                      disabled={!selectedSubjectId}
                     />
                   </div>
-
-                  {subjectsData && subjectsData.length > 0 && (
-                    <select
-                      value={filterSubjectId ?? ""}
-                      onChange={(e) => {
-                        setFilterSubjectId(e.target.value ? Number(e.target.value) : undefined);
-                        setSelectedQuestions(new Set());
-                        setCurrentPage(0);
-                      }}
-                      className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground outline-none focus:ring-2 focus:ring-primary min-w-37.5"
-                    >
-                      <option value="">Tất cả môn</option>
-                      {subjectsData.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
-                  )}
                 </div>
               )}
             </CardHeader>
 
             <CardContent>
-              {isLoading ? (
+              {!selectedSubjectId && !isExamGenerated ? (
+                <div className="text-center py-12 text-slate-400">
+                  <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p className="font-medium">Chưa chọn môn học</p>
+                  <p className="text-sm mt-1">Vui lòng chọn môn học ở phần cài đặt để xem danh sách câu hỏi</p>
+                </div>
+              ) : isLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <Skeleton key={i} className="h-16 w-full" />
@@ -328,14 +321,14 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                               <span className="text-xs">{getDifficultyBadge(question.questionLevel)}</span>
                               {question.chapter && (
                                 <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                  Chương: {question.chapter.name}
+                                  Chương {question.chapter.chapterNo}
                                 </span>
                               )}
                               {question.lesson && (
                                 <>
                                   <span className="text-slate-400">●</span>
                                   <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                    {question.lesson.name}
+                                    Bài {question.lesson.lessonNo}
                                   </span>
                                 </>
                               )}
@@ -348,7 +341,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               )}
 
-              {totalPages > 1 && (
+              {totalPages > 1 && selectedSubjectId && (
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <Button
                     variant="outline"
@@ -385,6 +378,36 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="subjectId">
+                    Môn học <span className="text-red-500">*</span>
+                  </Label>
+                  <select
+                    id="subjectId"
+                    value={selectedSubjectId ?? ""}
+                    onChange={(e) => {
+                      const newId = e.target.value ? Number(e.target.value) : undefined;
+                      setSelectedSubjectId(newId);
+                      setSelectedQuestions(new Set());
+                      setCurrentPage(0);
+                      setSearchTerm("");
+                    }}
+                    className="w-full mt-1.5 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none"
+                  >
+                    <option value="">-- Chọn môn học --</option>
+                    {subjectsData?.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  {!selectedSubjectId && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      Chọn môn học để bắt đầu chọn câu hỏi
+                    </p>
+                  )}
+                </div>
+
                 <div>
                   <Label htmlFor="examName">
                     Tên đề thi <span className="text-red-500">*</span>
@@ -489,7 +512,10 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 <Button
                   onClick={handleGenerate}
                   isDisabled={
-                    generateExam.isPending || selectedQuestions.size === 0 || (examType === "EXAM" && !enrollKey.trim())
+                    generateExam.isPending ||
+                    selectedQuestions.size === 0 ||
+                    !selectedSubjectId ||
+                    (examType === "EXAM" && !enrollKey.trim())
                   }
                   size="lg"
                   className="w-full gap-2 mt-4"

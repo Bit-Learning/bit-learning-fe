@@ -3,6 +3,7 @@ import { X, Loader2, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import type { ExamBriefResponse, ExamType, ExamUpdateRequest } from "../types/exam.type";
 import { useUpdateExam } from "../queries/useExam";
+import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 
 interface EditExamModalProps {
   exam: ExamBriefResponse;
@@ -11,21 +12,24 @@ interface EditExamModalProps {
 
 export const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) => {
   const { mutate: updateExam, isPending } = useUpdateExam();
+  const { data: subjectsData } = useSubjectsList();
   const [name, setName] = useState(exam.name);
   const [code, setCode] = useState(exam.code);
   const [type, setType] = useState<ExamType>(exam.type ?? "EXAM");
   const [durationInMinutes, setDurationInMinutes] = useState(exam.durationInMinutes);
   const [totalScore, setTotalScore] = useState(exam.totalScore);
   const [enrollKey, setEnrollKey] = useState(exam.enrollKey ?? "");
+  const [subjectId, setSubjectId] = useState<number | undefined>(exam.subject?.id);
 
   const handleSubmit = () => {
-    if (!name.trim() || !code.trim()) return;
+    if (!name.trim() || !code.trim() || !subjectId) return;
     const data: ExamUpdateRequest = {
       name: name.trim(),
       code: code.trim(),
       type,
       durationInMinutes,
       totalScore,
+      subjectId,
       enrollKey: enrollKey.trim() || undefined,
     };
     updateExam({ id: exam.id, data }, { onSuccess: onClose });
@@ -55,6 +59,26 @@ export const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) =
               onChange={(e) => setName(e.target.value)}
               placeholder="Tên đề thi"
             />
+          </div>
+          <div>
+            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1.5">
+              Môn học <span className="text-red-500">*</span>
+            </label>
+            <div className="relative">
+              <select
+                value={subjectId ?? ""}
+                onChange={(e) => setSubjectId(e.target.value ? Number(e.target.value) : undefined)}
+                className="w-full px-3 py-2.5 rounded-lg border border-slate-200 dark:border-slate-700 dark:bg-slate-800 text-slate-900 dark:text-white text-sm outline-none focus:ring-2 focus:ring-blue-500 transition-all appearance-none"
+              >
+                <option value="">-- Chọn môn học --</option>
+                {subjectsData?.map((s) => (
+                  <option key={s.id} value={s.id}>
+                    {s.name}
+                  </option>
+                ))}
+              </select>
+              <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            </div>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -135,7 +159,9 @@ export const EditExamModal: React.FC<EditExamModalProps> = ({ exam, onClose }) =
           </button>
           <Button
             onClick={handleSubmit}
-            isDisabled={isPending || !name.trim() || !code.trim() || (type === "EXAM" && !enrollKey.trim())}
+            isDisabled={
+              isPending || !name.trim() || !code.trim() || !subjectId || (type === "EXAM" && !enrollKey.trim())
+            }
             className="gap-2 bg-blue-600 hover:bg-blue-700 text-white"
           >
             {isPending ? <Loader2 className="h-4 w-4 animate-spin" /> : null}
