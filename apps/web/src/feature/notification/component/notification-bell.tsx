@@ -170,7 +170,7 @@ export function NotificationBell() {
 								<button
 									onClick={handleMarkAllRead}
 									disabled={markAllAsReadMutation.isPending}
-									className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50"
+									className="text-sm text-primary hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 hover:cursor-pointer"
 								>
 									Đánh dấu đã đọc
 								</button>
