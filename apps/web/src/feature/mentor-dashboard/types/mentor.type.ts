@@ -23,6 +23,7 @@ export interface QuestionStats {
   pendingQuestions: number;
   approvedQuestions: number;
   rejectedQuestions: number;
+  noneQuestions: number;
 }
 
 export interface ExamStats {
@@ -46,6 +47,7 @@ export interface ProblemStats {
   pendingProblems: number;
   approvedProblems: number;
   rejectedProblems: number;
+  noneProblems: number;
 }
 
 export interface SlideStats {
@@ -103,6 +105,14 @@ export interface QuestionStatusData {
   approved: number;
   pending: number;
   rejected: number;
+  none: number; // chưa gửi
+}
+
+export interface ProblemStatusData {
+  approved: number;
+  pending: number;
+  rejected: number;
+  none: number; // chưa gửi
 }
 
 export interface MentorDashboardStats {
@@ -171,21 +181,15 @@ export interface TransformedMentorStats {
   examMonthly: MonthlyCount[];
   contentMonthly: ContentMonthlyData[];
   questionStatus: QuestionStatusData;
+  problemStatus: ProblemStatusData;
 }
-export function transformMentorStats(raw: MentorDashboardStatsResponse): {
-  stats: MentorDashboardStats;
-  examMonthly: MonthlyCount[];
-  contentMonthly: ContentMonthlyData[];
-  questionStatus: QuestionStatusData;
-} {
+
+export function transformMentorStats(raw: MentorDashboardStatsResponse): TransformedMentorStats {
   const currentMonth = new Date().getMonth();
 
   const examMonthly: MonthlyCount[] = MONTHS_VI.map((month, i) => {
     const key = EXAM_MONTH_KEYS[i]!;
-    return {
-      month,
-      count: raw.examStats[key],
-    };
+    return { month, count: raw.examStats[key] };
   });
 
   const contentMonthly: ContentMonthlyData[] = MONTHS_VI.map((month, i) => {
@@ -202,6 +206,14 @@ export function transformMentorStats(raw: MentorDashboardStatsResponse): {
     approved: raw.questionStats.approvedQuestions,
     pending: raw.questionStats.pendingQuestions,
     rejected: raw.questionStats.rejectedQuestions,
+    none: raw.questionStats.noneQuestions,
+  };
+
+  const problemStatus: ProblemStatusData = {
+    approved: raw.problemStats.approvedProblems,
+    pending: raw.problemStats.pendingProblems,
+    rejected: raw.problemStats.rejectedProblems,
+    none: raw.problemStats.noneProblems,
   };
 
   const stats: MentorDashboardStats = {
@@ -218,5 +230,5 @@ export function transformMentorStats(raw: MentorDashboardStatsResponse): {
     newMindMapsThisMonth: raw.mindMapStats[MINDMAP_MONTH_KEYS[currentMonth]!],
   };
 
-  return { stats, examMonthly, contentMonthly, questionStatus };
+  return { stats, examMonthly, contentMonthly, questionStatus, problemStatus };
 }
