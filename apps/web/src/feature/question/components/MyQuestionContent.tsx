@@ -355,30 +355,28 @@ const MyQuestionsContent: React.FC = () => {
                       )}
                     >
                       <td className="p-4">
-                        <label className="relative flex items-center cursor-pointer">
-                          <input
-                            type="checkbox"
-                            checked={selectedQuestions.includes(question.id)}
-                            onChange={() => handleSelectQuestion(question.id)}
-                            onClick={(e) => e.stopPropagation()}
-                            disabled={
-                              question.approvalStatus === ApprovalStatus.PENDING ||
-                              question.approvalStatus === ApprovalStatus.APPROVED
-                            }
-                            className="peer sr-only"
-                          />
-                          <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
-                            <svg
-                              className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
-                              fill="none"
-                              viewBox="0 0 24 24"
-                              stroke="currentColor"
-                              strokeWidth={3}
-                            >
-                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                            </svg>
-                          </div>
-                        </label>
+                        {question.approvalStatus === ApprovalStatus.NONE && (
+                          <label className="relative flex items-center cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={selectedQuestions.includes(question.id)}
+                              onChange={() => handleSelectQuestion(question.id)}
+                              onClick={(e) => e.stopPropagation()}
+                              className="peer sr-only"
+                            />
+                            <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
+                              <svg
+                                className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
+                                fill="none"
+                                viewBox="0 0 24 24"
+                                stroke="currentColor"
+                                strokeWidth={3}
+                              >
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                              </svg>
+                            </div>
+                          </label>
+                        )}
                       </td>
                       <td className="p-4">
                         <div className="flex-1 min-w-0">
@@ -398,7 +396,7 @@ const MyQuestionsContent: React.FC = () => {
                         <div className="flex items-center justify-center gap-1">
                           <button
                             className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
-                            title="Xem"
+                            title="Xem chi tiết"
                             onClick={(e) => {
                               e.stopPropagation();
                               setViewingQuestion(question);
@@ -406,30 +404,30 @@ const MyQuestionsContent: React.FC = () => {
                           >
                             <Eye className="h-6 w-6" />
                           </button>
-                          {question.approvalStatus !== ApprovalStatus.APPROVED && (
-                            <>
-                              <button
-                                className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
-                                title="Chỉnh sửa"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  navigate({ to: `/mentor/question/${question.id}/edit` });
-                                }}
-                              >
-                                <Edit className="h-6 w-6" />
-                              </button>
-                              <button
-                                className="cursor-pointer p-2 text-slate-600 hover:text-red-600 transition-colors"
-                                title="Xóa"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  setDeletingQuestion(question);
-                                }}
-                              >
-                                <Trash2 className="h-6 w-6" />
-                              </button>
-                            </>
-                          )}
+                          <>
+                            <button
+                              className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
+                              title="Chỉnh sửa"
+                              disabled={question.approvalStatus === ApprovalStatus.PENDING}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate({ to: `/mentor/question/${question.id}/edit` });
+                              }}
+                            >
+                              <Edit className="h-6 w-6" />
+                            </button>
+                            <button
+                              className="cursor-pointer p-2 text-slate-600 hover:text-red-600 transition-colors"
+                              title="Xóa"
+                              disabled={question.approvalStatus !== ApprovalStatus.PENDING}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDeletingQuestion(question);
+                              }}
+                            >
+                              <Trash2 className="h-6 w-6" />
+                            </button>
+                          </>
                         </div>
                       </td>
                     </tr>
