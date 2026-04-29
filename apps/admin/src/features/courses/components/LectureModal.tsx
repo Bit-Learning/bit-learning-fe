@@ -285,8 +285,8 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden py-0">
-        <div className="flex items-center justify-between border-b px-6 py-4">
+      <Card className="flex max-h-[90vh] w-full max-w-4xl flex-col overflow-hidden">
+        <div className="flex items-center justify-between border-b px-6 py-0">
           <h2 className="text-xl font-bold text-gray-900">
             {mode === "create" ? "Thêm bài học mới" : "Chỉnh sửa bài học"}
           </h2>
@@ -297,7 +297,7 @@ const LectureModal: React.FC<LectureModalProps> = ({
 
         <div className="flex-1 overflow-y-auto px-6">
           {mode === "create" && !lectureType && (
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4 py-2">
               <Card
                 className="cursor-pointer p-6 text-center transition-all hover:border-blue-400 hover:shadow-lg"
                 onClick={() => setLectureType("VIDEO")}
