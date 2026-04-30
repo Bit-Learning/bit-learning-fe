@@ -32,10 +32,6 @@ const blocklyTypeByBlockType: Record<BlockType, string> = {
 	repeat: "kids_repeat",
 };
 
-const movementBlocks = new Set<BlockType>(["move", "back", "jump"]);
-const directionBlocks = new Set<BlockType>(["left", "right", "turnAround"]);
-const controlBlocks = new Set<BlockType>(["repeat"]);
-
 let blocksRegistered = false;
 
 function registerKidsBlocks() {
@@ -138,24 +134,23 @@ function registerKidsBlocks() {
 }
 
 function buildToolboxXml(allowedBlocks: BlockType[]) {
-	const movement = allowedBlocks
-		.filter((type) => movementBlocks.has(type))
-		.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
-		.join("");
-	const directions = allowedBlocks
-		.filter((type) => directionBlocks.has(type))
-		.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
-		.join("");
-	const controls = allowedBlocks
-		.filter((type) => controlBlocks.has(type))
-		.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
-		.join("");
+	const buildBlocks = (types: BlockType[]) =>
+		types
+			.filter((type) => allowedBlocks.includes(type))
+			.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
+			.join("");
+
+	const movement = buildBlocks(["move", "back", "jump"]);
+	const directions = buildBlocks(["left", "right", "turnAround"]);
+	const controls = buildBlocks(["repeat"]);
 
 	return `
 		<xml xmlns="https://developers.google.com/blockly/xml">
-			${movement ? `<category name="Di chuyển" colour="160">${movement}</category>` : ""}
-			${directions ? `<category name="Đổi hướng" colour="210">${directions}</category>` : ""}
-			${controls ? `<category name="Lặp lại" colour="260">${controls}</category>` : ""}
+			${movement}
+			${movement && (directions || controls) ? '<sep gap="18"></sep>' : ""}
+			${directions}
+			${directions && controls ? '<sep gap="18"></sep>' : ""}
+			${controls}
 		</xml>
 	`;
 }
