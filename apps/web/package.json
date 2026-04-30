@@ -22,7 +22,7 @@
 		"@tanstack/react-query": "^5.99.0",
 		"@tanstack/react-query-devtools": "^5.99.0",
 		"@tanstack/react-router": "^1.168.26",
-		"@tanstack/react-router-devtools": "^1.132.37",
+		"@tanstack/react-router-devtools": "^1.166.13",
 		"@tanstack/router-plugin": "^1.167.29",
 		"@types/prismjs": "^1.26.6",
 		"@types/qrcode": "^1.5.6",
