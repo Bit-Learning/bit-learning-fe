@@ -127,6 +127,7 @@ export function runProgram(
 			}
 
 			if (isObstacle(level, nextX, nextY)) {
+				state = { ...state, x: nextX, y: nextY };
 				steps.push({
 					state: { ...state },
 					blockId: block.id,

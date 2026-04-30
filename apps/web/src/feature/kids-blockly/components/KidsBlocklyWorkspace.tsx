@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef } from "react";
 import * as Blockly from "blockly/core";
 import "blockly/blocks";
+import { cn } from "@workspace/ui/lib/utils";
 import type { ActionBlockType, BlockType, ProgramBlock } from "../types";
 
 interface KidsBlocklyWorkspaceProps {
@@ -8,6 +9,7 @@ interface KidsBlocklyWorkspaceProps {
 	isRunning: boolean;
 	activeBlockId: string | null;
 	resetSignal: number;
+	className?: string;
 	onProgramChange: (program: ProgramBlock[]) => void;
 }
 
@@ -29,10 +31,6 @@ const blocklyTypeByBlockType: Record<BlockType, string> = {
 	jump: "kids_jump",
 	repeat: "kids_repeat",
 };
-
-const movementBlocks = new Set<BlockType>(["move", "back", "jump"]);
-const directionBlocks = new Set<BlockType>(["left", "right", "turnAround"]);
-const controlBlocks = new Set<BlockType>(["repeat"]);
 
 let blocksRegistered = false;
 
@@ -136,24 +134,23 @@ function registerKidsBlocks() {
 }
 
 function buildToolboxXml(allowedBlocks: BlockType[]) {
-	const movement = allowedBlocks
-		.filter((type) => movementBlocks.has(type))
-		.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
-		.join("");
-	const directions = allowedBlocks
-		.filter((type) => directionBlocks.has(type))
-		.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
-		.join("");
-	const controls = allowedBlocks
-		.filter((type) => controlBlocks.has(type))
-		.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
-		.join("");
+	const buildBlocks = (types: BlockType[]) =>
+		types
+			.filter((type) => allowedBlocks.includes(type))
+			.map((type) => `<block type="${blocklyTypeByBlockType[type]}"></block>`)
+			.join("");
+
+	const movement = buildBlocks(["move", "back", "jump"]);
+	const directions = buildBlocks(["left", "right", "turnAround"]);
+	const controls = buildBlocks(["repeat"]);
 
 	return `
 		<xml xmlns="https://developers.google.com/blockly/xml">
-			${movement ? `<category name="Di chuyển" colour="160">${movement}</category>` : ""}
-			${directions ? `<category name="Đổi hướng" colour="210">${directions}</category>` : ""}
-			${controls ? `<category name="Lặp lại" colour="260">${controls}</category>` : ""}
+			${movement}
+			${movement && (directions || controls) ? '<sep gap="18"></sep>' : ""}
+			${directions}
+			${directions && controls ? '<sep gap="18"></sep>' : ""}
+			${controls}
 		</xml>
 	`;
 }
@@ -162,7 +159,7 @@ function loadStartBlock(workspace: Blockly.WorkspaceSvg) {
 	workspace.clear();
 	const xml = Blockly.utils.xml.textToDom(`
 		<xml xmlns="https://developers.google.com/blockly/xml">
-			<block type="kids_start" x="24" y="24" deletable="false" movable="false"></block>
+			<block type="kids_start" x="28" y="28" deletable="false" movable="false"></block>
 		</xml>
 	`);
 	Blockly.Xml.domToWorkspace(xml, workspace);
@@ -208,6 +205,7 @@ export function KidsBlocklyWorkspace({
 	isRunning,
 	activeBlockId,
 	resetSignal,
+	className,
 	onProgramChange,
 }: KidsBlocklyWorkspaceProps) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -227,8 +225,8 @@ export function KidsBlocklyWorkspace({
 			zoom: {
 				controls: true,
 				wheel: true,
-				startScale: 0.88,
-				maxScale: 1.3,
+				startScale: 0.9,
+				maxScale: 1.25,
 				minScale: 0.65,
 				scaleSpeed: 1.08,
 			},
@@ -240,7 +238,7 @@ export function KidsBlocklyWorkspace({
 			grid: {
 				spacing: 28,
 				length: 4,
-				colour: "#bae6fd",
+				colour: "#dbeafe",
 				snap: true,
 			},
 			renderer: "zelos",
@@ -284,33 +282,13 @@ export function KidsBlocklyWorkspace({
 	}, [activeBlockId]);
 
 	return (
-		<div className="relative overflow-hidden rounded-[28px] border border-sky-100 bg-white shadow-[0_18px_42px_rgba(14,165,233,0.12)]">
-			<div className="flex flex-wrap items-center justify-between gap-3 border-b border-sky-100 bg-gradient-to-r from-sky-50 via-white to-emerald-50 px-4 py-3">
-				<div>
-					<p className="text-xs font-semibold uppercase tracking-[0.18em] text-sky-600">
-						Sân lập trình
-					</p>
-					<p className="mt-1 text-sm font-medium text-slate-600">
-						Kéo khối từ bên trái và nối vào dưới cờ bắt đầu.
-					</p>
-				</div>
-				<div className="flex flex-wrap gap-2 text-xs font-semibold">
-					<span className="rounded-full bg-emerald-100 px-3 py-1.5 text-emerald-700">
-						Di chuyển
-					</span>
-					<span className="rounded-full bg-sky-100 px-3 py-1.5 text-sky-700">
-						Đổi hướng
-					</span>
-					<span className="rounded-full bg-violet-100 px-3 py-1.5 text-violet-700">
-						Lặp lại
-					</span>
-				</div>
-			</div>
-			<div className="bg-[linear-gradient(180deg,#f8fafc_0%,#eef9ff_100%)] p-3">
-				<div className="overflow-hidden rounded-[22px] border border-white bg-white shadow-inner">
-					<div ref={containerRef} className="h-[620px] min-h-[520px] w-full" />
-				</div>
-			</div>
+		<div
+			className={cn(
+				"relative h-full min-h-[560px] overflow-hidden rounded-[22px] border border-sky-100 bg-white shadow-inner",
+				className,
+			)}
+		>
+			<div ref={containerRef} className="h-full min-h-[560px] w-full" />
 			{isRunning && (
 				<div className="pointer-events-auto absolute inset-0 bg-white/10 backdrop-blur-[1px]" />
 			)}

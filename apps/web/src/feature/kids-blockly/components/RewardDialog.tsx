@@ -1,6 +1,7 @@
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Button } from "@workspace/ui/components/Button";
 import goldMedalAsset from "../asset/gold_medal.png";
+import tomHappyAsset from "../asset/tom_happy.png";
 
 interface RewardDialogProps {
 	open: boolean;
@@ -34,12 +35,20 @@ export function RewardDialog({
 						exit={{ scale: 0.92, y: 8 }}
 						className="w-full max-w-md rounded-[28px] bg-white p-6 text-center shadow-[0_24px_60px_rgba(15,23,42,0.24)]"
 					>
-						<img
-							src={goldMedalAsset}
-							alt="Huy chương hoàn thành"
-							className="mx-auto h-24 w-24 object-contain drop-shadow-md"
-							draggable={false}
-						/>
+						<div className="relative mx-auto h-32 w-32">
+							<img
+								src={tomHappyAsset}
+								alt="Tom vui vẻ"
+								className="h-full w-full object-contain drop-shadow-lg"
+								draggable={false}
+							/>
+							<img
+								src={goldMedalAsset}
+								alt="Huy chương hoàn thành"
+								className="-right-2 -bottom-1 absolute h-14 w-14 object-contain drop-shadow-md"
+								draggable={false}
+							/>
+						</div>
 						<h3 className="mt-4 text-2xl font-bold text-slate-900">
 							Bạn hoàn thành rồi
 						</h3>

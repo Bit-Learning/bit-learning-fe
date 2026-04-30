@@ -1,24 +1,21 @@
 import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@workspace/ui/lib/utils";
+import characterMouseAsset from "../asset/character_mouse.png";
+import characterTomAsset from "../asset/character_tom.png";
 import destinationAsset from "../asset/Destination.png";
 import fenceAsset from "../asset/fence.png";
 import rockAsset from "../asset/rock.png";
 import startAsset from "../asset/start.png";
-import tileGrassAsset from "../asset/tile_grass.png";
+import tileGrassAsset from "../asset/tile_sea.png";
 import treeAsset from "../asset/tree.png";
 import wallAsset from "../asset/wall.png";
-import type {
-	CharacterOption,
-	CharacterState,
-	KidsBlocklyLevel,
-} from "../types";
+import type { CharacterState, KidsBlocklyLevel } from "../types";
 
 interface GameBoardProps {
 	level: KidsBlocklyLevel;
 	character: CharacterState;
 	isRunning: boolean;
-	characterOption: CharacterOption;
 }
 
 const directionRotation = {
@@ -57,37 +54,31 @@ function getTileBackgroundStyle(
 	};
 }
 
-export function GameBoard({
-	level,
-	character,
-	isRunning,
-	characterOption,
-}: GameBoardProps) {
+export function GameBoard({ level, character, isRunning }: GameBoardProps) {
 	return (
-		<div className="rounded-[28px] border border-emerald-200 bg-white/80 p-4 shadow-[0_24px_60px_rgba(15,118,110,0.14)] backdrop-blur-sm">
-			<div className="mb-4 flex items-center justify-between gap-4">
-				<div>
-					<p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">
+		<div className="flex h-full flex-col rounded-[24px] border border-emerald-200 bg-white/90 p-4 shadow-[0_20px_44px_rgba(15,118,110,0.12)] backdrop-blur-sm">
+			<div className="mb-3 flex items-center justify-between gap-4">
+				<div className="min-w-0">
+					<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
 						Sân chơi
 					</p>
-					<h2 className="mt-1 text-2xl font-bold text-slate-900">
+					<h2 className="mt-1 truncate text-xl font-bold text-slate-900">
 						{level.title}
 					</h2>
-					<p className="mt-1 text-sm text-slate-600">{level.subtitle}</p>
 				</div>
-				<div className="rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
+				<div className="shrink-0 rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
 					Đích: ({level.goal.x + 1}, {level.goal.y + 1})
 				</div>
 			</div>
 
 			<div
-				className="relative overflow-hidden rounded-[24px] border border-emerald-200 bg-[linear-gradient(180deg,#f0fdf4_0%,#dcfce7_100%)] p-2"
+				className="relative flex-1 overflow-hidden rounded-[22px] border border-emerald-200 bg-[linear-gradient(180deg,#f0fdf4_0%,#dcfce7_100%)] p-2"
 				style={{
 					aspectRatio: `${level.gridSize.cols} / ${level.gridSize.rows}`,
 				}}
 			>
 				<div
-					className="grid h-full w-full overflow-hidden rounded-[18px] border border-emerald-200/80"
+					className="grid h-full w-full overflow-hidden rounded-[16px] border border-emerald-200/80"
 					style={{
 						gridTemplateColumns: `repeat(${level.gridSize.cols}, minmax(0, 1fr))`,
 						gridTemplateRows: `repeat(${level.gridSize.rows}, minmax(0, 1fr))`,
@@ -179,14 +170,12 @@ export function GameBoard({
 						} as CSSProperties
 					}
 				>
-					<div className="flex h-full w-full items-center justify-center rounded-[22px]">
-						<img
-							src={characterOption.src}
-							alt={characterOption.alt}
-							className="h-full w-full object-contain drop-shadow-md"
-							draggable={false}
-						/>
-					</div>
+					<img
+						src={characterTomAsset}
+						alt="Nhân vật chuột máy"
+						className="h-full w-full object-contain drop-shadow-md"
+						draggable={false}
+					/>
 				</motion.div>
 			</div>
 		</div>
