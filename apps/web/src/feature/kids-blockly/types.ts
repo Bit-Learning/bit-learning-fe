@@ -1,6 +1,16 @@
 export type Direction = "N" | "E" | "S" | "W";
 
-export type BlockType = "move" | "left" | "right";
+export type ActionBlockType =
+	| "move"
+	| "left"
+	| "right"
+	| "back"
+	| "turnAround"
+	| "jump";
+
+export type ControlBlockType = "repeat";
+
+export type BlockType = ActionBlockType | ControlBlockType;
 
 export interface Position {
 	x: number;
@@ -26,13 +36,13 @@ export interface KidsBlocklyLevel {
 
 export interface ProgramBlock {
 	id: string;
-	type: BlockType;
+	type: ActionBlockType;
 }
 
 export interface PlaybackStep {
 	state: CharacterState;
 	blockId: string;
-	type: BlockType;
+	type: ActionBlockType;
 	status: "running" | "success" | "hit-wall" | "out-of-bounds";
 }
 
@@ -47,4 +57,11 @@ export interface RunResult {
 export interface KidsBlocklyProgress {
 	unlockedLevelIds: string[];
 	starsByLevel: Record<string, number>;
+}
+
+export interface CharacterOption {
+	id: string;
+	name: string;
+	src: string;
+	alt: string;
 }

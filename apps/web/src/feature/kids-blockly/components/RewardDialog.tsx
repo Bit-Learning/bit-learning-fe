@@ -1,5 +1,6 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { Button } from "@workspace/ui/components/Button";
+import goldMedalAsset from "../asset/gold_medal.png";
 
 interface RewardDialogProps {
 	open: boolean;
@@ -10,7 +11,14 @@ interface RewardDialogProps {
 	hasNextLevel: boolean;
 }
 
-export function RewardDialog({ open, stars, message, onNext, onReplay, hasNextLevel }: RewardDialogProps) {
+export function RewardDialog({
+	open,
+	stars,
+	message,
+	onNext,
+	onReplay,
+	hasNextLevel,
+}: RewardDialogProps) {
 	return (
 		<AnimatePresence>
 			{open && (
@@ -26,12 +34,22 @@ export function RewardDialog({ open, stars, message, onNext, onReplay, hasNextLe
 						exit={{ scale: 0.92, y: 8 }}
 						className="w-full max-w-md rounded-[28px] bg-white p-6 text-center shadow-[0_24px_60px_rgba(15,23,42,0.24)]"
 					>
-						<div className="text-5xl">🎉</div>
-						<h3 className="mt-4 text-2xl font-bold text-slate-900">Bạn hoàn thành rồi</h3>
+						<img
+							src={goldMedalAsset}
+							alt="Huy chương hoàn thành"
+							className="mx-auto h-24 w-24 object-contain drop-shadow-md"
+							draggable={false}
+						/>
+						<h3 className="mt-4 text-2xl font-bold text-slate-900">
+							Bạn hoàn thành rồi
+						</h3>
 						<p className="mt-2 text-sm leading-6 text-slate-600">{message}</p>
 						<div className="mt-5 flex items-center justify-center gap-2 text-4xl">
 							{[1, 2, 3].map((value) => (
-								<span key={value} className={value <= stars ? "opacity-100" : "opacity-25"}>
+								<span
+									key={value}
+									className={value <= stars ? "opacity-100" : "opacity-25"}
+								>
 									⭐
 								</span>
 							))}

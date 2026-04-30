@@ -1,6 +1,6 @@
 import type { KidsBlocklyLevel } from "../types";
 
-export const kidsBlocklyLevels: KidsBlocklyLevel[] = [
+export const kidsBlocklyLevels = [
 	{
 		id: "meadow-1",
 		title: "Màn 1",
@@ -8,8 +8,8 @@ export const kidsBlocklyLevels: KidsBlocklyLevel[] = [
 		gridSize: { rows: 4, cols: 4 },
 		start: { x: 0, y: 3, dir: "E" },
 		goal: { x: 3, y: 3 },
-		allowedBlocks: ["move"],
-		hint: "Kéo 3 khối Đi thẳng vào vùng chương trình.",
+		allowedBlocks: ["move", "repeat"],
+		hint: "Kéo 3 khối Đi thẳng, hoặc dùng Lặp lại để đi thẳng 3 lần.",
 		par: 3,
 	},
 	{
@@ -19,9 +19,9 @@ export const kidsBlocklyLevels: KidsBlocklyLevel[] = [
 		gridSize: { rows: 5, cols: 5 },
 		start: { x: 1, y: 1, dir: "E" },
 		goal: { x: 3, y: 3 },
-		allowedBlocks: ["move", "right"],
-		hint: "Đi thẳng trước, rồi rẽ phải, sau đó đi tiếp.",
-		par: 4,
+		allowedBlocks: ["move", "right", "jump", "repeat"],
+		hint: "Có thể dùng Nhảy 2 ô, rồi rẽ phải và đi tiếp thật gọn.",
+		par: 3,
 	},
 	{
 		id: "meadow-3",
@@ -30,8 +30,8 @@ export const kidsBlocklyLevels: KidsBlocklyLevel[] = [
 		gridSize: { rows: 5, cols: 5 },
 		start: { x: 3, y: 3, dir: "N" },
 		goal: { x: 1, y: 1 },
-		allowedBlocks: ["move", "left"],
-		hint: "Nhớ đổi hướng trước khi đi tới lá cờ.",
+		allowedBlocks: ["move", "left", "back", "turnAround", "repeat"],
+		hint: "Nhớ đổi hướng trước khi đi tới lá cờ. Nếu đi quá xa, khối Đi lùi có thể cứu bạn.",
 		par: 4,
 	},
 	{
@@ -46,8 +46,16 @@ export const kidsBlocklyLevels: KidsBlocklyLevel[] = [
 			{ x: 2, y: 4 },
 			{ x: 2, y: 3 },
 		],
-		allowedBlocks: ["move", "left", "right"],
-		hint: "Nếu đi thẳng mãi sẽ đụng cây. Hãy rẽ hướng kịp lúc.",
+		allowedBlocks: [
+			"move",
+			"left",
+			"right",
+			"back",
+			"turnAround",
+			"jump",
+			"repeat",
+		],
+		hint: "Nếu đi thẳng mãi sẽ đụng cây. Hãy rẽ hướng kịp lúc, hoặc dùng Lặp lại cho các đoạn đường dài.",
 		par: 7,
 	},
 	{
@@ -62,8 +70,16 @@ export const kidsBlocklyLevels: KidsBlocklyLevel[] = [
 			{ x: 3, y: 3 },
 			{ x: 2, y: 3 },
 		],
-		allowedBlocks: ["move", "left", "right"],
-		hint: "Quan sát đường trống và rẽ đúng lúc để tránh hàng cây.",
+		allowedBlocks: [
+			"move",
+			"left",
+			"right",
+			"back",
+			"turnAround",
+			"jump",
+			"repeat",
+		],
+		hint: "Quan sát đường trống và rẽ đúng lúc để tránh hàng cây. Nhảy 2 ô giúp đi nhanh hơn nếu phía trước an toàn.",
 		par: 8,
 	},
 	{
@@ -80,8 +96,16 @@ export const kidsBlocklyLevels: KidsBlocklyLevel[] = [
 			{ x: 4, y: 3 },
 			{ x: 4, y: 4 },
 		],
-		allowedBlocks: ["move", "left", "right"],
-		hint: "Đường đúng sẽ như một chữ Z nhỏ.",
+		allowedBlocks: [
+			"move",
+			"left",
+			"right",
+			"back",
+			"turnAround",
+			"jump",
+			"repeat",
+		],
+		hint: "Đường đúng sẽ như một chữ Z nhỏ. Dùng Lặp lại để gom các đoạn đi thẳng.",
 		par: 10,
 	},
-];
+] satisfies [KidsBlocklyLevel, ...KidsBlocklyLevel[]];

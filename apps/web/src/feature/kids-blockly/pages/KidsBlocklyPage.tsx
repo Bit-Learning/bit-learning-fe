@@ -1,14 +1,14 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { motion } from "framer-motion";
 import { Button } from "@workspace/ui/components/Button";
 import { cn } from "@workspace/ui/lib/utils";
-import { Play, RotateCcw, Sparkles, Lightbulb, ChevronUp, ChevronDown, Trash2 } from "lucide-react";
+import { Blocks, Lightbulb, Play, RotateCcw } from "lucide-react";
+import { characterOptions } from "../data/characters";
 import { kidsBlocklyLevels } from "../data/levels";
 import { runProgram } from "../engine/run-program";
 import { GameBoard } from "../components/GameBoard";
+import { KidsBlocklyWorkspace } from "../components/KidsBlocklyWorkspace";
 import { RewardDialog } from "../components/RewardDialog";
 import type {
-	BlockType,
 	CharacterState,
 	KidsBlocklyLevel,
 	KidsBlocklyProgress,
@@ -16,34 +16,27 @@ import type {
 	RunResult,
 } from "../types";
 
-const blockMeta: Record<BlockType, { label: string; icon: string; color: string; help: string }> = {
-	move: {
-		label: "Đi thẳng",
-		icon: "⬆️",
-		color: "from-emerald-400 to-teal-500",
-		help: "Nhân vật tiến lên 1 ô.",
-	},
-	left: {
-		label: "Rẽ trái",
-		icon: "↪️",
-		color: "from-orange-400 to-amber-500",
-		help: "Nhân vật quay sang trái.",
-	},
-	right: {
-		label: "Rẽ phải",
-		icon: "↩️",
-		color: "from-sky-400 to-blue-500",
-		help: "Nhân vật quay sang phải.",
-	},
-};
-
 const storageKey = "kids-blockly-progress-v1";
+const characterStorageKey = "kids-blockly-character-v1";
 
-function createBlock(type: BlockType): ProgramBlock {
-	return {
-		id: `${type}-${Date.now()}-${Math.random().toString(36).slice(2, 7)}`,
-		type,
-	};
+function getFirstLevel(): KidsBlocklyLevel {
+	const level = kidsBlocklyLevels[0];
+	if (!level) {
+		throw new Error("Kids Blockly requires at least one level.");
+	}
+	return level;
+}
+
+const firstLevel = getFirstLevel();
+const firstCharacter = characterOptions[0];
+
+function getInitialCharacterId(): string {
+	if (typeof window === "undefined") return firstCharacter.id;
+
+	const savedCharacterId = window.localStorage.getItem(characterStorageKey);
+	return characterOptions.some((option) => option.id === savedCharacterId)
+		? (savedCharacterId ?? firstCharacter.id)
+		: firstCharacter.id;
 }
 
 function getStars(level: KidsBlocklyLevel, blockCount: number): number {
@@ -54,52 +47,79 @@ function getStars(level: KidsBlocklyLevel, blockCount: number): number {
 
 function loadProgress(): KidsBlocklyProgress {
 	if (typeof window === "undefined") {
-		return { unlockedLevelIds: [kidsBlocklyLevels[0].id], starsByLevel: {} };
+		return { unlockedLevelIds: [firstLevel.id], starsByLevel: {} };
 	}
 
 	try {
 		const raw = window.localStorage.getItem(storageKey);
-		if (!raw) return { unlockedLevelIds: [kidsBlocklyLevels[0].id], starsByLevel: {} };
+		if (!raw) return { unlockedLevelIds: [firstLevel.id], starsByLevel: {} };
 		const parsed = JSON.parse(raw) as KidsBlocklyProgress;
 		return {
-			unlockedLevelIds: parsed.unlockedLevelIds?.length ? parsed.unlockedLevelIds : [kidsBlocklyLevels[0].id],
+			unlockedLevelIds: parsed.unlockedLevelIds?.length
+				? parsed.unlockedLevelIds
+				: [firstLevel.id],
 			starsByLevel: parsed.starsByLevel ?? {},
 		};
 	} catch {
-		return { unlockedLevelIds: [kidsBlocklyLevels[0].id], starsByLevel: {} };
+		return { unlockedLevelIds: [firstLevel.id], starsByLevel: {} };
 	}
 }
 
 export default function KidsBlocklyPage() {
-	const [progress, setProgress] = useState<KidsBlocklyProgress>(() => loadProgress());
-	const [selectedLevelId, setSelectedLevelId] = useState(kidsBlocklyLevels[0].id);
+	const [progress, setProgress] = useState<KidsBlocklyProgress>(() =>
+		loadProgress(),
+	);
+	const [selectedLevelId, setSelectedLevelId] = useState(firstLevel.id);
 	const [program, setProgram] = useState<ProgramBlock[]>([]);
-	const [character, setCharacter] = useState<CharacterState>(kidsBlocklyLevels[0].start);
+	const [character, setCharacter] = useState<CharacterState>(firstLevel.start);
 	const [runResult, setRunResult] = useState<RunResult | null>(null);
 	const [isRunning, setIsRunning] = useState(false);
 	const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
 	const [showReward, setShowReward] = useState(false);
 	const [lastStars, setLastStars] = useState(0);
+	const [workspaceResetSignal, setWorkspaceResetSignal] = useState(0);
+	const [selectedCharacterId, setSelectedCharacterId] = useState(() =>
+		getInitialCharacterId(),
+	);
 	const playbackTimeouts = useRef<number[]>([]);
 
 	const level = useMemo(
-		() => kidsBlocklyLevels.find((item) => item.id === selectedLevelId) ?? kidsBlocklyLevels[0],
+		() =>
+			kidsBlocklyLevels.find((item) => item.id === selectedLevelId) ??
+			firstLevel,
 		[selectedLevelId],
 	);
-	const levelIndex = useMemo(() => kidsBlocklyLevels.findIndex((item) => item.id === selectedLevelId), [selectedLevelId]);
+	const levelIndex = useMemo(
+		() => kidsBlocklyLevels.findIndex((item) => item.id === selectedLevelId),
+		[selectedLevelId],
+	);
+	const selectedCharacter = useMemo(
+		() =>
+			characterOptions.find((option) => option.id === selectedCharacterId) ??
+			firstCharacter,
+		[selectedCharacterId],
+	);
 
 	useEffect(() => {
 		setCharacter(level.start);
 		setProgram([]);
 		setRunResult(null);
 		setShowReward(false);
-	}, [level.id]);
+		setActiveBlockId(null);
+		setWorkspaceResetSignal((value) => value + 1);
+	}, [level.start]);
 
 	useEffect(() => {
 		if (typeof window !== "undefined") {
 			window.localStorage.setItem(storageKey, JSON.stringify(progress));
 		}
 	}, [progress]);
+
+	useEffect(() => {
+		if (typeof window !== "undefined") {
+			window.localStorage.setItem(characterStorageKey, selectedCharacterId);
+		}
+	}, [selectedCharacterId]);
 
 	const clearPlayback = useCallback(() => {
 		for (const timeoutId of playbackTimeouts.current) {
@@ -110,35 +130,10 @@ export default function KidsBlocklyPage() {
 
 	useEffect(() => clearPlayback, [clearPlayback]);
 
-	const addBlock = useCallback(
-		(type: BlockType) => {
-			if (isRunning) return;
-			setProgram((prev) => [...prev, createBlock(type)]);
-		},
-		[isRunning],
-	);
-
-	const moveBlock = useCallback(
-		(index: number, direction: "up" | "down") => {
-			if (isRunning) return;
-			setProgram((prev) => {
-				const next = [...prev];
-				const swapIndex = direction === "up" ? index - 1 : index + 1;
-				if (swapIndex < 0 || swapIndex >= next.length) return prev;
-				[next[index], next[swapIndex]] = [next[swapIndex], next[index]];
-				return next;
-			});
-		},
-		[isRunning],
-	);
-
-	const removeBlock = useCallback(
-		(id: string) => {
-			if (isRunning) return;
-			setProgram((prev) => prev.filter((block) => block.id !== id));
-		},
-		[isRunning],
-	);
+	const handleProgramChange = useCallback((nextProgram: ProgramBlock[]) => {
+		setProgram(nextProgram);
+		setRunResult(null);
+	}, []);
 
 	const resetProgram = useCallback(() => {
 		clearPlayback();
@@ -148,6 +143,7 @@ export default function KidsBlocklyPage() {
 		setActiveBlockId(null);
 		setShowReward(false);
 		setIsRunning(false);
+		setWorkspaceResetSignal((value) => value + 1);
 	}, [clearPlayback, level.start]);
 
 	const replayCurrent = useCallback(() => {
@@ -159,22 +155,21 @@ export default function KidsBlocklyPage() {
 		setIsRunning(false);
 	}, [clearPlayback, level.start]);
 
-	const unlockNextLevel = useCallback(
-		(currentLevelId: string) => {
-			const currentIndex = kidsBlocklyLevels.findIndex((item) => item.id === currentLevelId);
-			const nextLevel = kidsBlocklyLevels[currentIndex + 1];
-			if (!nextLevel) return;
+	const unlockNextLevel = useCallback((currentLevelId: string) => {
+		const currentIndex = kidsBlocklyLevels.findIndex(
+			(item) => item.id === currentLevelId,
+		);
+		const nextLevel = kidsBlocklyLevels[currentIndex + 1];
+		if (!nextLevel) return;
 
-			setProgress((prev) => {
-				if (prev.unlockedLevelIds.includes(nextLevel.id)) return prev;
-				return {
-					...prev,
-					unlockedLevelIds: [...prev.unlockedLevelIds, nextLevel.id],
-				};
-			});
-		},
-		[],
-	);
+		setProgress((prev) => {
+			if (prev.unlockedLevelIds.includes(nextLevel.id)) return prev;
+			return {
+				...prev,
+				unlockedLevelIds: [...prev.unlockedLevelIds, nextLevel.id],
+			};
+		});
+	}, []);
 
 	const handleRun = useCallback(() => {
 		clearPlayback();
@@ -232,35 +227,52 @@ export default function KidsBlocklyPage() {
 			<div className="relative mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
 				<div className="mb-8 flex flex-col gap-6 rounded-[32px] border border-white/70 bg-white/70 p-6 shadow-[0_28px_80px_rgba(15,23,42,0.08)] backdrop-blur-md lg:flex-row lg:items-end lg:justify-between">
 					<div className="max-w-2xl">
-						<p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-600">Kids Visual Coding</p>
+						<p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-600">
+							Kids Visual Coding
+						</p>
 						<h1 className="mt-3 text-4xl font-black tracking-tight text-slate-900 sm:text-5xl">
 							Kéo thả khối lệnh để đưa nhân vật tới đích
 						</h1>
 						<p className="mt-4 max-w-xl text-base leading-7 text-slate-600">
-							Học tư duy tuần tự bằng trò chơi trực quan, ít khối lệnh, phản hồi nhanh và dễ dùng cho trẻ nhỏ.
+							Học tư duy tuần tự bằng trò chơi trực quan, ít khối lệnh, phản hồi
+							nhanh và dễ dùng cho trẻ nhỏ.
 						</p>
 					</div>
 					<div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
 						<div className="rounded-[24px] bg-emerald-50 px-4 py-4">
-							<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Màn đã mở</p>
-							<p className="mt-2 text-3xl font-black text-slate-900">{progress.unlockedLevelIds.length}</p>
+							<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">
+								Màn đã mở
+							</p>
+							<p className="mt-2 text-3xl font-black text-slate-900">
+								{progress.unlockedLevelIds.length}
+							</p>
 						</div>
 						<div className="rounded-[24px] bg-sky-50 px-4 py-4">
-							<p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Tổng sao</p>
+							<p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">
+								Tổng sao
+							</p>
 							<p className="mt-2 text-3xl font-black text-slate-900">
-								{Object.values(progress.starsByLevel).reduce((sum, value) => sum + value, 0)}
+								{Object.values(progress.starsByLevel).reduce(
+									(sum, value) => sum + value,
+									0,
+								)}
 							</p>
 						</div>
 						<div className="rounded-[24px] bg-amber-50 px-4 py-4 col-span-2 sm:col-span-1">
-							<p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">Mục tiêu</p>
-							<p className="mt-2 text-lg font-bold text-slate-900">Đi đúng đường, dùng ít khối</p>
+							<p className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-600">
+								Mục tiêu
+							</p>
+							<p className="mt-2 text-lg font-bold text-slate-900">
+								Đi đúng đường, dùng ít khối
+							</p>
 						</div>
 					</div>
 				</div>
 
 				<div className="mb-6 grid gap-3 md:grid-cols-2 xl:grid-cols-6">
 					{kidsBlocklyLevels.map((item, index) => {
-						const unlocked = progress.unlockedLevelIds.includes(item.id) || index === 0;
+						const unlocked =
+							progress.unlockedLevelIds.includes(item.id) || index === 0;
 						const stars = progress.starsByLevel[item.id] ?? 0;
 						const selected = item.id === level.id;
 
@@ -278,18 +290,31 @@ export default function KidsBlocklyPage() {
 									!unlocked && "cursor-not-allowed opacity-50",
 								)}
 							>
-								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">Màn {index + 1}</p>
-								<p className="mt-2 text-lg font-bold text-slate-900">{item.title}</p>
+								<p className="text-xs font-semibold uppercase tracking-[0.18em] text-slate-500">
+									Màn {index + 1}
+								</p>
+								<p className="mt-2 text-lg font-bold text-slate-900">
+									{item.title}
+								</p>
 								<p className="mt-1 text-sm text-slate-600">{item.subtitle}</p>
-								<p className="mt-3 text-sm">{Array.from({ length: 3 }).map((_, starIndex) => (starIndex < stars ? "⭐" : "☆")).join(" ")}</p>
+								<p className="mt-3 text-sm">
+									{Array.from({ length: 3 })
+										.map((_, starIndex) => (starIndex < stars ? "⭐" : "☆"))
+										.join(" ")}
+								</p>
 							</button>
 						);
 					})}
 				</div>
 
-				<div className="grid gap-6 xl:grid-cols-[1.25fr_0.95fr]">
+				<div className="grid gap-6 xl:grid-cols-[0.92fr_1.28fr]">
 					<div className="relative">
-						<GameBoard level={level} character={character} isRunning={isRunning} />
+						<GameBoard
+							level={level}
+							character={character}
+							isRunning={isRunning}
+							characterOption={selectedCharacter}
+						/>
 						<RewardDialog
 							open={showReward}
 							stars={lastStars}
@@ -301,11 +326,15 @@ export default function KidsBlocklyPage() {
 					</div>
 
 					<div className="space-y-6">
-						<div className="rounded-[28px] border border-white bg-white/85 p-5 shadow-[0_24px_50px_rgba(15,23,42,0.08)]">
+						<div className="rounded-[30px] border border-white bg-white/90 p-5 shadow-[0_24px_50px_rgba(15,23,42,0.08)]">
 							<div className="flex items-center justify-between gap-3">
 								<div>
-									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Gợi ý</p>
-									<p className="mt-2 text-sm leading-6 text-slate-700">{level.hint}</p>
+									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">
+										Gợi ý
+									</p>
+									<p className="mt-2 text-sm leading-6 text-slate-700">
+										{level.hint}
+									</p>
 								</div>
 								<div className="rounded-2xl bg-sky-50 p-3 text-sky-600">
 									<Lightbulb className="h-5 w-5" />
@@ -314,117 +343,75 @@ export default function KidsBlocklyPage() {
 						</div>
 
 						<div className="rounded-[28px] border border-white bg-white/85 p-5 shadow-[0_24px_50px_rgba(15,23,42,0.08)]">
-							<div className="mb-4 flex items-center justify-between">
-								<div>
-									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Hộp khối lệnh</p>
-									<h3 className="mt-1 text-xl font-bold text-slate-900">Chạm để thêm khối</h3>
-								</div>
-								<Sparkles className="h-5 w-5 text-emerald-500" />
-							</div>
-							<div className="grid gap-3 sm:grid-cols-2">
-								{level.allowedBlocks.map((type) => (
-									<button
-										key={type}
-										type="button"
-										onClick={() => addBlock(type)}
-										disabled={isRunning}
-										className={cn(
-											"rounded-[22px] bg-gradient-to-br p-[1px] text-left transition-transform hover:-translate-y-0.5 disabled:cursor-not-allowed disabled:opacity-50",
-											blockMeta[type].color,
-										)}
-									>
-										<div className="rounded-[21px] bg-white px-4 py-4">
-											<div className="flex items-center gap-3">
-												<div className={cn("flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl text-white", blockMeta[type].color)}>
-													{blockMeta[type].icon}
-												</div>
-												<div>
-													<p className="font-bold text-slate-900">{blockMeta[type].label}</p>
-													<p className="text-sm text-slate-500">{blockMeta[type].help}</p>
-												</div>
-											</div>
-										</div>
-									</button>
-								))}
-							</div>
-						</div>
-
-						<div className="rounded-[28px] border border-white bg-white/85 p-5 shadow-[0_24px_50px_rgba(15,23,42,0.08)]">
-							<div className="mb-4 flex items-center justify-between">
-								<div>
-									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-600">Chương trình</p>
-									<h3 className="mt-1 text-xl font-bold text-slate-900">Sắp xếp các bước đi</h3>
-								</div>
-								<div className="rounded-2xl bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700">
-									Par: {level.par}
-								</div>
-							</div>
-
-							<div className="space-y-3">
-								<div className="rounded-[22px] border border-dashed border-sky-200 bg-sky-50 px-4 py-4">
-									<div className="flex items-center gap-3">
-										<div className="flex h-12 w-12 items-center justify-center rounded-2xl bg-sky-500 text-2xl text-white">🚩</div>
-										<div>
-											<p className="font-bold text-slate-900">Bắt đầu</p>
-											<p className="text-sm text-slate-500">Đây là điểm bắt đầu của chương trình.</p>
-										</div>
+							<div className="mb-5">
+								<div className="mb-3 flex items-center justify-between">
+									<div>
+										<p className="text-xs font-semibold uppercase tracking-[0.2em] text-rose-600">
+											Nhân vật
+										</p>
+										<h3 className="mt-1 text-lg font-bold text-slate-900">
+											Chọn bạn đồng hành
+										</h3>
 									</div>
 								</div>
+								<div className="grid gap-3 sm:grid-cols-3">
+									{characterOptions.map((option) => {
+										const selected = selectedCharacterId === option.id;
 
-								{program.length === 0 && (
-									<div className="rounded-[22px] border border-dashed border-slate-200 bg-slate-50 px-4 py-6 text-center text-sm text-slate-500">
-										Chưa có khối lệnh nào. Hãy thêm vài khối ở phía trên.
-									</div>
-								)}
-
-								{program.map((block, index) => (
-									<motion.div
-										key={block.id}
-										layout
-										className={cn(
-											"rounded-[22px] bg-gradient-to-br p-[1px]",
-											blockMeta[block.type].color,
-											activeBlockId === block.id && "shadow-[0_0_0_4px_rgba(16,185,129,0.18)]",
-										)}
-									>
-										<div className="flex items-center gap-3 rounded-[21px] bg-white px-4 py-4">
-											<div className={cn("flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br text-2xl text-white", blockMeta[block.type].color)}>
-												{blockMeta[block.type].icon}
-											</div>
-											<div className="min-w-0 flex-1">
-												<p className="font-bold text-slate-900">{blockMeta[block.type].label}</p>
-												<p className="text-sm text-slate-500">Bước {index + 1}</p>
-											</div>
-											<div className="flex items-center gap-1">
-												<button
-													type="button"
-													onClick={() => moveBlock(index, "up")}
-													className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
-													disabled={index === 0 || isRunning}
-												>
-													<ChevronUp className="h-4 w-4" />
-												</button>
-												<button
-													type="button"
-													onClick={() => moveBlock(index, "down")}
-													className="rounded-xl p-2 text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800"
-													disabled={index === program.length - 1 || isRunning}
-												>
-													<ChevronDown className="h-4 w-4" />
-												</button>
-												<button
-													type="button"
-													onClick={() => removeBlock(block.id)}
-													className="rounded-xl p-2 text-rose-500 transition-colors hover:bg-rose-50"
-													disabled={isRunning}
-												>
-													<Trash2 className="h-4 w-4" />
-												</button>
-											</div>
-										</div>
-									</motion.div>
-								))}
+										return (
+											<button
+												key={option.id}
+												type="button"
+												onClick={() => setSelectedCharacterId(option.id)}
+												disabled={isRunning}
+												className={cn(
+													"flex items-center gap-3 rounded-[20px] border bg-white px-3 py-3 text-left transition-all disabled:cursor-not-allowed disabled:opacity-60",
+													selected
+														? "border-rose-300 bg-rose-50 shadow-[0_12px_24px_rgba(244,63,94,0.12)]"
+														: "border-slate-200 hover:border-rose-200 hover:bg-rose-50/50",
+												)}
+											>
+												<span className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-white p-1 shadow-sm">
+													<img
+														src={option.src}
+														alt={option.alt}
+														className="h-full w-full object-contain"
+														draggable={false}
+													/>
+												</span>
+												<span className="min-w-0">
+													<span className="block truncate font-bold text-slate-900">
+														{option.name}
+													</span>
+												</span>
+											</button>
+										);
+									})}
+								</div>
 							</div>
+
+							<div className="mb-4 flex items-center justify-between">
+								<div>
+									<p className="text-xs font-semibold uppercase tracking-[0.2em] text-violet-600">
+										Blockly workspace
+									</p>
+									<h3 className="mt-1 text-xl font-bold text-slate-900">
+										Kéo khối vào dưới Bắt đầu
+									</h3>
+								</div>
+								<div className="flex items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700">
+									<Blocks className="h-4 w-4" />
+									{program.length} bước
+								</div>
+							</div>
+
+							<KidsBlocklyWorkspace
+								allowedBlocks={level.allowedBlocks}
+								isRunning={isRunning}
+								activeBlockId={activeBlockId}
+								resetSignal={workspaceResetSignal}
+								onProgramChange={handleProgramChange}
+							/>
 
 							<div className="mt-5 flex flex-wrap gap-3">
 								<Button

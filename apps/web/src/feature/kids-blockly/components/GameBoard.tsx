@@ -1,13 +1,24 @@
 import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
-import { Flag, Trees } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
-import type { CharacterState, KidsBlocklyLevel } from "../types";
+import destinationAsset from "../asset/Destination.png";
+import fenceAsset from "../asset/fence.png";
+import rockAsset from "../asset/rock.png";
+import startAsset from "../asset/start.png";
+import tileGrassAsset from "../asset/tile_grass.png";
+import treeAsset from "../asset/tree.png";
+import wallAsset from "../asset/wall.png";
+import type {
+	CharacterOption,
+	CharacterState,
+	KidsBlocklyLevel,
+} from "../types";
 
 interface GameBoardProps {
 	level: KidsBlocklyLevel;
 	character: CharacterState;
 	isRunning: boolean;
+	characterOption: CharacterOption;
 }
 
 const directionRotation = {
@@ -17,13 +28,51 @@ const directionRotation = {
 	W: 180,
 };
 
-export function GameBoard({ level, character, isRunning }: GameBoardProps) {
+const obstacleAssets = [
+	{ src: treeAsset, alt: "Cây chắn đường" },
+	{ src: rockAsset, alt: "Đá chắn đường" },
+	{ src: fenceAsset, alt: "Hàng rào chắn đường" },
+	{ src: wallAsset, alt: "Tường chắn đường" },
+];
+
+function getObstacleAsset(x: number, y: number) {
+	const index = (x * 7 + y * 11) % obstacleAssets.length;
+	return obstacleAssets[index] ?? obstacleAssets[0];
+}
+
+function getTileBackgroundStyle(
+	level: KidsBlocklyLevel,
+	x: number,
+	y: number,
+): CSSProperties {
+	const xPosition =
+		level.gridSize.cols <= 1 ? 0 : (x / (level.gridSize.cols - 1)) * 100;
+	const yPosition =
+		level.gridSize.rows <= 1 ? 0 : (y / (level.gridSize.rows - 1)) * 100;
+
+	return {
+		backgroundImage: `url(${tileGrassAsset})`,
+		backgroundSize: `${level.gridSize.cols * 100}% ${level.gridSize.rows * 100}%`,
+		backgroundPosition: `${xPosition}% ${yPosition}%`,
+	};
+}
+
+export function GameBoard({
+	level,
+	character,
+	isRunning,
+	characterOption,
+}: GameBoardProps) {
 	return (
 		<div className="rounded-[28px] border border-emerald-200 bg-white/80 p-4 shadow-[0_24px_60px_rgba(15,118,110,0.14)] backdrop-blur-sm">
 			<div className="mb-4 flex items-center justify-between gap-4">
 				<div>
-					<p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">Sân chơi</p>
-					<h2 className="mt-1 text-2xl font-bold text-slate-900">{level.title}</h2>
+					<p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">
+						Sân chơi
+					</p>
+					<h2 className="mt-1 text-2xl font-bold text-slate-900">
+						{level.title}
+					</h2>
 					<p className="mt-1 text-sm text-slate-600">{level.subtitle}</p>
 				</div>
 				<div className="rounded-2xl bg-emerald-50 px-4 py-2 text-sm font-semibold text-emerald-700">
@@ -32,54 +81,84 @@ export function GameBoard({ level, character, isRunning }: GameBoardProps) {
 			</div>
 
 			<div
-				className="relative overflow-hidden rounded-[24px] border border-emerald-100 bg-[linear-gradient(180deg,#f0fdf4_0%,#dcfce7_100%)] p-3"
+				className="relative overflow-hidden rounded-[24px] border border-emerald-200 bg-[linear-gradient(180deg,#f0fdf4_0%,#dcfce7_100%)] p-2"
 				style={{
 					aspectRatio: `${level.gridSize.cols} / ${level.gridSize.rows}`,
 				}}
 			>
 				<div
-					className="grid h-full w-full gap-2"
+					className="grid h-full w-full overflow-hidden rounded-[18px] border border-emerald-200/80"
 					style={{
 						gridTemplateColumns: `repeat(${level.gridSize.cols}, minmax(0, 1fr))`,
 						gridTemplateRows: `repeat(${level.gridSize.rows}, minmax(0, 1fr))`,
 					}}
 				>
-					{Array.from({ length: level.gridSize.rows * level.gridSize.cols }, (_, index) => {
-						const x = index % level.gridSize.cols;
-						const y = Math.floor(index / level.gridSize.cols);
-						const isGoal = level.goal.x === x && level.goal.y === y;
-						const isObstacle = level.obstacles?.some((item) => item.x === x && item.y === y);
-						const isStart = level.start.x === x && level.start.y === y;
+					{Array.from(
+						{ length: level.gridSize.rows * level.gridSize.cols },
+						(_, index) => {
+							const x = index % level.gridSize.cols;
+							const y = Math.floor(index / level.gridSize.cols);
+							const isGoal = level.goal.x === x && level.goal.y === y;
+							const isObstacle = level.obstacles?.some(
+								(item) => item.x === x && item.y === y,
+							);
+							const isStart = level.start.x === x && level.start.y === y;
+							const obstacleAsset = isObstacle ? getObstacleAsset(x, y) : null;
 
-						return (
-							<div
-								key={`${x}-${y}`}
-								className={cn(
-									"relative rounded-2xl border transition-colors",
-									isGoal ? "border-amber-300 bg-amber-100/80" : "border-white/90 bg-white/60",
-									isObstacle && "border-emerald-300 bg-emerald-200/90",
-									isStart && "ring-2 ring-sky-300",
-								)}
-							>
-								{isGoal && (
-									<div className="absolute inset-0 flex items-center justify-center">
-										<Flag className="h-7 w-7 text-amber-500" />
-									</div>
-								)}
-								{isObstacle && (
-									<div className="absolute inset-0 flex items-center justify-center">
-										<Trees className="h-7 w-7 text-emerald-700" />
-									</div>
-								)}
-							</div>
-						);
-					})}
+							return (
+								<div
+									key={`${x}-${y}`}
+									className={cn(
+										"relative overflow-hidden border border-emerald-100/80 transition-colors",
+										isGoal
+											? "border-amber-300 bg-amber-100/70"
+											: "border-white/90 bg-white/60",
+										isObstacle && "border-emerald-300 bg-emerald-100/90",
+										isStart && "ring-2 ring-sky-300",
+									)}
+									style={getTileBackgroundStyle(level, x, y)}
+								>
+									<div className="absolute inset-0 bg-white/18" />
+									{isStart && (
+										<div className="absolute inset-0 flex items-center justify-center p-1.5">
+											<img
+												src={startAsset}
+												alt="Điểm bắt đầu"
+												className="h-full w-full object-contain opacity-90 drop-shadow-sm"
+												draggable={false}
+											/>
+										</div>
+									)}
+									{isGoal && (
+										<div className="absolute inset-0 flex items-center justify-center p-1.5">
+											<img
+												src={destinationAsset}
+												alt="Đích đến"
+												className="h-full w-full object-contain drop-shadow-sm"
+												draggable={false}
+											/>
+										</div>
+									)}
+									{obstacleAsset && (
+										<div className="absolute inset-0 flex items-center justify-center p-1.5">
+											<img
+												src={obstacleAsset.src}
+												alt={obstacleAsset.alt}
+												className="h-full w-full object-contain drop-shadow-sm"
+												draggable={false}
+											/>
+										</div>
+									)}
+								</div>
+							);
+						},
+					)}
 				</div>
 
 				<motion.div
 					animate={{
-						left: `calc(${(character.x / level.gridSize.cols) * 100}% + 6px)`,
-						top: `calc(${(character.y / level.gridSize.rows) * 100}% + 6px)`,
+						left: `calc(8px + ${character.x} * ((100% - 16px) / ${level.gridSize.cols}))`,
+						top: `calc(8px + ${character.y} * ((100% - 16px) / ${level.gridSize.rows}))`,
 						rotate: directionRotation[character.dir],
 						scale: isRunning ? [1, 1.06, 1] : 1,
 					}}
@@ -87,9 +166,12 @@ export function GameBoard({ level, character, isRunning }: GameBoardProps) {
 						left: { duration: 0.42, ease: "easeInOut" },
 						top: { duration: 0.42, ease: "easeInOut" },
 						rotate: { duration: 0.25, ease: "easeInOut" },
-						scale: { duration: 0.35, repeat: isRunning ? Number.POSITIVE_INFINITY : 0 },
+						scale: {
+							duration: 0.35,
+							repeat: isRunning ? Number.POSITIVE_INFINITY : 0,
+						},
 					}}
-					className="pointer-events-none absolute z-20 flex h-[calc(100%/var(--rows)-12px)] w-[calc(100%/var(--cols)-12px)] items-center justify-center"
+					className="pointer-events-none absolute z-20 flex h-[calc((100%_-_16px)/var(--rows))] w-[calc((100%_-_16px)/var(--cols))] items-center justify-center"
 					style={
 						{
 							"--rows": level.gridSize.rows,
@@ -97,8 +179,13 @@ export function GameBoard({ level, character, isRunning }: GameBoardProps) {
 						} as CSSProperties
 					}
 				>
-					<div className="flex h-full w-full items-center justify-center rounded-[22px] bg-[radial-gradient(circle_at_30%_30%,#fef3c7,#fb7185)] shadow-lg">
-						<div className="text-3xl">🚗</div>
+					<div className="flex h-full w-full items-center justify-center rounded-[22px]">
+						<img
+							src={characterOption.src}
+							alt={characterOption.alt}
+							className="h-full w-full object-contain drop-shadow-md"
+							draggable={false}
+						/>
 					</div>
 				</motion.div>
 			</div>
