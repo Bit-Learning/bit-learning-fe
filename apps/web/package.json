@@ -91,7 +91,7 @@
 		"@workspace/typescript-config": "workspace:*",
 		"fast-check": "^4.7.0",
 		"jsdom": "^27.2.0",
-		"playwright": "^1.58.2",
+		"playwright": "^1.59.1",
 		"typescript": "^5.9.2",
 		"vite": "^7.3.2",
 		"vite-plugin-imagemin": "^0.6.1",
