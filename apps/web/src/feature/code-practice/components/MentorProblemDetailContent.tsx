@@ -138,13 +138,13 @@ const MentorProblemDetailContent: React.FC = () => {
             <h1 className="text-2xl font-bold text-slate-800 dark:text-white">Chi tiết bài tập: {problem.title}</h1>
           </div>
           <div className="flex items-center gap-3">
-            {problem.approvalStatus === ApprovalStatus.NONE && (
+            {(problem.approvalStatus === ApprovalStatus.NONE || problem.approvalStatus === ApprovalStatus.REJECTED) && (
               <button
                 onClick={() => setShowApprovalModal(true)}
                 className="flex items-center gap-2 px-4 py-2.5 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-semibold shadow-sm transition-all duration-150"
               >
                 <SendHorizonal className="w-4 h-4" />
-                Gửi yêu cầu phê duyệt
+                {problem.approvalStatus === ApprovalStatus.REJECTED ? "Gửi lại yêu cầu" : "Gửi yêu cầu phê duyệt"}
               </button>
             )}
             <Button
@@ -207,6 +207,25 @@ const MentorProblemDetailContent: React.FC = () => {
       </div>
 
       <div className="mx-auto px-8 pt-6">
+        {problem.approvalStatus === ApprovalStatus.REJECTED && (
+          <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 mb-4">
+            <div className="shrink-0 mt-0.5">
+              <svg className="h-8 w-8 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-700">Bài tập bị từ chối phê duyệt</p>
+              <p className="mt-1 text-md text-black">
+                Lí do: {(problem as any).rejectReason ?? "Không có lý do cụ thể."}
+              </p>
+            </div>
+          </div>
+        )}
         <div className="flex gap-8 border-b border-slate-300 dark:border-slate-800">
           {(["description", "testcases", "templates"] as const).map((tab) => (
             <button

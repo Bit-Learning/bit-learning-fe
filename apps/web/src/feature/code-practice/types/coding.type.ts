@@ -361,6 +361,7 @@ export interface ProblemBriefResponse {
   isFavorite: boolean;
   createdBy?: UserSummary;
   approvalStatus: ApprovalStatus;
+  rejectReason?: string;
   createdAt: string;
   updatedAt: string;
 }
@@ -382,6 +383,7 @@ export interface ProblemDetailResponse {
   multifileEntryTemplate?: string;
   createdBy?: UserSummary;
   approvalStatus: ApprovalStatus;
+  rejectReason?: string;
   createdAt: string;
   updatedAt: string;
 }
