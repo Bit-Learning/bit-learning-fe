@@ -1,7 +1,16 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/Button";
 import { cn } from "@workspace/ui/lib/utils";
-import { Blocks, Lightbulb, Play, RotateCcw, Trash2 } from "lucide-react";
+import { AnimatePresence, motion } from "framer-motion";
+import {
+	AlertTriangle,
+	Blocks,
+	Lightbulb,
+	Play,
+	RotateCcw,
+	Trash2,
+	X,
+} from "lucide-react";
 import { GameBoard } from "../components/GameBoard";
 import { KidsBlocklyWorkspace } from "../components/KidsBlocklyWorkspace";
 import { RewardDialog } from "../components/RewardDialog";
@@ -26,6 +35,86 @@ function getFirstLevel(): KidsBlocklyLevel {
 }
 
 const firstLevel = getFirstLevel();
+
+interface BlocklyInfoDialogProps {
+	open: boolean;
+	title: string;
+	description: string;
+	tone?: "hint" | "warning";
+	onClose: () => void;
+}
+
+function BlocklyInfoDialog({
+	open,
+	title,
+	description,
+	tone = "hint",
+	onClose,
+}: BlocklyInfoDialogProps) {
+	const isWarning = tone === "warning";
+
+	return (
+		<AnimatePresence>
+			{open && (
+				<motion.div
+					initial={{ opacity: 0 }}
+					animate={{ opacity: 1 }}
+					exit={{ opacity: 0 }}
+					className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/45 p-4 backdrop-blur-sm"
+				>
+					<motion.div
+						initial={{ scale: 0.92, y: 14 }}
+						animate={{ scale: 1, y: 0 }}
+						exit={{ scale: 0.94, y: 10 }}
+						className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.24)]"
+					>
+						<div className="flex items-start justify-between gap-4">
+							<div
+								className={cn(
+									"flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
+									isWarning
+										? "bg-amber-100 text-amber-700"
+										: "bg-sky-100 text-sky-700",
+								)}
+							>
+								{isWarning ? (
+									<AlertTriangle className="h-6 w-6" />
+								) : (
+									<Lightbulb className="h-6 w-6" />
+								)}
+							</div>
+							<button
+								type="button"
+								onClick={onClose}
+								className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+								aria-label="Đóng"
+							>
+								<X className="h-5 w-5" />
+							</button>
+						</div>
+						<h3 className="mt-5 text-2xl font-black text-slate-900">{title}</h3>
+						<p className="mt-3 text-base leading-7 text-slate-600">
+							{description}
+						</p>
+						<div className="mt-6 flex justify-end">
+							<Button
+								onPress={onClose}
+								className={cn(
+									"cursor-pointer rounded-2xl px-5 py-3 text-white",
+									isWarning
+										? "bg-amber-500 hover:bg-amber-600"
+										: "bg-sky-500 hover:bg-sky-600",
+								)}
+							>
+								Đã hiểu
+							</Button>
+						</div>
+					</motion.div>
+				</motion.div>
+			)}
+		</AnimatePresence>
+	);
+}
 
 function getStars(level: KidsBlocklyLevel, blockCount: number): number {
 	if (blockCount <= level.par) return 3;
@@ -64,6 +153,8 @@ export default function KidsBlocklyPage() {
 	const [isRunning, setIsRunning] = useState(false);
 	const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
 	const [showReward, setShowReward] = useState(false);
+	const [showHint, setShowHint] = useState(false);
+	const [showStatus, setShowStatus] = useState(false);
 	const [lastStars, setLastStars] = useState(0);
 	const [workspaceResetSignal, setWorkspaceResetSignal] = useState(0);
 	const playbackTimeouts = useRef<number[]>([]);
@@ -86,12 +177,15 @@ export default function KidsBlocklyPage() {
 			),
 		[progress.starsByLevel],
 	);
+	const nextLevel = kidsBlocklyLevels[levelIndex + 1];
 
 	useEffect(() => {
 		setCharacter(level.start);
 		setProgram([]);
 		setRunResult(null);
 		setShowReward(false);
+		setShowHint(false);
+		setShowStatus(false);
 		setActiveBlockId(null);
 		setWorkspaceResetSignal((value) => value + 1);
 	}, [level.start]);
@@ -114,6 +208,7 @@ export default function KidsBlocklyPage() {
 	const handleProgramChange = useCallback((nextProgram: ProgramBlock[]) => {
 		setProgram(nextProgram);
 		setRunResult(null);
+		setShowStatus(false);
 	}, []);
 
 	const resetProgram = useCallback(() => {
@@ -123,6 +218,7 @@ export default function KidsBlocklyPage() {
 		setCharacter(level.start);
 		setActiveBlockId(null);
 		setShowReward(false);
+		setShowStatus(false);
 		setIsRunning(false);
 		setWorkspaceResetSignal((value) => value + 1);
 	}, [clearPlayback, level.start]);
@@ -133,6 +229,7 @@ export default function KidsBlocklyPage() {
 		setCharacter(level.start);
 		setActiveBlockId(null);
 		setShowReward(false);
+		setShowStatus(false);
 		setIsRunning(false);
 	}, [clearPlayback, level.start]);
 
@@ -140,14 +237,14 @@ export default function KidsBlocklyPage() {
 		const currentIndex = kidsBlocklyLevels.findIndex(
 			(item) => item.id === currentLevelId,
 		);
-		const nextLevel = kidsBlocklyLevels[currentIndex + 1];
-		if (!nextLevel) return;
+		const nextLevelToUnlock = kidsBlocklyLevels[currentIndex + 1];
+		if (!nextLevelToUnlock) return;
 
 		setProgress((prev) => {
-			if (prev.unlockedLevelIds.includes(nextLevel.id)) return prev;
+			if (prev.unlockedLevelIds.includes(nextLevelToUnlock.id)) return prev;
 			return {
 				...prev,
-				unlockedLevelIds: [...prev.unlockedLevelIds, nextLevel.id],
+				unlockedLevelIds: [...prev.unlockedLevelIds, nextLevelToUnlock.id],
 			};
 		});
 	}, []);
@@ -158,6 +255,7 @@ export default function KidsBlocklyPage() {
 		setRunResult(null);
 		setActiveBlockId(null);
 		setShowReward(false);
+		setShowStatus(false);
 
 		const result = runProgram(level, program);
 		setRunResult(result);
@@ -185,6 +283,8 @@ export default function KidsBlocklyPage() {
 						}));
 						unlockNextLevel(level.id);
 						window.setTimeout(() => setShowReward(true), 240);
+					} else {
+						window.setTimeout(() => setShowStatus(true), 240);
 					}
 				}
 			}, index * 500);
@@ -192,8 +292,6 @@ export default function KidsBlocklyPage() {
 			playbackTimeouts.current.push(timeoutId);
 		});
 	}, [clearPlayback, level, program, unlockNextLevel]);
-
-	const nextLevel = kidsBlocklyLevels[levelIndex + 1];
 
 	const goNext = useCallback(() => {
 		setShowReward(false);
@@ -284,38 +382,17 @@ export default function KidsBlocklyPage() {
 					</section>
 				</main>
 
-				<footer className="grid gap-4 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-[0_16px_38px_rgba(15,23,42,0.07)] backdrop-blur-md xl:grid-cols-[1.2fr_1fr]">
-					<div className="grid gap-3 lg:grid-cols-[0.9fr_1.1fr]">
-						<div className="rounded-[18px] bg-sky-50 px-4 py-3">
-							<div className="mb-2 flex items-center gap-2 text-sm font-bold text-sky-700">
-								<Lightbulb className="h-4 w-4" />
-								Gợi ý
-							</div>
-							<p className="text-sm leading-6 text-slate-700">{level.hint}</p>
-						</div>
-
-						<div
-							className={cn(
-								"rounded-[18px] border px-4 py-3 text-sm leading-6",
-								runResult
-									? runResult.status === "success"
-										? "border-emerald-200 bg-emerald-50 text-emerald-800"
-										: "border-amber-200 bg-amber-50 text-amber-800"
-									: "border-slate-200 bg-slate-50 text-slate-600",
-							)}
-						>
-							<p className="mb-1 text-xs font-semibold uppercase tracking-[0.18em]">
-								Trạng thái
-							</p>
-							<p>
-								{runResult?.message ??
-									"Kéo các khối lệnh ở bên phải, nối chúng vào cờ bắt đầu rồi bấm Chạy."}
-							</p>
-						</div>
-					</div>
-
-					<div className="flex flex-col gap-3">
+				<footer className="grid gap-4 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-[0_16px_38px_rgba(15,23,42,0.07)] backdrop-blur-md xl:grid-cols-[0.75fr_1.25fr]">
+					<div className="flex flex-col justify-between gap-3">
 						<div className="flex flex-wrap gap-3">
+							<Button
+								onPress={() => setShowHint(true)}
+								isDisabled={isRunning}
+								className="cursor-pointer rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3 text-sky-700 hover:bg-sky-100"
+							>
+								<Lightbulb className="mr-2 h-4 w-4" />
+								Gợi ý
+							</Button>
 							<Button
 								onPress={handleRun}
 								isDisabled={isRunning || program.length === 0}
@@ -341,45 +418,63 @@ export default function KidsBlocklyPage() {
 								Xóa hết
 							</Button>
 						</div>
+						<p className="text-sm leading-6 text-slate-500">
+							Kéo các khối lệnh, nối vào cờ bắt đầu rồi bấm Chạy. Kết quả sẽ tự
+							hiện sau khi nhân vật di chuyển xong.
+						</p>
+					</div>
 
-						<div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
-							{kidsBlocklyLevels.map((item, index) => {
-								const unlocked =
-									progress.unlockedLevelIds.includes(item.id) || index === 0;
-								const stars = progress.starsByLevel[item.id] ?? 0;
-								const selected = item.id === level.id;
+					<div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
+						{kidsBlocklyLevels.map((item, index) => {
+							const unlocked =
+								progress.unlockedLevelIds.includes(item.id) || index === 0;
+							const stars = progress.starsByLevel[item.id] ?? 0;
+							const selected = item.id === level.id;
 
-								return (
-									<button
-										key={item.id}
-										type="button"
-										disabled={!unlocked || isRunning}
-										onClick={() => setSelectedLevelId(item.id)}
-										className={cn(
-											"min-h-16 rounded-2xl border px-3 py-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-45",
-											selected
-												? "border-emerald-300 bg-emerald-50 shadow-[0_10px_20px_rgba(16,185,129,0.12)]"
-												: "border-slate-200 bg-white hover:border-emerald-200 hover:bg-emerald-50/50",
-										)}
-									>
-										<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
-											Màn {index + 1}
-										</p>
-										<p className="truncate text-sm font-bold text-slate-900">
-											{item.title}
-										</p>
-										<p className="text-xs text-amber-500">
-											{Array.from({ length: 3 })
-												.map((_, starIndex) => (starIndex < stars ? "★" : "☆"))
-												.join(" ")}
-										</p>
-									</button>
-								);
-							})}
-						</div>
+							return (
+								<button
+									key={item.id}
+									type="button"
+									disabled={!unlocked || isRunning}
+									onClick={() => setSelectedLevelId(item.id)}
+									className={cn(
+										"min-h-16 rounded-2xl border px-3 py-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-45",
+										selected
+											? "border-emerald-300 bg-emerald-50 shadow-[0_10px_20px_rgba(16,185,129,0.12)]"
+											: "border-slate-200 bg-white hover:border-emerald-200 hover:bg-emerald-50/50",
+									)}
+								>
+									<p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-slate-500">
+										Màn {index + 1}
+									</p>
+									<p className="truncate text-sm font-bold text-slate-900">
+										{item.title}
+									</p>
+									<p className="text-xs text-amber-500">
+										{Array.from({ length: 3 })
+											.map((_, starIndex) => (starIndex < stars ? "★" : "☆"))
+											.join(" ")}
+									</p>
+								</button>
+							);
+						})}
 					</div>
 				</footer>
 			</div>
+
+			<BlocklyInfoDialog
+				open={showHint}
+				title="Gợi ý"
+				description={level.hint}
+				onClose={() => setShowHint(false)}
+			/>
+			<BlocklyInfoDialog
+				open={showStatus && !!runResult}
+				title="Thử lại nhé"
+				description={runResult?.message ?? ""}
+				tone="warning"
+				onClose={() => setShowStatus(false)}
+			/>
 		</div>
 	);
 }

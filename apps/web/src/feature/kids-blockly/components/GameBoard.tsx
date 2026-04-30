@@ -2,6 +2,7 @@ import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@workspace/ui/lib/utils";
 import characterMouseAsset from "../asset/character_mouse.png";
+import characterTomAsset from "../asset/character_tom.png";
 import destinationAsset from "../asset/Destination.png";
 import fenceAsset from "../asset/fence.png";
 import rockAsset from "../asset/rock.png";
@@ -170,7 +171,7 @@ export function GameBoard({ level, character, isRunning }: GameBoardProps) {
 					}
 				>
 					<img
-						src={characterMouseAsset}
+						src={characterTomAsset}
 						alt="Nhân vật chuột máy"
 						className="h-full w-full object-contain drop-shadow-md"
 						draggable={false}
