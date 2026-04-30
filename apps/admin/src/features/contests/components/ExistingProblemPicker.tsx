@@ -1,266 +1,134 @@
-import React, { useState, useMemo, useEffect } from "react";
-import {
-  Search,
-  Plus,
-  Check,
-  X,
-  Filter,
-  Code,
-  Loader2,
-  ArrowLeft,
-  ChevronLeft,
-  ChevronRight,
-  AlertTriangle,
-} from "lucide-react";
+import React, { useState, useEffect } from "react";
+import { Search, Plus, Check, X, Loader2, ArrowLeft, ChevronLeft, ChevronRight, Eye, BookOpen } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Difficulty, ProblemBriefResponse } from "../../problems/types/problem.type";
-import { useProblems, useProblemDetail } from "../../problems/queries/useProblem";
-import { useAddProblem, useRemoveProblem, useContestProblems } from "../queries/useContest";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
-
-interface ConfirmModalProps {
-  open: boolean;
-  title: string;
-  description: string;
-  confirmLabel?: string;
-  cancelLabel?: string;
-  variant?: "danger" | "default";
-  onConfirm: () => void;
-  onCancel: () => void;
-}
-
-const ConfirmModal: React.FC<ConfirmModalProps> = ({
-  open,
-  title,
-  description,
-  confirmLabel = "Xác nhận",
-  cancelLabel = "Hủy",
-  variant = "danger",
-  onConfirm,
-  onCancel,
-}) => {
-  if (!open) return null;
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center">
-      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onCancel} />
-      <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 p-6 animate-in fade-in zoom-in-95 duration-200">
-        <div className="flex items-start gap-4 mb-5">
-          <div
-            className={cn(
-              "shrink-0 w-10 h-10 rounded-full flex items-center justify-center",
-              variant === "danger" ? "bg-red-100" : "bg-blue-100",
-            )}
-          >
-            <AlertTriangle className={cn("w-5 h-5", variant === "danger" ? "text-red-600" : "text-blue-600")} />
-          </div>
-          <div>
-            <h3 className="text-base font-bold text-gray-900 mb-1">{title}</h3>
-            <p className="text-sm text-gray-500 leading-relaxed">{description}</p>
-          </div>
-        </div>
-        <div className="flex items-center justify-end gap-3">
-          <Button variant="outline" onClick={onCancel} className="border-gray-200 text-gray-600 hover:bg-gray-50">
-            {cancelLabel}
-          </Button>
-          <Button
-            onClick={onConfirm}
-            className={cn(
-              "text-white",
-              variant === "danger" ? "bg-red-600 hover:bg-red-700" : "bg-primary hover:bg-blue-700",
-            )}
-          >
-            {confirmLabel}
-          </Button>
-        </div>
-      </div>
-    </div>
-  );
-};
-
+import { useAddProblem, useRemoveProblem, useContestProblems } from "../queries/useContest";
+import ConfirmModal from "./ConfirmModal";
+import { DIFFICULTY_CONFIG, LANG_LABELS } from "../utils/contest.util";
+import { Difficulty, Language, ProblemBriefResponse } from "@/features/problems/types/problem.type";
+import { useProblemDetail, useProblems } from "@/features/problems/queries/useProblem";
 interface ExistingProblemPickerProps {
   contestId: string;
   onBack: () => void;
 }
 
+type PreviewTab = "content" | "testcases" | "details";
+
 export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ contestId, onBack }) => {
   const navigate = useNavigate();
 
-  const [currentPage, setCurrentPage] = useState(0);
-  const [searchQuery, setSearchQuery] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("Tất cả");
+  const [page, setPage] = useState(0);
+  const [search, setSearch] = useState("");
+  const [diffFilter, setDiffFilter] = useState<Difficulty | "">("");
   const [activeProblem, setActiveProblem] = useState<ProblemBriefResponse | null>(null);
-  const [activeTab, setActiveTab] = useState<"content" | "testcases" | "details">("content");
-  const [clearAllModal, setClearAllModal] = useState(false);
+  const [previewTab, setPreviewTab] = useState<PreviewTab>("content");
+  const [previewLang, setPreviewLang] = useState<Language>(Language.PYTHON);
+  const [clearAllConfirm, setClearAllConfirm] = useState(false);
+  const [debouncedSearch, setDebouncedSearch] = useState("");
 
-  const { data: availableProblemsData, isLoading: isLoadingProblems } = useProblems({
-    page: currentPage,
-    size: 20,
+  useEffect(() => {
+    const t = setTimeout(() => setDebouncedSearch(search), 300);
+    return () => clearTimeout(t);
+  }, [search]);
+
+  useEffect(() => {
+    setPage(0);
+  }, [debouncedSearch, diffFilter]);
+
+  const { data: problemsData, isLoading: loadingProblems } = useProblems({
+    page,
+    size: 15,
+    search: debouncedSearch || undefined,
+    difficulty: diffFilter || undefined,
   });
 
-  const { data: contestProblems, isLoading: isLoadingContestProblems } = useContestProblems(contestId);
-  const addProblemMutation = useAddProblem();
-  const removeProblemMutation = useRemoveProblem();
+  const { data: contestProblems } = useContestProblems(contestId);
+  const addProblem = useAddProblem();
+  const removeProblem = useRemoveProblem();
 
-  const availableProblems = availableProblemsData?.data || [];
-  const totalPages = availableProblemsData?.page?.totalPages || 1;
-  const totalElements = availableProblemsData?.page?.totalElements || 0;
-  const pageSize = availableProblemsData?.page?.size || 20;
-
-  useEffect(() => {
-    if (!activeProblem && availableProblems.length > 0) {
-      setActiveProblem(availableProblems[0]!);
-    }
-  }, [availableProblems, activeProblem]);
-
-  useEffect(() => {
-    setCurrentPage(0);
-  }, [searchQuery, difficultyFilter]);
-
-  const { data: problemDetailData, isLoading: isLoadingDetail } = useProblemDetail(activeProblem?.id || "", undefined, {
+  const { data: previewDetail, isLoading: loadingPreview } = useProblemDetail(activeProblem?.id || "", previewLang, {
     enabled: !!activeProblem,
   });
 
-  const getDifficultyColor = (difficulty: string) => {
-    const colors: Record<string, string> = {
-      [Difficulty.EASY]: "bg-green-100 text-green-700 border-green-200",
-      [Difficulty.MEDIUM]: "bg-orange-100 text-orange-700 border-orange-200",
-      [Difficulty.HARD]: "bg-red-100 text-red-700 border-red-200",
-    };
-    return colors[difficulty] || colors[Difficulty.MEDIUM];
-  };
+  const problems = problemsData?.data || [];
+  const totalPages = problemsData?.page?.totalPages || 1;
+  const totalElements = problemsData?.page?.totalElements || 0;
 
-  const getDifficultyLabel = (difficulty: Difficulty | string) => {
-    const labels: Record<string, string> = {
-      [Difficulty.EASY]: "Dễ",
-      [Difficulty.MEDIUM]: "Trung bình",
-      [Difficulty.HARD]: "Khó",
-    };
-    return labels[difficulty] || "Trung bình";
-  };
+  useEffect(() => {
+    if (!activeProblem && problems.length > 0) {
+      setActiveProblem(problems[0]!);
+    }
+  }, [problems]);
 
-  const isProblemInContest = (problemId: string) => contestProblems?.some((p) => p.problemId === problemId) || false;
+  const isInContest = (problemId: string) => contestProblems?.some((p) => p.problemId === problemId) ?? false;
 
   const getContestProblem = (problemId: string) => contestProblems?.find((p) => p.problemId === problemId);
 
-  const handleAddProblem = async (problem: ProblemBriefResponse) => {
+  const handleAdd = async (p: ProblemBriefResponse) => {
     if (!contestProblems) return;
     try {
-      await addProblemMutation.mutateAsync({
+      await addProblem.mutateAsync({
         contestId,
-        request: { problemId: problem.id, orderIndex: contestProblems.length + 1 },
+        request: { problemId: p.id, orderIndex: contestProblems.length + 1 },
       });
-    } catch (error: any) {
-      toast.error("Không thể thêm bài tập!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi thêm bài tập.",
+    } catch (err: any) {
+      toast.error("Không thể thêm bài tập", {
+        description: err?.response?.data?.message,
       });
     }
   };
 
-  const handleRemoveProblem = async (problem: ProblemBriefResponse) => {
-    const contestProblem = getContestProblem(problem.id);
-    if (!contestProblem) return;
+  const handleRemove = async (p: ProblemBriefResponse) => {
+    const cp = getContestProblem(p.id);
+    if (!cp) return;
     try {
-      await removeProblemMutation.mutateAsync({
-        contestId,
-        contestProblemId: contestProblem.contestProblemId,
-      });
-    } catch (error: any) {
-      toast.error("Không thể gỡ bài tập!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi gỡ bài tập.",
+      await removeProblem.mutateAsync({ contestId, contestProblemId: cp.contestProblemId });
+    } catch (err: any) {
+      toast.error("Không thể gỡ bài tập", {
+        description: err?.response?.data?.message,
       });
     }
   };
 
-  const toggleProblem = (problem: ProblemBriefResponse) => {
-    if (isProblemInContest(problem.id)) {
-      handleRemoveProblem(problem);
-    } else {
-      handleAddProblem(problem);
-    }
+  const handleToggle = (p: ProblemBriefResponse) => {
+    if (isInContest(p.id)) handleRemove(p);
+    else handleAdd(p);
   };
 
   const handleClearAll = async () => {
-    if (!contestProblems || contestProblems.length === 0) return;
-    try {
-      for (const problem of contestProblems) {
-        await removeProblemMutation.mutateAsync({
-          contestId,
-          contestProblemId: problem.contestProblemId,
-        });
-      }
-    } catch (error: any) {
-      toast.error("Xóa bài tập thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi xóa bài tập.",
-      });
-    } finally {
-      setClearAllModal(false);
+    if (!contestProblems) return;
+    for (const cp of contestProblems) {
+      await removeProblem.mutateAsync({ contestId, contestProblemId: cp.contestProblemId });
     }
+    setClearAllConfirm(false);
   };
 
-  const filteredProblems = useMemo(() => {
-    return availableProblems.filter((problem) => {
-      const matchesSearch =
-        problem.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        problem.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        problem.tags.some((tag) => tag.name.toLowerCase().includes(searchQuery.toLowerCase()));
+  const isProcessing = addProblem.isPending || removeProblem.isPending;
 
-      if (difficultyFilter === "Tất cả") return matchesSearch;
-
-      const map: Record<string, Difficulty> = {
-        Dễ: Difficulty.EASY,
-        "Trung bình": Difficulty.MEDIUM,
-        Khó: Difficulty.HARD,
-      };
-
-      return matchesSearch && problem.difficulty === map[difficultyFilter];
-    });
-  }, [availableProblems, searchQuery, difficultyFilter]);
-
-  const handlePreviousPage = () => {
-    if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-    }
-  };
-
-  const handleNextPage = () => {
-    if (currentPage < totalPages - 1) {
-      setCurrentPage(currentPage + 1);
-    }
-  };
-
-  const currentProblemData = activeProblem ? getContestProblem(activeProblem.id) : null;
-  const isProcessing = addProblemMutation.isPending || removeProblemMutation.isPending;
-
-  if (isLoadingProblems || isLoadingContestProblems) {
-    return (
-      <div className="flex items-center justify-center h-screen bg-gray-50">
-        <div className="text-center">
-          <Loader2 className="w-16 h-16 animate-spin text-blue-600 mx-auto mb-4" />
-          <p className="text-gray-600">Đang tải danh sách bài tập...</p>
-        </div>
-      </div>
-    );
-  }
+  const diffOptions: { value: Difficulty | ""; label: string }[] = [
+    { value: "", label: "Tất cả" },
+    { value: Difficulty.EASY, label: "Dễ" },
+    { value: Difficulty.MEDIUM, label: "Trung bình" },
+    { value: Difficulty.HARD, label: "Khó" },
+  ];
 
   return (
     <>
       <ConfirmModal
-        open={clearAllModal}
-        title="Xóa tất cả bài tập"
-        description={`Bạn có chắc chắn muốn xóa tất cả ${contestProblems?.length || 0} bài tập khỏi kỳ thi? Hành động này không thể hoàn tác.`}
-        confirmLabel="Xóa tất cả"
-        cancelLabel="Hủy"
+        open={clearAllConfirm}
         variant="danger"
+        title="Xóa tất cả bài tập"
+        description="Bạn có chắc muốn gỡ tất cả bài tập đã chọn khỏi kỳ thi này?"
+        confirmLabel="Xóa tất cả"
         onConfirm={handleClearAll}
-        onCancel={() => setClearAllModal(false)}
+        onCancel={() => setClearAllConfirm(false)}
       />
 
-      <div className="flex flex-col h-screen overflow-hidden bg-gray-50">
-        <div className="shrink-0 px-6 py-4 bg-white border-b border-gray-200 flex items-center gap-4">
+      <div className="flex flex-col h-screen bg-gray-50">
+        <div className="px-8 py-4 bg-white border-b border-gray-200 flex items-center gap-4 shrink-0">
           <button
             onClick={onBack}
             className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 transition-colors"
@@ -269,330 +137,364 @@ export const ExistingProblemPicker: React.FC<ExistingProblemPickerProps> = ({ co
             Quay lại
           </button>
           <span className="text-gray-300">|</span>
-          <h1 className="text-base font-bold text-gray-900">Chọn bài tập có sẵn</h1>
+          <h1 className="text-base font-bold text-gray-900">Chọn bài tập từ ngân hàng</h1>
+          {contestProblems && contestProblems.length > 0 && (
+            <Badge className="bg-blue-600 text-white text-xs ml-auto">{contestProblems.length} đã chọn</Badge>
+          )}
         </div>
 
         <div className="flex flex-1 overflow-hidden">
-          <div className="w-105 border-r border-gray-200 flex flex-col bg-white">
-            <div className="p-4 border-b border-gray-200 space-y-3">
+          <div className="w-96 shrink-0 flex flex-col border-r border-gray-200 bg-white">
+            <div className="p-4 border-b border-gray-100 space-y-3">
               <div className="relative">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
                 <input
-                  type="text"
+                  value={search}
+                  onChange={(e) => setSearch(e.target.value)}
                   placeholder="Tìm kiếm bài tập..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-gray-50 border border-gray-200 rounded-xl text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none"
+                  className="w-full pl-9 pr-4 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-blue-400 focus:ring-1 focus:ring-blue-100"
                 />
               </div>
-              <div className="flex items-center justify-between">
-                <div className="flex gap-2">
-                  {["Tất cả", "Dễ", "Trung bình", "Khó"].map((filter) => (
-                    <button
-                      key={filter}
-                      onClick={() => setDifficultyFilter(filter)}
-                      className={cn(
-                        "px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors",
-                        difficultyFilter === filter
-                          ? "bg-primary text-white"
-                          : "text-gray-600 bg-gray-100 hover:bg-gray-200",
-                      )}
-                    >
-                      {filter === "Trung bình" ? "T.Bình" : filter}
-                    </button>
-                  ))}
-                </div>
-                <button className="p-1.5 text-gray-400 hover:text-gray-600">
-                  <Filter className="w-5 h-5" />
-                </button>
+              <div className="flex gap-1.5 flex-wrap">
+                {diffOptions.map((opt) => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setDiffFilter(opt.value)}
+                    className={cn(
+                      "px-2.5 py-1 text-xs font-semibold rounded-md border transition-all",
+                      diffFilter === opt.value
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-gray-600 border-gray-200 hover:border-blue-300",
+                    )}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
               </div>
+              <p className="text-xs text-gray-400">{totalElements} bài tập</p>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-3 space-y-2 bg-gray-50">
-              {filteredProblems.length === 0 ? (
-                <div className="text-center py-12">
-                  <p className="text-gray-500 text-sm">Không tìm thấy bài tập</p>
+            <div className="flex-1 overflow-y-auto">
+              {loadingProblems ? (
+                <div className="flex justify-center py-10">
+                  <Loader2 className="w-6 h-6 animate-spin text-blue-600" />
+                </div>
+              ) : problems.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-12 gap-2">
+                  <BookOpen className="w-8 h-8 text-gray-300" />
+                  <p className="text-sm text-gray-400">Không tìm thấy bài tập nào.</p>
                 </div>
               ) : (
-                filteredProblems.map((problem) => {
-                  const inContest = isProblemInContest(problem.id);
-                  const isActive = activeProblem?.id === problem.id;
+                problems.map((p) => {
+                  const inContest = isInContest(p.id);
+                  const cfg = DIFFICULTY_CONFIG[p.difficulty];
+                  const isActive = activeProblem?.id === p.id;
                   return (
-                    <div
-                      key={problem.id}
-                      onClick={() => setActiveProblem(problem)}
+                    <button
+                      key={p.id}
+                      onClick={() => setActiveProblem(p)}
                       className={cn(
-                        "p-3 rounded-md border cursor-pointer transition-all",
-                        isActive
-                          ? "bg-white border-primary shadow-sm"
-                          : "bg-white border-gray-200 hover:border-gray-300 hover:shadow-sm",
+                        "w-full flex items-start gap-3 p-4 border-b border-gray-100 text-left transition-colors",
+                        isActive ? "bg-blue-50 border-l-2 border-l-blue-600" : "hover:bg-gray-50",
                       )}
                     >
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-semibold text-gray-900 truncate">{problem.title}</p>
-                          <div className="flex items-center gap-2 mt-1.5">
-                            <Badge
-                              variant="outline"
-                              className={cn(
-                                "px-2 py-0.5 rounded-md text-[10px] font-bold border",
-                                getDifficultyColor(problem.difficulty),
-                              )}
-                            >
-                              {getDifficultyLabel(problem.difficulty)}
-                            </Badge>
-                          </div>
-                        </div>
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            toggleProblem(problem);
-                          }}
-                          disabled={isProcessing}
-                          className={cn(
-                            "shrink-0 w-7 h-7 rounded-full flex items-center justify-center transition-all border-2",
-                            inContest
-                              ? "bg-primary border-primary text-white hover:bg-red-500 hover:border-red-500"
-                              : "border-gray-300 text-gray-400 hover:border-primary hover:text-primary",
-                          )}
-                        >
-                          {inContest ? <Check className="w-3.5 h-3.5" /> : <Plus className="w-3.5 h-3.5" />}
-                        </button>
+                      <div
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleToggle(p);
+                        }}
+                        className={cn(
+                          "shrink-0 mt-0.5 w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all cursor-pointer",
+                          inContest ? "bg-blue-600 border-blue-600" : "bg-white border-gray-300 hover:border-blue-400",
+                        )}
+                      >
+                        {inContest && <Check className="w-3 h-3 text-white" />}
                       </div>
-                    </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-semibold text-gray-900 truncate">{p.title}</p>
+                        <div className="flex items-center gap-1.5 mt-1">
+                          <Badge
+                            variant="outline"
+                            className={cn("text-[10px] font-bold border px-1.5 py-0", cfg?.className)}
+                          >
+                            {cfg?.label}
+                          </Badge>
+                          {p.tags.slice(0, 2).map((tag) => (
+                            <span key={tag.id} className="text-[10px] text-gray-400">
+                              {tag.name}
+                            </span>
+                          ))}
+                        </div>
+                      </div>
+                    </button>
                   );
                 })
               )}
             </div>
 
-            <div className="shrink-0 p-4 bg-white border-t border-gray-200">
-              <div className="flex items-center justify-between">
-                <div className="text-xs text-gray-500">
-                  Hiển thị {currentPage * pageSize + 1}-{Math.min((currentPage + 1) * pageSize, totalElements)} /{" "}
-                  {totalElements}
-                </div>
-                <div className="flex items-center gap-2">
-                  <button
-                    onClick={handlePreviousPage}
-                    disabled={currentPage === 0}
-                    className={cn(
-                      "p-1.5 rounded-lg border transition-colors",
-                      currentPage === 0
-                        ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                        : "border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400",
-                    )}
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  <div className="text-sm font-medium text-gray-700">
-                    {currentPage + 1} / {totalPages}
-                  </div>
-                  <button
-                    onClick={handleNextPage}
-                    disabled={currentPage >= totalPages - 1}
-                    className={cn(
-                      "p-1.5 rounded-lg border transition-colors",
-                      currentPage >= totalPages - 1
-                        ? "border-gray-200 text-gray-300 cursor-not-allowed"
-                        : "border-gray-300 text-gray-600 hover:bg-gray-50 hover:border-gray-400",
-                    )}
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
-                </div>
-              </div>
+            <div className="flex items-center justify-between px-4 py-3 border-t border-gray-200 bg-white shrink-0">
+              <button
+                onClick={() => setPage((p) => Math.max(0, p - 1))}
+                disabled={page === 0}
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronLeft className="w-4 h-4" />
+              </button>
+              <span className="text-xs font-semibold text-gray-600">
+                {page + 1} / {totalPages}
+              </span>
+              <button
+                onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+                disabled={page >= totalPages - 1}
+                className="p-1.5 rounded-lg hover:bg-gray-100 text-gray-500 disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+              >
+                <ChevronRight className="w-4 h-4" />
+              </button>
             </div>
           </div>
 
           <div className="flex-1 flex flex-col overflow-hidden">
-            <div className="shrink-0 px-8 py-5 bg-white border-b border-gray-200 flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <h2 className="text-xl font-bold text-gray-900">{activeProblem?.title || "Chọn bài tập"}</h2>
-                {activeProblem && (
-                  <Badge
-                    variant="outline"
-                    className={cn(
-                      "px-2.5 py-1 rounded-md text-[11px] font-bold border uppercase",
-                      getDifficultyColor(activeProblem.difficulty),
-                    )}
-                  >
-                    {getDifficultyLabel(activeProblem.difficulty)}
-                  </Badge>
-                )}
+            {!activeProblem ? (
+              <div className="flex-1 flex items-center justify-center">
+                <div className="text-center">
+                  <Eye className="w-10 h-10 text-gray-300 mx-auto mb-3" />
+                  <p className="text-sm text-gray-400">Chọn bài tập để xem chi tiết</p>
+                </div>
               </div>
-              {activeProblem && (
-                <div className="flex items-center gap-3">
-                  {currentProblemData ? (
+            ) : (
+              <>
+                <div className="px-6 py-4 bg-white border-b border-gray-200 flex items-center justify-between shrink-0">
+                  <div className="flex items-center gap-3">
+                    <h2 className="text-base font-bold text-gray-900">{activeProblem.title}</h2>
+                    {activeProblem.difficulty && (
+                      <Badge
+                        variant="outline"
+                        className={cn(
+                          "text-xs font-bold border",
+                          DIFFICULTY_CONFIG[activeProblem.difficulty]?.className,
+                        )}
+                      >
+                        {DIFFICULTY_CONFIG[activeProblem.difficulty]?.label}
+                      </Badge>
+                    )}
+                  </div>
+                  {isInContest(activeProblem.id) ? (
                     <Button
                       variant="outline"
-                      onClick={() => toggleProblem(activeProblem)}
+                      size="sm"
+                      onClick={() => handleRemove(activeProblem)}
                       disabled={isProcessing}
-                      className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
+                      className="gap-1.5 border-red-200 text-red-600 hover:bg-red-50"
                     >
-                      {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <X className="w-4 h-4" />}
+                      {isProcessing ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <X className="w-3.5 h-3.5" />}
                       Gỡ khỏi kỳ thi
                     </Button>
                   ) : (
                     <Button
-                      onClick={() => handleAddProblem(activeProblem)}
+                      size="sm"
+                      onClick={() => handleAdd(activeProblem)}
                       disabled={isProcessing}
-                      className="gap-2 bg-primary hover:bg-blue-700 text-white"
+                      className="gap-1.5 bg-primary hover:bg-blue-700 text-white"
                     >
-                      {isProcessing ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                      {isProcessing ? (
+                        <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      ) : (
+                        <Plus className="w-3.5 h-3.5" />
+                      )}
                       Thêm vào kỳ thi
                     </Button>
                   )}
                 </div>
-              )}
-            </div>
 
-            <div className="px-8 bg-white border-b border-gray-200">
-              <div className="flex gap-8">
-                {[
-                  { id: "content", label: "Nội dung đề bài" },
-                  { id: "testcases", label: "Test Case mẫu" },
-                  { id: "details", label: "Thông tin chi tiết" },
-                ].map((tab) => (
-                  <button
-                    key={tab.id}
-                    onClick={() => setActiveTab(tab.id as "content" | "testcases" | "details")}
-                    className={cn(
-                      "py-4 text-sm font-bold transition-colors border-b-2",
-                      activeTab === tab.id
-                        ? "text-blue-600 border-blue-600"
-                        : "text-gray-500 border-transparent hover:text-gray-700",
-                    )}
-                  >
-                    {tab.label}
-                  </button>
-                ))}
-              </div>
-            </div>
+                <div className="flex gap-0 px-6 bg-white border-b border-gray-200 shrink-0">
+                  {(
+                    [
+                      { id: "content", label: "Nội dung" },
+                      { id: "testcases", label: "Test Cases mẫu" },
+                      { id: "details", label: "Thông tin" },
+                    ] as { id: PreviewTab; label: string }[]
+                  ).map((tab) => (
+                    <button
+                      key={tab.id}
+                      onClick={() => setPreviewTab(tab.id)}
+                      className={cn(
+                        "py-3 px-4 text-xs font-semibold border-b-2 transition-colors",
+                        previewTab === tab.id
+                          ? "text-blue-600 border-blue-600"
+                          : "text-gray-500 border-transparent hover:text-gray-700",
+                      )}
+                    >
+                      {tab.label}
+                    </button>
+                  ))}
+                </div>
 
-            <div className="flex-1 overflow-y-auto p-8 bg-gray-50">
-              {!activeProblem ? (
-                <div className="flex items-center justify-center h-full">
-                  <p className="text-gray-500">Chọn một bài tập để xem chi tiết</p>
-                </div>
-              ) : isLoadingDetail ? (
-                <div className="flex items-center justify-center h-full">
-                  <div className="text-center">
-                    <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-3" />
-                    <p className="text-gray-600">Đang tải chi tiết bài tập...</p>
-                  </div>
-                </div>
-              ) : (
-                <div className="max-w-4xl mx-auto">
-                  {activeTab === "content" && problemDetailData && (
-                    <div className="bg-white rounded-xl p-6 border border-gray-200">
-                      <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap">
-                        {problemDetailData.description}
-                      </div>
+                <div className="flex-1 overflow-y-auto p-6 bg-gray-50">
+                  {loadingPreview ? (
+                    <div className="flex justify-center py-12">
+                      <Loader2 className="w-8 h-8 animate-spin text-blue-600" />
                     </div>
-                  )}
-
-                  {activeTab === "testcases" && problemDetailData && (
-                    <div className="space-y-4">
-                      <h3 className="text-lg font-bold text-gray-900 mb-4">
-                        Test Case mẫu ({problemDetailData.sampleTestcases.length})
-                      </h3>
-                      {problemDetailData.sampleTestcases.map((testcase, index) => (
-                        <div key={testcase.id} className="bg-white p-6 rounded-xl border border-gray-200">
-                          <h4 className="text-sm font-bold text-gray-900 mb-4 flex items-center gap-2">
-                            <Code className="w-4 h-4 text-blue-600" />
-                            Test Case #{index + 1}
-                          </h4>
-                          <div className="grid grid-cols-2 gap-6">
+                  ) : previewDetail ? (
+                    <>
+                      {previewTab === "content" && (
+                        <div className="bg-white rounded-xl p-6 border border-gray-200 space-y-4">
+                          <div className="prose prose-sm max-w-none text-gray-700 whitespace-pre-wrap text-sm leading-relaxed">
+                            {previewDetail.description}
+                          </div>
+                          {previewDetail.constraints && (
                             <div>
-                              <p className="text-xs font-bold text-gray-500 uppercase mb-2">Input</p>
-                              <pre className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm font-mono whitespace-pre">
-                                {testcase.input}
+                              <p className="text-xs font-bold text-gray-500 uppercase mb-2">Ràng buộc</p>
+                              <pre className="bg-amber-50 border border-amber-200 text-amber-900 rounded-lg p-3 text-sm font-mono whitespace-pre-wrap">
+                                {previewDetail.constraints}
                               </pre>
                             </div>
-                            <div>
-                              <p className="text-xs font-bold text-gray-500 uppercase mb-2">Expected Output</p>
-                              <pre className="bg-gray-50 p-3 rounded-lg border border-gray-200 text-sm font-mono whitespace-pre">
-                                {testcase.expectedOutput}
-                              </pre>
+                          )}
+                        </div>
+                      )}
+
+                      {previewTab === "testcases" && (
+                        <div className="space-y-4">
+                          {previewDetail.sampleTestcases.length === 0 ? (
+                            <div className="text-center py-8 bg-white rounded-xl border border-gray-200 text-sm text-gray-400">
+                              Không có test case mẫu.
+                            </div>
+                          ) : (
+                            previewDetail.sampleTestcases.map((tc, idx) => (
+                              <div key={tc.id} className="bg-white rounded-xl border border-gray-200 overflow-hidden">
+                                <div className="flex items-center px-4 py-2 bg-gray-50 border-b border-gray-200">
+                                  <span className="text-xs font-bold text-gray-600">Test Case #{idx + 1}</span>
+                                </div>
+                                <div className="grid grid-cols-2 divide-x divide-gray-200">
+                                  <div className="p-4">
+                                    <p className="text-xs font-bold text-gray-400 uppercase mb-2">Input</p>
+                                    <pre className="text-sm font-mono text-gray-800 whitespace-pre-wrap">
+                                      {tc.input}
+                                    </pre>
+                                  </div>
+                                  <div className="p-4">
+                                    <p className="text-xs font-bold text-gray-400 uppercase mb-2">Expected Output</p>
+                                    <pre className="text-sm font-mono text-gray-800 whitespace-pre-wrap">
+                                      {tc.expectedOutput}
+                                    </pre>
+                                  </div>
+                                </div>
+                              </div>
+                            ))
+                          )}
+                        </div>
+                      )}
+
+                      {previewTab === "details" && (
+                        <div className="space-y-4">
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="p-4 bg-white rounded-xl border border-gray-200">
+                              <p className="text-xs font-bold text-gray-400 uppercase mb-1.5">Thời gian</p>
+                              <p className="text-xl font-bold text-gray-900">{previewDetail.timeLimitMs / 1000}s</p>
+                            </div>
+                            <div className="p-4 bg-white rounded-xl border border-gray-200">
+                              <p className="text-xs font-bold text-gray-400 uppercase mb-1.5">Bộ nhớ</p>
+                              <p className="text-xl font-bold text-gray-900">{previewDetail.memoryLimitMb} MB</p>
+                            </div>
+                            <div className="p-4 bg-white rounded-xl border border-gray-200">
+                              <p className="text-xs font-bold text-gray-400 uppercase mb-1.5">Khối lớp</p>
+                              <p className="text-xl font-bold text-gray-900">Lớp {previewDetail.classLevel}</p>
+                            </div>
+                            <div className="p-4 bg-white rounded-xl border border-gray-200">
+                              <p className="text-xs font-bold text-gray-400 uppercase mb-1.5">Trạng thái</p>
+                              <Badge
+                                variant="outline"
+                                className={cn(
+                                  "font-bold border text-sm",
+                                  previewDetail.isPublic
+                                    ? "bg-green-50 text-green-700 border-green-200"
+                                    : "bg-gray-100 text-gray-600 border-gray-200",
+                                )}
+                              >
+                                {previewDetail.isPublic ? "Công khai" : "Không công khai"}
+                              </Badge>
                             </div>
                           </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-
-                  {activeTab === "details" && problemDetailData && (
-                    <div className="space-y-6">
-                      <div className="grid grid-cols-2 gap-6">
-                        <div className="p-4 rounded-xl bg-white border border-gray-200">
-                          <p className="text-xs font-bold text-gray-500 uppercase mb-2">Thời gian giới hạn</p>
-                          <p className="text-2xl font-bold text-gray-900">{problemDetailData.timeLimitMs / 1000}s</p>
-                        </div>
-                        <div className="p-4 rounded-xl bg-white border border-gray-200">
-                          <p className="text-xs font-bold text-gray-500 uppercase mb-2">Bộ nhớ giới hạn</p>
-                          <p className="text-2xl font-bold text-gray-900">{problemDetailData.memoryLimitMb} MB</p>
-                        </div>
-                      </div>
-                      {problemDetailData.tags.length > 0 && (
-                        <div className="p-4 rounded-xl bg-white border border-gray-200">
-                          <p className="text-xs font-bold text-gray-500 uppercase mb-3">Tags</p>
-                          <div className="flex flex-wrap gap-2">
-                            {problemDetailData.tags.map((tag) => (
-                              <Badge
-                                key={tag.id}
-                                variant="outline"
-                                className="px-3 py-1 bg-blue-50 text-blue-600 border-blue-200"
-                              >
-                                {tag.name}
-                              </Badge>
-                            ))}
+                          {previewDetail.tags.length > 0 && (
+                            <div className="p-4 bg-white rounded-xl border border-gray-200">
+                              <p className="text-xs font-bold text-gray-400 uppercase mb-3">Tags</p>
+                              <div className="flex flex-wrap gap-2">
+                                {previewDetail.tags.map((tag) => (
+                                  <Badge
+                                    key={tag.id}
+                                    variant="outline"
+                                    className="bg-blue-50 text-blue-600 border-blue-200 text-xs"
+                                  >
+                                    {tag.name}
+                                  </Badge>
+                                ))}
+                              </div>
+                            </div>
+                          )}
+                          <div className="p-4 bg-white rounded-xl border border-gray-200">
+                            <div className="flex items-center gap-2 mb-3">
+                              <p className="text-xs font-bold text-gray-400 uppercase">Code Template</p>
+                              <div className="flex gap-1.5 ml-auto">
+                                {Object.values(Language).map((lang) => (
+                                  <button
+                                    key={lang}
+                                    onClick={() => setPreviewLang(lang)}
+                                    className={cn(
+                                      "px-2 py-1 text-[10px] font-bold rounded border transition-all",
+                                      previewLang === lang
+                                        ? "bg-blue-600 text-white border-blue-600"
+                                        : "bg-white text-gray-500 border-gray-200 hover:border-blue-400",
+                                    )}
+                                  >
+                                    {LANG_LABELS[lang]}
+                                  </button>
+                                ))}
+                              </div>
+                            </div>
+                            <pre className="bg-gray-900 text-green-300 p-4 rounded-lg text-xs font-mono whitespace-pre overflow-x-auto max-h-48">
+                              {previewDetail.codeTemplate || "Không có template."}
+                            </pre>
                           </div>
                         </div>
                       )}
-                      <div className="p-4 rounded-xl bg-white border border-gray-200">
-                        <p className="text-xs font-bold text-gray-500 uppercase mb-2">Code Template</p>
-                        <pre className="bg-gray-50 p-4 rounded-lg text-sm font-mono whitespace-pre-wrap border border-gray-200">
-                          {problemDetailData.codeTemplate}
-                        </pre>
-                      </div>
-                    </div>
-                  )}
+                    </>
+                  ) : null}
                 </div>
-              )}
-            </div>
+              </>
+            )}
           </div>
         </div>
 
-        <div className="shrink-0 h-16 bg-white border-t border-gray-200 px-8 flex items-center justify-between shadow-lg">
-          <div className="flex items-center gap-4">
+        <div className="shrink-0 bg-white border-t border-gray-200 px-8 py-3 flex items-center justify-between shadow-lg">
+          <div className="flex items-center gap-3">
             <span className="text-sm font-medium text-gray-600">
-              Đã chọn <span className="text-blue-600 font-bold">{contestProblems?.length || 0}</span> bài tập:
+              Đã chọn <span className="text-blue-600 font-bold">{contestProblems?.length || 0}</span> bài:
             </span>
-            <div className="flex items-center gap-1.5 overflow-x-auto max-w-250">
+            <div className="flex items-center gap-1.5 overflow-x-auto max-w-xl">
               {contestProblems?.map((cp) => (
                 <span
                   key={cp.contestProblemId}
-                  className="flex items-center gap-1.5 px-3 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-bold border border-blue-200 whitespace-nowrap"
+                  className="flex items-center gap-1 px-2.5 py-1 bg-blue-50 text-blue-600 rounded-md text-xs font-bold border border-blue-200 whitespace-nowrap"
                 >
-                  <span className="opacity-60 text-[10px]">{cp.label}</span> {cp.title}
+                  <span className="opacity-60 text-[10px]">{cp.label}</span>
+                  {cp.title}
                 </span>
               ))}
             </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <button
-              onClick={() => setClearAllModal(true)}
-              disabled={!contestProblems || contestProblems.length === 0 || isProcessing}
-              className="text-sm font-semibold text-gray-500 hover:text-red-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              onClick={() => setClearAllConfirm(true)}
+              disabled={!contestProblems?.length || isProcessing}
+              className="text-xs font-semibold text-gray-400 hover:text-red-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               Xóa tất cả
             </button>
             <Button
               onClick={() => navigate({ to: `/contests/${contestId}` })}
-              className="gap-2 shadow-lg bg-primary hover:bg-blue-700 text-white"
+              className="gap-2 bg-primary hover:bg-blue-700 text-white"
             >
               <Check className="w-4 h-4" />
-              Hoàn tất
+              Hoàn tất ({contestProblems?.length || 0})
             </Button>
           </div>
         </div>
