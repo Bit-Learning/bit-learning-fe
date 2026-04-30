@@ -1,8 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="Student avatar">
-  <rect width="160" height="160" rx="80" fill="#FCE7F3"/>
-  <circle cx="80" cy="62" r="28" fill="#F8FAFC"/>
-  <path d="M28 150c6-30 30-50 52-50s46 20 52 50" fill="#FBCFE8"/>
-  <path d="M58 48c10-8 22-12 22-12s12 4 22 12" fill="none" stroke="#0F172A" stroke-width="8" stroke-linecap="round" opacity="0.12"/>
-  <path d="M70 76c6 6 14 6 20 0" fill="none" stroke="#0F172A" stroke-width="6" stroke-linecap="round" opacity="0.18"/>
-</svg>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" aria-label="Student avatar" role="img" viewBox="0 0 160 160"><rect width="160" height="160" fill="#FCE7F3" rx="80"/><circle cx="80" cy="62" r="28" fill="#F8FAFC"/><path fill="#FBCFE8" d="M28 150c6-30 30-50 52-50s46 20 52 50"/><path fill="none" stroke="#0F172A" stroke-linecap="round" stroke-width="8" d="M58 48c10-8 22-12 22-12s12 4 22 12" opacity=".12"/><path fill="none" stroke="#0F172A" stroke-linecap="round" stroke-width="6" d="M70 76c6 6 14 6 20 0" opacity=".18"/></svg>

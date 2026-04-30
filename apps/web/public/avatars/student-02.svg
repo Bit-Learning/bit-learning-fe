@@ -1,9 +1,1 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" viewBox="0 0 160 160" role="img" aria-label="Student avatar">
-  <rect width="160" height="160" rx="80" fill="#E0F2FE"/>
-  <circle cx="80" cy="62" r="28" fill="#F8FAFC"/>
-  <path d="M28 150c6-30 30-50 52-50s46 20 52 50" fill="#BAE6FD"/>
-  <circle cx="70" cy="58" r="4" fill="#0F172A" opacity="0.35"/>
-  <circle cx="90" cy="58" r="4" fill="#0F172A" opacity="0.35"/>
-  <path d="M70 75c6 6 14 6 20 0" fill="none" stroke="#0F172A" stroke-width="6" stroke-linecap="round" opacity="0.18"/>
-</svg>
-
+<svg xmlns="http://www.w3.org/2000/svg" width="160" height="160" aria-label="Student avatar" role="img" viewBox="0 0 160 160"><rect width="160" height="160" fill="#E0F2FE" rx="80"/><circle cx="80" cy="62" r="28" fill="#F8FAFC"/><path fill="#BAE6FD" d="M28 150c6-30 30-50 52-50s46 20 52 50"/><circle cx="70" cy="58" r="4" fill="#0F172A" opacity=".35"/><circle cx="90" cy="58" r="4" fill="#0F172A" opacity=".35"/><path fill="none" stroke="#0F172A" stroke-linecap="round" stroke-width="6" d="M70 75c6 6 14 6 20 0" opacity=".18"/></svg>
