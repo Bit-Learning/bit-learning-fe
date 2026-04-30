@@ -1,20 +1,7 @@
 import React, { useState } from "react";
-import {
-	Bell,
-	Settings,
-	MessageSquare,
-	Award,
-	DollarSign,
-	Megaphone,
-	Users,
-	ChevronDown,
-	Trash2,
-	ChevronLeft,
-	ChevronRight,
-} from "lucide-react";
+import { Bell, CheckCheck, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
-import { Card } from "@workspace/ui/components/Card";
-import { Button } from "@workspace/ui/components/Button";
+import { cn } from "@workspace/ui/lib/utils";
 import {
 	useDeleteNotification,
 	useMarkAllAsRead,
@@ -22,11 +9,25 @@ import {
 	useNotifications,
 } from "@/feature/notification/queries/use-notification-queries";
 import { NotificationMessage } from "@/feature/notification/channel";
-import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { Pagination } from "@/shared/components/Pagination";
+
+const formatDateTime = (iso: string) => {
+	const date = new Date(iso);
+	const formattedDate = date.toLocaleDateString("vi-VN", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+	const formattedTime = date.toLocaleTimeString("vi-VN", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+	return `${formattedDate} ${formattedTime}`;
+};
 
 export const NotificationsContent = () => {
 	const [page, setPage] = useState(0);
+	const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 	const size = 10;
 	const navigate = useNavigate();
 
@@ -37,29 +38,7 @@ export const NotificationsContent = () => {
 
 	const notifications = (data?.content || []) as NotificationMessage[];
 	const totalPages = data?.totalPages || 1;
-
-	const getNotificationIcon = (type: string) => {
-		const icons = {
-			COMMENT: {
-				Icon: MessageSquare,
-				color: "text-primary",
-				bg: "bg-blue-100",
-			},
-			BADGE: { Icon: Award, color: "text-[#f7941e]", bg: "bg-orange-100" },
-			PAYMENT: {
-				Icon: DollarSign,
-				color: "text-green-600",
-				bg: "bg-green-100",
-			},
-			ANNOUNCEMENT: {
-				Icon: Megaphone,
-				color: "text-slate-500",
-				bg: "bg-slate-100",
-			},
-			INVITE: { Icon: Users, color: "text-slate-500", bg: "bg-slate-100" },
-		};
-		return icons[type as keyof typeof icons] || icons.ANNOUNCEMENT;
-	};
+	const unreadCount = notifications.filter((n) => !n.isRead).length;
 
 	const handleNotificationClick = async (notification: NotificationMessage) => {
 		if (!notification.isRead) {
@@ -69,7 +48,6 @@ export const NotificationsContent = () => {
 				console.error("Failed to mark as read:", error);
 			}
 		}
-
 		if (notification.targetUrl) {
 			if (
 				notification.targetUrl.startsWith("http://") ||
@@ -93,115 +71,196 @@ export const NotificationsContent = () => {
 		}
 	};
 
-	const handleDelete = async (id: number, e: React.MouseEvent) => {
+	const handleDeleteClick = (id: number, e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (confirm("Bạn có chắc chắn muốn xóa thông báo này?")) {
-			try {
-				await deleteNotificationMutation.mutateAsync(id);
-			} catch (error) {
-				console.error("Failed to delete:", error);
-			}
+		setConfirmDeleteId(id);
+	};
+
+	const handleDeleteConfirm = async (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (confirmDeleteId === null) return;
+		try {
+			await deleteNotificationMutation.mutateAsync(confirmDeleteId);
+		} catch (error) {
+			console.error("Failed to delete:", error);
+		} finally {
+			setConfirmDeleteId(null);
 		}
+	};
+
+	const handleDeleteCancel = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setConfirmDeleteId(null);
 	};
 
 	return (
 		<div className="grow space-y-4">
-			<Card className="p-0">
-				<div className="p-8 border-b border-slate-50 flex items-center justify-between">
-					<div className="flex items-center gap-3">
-						<h2 className="text-2xl font-bold text-slate-900">Thông báo</h2>
-					</div>
-					<div className="flex items-center gap-2">
-						<Button
-							variant="ghost"
-							size="lg"
-							className="text-primary text-md"
-							onClick={() => markAllAsReadMutation.mutate()}
-							isDisabled={markAllAsReadMutation.isPending}
-						>
-							Đánh dấu đã đọc tất cả
-						</Button>
-					</div>
+			{/* Header */}
+			<div className="flex items-center justify-between">
+				<div>
+					<h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
+						Thông báo
+					</h1>
+					{unreadCount > 0 && (
+						<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
+							Bạn có {unreadCount} thông báo chưa đọc
+						</p>
+					)}
 				</div>
+				{unreadCount > 0 && (
+					<button
+						onClick={() => markAllAsReadMutation.mutate()}
+						disabled={markAllAsReadMutation.isPending}
+						className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+					>
+						{markAllAsReadMutation.isPending ? (
+							<Loader2 className="h-4 w-4 animate-spin" />
+						) : (
+							<CheckCheck className="h-4 w-4" />
+						)}
+						Đánh dấu tất cả là đã đọc
+					</button>
+				)}
+			</div>
 
-				<div className="px-8 space-y-4">
-					{isLoading ? (
-						<Loader />
-					) : notifications.length === 0 ? (
-						<div className="text-center py-12 text-slate-500">
-							Không có thông báo nào
-						</div>
-					) : (
-						notifications.map((notif) => {
-							const { Icon, color, bg } = getNotificationIcon(notif.type);
-							return (
-								<div
-									key={notif.id}
-									className={`flex gap-4 p-5 rounded-xl border transition-all cursor-pointer hover:border-primary/20 hover:bg-slate-50 group ${
-										!notif.isRead
-											? "bg-blue-50/50 border-blue-200"
-											: "border-slate-200"
-									}`}
-									onClick={() => handleNotificationClick(notif)}
-								>
-									<div
-										className={`size-12 rounded-full shrink-0 ${bg} flex items-center justify-center ${color}`}
-									>
-										<Icon className="w-6 h-6" />
-									</div>
-									<div className="grow min-w-0">
-										<div className="flex items-start justify-between gap-4 mb-1">
-											<h4 className="font-bold text-slate-900 grow">
-												{notif.title}
-											</h4>
-											<div className="flex items-center gap-2 shrink-0">
-												<span className="text-xs font-medium text-slate-400">
-													{new Date(notif.createdAt).toLocaleDateString(
-														"vi-VN",
-													)}
-												</span>
-												<Button
-													variant="ghost"
-													size="sm"
-													className="opacity-0 group-hover:opacity-100 transition-opacity p-1 h-auto"
-													onClick={(e) => handleDelete(notif.id, e)}
-												>
-													<Trash2 className="w-4 h-4 text-slate-400 hover:text-red-500" />
-												</Button>
-											</div>
+			{/* Notifications List */}
+			<div className="space-y-3">
+				{isLoading ? (
+					<div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-12 text-center">
+						<Loader2 className="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600 mb-4 animate-spin" />
+						<p className="text-sm text-gray-500 dark:text-gray-400">
+							Đang tải thông báo...
+						</p>
+					</div>
+				) : notifications.length === 0 ? (
+					<div className="rounded-2xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-12 text-center">
+						<Bell className="mx-auto h-16 w-16 text-gray-300 dark:text-gray-600 mb-4" />
+						<h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100 mb-2">
+							Chưa có thông báo
+						</h3>
+						<p className="text-sm text-gray-500 dark:text-gray-400">
+							Các thông báo của bạn sẽ xuất hiện ở đây
+						</p>
+					</div>
+				) : (
+					notifications.map((notif) => (
+						<div
+							key={notif.id}
+							className={cn(
+								"rounded-2xl border bg-white dark:bg-gray-800 p-6 transition-all cursor-pointer",
+								"hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800",
+								notif.isRead
+									? "border-gray-200 dark:border-gray-700"
+									: "border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10",
+							)}
+							onClick={() => handleNotificationClick(notif)}
+						>
+							<div className="flex items-start gap-4">
+								{/* Icon/Avatar */}
+								<div className="flex-shrink-0">
+									{notif.sender?.avatar ? (
+										<img
+											src={notif.sender.avatar}
+											alt={`${notif.sender.firstName} ${notif.sender.lastName}`}
+											className="h-12 w-12 rounded-full object-cover"
+										/>
+									) : (
+										<div
+											className={cn(
+												"h-12 w-12 rounded-full flex items-center justify-center text-white text-lg font-medium",
+												notif.type === "PAYMENT"
+													? "bg-green-500"
+													: notif.type === "LEARNING"
+														? "bg-purple-500"
+														: notif.type === "SYSTEM"
+															? "bg-blue-500"
+															: "bg-gray-500",
+											)}
+										>
+											{notif.type[0]}
 										</div>
-										<p className="text-[14px] text-slate-600 leading-relaxed">
-											{notif.message}
-										</p>
+									)}
+								</div>
+
+								{/* Content */}
+								<div className="flex-1 min-w-0">
+									<div className="flex items-start justify-between gap-4">
+										<div className="flex-1">
+											<h3 className="font-semibold text-gray-900 dark:text-gray-100">
+												{notif.title}
+											</h3>
+										</div>
 										{!notif.isRead && (
-											<div className="mt-2">
-												<div className="size-2 rounded-full bg-primary inline-block" />
+											<div className="flex-shrink-0">
+												<div className="h-2 w-2 rounded-full bg-primary" />
 											</div>
 										)}
 									</div>
-								</div>
-							);
-						})
-					)}
-				</div>
 
-				{notifications.length > 0 && (
-					<div className="p-6 border-t border-slate-50">
-						<div className="flex items-center justify-between">
-							<p className="text-md text-slate-600">
-								Trang {page + 1} / {totalPages}
-							</p>
-							<div className="flex gap-2">
-								<Pagination
-									currentPage={page}
-									totalPages={totalPages}
-									onPageChange={setPage}
-								/>
+									<p className="mt-2 text-gray-600 dark:text-gray-300">
+										{notif.message}
+									</p>
+
+									<div className="mt-3 flex items-center justify-between">
+										<p className="text-sm text-gray-400 dark:text-gray-500">
+											{formatDateTime(notif.createdAt)}
+										</p>
+
+										{confirmDeleteId === notif.id ? (
+											<div
+												className="flex items-center gap-2"
+												onClick={(e) => e.stopPropagation()}
+											>
+												<span className="text-sm text-gray-500 dark:text-gray-400">
+													Xóa thông báo?
+												</span>
+												<button
+													onClick={handleDeleteConfirm}
+													disabled={deleteNotificationMutation.isPending}
+													className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-colors disabled:opacity-50"
+												>
+													{deleteNotificationMutation.isPending ? (
+														<Loader2 className="h-3 w-3 animate-spin" />
+													) : null}
+													Xóa
+												</button>
+												<button
+													onClick={handleDeleteCancel}
+													className="px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+												>
+													Hủy
+												</button>
+											</div>
+										) : (
+											<button
+												onClick={(e) => handleDeleteClick(notif.id, e)}
+												className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+												title="Xóa thông báo"
+											>
+												<Trash2 className="h-4 w-4" />
+											</button>
+										)}
+									</div>
+								</div>
 							</div>
 						</div>
-					</div>
+					))
 				)}
-			</Card>
+			</div>
+
+			{/* Pagination */}
+			{notifications.length > 0 && totalPages > 1 && (
+				<div className="flex items-center justify-between pt-2">
+					<p className="text-sm text-gray-600 dark:text-gray-400">
+						Trang {page + 1} / {totalPages}
+					</p>
+					<Pagination
+						currentPage={page}
+						totalPages={totalPages}
+						onPageChange={setPage}
+					/>
+				</div>
+			)}
 		</div>
 	);
 };

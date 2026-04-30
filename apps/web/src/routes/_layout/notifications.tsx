@@ -13,13 +13,31 @@ import { Bell, Check, CheckCheck, Trash2, Loader2 } from "lucide-react";
 import { useNavigate } from "@tanstack/react-router";
 import { useState } from "react";
 
-export const Route = createFileRoute("/notifications")({
+export const Route = createFileRoute("/_layout/notifications")({
 	component: NotificationsPage,
 });
+
+const formatDateTime = (iso: string) => {
+	const date = new Date(iso);
+
+	const formattedDate = date.toLocaleDateString("vi-VN", {
+		year: "numeric",
+		month: "long",
+		day: "numeric",
+	});
+
+	const formattedTime = date.toLocaleTimeString("vi-VN", {
+		hour: "2-digit",
+		minute: "2-digit",
+	});
+
+	return `${formattedDate} ${formattedTime}`;
+};
 
 function NotificationsPage() {
 	const navigate = useNavigate();
 	const [page, setPage] = useState(0);
+	const [confirmDeleteId, setConfirmDeleteId] = useState<number | null>(null);
 	const size = 20;
 
 	// Fetch notifications from API
@@ -65,15 +83,26 @@ function NotificationsPage() {
 		}
 	};
 
-	const handleDelete = async (id: number, e: React.MouseEvent) => {
+	const handleDeleteClick = (id: number, e: React.MouseEvent) => {
 		e.stopPropagation();
-		if (confirm("Bạn có chắc chắn muốn xóa thông báo này?")) {
-			try {
-				await deleteNotificationMutation.mutateAsync(id);
-			} catch (error) {
-				console.error("Failed to delete:", error);
-			}
+		setConfirmDeleteId(id);
+	};
+
+	const handleDeleteConfirm = async (e: React.MouseEvent) => {
+		e.stopPropagation();
+		if (confirmDeleteId === null) return;
+		try {
+			await deleteNotificationMutation.mutateAsync(confirmDeleteId);
+		} catch (error) {
+			console.error("Failed to delete:", error);
+		} finally {
+			setConfirmDeleteId(null);
 		}
+	};
+
+	const handleDeleteCancel = (e: React.MouseEvent) => {
+		e.stopPropagation();
+		setConfirmDeleteId(null);
 	};
 
 	return (
@@ -83,7 +112,7 @@ function NotificationsPage() {
 				<div className="mb-6 flex items-center justify-between">
 					<div>
 						<h1 className="text-3xl font-bold text-gray-900 dark:text-gray-100">
-							Thông báo
+							Quản lý thông báo
 						</h1>
 						{unreadCount > 0 && (
 							<p className="mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -95,14 +124,14 @@ function NotificationsPage() {
 						<button
 							onClick={handleMarkAllRead}
 							disabled={markAllAsReadMutation.isPending}
-							className="flex items-center gap-2 rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+							className="flex items-center gap-2 rounded-lg bg-primary px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
 						>
 							{markAllAsReadMutation.isPending ? (
 								<Loader2 className="h-4 w-4 animate-spin" />
 							) : (
 								<CheckCheck className="h-4 w-4" />
 							)}
-							Đánh dấu tất cả đã đọc
+							Đánh dấu tất cả là đã đọc
 						</button>
 					)}
 				</div>
@@ -135,7 +164,7 @@ function NotificationsPage() {
 									"hover:shadow-lg hover:border-blue-200 dark:hover:border-blue-800",
 									notif.isRead
 										? "border-gray-200 dark:border-gray-700"
-										: "border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10"
+										: "border-blue-200 dark:border-blue-800 bg-blue-50/30 dark:bg-blue-900/10",
 								)}
 								onClick={() => handleNotificationClick(notif)}
 							>
@@ -158,7 +187,7 @@ function NotificationsPage() {
 															? "bg-purple-500"
 															: notif.type === "SYSTEM"
 																? "bg-blue-500"
-																: "bg-gray-500"
+																: "bg-gray-500",
 												)}
 											>
 												{notif.type[0]}
@@ -173,25 +202,17 @@ function NotificationsPage() {
 												<h3 className="font-semibold text-gray-900 dark:text-gray-100">
 													{notif.title}
 													<div className="flex items-center gap-2">
-														{!notif.isRead && (
+														{/* {!notif.isRead && (
 															<div className="flex-shrink-0">
-																<div className="h-2 w-2 rounded-full bg-blue-600" />
+																<div className="h-2 w-2 rounded-full bg-primary" />
 															</div>
-														)}
-														<button
-															onClick={(e) => handleDelete(notif.id, e)}
-															disabled={deleteNotificationMutation.isPending}
-															className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors disabled:opacity-50"
-															title="Xóa thông báo"
-														>
-															<Trash2 className="h-4 w-4" />
-														</button>
-													</div></h3>
-												
+														)} */}
+													</div>
+												</h3>
 											</div>
 											{!notif.isRead && (
 												<div className="flex-shrink-0">
-													<div className="h-2 w-2 rounded-full bg-blue-600" />
+													<div className="h-2 w-2 rounded-full bg-primary" />
 												</div>
 											)}
 										</div>
@@ -202,28 +223,43 @@ function NotificationsPage() {
 
 										<div className="mt-3 flex items-center justify-between">
 											<p className="text-sm text-gray-400 dark:text-gray-500">
-												{new Date(notif.createdAt).toLocaleString("vi-VN", {
-													year: "numeric",
-													month: "long",
-													day: "numeric",
-													hour: "2-digit",
-													minute: "2-digit",
-												})}
+												{formatDateTime(notif.createdAt)}
 											</p>
-											<span
-												className={cn(
-													"text-xs px-3 py-1 rounded-full font-medium",
-													notif.type === "INTERACTION"
-														? "bg-gray-100 text-gray-600 dark:bg-gray-700 dark:text-gray-300"
-														: notif.type === "SYSTEM"
-															? "bg-blue-100 text-blue-600 dark:bg-blue-900/30 dark:text-blue-400"
-															: notif.type === "PAYMENT"
-																? "bg-green-100 text-green-600 dark:bg-green-900/30 dark:text-green-400"
-																: "bg-purple-100 text-purple-600 dark:bg-purple-900/30 dark:text-purple-400"
-												)}
-											>
-												{notif.type}
-											</span>
+
+											{confirmDeleteId === notif.id ? (
+												<div
+													className="flex items-center gap-2"
+													onClick={(e) => e.stopPropagation()}
+												>
+													<span className="text-sm text-gray-500 dark:text-gray-400">
+														Xóa thông báo?
+													</span>
+													<button
+														onClick={handleDeleteConfirm}
+														disabled={deleteNotificationMutation.isPending}
+														className="flex items-center gap-1 px-2.5 py-1 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-medium transition-colors disabled:opacity-50"
+													>
+														{deleteNotificationMutation.isPending ? (
+															<Loader2 className="h-3 w-3 animate-spin" />
+														) : null}
+														Xóa
+													</button>
+													<button
+														onClick={handleDeleteCancel}
+														className="px-2.5 py-1 rounded-lg border border-gray-300 dark:border-gray-600 text-gray-600 dark:text-gray-300 text-xs font-medium hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+													>
+														Hủy
+													</button>
+												</div>
+											) : (
+												<button
+													onClick={(e) => handleDeleteClick(notif.id, e)}
+													className="p-1.5 rounded-lg hover:bg-red-50 dark:hover:bg-red-900/20 text-gray-400 hover:text-red-600 dark:hover:text-red-400 transition-colors"
+													title="Xóa thông báo"
+												>
+													<Trash2 className="h-4 w-4" />
+												</button>
+											)}
 										</div>
 									</div>
 								</div>
