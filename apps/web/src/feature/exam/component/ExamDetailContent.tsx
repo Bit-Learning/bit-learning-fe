@@ -209,13 +209,13 @@ const ExamDetailContent: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center gap-2">
-            {exam.approvalStatus === ApprovalStatus.NONE && (
+            {(exam.approvalStatus === ApprovalStatus.NONE || exam.approvalStatus === ApprovalStatus.REJECTED) && (
               <button
                 onClick={() => setShowApprovalModal(true)}
                 className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-semibold shadow-sm transition-all duration-150"
               >
                 <SendHorizonal className="h-4 w-4" />
-                Gửi yêu cầu phê duyệt
+                {exam.approvalStatus === ApprovalStatus.REJECTED ? "Gửi lại yêu cầu" : "Gửi yêu cầu phê duyệt"}
               </button>
             )}
             <button className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-lg transition-colors">
@@ -226,6 +226,23 @@ const ExamDetailContent: React.FC = () => {
       </div>
 
       <div className="mx-auto px-6 bg-slate-50">
+        {exam.approvalStatus === "REJECTED" && (
+          <div className="flex items-start gap-3 rounded-lg border border-red-200 bg-red-50 p-4 my-4">
+            <div className="shrink-0 mt-0.5">
+              <svg className="h-8 w-8 text-red-500" viewBox="0 0 20 20" fill="currentColor">
+                <path
+                  fillRule="evenodd"
+                  d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z"
+                  clipRule="evenodd"
+                />
+              </svg>
+            </div>
+            <div>
+              <p className="text-sm font-semibold text-red-700">Đề thi bị từ chối phê duyệt</p>
+              <p className="mt-1 text-md text-black">Lí do: {(exam as any).rejectReason ?? "Không có lý do cụ thể."}</p>
+            </div>
+          </div>
+        )}
         <div className="flex gap-4">
           <div className="w-75 space-y-4 shrink-0">
             <div className="bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-md p-4 space-y-2">
