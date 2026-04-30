@@ -84,8 +84,8 @@
               ─────────────────────────────
               Environment   : {{ env }}
               Host          : {{ inventory_hostname }}
-              Web image     : lcaohoanq/bitlearning-web:{{ env }}-latest
-              Admin image   : lcaohoanq/bitlearning-admin:{{ env }}-latest
+              Web image     : hoangclw/bitlearning-web:{{ env }}-latest
+              Admin image   : hoangclw/bitlearning-admin:{{ env }}-latest
               Deploy time   : {{ deploy_time }}
               ─────────────────────────────
 
@@ -115,8 +115,8 @@
               ─────────────────────────────
               Environment   : {{ env }}
               Host          : {{ inventory_hostname }}
-              Web image     : lcaohoanq/bitlearning-web:{{ env }}-latest
-              Admin image   : lcaohoanq/bitlearning-admin:{{ env }}-latest
+              Web image     : hoangclw/bitlearning-web:{{ env }}-latest
+              Admin image   : hoangclw/bitlearning-admin:{{ env }}-latest
               Deploy time   : {{ deploy_time }}
               ─────────────────────────────
 

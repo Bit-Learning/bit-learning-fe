@@ -1,3 +1,4 @@
+import { TSubjectBriefResponse } from "@/feature/matrix/types/subject.type";
 import { QuestionResponse } from "@/feature/question/types/question.type";
 
 export type ExamType = "EXAM" | "PRACTICE";
@@ -18,12 +19,6 @@ export interface MatrixVersionBriefResponse {
   id: number;
   versionNo: number;
   name: string;
-}
-
-export interface SubjectBriefResponse {
-  id: number;
-  name: string;
-  code: string;
 }
 
 export interface ExamQuestionResponse {
@@ -63,6 +58,7 @@ export interface ExamGenerateFromQuestionsRequest {
   code: string;
   shuffleOptions?: boolean;
   durationInMinutes: number;
+  subjectId: number;
   totalScore: number;
   enrollKey?: string;
   type: ExamType;
@@ -73,6 +69,7 @@ export interface ExamUpdateRequest {
   code?: string;
   type?: ExamType;
   durationInMinutes?: number;
+  subjectId: number;
   totalScore?: number;
   enrollKey?: string;
   openTime?: string;
@@ -94,7 +91,7 @@ export interface ExamResponse {
   publishedAt?: string;
   isPublished: boolean;
   matrixVersion?: MatrixVersionBriefResponse;
-  subject?: SubjectBriefResponse;
+  subject?: TSubjectBriefResponse;
   examQuestions: ExamQuestionResponse[];
   createdBy?: UserSummary;
   approvalStatus: ApprovalStatus;
@@ -110,7 +107,7 @@ export interface ExamBriefResponse {
   durationInMinutes: number;
   totalScore: number;
   enrollKey: string;
-  subject?: SubjectBriefResponse;
+  subject?: TSubjectBriefResponse;
   totalQuestions: number;
   isPublished: boolean;
   createdBy?: UserSummary;
@@ -125,6 +122,8 @@ export interface ExamSearchParams {
   search?: string;
   subjectId?: number;
   status?: ApprovalStatus;
+  createdById?: number;
+  grade?: number;
 }
 
 export interface ExamApprovalFilters {

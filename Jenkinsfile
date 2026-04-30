@@ -9,8 +9,8 @@ pipeline {
         TIME_STAMP_FORMAT = "dd-MM-yyyy HH:mm:ss"
         NODE_ENV = 'production'
         GITHUB_PR_URL = 'https://github.com/lcaohoanq/bit-learning-fe/pull/'
-        IMAGE_WEB = 'lcaohoanq/bitlearning-web'
-        IMAGE_ADMIN = 'lcaohoanq/bitlearning-admin'
+        IMAGE_WEB = 'hoangclw/bitlearning-web'
+        IMAGE_ADMIN = 'hoangclw/bitlearning-admin'
         REGISTRY_CREDENTIAL = 'lcaohoanq-dockerhub-credentials'
         REGISTRY_URL = 'https://index.docker.io/v1/'
     }

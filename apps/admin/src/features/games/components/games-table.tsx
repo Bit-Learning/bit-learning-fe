@@ -6,6 +6,8 @@ import {
 	getFilteredRowModel,
 	getPaginationRowModel,
 	getSortedRowModel,
+	type ColumnFiltersState,
+	type RowSelectionState,
 	type SortingState,
 	useReactTable,
 } from "@tanstack/react-table";
@@ -28,6 +30,9 @@ type GamesTableProps = {
 	onDeleteMatching: (gameId: number) => void;
 	isDeletingStandard?: boolean;
 	isDeletingMatching?: boolean;
+	initialColumnFilters?: ColumnFiltersState;
+	onColumnFiltersChange?: (filters: ColumnFiltersState) => void;
+	onSelectionChange?: (rows: GameRow[]) => void;
 };
 
 export function GamesTable({
@@ -36,8 +41,14 @@ export function GamesTable({
 	onDeleteStandard,
 	isDeletingMatching = false,
 	isDeletingStandard = false,
+	initialColumnFilters = [],
+	onColumnFiltersChange,
+	onSelectionChange,
 }: GamesTableProps) {
 	const [sorting, setSorting] = useState<SortingState>([]);
+	const [columnFilters, setColumnFilters] =
+		useState<ColumnFiltersState>(initialColumnFilters);
+	const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
 
 	// eslint-disable-next-line react-hooks/incompatible-library
 	const table = useReactTable<GameRow>({
@@ -50,8 +61,32 @@ export function GamesTable({
 		}),
 		state: {
 			sorting,
+			columnFilters,
+			rowSelection,
+		},
+		enableRowSelection: true,
+		onRowSelectionChange: (updater) => {
+			const next =
+				typeof updater === "function" ? updater(rowSelection) : updater;
+			setRowSelection(next);
+			if (onSelectionChange) {
+				const selectedRows = Object.keys(next)
+					.filter((key) => next[key])
+					.map((key) => {
+						const row = table.getRowModel().rows.find((r) => r.id === key);
+						return row?.original;
+					})
+					.filter(Boolean) as GameRow[];
+				onSelectionChange(selectedRows);
+			}
 		},
 		onSortingChange: setSorting,
+		onColumnFiltersChange: (updater) => {
+			const next =
+				typeof updater === "function" ? updater(columnFilters) : updater;
+			setColumnFilters(next);
+			onColumnFiltersChange?.(next);
+		},
 		getCoreRowModel: getCoreRowModel(),
 		getFilteredRowModel: getFilteredRowModel(),
 		getSortedRowModel: getSortedRowModel(),

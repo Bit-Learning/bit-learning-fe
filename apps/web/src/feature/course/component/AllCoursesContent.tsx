@@ -1,8 +1,9 @@
-import { useNavigate } from "@tanstack/react-router";
-import { LayoutGrid, Sparkles } from "lucide-react";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import { BookOpen, LayoutGrid, Sparkles } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
+import { useSearch, useNavigate } from "@tanstack/react-router";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import { useCourseActions, useCourseState, usePrefetchCourse } from "../queries/useCourse";
 import type { CourseLevel, SearchCourseRequest } from "../types/course.type";
@@ -19,8 +20,16 @@ const AllCoursesContent: React.FC = () => {
   const studentGrade: number | null = currentUser?.userInfo?.grade ?? null;
   const isLoggedIn = !!currentUser;
 
-  const [showAll, setShowAll] = useState(false);
-  const [selectedSchoolLevel, setSelectedSchoolLevel] = useState<SchoolLevelKey>(null);
+  const { minGrade, maxGrade } = useSearch({ from: "/_layout/courses/" });
+
+  const [showAll, setShowAll] = useState(() => minGrade !== undefined || maxGrade !== undefined);
+
+  const [selectedSchoolLevel, setSelectedSchoolLevel] = useState<SchoolLevelKey>(() => {
+    if (minGrade !== undefined && maxGrade !== undefined) {
+      return SCHOOL_LEVELS.find((s) => s.minGrade === minGrade && s.maxGrade === maxGrade)?.label ?? null;
+    }
+    return null;
+  });
 
   const isPersonalised = isLoggedIn && !!studentGrade && !showAll;
 

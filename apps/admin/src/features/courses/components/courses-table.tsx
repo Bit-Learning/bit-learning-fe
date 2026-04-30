@@ -67,6 +67,8 @@ export function CoursesTable({
 		columnFilters: [
 			{ columnId: "title", searchKey: "title", type: "string" },
 			{ columnId: "status", searchKey: "status", type: "array" },
+			{ columnId: "grade", searchKey: "grade", type: "array" },
+			{ columnId: "level", searchKey: "level", type: "array" },
 		],
 	});
 
@@ -124,6 +126,33 @@ export function CoursesTable({
 							{ label: "Chờ duyệt", value: "PENDING" },
 							{ label: "Đã xuất bản", value: "PUBLISHED" },
 							// { label: "Từ chối", value: "REJECTED" },
+						],
+					},
+					{
+						columnId: "grade",
+						title: "Lớp",
+						options: [
+							// { label: "Lớp 1", value: "1" },
+							// { label: "Lớp 2", value: "2" },
+							{ label: "Lớp 3", value: "3" },
+							{ label: "Lớp 4", value: "4" },
+							{ label: "Lớp 5", value: "5" },
+							{ label: "Lớp 6", value: "6" },
+							{ label: "Lớp 7", value: "7" },
+							{ label: "Lớp 8", value: "8" },
+							{ label: "Lớp 9", value: "9" },
+							{ label: "Lớp 10", value: "10" },
+							{ label: "Lớp 11", value: "11" },
+							{ label: "Lớp 12", value: "12" },
+						],
+					},
+					{
+						columnId: "level",
+						title: "Độ khó",
+						options: [
+							{ label: "Cơ bản", value: "BEGINNING" },
+							{ label: "Trung cấp", value: "INTERMEDIATE" },
+							{ label: "Nâng cao", value: "ADVANCED" },
 						],
 					},
 				]}

@@ -224,18 +224,12 @@
   }
 }
 
-@media (min-width: 1400px) {
-  .grid {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-  }
-}
-
 /* Card */
 .card {
   border-radius: 1.5rem;
   border: 1px solid rgba(255, 255, 255, 0.08);
   background: rgba(255, 255, 255, 0.03);
-  overflow: hidden;
+  overflow: visible;
   transition: border-color 0.2s, transform 0.2s;
 }
 
@@ -295,6 +289,7 @@
 .chapterList {
   display: flex;
   flex-direction: column;
+  overflow: visible;
 }
 
 .chapterRow {
@@ -302,9 +297,10 @@
   align-items: center;
   justify-content: space-between;
   gap: 0.75rem;
-  padding: 0.75rem 1.25rem;
+  padding: 0.65rem 1.25rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.04);
   transition: background 0.15s;
+  overflow: visible;
 }
 
 .chapterRow:last-child {
@@ -321,6 +317,28 @@
   gap: 0.65rem;
   min-width: 0;
   flex: 1;
+  position: relative;
+}
+
+/* Show full chapter name as custom tooltip on hover */
+.chapterInfo:hover .chapterName {
+  white-space: normal;
+  overflow: visible;
+  text-overflow: unset;
+  position: absolute;
+  left: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 20;
+  background: #1e1830;
+  border: 1px solid rgba(249, 115, 22, 0.25);
+  border-radius: 0.5rem;
+  padding: 0.35rem 0.65rem;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.45);
+  max-width: 28rem;
+  word-break: break-word;
+  color: #fffbeb;
+  pointer-events: none;
 }
 
 .chapterNo {
@@ -348,8 +366,95 @@
 .chapterAction {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
+  gap: 0.4rem;
   flex-shrink: 0;
+  position: relative;
+}
+
+/* ── Static games hover dropdown ── */
+.staticDropdownWrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.moreBtn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  padding: 0.3rem 0.65rem;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.07);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #94a3b8;
+  font-size: 0.72rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+  white-space: nowrap;
+}
+
+.moreBtn:hover {
+  background: rgba(249, 115, 22, 0.15);
+  border-color: rgba(249, 115, 22, 0.35);
+  color: #fdba74;
+}
+
+.staticDropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  z-index: 50;
+  min-width: 16rem;
+  max-width: 22rem;
+  background: #1a1625;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 0.875rem;
+  padding: 0.5rem;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(249,115,22,0.08);
+  animation: dropIn 0.12s ease;
+}
+
+@keyframes dropIn {
+  from { opacity: 0; transform: translateY(-4px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+.dropdownLabel {
+  margin: 0 0 0.35rem 0.4rem;
+  font-size: 0.62rem;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  color: #475569;
+}
+
+.dropdownItem {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 0.6rem;
+  border-radius: 0.5rem;
+  color: #cbd5e1;
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.12s, color 0.12s;
+}
+
+.dropdownItem:hover {
+  background: rgba(249, 115, 22, 0.15);
+  color: #fdba74;
+}
+
+.dropdownItem .material-icons {
+  color: #f97316;
+  flex-shrink: 0;
+}
+
+.dropdownItemTitle {
+  overflow: visible;
+  white-space: normal;
+  word-break: break-word;
 }
 
 .statusBadge {
@@ -383,6 +488,10 @@
   text-decoration: none;
   transition: transform 0.15s, box-shadow 0.15s;
   box-shadow: 0 4px 12px rgba(249, 115, 22, 0.25);
+  max-width: 14rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .playBtn:hover {

@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
@@ -10,6 +10,8 @@ import { Navbar } from "@/feature/game/components/Navbar/Navbar";
 import Footer from "@/feature/game/components/Footer";
 import PageMeta from "@/shared/components/seo/page-meta";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { useStaticGamesBySubject } from "@/feature/game/queries/useStaticGamesBySubject";
+import type { StaticGameSummaryResponse } from "@/feature/game/services/curriculumLinkService";
 import styles from "./CurriculumBrowsePage.module.css";
 
 // Extract topic code from chapter name "Chủ đề A: ..." → "A"
@@ -18,6 +20,10 @@ function extractTopicCode(name: string): string {
 	if (match?.[1]) return match[1].toUpperCase();
 	const fallback = name.match(/\b([A-F])\b/);
 	return fallback?.[1] ?? "";
+}
+
+function constructFullname(firstName?: string, lastName?: string): string {
+	return firstName + " " + lastName;
 }
 
 const STATUS_CONFIG: Record<
@@ -55,14 +61,69 @@ const GRADE_LEVEL_CONFIG: Record<
 
 type MappingWithStatus = CurriculumMapping & { status?: string };
 
+/** Dropdown that appears on hover showing extra static games */
+function StaticGamesDropdown({
+	games,
+}: {
+	games: StaticGameSummaryResponse[];
+}) {
+	const [open, setOpen] = useState(false);
+	const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+	const show = () => {
+		if (timerRef.current) clearTimeout(timerRef.current);
+		setOpen(true);
+	};
+	const hide = () => {
+		timerRef.current = setTimeout(() => setOpen(false), 120);
+	};
+
+	if (games.length === 0) return null;
+
+	return (
+		<div
+			className={styles.staticDropdownWrap}
+			onMouseEnter={show}
+			onMouseLeave={hide}
+		>
+			<button type="button" className={styles.moreBtn}>
+				<span className="material-icons" style={{ fontSize: 14 }}>
+					videogame_asset
+				</span>
+				+{games.length}
+			</button>
+			{open && (
+				<div className={styles.staticDropdown}>
+					<p className={styles.dropdownLabel}>Game gợi ý</p>
+					{games.map((game) => (
+						<Link
+							key={game.gameId}
+							to="/games/$id"
+							params={{ id: String(game.gameId) }}
+							className={styles.dropdownItem}
+						>
+							<span className="material-icons" style={{ fontSize: 14 }}>
+								play_circle
+							</span>
+							<span className={styles.dropdownItemTitle}>{game.title}</span>
+						</Link>
+					))}
+				</div>
+			)}
+		</div>
+	);
+}
+
 function ChapterRow({
 	chapter,
 	grade,
 	mappingLookup,
+	staticGames,
 }: {
 	chapter: { id: number; name: string; chapterNo: number };
 	grade: number;
 	mappingLookup: Map<string, CurriculumMapping>;
+	staticGames: StaticGameSummaryResponse[];
 }) {
 	const topicCode = extractTopicCode(chapter.name);
 	const mapping = mappingLookup.get(`${grade}-${topicCode}`) as
@@ -72,16 +133,26 @@ function ChapterRow({
 		? (STATUS_CONFIG[mapping.status ?? "PUBLISHED"] ?? STATUS_CONFIG.PUBLISHED)
 		: null;
 
+	const hasAnyGame = mapping || staticGames.length > 0;
+
+	// When no matching game, first static game is the primary CTA; rest go in dropdown
+	const primaryStatic =
+		!mapping && staticGames.length > 0 ? staticGames[0] : null;
+	const extraStatics = !mapping ? staticGames.slice(1) : staticGames;
+
 	return (
 		<div className={styles.chapterRow}>
 			<div className={styles.chapterInfo}>
 				<span className={styles.chapterNo}>{chapter.chapterNo}</span>
-				<span className={styles.chapterName}>{chapter.name}</span>
+				<span className={styles.chapterName} title={chapter.name}>
+					{chapter.name}
+				</span>
 			</div>
 			<div className={styles.chapterAction}>
-				{mapping ? (
+				{hasAnyGame ? (
 					<>
-						{statusCfg && (
+						{/* Status badge for matching game */}
+						{mapping && statusCfg && (
 							<span
 								className={styles.statusBadge}
 								style={{ background: statusCfg.color }}
@@ -93,20 +164,41 @@ function ChapterRow({
 								{statusCfg.label}
 							</span>
 						)}
-						<Link
-							to="/matching/detail"
-							search={{
-								gameId: mapping.gameId,
-								grade: mapping.grade,
-								topic: mapping.topicCode,
-							}}
-							className={styles.playBtn}
-						>
-							<span className="material-icons" style={{ fontSize: 16 }}>
-								play_arrow
-							</span>
-							Chơi
-						</Link>
+
+						{/* Primary CTA: matching game */}
+						{mapping && (
+							<Link
+								to="/matching/detail"
+								search={{
+									gameId: mapping.gameId,
+									grade: mapping.grade,
+									topic: mapping.topicCode,
+								}}
+								className={styles.playBtn}
+							>
+								<span className="material-icons" style={{ fontSize: 16 }}>
+									play_arrow
+								</span>
+								Chơi
+							</Link>
+						)}
+
+						{/* Primary CTA: first static game (only when no matching) */}
+						{primaryStatic && (
+							<Link
+								to="/games/$id"
+								params={{ id: String(primaryStatic.gameId) }}
+								className={styles.playBtn}
+							>
+								<span className="material-icons" style={{ fontSize: 16 }}>
+									play_arrow
+								</span>
+								Chơi
+							</Link>
+						)}
+
+						{/* Extra static games revealed on hover */}
+						<StaticGamesDropdown games={extraStatics} />
 					</>
 				) : (
 					<span className={styles.noGame}>Chưa có game</span>
@@ -135,9 +227,27 @@ function SubjectCard({
 		.slice()
 		.sort((a, b) => a.chapterNo - b.chapterNo);
 
-	const gameCount = chapters.filter((c) =>
+	const { data: staticGames = [] } = useStaticGamesBySubject(subject.id);
+
+	// Index static games by chapterId (null = subject-level)
+	const staticGamesByChapter = useMemo(() => {
+		const map = new Map<number | null, StaticGameSummaryResponse[]>();
+		for (const game of staticGames) {
+			const key = game.chapterId ?? null;
+			const existing = map.get(key) ?? [];
+			map.set(key, [...existing, game]);
+		}
+		return map;
+	}, [staticGames]);
+
+	const subjectLevelStaticGames = staticGamesByChapter.get(null) ?? [];
+
+	const matchingGameCount = chapters.filter((c) =>
 		mappingLookup.has(`${subject.classLevel}-${extractTopicCode(c.name)}`),
 	).length;
+
+	const staticGameCount = staticGames.length;
+	const gameCount = matchingGameCount + staticGameCount;
 
 	return (
 		<div className={`${styles.card} ${highlight ? styles.cardHighlight : ""}`}>
@@ -175,8 +285,37 @@ function SubjectCard({
 							chapter={chapter}
 							grade={subject.classLevel}
 							mappingLookup={mappingLookup}
+							staticGames={staticGamesByChapter.get(chapter.id) ?? []}
 						/>
 					))
+				)}
+				{subjectLevelStaticGames.length > 0 && (
+					<div className={styles.chapterRow}>
+						<div className={styles.chapterInfo}>
+							<span
+								className={styles.chapterName}
+								style={{ fontStyle: "italic", color: "#94a3b8" }}
+							>
+								Game môn học
+							</span>
+						</div>
+						<div className={styles.chapterAction}>
+							{/* First game as primary CTA, rest in dropdown */}
+							{subjectLevelStaticGames[0] && (
+								<Link
+									to="/games/$id"
+									params={{ id: String(subjectLevelStaticGames[0].gameId) }}
+									className={styles.playBtn}
+								>
+									<span className="material-icons" style={{ fontSize: 16 }}>
+										play_arrow
+									</span>
+									Chơi
+								</Link>
+							)}
+							<StaticGamesDropdown games={subjectLevelStaticGames.slice(1)} />
+						</div>
+					</div>
 				)}
 			</div>
 		</div>
@@ -313,6 +452,14 @@ export default function CurriculumBrowsePage() {
 			<section className={styles.hero}>
 				<div className={styles.heroGlow} />
 				<div className={styles.heroContent}>
+					<button
+						type="button"
+						onClick={() => navigate({ to: "/games" })}
+						className="w-35 px-6 py-2 font-bold hover:cursor-pointer"
+					>
+						← Quay lại
+					</button>
+
 					<span className={styles.heroBadge}>
 						<span className="material-icons" style={{ fontSize: 14 }}>
 							school
@@ -324,7 +471,7 @@ export default function CurriculumBrowsePage() {
 					</h1>
 					<p className={styles.heroDesc}>
 						{userGrade
-							? `Chào ${userInfo?.firstName ?? "bạn"}! Dưới đây là game dành riêng cho Lớp ${userGrade} của bạn.`
+							? `Chào ${constructFullname(userInfo?.firstName, userInfo?.lastName)}! Dưới đây là game dành riêng cho Lớp ${userGrade} của bạn.`
 							: "Chọn bộ sách và lớp học để tìm trò chơi ghép cặp phù hợp với chương trình Tin học."}
 					</p>
 					<div className={styles.heroStats}>

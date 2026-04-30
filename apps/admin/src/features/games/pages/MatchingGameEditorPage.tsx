@@ -112,6 +112,7 @@ interface GameForm {
 	grade: number;
 	topicCode: string;
 	topicName: string;
+	description: string;
 	metaVersion: string;
 	metaLanguage: string;
 	thumbnailUrl: string;
@@ -156,6 +157,7 @@ const defaultForm = (): GameForm => ({
 	grade: 3,
 	topicCode: "A",
 	topicName: "",
+	description: "",
 	metaVersion: "1.0.0",
 	metaLanguage: "vi",
 	thumbnailUrl: "",
@@ -197,12 +199,13 @@ const apiToForm = (
 ): GameForm => {
 	const rawTitle = data?.meta?.title ?? "";
 	return {
-		curriculumId: null,
-		subjectId: null,
-		chapterId: null,
+		curriculumId: data?.meta?.curriculumId ?? null,
+		subjectId: data?.meta?.subjectId ?? null,
+		chapterId: data?.meta?.chapterId ?? null,
 		grade,
 		topicCode,
 		topicName: parseTopicName(rawTitle, grade, topicCode),
+		description: data?.meta?.description ?? "",
 		metaVersion: data?.meta?.version ?? "1.0.0",
 		metaLanguage: data?.meta?.language ?? "vi",
 		thumbnailUrl: data?.meta?.thumbnailUrl ?? "",
@@ -845,11 +848,14 @@ export function MatchingGameEditorPage({
 				meta: {
 					gameId: matchingGameId,
 					title: buildTitle(form.grade, nextTopicCode, form.topicName),
+					description: form.description,
 					version: form.metaVersion || "1.0.0",
 					language: form.metaLanguage || "vi",
 					thumbnailUrl: form.thumbnailUrl || undefined,
 				},
 				stages: formToStages(form.stages),
+				subjectId: form.subjectId ?? null,
+				chapterId: form.chapterId ?? null,
 			});
 
 			// Upload thumbnail file if provided (uses /admin/games/{id} multipart endpoint)
@@ -860,7 +866,7 @@ export function MatchingGameEditorPage({
 						title:
 							savedGame.meta.title ??
 							buildTitle(form.grade, nextTopicCode, form.topicName),
-						desc: "",
+						desc: form.description ?? "",
 						thumbnail: thumbnailFile,
 					});
 					setThumbnailFile(undefined);
@@ -1224,7 +1230,22 @@ export function MatchingGameEditorPage({
 							</div>
 
 							<div className="space-y-2">
-								<Label>Thumbnail</Label>
+								<Label>Mô tả</Label>
+								<Textarea
+									placeholder="Mô tả ngắn về game này..."
+									value={form.description}
+									rows={3}
+									onChange={(e) =>
+										setForm((prev) => ({
+											...prev,
+											description: e.target.value,
+										}))
+									}
+								/>
+							</div>
+
+							<div className="space-y-2">
+								<Label>Thumbnail</Label>{" "}
 								<div className="space-y-3">
 									<Input
 										placeholder="https://example.com/thumbnail.png"

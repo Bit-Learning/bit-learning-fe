@@ -196,7 +196,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     if (mode === "edit" && questionId) {
       updateQuestion.mutate(
         { id: questionId, data: requestData },
-        { onSuccess: () => navigate({ to: `/mentor/question/${questionId}` }) },
+        { onSuccess: () => navigate({ to: `/mentor/question/my` }) },
       );
     } else {
       createQuestion.mutate(requestData, {

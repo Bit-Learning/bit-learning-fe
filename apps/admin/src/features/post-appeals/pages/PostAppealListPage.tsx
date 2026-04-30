@@ -2,6 +2,7 @@ import type React from "react";
 import { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
 import {
+	ArrowLeft,
 	ArrowRight,
 	CheckCircle2,
 	FileWarning,
@@ -50,6 +51,16 @@ export const PostAppealListPage: React.FC = () => {
 	return (
 		<>
 			<Header />
+			<div className="mt-5 ml-5">
+				<Button
+					variant="link"
+					className="justify-start"
+					onClick={() => navigate({ to: "/posts" })}
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Quay lại
+				</Button>
+			</div>
 			<div className="flex flex-1 flex-col gap-6 p-6">
 				<div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
 					<div className="space-y-2">

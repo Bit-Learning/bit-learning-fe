@@ -1,5 +1,4 @@
 import { Card } from "@workspace/ui/components/Card";
-import { HelpCircle, FileText, BookOpen, PresentationIcon, Network, Wallet } from "lucide-react";
 import type { MentorDashboardStats } from "../types/mentor.type";
 
 interface StatsCardsProps {
@@ -42,7 +41,7 @@ export const StatsCards = ({ stats }: StatsCardsProps) => {
     {
       label: "BÀI TẬP",
       value: stats.totalPractices.toString(),
-      desc: `+${stats.newPracticesThisMonth ?? 0} tháng này`,
+      desc: ``,
       bg: "bg-[#E1F5EE]",
       border: "border-[#5DCAA5]",
       labelColor: "text-[#0F6E56]",

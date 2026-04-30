@@ -34,6 +34,7 @@ type IncomingGameMessage = {
 	attemptState?: unknown;
 	metricsVersion?: unknown;
 	score?: unknown;
+	emittedAt?: unknown;
 };
 
 interface TrackedGameFrameProps {
@@ -59,6 +60,7 @@ export default function TrackedGameFrame({
 		variant === "page"
 			? "[TrackedGameFrame:page]"
 			: "[TrackedGameFrame:inline]";
+	const submittedResultKeyRef = useRef<string | null>(null);
 	const [tracked, setTracked] = useState(false);
 	const [isFullscreen, setIsFullscreen] = useState(false);
 	const iframeRef = useRef<HTMLIFrameElement>(null);
@@ -108,10 +110,21 @@ export default function TrackedGameFrame({
 		[logInfo],
 	);
 
+	const markTracked = useCallback(() => {
+		trackedRef.current = true;
+		setTracked(true);
+	}, []);
+
+	const clearTracked = useCallback(() => {
+		trackedRef.current = false;
+		setTracked(false);
+	}, []);
+
 	useEffect(() => {
 		startTimeRef.current = Date.now();
 		trackedRef.current = false;
 		latestProgressRef.current = null;
+		submittedResultKeyRef.current = null;
 		setTracked(false);
 	}, [game.id]);
 
@@ -186,8 +199,7 @@ export default function TrackedGameFrame({
 				return;
 			}
 
-			trackedRef.current = true;
-			setTracked(true);
+			markTracked();
 
 			const elapsed =
 				("duration" in payload ? payload.duration : undefined) ??
@@ -254,11 +266,18 @@ export default function TrackedGameFrame({
 					gameId: game.id,
 					error,
 				});
-				trackedRef.current = false;
-				setTracked(false);
+				clearTracked();
 			}
 		},
-		[game.id, game.scoringModel, logAttemptEvent, logInfo, logWarn],
+		[
+			game.id,
+			game.scoringModel,
+			logAttemptEvent,
+			logInfo,
+			logWarn,
+			markTracked,
+			clearTracked,
+		],
 	);
 
 	const submitPartialAttempt = useCallback(
@@ -345,8 +364,7 @@ export default function TrackedGameFrame({
 			const url = new URL(`games/${game.id}/attempts`, apiBaseUrl).toString();
 			const body = JSON.stringify(payload);
 
-			trackedRef.current = true;
-			setTracked(true);
+			markTracked();
 
 			logInfo("Submitting partial attempt", {
 				gameId: game.id,
@@ -420,8 +438,7 @@ export default function TrackedGameFrame({
 						status: response.status,
 						ok: response.ok,
 					});
-					trackedRef.current = false;
-					setTracked(false);
+					clearTracked();
 				})
 				.catch((error) => {
 					logWarn("Partial attempt fetch failed", {
@@ -435,13 +452,20 @@ export default function TrackedGameFrame({
 						method: "fetch",
 						error,
 					});
-					trackedRef.current = false;
-					setTracked(false);
+					clearTracked();
 				});
 
 			return true;
 		},
-		[game.id, game.scoringModel, logAttemptEvent, logInfo, logWarn],
+		[
+			game.id,
+			game.scoringModel,
+			logAttemptEvent,
+			logInfo,
+			logWarn,
+			markTracked,
+			clearTracked,
+		],
 	);
 
 	const parseIncomingMessage = useCallback(
@@ -527,6 +551,24 @@ export default function TrackedGameFrame({
 			}
 
 			if (data?.type === "GAME_PROGRESS") {
+				const exitReason =
+					typeof data.metrics?.exitReason === "string"
+						? data.metrics.exitReason
+						: null;
+
+				// When game starts a new session, clear the previously submitted result key
+				if (exitReason === "SESSION_STARTED") {
+					submittedResultKeyRef.current = null;
+					try {
+						sessionStorage.removeItem(
+							`bitlearning:host-submitted-result:${game.id}`,
+						);
+					} catch {
+						// ignore
+					}
+					logInfo("New game session detected — cleared submitted result key");
+				}
+
 				const payload = buildAttemptPayload({
 					rawScore:
 						typeof data.rawScore === "number" ? data.rawScore : undefined,
@@ -584,6 +626,32 @@ export default function TrackedGameFrame({
 
 			if (data?.type === "GAME_RESULT") {
 				logInfo("Received GAME_RESULT payload", data);
+
+				// Dedup: if this exact emittedAt was already submitted, it's a replay from the game bridge
+				const emittedAt =
+					typeof data.emittedAt === "number" ? String(data.emittedAt) : null;
+				const sessionStorageKey = `bitlearning:host-submitted-result:${game.id}`;
+				const alreadySubmittedKey =
+					submittedResultKeyRef.current ??
+					sessionStorage.getItem(sessionStorageKey);
+				if (emittedAt && alreadySubmittedKey === emittedAt) {
+					logInfo(
+						"GAME_RESULT ignored — duplicate replay (same emittedAt already submitted)",
+						{ emittedAt },
+					);
+					return;
+				}
+
+				// Mark this emittedAt as submitted before calling trackResult
+				if (emittedAt) {
+					submittedResultKeyRef.current = emittedAt;
+					try {
+						sessionStorage.setItem(sessionStorageKey, emittedAt);
+					} catch {
+						// ignore storage errors
+					}
+				}
+
 				void trackResult(
 					buildAttemptPayload({
 						rawScore:

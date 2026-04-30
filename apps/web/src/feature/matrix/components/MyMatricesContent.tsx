@@ -163,7 +163,7 @@ const MyMatricesContent: React.FC = () => {
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                       TÊN MA TRẬN
                     </th>
-                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-36">
+                    <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-36">
                       MÃ
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-80">
@@ -224,7 +224,7 @@ const MyMatricesContent: React.FC = () => {
                               navigate({ to: "/mentor/matrix/$id", params: { id: matrix.id.toString() } });
                             }}
                           >
-                            <Eye className="h-5 w-5" />
+                            <Eye className="h-6 w-6" />
                           </button>
                           <button
                             className="cursor-pointer p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded transition-colors"
@@ -234,7 +234,7 @@ const MyMatricesContent: React.FC = () => {
                               setModal({ open: true, data: matrix });
                             }}
                           >
-                            <Edit className="h-5 w-5" />
+                            <Edit className="h-6 w-6" />
                           </button>
                           <button
                             className="cursor-pointer p-2 text-gray-600 hover:text-red-600 hover:bg-red-50 rounded transition-colors"
@@ -244,7 +244,7 @@ const MyMatricesContent: React.FC = () => {
                               setDeletingMatrix(matrix);
                             }}
                           >
-                            <Trash2 className="h-5 w-5" />
+                            <Trash2 className="h-6 w-6" />
                           </button>
                         </div>
                       </td>

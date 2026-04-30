@@ -43,4 +43,10 @@ export const advancedMetricsLinks: AdvancedMetricsLink[] = [
 		purpose:
 			"Một công cụ quản lý Docker với giao diện người dùng trực quan, giúp bạn dễ dàng triển khai, quản lý và giám sát các container, hình ảnh và dịch vụ Docker của mình.",
 	},
+	{
+		title: "k6",
+		url: "https://bit-k6.lch.id.vn/",
+		purpose:
+			"Một công cụ kiểm thử tải mã nguồn mở giúp bạn đánh giá hiệu suất và khả năng chịu tải của các ứng dụng và dịch vụ của mình thông qua việc mô phỏng các kịch bản người dùng thực tế.",
+	},
 ];

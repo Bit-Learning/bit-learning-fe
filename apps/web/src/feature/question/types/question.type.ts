@@ -1,3 +1,7 @@
+import { TChapterBriefResponse } from "@/feature/matrix/types/chapter.type";
+import { TLessonBriefResponse } from "@/feature/matrix/types/lesson.type";
+import { TSubjectBriefResponse } from "@/feature/matrix/types/subject.type";
+
 export enum QuestionType {
   MCQ = "MCQ",
   ESSAY = "ESSAY",
@@ -34,24 +38,6 @@ export interface OptionResponse {
   content: string;
   isCorrect: boolean;
   orderNo: number;
-}
-
-export interface SubjectBriefResponse {
-  id: number;
-  name: string;
-  code: string;
-}
-
-export interface ChapterBriefResponse {
-  id: number;
-  name: string;
-  code: string;
-}
-
-export interface LessonBriefResponse {
-  id: number;
-  name: string;
-  code: string;
 }
 
 export interface TagResponse {
@@ -91,9 +77,9 @@ export interface QuestionResponse {
   canonicalAnswer?: string;
   questionType: QuestionType;
   questionLevel: QuestionLevel;
-  subject?: SubjectBriefResponse;
-  chapter?: ChapterBriefResponse;
-  lesson?: LessonBriefResponse;
+  subject?: TSubjectBriefResponse;
+  chapter?: TChapterBriefResponse;
+  lesson?: TLessonBriefResponse;
   tags?: TagResponse[];
   options?: OptionResponse[];
   isActive: boolean;
@@ -110,7 +96,7 @@ export interface QuestionBriefResponse {
   content: string;
   questionType: QuestionType;
   questionLevel: QuestionLevel;
-  lesson?: LessonBriefResponse;
+  lesson?: TLessonBriefResponse;
 }
 
 export interface RequestPublishDTO {
@@ -125,6 +111,7 @@ export interface ApproveRejectDTO {
 export interface QuestionSearchParams {
   keyword?: string;
   subjectId?: number;
+  chapterId?: number;
   lessonId?: number;
   questionType?: QuestionType;
   questionLevel?: QuestionLevel;

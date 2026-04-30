@@ -481,12 +481,12 @@ export const PublicProfileContent = ({
 												</span>
 											</span>
 										</div>
-										<div className="mt-1 text-xs text-slate-500">
+										{/* <div className="mt-1 text-xs text-slate-500">
 											Điểm:{" "}
 											<span className="font-bold text-yellow-600">
 												{item.score}
 											</span>
-										</div>
+										</div> */}
 										{/* <div className="text-[11px] text-slate-400 mt-1">
 											{new Date(item.playedAt).toLocaleDateString("vi-VN")}
 										</div> */}

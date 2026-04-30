@@ -8,8 +8,14 @@ import {
 	TrendingUp,
 	TriangleAlert,
 } from "lucide-react";
-import { useCallback, useEffect, useState, type ReactNode } from "react";
-import { useNavigate } from "@tanstack/react-router";
+import {
+	useCallback,
+	useEffect,
+	useMemo,
+	useState,
+	type ReactNode,
+} from "react";
+import { Link, useNavigate } from "@tanstack/react-router";
 import { useSelector } from "react-redux";
 import type { RootState } from "@/shared/redux/store";
 import type { Comment, Game } from "../services/gameService";
@@ -200,6 +206,27 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 		}
 	};
 
+	const curriculumLinks = detailGame?.curriculumLinks ?? [];
+	const isMatchingGame = detailGame?.gameType === "MATCHING";
+
+	const groupedLinks = useMemo(() => {
+		const map = new Map<number, { curriculumName: string; grades: number[] }>();
+		for (const link of curriculumLinks) {
+			const existing = map.get(link.curriculumId);
+			if (existing) {
+				if (!existing.grades.includes(link.classLevel)) {
+					existing.grades.push(link.classLevel);
+				}
+			} else {
+				map.set(link.curriculumId, {
+					curriculumName: link.curriculumName,
+					grades: [link.classLevel],
+				});
+			}
+		}
+		return map;
+	}, [curriculumLinks]);
+
 	if (loading) {
 		return <Loader />;
 	}
@@ -332,11 +359,11 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 			/>
 			<Navbar />
 
-			<div className="min-h-screen max-w-7xl mx-auto px-6 py-16 mt-10">
+			<div className="min-h-screen max-w-[90rem] mx-auto px-6 py-16 mt-10">
 				<button
 					type="button"
 					onClick={() => navigate({ to: "/games" })}
-					className="mb-10 bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded font-bold transition-colors"
+					className="mb-10 px-6 py-2 rounded font-bold transition-colors hover:cursor-pointer"
 				>
 					← Quay lại
 				</button>
@@ -547,10 +574,6 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 																				"vi-VN",
 																			)}
 																		</div>
-																		<div className="mt-1 text-xs uppercase tracking-[0.16em] text-slate-500">
-																			{item.attemptState ??
-																				(isCompleted ? "COMPLETED" : "PARTIAL")}
-																		</div>
 																	</div>
 																	<span
 																		className={`rounded-full px-3 py-1 text-xs font-semibold ${
@@ -603,12 +626,12 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 																			<span className="rounded-full bg-rose-500/10 px-3 py-1">
 																				Sai {item.wrongCount ?? 0}
 																			</span>
-																			<span className="rounded-full bg-amber-500/10 px-3 py-1">
+																			{/* <span className="rounded-full bg-amber-500/10 px-3 py-1">
 																				Hết giờ {item.timeoutCount ?? 0}
 																			</span>
 																			<span className="rounded-full bg-sky-500/10 px-3 py-1">
 																				Điểm {item.score ?? 0}
-																			</span>
+																			</span> */}
 																		</>
 																	) : isHighScore ? (
 																		<>
@@ -882,6 +905,40 @@ export default function GameDetailPage({ id }: GameDetailPageProps) {
 								)}
 							</div>
 						</div>
+
+						{!isMatchingGame && groupedLinks.size > 0 && (
+							<div className="bg-gray-800/50 rounded-lg p-6">
+								<h3 className="font-bold mb-4">Phù hợp với chương trình</h3>
+								<div className="space-y-3">
+									{Array.from(groupedLinks.entries()).map(
+										([curriculumId, { curriculumName, grades }]) => (
+											<div key={curriculumId}>
+												<span className="text-gray-300 text-sm font-semibold">
+													{curriculumName}:{" "}
+												</span>
+												{grades.map((grade, index) => (
+													<span key={grade}>
+														{index > 0 && (
+															<span className="text-gray-500 mx-1">·</span>
+														)}
+														<Link
+															to="/games/curriculum"
+															search={{
+																curriculum: curriculumId,
+																grade: grade,
+															}}
+															className="text-red-400 hover:text-red-300 text-sm transition-colors"
+														>
+															Lớp {grade}
+														</Link>
+													</span>
+												))}
+											</div>
+										),
+									)}
+								</div>
+							</div>
+						)}
 					</div>
 				</div>
 			</div>

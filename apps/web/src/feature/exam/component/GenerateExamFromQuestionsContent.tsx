@@ -22,6 +22,8 @@ import { toast } from "@/shared/components/Sonner";
 import { useMyQuestions, useSearchQuestions } from "@/feature/question/queries/useQuestion";
 import { useGenerateExamFromQuestions, useExam, useDownloadExam } from "../queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
+import { useChaptersBySubject } from "@/feature/matrix/queries/useChapter";
+import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
 import { ApprovalStatus } from "@/feature/question/types/question.type";
 import type { ExamType } from "../types/exam.type";
 import { getDifficultyBadge, getTypeBadge } from "@/feature/question/utils/question.utils";
@@ -44,17 +46,23 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const [generatedExamId, setGeneratedExamId] = useState<number | null>(null);
 
   const [searchTerm, setSearchTerm] = useState("");
-  const [filterSubjectId, setFilterSubjectId] = useState<number | undefined>(undefined);
+  const [selectedSubjectId, setSelectedSubjectId] = useState<number | undefined>(undefined);
+  const [selectedChapterId, setSelectedChapterId] = useState<number | undefined>(undefined);
+  const [selectedLessonId, setSelectedLessonId] = useState<number | undefined>(undefined);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
   const [currentPage, setCurrentPage] = useState(0);
 
   const { data: subjectsData } = useSubjectsList();
+  const { data: chapters, isLoading: loadingChapters } = useChaptersBySubject(selectedSubjectId ?? undefined);
+  const { data: lessons, isLoading: loadingLessons } = useLessonsByChapter(selectedChapterId ?? undefined);
 
   const systemParams = {
     page: currentPage,
     size: PAGE_SIZE,
     keyword: searchTerm || undefined,
-    subjectId: filterSubjectId,
+    subjectId: selectedSubjectId,
+    chapterId: selectedChapterId,
+    lessonId: selectedLessonId,
     approvalStatus: ApprovalStatus.APPROVED,
   };
 
@@ -62,15 +70,17 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     page: currentPage,
     size: PAGE_SIZE,
     keyword: searchTerm || undefined,
-    subjectId: filterSubjectId,
+    subjectId: selectedSubjectId,
+    chapterId: selectedChapterId,
+    lessonId: selectedLessonId,
   };
 
   const { data: systemData, isLoading: systemLoading } = useSearchQuestions(systemParams, {
-    enabled: questionSource === "system",
+    enabled: questionSource === "system" && !!selectedSubjectId,
   });
 
   const { data: userData, isLoading: userLoading } = useMyQuestions(userParams, {
-    enabled: questionSource === "user",
+    enabled: questionSource === "user" && !!selectedSubjectId,
   });
 
   const isLoading = questionSource === "system" ? systemLoading : userLoading;
@@ -88,6 +98,10 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const handleGenerate = () => {
     if (!examName.trim() || !examCode.trim()) {
       toast.error({ title: "Lỗi", description: "Vui lòng nhập tên và mã đề thi" });
+      return;
+    }
+    if (!selectedSubjectId) {
+      toast.error({ title: "Lỗi", description: "Vui lòng chọn môn học" });
       return;
     }
     if (examType === "EXAM" && !enrollKey.trim()) {
@@ -108,6 +122,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
         shuffleOptions,
         durationInMinutes,
         totalScore,
+        subjectId: selectedSubjectId!,
         type: examType,
         enrollKey: enrollKey.trim() || undefined,
       },
@@ -140,8 +155,25 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setQuestionSource(source);
     setSelectedQuestions(new Set());
     setCurrentPage(0);
-    setFilterSubjectId(undefined);
+    setSelectedSubjectId(undefined);
+    setSelectedChapterId(undefined);
+    setSelectedLessonId(undefined);
     setSearchTerm("");
+  };
+
+  const handleSubjectChange = (subjectId: number | undefined) => {
+    setSelectedSubjectId(subjectId);
+    setSelectedChapterId(undefined);
+    setSelectedLessonId(undefined);
+    setSelectedQuestions(new Set());
+    setCurrentPage(0);
+    setSearchTerm("");
+  };
+
+  const handleChapterChange = (chapterId: number | undefined) => {
+    setSelectedChapterId(chapterId);
+    setSelectedLessonId(undefined);
+    setCurrentPage(0);
   };
 
   const handleDownload = (format: "pdf" | "docx") => {
@@ -160,7 +192,9 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setEnrollKey("");
     setSelectedQuestions(new Set());
     setSearchTerm("");
-    setFilterSubjectId(undefined);
+    setSelectedSubjectId(undefined);
+    setSelectedChapterId(undefined);
+    setSelectedLessonId(undefined);
     setCurrentPage(0);
   };
 
@@ -251,8 +285,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
               </div>
 
               {!isExamGenerated && (
-                <div className="flex gap-2 mt-3">
-                  <div className="relative flex-1">
+                <div className="flex flex-col gap-2 mt-3 w-full min-w-0">
+                  <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
                     <Input
                       placeholder="Tìm kiếm câu hỏi..."
@@ -262,33 +296,56 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                         setCurrentPage(0);
                       }}
                       className="pl-9"
+                      disabled={!selectedSubjectId}
                     />
                   </div>
 
-                  {subjectsData && subjectsData.length > 0 && (
-                    <select
-                      value={filterSubjectId ?? ""}
-                      onChange={(e) => {
-                        setFilterSubjectId(e.target.value ? Number(e.target.value) : undefined);
-                        setSelectedQuestions(new Set());
-                        setCurrentPage(0);
-                      }}
-                      className="px-3 py-2 border border-input rounded-md text-sm bg-background text-foreground outline-none focus:ring-2 focus:ring-primary min-w-37.5"
-                    >
-                      <option value="">Tất cả môn</option>
-                      {subjectsData.map((s) => (
-                        <option key={s.id} value={s.id}>
-                          {s.name}
-                        </option>
-                      ))}
-                    </select>
+                  {selectedSubjectId && (
+                    <div className="grid grid-cols-2 gap-2 w-full min-w-0">
+                      <select
+                        value={selectedChapterId ?? ""}
+                        onChange={(e) => handleChapterChange(e.target.value ? Number(e.target.value) : undefined)}
+                        disabled={loadingChapters}
+                        className="w-full min-w-0 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none disabled:opacity-50"
+                      >
+                        <option value="">-- Tất cả chương --</option>
+                        {chapters?.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))}
+                      </select>
+
+                      <select
+                        value={selectedLessonId ?? ""}
+                        onChange={(e) => {
+                          setSelectedLessonId(e.target.value ? Number(e.target.value) : undefined);
+                          setCurrentPage(0);
+                        }}
+                        disabled={!selectedChapterId || loadingLessons}
+                        className="w-full min-w-0 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none disabled:opacity-50"
+                      >
+                        <option value="">-- Tất cả bài học --</option>
+                        {lessons?.map((l) => (
+                          <option key={l.id} value={l.id}>
+                            {l.name}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
                   )}
                 </div>
               )}
             </CardHeader>
 
             <CardContent>
-              {isLoading ? (
+              {!selectedSubjectId && !isExamGenerated ? (
+                <div className="text-center py-12 text-slate-400">
+                  <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                  <p className="font-medium">Chưa chọn môn học</p>
+                  <p className="text-sm mt-1">Vui lòng chọn môn học ở phần cài đặt để xem danh sách câu hỏi</p>
+                </div>
+              ) : isLoading ? (
                 <div className="space-y-3">
                   {[1, 2, 3, 4, 5].map((i) => (
                     <Skeleton key={i} className="h-16 w-full" />
@@ -328,14 +385,14 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                               <span className="text-xs">{getDifficultyBadge(question.questionLevel)}</span>
                               {question.chapter && (
                                 <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                  Chương: {question.chapter.name}
+                                  Chương {question.chapter.chapterNo}
                                 </span>
                               )}
                               {question.lesson && (
                                 <>
                                   <span className="text-slate-400">●</span>
                                   <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                    {question.lesson.name}
+                                    Bài {question.lesson.lessonNo}
                                   </span>
                                 </>
                               )}
@@ -348,7 +405,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               )}
 
-              {totalPages > 1 && (
+              {totalPages > 1 && selectedSubjectId && (
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <Button
                     variant="outline"
@@ -385,6 +442,30 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
+                <div>
+                  <Label htmlFor="subjectId">
+                    Môn học <span className="text-red-500">*</span>
+                  </Label>
+                  <select
+                    id="subjectId"
+                    value={selectedSubjectId ?? ""}
+                    onChange={(e) => handleSubjectChange(e.target.value ? Number(e.target.value) : undefined)}
+                    className="w-full mt-1.5 px-3 py-2 rounded-md border border-input bg-background text-sm focus:ring-2 focus:ring-primary outline-none"
+                  >
+                    <option value="">-- Chọn môn học --</option>
+                    {subjectsData?.map((s) => (
+                      <option key={s.id} value={s.id}>
+                        {s.name}
+                      </option>
+                    ))}
+                  </select>
+                  {!selectedSubjectId && (
+                    <p className="text-xs text-amber-600 dark:text-amber-400 mt-1">
+                      Chọn môn học để bắt đầu chọn câu hỏi
+                    </p>
+                  )}
+                </div>
+
                 <div>
                   <Label htmlFor="examName">
                     Tên đề thi <span className="text-red-500">*</span>
@@ -489,7 +570,10 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 <Button
                   onClick={handleGenerate}
                   isDisabled={
-                    generateExam.isPending || selectedQuestions.size === 0 || (examType === "EXAM" && !enrollKey.trim())
+                    generateExam.isPending ||
+                    selectedQuestions.size === 0 ||
+                    !selectedSubjectId ||
+                    (examType === "EXAM" && !enrollKey.trim())
                   }
                   size="lg"
                   className="w-full gap-2 mt-4"

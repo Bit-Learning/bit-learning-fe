@@ -1,4 +1,3 @@
-/* biome-ignore-all lint/security/noDangerouslySetInnerHtml: backend stores authored rich HTML for forum posts. */
 import {
 	AlertDialog,
 	AlertDialogAction,
@@ -202,12 +201,9 @@ export const PostDetailPage: React.FC = () => {
 
 							<CardContent className="space-y-4">
 								<div className="rounded-xl border bg-background p-6">
-									<div
-										dangerouslySetInnerHTML={{
-											__html: post.content || "<p>Không có nội dung</p>",
-										}}
-										className="lecture-content prose prose-sm max-w-none"
-									/>
+									<p className="text-sm leading-[1.8] whitespace-pre-wrap text-foreground">
+										{post.content || "Không có nội dung"}
+									</p>
 								</div>
 
 								{post.attachments.length > 0 && (

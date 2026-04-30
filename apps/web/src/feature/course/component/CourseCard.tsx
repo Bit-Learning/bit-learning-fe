@@ -7,6 +7,8 @@ import { BookOpen, Clock, Loader2, Play, Star, Users } from "lucide-react";
 import type React from "react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
+import { useSelector } from "react-redux";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import type { CoursePreview } from "../types/course.type";
 import { useCourseAccess, useEnrollCourse } from "../queries/useEnroll";
 
@@ -27,17 +29,18 @@ const CoursePopup: React.FC<{
   courseId: number;
   position: PopupPosition;
   cartPending?: boolean;
+  isAuthenticated: boolean;
   onAddToCart: () => void;
   onBuyNow: () => void;
   onMouseEnter: () => void;
   onMouseLeave: () => void;
-}> = ({ courseId, position, cartPending, onAddToCart, onBuyNow, onMouseEnter, onMouseLeave }) => {
+}> = ({ courseId, position, cartPending, isAuthenticated, onAddToCart, onBuyNow, onMouseEnter, onMouseLeave }) => {
   const navigate = useNavigate();
   const { data: course, isLoading } = useCourseDetail(courseId);
   const level = course?.level ? LEVEL_CONFIG[course.level] : null;
   const totalHours = course?.totalDuration ? Math.round(course.totalDuration / 3600) : null;
-  const { data: enrollAccess } = useCourseAccess(course?.id || 0);
-  const hasAccess = enrollAccess;
+  const { data: enrollAccess } = useCourseAccess(course?.id || 0, isAuthenticated);
+  const hasAccess = isAuthenticated && enrollAccess;
   const { mutate: enroll, isPending: enrollPending } = useEnrollCourse();
 
   const isPending = cartPending || enrollPending;
@@ -200,6 +203,8 @@ interface CourseCardProps {
 const CourseCard: React.FC<CourseCardProps> = ({ course, onClick, onMouseEnter }) => {
   const navigate = useNavigate();
   const { mutate: addToCart, isPending: cartPending } = useAddToCart();
+  const currentUser = useSelector(selectAuthStateInfo);
+  const isAuthenticated = !!currentUser?.isAuthenticated;
   const [showPopup, setShowPopup] = useState(false);
   const [popupPos, setPopupPos] = useState<PopupPosition | null>(null);
   const cardRef = useRef<HTMLDivElement>(null);
@@ -318,6 +323,7 @@ const CourseCard: React.FC<CourseCardProps> = ({ course, onClick, onMouseEnter }
           courseId={course.id}
           position={popupPos}
           cartPending={cartPending}
+          isAuthenticated={isAuthenticated}
           onAddToCart={handleAddToCart}
           onBuyNow={handleBuyNow}
           onMouseEnter={clearHideTimer}

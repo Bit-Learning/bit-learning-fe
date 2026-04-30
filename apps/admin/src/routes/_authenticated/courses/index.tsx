@@ -12,6 +12,13 @@ const coursesSearchSchema = z.object({
 		.array(z.enum(["PENDING", "PUBLISHED", "REJECTED"]))
 		.optional()
 		.catch([]),
+	// Filter by course grade (class)
+	grade: z.array(z.coerce.number()).optional().catch([]),
+	// Filter by course level (difficulty)
+	level: z
+		.array(z.enum(["BEGINNING", "INTERMEDIATE", "ADVANCED"]))
+		.optional()
+		.catch([]),
 });
 
 export const Route = createFileRoute("/_authenticated/courses/")({

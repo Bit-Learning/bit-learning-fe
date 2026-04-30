@@ -1,4 +1,4 @@
-import { Link } from "@tanstack/react-router";
+import { Link, useNavigate, useSearch } from "@tanstack/react-router";
 import {
 	ArrowRight,
 	Gamepad2,
@@ -6,6 +6,7 @@ import {
 	Loader2,
 	Sparkles,
 } from "lucide-react";
+import { useState } from "react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import {
@@ -19,6 +20,7 @@ import {
 	useDeleteGame,
 	useAdminGamesList,
 	useGameCategories,
+	useBulkUpdateGameStatus,
 } from "../queries/useAdminGamesCrud";
 import { useAdminGameAnalyticsDashboard } from "../queries/useAdminGameAnalytics";
 import {
@@ -27,6 +29,7 @@ import {
 } from "../queries/useAdminMatchingGame";
 import { GamesTable } from "./games-table";
 import type { GameRow } from "./games-columns";
+import type { ColumnFiltersState } from "@tanstack/react-table";
 
 const getErrorMessage = (error: unknown, fallback: string) => {
 	if (error instanceof Error && error.message) {
@@ -57,6 +60,30 @@ export const GamesCrudManager = () => {
 		useMatchingGameMappings();
 	const deleteGame = useDeleteGame();
 	const deleteMatchingGame = useDeleteMatchingGame();
+	const bulkUpdateStatus = useBulkUpdateGameStatus();
+	const navigate = useNavigate({ from: "/apps/games/" });
+	const search = useSearch({ from: "/_authenticated/apps/games/" });
+	const [selectedRows, setSelectedRows] = useState<GameRow[]>([]);
+
+	const initialColumnFilters: ColumnFiltersState = [
+		...(search.status ? [{ id: "status", value: [search.status] }] : []),
+		...(search.rowType ? [{ id: "rowType", value: [search.rowType] }] : []),
+	];
+
+	const handleColumnFiltersChange = (filters: ColumnFiltersState) => {
+		const statusFilter = filters.find((f) => f.id === "status");
+		const rowTypeFilter = filters.find((f) => f.id === "rowType");
+		const statusValues = statusFilter?.value as string[] | undefined;
+		const rowTypeValues = rowTypeFilter?.value as string[] | undefined;
+		navigate({
+			search: {
+				status: statusValues?.[0],
+				rowType: rowTypeValues?.[0],
+			},
+			replace: true,
+			resetScroll: false,
+		});
+	};
 
 	const getCategoryName = (categoryId?: number | null) => {
 		if (!categoryId) return "Chưa phân loại";
@@ -144,6 +171,34 @@ export const GamesCrudManager = () => {
 			toast.success("Đã xoá matching game");
 		} catch (error: unknown) {
 			toast.error(getErrorMessage(error, "Không thể xoá matching game"));
+		}
+	};
+
+	const handleBulkPublish = async () => {
+		const ids = selectedRows
+			.map((r) => r.standardId ?? r.matchingGameId)
+			.filter((id): id is number => id !== undefined);
+		if (ids.length === 0) return;
+		try {
+			await bulkUpdateStatus.mutateAsync({ ids, status: "PUBLISHED" });
+			toast.success(`Đã xuất bản ${ids.length} game`);
+			setSelectedRows([]);
+		} catch (error: unknown) {
+			toast.error(getErrorMessage(error, "Không thể xuất bản game"));
+		}
+	};
+
+	const handleBulkDraft = async () => {
+		const ids = selectedRows
+			.map((r) => r.standardId ?? r.matchingGameId)
+			.filter((id): id is number => id !== undefined);
+		if (ids.length === 0) return;
+		try {
+			await bulkUpdateStatus.mutateAsync({ ids, status: "DRAFT" });
+			toast.success(`Đã chuyển ${ids.length} game về nháp`);
+			setSelectedRows([]);
+		} catch (error: unknown) {
+			toast.error(getErrorMessage(error, "Không thể chuyển game về nháp"));
 		}
 	};
 
@@ -254,6 +309,34 @@ export const GamesCrudManager = () => {
 					</CardDescription>
 				</CardHeader>
 				<CardContent className="pt-6">
+					{selectedRows.length > 0 && (
+						<div className="mb-4 flex items-center gap-3 rounded-lg border border-sky-200 bg-sky-50 px-4 py-3">
+							<span className="text-sm font-medium text-sky-800">
+								Đã chọn {selectedRows.length} game
+							</span>
+							<div className="ml-auto flex gap-2">
+								<Button
+									size="sm"
+									variant="default"
+									disabled={bulkUpdateStatus.isPending}
+									onClick={handleBulkPublish}
+								>
+									{bulkUpdateStatus.isPending ? (
+										<Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />
+									) : null}
+									Xuất bản
+								</Button>
+								<Button
+									size="sm"
+									variant="outline"
+									disabled={bulkUpdateStatus.isPending}
+									onClick={handleBulkDraft}
+								>
+									Chuyển về nháp
+								</Button>
+							</div>
+						</div>
+					)}
 					{isLoading ? (
 						<div className="flex items-center gap-2 text-muted-foreground">
 							<Loader2 className="h-4 w-4 animate-spin" />
@@ -266,6 +349,9 @@ export const GamesCrudManager = () => {
 							onDeleteMatching={handleDeleteMatching}
 							isDeletingStandard={deleteGame.isPending}
 							isDeletingMatching={deleteMatchingGame.isPending}
+							initialColumnFilters={initialColumnFilters}
+							onColumnFiltersChange={handleColumnFiltersChange}
+							onSelectionChange={setSelectedRows}
 						/>
 					)}
 				</CardContent>

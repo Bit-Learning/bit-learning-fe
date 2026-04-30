@@ -5,21 +5,21 @@ import { courseKeys } from "./useCourse";
 
 const STALE_TIME = 15 * 1000;
 const GC_TIME = 30 * 1000;
-export const useCourseAccess = (courseId: number) => {
+
+export const useCourseAccess = (courseId: number, isAuthenticated: boolean) => {
   return useQuery({
     queryKey: ["course-access", courseId],
     queryFn: async () => {
       const response = await enrollApi.checkCourseAccess(courseId);
       return response.data.data;
     },
-    enabled: !!courseId,
+    enabled: isAuthenticated && !!courseId,
     staleTime: STALE_TIME,
     gcTime: GC_TIME,
     refetchOnMount: true,
     refetchOnWindowFocus: true,
   });
 };
-
 export const useEnrollCourse = () => {
   const queryClient = useQueryClient();
 
