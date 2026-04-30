@@ -7,7 +7,7 @@ import destinationAsset from "../asset/Destination.png";
 import fenceAsset from "../asset/fence.png";
 import rockAsset from "../asset/rock.png";
 import startAsset from "../asset/start.png";
-import tileGrassAsset from "../asset/tile_grass.png";
+import tileGrassAsset from "../asset/tile_sea.png";
 import treeAsset from "../asset/tree.png";
 import wallAsset from "../asset/wall.png";
 import type { CharacterState, KidsBlocklyLevel } from "../types";

@@ -14,6 +14,7 @@ import {
 import { GameBoard } from "../components/GameBoard";
 import { KidsBlocklyWorkspace } from "../components/KidsBlocklyWorkspace";
 import { RewardDialog } from "../components/RewardDialog";
+import tomSadAsset from "../asset/tom_sad.png";
 import { kidsBlocklyLevels } from "../data/levels";
 import { runProgram } from "../engine/run-program";
 import type {
@@ -41,6 +42,8 @@ interface BlocklyInfoDialogProps {
 	title: string;
 	description: string;
 	tone?: "hint" | "warning";
+	imageSrc?: string;
+	imageAlt?: string;
 	onClose: () => void;
 }
 
@@ -49,6 +52,8 @@ function BlocklyInfoDialog({
 	title,
 	description,
 	tone = "hint",
+	imageSrc,
+	imageAlt,
 	onClose,
 }: BlocklyInfoDialogProps) {
 	const isWarning = tone === "warning";
@@ -66,37 +71,64 @@ function BlocklyInfoDialog({
 						initial={{ scale: 0.92, y: 14 }}
 						animate={{ scale: 1, y: 0 }}
 						exit={{ scale: 0.94, y: 10 }}
-						className="w-full max-w-md rounded-[28px] bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.24)]"
+						className={cn(
+							"w-full max-w-md rounded-[28px] bg-white p-6 shadow-[0_24px_60px_rgba(15,23,42,0.24)]",
+							imageSrc && "text-center",
+						)}
 					>
-						<div className="flex items-start justify-between gap-4">
-							<div
-								className={cn(
-									"flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
-									isWarning
-										? "bg-amber-100 text-amber-700"
-										: "bg-sky-100 text-sky-700",
-								)}
-							>
-								{isWarning ? (
-									<AlertTriangle className="h-6 w-6" />
-								) : (
-									<Lightbulb className="h-6 w-6" />
-								)}
-							</div>
+						<div
+							className={cn(
+								"flex items-start justify-between gap-4",
+								imageSrc && "justify-center",
+							)}
+						>
+							{imageSrc ? (
+								<div className="relative mx-auto h-32 w-32">
+									<img
+										src={imageSrc}
+										alt={imageAlt ?? ""}
+										className="h-full w-full object-contain drop-shadow-lg"
+										draggable={false}
+									/>
+								</div>
+							) : (
+								<div
+									className={cn(
+										"flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl",
+										isWarning
+											? "bg-amber-100 text-amber-700"
+											: "bg-sky-100 text-sky-700",
+									)}
+								>
+									{isWarning ? (
+										<AlertTriangle className="h-6 w-6" />
+									) : (
+										<Lightbulb className="h-6 w-6" />
+									)}
+								</div>
+							)}
 							<button
 								type="button"
 								onClick={onClose}
-								className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900"
+								className={cn(
+									"flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-slate-500 transition hover:bg-slate-100 hover:text-slate-900",
+									imageSrc && "absolute right-5 top-5",
+								)}
 								aria-label="Đóng"
 							>
 								<X className="h-5 w-5" />
 							</button>
 						</div>
-						<h3 className="mt-5 text-2xl font-black text-slate-900">{title}</h3>
+						<h3 className="mt-4 text-2xl font-black text-slate-900">{title}</h3>
 						<p className="mt-3 text-base leading-7 text-slate-600">
 							{description}
 						</p>
-						<div className="mt-6 flex justify-end">
+						<div
+							className={cn(
+								"mt-6 flex justify-end",
+								imageSrc && "justify-center",
+							)}
+						>
 							<Button
 								onPress={onClose}
 								className={cn(
@@ -473,6 +505,8 @@ export default function KidsBlocklyPage() {
 				title="Thử lại nhé"
 				description={runResult?.message ?? ""}
 				tone="warning"
+				imageSrc={tomSadAsset}
+				imageAlt="Tom buồn"
 				onClose={() => setShowStatus(false)}
 			/>
 		</div>
