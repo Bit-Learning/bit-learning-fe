@@ -58,10 +58,3 @@ export interface KidsBlocklyProgress {
 	unlockedLevelIds: string[];
 	starsByLevel: Record<string, number>;
 }
-
-export interface CharacterOption {
-	id: string;
-	name: string;
-	src: string;
-	alt: string;
-}
