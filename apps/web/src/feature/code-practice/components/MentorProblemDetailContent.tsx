@@ -13,6 +13,7 @@ import {
   ArrowLeft,
   SendHorizonal,
   X,
+  Code2,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Badge } from "@workspace/ui/components/Badge";
@@ -33,6 +34,7 @@ import TestCaseModal from "./TestCaseModal";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import ApprovalModal from "@/shared/components/ApprovalModal";
+import EditCodeTemplateModal from "./EditCodeTemplateModal";
 
 const MentorProblemDetailContent: React.FC = () => {
   const { id: problemId } = useParams({ strict: false });
@@ -42,8 +44,8 @@ const MentorProblemDetailContent: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingTestCase, setEditingTestCase] = useState<TestCaseResponse | null>(null);
   const [deletingTestCase, setDeletingTestCase] = useState<TestCaseResponse | null>(null);
-
   const [showApprovalModal, setShowApprovalModal] = useState(false);
+  const [showEditTemplateModal, setShowEditTemplateModal] = useState(false);
 
   const requestPublish = useRequestPublish();
 
@@ -358,21 +360,30 @@ const MentorProblemDetailContent: React.FC = () => {
                     <span className="w-1.5 h-6 bg-blue-600 rounded-full" />
                     Mẫu Code Khởi Tạo
                   </h2>
-                  <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-md">
-                    {Object.values(Language).map((lang) => (
-                      <button
-                        key={lang}
-                        onClick={() => setSelectedLanguage(lang)}
-                        className={cn(
-                          "px-4 py-1.5 text-sm font-semibold rounded-md transition-all",
-                          selectedLanguage === lang
-                            ? "bg-white dark:bg-slate-700 text-blue-600 shadow-sm"
-                            : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300",
-                        )}
-                      >
-                        {lang}
-                      </button>
-                    ))}
+                  <div className="flex items-center gap-3">
+                    <button
+                      onClick={() => setShowEditTemplateModal(true)}
+                      className="cursor-pointer flex items-center gap-2 px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-semibold shadow-sm transition-all duration-150"
+                    >
+                      <Code2 className="w-4 h-4" />
+                      Chỉnh sửa Template
+                    </button>
+                    <div className="flex items-center gap-2 p-1 bg-slate-100 dark:bg-slate-800 rounded-md">
+                      {Object.values(Language).map((lang) => (
+                        <button
+                          key={lang}
+                          onClick={() => setSelectedLanguage(lang)}
+                          className={cn(
+                            "px-4 py-1.5 text-sm font-semibold rounded-md transition-all",
+                            selectedLanguage === lang
+                              ? "bg-white dark:bg-slate-700 text-blue-600 shadow-sm"
+                              : "text-slate-500 hover:text-slate-700 dark:hover:text-slate-300",
+                          )}
+                        >
+                          {lang}
+                        </button>
+                      ))}
+                    </div>
                   </div>
                 </div>
 
@@ -508,7 +519,6 @@ const MentorProblemDetailContent: React.FC = () => {
             : undefined
         }
       />
-
       <ApprovalModal
         open={showApprovalModal}
         onClose={() => setShowApprovalModal(false)}
@@ -517,6 +527,12 @@ const MentorProblemDetailContent: React.FC = () => {
         isSuccess={requestPublish.isSuccess}
         itemName={problem.title}
         type="problem"
+      />
+      <EditCodeTemplateModal
+        isOpen={showEditTemplateModal}
+        onClose={() => setShowEditTemplateModal(false)}
+        problemId={problemId || ""}
+        problemTitle={problem.title}
       />
     </div>
   );
