@@ -455,10 +455,15 @@ const GenerateExamFlow: React.FC = () => {
             setCurrentStep("complete");
 
             generateExam(request, {
-              onSuccess: () => {
+              onSuccess: (data) => {
+                const examId = data.data.data?.id;
+                setCurrentStep("complete");
                 setTimeout(() => {
-                  navigate({ to: "/mentor/matrix/$id", params: { id } });
+                  navigate({ to: "/mentor/exam/$id", params: { id: String(examId) } });
                 }, 3000);
+              },
+              onError: () => {
+                setCurrentStep("setup");
               },
             });
           }}
@@ -507,7 +512,7 @@ const GenerateExamFlow: React.FC = () => {
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-slate-900 dark:text-white mb-1">Tạo đề thi thành công!</p>
-              <p className="text-md text-slate-500 dark:text-slate-400">Đang chuyển hướng về trang ma trận...</p>
+              <p className="text-md text-slate-500 dark:text-slate-400">Đang chuyển hướng...</p>
             </div>
           </>
         )}
