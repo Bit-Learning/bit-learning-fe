@@ -14,7 +14,13 @@ import {
 import { GameBoard } from "../components/GameBoard";
 import { KidsBlocklyWorkspace } from "../components/KidsBlocklyWorkspace";
 import { RewardDialog } from "../components/RewardDialog";
+import backgroundMusicAsset from "../asset/background_music.mp3";
+import clickSoundAsset from "../asset/click.mp3";
+import errorSoundAsset from "../asset/error.mp3";
+import footstepSoundAsset from "../asset/footstep.mp3";
+import popSoundAsset from "../asset/pop.mp3";
 import tomSadAsset from "../asset/tom_sad.png";
+import yaySoundAsset from "../asset/yay.mp3";
 import { kidsBlocklyLevels } from "../data/levels";
 import { runProgram } from "../engine/run-program";
 import type {
@@ -36,6 +42,18 @@ function getFirstLevel(): KidsBlocklyLevel {
 }
 
 const firstLevel = getFirstLevel();
+
+function playAudio(audio: HTMLAudioElement | null) {
+	if (!audio) return;
+	audio.currentTime = 0;
+	void audio.play().catch(() => undefined);
+}
+
+function stopAudio(audio: HTMLAudioElement | null) {
+	if (!audio) return;
+	audio.pause();
+	audio.currentTime = 0;
+}
 
 interface BlocklyInfoDialogProps {
 	open: boolean;
@@ -190,6 +208,12 @@ export default function KidsBlocklyPage() {
 	const [lastStars, setLastStars] = useState(0);
 	const [workspaceResetSignal, setWorkspaceResetSignal] = useState(0);
 	const playbackTimeouts = useRef<number[]>([]);
+	const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
+	const clickSoundRef = useRef<HTMLAudioElement | null>(null);
+	const popSoundRef = useRef<HTMLAudioElement | null>(null);
+	const footstepSoundRef = useRef<HTMLAudioElement | null>(null);
+	const errorSoundRef = useRef<HTMLAudioElement | null>(null);
+	const yaySoundRef = useRef<HTMLAudioElement | null>(null);
 
 	const level = useMemo(
 		() =>
@@ -228,11 +252,71 @@ export default function KidsBlocklyPage() {
 		}
 	}, [progress]);
 
+	useEffect(() => {
+		const backgroundMusic = new Audio(backgroundMusicAsset);
+		const clickSound = new Audio(clickSoundAsset);
+		const popSound = new Audio(popSoundAsset);
+		const footstepSound = new Audio(footstepSoundAsset);
+		const errorSound = new Audio(errorSoundAsset);
+		const yaySound = new Audio(yaySoundAsset);
+
+		backgroundMusic.loop = true;
+		backgroundMusic.autoplay = true;
+		backgroundMusic.preload = "auto";
+		footstepSound.loop = true;
+		footstepSound.preload = "auto";
+		backgroundMusic.volume = 0.1;
+		clickSound.volume = 0.55;
+		popSound.volume = 0.55;
+		footstepSound.volume = 0.8;
+		errorSound.volume = 0.9;
+		yaySound.volume = 0.75;
+
+		backgroundMusicRef.current = backgroundMusic;
+		clickSoundRef.current = clickSound;
+		popSoundRef.current = popSound;
+		footstepSoundRef.current = footstepSound;
+		errorSoundRef.current = errorSound;
+		yaySoundRef.current = yaySound;
+
+		const startBackgroundMusic = () => {
+			void backgroundMusic.play().catch(() => undefined);
+		};
+
+		startBackgroundMusic();
+		backgroundMusic.addEventListener("canplaythrough", startBackgroundMusic, {
+			once: true,
+		});
+		document.addEventListener("visibilitychange", startBackgroundMusic);
+		window.addEventListener("pointerdown", startBackgroundMusic, {
+			once: true,
+		});
+		window.addEventListener("keydown", startBackgroundMusic, { once: true });
+
+		return () => {
+			backgroundMusic.pause();
+			backgroundMusic.removeEventListener(
+				"canplaythrough",
+				startBackgroundMusic,
+			);
+			document.removeEventListener("visibilitychange", startBackgroundMusic);
+			window.removeEventListener("pointerdown", startBackgroundMusic);
+			window.removeEventListener("keydown", startBackgroundMusic);
+			backgroundMusicRef.current = null;
+			clickSoundRef.current = null;
+			popSoundRef.current = null;
+			footstepSoundRef.current = null;
+			errorSoundRef.current = null;
+			yaySoundRef.current = null;
+		};
+	}, []);
+
 	const clearPlayback = useCallback(() => {
 		for (const timeoutId of playbackTimeouts.current) {
 			window.clearTimeout(timeoutId);
 		}
 		playbackTimeouts.current = [];
+		stopAudio(footstepSoundRef.current);
 	}, []);
 
 	useEffect(() => clearPlayback, [clearPlayback]);
@@ -241,6 +325,14 @@ export default function KidsBlocklyPage() {
 		setProgram(nextProgram);
 		setRunResult(null);
 		setShowStatus(false);
+	}, []);
+
+	const handleBlockClick = useCallback(() => {
+		playAudio(clickSoundRef.current);
+	}, []);
+
+	const handleBlockDrop = useCallback(() => {
+		playAudio(popSoundRef.current);
 	}, []);
 
 	const resetProgram = useCallback(() => {
@@ -292,9 +384,14 @@ export default function KidsBlocklyPage() {
 		const result = runProgram(level, program);
 		setRunResult(result);
 
-		if (result.steps.length === 0) return;
+		if (result.steps.length === 0) {
+			playAudio(errorSoundRef.current);
+			setShowStatus(true);
+			return;
+		}
 
 		setIsRunning(true);
+		playAudio(footstepSoundRef.current);
 		result.steps.forEach((step, index) => {
 			const timeoutId = window.setTimeout(() => {
 				setCharacter(step.state);
@@ -302,6 +399,7 @@ export default function KidsBlocklyPage() {
 
 				const isLast = index === result.steps.length - 1;
 				if (isLast) {
+					stopAudio(footstepSoundRef.current);
 					setIsRunning(false);
 					if (result.status === "success") {
 						const stars = getStars(level, program.length);
@@ -314,9 +412,15 @@ export default function KidsBlocklyPage() {
 							},
 						}));
 						unlockNextLevel(level.id);
-						window.setTimeout(() => setShowReward(true), 240);
+						window.setTimeout(() => {
+							playAudio(yaySoundRef.current);
+							setShowReward(true);
+						}, 240);
 					} else {
-						window.setTimeout(() => setShowStatus(true), 240);
+						window.setTimeout(() => {
+							playAudio(errorSoundRef.current);
+							setShowStatus(true);
+						}, 240);
 					}
 				}
 			}, index * 500);
@@ -409,6 +513,8 @@ export default function KidsBlocklyPage() {
 							activeBlockId={activeBlockId}
 							resetSignal={workspaceResetSignal}
 							className="flex-1"
+							onBlockClick={handleBlockClick}
+							onBlockDrop={handleBlockDrop}
 							onProgramChange={handleProgramChange}
 						/>
 					</section>
