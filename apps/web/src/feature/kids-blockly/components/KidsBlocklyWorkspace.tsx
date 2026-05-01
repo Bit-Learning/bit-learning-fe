@@ -10,6 +10,8 @@ interface KidsBlocklyWorkspaceProps {
 	activeBlockId: string | null;
 	resetSignal: number;
 	className?: string;
+	onBlockClick?: () => void;
+	onBlockDrop?: () => void;
 	onProgramChange: (program: ProgramBlock[]) => void;
 }
 
@@ -206,6 +208,8 @@ export function KidsBlocklyWorkspace({
 	activeBlockId,
 	resetSignal,
 	className,
+	onBlockClick,
+	onBlockDrop,
 	onProgramChange,
 }: KidsBlocklyWorkspaceProps) {
 	const containerRef = useRef<HTMLDivElement | null>(null);
@@ -249,6 +253,21 @@ export function KidsBlocklyWorkspace({
 		onProgramChange([]);
 
 		const listener = (event: Blockly.Events.Abstract) => {
+			const blocklyEvent = event as Blockly.Events.Abstract & {
+				newElementId?: string;
+				isStart?: boolean;
+			};
+
+			if (event.type === Blockly.Events.SELECTED && blocklyEvent.newElementId) {
+				onBlockClick?.();
+				return;
+			}
+
+			if (event.type === Blockly.Events.BLOCK_DRAG && !blocklyEvent.isStart) {
+				onBlockDrop?.();
+				return;
+			}
+
 			if (event.isUiEvent) return;
 			onProgramChange(readProgram(workspace));
 		};
@@ -261,7 +280,7 @@ export function KidsBlocklyWorkspace({
 			workspace.dispose();
 			workspaceRef.current = null;
 		};
-	}, [onProgramChange, toolboxXml]);
+	}, [onBlockClick, onBlockDrop, onProgramChange, toolboxXml]);
 
 	useEffect(() => {
 		const workspace = workspaceRef.current;
