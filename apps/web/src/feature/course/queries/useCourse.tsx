@@ -12,7 +12,13 @@ import {
   setSortByAction,
   type SortType,
 } from "../store/course.store";
-import type { CourseLevel, CoursePreview, MyCourse, SearchCourseRequest } from "../types/course.type";
+import type {
+  CourseLevel,
+  CoursePreview,
+  MyCourse,
+  RecommendedCourse,
+  SearchCourseRequest,
+} from "../types/course.type";
 import type { ApiResponse, PaginationInfo } from "@/shared/api/api.type";
 
 const STALE_TIME = 30 * 1000;
@@ -25,6 +31,7 @@ export const courseKeys = {
   myPaginated: (page: number, size: number) => ["courses", "my", page, size] as const,
   detail: (id: number) => ["courses", "detail", id] as const,
   certificate: (courseId: number) => ["courses", "certificate", courseId] as const,
+  allCategories: ["courses", "categories"] as const,
 };
 
 export const useSearchCourses = (request: SearchCourseRequest) => {
@@ -175,5 +182,29 @@ export const useVerifyCertificate = () => {
       const res = await courseApi.verifyCertificate(file);
       return res.data.data;
     },
+  });
+};
+
+export const useAllCategories = () => {
+  return useQuery<string[]>({
+    queryKey: courseKeys.allCategories,
+    queryFn: async () => {
+      const res = await courseApi.getAllCategories();
+      return res.data.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useRecommendedCourses = (userId: number | undefined) => {
+  return useQuery({
+    queryKey: ["courses", "recommended", userId],
+    queryFn: async () => {
+      const res = await courseApi.getRecommendedCourses(userId!, 0, 10);
+      return res.data.data;
+    },
+    enabled: !!userId,
+    staleTime: STALE_TIME,
+    gcTime: GC_TIME,
   });
 };

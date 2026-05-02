@@ -107,3 +107,18 @@ export interface SearchCourseRequest {
   minGrade?: number;
   maxGrade?: number;
 }
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface RecommendedCourse {
+  recommendedByGrade: Page<CoursePreview>;
+  recommendedByFavoriteCategories: Page<CoursePreview>;
+}
