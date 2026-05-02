@@ -1,4 +1,4 @@
-import { useState, useMemo } from "react";
+import { useState, useRef } from "react";
 import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
@@ -14,13 +14,7 @@ import {
   AlertDialogTrigger,
 } from "@workspace/ui/components/alert-dialog";
 import { useDeleteQuestion, useRequestPublish, useMyQuestions } from "../queries/useQuestion";
-import {
-  ApprovalStatus,
-  QuestionLevel,
-  QuestionSearchParams,
-  QuestionType,
-  type QuestionResponse,
-} from "../types/question.type";
+import { ApprovalStatus, QuestionSearchParams, QuestionType, type QuestionResponse } from "../types/question.type";
 import { cn } from "@workspace/ui/lib/utils";
 import { Pagination } from "@/shared/components/Pagination";
 import { useNavigate } from "@tanstack/react-router";
@@ -29,7 +23,7 @@ import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { DetailModal } from "./DetailModal";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 
-const PAGE_SIZE = 20;
+const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const selectCls =
   "appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer";
@@ -38,6 +32,7 @@ const MyQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(0);
+  const [pageSize, setPageSize] = useState(20);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
   const [typeFilter, setTypeFilter] = useState<QuestionType | "">("");
   const [statusFilter, setStatusFilter] = useState<ApprovalStatus | "">("");
@@ -51,7 +46,7 @@ const MyQuestionsContent: React.FC = () => {
 
   const params: QuestionSearchParams = {
     page,
-    size: PAGE_SIZE,
+    size: pageSize,
     keyword: search || undefined,
     questionType: typeFilter || undefined,
     approvalStatus: statusFilter || undefined,
@@ -62,6 +57,7 @@ const MyQuestionsContent: React.FC = () => {
 
   const allQuestions = data?.data ?? [];
   const totalPages = data?.page?.totalPages ?? 0;
+  const totalElements = data?.page?.totalElements ?? allQuestions.length;
 
   const deleteQuestion = useDeleteQuestion();
   const requestPublish = useRequestPublish();
@@ -78,6 +74,12 @@ const MyQuestionsContent: React.FC = () => {
   const handleSearchChange = (value: string) => {
     setSearch(value);
     resetPage();
+  };
+
+  const handlePageSizeChange = (size: number) => {
+    setPageSize(size);
+    setPage(0);
+    setSelectedQuestions([]);
   };
 
   const handleSelectQuestion = (id: number) => {
@@ -223,6 +225,21 @@ const MyQuestionsContent: React.FC = () => {
               <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
             </div>
           )}
+
+          <div className="relative">
+            <select
+              value={pageSize}
+              onChange={(e) => handlePageSizeChange(Number(e.target.value))}
+              className={selectCls}
+            >
+              {PAGE_SIZE_OPTIONS.map((size) => (
+                <option key={size} value={size}>
+                  {size} / trang
+                </option>
+              ))}
+            </select>
+            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          </div>
         </div>
 
         {isLoading ? (
@@ -404,30 +421,28 @@ const MyQuestionsContent: React.FC = () => {
                           >
                             <Eye className="h-6 w-6" />
                           </button>
-                          <>
-                            <button
-                              className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
-                              title="Chỉnh sửa"
-                              disabled={question.approvalStatus === ApprovalStatus.PENDING}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate({ to: `/mentor/question/${question.id}/edit` });
-                              }}
-                            >
-                              <Edit className="h-6 w-6" />
-                            </button>
-                            <button
-                              className="cursor-pointer p-2 text-slate-600 hover:text-red-600 transition-colors"
-                              title="Xóa"
-                              disabled={question.approvalStatus !== ApprovalStatus.PENDING}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                setDeletingQuestion(question);
-                              }}
-                            >
-                              <Trash2 className="h-6 w-6" />
-                            </button>
-                          </>
+                          <button
+                            className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
+                            title="Chỉnh sửa"
+                            disabled={question.approvalStatus === ApprovalStatus.PENDING}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate({ to: `/mentor/question/${question.id}/edit` });
+                            }}
+                          >
+                            <Edit className="h-6 w-6" />
+                          </button>
+                          <button
+                            className="cursor-pointer p-2 text-slate-600 hover:text-red-600 transition-colors"
+                            title="Xóa"
+                            disabled={question.approvalStatus === ApprovalStatus.PENDING}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeletingQuestion(question);
+                            }}
+                          >
+                            <Trash2 className="h-6 w-6" />
+                          </button>
                         </div>
                       </td>
                     </tr>
@@ -440,9 +455,9 @@ const MyQuestionsContent: React.FC = () => {
               <p className="text-sm text-gray-600">
                 Hiển thị{" "}
                 <span className="font-semibold text-gray-900">
-                  {page * PAGE_SIZE + 1}–{Math.min((page + 1) * PAGE_SIZE, allQuestions.length)}
+                  {totalElements === 0 ? 0 : page * pageSize + 1}–{Math.min((page + 1) * pageSize, totalElements)}
                 </span>{" "}
-                trong <span className="font-semibold text-gray-900">{allQuestions.length}</span> câu hỏi
+                trong <span className="font-semibold text-gray-900">{totalElements}</span> câu hỏi
               </p>
               {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
             </div>
