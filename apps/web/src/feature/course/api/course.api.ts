@@ -6,6 +6,7 @@ import type {
   CourseDetail,
   CoursePreview,
   MyCourse,
+  RecommendedCourse,
   SearchCourseRequest,
   VerifyCertificateResponse,
 } from "../types/course.type";
@@ -48,5 +49,15 @@ export const courseApi = {
   },
   getAllCategories(): Promise<AxiosResponse<ApiResponse<string[]>>> {
     return api.get(`${endpoints.COURSES}/categories`);
+  },
+
+  getRecommendedCourses(
+    userId: number,
+    pageNum = 0,
+    pageSize = 10,
+  ): Promise<AxiosResponse<ApiResponse<RecommendedCourse>>> {
+    return api.get(`${endpoints.COURSES}/recommended/users/${userId}`, {
+      params: { pageNum, pageSize },
+    });
   },
 };

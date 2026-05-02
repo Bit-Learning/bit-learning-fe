@@ -43,7 +43,7 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
                 <BookMarked className="h-5 w-5 text-slate-600" />
               </div>
               <div>
-                <h2 className="text-lg font-semibold text-slate-800 leading-tight">Em thích học gì?</h2>
+                <h2 className="text-lg font-semibold text-slate-800 leading-tight">Bạn thích học gì?</h2>
                 <p className="text-sm text-slate-400 mt-0.5">Chọn để nhận gợi ý khóa học phù hợp</p>
               </div>
             </div>
@@ -67,7 +67,7 @@ export const FavoriteCategoriesModal: React.FC<FavoriteCategoriesModalProps> = (
           ) : (
             <>
               <p className="text-xs text-slate-400 mb-3 uppercase tracking-wide font-medium">
-                Đã chọn {selected.size} / {categories.length} môn
+                Đã chọn {selected.size} / {categories.length} danh mục
               </p>
               <div className="flex flex-wrap gap-2 max-h-60 overflow-y-auto">
                 {categories.map((cat) => {

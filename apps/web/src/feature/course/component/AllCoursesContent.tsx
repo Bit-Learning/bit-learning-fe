@@ -193,7 +193,7 @@ const AllCoursesContent: React.FC = () => {
                 flex items-center gap-1.5"
             >
               <BookMarked className="w-3.5 h-3.5" />
-              Em muốn học gì
+              Bạn muốn học gì
               {favoriteCategories.length > 0 && (
                 <span className="rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-1.5 py-0.5 leading-none font-semibold">
                   {favoriteCategories.length}
