@@ -11,6 +11,7 @@ export interface CreateCourseRequest {
   audience: string;
   level: CourseLevel;
   grade: number;
+  categories?: string[];
 }
 
 export interface UpdateCourseRequest {
@@ -24,6 +25,7 @@ export interface UpdateCourseRequest {
   audience: string;
   level: CourseLevel;
   grade: number;
+  categories?: string[];
 }
 
 export interface CoursePreview {
@@ -41,6 +43,7 @@ export interface CoursePreview {
   price: number;
   isDeleted: boolean;
   status: CourseStatus;
+  categories?: string[];
 }
 
 export interface CourseDetail {
@@ -68,6 +71,7 @@ export interface CourseDetail {
   isDeleted: boolean;
   status: CourseStatus;
   progressPercentage: number;
+  categories?: string[];
 }
 
 export interface MyCourse {
@@ -86,6 +90,7 @@ export interface MyCourse {
   isDeleted: boolean;
   status: CourseStatus;
   progressPercentage: number;
+  categories?: string[];
 }
 
 export enum CourseLevel {
