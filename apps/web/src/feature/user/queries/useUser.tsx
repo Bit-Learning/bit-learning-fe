@@ -323,3 +323,30 @@ export function useUnfollowUser() {
     },
   });
 }
+
+export function useUpdateFavoriteCategories() {
+  const dispatch = useAppDispatch();
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (categories: string[]) => {
+      const res = await userApi.updateFavoriteCategories(categories);
+      return res.data;
+    },
+    onMutate: () => dispatch(setIsLoadingAction(true)),
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: userQueryKeys.all });
+      dispatch(setUserInfoAction(data.data));
+      toast.success({
+        title: "Cập nhật danh mục yêu thích thành công",
+        description: "Chúng tôi sẽ gợi ý khóa học phù hợp hơn cho bạn.",
+      });
+    },
+    onError: (error: any) => {
+      const msg = error?.response?.data?.message || "Cập nhật thất bại";
+      dispatch(setErrorAction(msg));
+      toast.error({ title: "Lỗi", description: msg });
+    },
+    onSettled: () => dispatch(setIsLoadingAction(false)),
+  });
+}

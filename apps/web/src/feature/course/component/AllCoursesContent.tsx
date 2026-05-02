@@ -1,5 +1,5 @@
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
-import { BookOpen, LayoutGrid, Sparkles } from "lucide-react";
+import { BookOpen, LayoutGrid, Sparkles, SlidersHorizontal, BookMarked } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -9,6 +9,7 @@ import { useCourseActions, useCourseState, usePrefetchCourse } from "../queries/
 import type { CourseLevel, SearchCourseRequest } from "../types/course.type";
 import { AllCoursesView, SCHOOL_LEVELS, type SchoolLevelKey } from "./AllCoursesView";
 import { PersonalisedView } from "./PersonalisedView";
+import FavoriteCategoriesModal from "./FavoriteCategoriesModal";
 
 const AllCoursesContent: React.FC = () => {
   const navigate = useNavigate();
@@ -19,10 +20,12 @@ const AllCoursesContent: React.FC = () => {
   const currentUser = useSelector(selectAuthStateInfo);
   const studentGrade: number | null = currentUser?.userInfo?.grade ?? null;
   const isLoggedIn = !!currentUser;
+  const favoriteCategories: string[] = currentUser?.userInfo?.favoriteCategories ?? [];
 
   const { minGrade, maxGrade } = useSearch({ from: "/_layout/courses/" });
 
   const [showAll, setShowAll] = useState(() => minGrade !== undefined || maxGrade !== undefined);
+  const [showCategoryModal, setShowCategoryModal] = useState(false);
 
   const [selectedSchoolLevel, setSelectedSchoolLevel] = useState<SchoolLevelKey>(() => {
     if (minGrade !== undefined && maxGrade !== undefined) {
@@ -180,6 +183,24 @@ const AllCoursesContent: React.FC = () => {
               </button>
             </>
           )}
+
+          {isLoggedIn && (
+            <button
+              onClick={() => setShowCategoryModal(true)}
+              className="cursor-pointer ml-auto text-md px-3.5 py-1.5 rounded-full border font-medium transition-all
+                border-slate-300 dark:border-slate-700 text-slate-600 dark:text-slate-300
+                bg-white dark:bg-slate-900 hover:border-slate-500 hover:text-slate-800
+                flex items-center gap-1.5"
+            >
+              <BookMarked className="w-3.5 h-3.5" />
+              Em muốn học gì
+              {favoriteCategories.length > 0 && (
+                <span className="rounded-full bg-slate-200 dark:bg-slate-700 text-slate-600 dark:text-slate-300 text-xs px-1.5 py-0.5 leading-none font-semibold">
+                  {favoriteCategories.length}
+                </span>
+              )}
+            </button>
+          )}
         </div>
 
         {isPersonalised ? (
@@ -200,6 +221,10 @@ const AllCoursesContent: React.FC = () => {
           />
         )}
       </div>
+
+      {showCategoryModal && (
+        <FavoriteCategoriesModal currentCategories={favoriteCategories} onClose={() => setShowCategoryModal(false)} />
+      )}
     </div>
   );
 };

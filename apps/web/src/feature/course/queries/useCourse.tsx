@@ -25,6 +25,7 @@ export const courseKeys = {
   myPaginated: (page: number, size: number) => ["courses", "my", page, size] as const,
   detail: (id: number) => ["courses", "detail", id] as const,
   certificate: (courseId: number) => ["courses", "certificate", courseId] as const,
+  allCategories: ["courses", "categories"] as const,
 };
 
 export const useSearchCourses = (request: SearchCourseRequest) => {
@@ -175,5 +176,16 @@ export const useVerifyCertificate = () => {
       const res = await courseApi.verifyCertificate(file);
       return res.data.data;
     },
+  });
+};
+
+export const useAllCategories = () => {
+  return useQuery<string[]>({
+    queryKey: courseKeys.allCategories,
+    queryFn: async () => {
+      const res = await courseApi.getAllCategories();
+      return res.data.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
   });
 };

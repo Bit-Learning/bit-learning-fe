@@ -46,4 +46,7 @@ export const courseApi = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
+  getAllCategories(): Promise<AxiosResponse<ApiResponse<string[]>>> {
+    return api.get(`${endpoints.COURSES}/categories`);
+  },
 };

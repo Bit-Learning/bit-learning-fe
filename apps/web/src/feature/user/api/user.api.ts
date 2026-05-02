@@ -82,4 +82,7 @@ export const userApi = {
       params: { page, size },
     });
   },
+  updateFavoriteCategories(categories: string[]): Promise<AxiosResponse<ApiResponse<TUserProfile>>> {
+    return api.patch(`${endpoints.ACCOUNT}/favorite-categories`, categories);
+  },
 };
