@@ -97,6 +97,7 @@ export type TUserProfile = {
   featured?: boolean | null;
   studentsCount?: number | null;
   coursesCount?: number | null;
+  favoriteCategories: string[];
 };
 
 export type TLoginResponse = {
