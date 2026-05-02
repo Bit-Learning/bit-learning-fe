@@ -17,11 +17,11 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { ContestOverview } from "../components/ContestOverview";
-import { ContestProblems } from "../components/ContestProblems";
 import { ContestParticipants } from "../components/ContestParticipants";
 import { ContestLeaderboard } from "../components/ContestLeaderboard";
 import { ContestSubmissions } from "../components/ContestSubmissions";
 import { ContestClarifications } from "../components/ContestClarifications";
+import ContestProblems from "../components/ContestProblems";
 
 const ContestDetailPage: React.FC = () => {
   const { id } = useParams({ from: "/_authenticated/contests/$id/" });

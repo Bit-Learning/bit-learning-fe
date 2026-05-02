@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
-import { Loader2, Plus, Trash2, AlertCircle, Info } from "lucide-react";
+import { Loader2, Plus, Trash2, AlertCircle } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { useGenerateVersion } from "../queries/useMatrix";
 import { useChaptersBySubject } from "../queries/useChapter";
@@ -62,7 +62,7 @@ const NumericInput: React.FC<NumericInputProps> = ({
 };
 
 interface PercentInputProps {
-  value: number; // 0–1
+  value: number;
   onChange: (val: number) => void;
   onBlur?: () => void;
   className?: string;
@@ -115,10 +115,7 @@ const formSchema = z.object({
   difficultyHard: z.number().min(0).max(1),
   typeMCQ: z.number().min(0).max(1),
   typeEssay: z.number().min(0).max(1),
-  scoringMode: z.enum(["UNIFORM", "WEIGHTED"]),
-  weightEasy: z.number().positive().optional(),
-  weightMedium: z.number().positive().optional(),
-  weightHard: z.number().positive().optional(),
+  scoringMode: "UNIFORM",
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -210,16 +207,12 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
       difficultyEasy: 0.4,
       difficultyMedium: 0.4,
       difficultyHard: 0.2,
-      typeMCQ: 0.7,
-      typeEssay: 0.3,
+      typeMCQ: 0.9,
+      typeEssay: 0.1,
       scoringMode: "UNIFORM",
-      weightEasy: 1,
-      weightMedium: 2,
-      weightHard: 3,
     },
   });
 
-  const scoringMode = watch("scoringMode");
   const diffEasy = watch("difficultyEasy") || 0;
   const diffMedium = watch("difficultyMedium") || 0;
   const diffHard = watch("difficultyHard") || 0;
@@ -265,22 +258,12 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
             ESSAY: values.typeEssay,
           },
         },
-        ...(values.scoringMode === "WEIGHTED" && {
-          scoring: {
-            mode: "WEIGHTED" as const,
-            weights: {
-              EASY: values.weightEasy || 1,
-              MEDIUM: values.weightMedium || 2,
-              HARD: values.weightHard || 3,
-            },
-          },
-        }),
+        scoring: { mode: "UNIFORM" as const },
       },
       { onSuccess: onClose },
     );
   };
 
-  // Hiển thị tổng dưới dạng % (0–100)
   const SumBadge = ({ sum, valid }: { sum: number; valid: boolean }) => (
     <span
       className={`text-sm font-bold px-2 py-0.5 rounded-full ${
@@ -462,68 +445,6 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
               ))}
             </div>
           </div>
-        </div>
-
-        <div className="p-4 bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-700">
-          <h3 className="text-md font-semibold text-slate-900 dark:text-white mb-3">Chiến lược tính điểm</h3>
-          <div className="flex gap-3 mb-4">
-            {(["UNIFORM", "WEIGHTED"] as const).map((m) => (
-              <label
-                key={m}
-                className={`flex-1 flex items-center gap-3 p-3 rounded-lg border-2 cursor-pointer transition-all ${
-                  scoringMode === m
-                    ? "border-blue-600 bg-blue-50 dark:bg-blue-900/20"
-                    : "border-slate-200 dark:border-slate-700 hover:border-slate-300"
-                }`}
-              >
-                <input {...register("scoringMode")} type="radio" value={m} className="accent-blue-600" />
-                <div>
-                  <p className="text-md font-bold text-slate-800 dark:text-slate-100">
-                    {m === "UNIFORM" ? "Đồng đều" : "Có trọng số"}
-                  </p>
-                  <p className="text-sm text-slate-500 dark:text-slate-400">
-                    {m === "UNIFORM" ? "Mọi câu cùng điểm số" : "Câu khó > câu dễ theo tỷ lệ"}
-                  </p>
-                </div>
-              </label>
-            ))}
-          </div>
-
-          {scoringMode === "WEIGHTED" && (
-            <div>
-              <p className="text-sm text-slate-500 mb-3 flex items-center gap-1.5">
-                <Info className="h-3.5 w-3.5" />
-                Tỷ lệ điểm theo độ khó (mặc định: Dễ=1, TB=2, Khó=3)
-              </p>
-              <div className="grid grid-cols-3 gap-3">
-                {(
-                  [
-                    { label: "Dễ", name: "weightEasy", color: "text-green-600" },
-                    { label: "TB", name: "weightMedium", color: "text-amber-600" },
-                    { label: "Khó", name: "weightHard", color: "text-red-600" },
-                  ] as const
-                ).map(({ label, name, color }) => (
-                  <div key={name}>
-                    <label className={`block text-sm font-medium mb-1 ${color}`}>{label}</label>
-                    <Controller
-                      name={name}
-                      control={control}
-                      render={({ field }) => (
-                        <NumericInput
-                          value={field.value ?? 0}
-                          onChange={field.onChange}
-                          onBlur={field.onBlur}
-                          min={1}
-                          step={1}
-                          className="w-full px-3 py-2 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
-                        />
-                      )}
-                    />
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-slate-200 dark:border-slate-800">
