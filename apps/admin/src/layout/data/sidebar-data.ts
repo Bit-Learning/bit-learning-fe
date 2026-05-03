@@ -57,6 +57,7 @@ export const navGroups: NavGroup[] = [
 				icon: School,
 				items: [
 					{ title: "Trò chơi giáo dục", url: "/apps/games" },
+					{ title: "Lập trình khối", url: "/apps/kids-blockly" },
 					{ title: "Mẫu thuyết trình", url: "/templates" },
 					{ title: "Sơ đồ tư duy", url: "/mindmap" },
 				],
