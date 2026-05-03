@@ -83,7 +83,10 @@ export const CourseListPage: React.FC = () => {
 			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
 				<div className="flex flex-wrap items-end justify-between gap-2">
 					<div>
-						<h1 className="text-2xl font-bold">Khóa học của tôi</h1>
+						<h1 className="text-2xl font-bold mb-2">Khóa học của tôi</h1>
+						<p className="text-muted-foreground text-sm">
+							Quản lý các khóa học hiện có trên hệ thống
+						</p>
 					</div>
 					<Button size="sm" onClick={() => navigate({ to: "/courses/create" })}>
 						<Plus className="mr-0 h-4 w-4" />
