@@ -44,12 +44,16 @@ function isObstacle(level: KidsBlocklyLevel, x: number, y: number): boolean {
 function getMoveDelta(type: Extract<ActionBlockType, "move" | "back" | "jump">, dir: CharacterState["dir"]) {
   const delta = moveDelta[dir];
   if (type === "back") {
-    return { dx: -delta.dx, dy: -delta.dy, distance: 1 };
+    return { dx: -delta!.dx, dy: -delta!.dy, distance: 1 };
   }
   if (type === "jump") {
-    return { dx: delta.dx, dy: delta.dy, distance: 2 };
+    return { dx: delta!.dx, dy: delta!.dy, distance: 2 };
   }
   return { ...delta, distance: 1 };
+}
+
+function isOutOfBounds(level: KidsBlocklyLevel, x: number, y: number): boolean {
+  return x < 0 || y < 0 || x >= level.gridSize.cols || y >= level.gridSize.rows;
 }
 
 export function runProgram(level: KidsBlocklyLevel, program: ProgramBlock[]): RunResult {
@@ -93,12 +97,13 @@ export function runProgram(level: KidsBlocklyLevel, program: ProgramBlock[]): Ru
     const delta = getMoveDelta(block.type, state.dir);
     let nextX = state.x;
     let nextY = state.y;
+    const shouldCheckObstacle = block.type !== "jump";
 
     for (let stepIndex = 0; stepIndex < delta.distance; stepIndex += 1) {
       nextX += delta.dx;
       nextY += delta.dy;
 
-      if (nextX < 0 || nextY < 0 || nextX >= level.gridSize.cols || nextY >= level.gridSize.rows) {
+      if (isOutOfBounds(level, nextX, nextY)) {
         steps.push({
           state: { ...state },
           blockId: block.id,
@@ -116,7 +121,7 @@ export function runProgram(level: KidsBlocklyLevel, program: ProgramBlock[]): Ru
         };
       }
 
-      if (isObstacle(level, nextX, nextY)) {
+      if (shouldCheckObstacle && isObstacle(level, nextX, nextY)) {
         state = { ...state, x: nextX, y: nextY };
         steps.push({
           state: { ...state },
@@ -134,6 +139,25 @@ export function runProgram(level: KidsBlocklyLevel, program: ProgramBlock[]): Ru
           isNewBest: false,
         };
       }
+    }
+
+    if (block.type === "jump" && isObstacle(level, nextX, nextY)) {
+      state = { ...state, x: nextX, y: nextY };
+      steps.push({
+        state: { ...state },
+        blockId: block.id,
+        type: block.type,
+        status: "hit-wall",
+      });
+      return {
+        status: "hit-wall",
+        finalState: state,
+        steps,
+        failedBlockId: block.id,
+        message: "NhÃ¢n váº­t bá»‹ cháº·n bá»Ÿi chÆ°á»›ng ngáº¡i váº­t.",
+        stars: 0,
+        isNewBest: false,
+      };
     }
 
     state = { ...state, x: nextX, y: nextY };
