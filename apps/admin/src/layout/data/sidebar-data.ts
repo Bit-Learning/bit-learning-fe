@@ -23,7 +23,7 @@ export const navGroups: NavGroup[] = [
 	{
 		title: "Tổng quan",
 		items: [
-			{ title: "Dashboard", url: "/", icon: LayoutDashboard },
+			{ title: "Bảng thống kê", url: "/", icon: LayoutDashboard },
 			{
 				title: "Giao dịch & Doanh thu",
 				url: "/transactions",
