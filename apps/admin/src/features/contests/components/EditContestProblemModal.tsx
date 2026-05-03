@@ -13,7 +13,6 @@ import {
   Code2,
   CheckSquare,
   AlertCircle,
-  Upload,
   Pencil,
   Check,
 } from "lucide-react";
@@ -29,10 +28,8 @@ import {
   useAllTestCases,
   useCodeTemplates,
   useBulkCreateTestCases,
-  useImportTestCasesFromFile,
   useUpdateTestCase,
   useDeleteTestCase,
-  useDeleteAllTestCases,
   useGenerateCodeTemplates,
 } from "@/features/problems/queries/useProblem";
 import { useUpdateContestProblem } from "../queries/useContest";
@@ -102,9 +99,6 @@ const EditContestProblemModal: React.FC<EditContestProblemModalProps> = ({
   const [editingTCId, setEditingTCId] = useState<string | null>(null);
   const [editingTCData, setEditingTCData] = useState<UpdateTestCaseRequest | null>(null);
   const [deletingTCId, setDeletingTCId] = useState<string | null>(null);
-  const [clearAllConfirm, setClearAllConfirm] = useState(false);
-  const [importFile, setImportFile] = useState<File | null>(null);
-  const [replaceExisting, setReplaceExisting] = useState(false);
 
   const { data: detail, isLoading: loadingDetail } = useProblemDetail(problemId);
   const { data: allTestCases, isLoading: loadingTC } = useAllTestCases(problemId);
@@ -112,10 +106,8 @@ const EditContestProblemModal: React.FC<EditContestProblemModalProps> = ({
 
   const updateProblem = useUpdateContestProblem();
   const bulkCreateTC = useBulkCreateTestCases();
-  const importTC = useImportTestCasesFromFile();
   const updateTC = useUpdateTestCase();
   const deleteTC = useDeleteTestCase();
-  const deleteAllTC = useDeleteAllTestCases();
   const generateTemplates = useGenerateCodeTemplates();
 
   const form = useForm<ProblemFormData>({
@@ -183,17 +175,6 @@ const EditContestProblemModal: React.FC<EditContestProblemModalProps> = ({
     setDeletingTCId(null);
   };
 
-  const handleClearAllTC = async () => {
-    await deleteAllTC.mutateAsync(problemId);
-    setClearAllConfirm(false);
-  };
-
-  const handleImport = async () => {
-    if (!importFile) return;
-    await importTC.mutateAsync({ problemId, file: importFile, replaceExisting });
-    setImportFile(null);
-  };
-
   const tabs: { id: Tab; label: string; icon: React.ReactNode }[] = [
     { id: "info", label: "Thông tin bài toán", icon: <FileText className="w-3.5 h-3.5" /> },
     {
@@ -219,16 +200,6 @@ const EditContestProblemModal: React.FC<EditContestProblemModalProps> = ({
         onConfirm={handleDeleteTC}
         onCancel={() => setDeletingTCId(null)}
       />
-      <ConfirmModal
-        open={clearAllConfirm}
-        variant="danger"
-        title="Xóa tất cả test cases"
-        description="Toàn bộ test cases của bài toán này sẽ bị xóa vĩnh viễn. Bạn chắc chắn không?"
-        confirmLabel="Xóa tất cả"
-        onConfirm={handleClearAllTC}
-        onCancel={() => setClearAllConfirm(false)}
-      />
-
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
         <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
         <div className="relative bg-white rounded-2xl shadow-2xl w-full max-w-3xl max-h-[92vh] flex flex-col animate-in fade-in zoom-in-95 duration-200">
@@ -384,13 +355,6 @@ const EditContestProblemModal: React.FC<EditContestProblemModalProps> = ({
                 <div className="flex items-center justify-between">
                   <p className="text-sm font-bold text-gray-800">Test cases hiện có</p>
                   <div className="flex items-center gap-2">
-                    <button
-                      onClick={() => setClearAllConfirm(true)}
-                      disabled={!allTestCases?.length || deleteAllTC.isPending}
-                      className="text-xs font-semibold text-red-500 hover:text-red-700 disabled:opacity-40 disabled:cursor-not-allowed transition-colors"
-                    >
-                      Xóa tất cả
-                    </button>
                     <button
                       onClick={addNewTC}
                       className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-bold text-blue-600 bg-blue-50 hover:bg-blue-100 rounded-lg border border-blue-200 transition-colors"
@@ -596,49 +560,6 @@ const EditContestProblemModal: React.FC<EditContestProblemModalProps> = ({
                     </Button>
                   </div>
                 )}
-
-                <div className="border-t border-gray-100 pt-4 space-y-3">
-                  <p className="text-xs font-bold text-gray-700 flex items-center gap-1.5">
-                    <Upload className="w-3.5 h-3.5" />
-                    Import từ file CSV / Excel
-                  </p>
-                  <div className="bg-gray-50 rounded-xl border border-gray-200 p-4 space-y-3">
-                    <input
-                      type="file"
-                      accept=".csv,.xlsx,.xls"
-                      onChange={(e) => setImportFile(e.target.files?.[0] ?? null)}
-                      className="w-full text-sm text-gray-600 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:text-xs file:font-bold file:bg-blue-50 file:text-blue-600 hover:file:bg-blue-100 file:cursor-pointer"
-                    />
-                    <label className="flex items-center gap-2 text-xs text-gray-600 cursor-pointer">
-                      <input
-                        type="checkbox"
-                        checked={replaceExisting}
-                        onChange={(e) => setReplaceExisting(e.target.checked)}
-                        className="w-3.5 h-3.5 accent-blue-600"
-                      />
-                      Xóa tất cả test case cũ trước khi import
-                    </label>
-                    {replaceExisting && (
-                      <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 rounded-lg px-3 py-2 border border-red-200">
-                        <AlertCircle className="w-3.5 h-3.5 shrink-0" />
-                        Cảnh báo: Tất cả test case hiện tại sẽ bị xóa vĩnh viễn!
-                      </div>
-                    )}
-                    <Button
-                      onClick={() => void handleImport()}
-                      disabled={!importFile || importTC.isPending}
-                      variant="outline"
-                      className="w-full gap-2 border-gray-300 text-sm"
-                    >
-                      {importTC.isPending ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
-                      ) : (
-                        <Upload className="w-4 h-4" />
-                      )}
-                      Import{importFile ? `: ${importFile.name}` : ""}
-                    </Button>
-                  </div>
-                </div>
               </div>
             )}
 
