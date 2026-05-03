@@ -52,7 +52,7 @@ const GenerateExamFlow: React.FC = () => {
   const { mutate: generateExam, isPending: isGenerating } = useGenerateExam();
 
   const { data: questionsData, isLoading } = useSearchQuestions(
-    { keyword: "", page: 0, size: 1000 },
+    { keyword: "", page: 0, size: 99999 },
     { enabled: currentStep === "check" },
   );
 
