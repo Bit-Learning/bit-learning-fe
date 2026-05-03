@@ -345,7 +345,7 @@ const MyQuestionsContent: React.FC = () => {
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-120">
                       NỘI DUNG CÂU HỎI
                     </th>
-                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-30">
+                    <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
                       MỨC ĐỘ
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-35">
@@ -400,9 +400,6 @@ const MyQuestionsContent: React.FC = () => {
                           <span className="line-clamp-1 text-md font-semibold text-slate-800 dark:text-blue-400 hover:underline">
                             {question.content}
                           </span>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Cập nhật {new Date(question.updatedAt || question.createdAt).toLocaleDateString("vi-VN")}
-                          </p>
                         </div>
                       </td>
                       <td className="p-4 text-sm">{getDifficultyBadge(question.questionLevel)}</td>

@@ -252,7 +252,7 @@ const GenerateExamFlow: React.FC = () => {
                           {r.available}
                         </span>
                         <span>/</span>
-                        <span className="font-bold">{r.required}</span>
+                        <span className="font-bold">{r.required} </span>
                         câu
                       </p>
                     ))}
