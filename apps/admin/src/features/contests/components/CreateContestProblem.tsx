@@ -60,7 +60,6 @@ interface CreateContestProblemProps {
 
 const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, onBack, onSuccess }) => {
   const [jsonError, setJsonError] = useState<string | null>(null);
-  const [selectedTagIds, setSelectedTagIds] = useState<string[]>([]);
   const [tcState, setTcState] = useState<TestCaseInputState>(defaultTestCaseInputState);
   const [tcError, setTcError] = useState<string | null>(null);
   const createProblem = useCreateProblem();
@@ -84,6 +83,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
       functionName: "",
       returnType: ParamType.INT,
       isPublic: false,
+      tags: [],
       parameters: [{ name: "", type: ParamType.INT }],
     },
   });
@@ -92,6 +92,12 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
     control: form.control,
     name: "parameters",
   });
+
+  const selectedTagIds = form.watch("tags");
+
+  const handleTagChange = (ids: string[]) => {
+    form.setValue("tags", ids, { shouldValidate: true });
+  };
 
   const removeVietnameseTones = (str: string): string => {
     str = str.toLowerCase();
@@ -129,7 +135,7 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
         memoryLimitMb: data.memoryLimitMb,
         classLevel: data.classLevel,
         isPublic: false,
-        tags: selectedTagIds,
+        tags: data.tags,
       });
 
       const { testCases, error } = resolveTestCases(tcState);
@@ -241,10 +247,10 @@ const CreateContestProblem: React.FC<CreateContestProblemProps> = ({ contestId, 
               />
             </FieldGroup>
 
-            <FieldGroup label="Thẻ tag">
+            <FieldGroup label="Thẻ tag" error={form.formState.errors.tags?.message}>
               <TagMultiSelect
                 value={selectedTagIds}
-                onChange={setSelectedTagIds}
+                onChange={handleTagChange}
                 placeholder="Chọn thẻ tag..."
                 className="w-full"
               />

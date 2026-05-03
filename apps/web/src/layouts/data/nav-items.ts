@@ -11,7 +11,12 @@ export const navItems = [
     title: "Học tập",
     items: [
       {
-        title: "Bài tập thực hành",
+        title: "Lập trình khối",
+        to: "/kids-blockly",
+        description: "Học lập trình kéo thả trực quan bằng Blockly.",
+      },
+      {
+        title: "Lập trình nâng cao",
         to: "/problem",
         description: "Luyện tập và giải các bài tập theo từng chủ đề.",
       },

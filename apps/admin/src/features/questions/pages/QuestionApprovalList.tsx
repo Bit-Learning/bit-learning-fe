@@ -10,12 +10,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import {
-  usePendingApproval,
-  useApproveQuestions,
-  useRejectQuestions,
-  usePendingApprovalAll,
-} from "../queries/useQuestion";
+import { usePendingApproval, useApproveQuestions, useRejectQuestions } from "../queries/useQuestion";
 import { QuestionLevel, QuestionType, type QuestionResponse } from "../types/question.type";
 import { QuestionDetailDialog } from "../components/QuestionDetailDialog";
 import { RejectDialog } from "../components/RejectDialog";
@@ -120,13 +115,15 @@ export function QuestionApprovalList() {
     { enabled: activeTab === "pending" },
   );
 
-  const { data: questionsAll } = usePendingApprovalAll();
-
   const approveQuestions = useApproveQuestions();
   const rejectQuestions = useRejectQuestions();
 
   const questions = response?.data || [];
   const pagination = response?.page;
+
+  const allIds = questions.map((q: QuestionResponse) => q.id);
+  const allSelected = allIds.length > 0 && allIds.every((id: number) => selectedQuestions.includes(id));
+  const someSelected = allIds.some((id: number) => selectedQuestions.includes(id)) && !allSelected;
 
   useEffect(() => {
     setSelectedQuestions([]);
@@ -164,7 +161,6 @@ export function QuestionApprovalList() {
     });
   };
 
-  // eslint-disable-next-line react-hooks/incompatible-library
   const pendingTable = useReactTable({
     data: questions,
     columns: [],
@@ -180,10 +176,10 @@ export function QuestionApprovalList() {
   };
 
   const handleSelectAll = () => {
-    if (selectedQuestions.length === questions.length) {
+    if (allSelected) {
       setSelectedQuestions([]);
     } else {
-      setSelectedQuestions(questionsAll?.data?.map((q) => q.id)!);
+      setSelectedQuestions(allIds);
     }
   };
 
@@ -284,7 +280,7 @@ export function QuestionApprovalList() {
               <CheckCircle className="h-4 w-4" />
               Chờ phê duyệt
               <Badge variant="secondary" className="ml-1">
-                {questionsAll?.page?.totalElements}
+                {pagination?.totalElements}
               </Badge>
             </TabsTrigger>
             <TabsTrigger value="bank" className="gap-2 px-6 py-3 text-base font-medium">
@@ -307,7 +303,13 @@ export function QuestionApprovalList() {
                     <TableRow>
                       <TableHead className="w-12">
                         <Checkbox
-                          checked={selectedQuestions.length === questions.length && questions.length > 0}
+                          checked={allSelected}
+                          ref={(el: HTMLButtonElement | null) => {
+                            if (el) {
+                              const input = el.querySelector("input");
+                              if (input) input.indeterminate = someSelected;
+                            }
+                          }}
                           onCheckedChange={handleSelectAll}
                         />
                       </TableHead>

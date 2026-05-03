@@ -93,6 +93,7 @@ export interface ExamResponse {
   matrixVersion?: MatrixVersionBriefResponse;
   subject?: TSubjectBriefResponse;
   examQuestions: ExamQuestionResponse[];
+  rejectReason?: string;
   createdBy?: UserSummary;
   approvalStatus: ApprovalStatus;
   createdAt: string;
@@ -108,6 +109,7 @@ export interface ExamBriefResponse {
   totalScore: number;
   enrollKey: string;
   subject?: TSubjectBriefResponse;
+  rejectReason?: string;
   totalQuestions: number;
   isPublished: boolean;
   createdBy?: UserSummary;
