@@ -2,10 +2,16 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/Button";
 import { cn } from "@workspace/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Blocks, Lightbulb, Play, RotateCcw, Trash2, X } from "lucide-react";
-import { GameBoard } from "../components/GameBoard";
-import { KidsBlocklyWorkspace } from "../components/KidsBlocklyWorkspace";
-import { RewardDialog } from "../components/RewardDialog";
+import {
+	AlertTriangle,
+	Blocks,
+	Lightbulb,
+	Loader2,
+	Play,
+	RotateCcw,
+	Trash2,
+	X,
+} from "lucide-react";
 import backgroundMusicAsset from "../asset/background_music.mp3";
 import clickSoundAsset from "../asset/click.mp3";
 import errorSoundAsset from "../asset/error.mp3";
@@ -13,21 +19,26 @@ import footstepSoundAsset from "../asset/footstep.mp3";
 import popSoundAsset from "../asset/pop.mp3";
 import tomSadAsset from "../asset/tom_sad.png";
 import yaySoundAsset from "../asset/yay.mp3";
-import { kidsBlocklyLevels } from "../data/levels";
-import { runProgram } from "../engine/run-program";
-import type { CharacterState, KidsBlocklyLevel, KidsBlocklyProgress, ProgramBlock, RunResult } from "../types";
+import { GameBoard } from "../components/GameBoard";
+import { KidsBlocklyWorkspace } from "../components/KidsBlocklyWorkspace";
+import { RewardDialog } from "../components/RewardDialog";
+import {
+	useKidsBlocklyBootstrap,
+	useSubmitKidsBlocklyRun,
+} from "../queries/useKidsBlockly";
+import type {
+	CharacterState,
+	KidsBlocklyProgressResponse,
+	ProgramBlock,
+	RunResult,
+} from "../types";
 
-const storageKey = "kids-blockly-progress-v1";
-
-function getFirstLevel(): KidsBlocklyLevel {
-  const level = kidsBlocklyLevels[0];
-  if (!level) {
-    throw new Error("Kids Blockly requires at least one level.");
-  }
-  return level;
-}
-
-const firstLevel = getFirstLevel();
+const emptyProgress: KidsBlocklyProgressResponse = {
+	unlockedLevelIds: [],
+	starsByLevel: {},
+	completedLevelIds: [],
+	totalStars: 0,
+};
 
 function playAudio(audio: HTMLAudioElement | null) {
 	if (!audio) return;
@@ -39,6 +50,11 @@ function stopAudio(audio: HTMLAudioElement | null) {
 	if (!audio) return;
 	audio.pause();
 	audio.currentTime = 0;
+}
+
+function getErrorMessage(error: unknown) {
+	if (error instanceof Error) return error.message;
+	return "Không thể kết nối Kids Blockly. Vui lòng thử lại.";
 }
 
 interface BlocklyInfoDialogProps {
@@ -132,38 +148,16 @@ function BlocklyInfoDialog({
   );
 }
 
-function getStars(level: KidsBlocklyLevel, blockCount: number): number {
-  if (blockCount <= level.par) return 3;
-  if (blockCount <= level.par + 2) return 2;
-  return 1;
-}
-
-function loadProgress(): KidsBlocklyProgress {
-  if (typeof window === "undefined") {
-    return { unlockedLevelIds: [firstLevel.id], starsByLevel: {} };
-  }
-
-  try {
-    const raw = window.localStorage.getItem(storageKey);
-    if (!raw) return { unlockedLevelIds: [firstLevel.id], starsByLevel: {} };
-    const parsed = JSON.parse(raw) as KidsBlocklyProgress;
-    return {
-      unlockedLevelIds: parsed.unlockedLevelIds?.length ? parsed.unlockedLevelIds : [firstLevel.id],
-      starsByLevel: parsed.starsByLevel ?? {},
-    };
-  } catch {
-    return { unlockedLevelIds: [firstLevel.id], starsByLevel: {} };
-  }
-}
-
 export default function KidsBlocklyPage() {
-	const [progress, setProgress] = useState<KidsBlocklyProgress>(() =>
-		loadProgress(),
-	);
-	const [selectedLevelId, setSelectedLevelId] = useState(firstLevel.id);
+	const bootstrapQuery = useKidsBlocklyBootstrap();
+	const submitRun = useSubmitKidsBlocklyRun();
+
+	const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
 	const [program, setProgram] = useState<ProgramBlock[]>([]);
-	const [character, setCharacter] = useState<CharacterState>(firstLevel.start);
+	const [character, setCharacter] = useState<CharacterState | null>(null);
 	const [runResult, setRunResult] = useState<RunResult | null>(null);
+	const [progress, setProgress] =
+		useState<KidsBlocklyProgressResponse>(emptyProgress);
 	const [isRunning, setIsRunning] = useState(false);
 	const [activeBlockId, setActiveBlockId] = useState<string | null>(null);
 	const [showReward, setShowReward] = useState(false);
@@ -179,27 +173,41 @@ export default function KidsBlocklyPage() {
 	const errorSoundRef = useRef<HTMLAudioElement | null>(null);
 	const yaySoundRef = useRef<HTMLAudioElement | null>(null);
 
+	const levels = bootstrapQuery.data?.levels ?? [];
 	const level = useMemo(
 		() =>
-			kidsBlocklyLevels.find((item) => item.id === selectedLevelId) ??
-			firstLevel,
-		[selectedLevelId],
+			levels.find((item) => item.id === selectedLevelId) ?? levels[0] ?? null,
+		[levels, selectedLevelId],
 	);
 	const levelIndex = useMemo(
-		() => kidsBlocklyLevels.findIndex((item) => item.id === selectedLevelId),
-		[selectedLevelId],
+		() => levels.findIndex((item) => item.id === level?.id),
+		[levels, level?.id],
 	);
-	const totalStars = useMemo(
-		() =>
-			Object.values(progress.starsByLevel).reduce(
-				(sum, value) => sum + value,
-				0,
-			),
-		[progress.starsByLevel],
-	);
-	const nextLevel = kidsBlocklyLevels[levelIndex + 1];
+	const nextLevel = levelIndex >= 0 ? levels[levelIndex + 1] : undefined;
 
 	useEffect(() => {
+		if (!bootstrapQuery.data) return;
+
+		const nextProgress = bootstrapQuery.data.progress;
+		const nextLevels = bootstrapQuery.data.levels;
+		const preferredLevelId =
+			nextProgress.lastPlayedLevelId &&
+			nextProgress.unlockedLevelIds.includes(nextProgress.lastPlayedLevelId)
+				? nextProgress.lastPlayedLevelId
+				: (nextProgress.unlockedLevelIds[0] ?? nextLevels[0]?.id);
+
+		setProgress(nextProgress);
+		setSelectedLevelId((current) => {
+			if (current && nextLevels.some((item) => item.id === current)) {
+				return current;
+			}
+			return preferredLevelId ?? null;
+		});
+	}, [bootstrapQuery.data]);
+
+	useEffect(() => {
+		if (!level) return;
+
 		setCharacter(level.start);
 		setProgram([]);
 		setRunResult(null);
@@ -208,13 +216,7 @@ export default function KidsBlocklyPage() {
 		setShowStatus(false);
 		setActiveBlockId(null);
 		setWorkspaceResetSignal((value) => value + 1);
-	}, [level.start]);
-
-	useEffect(() => {
-		if (typeof window !== "undefined") {
-			window.localStorage.setItem(storageKey, JSON.stringify(progress));
-		}
-	}, [progress]);
+	}, [level]);
 
 	useEffect(() => {
 		const backgroundMusic = new Audio(backgroundMusicAsset);
@@ -259,6 +261,7 @@ export default function KidsBlocklyPage() {
 
 		return () => {
 			backgroundMusic.pause();
+			stopAudio(footstepSound);
 			backgroundMusic.removeEventListener(
 				"canplaythrough",
 				startBackgroundMusic,
@@ -285,6 +288,51 @@ export default function KidsBlocklyPage() {
 
 	useEffect(() => clearPlayback, [clearPlayback]);
 
+	const animateResult = useCallback(
+		(result: RunResult, nextProgress: KidsBlocklyProgressResponse) => {
+			setRunResult(result);
+			setProgress(nextProgress);
+
+			if (result.steps.length === 0) {
+				playAudio(errorSoundRef.current);
+				setShowStatus(true);
+				return;
+			}
+
+			setIsRunning(true);
+			playAudio(footstepSoundRef.current);
+			result.steps.forEach((step, index) => {
+				const timeoutId = window.setTimeout(() => {
+					setCharacter(step.state);
+					setActiveBlockId(step.blockId);
+
+					const isLast = index === result.steps.length - 1;
+					if (!isLast) return;
+
+					stopAudio(footstepSoundRef.current);
+					setIsRunning(false);
+
+					if (result.status === "success") {
+						setLastStars(result.stars);
+						window.setTimeout(() => {
+							playAudio(yaySoundRef.current);
+							setShowReward(true);
+						}, 240);
+						return;
+					}
+
+					window.setTimeout(() => {
+						playAudio(errorSoundRef.current);
+						setShowStatus(true);
+					}, 240);
+				}, index * 500);
+
+				playbackTimeouts.current.push(timeoutId);
+			});
+		},
+		[],
+	);
+
 	const handleProgramChange = useCallback((nextProgram: ProgramBlock[]) => {
 		setProgram(nextProgram);
 		setRunResult(null);
@@ -300,6 +348,7 @@ export default function KidsBlocklyPage() {
 	}, []);
 
 	const resetProgram = useCallback(() => {
+		if (!level) return;
 		clearPlayback();
 		setProgram([]);
 		setRunResult(null);
@@ -309,9 +358,10 @@ export default function KidsBlocklyPage() {
 		setShowStatus(false);
 		setIsRunning(false);
 		setWorkspaceResetSignal((value) => value + 1);
-	}, [clearPlayback, level.start]);
+	}, [clearPlayback, level]);
 
 	const replayCurrent = useCallback(() => {
+		if (!level) return;
 		clearPlayback();
 		setRunResult(null);
 		setCharacter(level.start);
@@ -319,25 +369,11 @@ export default function KidsBlocklyPage() {
 		setShowReward(false);
 		setShowStatus(false);
 		setIsRunning(false);
-	}, [clearPlayback, level.start]);
+	}, [clearPlayback, level]);
 
-	const unlockNextLevel = useCallback((currentLevelId: string) => {
-		const currentIndex = kidsBlocklyLevels.findIndex(
-			(item) => item.id === currentLevelId,
-		);
-		const nextLevelToUnlock = kidsBlocklyLevels[currentIndex + 1];
-		if (!nextLevelToUnlock) return;
+	const handleRun = useCallback(async () => {
+		if (!level) return;
 
-		setProgress((prev) => {
-			if (prev.unlockedLevelIds.includes(nextLevelToUnlock.id)) return prev;
-			return {
-				...prev,
-				unlockedLevelIds: [...prev.unlockedLevelIds, nextLevelToUnlock.id],
-			};
-		});
-	}, []);
-
-	const handleRun = useCallback(() => {
 		clearPlayback();
 		setCharacter(level.start);
 		setRunResult(null);
@@ -345,53 +381,29 @@ export default function KidsBlocklyPage() {
 		setShowReward(false);
 		setShowStatus(false);
 
-		const result = runProgram(level, program);
-		setRunResult(result);
-
-		if (result.steps.length === 0) {
+		try {
+			const response = await submitRun.mutateAsync({
+				levelId: level.id,
+				request: {
+					program,
+					clientRunId: `${level.id}-${Date.now()}`,
+				},
+			});
+			animateResult(response.result, response.progress);
+		} catch (error) {
+			const fallbackResult: RunResult = {
+				status: "incomplete",
+				finalState: level.start,
+				steps: [],
+				message: getErrorMessage(error),
+				stars: 0,
+				isNewBest: false,
+			};
+			setRunResult(fallbackResult);
 			playAudio(errorSoundRef.current);
 			setShowStatus(true);
-			return;
 		}
-
-		setIsRunning(true);
-		playAudio(footstepSoundRef.current);
-		result.steps.forEach((step, index) => {
-			const timeoutId = window.setTimeout(() => {
-				setCharacter(step.state);
-				setActiveBlockId(step.blockId);
-
-				const isLast = index === result.steps.length - 1;
-				if (isLast) {
-					stopAudio(footstepSoundRef.current);
-					setIsRunning(false);
-					if (result.status === "success") {
-						const stars = getStars(level, program.length);
-						setLastStars(stars);
-						setProgress((prev) => ({
-							unlockedLevelIds: prev.unlockedLevelIds,
-							starsByLevel: {
-								...prev.starsByLevel,
-								[level.id]: Math.max(prev.starsByLevel[level.id] ?? 0, stars),
-							},
-						}));
-						unlockNextLevel(level.id);
-						window.setTimeout(() => {
-							playAudio(yaySoundRef.current);
-							setShowReward(true);
-						}, 240);
-					} else {
-						window.setTimeout(() => {
-							playAudio(errorSoundRef.current);
-							setShowStatus(true);
-						}, 240);
-					}
-				}
-			}, index * 500);
-
-			playbackTimeouts.current.push(timeoutId);
-		});
-	}, [clearPlayback, level, program, unlockNextLevel]);
+	}, [animateResult, clearPlayback, level, program, submitRun]);
 
 	const goNext = useCallback(() => {
 		setShowReward(false);
@@ -399,6 +411,43 @@ export default function KidsBlocklyPage() {
 			setSelectedLevelId(nextLevel.id);
 		}
 	}, [nextLevel]);
+
+	const busy = isRunning || submitRun.isPending;
+
+	if (bootstrapQuery.isLoading) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f7fffb_0%,#eef8ff_48%,#f8fafc_100%)] p-6">
+				<div className="flex items-center gap-3 rounded-[24px] bg-white px-6 py-5 text-slate-700 shadow-[0_16px_40px_rgba(15,23,42,0.1)]">
+					<Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
+					Đang tải Kids Blockly...
+				</div>
+			</div>
+		);
+	}
+
+	if (bootstrapQuery.isError || !level || !character) {
+		return (
+			<div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f7fffb_0%,#eef8ff_48%,#f8fafc_100%)] p-6">
+				<div className="max-w-md rounded-[28px] bg-white p-6 text-center shadow-[0_18px_48px_rgba(15,23,42,0.12)]">
+					<div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-amber-100 text-amber-700">
+						<AlertTriangle className="h-7 w-7" />
+					</div>
+					<h1 className="mt-4 text-2xl font-black text-slate-900">
+						Không tải được Kids Blockly
+					</h1>
+					<p className="mt-3 text-sm leading-6 text-slate-600">
+						{getErrorMessage(bootstrapQuery.error)}
+					</p>
+					<Button
+						onPress={() => bootstrapQuery.refetch()}
+						className="mt-5 cursor-pointer rounded-2xl bg-emerald-500 px-5 py-3 text-white hover:bg-emerald-600"
+					>
+						Thử lại
+					</Button>
+				</div>
+			</div>
+		);
+	}
 
 	return (
 		<div className="min-h-screen bg-[linear-gradient(180deg,#f7fffb_0%,#eef8ff_48%,#f8fafc_100%)]">
@@ -433,18 +482,16 @@ export default function KidsBlocklyPage() {
 							<p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-600">
 								Sao
 							</p>
-							<p className="text-xl font-black text-slate-900">{totalStars}</p>
+							<p className="text-xl font-black text-slate-900">
+								{progress.totalStars}
+							</p>
 						</div>
 					</div>
 				</header>
 
 				<main className="grid flex-1 items-stretch gap-4 lg:min-h-[620px] lg:grid-cols-[minmax(420px,0.92fr)_minmax(540px,1.08fr)]">
 					<section className="relative min-h-[520px]">
-						<GameBoard
-							level={level}
-							character={character}
-							isRunning={isRunning}
-						/>
+						<GameBoard level={level} character={character} isRunning={busy} />
 						<RewardDialog
 							open={showReward}
 							stars={lastStars}
@@ -473,7 +520,7 @@ export default function KidsBlocklyPage() {
 
 						<KidsBlocklyWorkspace
 							allowedBlocks={level.allowedBlocks}
-							isRunning={isRunning}
+							isRunning={busy}
 							activeBlockId={activeBlockId}
 							resetSignal={workspaceResetSignal}
 							className="flex-1"
@@ -489,7 +536,7 @@ export default function KidsBlocklyPage() {
 						<div className="flex flex-wrap gap-3">
 							<Button
 								onPress={() => setShowHint(true)}
-								isDisabled={isRunning}
+								isDisabled={busy}
 								className="cursor-pointer rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3 text-sky-700 hover:bg-sky-100"
 							>
 								<Lightbulb className="mr-2 h-4 w-4" />
@@ -497,15 +544,19 @@ export default function KidsBlocklyPage() {
 							</Button>
 							<Button
 								onPress={handleRun}
-								isDisabled={isRunning || program.length === 0}
+								isDisabled={busy || program.length === 0}
 								className="cursor-pointer rounded-2xl bg-emerald-500 px-5 py-3 text-white hover:bg-emerald-600 disabled:bg-slate-300"
 							>
-								<Play className="mr-2 h-4 w-4" />
+								{submitRun.isPending ? (
+									<Loader2 className="mr-2 h-4 w-4 animate-spin" />
+								) : (
+									<Play className="mr-2 h-4 w-4" />
+								)}
 								Chạy
 							</Button>
 							<Button
 								onPress={replayCurrent}
-								isDisabled={isRunning}
+								isDisabled={busy}
 								className="cursor-pointer rounded-2xl border border-slate-200 bg-white px-5 py-3 text-slate-700 hover:bg-slate-50"
 							>
 								<RotateCcw className="mr-2 h-4 w-4" />
@@ -513,7 +564,7 @@ export default function KidsBlocklyPage() {
 							</Button>
 							<Button
 								onPress={resetProgram}
-								isDisabled={isRunning}
+								isDisabled={busy}
 								className="cursor-pointer rounded-2xl border border-slate-200 bg-white px-5 py-3 text-slate-700 hover:bg-slate-50"
 							>
 								<Trash2 className="mr-2 h-4 w-4" />
@@ -521,13 +572,13 @@ export default function KidsBlocklyPage() {
 							</Button>
 						</div>
 						<p className="text-sm leading-6 text-slate-500">
-							Kéo các khối lệnh, nối vào cờ bắt đầu rồi bấm Chạy. Kết quả sẽ tự
-							hiện sau khi nhân vật di chuyển xong.
+							Kéo các khối lệnh, nối vào cờ bắt đầu rồi bấm Chạy. Kết quả sẽ lấy
+							từ backend và tự hiện sau khi nhân vật di chuyển xong.
 						</p>
 					</div>
 
 					<div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
-						{kidsBlocklyLevels.map((item, index) => {
+						{levels.map((item, index) => {
 							const unlocked =
 								progress.unlockedLevelIds.includes(item.id) || index === 0;
 							const stars = progress.starsByLevel[item.id] ?? 0;
@@ -537,7 +588,7 @@ export default function KidsBlocklyPage() {
 								<button
 									key={item.id}
 									type="button"
-									disabled={!unlocked || isRunning}
+									disabled={!unlocked || busy}
 									onClick={() => setSelectedLevelId(item.id)}
 									className={cn(
 										"min-h-16 rounded-2xl border px-3 py-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-45",

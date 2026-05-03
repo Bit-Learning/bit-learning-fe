@@ -52,9 +52,32 @@ export interface RunResult {
 	steps: PlaybackStep[];
 	failedBlockId?: string;
 	message: string;
+	stars: number;
+	isNewBest: boolean;
+	unlockedNextLevelId?: string;
 }
 
-export interface KidsBlocklyProgress {
+export interface KidsBlocklyProgressResponse {
 	unlockedLevelIds: string[];
 	starsByLevel: Record<string, number>;
+	completedLevelIds: string[];
+	totalStars: number;
+	lastPlayedLevelId?: string;
+}
+
+export interface KidsBlocklyBootstrapResponse {
+	levels: KidsBlocklyLevel[];
+	progress: KidsBlocklyProgressResponse;
+}
+
+export interface SubmitKidsBlocklyRunRequest {
+	program: ProgramBlock[];
+	clientRunId?: string;
+}
+
+export interface SubmitKidsBlocklyRunResponse {
+	runId: string;
+	levelId: string;
+	result: RunResult;
+	progress: KidsBlocklyProgressResponse;
 }

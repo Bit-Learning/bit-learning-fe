@@ -71,6 +71,8 @@ export function runProgram(
 			finalState: state,
 			steps,
 			message: "Hãy kéo vài khối lệnh vào trước nhé.",
+			stars: 0,
+			isNewBest: false,
 		};
 	}
 
@@ -123,6 +125,8 @@ export function runProgram(
 					steps,
 					failedBlockId: block.id,
 					message: "Ôi, bạn đi ra ngoài bản đồ rồi.",
+					stars: 0,
+					isNewBest: false,
 				};
 			}
 
@@ -140,6 +144,8 @@ export function runProgram(
 					steps,
 					failedBlockId: block.id,
 					message: "Nhân vật bị chặn bởi chướng ngại vật.",
+					stars: 0,
+					isNewBest: false,
 				};
 			}
 		}
@@ -162,6 +168,8 @@ export function runProgram(
 			finalState: state,
 			steps,
 			message: "Tuyệt lắm, bạn đã tới đích.",
+			stars: 0,
+			isNewBest: false,
 		};
 	}
 
@@ -170,5 +178,7 @@ export function runProgram(
 		finalState: state,
 		steps,
 		message: "Nhân vật chưa tới đích, thử thêm hoặc đổi thứ tự khối lệnh nhé.",
+		stars: 0,
+		isNewBest: false,
 	};
 }

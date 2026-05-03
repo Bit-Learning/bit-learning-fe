@@ -1,7 +1,6 @@
 import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@workspace/ui/lib/utils";
-import characterMouseAsset from "../asset/character_mouse.png";
 import characterTomAsset from "../asset/character_tom.png";
 import destinationAsset from "../asset/Destination.png";
 import fenceAsset from "../asset/fence.png";
