@@ -20,13 +20,7 @@ const AddContestProblems: React.FC = () => {
 
   if (mode === "select") return <ModeSelector onSelect={setMode} onBack={handleBack} />;
   if (mode === "existing") return <ExistingProblemPicker contestId={contestId} onBack={handleBack} />;
-  return (
-    <CreateContestProblem
-      contestId={contestId}
-      onBack={handleBack}
-      onSuccess={() => navigate({ to: `/contests/${contestId}/manage-problems` })}
-    />
-  );
+  return <CreateContestProblem contestId={contestId} onBack={handleBack} onSuccess={() => setMode("select")} />;
 };
 
 export default AddContestProblems;
