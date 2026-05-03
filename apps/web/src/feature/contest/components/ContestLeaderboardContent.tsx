@@ -163,7 +163,7 @@ const ContestLeaderboardContent: React.FC = () => {
 
   const formatTime = (minutes: number | null) => {
     if (minutes === null) return "--";
-    return `${minutes}ms`;
+    return `${minutes}m`;
   };
 
   if (isLoading) return <Loader />;
