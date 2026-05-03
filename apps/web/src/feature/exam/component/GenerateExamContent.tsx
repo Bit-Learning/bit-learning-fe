@@ -51,13 +51,13 @@ const GenerateExamFlow: React.FC = () => {
   const { data: versions } = useMatrixVersions(matrixId);
   const { mutate: generateExam, isPending: isGenerating } = useGenerateExam();
 
+  const selectedVersion = versions?.find((v) => v.id === versionId);
+
   const { data: questionsData, isLoading } = useSearchQuestions(
-    { keyword: "", page: 0, size: 99999 },
+    { keyword: "", page: 0, size: 9999, subjectId: matrix?.subject.id },
     { enabled: currentStep === "check" },
   );
-
   const allQuestions = questionsData?.data || [];
-  const selectedVersion = versions?.find((v) => v.id === versionId);
 
   const checkRequirements = (): LessonRequirement[] => {
     if (!selectedVersion?.matrixDetails) return [];

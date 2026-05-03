@@ -31,10 +31,6 @@ const NumericInput: React.FC<NumericInputProps> = ({
 }) => {
   const [display, setDisplay] = useState<string>(value === 0 ? "" : String(value));
 
-  useState(() => {
-    setDisplay(value === 0 ? "" : String(value));
-  });
-
   return (
     <input
       type="number"
@@ -70,10 +66,6 @@ interface PercentInputProps {
 
 const PercentInput: React.FC<PercentInputProps> = ({ value, onChange, onBlur, className = "" }) => {
   const [display, setDisplay] = useState<string>(value === 0 ? "" : String(Math.round(value * 100)));
-
-  useState(() => {
-    setDisplay(value === 0 ? "" : String(Math.round(value * 100)));
-  });
 
   return (
     <div className="relative flex-1">
@@ -115,7 +107,7 @@ const formSchema = z.object({
   difficultyHard: z.number().min(0).max(1),
   typeMCQ: z.number().min(0).max(1),
   typeEssay: z.number().min(0).max(1),
-  scoringMode: "UNIFORM",
+  scoringMode: z.literal("UNIFORM"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -132,7 +124,7 @@ interface LessonSelectorProps {
 
 const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onChange, onRemove, index }) => {
   const { data: chapters } = useChaptersBySubject(subjectId);
-  const { data: lessons } = useLessonsByChapter(value.chapterId || undefined);
+  const { data: lessons } = useLessonsByChapter(value.chapterId > 0 ? value.chapterId : undefined);
 
   return (
     <div className="grid grid-cols-12 gap-3 items-center p-3 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700">
@@ -144,8 +136,8 @@ const LessonSelector: React.FC<LessonSelectorProps> = ({ subjectId, value, onCha
           className="w-full px-3 py-2 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg text-md outline-none focus:ring-2 focus:ring-blue-500"
         >
           <option value={0}>-- Chọn chương --</option>
-          {chapters?.map((ch: any, i: number) => (
-            <option key={i} value={ch.id}>
+          {chapters?.map((ch: any) => (
+            <option key={ch.id} value={ch.id}>
               {ch.name}
             </option>
           ))}
@@ -278,7 +270,10 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
 
   return (
     <div className="p-6">
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <form
+        onSubmit={handleSubmit(onSubmit, (errs) => console.error("[AutoGenerateForm] validation errors", errs))}
+        className="space-y-6"
+      >
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-md font-medium text-slate-700 dark:text-slate-300 mb-2">
