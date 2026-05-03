@@ -516,7 +516,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             <option value={Language.PYTHON}>Python</option>
             <option value={Language.JAVASCRIPT}>JavaScript</option>
           </select>
-          {formatErrors.length > 0 && (
+          {/* {formatErrors.length > 0 && (
             <div className="flex items-center gap-1.5 text-yellow-400 text-xs">
               <AlertCircle className="w-4 h-4" />
               <span>
@@ -524,7 +524,7 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
                 {formatErrors.length > 1 ? "s" : ""}
               </span>
             </div>
-          )}
+          )} */}
         </div>
         <div className="flex items-center gap-4 text-gray-300">
           <button

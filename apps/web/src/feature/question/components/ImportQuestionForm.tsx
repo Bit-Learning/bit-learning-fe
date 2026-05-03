@@ -42,6 +42,7 @@ type ImportStep = "upload" | "preview" | "processing" | "completed";
 interface EditState {
   content: string;
   options: { label: string; content: string; orderNo: number; correct: boolean }[] | null;
+  canonicalAnswer: string | null;
 }
 
 const isSkipped = (q: PreviewQuestionResponse) => q.duplicated && !q.reused;
@@ -182,7 +183,7 @@ const ImportQuestionForm: React.FC = () => {
   } | null>(null);
 
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
-  const [editState, setEditState] = useState<EditState>({ content: "", options: null });
+  const [editState, setEditState] = useState<EditState>({ content: "", options: null, canonicalAnswer: null });
   const [guideOpen, setGuideOpen] = useState(false);
 
   const [selectedCurriculumId, setSelectedCurriculumId] = useState<number | null>(null);
@@ -291,12 +292,13 @@ const ImportQuestionForm: React.FC = () => {
         question.questionType === "MCQ" && question.options
           ? question.options.map((o) => ({ ...o, label: o.label || String.fromCharCode(64 + o.orderNo) }))
           : null,
+      canonicalAnswer: question.questionType === "ESSAY" ? (question.canonicalAnswer ?? "") : null,
     });
   };
 
   const closeEdit = () => {
     setEditingQuestionId(null);
-    setEditState({ content: "", options: null });
+    setEditState({ content: "", options: null, canonicalAnswer: null });
   };
 
   const handleSetCorrectOption = (orderNo: number) => {
@@ -315,6 +317,7 @@ const ImportQuestionForm: React.FC = () => {
           editedContent: editState.content,
           status: "KEEP" as PreviewQuestionStatus,
           ...(editState.options ? { options: editState.options } : {}),
+          ...(editState.canonicalAnswer !== null ? { canonicalAnswer: editState.canonicalAnswer } : {}),
         },
       });
       setPreviewData((prev) => {
@@ -328,6 +331,7 @@ const ImportQuestionForm: React.FC = () => {
                   editedContent: editState.content,
                   status: "KEEP" as PreviewQuestionStatus,
                   ...(editState.options ? { options: editState.options! } : {}),
+                  ...(editState.canonicalAnswer !== null ? { canonicalAnswer: editState.canonicalAnswer } : {}),
                 }
               : q,
           ),
@@ -401,9 +405,7 @@ const ImportQuestionForm: React.FC = () => {
   };
 
   const getKeepCount = () => previewData?.questions.filter((q) => q.status === "KEEP" && !isSkipped(q)).length || 0;
-
   const getDeleteCount = () => previewData?.questions.filter((q) => q.status === "DELETE").length || 0;
-
   const getSkippedCount = () => previewData?.questions.filter((q) => isSkipped(q)).length || 0;
 
   return (
@@ -797,6 +799,21 @@ const ImportQuestionForm: React.FC = () => {
                                 placeholder="Nội dung câu hỏi..."
                               />
                             </div>
+
+                            {editState.canonicalAnswer !== null && (
+                              <div className="space-y-1.5">
+                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                  Đáp án
+                                </label>
+                                <textarea
+                                  value={editState.canonicalAnswer}
+                                  onChange={(e) => setEditState((s) => ({ ...s, canonicalAnswer: e.target.value }))}
+                                  className="w-full p-3 border rounded-xl min-h-20 bg-white dark:bg-gray-800 text-sm font-mono"
+                                  placeholder="Nội dung đáp án..."
+                                />
+                              </div>
+                            )}
+
                             {editState.options && (
                               <div className="space-y-1.5">
                                 <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
@@ -842,6 +859,7 @@ const ImportQuestionForm: React.FC = () => {
                                 </div>
                               </div>
                             )}
+
                             <div className="flex gap-2">
                               <Button
                                 size="sm"

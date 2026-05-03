@@ -6,6 +6,7 @@ import type {
   CourseDetail,
   CoursePreview,
   MyCourse,
+  RecommendedCourse,
   SearchCourseRequest,
   VerifyCertificateResponse,
 } from "../types/course.type";
@@ -44,6 +45,19 @@ export const courseApi = {
     formData.append("certificate", file);
     return api.post(`${endpoints.COURSES}/certificate/verify`, formData, {
       headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+  getAllCategories(): Promise<AxiosResponse<ApiResponse<string[]>>> {
+    return api.get(`${endpoints.COURSES}/categories`);
+  },
+
+  getRecommendedCourses(
+    userId: number,
+    pageNum = 0,
+    pageSize = 10,
+  ): Promise<AxiosResponse<ApiResponse<RecommendedCourse>>> {
+    return api.get(`${endpoints.COURSES}/recommended/users/${userId}`, {
+      params: { pageNum, pageSize },
     });
   },
 };

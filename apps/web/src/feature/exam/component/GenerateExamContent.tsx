@@ -51,13 +51,13 @@ const GenerateExamFlow: React.FC = () => {
   const { data: versions } = useMatrixVersions(matrixId);
   const { mutate: generateExam, isPending: isGenerating } = useGenerateExam();
 
+  const selectedVersion = versions?.find((v) => v.id === versionId);
+
   const { data: questionsData, isLoading } = useSearchQuestions(
-    { keyword: "", page: 0, size: 1000 },
+    { keyword: "", page: 0, size: 9999, subjectId: matrix?.subject.id },
     { enabled: currentStep === "check" },
   );
-
   const allQuestions = questionsData?.data || [];
-  const selectedVersion = versions?.find((v) => v.id === versionId);
 
   const checkRequirements = (): LessonRequirement[] => {
     if (!selectedVersion?.matrixDetails) return [];
@@ -252,7 +252,7 @@ const GenerateExamFlow: React.FC = () => {
                           {r.available}
                         </span>
                         <span>/</span>
-                        <span className="font-bold">{r.required}</span>
+                        <span className="font-bold">{r.required} </span>
                         câu
                       </p>
                     ))}
@@ -455,10 +455,15 @@ const GenerateExamFlow: React.FC = () => {
             setCurrentStep("complete");
 
             generateExam(request, {
-              onSuccess: () => {
+              onSuccess: (data) => {
+                const examId = data.data.data?.id;
+                setCurrentStep("complete");
                 setTimeout(() => {
-                  navigate({ to: "/mentor/matrix/$id", params: { id } });
+                  navigate({ to: "/mentor/exam/$id", params: { id: String(examId) } });
                 }, 3000);
+              },
+              onError: () => {
+                setCurrentStep("setup");
               },
             });
           }}
@@ -507,7 +512,7 @@ const GenerateExamFlow: React.FC = () => {
             </div>
             <div className="text-center">
               <p className="text-lg font-bold text-slate-900 dark:text-white mb-1">Tạo đề thi thành công!</p>
-              <p className="text-md text-slate-500 dark:text-slate-400">Đang chuyển hướng về trang ma trận...</p>
+              <p className="text-md text-slate-500 dark:text-slate-400">Đang chuyển hướng...</p>
             </div>
           </>
         )}

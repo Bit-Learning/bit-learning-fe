@@ -241,7 +241,7 @@ const MyExamsContent: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-4 py-3.5">
-                            <span className="px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-sm font-semibold font-mono">
+                            <span className="line-clamp-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-sm font-semibold font-mono">
                               {exam.code}
                             </span>
                           </td>

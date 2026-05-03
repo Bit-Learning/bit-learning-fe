@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useForm, useFieldArray, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -57,6 +57,8 @@ const generateTemplateSchema = z.object({
     .min(1, "Cần ít nhất 1 tham số"),
 });
 
+const editSchema = problemSchema;
+
 const combinedSchema = problemSchema.merge(generateTemplateSchema);
 
 type ProblemFormData = z.infer<typeof problemSchema>;
@@ -111,8 +113,13 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
     enabled: isEditMode,
   });
 
+  const resolver = useMemo(
+    () => zodResolver(isEditMode ? editSchema : combinedSchema) as unknown as Resolver<CombinedFormData>,
+    [],
+  );
+
   const form = useForm<CombinedFormData>({
-    resolver: zodResolver(combinedSchema) as Resolver<CombinedFormData>,
+    resolver,
     defaultValues: {
       title: "",
       slug: "",
@@ -196,7 +203,6 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
     if (isEditMode) {
       try {
         await updateProblemMutation.mutateAsync({ problemId: problemId!, data: problemPayload });
-        await generateTemplatesMutation.mutateAsync({ problemId: problemId!, data: templatePayload });
         navigate({ to: "/mentor/problem" });
       } catch (err) {
         console.error(err);
@@ -245,7 +251,7 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
 
   return (
     <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button
           variant="outline"
           size="lg"
@@ -381,93 +387,95 @@ const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "cre
             </div>
           </SectionCard>
 
-          <SectionCard
-            title={isEditMode ? "Cấu hình Code Templates" : "Tạo mẫu Code tự động"}
-            subtitle="Hệ thống tự động tạo template cho Python, Java, C++, JavaScript"
-          >
-            <div className="space-y-5">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <div>
-                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
-                    Tên hàm <span className="text-red-500">*</span>
-                  </Label>
-                  <input
-                    {...form.register("functionName")}
-                    placeholder="solution"
-                    className={cn(inputCls, "font-mono")}
-                  />
-                  <FieldError message={form.formState.errors.functionName?.message} />
-                </div>
-                <div>
-                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
-                    Kiểu trả về <span className="text-red-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <select {...form.register("returnType")} className={selectCls}>
-                      {Object.values(ParamType).map((type) => (
-                        <option key={type} value={type}>
-                          {ParamTypeInfo[type].displayName} ({ParamTypeInfo[type].javaType})
-                        </option>
-                      ))}
-                    </select>
-                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+          {!isEditMode && (
+            <SectionCard
+              title="Tạo mẫu Code tự động"
+              subtitle="Hệ thống tự động tạo template cho Python, Java, C++, JavaScript"
+            >
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                      Tên hàm <span className="text-red-500">*</span>
+                    </Label>
+                    <input
+                      {...form.register("functionName")}
+                      placeholder="solution"
+                      className={cn(inputCls, "font-mono")}
+                    />
+                    <FieldError message={form.formState.errors.functionName?.message} />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                      Kiểu trả về <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <select {...form.register("returnType")} className={selectCls}>
+                        {Object.values(ParamType).map((type) => (
+                          <option key={type} value={type}>
+                            {ParamTypeInfo[type].displayName} ({ParamTypeInfo[type].javaType})
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <div>
-                <div className="flex items-center justify-between mb-3">
-                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
-                    Tham số đầu vào <span className="text-red-500">*</span>
-                  </Label>
-                  <button
-                    type="button"
-                    onClick={() => append({ name: "", type: ParamType.INT })}
-                    className="cursor-pointer flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors"
-                  >
-                    <Plus className="w-3.5 h-3.5" />
-                    Thêm tham số
-                  </button>
-                </div>
-                <div className="space-y-2.5">
-                  {fields.map((field, index) => (
-                    <div key={field.id} className="flex gap-2.5 items-start">
-                      <span className="w-7 h-11 flex items-center justify-center text-xs font-mono text-slate-400 shrink-0">
-                        {index + 1}.
-                      </span>
-                      <div className="flex-1">
-                        <input
-                          {...form.register(`parameters.${index}.name`)}
-                          placeholder="Tên tham số (vd: nums)"
-                          className={cn(inputCls, "font-mono")}
-                        />
-                        <FieldError message={form.formState.errors.parameters?.[index]?.name?.message} />
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Tham số đầu vào <span className="text-red-500">*</span>
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() => append({ name: "", type: ParamType.INT })}
+                      className="cursor-pointer flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Thêm tham số
+                    </button>
+                  </div>
+                  <div className="space-y-2.5">
+                    {fields.map((field, index) => (
+                      <div key={field.id} className="flex gap-2.5 items-start">
+                        <span className="w-7 h-11 flex items-center justify-center text-xs font-mono text-slate-400 shrink-0">
+                          {index + 1}.
+                        </span>
+                        <div className="flex-1">
+                          <input
+                            {...form.register(`parameters.${index}.name`)}
+                            placeholder="Tên tham số (vd: nums)"
+                            className={cn(inputCls, "font-mono")}
+                          />
+                          <FieldError message={form.formState.errors.parameters?.[index]?.name?.message} />
+                        </div>
+                        <div className="flex-1 relative">
+                          <select {...form.register(`parameters.${index}.type`)} className={selectCls}>
+                            {Object.values(ParamType).map((type) => (
+                              <option key={type} value={type}>
+                                {ParamTypeInfo[type].displayName}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          disabled={fields.length === 1}
+                          className="h-11 w-11 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
                       </div>
-                      <div className="flex-1 relative">
-                        <select {...form.register(`parameters.${index}.type`)} className={selectCls}>
-                          {Object.values(ParamType).map((type) => (
-                            <option key={type} value={type}>
-                              {ParamTypeInfo[type].displayName}
-                            </option>
-                          ))}
-                        </select>
-                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => remove(index)}
-                        disabled={fields.length === 1}
-                        className="h-11 w-11 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </button>
-                    </div>
-                  ))}
+                    ))}
+                  </div>
+                  <FieldError message={form.formState.errors.parameters?.message} />
                 </div>
-                <FieldError message={form.formState.errors.parameters?.message} />
               </div>
-            </div>
-          </SectionCard>
+            </SectionCard>
+          )}
 
           {!isEditMode && (
             <SectionCard title="Test Cases" subtitle="Thêm các trường hợp kiểm thử cho bài tập">

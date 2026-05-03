@@ -82,6 +82,7 @@ export interface QuestionResponse {
   lesson?: TLessonBriefResponse;
   tags?: TagResponse[];
   options?: OptionResponse[];
+  rejectReason?: string;
   isActive: boolean;
   isPublic: boolean;
   approvalStatus: ApprovalStatus;
@@ -96,6 +97,7 @@ export interface QuestionBriefResponse {
   content: string;
   questionType: QuestionType;
   questionLevel: QuestionLevel;
+  rejectReason?: string;
   lesson?: TLessonBriefResponse;
 }
 

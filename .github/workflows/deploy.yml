@@ -185,7 +185,7 @@ jobs:
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       body: `
-                      ❌ **PROD deployment failed**
+                      ❌ **PROD deployment failed** @${{ github.actor }}
 
                       The deployment to production failed for this pull request.
 
@@ -209,7 +209,7 @@ jobs:
                       owner: context.repo.owner,
                       repo: context.repo.repo,
                       body: `
-                      ✅ **PROD deployment passed**
+                      ✅ **PROD deployment passed** @${{ github.actor }}
 
                       Successfully deployed to production.
 
@@ -220,3 +220,34 @@ jobs:
                       | 🕐 **Run** | [#${{ github.run_number }}](${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}) |
                       `
                     })
+
+    # ─────────────────────────────────────────────
+    # 3. Notify committer on failure (push events)
+    # ─────────────────────────────────────────────
+    notify-on-failure:
+        name: Notify Committer on Failure
+        needs: [build-web, build-admin, deploy]
+        if: failure() && github.event_name != 'pull_request'
+        runs-on: ubuntu-latest
+        steps:
+            - name: Create commit comment
+              uses: actions/github-script@v7
+              with:
+                  script: |
+                    const runUrl = `${context.serverUrl}/${context.repo.owner}/${context.repo.repo}/actions/runs/${context.runId}`;
+                    await github.rest.repos.createCommitComment({
+                      owner: context.repo.owner,
+                      repo: context.repo.repo,
+                      commit_sha: context.sha,
+                      body: [
+                        `❌ **CI/CD Failed** — @${context.actor}`,
+                        ``,
+                        `Pipeline thất bại, vui lòng kiểm tra lại.`,
+                        ``,
+                        `| | |`,
+                        `|---|---|`,
+                        `| 🔀 **Branch** | \`${{ github.ref_name }}\` |`,
+                        `| 📝 **Commit** | \`${{ github.sha }}\` |`,
+                        `| 🕐 **Run** | [#${{ github.run_number }}](${runUrl}) |`,
+                      ].join('\n')
+                    });

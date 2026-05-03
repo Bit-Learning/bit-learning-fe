@@ -1,5 +1,6 @@
 import React, { useRef, useState, useEffect } from "react";
-import { Badge, Check, ChevronDown, X } from "lucide-react";
+import { Check, ChevronDown, X } from "lucide-react";
+import { Badge } from "@/components/ui/badge";
 import { useGetAllTags } from "../../problems/queries/useProblem";
 import { cn } from "@/shared/lib/utils";
 
@@ -40,7 +41,6 @@ const TagMultiSelect: React.FC<TagMultiSelectProps> = ({
     onChange(value.filter((v) => v !== id));
   };
 
-  // Lấy name từ id để hiển thị
   const getTagName = (id: string) => allTags.find((t) => t.id === id)?.name ?? id;
 
   return (

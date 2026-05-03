@@ -1,24 +1,29 @@
 import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
-import type { ApiResponse } from "@/shared/api/api.type";
-import {
-  ApproveRejectRequest,
+import type {
+  ProblemBriefResponse,
+  ProblemDetailResponse,
+  ProblemStatisticsResponse,
+  CreateProblemRequest,
+  CreateProblemResponse,
+  UpdateProblemRequest,
+  CreateTestCaseRequest,
+  CreateTestCaseResponse,
+  UpdateTestCaseRequest,
+  TestCaseResponse,
   BulkCreateTestCaseRequest,
   BulkCreateTestCaseResponse,
   CreateCodeTemplateRequest,
   CreateCodeTemplateResponse,
-  CreateProblemRequest,
-  CreateProblemResponse,
-  CreateTestCaseRequest,
-  CreateTestCaseResponse,
+  CodeTemplateResponse,
   GenerateCodeTemplatesRequest,
   GenerateCodeTemplatesResponse,
-  ProblemBriefResponse,
-  ProblemDetailResponse,
   ProblemFilters,
   TagResponse,
+  ApproveRejectRequest,
+  Language,
 } from "../types/problem.type";
-import { Language } from "../../contests/types/contest.type";
+import { ApiResponse } from "@/shared/api/api.type";
 
 export const problemApi = {
   getProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
@@ -27,12 +32,56 @@ export const problemApi = {
 
   getProblemDetail(problemId: string, language?: Language): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
     return api.get(`/problems/${problemId}`, {
-      params: { language: language || Language.PYTHON },
+      params: { language: language || "PYTHON" },
     });
   },
+
   createProblem(data: CreateProblemRequest): Promise<AxiosResponse<ApiResponse<CreateProblemResponse>>> {
     return api.post("/problems", data);
   },
+
+  updateProblem(
+    problemId: string,
+    data: UpdateProblemRequest,
+  ): Promise<AxiosResponse<ApiResponse<CreateProblemResponse>>> {
+    return api.put(`/problems/${problemId}`, data);
+  },
+
+  deleteProblem(problemId: string): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.delete(`/problems/${problemId}`);
+  },
+
+  getProblemStatistics(problemId: string): Promise<AxiosResponse<ApiResponse<ProblemStatisticsResponse>>> {
+    return api.get(`/problems/${problemId}/statistics`);
+  },
+
+  createTestCase(
+    problemId: string,
+    data: CreateTestCaseRequest,
+  ): Promise<AxiosResponse<ApiResponse<CreateTestCaseResponse>>> {
+    return api.post(`/problems/${problemId}/testcases`, data);
+  },
+
+  updateTestCase(
+    problemId: string,
+    testCaseId: string,
+    data: UpdateTestCaseRequest,
+  ): Promise<AxiosResponse<ApiResponse<CreateTestCaseResponse>>> {
+    return api.put(`/problems/${problemId}/testcases/${testCaseId}`, data);
+  },
+
+  deleteTestCase(problemId: string, testCaseId: string): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.delete(`/problems/${problemId}/testcases/${testCaseId}`);
+  },
+
+  getAllTestCases(problemId: string): Promise<AxiosResponse<ApiResponse<TestCaseResponse[]>>> {
+    return api.get(`/problems/${problemId}/testcases`);
+  },
+
+  deleteAllTestCases(problemId: string): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.delete(`/problems/${problemId}/testcases`);
+  },
+
   bulkCreateTestCases(
     problemId: string,
     data: BulkCreateTestCaseRequest,
@@ -52,17 +101,20 @@ export const problemApi = {
       headers: { "Content-Type": "multipart/form-data" },
     });
   },
+
   createCodeTemplate(
     problemId: string,
     data: CreateCodeTemplateRequest,
   ): Promise<AxiosResponse<ApiResponse<CreateCodeTemplateResponse>>> {
     return api.post(`/problems/${problemId}/code-templates`, data);
   },
-  createTestCase(
-    problemId: string,
-    data: CreateTestCaseRequest,
-  ): Promise<AxiosResponse<ApiResponse<CreateTestCaseResponse>>> {
-    return api.post(`/problems/${problemId}/testcases`, data);
+
+  getCodeTemplates(problemId: string): Promise<AxiosResponse<ApiResponse<CodeTemplateResponse[]>>> {
+    return api.get(`/problems/${problemId}/code-templates`);
+  },
+
+  deleteCodeTemplate(problemId: string, language: Language): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.delete(`/problems/${problemId}/code-templates/${language}`);
   },
 
   generateCodeTemplates(
@@ -76,8 +128,8 @@ export const problemApi = {
     return api.get("/coding/tags");
   },
 
-  getPendingProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
-    return api.get("/problems/pending-approval", { params: filters });
+  publishProblem(id: string, isPublic: boolean): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
+    return api.put(`/problems/${id}/publish`, null, { params: { isPublic } });
   },
 
   approve(data: ApproveRejectRequest): Promise<AxiosResponse<ApiResponse<void>>> {
@@ -88,7 +140,7 @@ export const problemApi = {
     return api.put("/problems/reject", data);
   },
 
-  publishProblem(id: string, isPublic: boolean): Promise<AxiosResponse<ApiResponse<ProblemDetailResponse>>> {
-    return api.put(`/problems/${id}/publish`, null, { params: { isPublic } });
+  getPendingProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse>>> {
+    return api.get("/problems/pending-approval", { params: filters });
   },
 };
