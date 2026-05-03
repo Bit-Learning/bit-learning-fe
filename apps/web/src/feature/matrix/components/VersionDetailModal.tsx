@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { X, Pencil, Save, Loader2, Trash2, BookOpen, BarChart3, AlertCircle } from "lucide-react";
+import { X, Pencil, Save, Loader2, BookOpen, AlertCircle } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
-import { useMatrixVersionDetail, useUpdateMatrixDetail, useDeleteMatrixDetail } from "../queries/useMatrix";
+import { useMatrixVersionDetail, useUpdateMatrixDetail } from "../queries/useMatrix";
 
 interface Props {
   isOpen: boolean;
@@ -40,7 +40,6 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
 
   const { data: version, isLoading } = useMatrixVersionDetail(versionId ?? undefined);
   const { mutate: updateDetail, isPending: saving } = useUpdateMatrixDetail();
-  const { mutate: deleteDetail, isPending: deleting } = useDeleteMatrixDetail();
 
   useEffect(() => {
     if (!isOpen) {
@@ -76,7 +75,7 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
   };
 
   const saveEdit = () => {
-    if (!editData || isOverScore) return;
+    if (!editData || isScoreMismatch) return;
     updateDetail(
       {
         id: editData.id,
@@ -94,25 +93,19 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
     );
   };
 
-  const handleDelete = (id: number) => {
-    if (!confirm("Xóa chi tiết này?")) return;
-    deleteDetail(id);
-  };
-
   const totalDetails = version?.matrixDetails || [];
   const totalQuestions = totalDetails.reduce(
     (s: number, d: any) => s + d.easyMCQ + d.mediumMCQ + d.hardMCQ + d.easyEssay + d.mediumEssay + d.hardEssay,
     0,
   );
 
-  // Tính tổng điểm: nếu đang edit thì thay row đang edit bằng editData
   const totalScore = totalDetails.reduce((s: number, d: any) => {
     const isEditing = editingId === d.id && editData;
     return s + calculateScore(isEditing ? editData : d);
   }, 0);
 
-  const editingRowScore = editData ? calculateScore(editData) : 0;
-  const isOverScore = totalScore > matrixTotalScore + 0.001;
+  const isScoreMismatch = editingId !== null && Math.abs(totalScore - matrixTotalScore) > 0.001;
+  const scoreDiff = totalScore - matrixTotalScore;
 
   const updateField = (field: keyof EditingDetail, value: number) => {
     if (!editData) return;
@@ -182,146 +175,156 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
           ) : !totalDetails.length ? (
             <div className="text-center py-16 text-slate-500">Phiên bản này chưa có chi tiết nào</div>
           ) : (
-            <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-slate-50 dark:bg-slate-800">
-                    <th className="px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-slate-500 w-60">
-                      Bài học
-                    </th>
-                    <th
-                      colSpan={3}
-                      className="px-2 py-3 text-center text-sm font-bold text-blue-600 dark:text-blue-400"
-                    >
-                      MCQ — Trắc nghiệm
-                    </th>
-                    <th
-                      colSpan={3}
-                      className="px-2 py-3 text-center text-sm font-bold text-orange-600 dark:text-orange-400"
-                    >
-                      Essay — Tự luận
-                    </th>
-                    <th className="px-2 py-3 text-center text-sm font-bold text-slate-600 dark:text-slate-400">Điểm</th>
-                    <th className="w-20" />
-                  </tr>
-                  <tr className="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
-                    <th />
-                    {["Dễ", "TB", "Khó", "Dễ", "TB", "Khó"].map((l, i) => (
-                      <th key={i} className="px-2 py-2 text-center text-xs font-medium text-slate-500">
-                        {l}
+            <>
+              {isScoreMismatch && (
+                <div className="mb-4 flex items-start gap-3 rounded-xl border border-red-200 dark:border-red-800 bg-red-50 dark:bg-red-900/20 px-4 py-3">
+                  <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400 mt-0.5 shrink-0" />
+                  <p className="text-sm text-red-700 dark:text-red-300 font-medium">
+                    Tổng điểm hiện tại là <span className="font-bold">{totalScore.toFixed(2)}</span> —{" "}
+                    {scoreDiff > 0
+                      ? `vượt quá ${matrixTotalScore} điểm (+${scoreDiff.toFixed(2)})`
+                      : `chưa đủ ${matrixTotalScore} điểm (${scoreDiff.toFixed(2)})`}
+                    . Vui lòng điều chỉnh để tổng điểm bằng đúng <span className="font-bold">{matrixTotalScore}</span>.
+                  </p>
+                </div>
+              )}
+
+              <div className="overflow-x-auto rounded-xl border border-slate-200 dark:border-slate-700">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-slate-50 dark:bg-slate-800">
+                      <th className="px-4 py-3 text-left text-sm font-bold uppercase tracking-wider text-slate-500 w-60">
+                        Bài học
                       </th>
-                    ))}
-                    <th />
-                    <th />
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                  {totalDetails.map((detail: any) => {
-                    const isEditing = editingId === detail.id;
-                    const rowScore = calculateScore(isEditing && editData ? editData : detail);
-
-                    const CellContent = ({
-                      countField,
-                      scoreField,
-                      isEditing,
-                    }: {
-                      countField: keyof EditingDetail;
-                      scoreField: keyof EditingDetail;
-                      isEditing: boolean;
-                    }) =>
-                      isEditing ? (
-                        <div className="flex flex-col items-center gap-1">
-                          <NumInput field={countField} isCount />
-                          <div className="flex items-center gap-1">
-                            <span className="text-[10px] text-slate-400">×</span>
-                            <NumInput field={scoreField} />
-                          </div>
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center">
-                          <span className="font-semibold">{(detail as any)[countField]}</span>
-                          <span className="text-[10px] text-slate-400">
-                            ×{parseFloat((detail as any)[scoreField]).toFixed(2)}
-                          </span>
-                        </div>
-                      );
-
-                    return (
-                      <tr
-                        key={detail.id}
-                        className={`transition-colors ${
-                          isEditing
-                            ? "bg-blue-50/50 dark:bg-blue-900/10"
-                            : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
-                        }`}
+                      <th
+                        colSpan={3}
+                        className="px-2 py-3 text-center text-sm font-bold text-blue-600 dark:text-blue-400"
                       >
-                        <td className="px-4 py-3">
-                          <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">
-                            {detail.lesson?.name}
-                          </p>
-                          <p className="text-xs text-slate-400">
-                            C{detail.chapter.chapterNo}: {detail.chapter.name}
-                          </p>
-                          {/* Warning hiện ngay dưới tên bài học đang edit */}
-                          {isEditing && isOverScore && (
-                            <div className="flex items-center gap-1.5 mt-2 text-xs text-red-600 dark:text-red-400 font-medium">
-                              <AlertCircle className="h-3.5 w-3.5 shrink-0" />
-                              Tổng điểm vượt quá {matrixTotalScore} điểm ({totalScore.toFixed(2)})
+                        MCQ — Trắc nghiệm
+                      </th>
+                      <th
+                        colSpan={3}
+                        className="px-2 py-3 text-center text-sm font-bold text-orange-600 dark:text-orange-400"
+                      >
+                        Essay — Tự luận
+                      </th>
+                      <th className="px-2 py-3 text-center text-sm font-bold text-slate-600 dark:text-slate-400">
+                        Điểm
+                      </th>
+                      <th className="w-20" />
+                    </tr>
+                    <tr className="bg-slate-50 dark:bg-slate-800 border-t border-slate-200 dark:border-slate-700">
+                      <th />
+                      {["Dễ", "TB", "Khó", "Dễ", "TB", "Khó"].map((l, i) => (
+                        <th key={i} className="px-2 py-2 text-center text-xs font-medium text-slate-500">
+                          {l}
+                        </th>
+                      ))}
+                      <th />
+                      <th />
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
+                    {totalDetails.map((detail: any) => {
+                      const isEditing = editingId === detail.id;
+                      const rowScore = calculateScore(isEditing && editData ? editData : detail);
+
+                      const CellContent = ({
+                        countField,
+                        scoreField,
+                        isEditing,
+                      }: {
+                        countField: keyof EditingDetail;
+                        scoreField: keyof EditingDetail;
+                        isEditing: boolean;
+                      }) =>
+                        isEditing ? (
+                          <div className="flex flex-col items-center gap-1">
+                            <NumInput field={countField} isCount />
+                            <div className="flex items-center gap-1">
+                              <span className="text-[10px] text-slate-400">×</span>
+                              <NumInput field={scoreField} />
                             </div>
-                          )}
-                        </td>
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center">
+                            <span className="font-semibold">{(detail as any)[countField]}</span>
+                            <span className="text-[10px] text-slate-400">
+                              ×{parseFloat((detail as any)[scoreField]).toFixed(2)}
+                            </span>
+                          </div>
+                        );
 
-                        {(
-                          [
-                            ["easyMCQ", "easyMCQScore"],
-                            ["mediumMCQ", "mediumMCQScore"],
-                            ["hardMCQ", "hardMCQScore"],
-                            ["easyEssay", "easyEssayScore"],
-                            ["mediumEssay", "mediumEssayScore"],
-                            ["hardEssay", "hardEssayScore"],
-                          ] as [keyof EditingDetail, keyof EditingDetail][]
-                        ).map(([countField, scoreField]) => (
-                          <td key={countField} className="px-2 py-3 text-center">
-                            <CellContent countField={countField} scoreField={scoreField} isEditing={isEditing} />
+                      return (
+                        <tr
+                          key={detail.id}
+                          className={`transition-colors ${
+                            isEditing
+                              ? "bg-blue-50/50 dark:bg-blue-900/10"
+                              : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
+                          }`}
+                        >
+                          <td className="px-4 py-3">
+                            <p className="font-medium text-slate-800 dark:text-slate-200 text-sm">
+                              {detail.lesson?.name}
+                            </p>
+                            <p className="text-xs text-slate-400">{detail.chapter.name}</p>
                           </td>
-                        ))}
 
-                        <td className="px-2 py-3 text-center">
-                          <span
-                            className={`text-base font-bold ${
-                              isEditing && isOverScore
-                                ? "text-red-600 dark:text-red-400"
-                                : "text-slate-900 dark:text-white"
-                            }`}
-                          >
-                            {rowScore.toFixed(2)}
-                          </span>
-                        </td>
+                          {(
+                            [
+                              ["easyMCQ", "easyMCQScore"],
+                              ["mediumMCQ", "mediumMCQScore"],
+                              ["hardMCQ", "hardMCQScore"],
+                              ["easyEssay", "easyEssayScore"],
+                              ["mediumEssay", "mediumEssayScore"],
+                              ["hardEssay", "hardEssayScore"],
+                            ] as [keyof EditingDetail, keyof EditingDetail][]
+                          ).map(([countField, scoreField]) => (
+                            <td key={countField} className="px-2 py-3 text-center">
+                              <CellContent countField={countField} scoreField={scoreField} isEditing={isEditing} />
+                            </td>
+                          ))}
 
-                        <td className="px-2 py-3">
-                          <div className="flex items-center justify-center gap-1">
-                            {isEditing ? (
-                              <>
-                                <button
-                                  type="button"
-                                  onClick={saveEdit}
-                                  disabled={saving || isOverScore}
-                                  title={isOverScore ? `Tổng điểm vượt quá ${matrixTotalScore}` : undefined}
-                                  className="flex items-center gap-1 px-2 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                >
-                                  {saving ? <Loader2 className="h-3 w-3 animate-spin" /> : <Save className="h-3 w-3" />}
-                                  Lưu
-                                </button>
-                                <button
-                                  type="button"
-                                  onClick={cancelEdit}
-                                  className="px-2 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
-                                >
-                                  Huỷ
-                                </button>
-                              </>
-                            ) : (
-                              <>
+                          <td className="px-2 py-3 text-center">
+                            <span
+                              className={`text-base font-bold ${
+                                isEditing && isScoreMismatch
+                                  ? "text-red-600 dark:text-red-400"
+                                  : "text-slate-900 dark:text-white"
+                              }`}
+                            >
+                              {rowScore.toFixed(2)}
+                            </span>
+                          </td>
+
+                          <td className="px-2 py-3">
+                            <div className="flex items-center justify-center gap-1">
+                              {isEditing ? (
+                                <>
+                                  <button
+                                    type="button"
+                                    onClick={saveEdit}
+                                    disabled={saving || isScoreMismatch}
+                                    title={isScoreMismatch ? `Tổng điểm phải bằng ${matrixTotalScore}` : undefined}
+                                    className="flex items-center gap-1 px-2 py-1.5 bg-blue-600 text-white text-xs font-medium rounded-md hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                  >
+                                    {saving ? (
+                                      <Loader2 className="h-3 w-3 animate-spin" />
+                                    ) : (
+                                      <Save className="h-3 w-3" />
+                                    )}
+                                    Lưu
+                                  </button>
+                                  <button
+                                    type="button"
+                                    onClick={cancelEdit}
+                                    className="px-2 py-1.5 text-xs font-medium text-slate-600 dark:text-slate-400 border border-slate-300 dark:border-slate-600 rounded-md hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                  >
+                                    Huỷ
+                                  </button>
+                                </>
+                              ) : (
                                 <button
                                   type="button"
                                   onClick={() => startEdit(detail)}
@@ -330,51 +333,42 @@ const VersionDetailModal: React.FC<Props> = ({ isOpen, onClose, versionId, matri
                                 >
                                   <Pencil className="h-4 w-4" />
                                 </button>
-                                <button
-                                  type="button"
-                                  onClick={() => handleDelete(detail.id)}
-                                  disabled={deleting}
-                                  className="p-1.5 text-slate-400 hover:text-red-500 transition-colors"
-                                  title="Xóa"
-                                >
-                                  <Trash2 className="h-4 w-4" />
-                                </button>
-                              </>
-                            )}
-                          </div>
+                              )}
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                  <tfoot>
+                    <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
+                      <td className="px-4 py-3 text-md font-bold text-slate-700 dark:text-slate-300">Tổng</td>
+                      {["easyMCQ", "mediumMCQ", "hardMCQ", "easyEssay", "mediumEssay", "hardEssay"].map((f) => (
+                        <td key={f} className="px-2 py-3 text-center">
+                          <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
+                            {totalDetails.reduce((s: number, d: any) => s + (d[f] || 0), 0)}
+                          </span>
                         </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-                <tfoot>
-                  <tr className="border-t-2 border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800">
-                    <td className="px-4 py-3 text-md font-bold text-slate-700 dark:text-slate-300">Tổng</td>
-                    {["easyMCQ", "mediumMCQ", "hardMCQ", "easyEssay", "mediumEssay", "hardEssay"].map((f) => (
-                      <td key={f} className="px-2 py-3 text-center">
-                        <span className="text-sm font-bold text-slate-700 dark:text-slate-300">
-                          {totalDetails.reduce((s: number, d: any) => s + (d[f] || 0), 0)}
+                      ))}
+                      <td className="px-2 py-3 text-center">
+                        <span
+                          className={`text-base font-bold ${
+                            isScoreMismatch
+                              ? "text-red-600 dark:text-red-400"
+                              : Math.abs(totalScore - matrixTotalScore) < 0.01
+                                ? "text-green-600 dark:text-green-400"
+                                : "text-slate-700 dark:text-slate-300"
+                          }`}
+                        >
+                          {totalScore.toFixed(2)}
                         </span>
                       </td>
-                    ))}
-                    <td className="px-2 py-3 text-center">
-                      <span
-                        className={`text-base font-bold ${
-                          isOverScore
-                            ? "text-red-600 dark:text-red-400"
-                            : Math.abs(totalScore - matrixTotalScore) < 0.01
-                              ? "text-green-600 dark:text-green-400"
-                              : "text-slate-700 dark:text-slate-300"
-                        }`}
-                      >
-                        {totalScore.toFixed(2)}
-                      </span>
-                    </td>
-                    <td />
-                  </tr>
-                </tfoot>
-              </table>
-            </div>
+                      <td />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            </>
           )}
         </div>
 
