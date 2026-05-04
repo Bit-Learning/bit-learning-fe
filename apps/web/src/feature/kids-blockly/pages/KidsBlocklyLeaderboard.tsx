@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "@tanstack/react-router";
 import { useKidsBlocklyLeaderboard } from "../queries/useKidsBlockly";
 import type { KidsBlocklyLeaderboardEntry } from "../types/kid-blockly.types";
 
@@ -100,10 +101,10 @@ function LeaderboardRow({ entry }: { entry: KidsBlocklyLeaderboardEntry }) {
   const isTop3 = entry.rank <= 3;
   return (
     <div
-      className={`grid items-center gap-2 px-3.5 py-3 rounded-2xl cursor-default ${isTop3 ? "bg-blue-50" : "bg-slate-50"}`}
+      className={`grid items-center gap-2 px-3.5 py-3 rounded-2xl cursor-default ${isTop3 ? "bg-blue-100" : "bg-slate-50"}`}
       style={{ gridTemplateColumns: "44px 1fr 80px 52px" }}
     >
-      <div className={`text-center font-black ${isTop3 ? "text-xl" : "text-base"} text-slate-400`}>
+      <div className={`text-center font-black ${isTop3 ? "text-xl" : "text-base"} text-slate-800`}>
         {RANK_EMOJI[entry.rank] ?? entry.rank}
       </div>
 
@@ -147,6 +148,7 @@ function SkeletonRow() {
 }
 
 export default function KidsBlocklyLeaderboard({ pageSize = 10 }: Props) {
+  const navigate = useNavigate();
   const [page, setPage] = useState(0);
   const { data, isLoading, isError } = useKidsBlocklyLeaderboard(page, pageSize);
 
@@ -159,68 +161,77 @@ export default function KidsBlocklyLeaderboard({ pageSize = 10 }: Props) {
   const podiumRanks = [2, 1, 3] as const;
 
   return (
-    <div className="flex flex-col gap-4 w-full max-w-xl mx-auto py-6 px-4 min-h-screen bg-white">
-      <div className="text-center pb-1">
-        <h1 className="text-2xl font-black tracking-tight text-blue-600 m-0">🏆 Bảng Xếp Hạng</h1>
-      </div>
-
-      {isLoading ? (
-        <div className="flex justify-center items-end gap-4 py-6">
-          {([72, 88, 60] as const).map((h, i) => (
-            <div key={i} className="flex flex-col items-center gap-2 animate-pulse">
-              <div className="w-14 h-4 rounded bg-slate-200" />
-              <div className="rounded-full bg-slate-200" style={{ width: h - 16, height: h - 16 }} />
-              <div className="w-25 rounded-t-xl bg-slate-200" style={{ height: h }} />
-            </div>
-          ))}
+    <div className="bg-[linear-gradient(180deg,#f7fffb_0%,#eef8ff_48%,#f8fafc_100%)]">
+      <div className="flex flex-col gap-4 w-full max-w-xl mx-auto py-6 px-4 min-h-screen">
+        <div className="relative flex items-center justify-center pb-1">
+          <button
+            type="button"
+            onClick={() => void navigate({ to: "/kids-blockly" })}
+            className="absolute left-0 flex items-center gap-1.5 rounded-2xl border border-slate-200 bg-white px-3.5 py-2 text-sm font-bold text-slate-600 transition hover:bg-slate-50 cursor-pointer"
+          >
+            ← Quay lại
+          </button>
+          <h1 className="text-2xl font-black tracking-tight text-blue-600 m-0">🏆 Bảng Xếp Hạng</h1>
         </div>
-      ) : top3.length > 0 ? (
-        <div className="flex justify-center items-end gap-4 py-4">
-          {podiumOrder.map((u, i) => (u ? <PodiumCard key={u.userId} user={u} rank={podiumRanks[i]!} /> : null))}
-        </div>
-      ) : null}
 
-      <div
-        className="grid text-md not-last:font-extrabold uppercase tracking-widest text-slate-800 px-3.5 pb-1"
-        style={{ gridTemplateColumns: "55px 1fr 70px 60px" }}
-      >
-        <span className="text-center">#</span>
-        <span>Người chơi</span>
-        <span className="text-right">Sao</span>
-        <span className="text-right">Màn</span>
-      </div>
-
-      <div className="flex flex-col gap-1.5">
         {isLoading ? (
-          Array.from({ length: pageSize }).map((_, i) => <SkeletonRow key={i} />)
-        ) : isError ? (
-          <p className="text-center py-8 text-sm text-slate-400">Không tải được bảng xếp hạng.</p>
-        ) : (
-          items.map((e) => <LeaderboardRow key={e.userId} entry={e} />)
+          <div className="flex justify-center items-end gap-4 py-6">
+            {([72, 88, 60] as const).map((h, i) => (
+              <div key={i} className="flex flex-col items-center gap-2 animate-pulse">
+                <div className="w-14 h-4 rounded bg-slate-200" />
+                <div className="rounded-full bg-slate-200" style={{ width: h - 16, height: h - 16 }} />
+                <div className="w-25 rounded-t-xl bg-slate-200" style={{ height: h }} />
+              </div>
+            ))}
+          </div>
+        ) : top3.length > 0 ? (
+          <div className="flex justify-center items-end gap-4 py-4">
+            {podiumOrder.map((u, i) => (u ? <PodiumCard key={u.userId} user={u} rank={podiumRanks[i]!} /> : null))}
+          </div>
+        ) : null}
+
+        <div
+          className="grid text-md not-last:font-extrabold uppercase tracking-widest text-slate-800 px-3.5 pb-1"
+          style={{ gridTemplateColumns: "55px 1fr 70px 60px" }}
+        >
+          <span className="text-center">#</span>
+          <span>Người chơi</span>
+          <span className="text-right">Sao</span>
+          <span className="text-right">Màn</span>
+        </div>
+
+        <div className="flex flex-col gap-1.5">
+          {isLoading ? (
+            Array.from({ length: pageSize }).map((_, i) => <SkeletonRow key={i} />)
+          ) : isError ? (
+            <p className="text-center py-8 text-sm text-slate-400">Không tải được bảng xếp hạng.</p>
+          ) : (
+            items.map((e) => <LeaderboardRow key={e.userId} entry={e} />)
+          )}
+        </div>
+
+        {totalPages > 1 && (
+          <div className="flex justify-center items-center gap-3 pt-2">
+            <button
+              onClick={() => setPage((p) => Math.max(0, p - 1))}
+              disabled={page === 0 || pagination?.first}
+              className="px-4 py-2 rounded-xl text-sm font-extrabold border border-slate-200 bg-slate-50 text-blue-600 disabled:opacity-40 cursor-pointer"
+            >
+              ← Trước
+            </button>
+            <span className="text-sm font-bold text-slate-400">
+              {page + 1} / {totalPages}
+            </span>
+            <button
+              onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
+              disabled={pagination?.last}
+              className="px-4 py-2 rounded-xl text-sm font-extrabold border border-slate-200 bg-slate-50 text-blue-600 disabled:opacity-40 cursor-pointer"
+            >
+              Sau →
+            </button>
+          </div>
         )}
       </div>
-
-      {totalPages > 1 && (
-        <div className="flex justify-center items-center gap-3 pt-2">
-          <button
-            onClick={() => setPage((p) => Math.max(0, p - 1))}
-            disabled={page === 0 || pagination?.first}
-            className="px-4 py-2 rounded-xl text-sm font-extrabold border border-slate-200 bg-slate-50 text-blue-600 disabled:opacity-40 cursor-pointer"
-          >
-            ← Trước
-          </button>
-          <span className="text-sm font-bold text-slate-400">
-            {page + 1} / {totalPages}
-          </span>
-          <button
-            onClick={() => setPage((p) => Math.min(totalPages - 1, p + 1))}
-            disabled={pagination?.last}
-            className="px-4 py-2 rounded-xl text-sm font-extrabold border border-slate-200 bg-slate-50 text-blue-600 disabled:opacity-40 cursor-pointer"
-          >
-            Sau →
-          </button>
-        </div>
-      )}
     </div>
   );
 }

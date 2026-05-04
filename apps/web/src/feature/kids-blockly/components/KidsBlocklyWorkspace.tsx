@@ -10,6 +10,7 @@ interface KidsBlocklyWorkspaceProps {
   activeBlockId: string | null;
   resetSignal: number;
   className?: string;
+  "data-tour"?: string;
   onBlockClick?: () => void;
   onBlockDrop?: () => void;
   onProgramChange: (program: ProgramBlock[]) => void;
@@ -147,24 +148,52 @@ function buildToolboxXml(allowedBlocks: BlockType[]) {
   const controls = buildBlocks(["repeat"]);
 
   return `
-		<xml xmlns="https://developers.google.com/blockly/xml">
-			${movement}
-			${movement && (directions || controls) ? '<sep gap="18"></sep>' : ""}
-			${directions}
-			${directions && controls ? '<sep gap="18"></sep>' : ""}
-			${controls}
-		</xml>
-	`;
+    <xml xmlns="https://developers.google.com/blockly/xml">
+      ${movement}
+      ${movement && (directions || controls) ? '<sep gap="18"></sep>' : ""}
+      ${directions}
+      ${directions && controls ? '<sep gap="18"></sep>' : ""}
+      ${controls}
+    </xml>
+  `;
 }
 
 function loadStartBlock(workspace: Blockly.WorkspaceSvg) {
   workspace.clear();
   const xml = Blockly.utils.xml.textToDom(`
-		<xml xmlns="https://developers.google.com/blockly/xml">
-			<block type="kids_start" x="28" y="28" deletable="false" movable="false"></block>
-		</xml>
-	`);
+    <xml xmlns="https://developers.google.com/blockly/xml">
+      <block type="kids_start" x="28" y="28" deletable="false" movable="false"></block>
+    </xml>
+  `);
   Blockly.Xml.domToWorkspace(xml, workspace);
+}
+
+/** Tag the Blockly toolbox div with data-tour="toolbox".
+ *  Blockly renders the toolbox asynchronously so we use MutationObserver
+ *  to wait for the toolbox element to appear inside the container.
+ *  Tries multiple selectors used by different Blockly renderers.
+ */
+function tagToolboxWhenReady(container: HTMLElement): () => void {
+  const TOOLBOX_SELECTORS = [".blocklyToolboxDiv", ".blocklyToolbox", "[class*='blocklyToolbox']"];
+
+  function tryTag() {
+    for (const sel of TOOLBOX_SELECTORS) {
+      const el = container.querySelector(sel) as HTMLElement | null;
+      if (el) {
+        el.setAttribute("data-tour", "toolbox");
+        return true;
+      }
+    }
+    return false;
+  }
+
+  if (tryTag()) return () => undefined;
+
+  const observer = new MutationObserver(() => {
+    if (tryTag()) observer.disconnect();
+  });
+  observer.observe(container, { childList: true, subtree: true });
+  return () => observer.disconnect();
 }
 
 function readStatementChain(block: Blockly.Block | null, depth = 0): ProgramBlock[] {
@@ -202,6 +231,7 @@ export function KidsBlocklyWorkspace({
   activeBlockId,
   resetSignal,
   className,
+  "data-tour": dataTour,
   onBlockClick,
   onBlockDrop,
   onProgramChange,
@@ -216,7 +246,7 @@ export function KidsBlocklyWorkspace({
 
     const workspace = Blockly.inject(containerRef.current, {
       toolbox: toolboxXml,
-      trashcan: true,
+      trashcan: false,
       zoom: {
         controls: true,
         wheel: true,
@@ -243,6 +273,9 @@ export function KidsBlocklyWorkspace({
     loadStartBlock(workspace);
     onProgramChange([]);
 
+    // Tag toolbox for tour — uses MutationObserver to handle async render
+    const stopObserver = tagToolboxWhenReady(containerRef.current);
+
     const listener = (event: Blockly.Events.Abstract) => {
       const blocklyEvent = event as Blockly.Events.Abstract & {
         newElementId?: string;
@@ -267,6 +300,7 @@ export function KidsBlocklyWorkspace({
     Blockly.svgResize(workspace);
 
     return () => {
+      stopObserver();
       workspace.removeChangeListener(listener);
       workspace.dispose();
       workspaceRef.current = null;
@@ -287,18 +321,18 @@ export function KidsBlocklyWorkspace({
   useEffect(() => {
     const workspace = workspaceRef.current;
     if (!workspace) return;
-
     workspace.highlightBlock(activeBlockId);
   }, [activeBlockId]);
 
   return (
     <div
       className={cn(
-        "relative h-full min-h-[560px] overflow-hidden rounded-[22px] border border-sky-100 bg-white shadow-inner",
+        "relative h-full min-h-140 overflow-hidden rounded-[22px] border border-sky-100 bg-white shadow-inner",
         className,
       )}
+      data-tour={dataTour}
     >
-      <div ref={containerRef} className="h-full min-h-[560px] w-full" />
+      <div ref={containerRef} className="h-full min-h-140 w-full" />
       {isRunning && <div className="pointer-events-auto absolute inset-0 bg-white/10 backdrop-blur-[1px]" />}
     </div>
   );
