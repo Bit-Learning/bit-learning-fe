@@ -11,7 +11,6 @@ const DRAG_ANIM_STYLE_ID = "blockly-tour-drag-anim";
 function injectDragAnimStyles() {
   if (document.getElementById(DRAG_ANIM_STYLE_ID)) return;
 
-  // Ensure Roboto Vietnamese subset is loaded for proper diacritic rendering
   if (!document.getElementById("blockly-tour-roboto")) {
     const link = document.createElement("link");
     link.id = "blockly-tour-roboto";
@@ -206,8 +205,8 @@ const ALL_STEPS = [
   {
     element: "[data-tour='step-count']",
     popover: {
-      title: "🔢 Số bước",
-      description: "Hiển thị số khối lệnh bạn đang dùng. Tối ưu số bước theo chuẩn mục tiêu để đạt 3 sao ⭐⭐⭐!",
+      title: "🔢 Số khối",
+      description: "Hiển thị số khối lệnh bạn đang dùng. Tối ưu số khối theo chuẩn mục tiêu để đạt 3 sao ⭐⭐⭐!",
       side: "bottom",
     },
   },
