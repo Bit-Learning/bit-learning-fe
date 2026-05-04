@@ -1,27 +1,27 @@
 import { useCallback, useEffect, useRef } from "react";
+import type { Config, DriveStep, Driver } from "driver.js";
 
 export interface BlocklyTourProps {
-  onStart?: (startTour: () => void) => void;
+	onStart?: (startTour: () => void) => void;
 }
-
-type AnyDriver = any;
 
 const DRAG_ANIM_STYLE_ID = "blockly-tour-drag-anim";
 
 function injectDragAnimStyles() {
-  if (document.getElementById(DRAG_ANIM_STYLE_ID)) return;
+	if (document.getElementById(DRAG_ANIM_STYLE_ID)) return;
 
-  if (!document.getElementById("blockly-tour-roboto")) {
-    const link = document.createElement("link");
-    link.id = "blockly-tour-roboto";
-    link.rel = "stylesheet";
-    link.href = "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;800&subset=vietnamese&display=swap";
-    document.head.appendChild(link);
-  }
+	if (!document.getElementById("blockly-tour-roboto")) {
+		const link = document.createElement("link");
+		link.id = "blockly-tour-roboto";
+		link.rel = "stylesheet";
+		link.href =
+			"https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;800&subset=vietnamese&display=swap";
+		document.head.appendChild(link);
+	}
 
-  const style = document.createElement("style");
-  style.id = DRAG_ANIM_STYLE_ID;
-  style.textContent = `
+	const style = document.createElement("style");
+	style.id = DRAG_ANIM_STYLE_ID;
+	style.textContent = `
     @keyframes blt-block-drag {
       0%   { transform: translateX(0px)   translateY(0px)  scale(1);    opacity: 1; }
       5%   { transform: translateX(0px)   translateY(0px)  scale(1.08); opacity: 1; }
@@ -138,7 +138,7 @@ function injectDragAnimStyles() {
       letter-spacing: normal !important;
     }
   `;
-  document.head.appendChild(style);
+	document.head.appendChild(style);
 }
 
 const DRAG_DEMO_HTML = `
@@ -159,165 +159,165 @@ const DRAG_DEMO_HTML = `
 
 const TOTAL_STEPS = 9;
 
-const ALL_STEPS = [
-  {
-    popover: {
-      title: "👋 Chào mừng đến Kids Blockly!",
-      description:
-        "Hãy để Tom hướng dẫn bạn cách chơi nhé. Bạn sẽ kéo các khối lệnh để dẫn đường cho nhân vật đến đích.",
-    },
-  },
-  {
-    element: "[data-tour='gameboard']",
-    popover: {
-      title: "🗺️ Sân chơi",
-      description:
-        "Đây là nơi nhân vật Tom di chuyển. Tom xuất phát từ ô đầu tiên, cần đến được cổng dịch chuyển màu xanh. Các vật cản như cây, đá, hàng rào trên đường sẽ chặn Tom lại!",
-      side: "right",
-    },
-  },
-  {
-    element: "[data-tour='hint-btn']",
-    popover: {
-      title: "💡 Nút Gợi ý",
-      description: "Bí quá không biết làm thế nào? Bấm vào đây để xem gợi ý cho màn chơi hiện tại.",
-      side: "bottom",
-    },
-  },
-  {
-    element: "[data-tour='workspace']",
-    popover: {
-      title: "🧩 Sân lập trình",
-      description:
-        "Kéo các khối lệnh từ thanh bên trái vào đây và nối chúng xuống dưới khối 🚩 Bắt đầu. Mỗi khối là một hành động Tom sẽ thực hiện theo thứ tự từ trên xuống.",
-      side: "left",
-    },
-  },
-  {
-    element: "[data-tour='toolbox']",
-    popover: {
-      title: "📦 Hộp khối lệnh",
-      description: `Đây là các khối bạn được dùng trong màn này. Kéo chúng vào sân bên phải để lắp ghép chương trình.${DRAG_DEMO_HTML}`,
-      side: "right",
-      popoverClass: "blockly-tour-popover blockly-tour-popover--wide",
-    },
-  },
-  {
-    element: "[data-tour='step-count']",
-    popover: {
-      title: "🔢 Số khối",
-      description: "Hiển thị số khối lệnh bạn đang dùng. Tối ưu số khối theo chuẩn mục tiêu để đạt 3 sao ⭐⭐⭐!",
-      side: "bottom",
-    },
-  },
-  {
-    element: "[data-tour='run-btn']",
-    popover: {
-      title: "▶️ Nút Chạy",
-      description:
-        "Khi đã xếp xong các khối, bấm Chạy để Tom thực hiện chương trình. Hãy xem Tom có đến được đích không nhé!",
-      side: "top",
-    },
-  },
-  // {
-  //   element: "[data-tour='replay-btn']",
-  //   popover: {
-  //     title: "🔄 Chạy lại",
-  //     description: "Đặt Tom về vị trí ban đầu và chạy lại chương trình hiện tại mà không xóa các khối.",
-  //     side: "top",
-  //   },
-  // },
-  {
-    element: "[data-tour='clear-btn']",
-    popover: {
-      title: "🗑️ Xóa hết",
-      description: "Xóa toàn bộ các khối lệnh để bắt đầu lại từ đầu.",
-      side: "top",
-    },
-  },
-  {
-    element: "[data-tour='level-grid'] > button:first-child",
-    popover: {
-      title: "🗂️ Chọn màn chơi",
-      description:
-        "Hoàn thành màn hiện tại để mở khóa màn tiếp theo. Số sao ⭐ bên dưới thể hiện kết quả tốt nhất của bạn.",
-      side: "top",
-      align: "start",
-    },
-  },
+const ALL_STEPS: DriveStep[] = [
+	{
+		popover: {
+			title: "👋 Chào mừng đến Kids Blockly!",
+			description:
+				"Hãy để Tom hướng dẫn bạn cách chơi nhé. Bạn sẽ kéo các khối lệnh để dẫn đường cho nhân vật đến đích.",
+		},
+	},
+	{
+		element: "[data-tour='gameboard']",
+		popover: {
+			title: "🗺️ Sân chơi",
+			description:
+				"Đây là nơi nhân vật Tom di chuyển. Tom xuất phát từ ô đầu tiên, cần đến được cổng dịch chuyển màu xanh. Các vật cản như cây, đá, hàng rào trên đường sẽ chặn Tom lại!",
+			side: "right",
+		},
+	},
+	{
+		element: "[data-tour='hint-btn']",
+		popover: {
+			title: "💡 Nút Gợi ý",
+			description:
+				"Bí quá không biết làm thế nào? Bấm vào đây để xem gợi ý cho màn chơi hiện tại.",
+			side: "bottom",
+		},
+	},
+	{
+		element: "[data-tour='workspace']",
+		popover: {
+			title: "🧩 Sân lập trình",
+			description:
+				"Kéo các khối lệnh từ thanh bên trái vào đây và nối chúng xuống dưới khối 🚩 Bắt đầu. Mỗi khối là một hành động Tom sẽ thực hiện theo thứ tự từ trên xuống.",
+			side: "left",
+		},
+	},
+	{
+		element: "[data-tour='toolbox']",
+		popover: {
+			title: "📦 Hộp khối lệnh",
+			description: `Đây là các khối bạn được dùng trong màn này. Kéo chúng vào sân bên phải để lắp ghép chương trình.${DRAG_DEMO_HTML}`,
+			side: "right",
+			popoverClass: "blockly-tour-popover blockly-tour-popover--wide",
+		},
+	},
+	{
+		element: "[data-tour='step-count']",
+		popover: {
+			title: "🔢 Số khối",
+			description:
+				"Hiển thị số khối lệnh bạn đang dùng. Tối ưu số khối theo chuẩn mục tiêu để đạt 3 sao ⭐⭐⭐!",
+			side: "bottom",
+		},
+	},
+	{
+		element: "[data-tour='run-btn']",
+		popover: {
+			title: "▶️ Nút Chạy",
+			description:
+				"Khi đã xếp xong các khối, bấm Chạy để Tom thực hiện chương trình. Hãy xem Tom có đến được đích không nhé!",
+			side: "top",
+		},
+	},
+	// {
+	//   element: "[data-tour='replay-btn']",
+	//   popover: {
+	//     title: "🔄 Chạy lại",
+	//     description: "Đặt Tom về vị trí ban đầu và chạy lại chương trình hiện tại mà không xóa các khối.",
+	//     side: "top",
+	//   },
+	// },
+	{
+		element: "[data-tour='clear-btn']",
+		popover: {
+			title: "🗑️ Xóa hết",
+			description: "Xóa toàn bộ các khối lệnh để bắt đầu lại từ đầu.",
+			side: "top",
+		},
+	},
+	{
+		element: "[data-tour='level-grid'] > button:first-child",
+		popover: {
+			title: "🗂️ Chọn màn chơi",
+			description:
+				"Hoàn thành màn hiện tại để mở khóa màn tiếp theo. Số sao ⭐ bên dưới thể hiện kết quả tốt nhất của bạn.",
+			side: "top",
+			align: "start",
+		},
+	},
 ];
 
 export function useBlocklyTour() {
-  const driverRef = useRef<AnyDriver>(null);
+	const driverRef = useRef<Driver | null>(null);
 
-  const startTour = useCallback(async () => {
-    try {
-      driverRef.current?.destroy();
-      driverRef.current = null;
+	const startTour = useCallback(async () => {
+		try {
+			driverRef.current?.destroy();
+			driverRef.current = null;
 
-      injectDragAnimStyles();
+			injectDragAnimStyles();
 
-      const mod = await import("driver.js");
-      import("driver.js/dist/driver.css").catch(() => undefined);
+			const { driver } = await import("driver.js");
+			import("driver.js/dist/driver.css").catch(() => undefined);
 
-      const fn: ((cfg: AnyDriver) => AnyDriver) | undefined =
-        (mod as any).driver ??
-        (mod as any).default?.driver ??
-        (typeof (mod as any).default === "function" ? (mod as any).default : undefined);
+			const NAVBAR_HEIGHT = 64;
 
-      if (!fn) return;
+			const config: Config = {
+				showProgress: true,
+				showButtons: ["next", "previous", "close"],
+				steps: ALL_STEPS,
+				nextBtnText: "Tiếp tục →",
+				prevBtnText: "← Quay lại",
+				doneBtnText: "Hoàn tất 🎉",
+				progressText: `{{current}} / ${TOTAL_STEPS}`,
+				popoverClass: "blockly-tour-popover",
+				smoothScroll: false,
+				allowClose: true,
+				stagePadding: 8,
+				stageRadius: 16,
+				popoverOffset: 12,
+				onHighlightStarted: (el) => {
+					if (!el) return;
+					const rect = el.getBoundingClientRect();
+					if (rect.top < NAVBAR_HEIGHT + 8) {
+						window.scrollBy({
+							top: rect.top - NAVBAR_HEIGHT - 16,
+							behavior: "instant",
+						});
+					}
+				},
+				onDestroyed: () => {
+					document.body.style.overflow = "";
+					driverRef.current = null;
+				},
+			};
 
-      const NAVBAR_HEIGHT = 64;
+			const d = driver(config);
 
-      const d = fn({
-        showProgress: true,
-        showButtons: ["next", "previous", "close"],
-        steps: ALL_STEPS,
-        nextBtnText: "Tiếp tục →",
-        prevBtnText: "← Quay lại",
-        doneBtnText: "Hoàn tất 🎉",
-        progressText: `{{current}} / ${TOTAL_STEPS}`,
-        popoverClass: "blockly-tour-popover",
-        smoothScroll: false,
-        allowClose: true,
-        stagePadding: 8,
-        stageRadius: 16,
-        popoverOffset: 12,
-        onHighlightStarted: (el: Element) => {
-          if (!el) return;
-          const rect = el.getBoundingClientRect();
-          if (rect.top < NAVBAR_HEIGHT + 8) {
-            window.scrollBy({ top: rect.top - NAVBAR_HEIGHT - 16, behavior: "instant" });
-          }
-        },
-        onDestroyed: () => {
-          document.body.style.overflow = "";
-          driverRef.current = null;
-        },
-      });
+			driverRef.current = d;
+			d.drive();
+			document.body.style.overflow = "hidden";
+		} catch (err) {
+			console.error("[BlocklyTour]", err);
+		}
+	}, []);
 
-      driverRef.current = d;
-      d.drive();
-      document.body.style.overflow = "hidden";
-    } catch (err) {
-      console.error("[BlocklyTour]", err);
-    }
-  }, []);
+	useEffect(
+		() => () => {
+			driverRef.current?.destroy();
+		},
+		[],
+	);
 
-  useEffect(
-    () => () => {
-      driverRef.current?.destroy();
-    },
-    [],
-  );
-
-  return { startTour };
+	return { startTour };
 }
 
 export function BlocklyTour({ onStart }: BlocklyTourProps) {
-  const { startTour } = useBlocklyTour();
-  useEffect(() => {
-    onStart?.(startTour);
-  }, [onStart, startTour]);
-  return null;
+	const { startTour } = useBlocklyTour();
+	useEffect(() => {
+		onStart?.(startTour);
+	}, [onStart, startTour]);
+	return null;
 }
