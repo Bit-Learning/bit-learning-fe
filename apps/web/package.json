@@ -23,7 +23,7 @@
 		"@tanstack/react-query-devtools": "^5.99.0",
 		"@tanstack/react-router": "^1.168.26",
 		"@tanstack/react-router-devtools": "^1.166.13",
-		"@tanstack/router-plugin": "^1.167.31",
+		"@tanstack/router-plugin": "^1.167.32",
 		"@types/prismjs": "^1.26.6",
 		"@types/qrcode": "^1.5.6",
 		"@workspace/lib": "workspace:*",
@@ -75,7 +75,7 @@
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.13",
+		"@biomejs/biome": "^2.4.14",
 		"@codecov/vite-plugin": "^1.9.1",
 		"@tailwindcss/postcss": "^4.2.4",
 		"@testing-library/jest-dom": "^6.9.1",
