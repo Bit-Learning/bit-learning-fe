@@ -5,7 +5,7 @@ import { cn } from "@workspace/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
 import { AlertTriangle, Blocks, BookOpen, Lightbulb, Loader2, Play, RotateCcw, Trophy, Trash2, X } from "lucide-react";
 import { useBlocklyTour } from "../components/BlocklyTour";
-import "./blockly-tour.css";
+import "../styles/blockly-tour.css";
 import backgroundMusicAsset from "../asset/background_music.mp3";
 import clickSoundAsset from "../asset/click.mp3";
 import errorSoundAsset from "../asset/error.mp3";
