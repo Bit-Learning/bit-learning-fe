@@ -1,6 +1,8 @@
 import type { CSSProperties } from "react";
 import { motion } from "framer-motion";
 import { cn } from "@workspace/ui/lib/utils";
+import { Lightbulb } from "lucide-react";
+import { Button } from "@workspace/ui/components/Button";
 import characterTomAsset from "../asset/character_tom.png";
 import destinationAsset from "../asset/Destination.png";
 import fenceAsset from "../asset/fence.png";
@@ -15,6 +17,7 @@ interface GameBoardProps {
   level: KidsBlocklyLevel;
   character: CharacterState;
   isRunning: boolean;
+  onHint?: () => void;
 }
 
 const directionRotation = {
@@ -47,16 +50,29 @@ function getTileBackgroundStyle(level: KidsBlocklyLevel, x: number, y: number): 
   };
 }
 
-export function GameBoard({ level, character, isRunning }: GameBoardProps) {
+export function GameBoard({ level, character, isRunning, onHint }: GameBoardProps) {
   return (
-    <div className="flex h-full flex-col rounded-[24px] border border-emerald-200 bg-white/90 p-4 shadow-[0_20px_44px_rgba(15,118,110,0.12)] backdrop-blur-sm">
+    <div className="flex h-full flex-col rounded-3xl border border-emerald-200 bg-white/90 p-4 shadow-[0_20px_44px_rgba(15,118,110,0.12)] backdrop-blur-sm">
       <div className="mb-3 flex items-center justify-between gap-4">
         <div className="min-w-0">
           <p className="text-xs font-semibold uppercase tracking-[0.2em] text-emerald-600">Sân chơi</p>
           <h2 className="mt-1 truncate text-xl font-bold text-slate-900">{level.title}</h2>
         </div>
-        <div className="shrink-0 rounded-2xl bg-emerald-50 px-3 py-2 text-sm font-semibold text-emerald-700">
-          Đích: ({level.goal.x + 1}, {level.goal.y + 1})
+        <div className="flex shrink-0 items-center gap-2">
+          {level.par && (
+            <div className="rounded-2xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">
+              ⭐⭐⭐ ≤ {level.par} bước
+            </div>
+          )}
+          <Button
+            onPress={onHint}
+            isDisabled={isRunning}
+            data-tour="hint-btn"
+            className="cursor-pointer rounded-2xl border border-sky-200 bg-sky-50 px-3 py-2 text-sky-700 hover:bg-sky-100"
+          >
+            <Lightbulb className="h-4 w-4" />
+            <span className="ml-1.5">Gợi ý</span>
+          </Button>
         </div>
       </div>
 
@@ -67,7 +83,7 @@ export function GameBoard({ level, character, isRunning }: GameBoardProps) {
         }}
       >
         <div
-          className="grid h-full w-full overflow-hidden rounded-[16px] border border-emerald-200/80"
+          className="grid h-full w-full overflow-hidden rounded-2xl border border-emerald-200/80"
           style={{
             gridTemplateColumns: `repeat(${level.gridSize.cols}, minmax(0, 1fr))`,
             gridTemplateRows: `repeat(${level.gridSize.rows}, minmax(0, 1fr))`,
@@ -144,7 +160,7 @@ export function GameBoard({ level, character, isRunning }: GameBoardProps) {
               repeat: isRunning ? Number.POSITIVE_INFINITY : 0,
             },
           }}
-          className="pointer-events-none absolute z-20 flex h-[calc((100%_-_16px)/var(--rows))] w-[calc((100%_-_16px)/var(--cols))] items-center justify-center"
+          className="pointer-events-none absolute z-20 flex h-[calc((100%-16px)/var(--rows))] w-[calc((100%-16px)/var(--cols))] items-center justify-center"
           style={
             {
               "--rows": level.gridSize.rows,

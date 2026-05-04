@@ -2,7 +2,9 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/Button";
 import { cn } from "@workspace/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Blocks, Lightbulb, Loader2, Play, RotateCcw, Trash2, X } from "lucide-react";
+import { AlertTriangle, Blocks, BookOpen, Lightbulb, Loader2, Play, RotateCcw, Trophy, Trash2, X } from "lucide-react";
+import { useBlocklyTour } from "../components/BlocklyTour";
+import "./blockly-tour.css";
 import backgroundMusicAsset from "../asset/background_music.mp3";
 import clickSoundAsset from "../asset/click.mp3";
 import errorSoundAsset from "../asset/error.mp3";
@@ -148,6 +150,7 @@ export default function KidsBlocklyPage() {
   const [lastStars, setLastStars] = useState(0);
   const [workspaceResetSignal, setWorkspaceResetSignal] = useState(0);
   const playbackTimeouts = useRef<number[]>([]);
+  const { startTour } = useBlocklyTour();
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
   const popSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -388,7 +391,7 @@ export default function KidsBlocklyPage() {
   if (bootstrapQuery.isLoading) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-[linear-gradient(180deg,#f7fffb_0%,#eef8ff_48%,#f8fafc_100%)] p-6">
-        <div className="flex items-center gap-3 rounded-[24px] bg-white px-6 py-5 text-slate-700 shadow-[0_16px_40px_rgba(15,23,42,0.1)]">
+        <div className="flex items-center gap-3 rounded-3xl bg-white px-6 py-5 text-slate-700 shadow-[0_16px_40px_rgba(15,23,42,0.1)]">
           <Loader2 className="h-5 w-5 animate-spin text-emerald-600" />
           Đang tải Kids Blockly...
         </div>
@@ -418,7 +421,7 @@ export default function KidsBlocklyPage() {
 
   return (
     <div className="min-h-screen bg-[linear-gradient(180deg,#f7fffb_0%,#eef8ff_48%,#f8fafc_100%)]">
-      <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col gap-4 px-4 py-4 sm:px-5 lg:px-6">
+      <div className="mx-auto flex min-h-screen max-w-400 flex-col gap-4 px-4 py-4 sm:px-5 lg:px-6">
         <header className="flex flex-col gap-3 rounded-[22px] border border-white/80 bg-white/85 px-5 py-4 shadow-[0_12px_34px_rgba(15,23,42,0.07)] backdrop-blur-md md:flex-row md:items-center md:justify-between">
           <div className="min-w-0">
             <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">Kids Visual Coding</p>
@@ -426,25 +429,44 @@ export default function KidsBlocklyPage() {
               Kéo khối lệnh để đưa nhân vật tới đích
             </h1>
           </div>
-          <div className="grid grid-cols-3 gap-2 text-center">
-            <div className="rounded-2xl bg-emerald-50 px-4 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600">Màn</p>
-              <p className="text-xl font-black text-slate-900">{levelIndex + 1}</p>
+          <div className="flex items-center gap-3">
+            <div className="grid grid-cols-3 gap-2 text-center">
+              <div className="rounded-2xl bg-emerald-50 px-4 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-emerald-600">Màn</p>
+                <p className="text-xl font-black text-slate-900">{levelIndex + 1}</p>
+              </div>
+              <div className="rounded-2xl bg-sky-50 px-4 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-600">Đã mở</p>
+                <p className="text-xl font-black text-slate-900">{progress.unlockedLevelIds.length}</p>
+              </div>
+              <div className="rounded-2xl bg-amber-50 px-4 py-2">
+                <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-600">Sao</p>
+                <p className="text-xl font-black text-slate-900">{progress.totalStars}</p>
+              </div>
             </div>
-            <div className="rounded-2xl bg-sky-50 px-4 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-sky-600">Đã mở</p>
-              <p className="text-xl font-black text-slate-900">{progress.unlockedLevelIds.length}</p>
-            </div>
-            <div className="rounded-2xl bg-amber-50 px-4 py-2">
-              <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-amber-600">Sao</p>
-              <p className="text-xl font-black text-slate-900">{progress.totalStars}</p>
-            </div>
+            <a
+              href="/kids-blockly/leaderboard"
+              data-tour="leaderboard-btn"
+              className="flex shrink-0 items-center gap-2 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-5 text-sm font-semibold text-violet-700 transition hover:bg-violet-100"
+            >
+              <Trophy className="h-4 w-4" />
+              Bảng xếp hạng
+            </a>
+            <button
+              type="button"
+              onClick={() => void startTour()}
+              className="flex shrink-0 items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+            >
+              <BookOpen className="h-4 w-4" />
+              Hướng dẫn
+            </button>
           </div>
         </header>
 
-        <main className="grid flex-1 items-stretch gap-4 lg:min-h-[620px] lg:grid-cols-[minmax(420px,0.92fr)_minmax(540px,1.08fr)]">
-          <section className="relative min-h-[520px]">
-            <GameBoard level={level} character={character} isRunning={busy} />
+        <main className="grid flex-1 items-stretch gap-4 lg:min-h-180 lg:grid-cols-[minmax(420px,0.92fr)_minmax(540px,1.08fr)]">
+          <section className="relative min-h-130 flex flex-col gap-3" data-tour="gameboard">
+            <GameBoard level={level} character={character} isRunning={busy} onHint={() => setShowHint(true)} />
+
             <RewardDialog
               open={showReward}
               stars={lastStars}
@@ -455,13 +477,16 @@ export default function KidsBlocklyPage() {
             />
           </section>
 
-          <section className="flex min-h-[620px] flex-col rounded-[24px] border border-sky-100 bg-white/90 p-4 shadow-[0_20px_44px_rgba(14,165,233,0.12)] backdrop-blur-sm">
+          <section className="flex min-h-155 flex-col rounded-3xl border border-sky-100 bg-white/90 p-4 shadow-[0_20px_44px_rgba(14,165,233,0.12)] backdrop-blur-sm">
             <div className="mb-3 flex items-center justify-between gap-3">
               <div className="min-w-0">
                 <p className="text-xs font-semibold uppercase tracking-[0.2em] text-sky-600">Sân lập trình</p>
                 <h2 className="mt-1 truncate text-xl font-bold text-slate-900">Kéo khối vào dưới cờ bắt đầu</h2>
               </div>
-              <div className="flex shrink-0 items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700">
+              <div
+                data-tour="step-count"
+                className="flex shrink-0 items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700"
+              >
                 <Blocks className="h-4 w-4" />
                 {program.length} bước
               </div>
@@ -473,28 +498,18 @@ export default function KidsBlocklyPage() {
               activeBlockId={activeBlockId}
               resetSignal={workspaceResetSignal}
               className="flex-1"
+              data-tour="workspace"
               onBlockClick={handleBlockClick}
               onBlockDrop={handleBlockDrop}
               onProgramChange={handleProgramChange}
             />
-          </section>
-        </main>
 
-        <footer className="grid gap-4 rounded-[24px] border border-white/80 bg-white/90 p-4 shadow-[0_16px_38px_rgba(15,23,42,0.07)] backdrop-blur-md xl:grid-cols-[0.75fr_1.25fr]">
-          <div className="flex flex-col justify-between gap-3">
-            <div className="flex flex-wrap gap-3">
+            <div className="mt-2 flex flex-wrap justify-center items-center gap-2">
               <Button
-                onPress={() => setShowHint(true)}
-                isDisabled={busy}
-                className="cursor-pointer rounded-2xl border border-sky-200 bg-sky-50 px-5 py-3 text-sky-700 hover:bg-sky-100"
-              >
-                <Lightbulb className="mr-2 h-4 w-4" />
-                Gợi ý
-              </Button>
-              <Button
+                data-tour="run-btn"
                 onPress={handleRun}
                 isDisabled={busy || program.length === 0}
-                className="cursor-pointer rounded-2xl bg-emerald-500 px-5 py-3 text-white hover:bg-emerald-600 disabled:bg-slate-300"
+                className="cursor-pointer rounded-2xl text-md bg-emerald-500 p-5 text-white hover:bg-emerald-700 disabled:bg-slate-400"
               >
                 {submitRun.isPending ? (
                   <Loader2 className="mr-2 h-4 w-4 animate-spin" />
@@ -504,29 +519,29 @@ export default function KidsBlocklyPage() {
                 Chạy
               </Button>
               <Button
+                data-tour="replay-btn"
                 onPress={replayCurrent}
                 isDisabled={busy}
-                className="cursor-pointer rounded-2xl border border-slate-200 bg-white px-5 py-3 text-slate-700 hover:bg-slate-50"
+                className="cursor-pointer rounded-2xl border text-slate-200 bg-blue-600 p-5 text-md hover:bg-slate-50 hover:text-blue-600 hover:border-blue-600"
               >
                 <RotateCcw className="mr-2 h-4 w-4" />
                 Chạy lại
               </Button>
               <Button
+                data-tour="clear-btn"
                 onPress={resetProgram}
                 isDisabled={busy}
-                className="cursor-pointer rounded-2xl border border-slate-200 bg-white px-5 py-3 text-slate-700 hover:bg-slate-50"
+                className="cursor-pointer rounded-2xl border border-slate-200 bg-white p-5 text-md text-slate-700 hover:bg-slate-50"
               >
                 <Trash2 className="mr-2 h-4 w-4" />
                 Xóa hết
               </Button>
             </div>
-            <p className="text-sm leading-6 text-slate-500">
-              Kéo các khối lệnh, nối vào cờ bắt đầu rồi bấm Chạy. Kết quả sẽ lấy từ backend và tự hiện sau khi nhân vật
-              di chuyển xong.
-            </p>
-          </div>
+          </section>
+        </main>
 
-          <div className="grid gap-2 sm:grid-cols-3 xl:grid-cols-6">
+        <footer className="rounded-3xl border border-white/80 bg-white/90 p-4 shadow-[0_16px_38px_rgba(15,23,42,0.07)] backdrop-blur-md">
+          <div data-tour="level-grid" className="grid gap-2 sm:grid-cols-4 md:grid-cols-6 xl:grid-cols-8">
             {levels.map((item, index) => {
               const unlocked = progress.unlockedLevelIds.includes(item.id) || index === 0;
               const stars = progress.starsByLevel[item.id] ?? 0;
@@ -539,7 +554,7 @@ export default function KidsBlocklyPage() {
                   disabled={!unlocked || busy}
                   onClick={() => setSelectedLevelId(item.id)}
                   className={cn(
-                    "min-h-16 rounded-2xl border px-3 py-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-45",
+                    "cursor-pointer min-h-16 rounded-2xl border px-3 py-2 text-left transition-all disabled:cursor-not-allowed disabled:opacity-45",
                     selected
                       ? "border-emerald-300 bg-emerald-50 shadow-[0_10px_20px_rgba(16,185,129,0.12)]"
                       : "border-slate-200 bg-white hover:border-emerald-200 hover:bg-emerald-50/50",
