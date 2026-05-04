@@ -60,18 +60,18 @@ export interface GenerateMindMapRequestBase {
 export interface GenerateMindMapRequestByTopic
 	extends GenerateMindMapRequestBase {
 	topic: string;
-	chapter_id?: never;
+	lesson_id?: never;
 }
 
-export interface GenerateMindMapRequestByChapter
+export interface GenerateMindMapRequestByLesson
 	extends GenerateMindMapRequestBase {
-	chapter_id: number;
+	lesson_id: number;
 	topic?: never;
 }
 
 export type GenerateMindMapRequest =
 	| GenerateMindMapRequestByTopic
-	| GenerateMindMapRequestByChapter;
+	| GenerateMindMapRequestByLesson;
 
 export interface MindMapMetadata {
 	total_nodes: number; // @JsonProperty
