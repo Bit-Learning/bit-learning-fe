@@ -40,6 +40,7 @@ export interface SlideGenerationResponse {
 
 export interface SlideRequestBase {
 	template_id: number;
+	name?: string;
 	slide_count?: number;
 	include_examples?: boolean;
 	include_exercises?: boolean;
@@ -47,15 +48,15 @@ export interface SlideRequestBase {
 
 export interface SlideRequestByTopic extends SlideRequestBase {
 	topic: string;
-	chapter_id?: never;
+	lesson_id?: never;
 }
 
-export interface SlideRequestByChapter extends SlideRequestBase {
-	chapter_id: number;
+export interface SlideRequestByLesson extends SlideRequestBase {
+	lesson_id: number;
 	topic?: never;
 }
 
-export type SlideRequest = SlideRequestByTopic | SlideRequestByChapter;
+export type SlideRequest = SlideRequestByTopic | SlideRequestByLesson;
 
 export interface SlideResponse {
 	topic: string;

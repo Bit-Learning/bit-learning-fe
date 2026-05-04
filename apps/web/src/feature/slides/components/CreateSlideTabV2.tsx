@@ -21,10 +21,10 @@ import { useGenerateSlide } from "../queries/useSlide";
 import { useTemplates } from "../queries/useTemplate";
 import type { SlideRequest } from "../types/slide.type";
 
-type GenerateMode = "topic" | "chapter";
+type GenerateMode = "topic" | "lesson";
 
 type FieldErrors = {
-	chapter?: string;
+	lesson?: string;
 	slideCount?: string;
 	template?: string;
 	topic?: string;
@@ -39,7 +39,8 @@ export const CreateSlideTabV2: React.FC = () => {
 	const [curriculumId, setCurriculumId] = useState<number | null>(null);
 	const [subjectId, setSubjectId] = useState<number | null>(null);
 	const [chapterId, setChapterId] = useState<number | null>(null);
-	const [chapterLabel, setChapterLabel] = useState<string | null>(null);
+	const [lessonId, setLessonId] = useState<number | null>(null);
+	const [lessonLabel, setLessonLabel] = useState<string | null>(null);
 	const [slideCount, setSlideCount] = useState(10);
 	const [includeExamples, setIncludeExamples] = useState(true);
 	const [includeExercises, setIncludeExercises] = useState(false);
@@ -90,7 +91,8 @@ export const CreateSlideTabV2: React.FC = () => {
 			setCurriculumId(null);
 			setSubjectId(null);
 			setChapterId(null);
-			setChapterLabel(null);
+			setLessonId(null);
+			setLessonLabel(null);
 			return;
 		}
 
@@ -104,8 +106,8 @@ export const CreateSlideTabV2: React.FC = () => {
 			nextErrors.topic = "Vui lòng nhập chủ đề bài giảng.";
 		}
 
-		if (mode === "chapter" && !chapterId) {
-			nextErrors.chapter = "Vui lòng chọn chương học trước khi tạo slide.";
+		if (mode === "lesson" && !lessonId) {
+			nextErrors.lesson = "Vui lòng chọn bài học trước khi tạo slide.";
 		}
 
 		if (!selectedTemplateId) {
@@ -138,7 +140,11 @@ export const CreateSlideTabV2: React.FC = () => {
 		const request: SlideRequest =
 			mode === "topic"
 				? { topic: topic.trim(), ...sharedFields }
-				: { chapter_id: chapterId as number, ...sharedFields };
+				: {
+						lesson_id: lessonId as number,
+						name: lessonLabel ?? undefined,
+						...sharedFields,
+					};
 
 		generateSlide.mutate(request);
 	};
@@ -176,22 +182,24 @@ export const CreateSlideTabV2: React.FC = () => {
 								<button
 									type="button"
 									onClick={() => handleModeChange("topic")}
-									className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${mode === "topic"
-										? "border-blue-600 bg-blue-50 text-blue-700"
-										: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
-										}`}
+									className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
+										mode === "topic"
+											? "border-blue-600 bg-blue-50 text-blue-700"
+											: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
+									}`}
 								>
 									Nhập chủ đề
 								</button>
 								<button
 									type="button"
-									onClick={() => handleModeChange("chapter")}
-									className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${mode === "chapter"
-										? "border-blue-600 bg-blue-50 text-blue-700"
-										: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
-										}`}
+									onClick={() => handleModeChange("lesson")}
+									className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
+										mode === "lesson"
+											? "border-blue-600 bg-blue-50 text-blue-700"
+											: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
+									}`}
 								>
-									Chọn chương học
+									Chọn bài học
 								</button>
 							</div>
 
@@ -205,10 +213,11 @@ export const CreateSlideTabV2: React.FC = () => {
 									</label>
 									<input
 										id="slide-v2-topic-input"
-										className={`w-full rounded-2xl border bg-slate-50 px-4 py-3 text-slate-900 outline-none transition-all ${fieldErrors.topic
-											? "border-red-300 ring-2 ring-red-100"
-											: "border-slate-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
-											} disabled:opacity-50`}
+										className={`w-full rounded-2xl border bg-slate-50 px-4 py-3 text-slate-900 outline-none transition-all ${
+											fieldErrors.topic
+												? "border-red-300 ring-2 ring-red-100"
+												: "border-slate-200 focus:border-blue-400 focus:bg-white focus:ring-2 focus:ring-blue-100"
+										} disabled:opacity-50`}
 										placeholder="Ví dụ: Mảng một chiều trong Pascal, thuật toán sắp xếp..."
 										type="text"
 										value={topic}
@@ -231,16 +240,20 @@ export const CreateSlideTabV2: React.FC = () => {
 									curriculumId={curriculumId}
 									subjectId={subjectId}
 									chapterId={chapterId}
+									lessonId={lessonId}
 									onCurriculumChange={setCurriculumId}
 									onSubjectChange={setSubjectId}
-									onChapterLabelChange={setChapterLabel}
 									onChapterChange={(value) => {
 										setChapterId(value);
-										if (fieldErrors.chapter) {
-											resetFieldError("chapter");
+									}}
+									onLessonLabelChange={setLessonLabel}
+									onLessonChange={(value) => {
+										setLessonId(value);
+										if (fieldErrors.lesson) {
+											resetFieldError("lesson");
 										}
 									}}
-									error={fieldErrors.chapter}
+									error={fieldErrors.lesson}
 									disabled={generateSlide.isPending}
 								/>
 							)}
@@ -356,10 +369,11 @@ export const CreateSlideTabV2: React.FC = () => {
 													}
 												}}
 												disabled={generateSlide.isPending}
-												className={`group relative overflow-hidden rounded-3xl border text-left transition-all ${isSelected
-													? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-500/10"
-													: "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
-													} disabled:opacity-60`}
+												className={`group relative overflow-hidden rounded-3xl border text-left transition-all ${
+													isSelected
+														? "border-blue-500 bg-blue-50 shadow-lg shadow-blue-500/10"
+														: "border-slate-200 bg-white hover:-translate-y-0.5 hover:border-blue-300 hover:shadow-md"
+												} disabled:opacity-60`}
 											>
 												<div className="relative h-40 overflow-hidden">
 													{template.thumbnailUrl ? (
@@ -383,10 +397,11 @@ export const CreateSlideTabV2: React.FC = () => {
 
 													<div className="absolute right-3 top-3 flex items-center gap-2">
 														<span
-															className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${isSelected
-																? "bg-blue-600 text-white"
-																: "bg-white/90 text-slate-700"
-																}`}
+															className={`inline-flex items-center gap-1 rounded-full px-2.5 py-1 text-xs font-semibold ${
+																isSelected
+																	? "bg-blue-600 text-white"
+																	: "bg-white/90 text-slate-700"
+															}`}
 														>
 															<CheckCircle2 size={13} />
 															{isSelected ? "Đang chọn" : "Chọn mẫu"}
@@ -450,9 +465,9 @@ export const CreateSlideTabV2: React.FC = () => {
 								<p className="mt-2 text-base font-semibold text-slate-900">
 									{mode === "topic"
 										? topic.trim() || "Chưa nhập chủ đề"
-										: chapterLabel
-											? chapterLabel
-											: "Chưa chọn chapter"}
+										: lessonLabel
+											? lessonLabel
+											: "Chưa chọn bài học"}
 								</p>
 							</div>
 
@@ -462,7 +477,7 @@ export const CreateSlideTabV2: React.FC = () => {
 										Mode
 									</p>
 									<p className="mt-2 text-lg font-semibold text-slate-900">
-										{mode === "topic" ? "Topic" : "Chapter"}
+										{mode === "topic" ? "Topic" : "Lesson"}
 									</p>
 								</div>
 								<div className="rounded-2xl border border-slate-200 p-4">
@@ -528,9 +543,8 @@ export const CreateSlideTabV2: React.FC = () => {
 											Gợi ý để ra slide tốt hơn
 										</p>
 										<p className="mt-1 text-sm leading-6 text-blue-800/80">
-											Với chủ đề, nên ghi chủ đề đủ cụ thể. Với chương học
-											, hãy chọn đúng bài học từ chương trình thay vì nhập
-											tay.
+											Với chủ đề, nên ghi chủ đề đủ cụ thể. Với bài học, hãy
+											chọn đúng bài từ chương trình thay vì nhập tay.
 										</p>
 									</div>
 								</div>
@@ -542,7 +556,7 @@ export const CreateSlideTabV2: React.FC = () => {
 								onClick={handleGenerate}
 								disabled={
 									generateSlide.isPending ||
-									(mode === "topic" ? !topic.trim() : !chapterId)
+									(mode === "topic" ? !topic.trim() : !lessonId)
 								}
 							>
 								{generateSlide.isPending ? (

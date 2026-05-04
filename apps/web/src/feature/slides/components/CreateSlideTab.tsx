@@ -17,7 +17,7 @@ import { useTemplates } from "../queries/useTemplate";
 import type { SlideRequest } from "../types/slide.type";
 import { toast } from "@/shared/components/Sonner";
 
-type GenerateMode = "topic" | "chapter";
+type GenerateMode = "topic" | "lesson";
 
 export const CreateSlideTab: React.FC = () => {
 	const [selectedTemplateId, setSelectedTemplateId] = useState<number | null>(
@@ -28,6 +28,8 @@ export const CreateSlideTab: React.FC = () => {
 	const [curriculumId, setCurriculumId] = useState<number | null>(null);
 	const [subjectId, setSubjectId] = useState<number | null>(null);
 	const [chapterId, setChapterId] = useState<number | null>(null);
+	const [lessonId, setLessonId] = useState<number | null>(null);
+	const [lessonLabel, setLessonLabel] = useState<string | null>(null);
 	const [slideCount, setSlideCount] = useState(10);
 	const [includeExamples, setIncludeExamples] = useState(true);
 	const [includeExercises, setIncludeExercises] = useState(false);
@@ -63,6 +65,8 @@ export const CreateSlideTab: React.FC = () => {
 			setCurriculumId(null);
 			setSubjectId(null);
 			setChapterId(null);
+			setLessonId(null);
+			setLessonLabel(null);
 			return;
 		}
 
@@ -78,10 +82,10 @@ export const CreateSlideTab: React.FC = () => {
 			return;
 		}
 
-		if (mode === "chapter" && !chapterId) {
+		if (mode === "lesson" && !lessonId) {
 			toast.error({
 				title: "Thiếu thông tin",
-				description: "Vui lòng chọn chương học trước khi tạo slide.",
+				description: "Vui lòng chọn bài học trước khi tạo slide.",
 			});
 			return;
 		}
@@ -111,7 +115,11 @@ export const CreateSlideTab: React.FC = () => {
 		const request: SlideRequest =
 			mode === "topic"
 				? { topic: topic.trim(), ...sharedFields }
-				: { chapter_id: chapterId as number, ...sharedFields };
+				: {
+						lesson_id: lessonId as number,
+						name: lessonLabel ?? undefined,
+						...sharedFields,
+					};
 
 		generateSlide.mutate(request);
 	};
@@ -148,13 +156,13 @@ export const CreateSlideTab: React.FC = () => {
 								<button
 									type="button"
 									className={`rounded-full border px-4 py-2 text-sm font-semibold transition-all ${
-										mode === "chapter"
+										mode === "lesson"
 											? "border-blue-600 bg-blue-50 text-blue-700"
 											: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700"
 									}`}
-									onClick={() => handleModeChange("chapter")}
+									onClick={() => handleModeChange("lesson")}
 								>
-									Chọn chương học
+									Chọn bài học
 								</button>
 							</div>
 
@@ -183,9 +191,12 @@ export const CreateSlideTab: React.FC = () => {
 											curriculumId={curriculumId}
 											subjectId={subjectId}
 											chapterId={chapterId}
+											lessonId={lessonId}
 											onCurriculumChange={setCurriculumId}
 											onSubjectChange={setSubjectId}
 											onChapterChange={setChapterId}
+											onLessonChange={setLessonId}
+											onLessonLabelChange={setLessonLabel}
 											disabled={generateSlide.isPending}
 										/>
 									</div>
@@ -346,7 +357,7 @@ export const CreateSlideTab: React.FC = () => {
 								disabled={
 									generateSlide.isPending ||
 									!selectedTemplateId ||
-									(mode === "topic" ? !topic.trim() : !chapterId)
+									(mode === "topic" ? !topic.trim() : !lessonId)
 								}
 							>
 								{generateSlide.isPending ? (
@@ -378,7 +389,7 @@ export const CreateSlideTab: React.FC = () => {
 							<p className="text-sm text-slate-400 max-w-50 mx-auto">
 								{mode === "topic"
 									? 'Nhập chủ đề và nhấn "Tạo Slide với AI" để bắt đầu thiết kế bài giảng.'
-									: 'Chọn chapter từ curriculum rồi nhấn "Tạo Slide với AI" để bắt đầu.'}
+									: 'Chọn bài học từ curriculum rồi nhấn "Tạo Slide với AI" để bắt đầu.'}
 							</p>
 						</div>
 						<div className="mt-8 space-y-3 opacity-30 select-none pointer-events-none">

@@ -64,7 +64,7 @@ import {
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 type ActiveTab = "generate" | "saved";
-type GenerateMode = "topic" | "chapter";
+type GenerateMode = "topic" | "lesson";
 
 function addChildToTree(
 	tree: MindMapTreeNode,
@@ -231,6 +231,7 @@ export default function MindMapView() {
 	const [curriculumId, setCurriculumId] = useState<number | null>(null);
 	const [subjectId, setSubjectId] = useState<number | null>(null);
 	const [chapterId, setChapterId] = useState<number | null>(null);
+	const [lessonId, setLessonId] = useState<number | null>(null);
 	const [sourceError, setSourceError] = useState<string | null>(null);
 	const [maxDepth, setMaxDepth] = useState(3);
 	const [maxBranches, setMaxBranches] = useState(3);
@@ -242,8 +243,8 @@ export default function MindMapView() {
 	);
 	const [nodeShape, setNodeShape] = useState<NodeShape>("rounded");
 	const nodeShapeRef = useRef<NodeShape>("rounded");
-	const addChildCallbackRef = useRef<(parentId: string) => void>(() => { });
-	const deleteNodeCallbackRef = useRef<(nodeId: string) => void>(() => { });
+	const addChildCallbackRef = useRef<(parentId: string) => void>(() => {});
+	const deleteNodeCallbackRef = useRef<(nodeId: string) => void>(() => {});
 
 	const [nodes, setNodes, onNodesChange] = useNodesState<Node>([]);
 	const [edges, setEdges, onEdgesChange] = useEdgesState<Edge>([]);
@@ -538,27 +539,27 @@ export default function MindMapView() {
 			return;
 		}
 
-		if (mode === "chapter" && !chapterId) {
-			setSourceError("Vui lòng chọn chương học trước khi tạo sơ đồ tư duy.");
+		if (mode === "lesson" && !lessonId) {
+			setSourceError("Vui lòng chọn bài học trước khi tạo sơ đồ tư duy.");
 			return;
 		}
 
 		const request =
 			mode === "topic"
 				? {
-					topic: trimmed,
-					max_depth: maxDepth,
-					max_branches: maxBranches,
-					structure_id: selectedStructureId,
-					theme_id: selectedThemeId,
-				}
+						topic: trimmed,
+						max_depth: maxDepth,
+						max_branches: maxBranches,
+						structure_id: selectedStructureId,
+						theme_id: selectedThemeId,
+					}
 				: {
-					chapter_id: chapterId as number,
-					max_depth: maxDepth,
-					max_branches: maxBranches,
-					structure_id: selectedStructureId,
-					theme_id: selectedThemeId,
-				};
+						lesson_id: lessonId as number,
+						max_depth: maxDepth,
+						max_branches: maxBranches,
+						structure_id: selectedStructureId,
+						theme_id: selectedThemeId,
+					};
 
 		generate(request, {
 			onSuccess: async (res) => {
@@ -692,6 +693,7 @@ export default function MindMapView() {
 			setCurriculumId(null);
 			setSubjectId(null);
 			setChapterId(null);
+			setLessonId(null);
 			setSourceError(null);
 			setCurrentTitle(detail.title);
 			setCurrentMindMapId(detail.id);
@@ -749,13 +751,13 @@ export default function MindMapView() {
 			prev.map((n: Node) =>
 				n.id === editingNode.id
 					? {
-						...n,
-						data: {
-							...n.data,
-							label: editingNode.label,
-							description: editingNode.description,
-						},
-					}
+							...n,
+							data: {
+								...n.data,
+								label: editingNode.label,
+								description: editingNode.description,
+							},
+						}
 					: n,
 			),
 		);
@@ -798,7 +800,7 @@ export default function MindMapView() {
 			const exportTitle =
 				currentTitle.trim() ||
 				topic.trim() ||
-				`Sơ đồ tư duy chương ${chapterId ?? ""}`.trim() ||
+				`Sơ đồ tư duy bài ${lessonId ?? ""}`.trim() ||
 				"Sơ đồ tư duy";
 			const nodesBounds = getNodesBounds(nodes);
 			const viewport = getViewportForBounds(
@@ -1012,9 +1014,7 @@ export default function MindMapView() {
 			const dataUrl = canvas.toDataURL("image/png");
 
 			const anchor = document.createElement("a");
-			const safeTopic = (
-				exportTitle || `so-do-tu-duy-${chapterId ?? "mindmap"}`
-			)
+			const safeTopic = (exportTitle || `so-do-tu-duy-${lessonId ?? "mindmap"}`)
 				.toLowerCase()
 				.replace(/[^a-z0-9\s-]/g, "")
 				.replace(/\s+/g, "-");
@@ -1048,6 +1048,7 @@ export default function MindMapView() {
 			setCurriculumId(null);
 			setSubjectId(null);
 			setChapterId(null);
+			setLessonId(null);
 			return;
 		}
 
@@ -1131,10 +1132,11 @@ export default function MindMapView() {
 				<button
 					type="button"
 					onClick={() => setActiveTab("generate")}
-					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${activeTab === "generate"
-						? "border-primary text-primary"
-						: "border-transparent text-slate-500 hover:text-slate-700"
-						}`}
+					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${
+						activeTab === "generate"
+							? "border-primary text-primary"
+							: "border-transparent text-slate-500 hover:text-slate-700"
+					}`}
 				>
 					<Sparkles className="h-4 w-4" />
 					Tạo sơ đồ
@@ -1142,10 +1144,11 @@ export default function MindMapView() {
 				<button
 					type="button"
 					onClick={() => setActiveTab("saved")}
-					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${activeTab === "saved"
-						? "border-primary text-primary"
-						: "border-transparent text-slate-500 hover:text-slate-700"
-						}`}
+					className={`flex items-center gap-2 cursor-pointer pb-4 border-b-2 font-semibold text-md transition-colors  ${
+						activeTab === "saved"
+							? "border-primary text-primary"
+							: "border-transparent text-slate-500 hover:text-slate-700"
+					}`}
 				>
 					<BookMarked className="h-4 w-4" />
 					Đã lưu
@@ -1205,23 +1208,25 @@ export default function MindMapView() {
 							<button
 								type="button"
 								onClick={() => handleModeChange("topic")}
-								className={`order-2 rounded-md border px-4 py-2 text-sm font-semibold transition-all ${mode === "topic"
-									? "border-blue-600 bg-blue-50 text-blue-700"
-									: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-									}`}
+								className={`order-2 rounded-md border px-4 py-2 text-sm font-semibold transition-all ${
+									mode === "topic"
+										? "border-blue-600 bg-blue-50 text-blue-700"
+										: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+								}`}
 							>
 								Nhập chủ đề
 							</button>
 
 							<button
 								type="button"
-								onClick={() => handleModeChange("chapter")}
-								className={`order-2 rounded-md border px-4 py-2 text-sm font-semibold transition-all ${mode === "chapter"
-									? "border-blue-600 bg-blue-50 text-blue-700"
-									: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
-									}`}
+								onClick={() => handleModeChange("lesson")}
+								className={`order-2 rounded-md border px-4 py-2 text-sm font-semibold transition-all ${
+									mode === "lesson"
+										? "border-blue-600 bg-blue-50 text-blue-700"
+										: "border-slate-200 bg-white text-slate-600 hover:border-blue-200 hover:text-blue-700 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-300"
+								}`}
 							>
-								Chọn chương học
+								Chọn bài học
 							</button>
 
 							{mode === "topic" ? (
@@ -1246,10 +1251,14 @@ export default function MindMapView() {
 										curriculumId={curriculumId}
 										subjectId={subjectId}
 										chapterId={chapterId}
+										lessonId={lessonId}
 										onCurriculumChange={setCurriculumId}
 										onSubjectChange={setSubjectId}
 										onChapterChange={(value) => {
 											setChapterId(value);
+										}}
+										onLessonChange={(value) => {
+											setLessonId(value);
 											if (sourceError) {
 												setSourceError(null);
 											}
@@ -1262,7 +1271,7 @@ export default function MindMapView() {
 							<Button
 								onPress={handleGenerate}
 								isDisabled={
-									isPending || (mode === "topic" ? !topic.trim() : !chapterId)
+									isPending || (mode === "topic" ? !topic.trim() : !lessonId)
 								}
 								className="order-2 cursor-pointer bg-blue-700 text-md text-white shadow-sm shadow-blue-500/30 transition-all hover:border-blue-600 hover:bg-white hover:text-blue-600 rounded-lg py-5 font-medium flex items-center gap-2"
 							>
@@ -1338,8 +1347,9 @@ export default function MindMapView() {
 					</div>
 
 					<div
-						className={`flex min-h-0 flex-1 overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950 ${isFullscreen ? "fixed inset-0 z-50 rounded-none" : "rounded-xl"
-							}`}
+						className={`flex min-h-0 flex-1 overflow-hidden border border-slate-200 bg-white shadow-sm dark:border-slate-700 dark:bg-slate-950 ${
+							isFullscreen ? "fixed inset-0 z-50 rounded-none" : "rounded-xl"
+						}`}
 					>
 						<div
 							ref={flowContainerRef}
@@ -1409,10 +1419,11 @@ export default function MindMapView() {
 											<button
 												type="button"
 												onClick={() => setShowVersionSidebar((v) => !v)}
-												className={`inline-flex h-9 items-center gap-2 rounded-md border bg-white px-3 text-sm font-medium shadow-sm transition-colors hover:border-blue-200 hover:text-blue-700 dark:bg-slate-800 dark:hover:text-blue-300 ${showVersionSidebar
-													? "border-indigo-300 text-indigo-600 dark:border-indigo-500 dark:text-indigo-300"
-													: "border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300"
-													}`}
+												className={`inline-flex h-9 items-center gap-2 rounded-md border bg-white px-3 text-sm font-medium shadow-sm transition-colors hover:border-blue-200 hover:text-blue-700 dark:bg-slate-800 dark:hover:text-blue-300 ${
+													showVersionSidebar
+														? "border-indigo-300 text-indigo-600 dark:border-indigo-500 dark:text-indigo-300"
+														: "border-slate-200 text-slate-600 dark:border-slate-700 dark:text-slate-300"
+												}`}
 												title="Lịch sử phiên bản"
 											>
 												<History className="h-4 w-4" />
@@ -1444,8 +1455,9 @@ export default function MindMapView() {
 
 							{isPreviewingVersion && previewVersionNumber && (
 								<div
-									className={`absolute left-4 right-4 z-20 flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 shadow-md dark:border-amber-700 dark:bg-amber-950 ${isFullscreen ? "top-23" : "top-4"
-										}`}
+									className={`absolute left-4 right-4 z-20 flex items-center justify-between rounded-lg border border-amber-300 bg-amber-50 px-4 py-2.5 shadow-md dark:border-amber-700 dark:bg-amber-950 ${
+										isFullscreen ? "top-23" : "top-4"
+									}`}
 								>
 									<div className="flex items-center gap-2 text-sm font-medium text-amber-800 dark:text-amber-300">
 										<Eye className="h-4 w-4" />
