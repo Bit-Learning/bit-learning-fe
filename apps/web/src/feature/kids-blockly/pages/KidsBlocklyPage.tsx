@@ -3,7 +3,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/Button";
 import { cn } from "@workspace/ui/lib/utils";
 import { AnimatePresence, motion } from "framer-motion";
-import { AlertTriangle, Blocks, BookOpen, Lightbulb, Loader2, Play, RotateCcw, Trophy, Trash2, X } from "lucide-react";
+import { AlertTriangle, Blocks, BookOpen, Lightbulb, Loader2, Play, Trophy, Trash2, X } from "lucide-react";
 import { useBlocklyTour } from "../components/BlocklyTour";
 import "../styles/blockly-tour.css";
 import backgroundMusicAsset from "../asset/background_music.mp3";
@@ -336,17 +336,6 @@ export default function KidsBlocklyPage() {
     setWorkspaceResetSignal((value) => value + 1);
   }, [clearPlayback, level]);
 
-  const replayCurrent = useCallback(() => {
-    if (!level) return;
-    clearPlayback();
-    setRunResult(null);
-    setCharacter(level.start);
-    setActiveBlockId(null);
-    setShowReward(false);
-    setShowStatus(false);
-    setIsRunning(false);
-  }, [clearPlayback, level]);
-
   const handleRun = useCallback(async () => {
     if (!level) return;
 
@@ -457,7 +446,7 @@ export default function KidsBlocklyPage() {
             <button
               type="button"
               onClick={() => void startTour()}
-              className="cursor-pointer flex shrink-0 items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+              className="flex shrink-0 items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
             >
               <BookOpen className="h-4 w-4" />
               Hướng dẫn
@@ -474,7 +463,7 @@ export default function KidsBlocklyPage() {
               stars={lastStars}
               message={runResult?.message ?? ""}
               onNext={goNext}
-              onReplay={replayCurrent}
+              onReplay={resetProgram}
               hasNextLevel={!!nextLevel}
             />
           </section>
@@ -519,15 +508,6 @@ export default function KidsBlocklyPage() {
                   <Play className="mr-2 h-4 w-4" />
                 )}
                 Chạy
-              </Button>
-              <Button
-                data-tour="replay-btn"
-                onPress={replayCurrent}
-                isDisabled={busy}
-                className="cursor-pointer rounded-2xl border text-slate-200 bg-blue-600 p-5 text-md hover:bg-slate-50 hover:text-blue-600 hover:border-blue-600"
-              >
-                <RotateCcw className="mr-2 h-4 w-4" />
-                Chạy lại
               </Button>
               <Button
                 data-tour="clear-btn"

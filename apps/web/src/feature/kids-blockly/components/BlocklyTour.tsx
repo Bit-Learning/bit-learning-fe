@@ -158,7 +158,7 @@ const DRAG_DEMO_HTML = `
   </div>
 `;
 
-const TOTAL_STEPS = 10;
+const TOTAL_STEPS = 9;
 
 const ALL_STEPS = [
   {
@@ -220,14 +220,14 @@ const ALL_STEPS = [
       side: "top",
     },
   },
-  {
-    element: "[data-tour='replay-btn']",
-    popover: {
-      title: "🔄 Chạy lại",
-      description: "Đặt Tom về vị trí ban đầu và chạy lại chương trình hiện tại mà không xóa các khối.",
-      side: "top",
-    },
-  },
+  // {
+  //   element: "[data-tour='replay-btn']",
+  //   popover: {
+  //     title: "🔄 Chạy lại",
+  //     description: "Đặt Tom về vị trí ban đầu và chạy lại chương trình hiện tại mà không xóa các khối.",
+  //     side: "top",
+  //   },
+  // },
   {
     element: "[data-tour='clear-btn']",
     popover: {
@@ -274,7 +274,7 @@ export function useBlocklyTour() {
         showProgress: true,
         showButtons: ["next", "previous", "close"],
         steps: ALL_STEPS,
-        nextBtnText: "Tiếp →",
+        nextBtnText: "Tiếp tục →",
         prevBtnText: "← Quay lại",
         doneBtnText: "Hoàn tất 🎉",
         progressText: `{{current}} / ${TOTAL_STEPS}`,
