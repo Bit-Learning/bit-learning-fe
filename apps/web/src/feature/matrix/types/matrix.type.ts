@@ -129,3 +129,22 @@ export type TGenerateRequest = {
   distribution: TDistribution;
   scoring?: TScoring;
 };
+
+export type TBucketRequirement = {
+  type: string;
+  difficulty: string;
+  required: number;
+  available: number;
+};
+
+export type TLessonRequirement = {
+  lessonId: number;
+  lessonName: string;
+  isValid: boolean;
+  requirements: TBucketRequirement[];
+};
+
+export type TCheckRequirementsResponse = {
+  allValid: boolean;
+  lessons: TLessonRequirement[];
+};
