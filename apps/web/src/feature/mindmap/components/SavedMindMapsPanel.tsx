@@ -36,17 +36,15 @@ const loadingSkeletonKeys = [
 ];
 
 function formatDate(dateStr: string) {
-	try {
-		return new Date(dateStr).toLocaleDateString("vi-VN", {
-			day: "2-digit",
-			month: "2-digit",
-			year: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-		});
-	} catch {
-		return dateStr;
-	}
+	const match = dateStr.match(
+		/^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2}))?/,
+	);
+	if (!match) return dateStr;
+
+	const [, year, month, day, hour, minute] = match;
+	if (!hour || !minute) return `${day}/${month}/${year}`;
+
+	return `${day}/${month}/${year} ${hour}:${minute}`;
 }
 
 export default function SavedMindMapsPanel({
@@ -75,8 +73,11 @@ export default function SavedMindMapsPanel({
 			}
 		} catch (error) {
 			toast.error({
-				title: "Lỗi khi tải mindmap",
-				description: extractApiErrorMessage(error, "Không thể tải mindmap."),
+				title: "Lỗi khi tải sơ đồ tư duy",
+				description: extractApiErrorMessage(
+					error,
+					"Không thể tải sơ đồ tư duy.",
+				),
 			});
 		} finally {
 			setLoadingId(null);
@@ -87,15 +88,18 @@ export default function SavedMindMapsPanel({
 		deleteMindMap(id, {
 			onSuccess: () => {
 				setConfirmDeleteId(null);
-				toast.success({ title: "Đã xóa mindmap" });
+				toast.success({ title: "Đã xóa sơ đồ tư duy" });
 				if (items.length === 1 && page > 0) {
 					setPage((previous) => previous - 1);
 				}
 			},
 			onError: (error) => {
 				toast.error({
-					title: "Lỗi khi xóa mindmap",
-					description: extractApiErrorMessage(error, "Không thể xóa mindmap."),
+					title: "Lỗi khi xóa sơ đồ tư duy",
+					description: extractApiErrorMessage(
+						error,
+						"Không thể xóa sơ đồ tư duy.",
+					),
 				});
 			},
 		});
@@ -111,7 +115,7 @@ export default function SavedMindMapsPanel({
 						</div>
 						<div>
 							<p className="text-sm font-semibold text-slate-900 dark:text-white">
-								Đang tải mindmap đã lưu
+								Đang tải sơ đồ tư duy đã lưu
 							</p>
 							<p className="text-sm text-slate-500 dark:text-slate-400">
 								Hệ thống đang lấy danh sách để bạn chọn lại nhanh.
@@ -154,7 +158,7 @@ export default function SavedMindMapsPanel({
 						<AlertCircle className="h-6 w-6" />
 					</div>
 					<p className="mt-4 text-lg font-semibold text-slate-900 dark:text-white">
-						Không thể tải danh sách mindmap đã lưu
+						Không thể tải danh sách sơ đồ tư duy đã lưu
 					</p>
 					<p className="mt-2 text-sm leading-6 text-slate-600 dark:text-slate-400">
 						Hãy thử tải lại trang hoặc quay lại sau khi kết nối ổn định hơn.
@@ -172,11 +176,11 @@ export default function SavedMindMapsPanel({
 						<BookMarked className="h-8 w-8" />
 					</div>
 					<p className="mt-5 text-xl font-semibold text-slate-900 dark:text-white">
-						Chưa có mindmap nào được lưu
+						Chưa có sơ đồ tư duy nào được lưu
 					</p>
 					<p className="mt-2 text-sm leading-6 text-slate-500 dark:text-slate-400">
-						Tạo mindmap, tinh chỉnh nếu cần, rồi nhấn &quot;Lưu&quot; để giữ lại
-						phiên bản bạn muốn tái sử dụng.
+						Tạo sơ đồ tư duy, tinh chỉnh nếu cần, rồi nhấn &quot;Lưu&quot; để
+						giữ lại phiên bản bạn muốn tái sử dụng.
 					</p>
 				</div>
 			</div>
@@ -188,10 +192,10 @@ export default function SavedMindMapsPanel({
 			<div className="flex items-center justify-between rounded-3xl border border-slate-200 bg-white px-5 py-4 shadow-sm dark:border-slate-700 dark:bg-slate-900">
 				<div>
 					<p className="text-sm font-semibold text-slate-900 dark:text-white">
-						Thư viện mindmap đã lưu
+						Thư viện sơ đồ tư duy đã lưu
 					</p>
 					<p className="text-sm text-slate-500 dark:text-slate-400">
-						{totalItems} mindmap sẵn sàng để mở lại và tiếp tục chỉnh sửa.
+						{totalItems} sơ đồ tư duy sẵn sàng để mở lại và tiếp tục chỉnh sửa.
 					</p>
 				</div>
 				<div className="rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-medium text-slate-500 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-300">
@@ -233,7 +237,7 @@ export default function SavedMindMapsPanel({
 									<div className="rounded-2xl border border-slate-200 bg-slate-50 px-3 py-3 dark:border-slate-700 dark:bg-slate-800/70">
 										<div className="flex items-center gap-2 text-xs font-semibold uppercase tracking-[0.16em] text-slate-400">
 											<Network className="h-3.5 w-3.5" />
-											Node
+											Nút
 										</div>
 										<p className="mt-2 text-lg font-semibold text-slate-900 dark:text-white">
 											{nodeCount}
