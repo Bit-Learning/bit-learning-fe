@@ -9,7 +9,7 @@
 
 .blockly-tour-popover .driver-popover-title {
   font-size: 18px;
-  font-weight: 800;
+  font-weight: 600;
   color: #0f172a;
   line-height: 1.3;
   margin-bottom: 8px;
@@ -37,28 +37,15 @@
 
 .blockly-tour-popover .driver-popover-prev-btn,
 .blockly-tour-popover .driver-popover-next-btn,
-.blockly-tour-popover .driver-popover-close-btn,
-.blockly-tour-popover .driver-popover-prev-btn *,
-.blockly-tour-popover .driver-popover-next-btn *,
-.blockly-tour-popover .driver-popover-close-btn * {
+.blockly-tour-popover .driver-popover-close-btn {
   border-radius: 14px;
-  font-size: 13px;
+  font-size: 15px;
   font-weight: 700;
   padding: 8px 18px;
   border: none;
   cursor: pointer;
   transition: background 0.15s, transform 0.1s;
-  line-height: 1.4;
-  font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif !important;
-  font-feature-settings: normal !important;
-  font-variant: normal !important;
-  font-variant-ligatures: none !important;
-  font-variant-caps: normal !important;
-  font-variant-numeric: normal !important;
-  font-variant-alternates: normal !important;
-  letter-spacing: normal !important;
-  text-rendering: auto !important;
-  -webkit-font-smoothing: auto !important;
+  line-height: 1.3;
 }
 
 .blockly-tour-popover .driver-popover-prev-btn:active,
@@ -82,26 +69,18 @@
   font-weight: 400;
 }
 
-.blockly-tour-popover .driver-popover-next-btn::before,
-.blockly-tour-popover .driver-popover-next-btn::after,
-.blockly-tour-popover .driver-popover-prev-btn::before,
-.blockly-tour-popover .driver-popover-prev-btn::after {
-  display: none !important;
-  content: none !important;
-}
-
 .blockly-tour-popover .driver-popover-next-btn:hover {
   background: #059669;
 }
 
 .blockly-tour-popover .driver-popover-close-btn {
   position: absolute;
-  top: 12px;
+  top: 14px;
   right: 14px;
   padding: 4px;
   background: transparent;
   color: #94a3b8;
-  font-size: 22px;
+  font-size: 18px;
   line-height: 1;
   border-radius: 8px;
 }

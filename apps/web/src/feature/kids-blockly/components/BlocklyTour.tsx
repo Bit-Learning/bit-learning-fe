@@ -10,24 +10,34 @@ const DRAG_ANIM_STYLE_ID = "blockly-tour-drag-anim";
 
 function injectDragAnimStyles() {
   if (document.getElementById(DRAG_ANIM_STYLE_ID)) return;
+
+  // Ensure Roboto Vietnamese subset is loaded for proper diacritic rendering
+  if (!document.getElementById("blockly-tour-roboto")) {
+    const link = document.createElement("link");
+    link.id = "blockly-tour-roboto";
+    link.rel = "stylesheet";
+    link.href = "https://fonts.googleapis.com/css2?family=Roboto:wght@400;700;800&subset=vietnamese&display=swap";
+    document.head.appendChild(link);
+  }
+
   const style = document.createElement("style");
   style.id = DRAG_ANIM_STYLE_ID;
   style.textContent = `
     @keyframes blt-block-drag {
       0%   { transform: translateX(0px)   translateY(0px)  scale(1);    opacity: 1; }
       5%   { transform: translateX(0px)   translateY(0px)  scale(1.08); opacity: 1; }
-      55%  { transform: translateX(165px) translateY(4px)  scale(1.04); opacity: 1; }
-      70%  { transform: translateX(165px) translateY(4px)  scale(1);    opacity: 1; }
-      82%  { transform: translateX(165px) translateY(4px)  scale(0.96); opacity: 0.7; }
-      100% { transform: translateX(165px) translateY(4px)  scale(0.96); opacity: 0; }
+      55%  { transform: translateX(200px) translateY(6px)  scale(1.04); opacity: 1; }
+      70%  { transform: translateX(200px) translateY(6px)  scale(1);    opacity: 1; }
+      82%  { transform: translateX(200px) translateY(6px)  scale(0.96); opacity: 0.7; }
+      100% { transform: translateX(200px) translateY(6px)  scale(0.96); opacity: 0; }
     }
     @keyframes blt-cursor-move {
-      0%   { left: 55px;  top: 70px; opacity: 1; }
-      5%   { left: 55px;  top: 70px; opacity: 1; }
-      55%  { left: 220px; top: 76px; opacity: 1; }
-      75%  { left: 220px; top: 76px; opacity: 1; }
-      90%  { left: 220px; top: 76px; opacity: 0; }
-      100% { left: 55px;  top: 70px; opacity: 0; }
+      0%   { left: 60px;  top: 68px; opacity: 1; }
+      5%   { left: 60px;  top: 68px; opacity: 1; }
+      55%  { left: 260px; top: 74px; opacity: 1; }
+      75%  { left: 260px; top: 74px; opacity: 1; }
+      90%  { left: 260px; top: 74px; opacity: 0; }
+      100% { left: 60px;  top: 68px; opacity: 0; }
     }
     @keyframes blt-drop-zone-pulse {
       0%, 60%  { border-color: #bae6fd; background: transparent; }
@@ -36,7 +46,7 @@ function injectDragAnimStyles() {
     }
     .blt-stage {
       position: relative;
-      height: 160px;
+      height: 148px;
       border-radius: 16px;
       overflow: hidden;
       border: 1px solid #e0f2fe;
@@ -45,12 +55,12 @@ function injectDragAnimStyles() {
     }
     .blt-toolbox {
       position: absolute; left: 0; top: 0; bottom: 0;
-      width: 150px;
-      background: rgba(255,255,255,0.95);
-      border-right: 2px solid #e0f2fe;
+      width: 160px;
+      background: rgba(255,255,255,0.9);
+      border-right: 1px solid #e0f2fe;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 8px;
-      padding: 0 12px;
+      padding: 0 10px;
     }
     .blt-toolbox-label {
       font-size: 10px; font-weight: 700;
@@ -60,8 +70,8 @@ function injectDragAnimStyles() {
     .blt-block {
       display: flex; align-items: center; gap: 6px;
       background: #5ba55b; color: #fff;
-      font-size: 12px; font-weight: 700;
-      padding: 8px 12px; border-radius: 10px;
+      font-size: 13px; font-weight: 700;
+      padding: 9px 13px; border-radius: 11px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
       white-space: nowrap; user-select: none;
       width: fit-content;
@@ -69,16 +79,15 @@ function injectDragAnimStyles() {
     .blt-block-ghost { opacity: 0.25; }
     .blt-block-animated {
       position: absolute;
-      left: 12px; top: 62px;
+      left: 18px; top: 56px;
       animation: blt-block-drag 2.4s cubic-bezier(0.4,0,0.2,1) 0.5s infinite;
       z-index: 10;
     }
     .blt-workspace {
-      position: absolute; left: 150px; right: 0; top: 0; bottom: 0;
+      position: absolute; left: 160px; right: 0; top: 0; bottom: 0;
       display: flex; flex-direction: column;
-      padding: 16px 14px 10px;
-      gap: 8px;
-      background: rgba(240,249,255,0.5);
+      padding: 14px 12px 10px;
+      gap: 6px;
     }
     .blt-ws-label {
       font-size: 10px; font-weight: 700;
@@ -88,22 +97,22 @@ function injectDragAnimStyles() {
     .blt-start-block {
       display: flex; align-items: center; gap: 6px;
       background: #3d7bbe; color: #fff;
-      font-size: 12px; font-weight: 700;
-      padding: 8px 12px; border-radius: 10px;
+      font-size: 13px; font-weight: 700;
+      padding: 9px 13px; border-radius: 11px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.14);
       width: fit-content; user-select: none;
     }
     .blt-drop-zone {
-      width: 130px; height: 32px;
+      width: 138px; height: 34px;
       border: 2px dashed #bae6fd;
-      border-radius: 8px;
+      border-radius: 9px;
       display: flex; align-items: center; justify-content: center;
       font-size: 10px; color: #7dd3fc; font-weight: 600;
       animation: blt-drop-zone-pulse 2.4s ease-in-out 0.5s infinite;
     }
     .blt-cursor {
       position: absolute;
-      width: 14px; height: 14px;
+      width: 16px; height: 16px;
       border-radius: 50%;
       background: #0ea5e9;
       border: 2px solid #fff;
@@ -198,8 +207,7 @@ const ALL_STEPS = [
     element: "[data-tour='step-count']",
     popover: {
       title: "🔢 Số bước",
-      description:
-        "Hiển thị số khối lệnh bạn đang dùng. Càng ít bước càng tốt — dùng đúng mốc par để đạt 3 sao ⭐⭐⭐!",
+      description: "Hiển thị số khối lệnh bạn đang dùng. Tối ưu số bước theo chuẩn mục tiêu để đạt 3 sao ⭐⭐⭐!",
       side: "bottom",
     },
   },
@@ -233,7 +241,7 @@ const ALL_STEPS = [
     popover: {
       title: "🗂️ Chọn màn chơi",
       description:
-        "Hoàn thành màn hiện tại để mở khóa màn tiếp theo. Số sao ★ bên dưới thể hiện kết quả tốt nhất của bạn.",
+        "Hoàn thành màn hiện tại để mở khóa màn tiếp theo. Số sao ⭐ bên dưới thể hiện kết quả tốt nhất của bạn.",
       side: "top",
       align: "start",
     },
@@ -260,26 +268,38 @@ export function useBlocklyTour() {
 
       if (!fn) return;
 
+      const NAVBAR_HEIGHT = 64;
+
       const d = fn({
         showProgress: true,
         showButtons: ["next", "previous", "close"],
         steps: ALL_STEPS,
-        nextBtnText: "Tiếp tục →",
+        nextBtnText: "Tiếp →",
         prevBtnText: "← Quay lại",
         doneBtnText: "Hoàn tất 🎉",
         progressText: `{{current}} / ${TOTAL_STEPS}`,
         popoverClass: "blockly-tour-popover",
-        smoothScroll: true,
+        smoothScroll: false,
         allowClose: true,
         stagePadding: 8,
         stageRadius: 16,
+        popoverOffset: 12,
+        onHighlightStarted: (el: Element) => {
+          if (!el) return;
+          const rect = el.getBoundingClientRect();
+          if (rect.top < NAVBAR_HEIGHT + 8) {
+            window.scrollBy({ top: rect.top - NAVBAR_HEIGHT - 16, behavior: "instant" });
+          }
+        },
         onDestroyed: () => {
+          document.body.style.overflow = "";
           driverRef.current = null;
         },
       });
 
       driverRef.current = d;
       d.drive();
+      document.body.style.overflow = "hidden";
     } catch (err) {
       console.error("[BlocklyTour]", err);
     }
