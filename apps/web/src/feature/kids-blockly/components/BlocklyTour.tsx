@@ -16,18 +16,18 @@ function injectDragAnimStyles() {
     @keyframes blt-block-drag {
       0%   { transform: translateX(0px)   translateY(0px)  scale(1);    opacity: 1; }
       5%   { transform: translateX(0px)   translateY(0px)  scale(1.08); opacity: 1; }
-      55%  { transform: translateX(200px) translateY(6px)  scale(1.04); opacity: 1; }
-      70%  { transform: translateX(200px) translateY(6px)  scale(1);    opacity: 1; }
-      82%  { transform: translateX(200px) translateY(6px)  scale(0.96); opacity: 0.7; }
-      100% { transform: translateX(200px) translateY(6px)  scale(0.96); opacity: 0; }
+      55%  { transform: translateX(165px) translateY(4px)  scale(1.04); opacity: 1; }
+      70%  { transform: translateX(165px) translateY(4px)  scale(1);    opacity: 1; }
+      82%  { transform: translateX(165px) translateY(4px)  scale(0.96); opacity: 0.7; }
+      100% { transform: translateX(165px) translateY(4px)  scale(0.96); opacity: 0; }
     }
     @keyframes blt-cursor-move {
-      0%   { left: 60px;  top: 68px; opacity: 1; }
-      5%   { left: 60px;  top: 68px; opacity: 1; }
-      55%  { left: 260px; top: 74px; opacity: 1; }
-      75%  { left: 260px; top: 74px; opacity: 1; }
-      90%  { left: 260px; top: 74px; opacity: 0; }
-      100% { left: 60px;  top: 68px; opacity: 0; }
+      0%   { left: 55px;  top: 70px; opacity: 1; }
+      5%   { left: 55px;  top: 70px; opacity: 1; }
+      55%  { left: 220px; top: 76px; opacity: 1; }
+      75%  { left: 220px; top: 76px; opacity: 1; }
+      90%  { left: 220px; top: 76px; opacity: 0; }
+      100% { left: 55px;  top: 70px; opacity: 0; }
     }
     @keyframes blt-drop-zone-pulse {
       0%, 60%  { border-color: #bae6fd; background: transparent; }
@@ -36,7 +36,7 @@ function injectDragAnimStyles() {
     }
     .blt-stage {
       position: relative;
-      height: 148px;
+      height: 160px;
       border-radius: 16px;
       overflow: hidden;
       border: 1px solid #e0f2fe;
@@ -45,12 +45,12 @@ function injectDragAnimStyles() {
     }
     .blt-toolbox {
       position: absolute; left: 0; top: 0; bottom: 0;
-      width: 300px;
-      background: rgba(255,255,255,0.9);
-      border-right: 1px solid #e0f2fe;
+      width: 150px;
+      background: rgba(255,255,255,0.95);
+      border-right: 2px solid #e0f2fe;
       display: flex; flex-direction: column;
       align-items: center; justify-content: center; gap: 8px;
-      padding: 0 10px;
+      padding: 0 12px;
     }
     .blt-toolbox-label {
       font-size: 10px; font-weight: 700;
@@ -60,8 +60,8 @@ function injectDragAnimStyles() {
     .blt-block {
       display: flex; align-items: center; gap: 6px;
       background: #5ba55b; color: #fff;
-      font-size: 13px; font-weight: 700;
-      padding: 9px 13px; border-radius: 11px;
+      font-size: 12px; font-weight: 700;
+      padding: 8px 12px; border-radius: 10px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.18);
       white-space: nowrap; user-select: none;
       width: fit-content;
@@ -69,15 +69,16 @@ function injectDragAnimStyles() {
     .blt-block-ghost { opacity: 0.25; }
     .blt-block-animated {
       position: absolute;
-      left: 18px; top: 56px;
+      left: 12px; top: 62px;
       animation: blt-block-drag 2.4s cubic-bezier(0.4,0,0.2,1) 0.5s infinite;
       z-index: 10;
     }
     .blt-workspace {
-      position: absolute; left: 160px; right: 0; top: 0; bottom: 0;
+      position: absolute; left: 150px; right: 0; top: 0; bottom: 0;
       display: flex; flex-direction: column;
-      padding: 14px 12px 10px;
-      gap: 6px;
+      padding: 16px 14px 10px;
+      gap: 8px;
+      background: rgba(240,249,255,0.5);
     }
     .blt-ws-label {
       font-size: 10px; font-weight: 700;
@@ -87,22 +88,22 @@ function injectDragAnimStyles() {
     .blt-start-block {
       display: flex; align-items: center; gap: 6px;
       background: #3d7bbe; color: #fff;
-      font-size: 13px; font-weight: 700;
-      padding: 9px 13px; border-radius: 11px;
+      font-size: 12px; font-weight: 700;
+      padding: 8px 12px; border-radius: 10px;
       box-shadow: 0 2px 6px rgba(0,0,0,0.14);
       width: fit-content; user-select: none;
     }
     .blt-drop-zone {
-      width: 138px; height: 34px;
+      width: 130px; height: 32px;
       border: 2px dashed #bae6fd;
-      border-radius: 9px;
+      border-radius: 8px;
       display: flex; align-items: center; justify-content: center;
       font-size: 10px; color: #7dd3fc; font-weight: 600;
       animation: blt-drop-zone-pulse 2.4s ease-in-out 0.5s infinite;
     }
     .blt-cursor {
       position: absolute;
-      width: 16px; height: 16px;
+      width: 14px; height: 14px;
       border-radius: 50%;
       background: #0ea5e9;
       border: 2px solid #fff;
@@ -119,6 +120,14 @@ function injectDragAnimStyles() {
     .blockly-tour-popover.driver-popover .driver-popover-description {
       font-size: 15px !important;
       line-height: 1.8 !important;
+    }
+    .driver-popover .driver-popover-prev-btn,
+    .driver-popover .driver-popover-next-btn,
+    .driver-popover .driver-popover-close-btn {
+      font-family: ui-sans-serif, system-ui, sans-serif !important;
+      font-feature-settings: normal !important;
+      font-variant-ligatures: normal !important;
+      letter-spacing: normal !important;
     }
   `;
   document.head.appendChild(style);
@@ -155,7 +164,7 @@ const ALL_STEPS = [
     popover: {
       title: "🗺️ Sân chơi",
       description:
-        "Đây là nơi nhân vật Tom di chuyển. Ô có cờ 🚩 là điểm bắt đầu, ô có đích là nơi Tom cần đến. Các vật cản trên đường sẽ chặn Tom lại!",
+        "Đây là nơi nhân vật Tom di chuyển. Tom xuất phát từ ô đầu tiên, cần đến được cổng dịch chuyển màu xanh. Các vật cản như cây, đá, hàng rào trên đường sẽ chặn Tom lại!",
       side: "right",
     },
   },
@@ -256,13 +265,13 @@ export function useBlocklyTour() {
         showButtons: ["next", "previous", "close"],
         steps: ALL_STEPS,
         nextBtnText: "Tiếp tục →",
-        prevBtnText: "Quay lại",
+        prevBtnText: "← Quay lại",
         doneBtnText: "Hoàn tất 🎉",
         progressText: `{{current}} / ${TOTAL_STEPS}`,
         popoverClass: "blockly-tour-popover",
         smoothScroll: true,
         allowClose: true,
-        stagePadding: 12,
+        stagePadding: 8,
         stageRadius: 16,
         onDestroyed: () => {
           driverRef.current = null;

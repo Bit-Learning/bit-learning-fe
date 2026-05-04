@@ -1,3 +1,4 @@
+import { useNavigate } from "@tanstack/react-router";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Button } from "@workspace/ui/components/Button";
 import { cn } from "@workspace/ui/lib/utils";
@@ -150,6 +151,7 @@ export default function KidsBlocklyPage() {
   const [lastStars, setLastStars] = useState(0);
   const [workspaceResetSignal, setWorkspaceResetSignal] = useState(0);
   const playbackTimeouts = useRef<number[]>([]);
+  const navigate = useNavigate();
   const { startTour } = useBlocklyTour();
   const backgroundMusicRef = useRef<HTMLAudioElement | null>(null);
   const clickSoundRef = useRef<HTMLAudioElement | null>(null);
@@ -444,18 +446,18 @@ export default function KidsBlocklyPage() {
                 <p className="text-xl font-black text-slate-900">{progress.totalStars}</p>
               </div>
             </div>
-            <a
-              href="/kids-blockly/leaderboard"
-              data-tour="leaderboard-btn"
-              className="flex shrink-0 items-center gap-2 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-5 text-sm font-semibold text-violet-700 transition hover:bg-violet-100"
+            <button
+              type="button"
+              onClick={() => void navigate({ to: "/kids-blockly/leaderboard" })}
+              className="cursor-pointer flex shrink-0 items-center gap-2 rounded-2xl border border-violet-200 bg-violet-50 px-4 py-5 text-sm font-semibold text-violet-700 transition hover:bg-violet-100"
             >
               <Trophy className="h-4 w-4" />
               Bảng xếp hạng
-            </a>
+            </button>
             <button
               type="button"
               onClick={() => void startTour()}
-              className="flex shrink-0 items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
+              className="cursor-pointer flex shrink-0 items-center gap-2 rounded-2xl border border-emerald-200 bg-emerald-50 px-4 py-5 text-sm font-semibold text-emerald-700 transition hover:bg-emerald-100"
             >
               <BookOpen className="h-4 w-4" />
               Hướng dẫn
