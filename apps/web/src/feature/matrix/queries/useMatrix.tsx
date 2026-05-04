@@ -6,6 +6,7 @@ import type {
   TMatrixVersionRequest,
   TMatrixDetailRequest,
   TGenerateRequest,
+  TCheckRequirementsResponse,
 } from "../types/matrix.type";
 
 export const matrixKeys = {
@@ -22,6 +23,7 @@ export const versionKeys = {
   detail: (id: number) => ["matrix-versions", "detail", id] as const,
   byMatrix: (matrixId: number) => ["matrix-versions", "matrix", matrixId] as const,
   latest: (matrixId: number) => ["matrix-versions", "latest", matrixId] as const,
+  checkRequirements: (versionId: number) => ["matrix-versions", "check-requirements", versionId] as const,
 };
 
 export const detailKeys = {
@@ -244,6 +246,19 @@ export const useMatrixDetails = (versionId?: number) => {
     },
     enabled: !!versionId,
     staleTime: 5 * 60 * 1000,
+  });
+};
+
+export const useCheckRequirements = (versionId?: number) => {
+  return useQuery({
+    queryKey: versionKeys.checkRequirements(versionId ?? 0),
+    queryFn: async () => {
+      if (!versionId) return null;
+      const res = await matrixVersionApi.checkRequirements(versionId);
+      return res.data.data;
+    },
+    enabled: !!versionId,
+    staleTime: 60 * 1000,
   });
 };
 

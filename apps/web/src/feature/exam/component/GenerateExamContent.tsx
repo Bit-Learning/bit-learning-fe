@@ -14,24 +14,10 @@ import {
 } from "lucide-react";
 import { useGenerateExam } from "../queries/useExam";
 import type { ExamGenerateRequest, ExamType } from "../types/exam.type";
-import { useMatrixDetail, useMatrixVersions } from "@/feature/matrix/queries/useMatrix";
-import { useSearchQuestions } from "@/feature/question/queries/useQuestion";
-import { QuestionLevel, QuestionType } from "@/feature/question/types/question.type";
+import { useMatrixDetail, useMatrixVersions, useCheckRequirements } from "@/feature/matrix/queries/useMatrix";
 import { toast } from "@/shared/components/Sonner";
 
 type Step = "check" | "setup" | "complete";
-
-interface LessonRequirement {
-  lessonId: number;
-  lessonName: string;
-  requirements: {
-    type: "MCQ" | "ESSAY";
-    difficulty: "EASY" | "MEDIUM" | "HARD";
-    required: number;
-    available: number;
-  }[];
-  isValid: boolean;
-}
 
 const GenerateExamFlow: React.FC = () => {
   const { id } = useParams({ from: "/mentor/matrix/$id/generate" });
@@ -53,81 +39,10 @@ const GenerateExamFlow: React.FC = () => {
 
   const selectedVersion = versions?.find((v) => v.id === versionId);
 
-  const { data: questionsData, isLoading } = useSearchQuestions(
-    { keyword: "", page: 0, size: 9999, subjectId: matrix?.subject.id },
-    { enabled: currentStep === "check" },
-  );
-  const allQuestions = questionsData?.data || [];
+  const { data: requirementsData, isLoading } = useCheckRequirements(currentStep === "check" ? versionId : undefined);
 
-  const checkRequirements = (): LessonRequirement[] => {
-    if (!selectedVersion?.matrixDetails) return [];
-
-    return selectedVersion.matrixDetails.map((detail) => {
-      const lessonQuestions = allQuestions.filter((q) => q.lesson?.id === detail.lesson.id);
-
-      const requirements = [
-        {
-          type: "MCQ" as const,
-          difficulty: "EASY" as const,
-          required: detail.easyMCQ,
-          available: lessonQuestions.filter(
-            (q) => q.questionType === QuestionType.MCQ && q.questionLevel === QuestionLevel.EASY,
-          ).length,
-        },
-        {
-          type: "MCQ" as const,
-          difficulty: "MEDIUM" as const,
-          required: detail.mediumMCQ,
-          available: lessonQuestions.filter(
-            (q) => q.questionType === QuestionType.MCQ && q.questionLevel === QuestionLevel.MEDIUM,
-          ).length,
-        },
-        {
-          type: "MCQ" as const,
-          difficulty: "HARD" as const,
-          required: detail.hardMCQ,
-          available: lessonQuestions.filter(
-            (q) => q.questionType === QuestionType.MCQ && q.questionLevel === QuestionLevel.HARD,
-          ).length,
-        },
-        {
-          type: "ESSAY" as const,
-          difficulty: "EASY" as const,
-          required: detail.easyEssay,
-          available: lessonQuestions.filter(
-            (q) => q.questionType === QuestionType.ESSAY && q.questionLevel === QuestionLevel.EASY,
-          ).length,
-        },
-        {
-          type: "ESSAY" as const,
-          difficulty: "MEDIUM" as const,
-          required: detail.mediumEssay,
-          available: lessonQuestions.filter(
-            (q) => q.questionType === QuestionType.ESSAY && q.questionLevel === QuestionLevel.MEDIUM,
-          ).length,
-        },
-        {
-          type: "ESSAY" as const,
-          difficulty: "HARD" as const,
-          required: detail.hardEssay,
-          available: lessonQuestions.filter(
-            (q) => q.questionType === QuestionType.ESSAY && q.questionLevel === QuestionLevel.HARD,
-          ).length,
-        },
-      ].filter((r) => r.required > 0);
-
-      const isValid = requirements.every((r) => r.available >= r.required);
-      return {
-        lessonId: detail.lesson.id,
-        lessonName: detail.lesson.name,
-        requirements,
-        isValid,
-      };
-    });
-  };
-
-  const requirements = checkRequirements();
-  const allValid = requirements.every((r) => r.isValid);
+  const requirements = requirementsData?.lessons ?? [];
+  const allValid = requirementsData?.allValid ?? false;
 
   if (isLoading) {
     return (

@@ -9,6 +9,7 @@ import type {
   TMatrixDetailRequest,
   TMatrixDetailResponse,
   TGenerateRequest,
+  TCheckRequirementsResponse,
 } from "../types/matrix.type";
 
 export const matrixApi = {
@@ -83,6 +84,10 @@ export const matrixVersionApi = {
 
   delete(versionId: number): Promise<AxiosResponse<ApiResponse<void>>> {
     return api.delete(`/matrix-versions/${versionId}`);
+  },
+
+  checkRequirements(versionId: number): Promise<AxiosResponse<ApiResponse<TCheckRequirementsResponse>>> {
+    return api.get(`/matrix-versions/${versionId}/check-requirements`);
   },
 };
 
