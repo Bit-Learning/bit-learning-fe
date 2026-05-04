@@ -61,7 +61,7 @@ export function GameBoard({ level, character, isRunning, onHint }: GameBoardProp
         <div className="flex shrink-0 items-center gap-2">
           {level.par && (
             <div className="rounded-2xl bg-amber-50 px-3 py-2 text-sm font-semibold text-amber-700">
-              ⭐⭐⭐ ≤ {level.par} bước
+              ⭐⭐⭐ ≤ {level.par} khối
             </div>
           )}
           <Button

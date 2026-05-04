@@ -140,6 +140,7 @@ export default function KidsBlocklyPage() {
 
   const [selectedLevelId, setSelectedLevelId] = useState<string | null>(null);
   const [program, setProgram] = useState<ProgramBlock[]>([]);
+  const [blockCount, setBlockCount] = useState(0);
   const [character, setCharacter] = useState<CharacterState | null>(null);
   const [runResult, setRunResult] = useState<RunResult | null>(null);
   const [progress, setProgress] = useState<KidsBlocklyProgressResponse>(emptyProgress);
@@ -192,6 +193,7 @@ export default function KidsBlocklyPage() {
 
     setCharacter(level.start);
     setProgram([]);
+    setBlockCount(0);
     setRunResult(null);
     setShowReward(false);
     setShowHint(false);
@@ -315,6 +317,10 @@ export default function KidsBlocklyPage() {
     setShowStatus(false);
   }, []);
 
+  const handleBlockCountChange = useCallback((count: number) => {
+    setBlockCount(count);
+  }, []);
+
   const handleBlockClick = useCallback(() => {
     playAudio(clickSoundRef.current);
   }, []);
@@ -327,6 +333,7 @@ export default function KidsBlocklyPage() {
     if (!level) return;
     clearPlayback();
     setProgram([]);
+    setBlockCount(0);
     setRunResult(null);
     setCharacter(level.start);
     setActiveBlockId(null);
@@ -479,7 +486,7 @@ export default function KidsBlocklyPage() {
                 className="flex shrink-0 items-center gap-2 rounded-2xl bg-violet-50 px-3 py-2 text-sm font-semibold text-violet-700"
               >
                 <Blocks className="h-4 w-4" />
-                {program.length} bước
+                {blockCount} khối
               </div>
             </div>
 
@@ -493,6 +500,7 @@ export default function KidsBlocklyPage() {
               onBlockClick={handleBlockClick}
               onBlockDrop={handleBlockDrop}
               onProgramChange={handleProgramChange}
+              onBlockCountChange={handleBlockCountChange}
             />
 
             <div className="mt-2 flex flex-wrap justify-center items-center gap-2">

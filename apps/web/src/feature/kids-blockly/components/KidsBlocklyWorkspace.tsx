@@ -14,6 +14,7 @@ interface KidsBlocklyWorkspaceProps {
   onBlockClick?: () => void;
   onBlockDrop?: () => void;
   onProgramChange: (program: ProgramBlock[]) => void;
+  onBlockCountChange?: (count: number) => void;
 }
 
 const blockTypeByBlocklyType: Record<string, ActionBlockType> = {
@@ -115,6 +116,11 @@ function registerKidsBlocks() {
             ["3", "3"],
             ["4", "4"],
             ["5", "5"],
+            ["6", "6"],
+            ["7", "7"],
+            ["8", "8"],
+            ["9", "9"],
+            ["10", "10"],
           ],
         },
       ],
@@ -168,11 +174,10 @@ function loadStartBlock(workspace: Blockly.WorkspaceSvg) {
   Blockly.Xml.domToWorkspace(xml, workspace);
 }
 
-/** Tag the Blockly toolbox div with data-tour="toolbox".
- *  Blockly renders the toolbox asynchronously so we use MutationObserver
- *  to wait for the toolbox element to appear inside the container.
- *  Tries multiple selectors used by different Blockly renderers.
- */
+function countWorkspaceBlocks(workspace: Blockly.WorkspaceSvg): number {
+  return workspace.getAllBlocks(false).filter((b) => b.type !== "kids_start").length;
+}
+
 function tagToolboxWhenReady(container: HTMLElement): () => void {
   const TOOLBOX_SELECTORS = [".blocklyToolboxDiv", ".blocklyToolbox", "[class*='blocklyToolbox']"];
 
@@ -235,6 +240,7 @@ export function KidsBlocklyWorkspace({
   onBlockClick,
   onBlockDrop,
   onProgramChange,
+  onBlockCountChange,
 }: KidsBlocklyWorkspaceProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const workspaceRef = useRef<Blockly.WorkspaceSvg | null>(null);
@@ -272,8 +278,8 @@ export function KidsBlocklyWorkspace({
     workspaceRef.current = workspace;
     loadStartBlock(workspace);
     onProgramChange([]);
+    onBlockCountChange?.(0);
 
-    // Tag toolbox for tour — uses MutationObserver to handle async render
     const stopObserver = tagToolboxWhenReady(containerRef.current);
 
     const listener = (event: Blockly.Events.Abstract) => {
@@ -294,6 +300,7 @@ export function KidsBlocklyWorkspace({
 
       if (event.isUiEvent) return;
       onProgramChange(readProgram(workspace));
+      onBlockCountChange?.(countWorkspaceBlocks(workspace));
     };
 
     workspace.addChangeListener(listener);
@@ -305,7 +312,7 @@ export function KidsBlocklyWorkspace({
       workspace.dispose();
       workspaceRef.current = null;
     };
-  }, [onBlockClick, onBlockDrop, onProgramChange, toolboxXml]);
+  }, [onBlockClick, onBlockDrop, onProgramChange, onBlockCountChange, toolboxXml]);
 
   useEffect(() => {
     const workspace = workspaceRef.current;
@@ -315,8 +322,9 @@ export function KidsBlocklyWorkspace({
     workspace.updateToolbox(toolboxXml);
     loadStartBlock(workspace);
     onProgramChange([]);
+    onBlockCountChange?.(0);
     Blockly.svgResize(workspace);
-  }, [onProgramChange, resetSignal, toolboxXml]);
+  }, [onProgramChange, onBlockCountChange, resetSignal, toolboxXml]);
 
   useEffect(() => {
     const workspace = workspaceRef.current;
