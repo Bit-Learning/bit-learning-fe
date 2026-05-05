@@ -21,7 +21,7 @@
 		"@stomp/stompjs": "^7.3.0",
 		"@tanstack/react-query": "^5.99.0",
 		"@tanstack/react-query-devtools": "^5.99.0",
-		"@tanstack/react-router": "^1.168.26",
+		"@tanstack/react-router": "^1.169.1",
 		"@tanstack/react-router-devtools": "^1.166.13",
 		"@tanstack/router-plugin": "^1.167.32",
 		"@types/prismjs": "^1.26.6",
