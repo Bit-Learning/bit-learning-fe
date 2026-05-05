@@ -162,7 +162,7 @@ export function TransactionsPage() {
 
 			// Tính thu/chi (chỉ tính giao dịch hoàn tất)
 			if (t.status === "COMPLETED") {
-				if (t.type === "DEPOSIT" || t.type === "CONTEST_PRIZE") {
+				if (t.type === "DEPOSIT") {
 					stats.totalIncome += t.amount;
 				} else if (t.type === "PURCHASE" || t.type === "AI_REQUEST") {
 					stats.totalExpense += t.amount;
@@ -257,7 +257,7 @@ export function TransactionsPage() {
 												<div className="space-y-1.5 text-xs">
 													<div className="flex justify-between gap-4">
 														<span className="text-emerald-600">
-															Thu nhập (Hoàn tất):
+															Doanh thu (Nạp tiền):
 														</span>
 														<span className="font-semibold text-emerald-600">
 															{formatCurrency(pageStats.totalIncome)}
@@ -268,7 +268,7 @@ export function TransactionsPage() {
 															Chi tiêu (Hoàn tất):
 														</span>
 														<span className="font-semibold text-rose-600">
-															({formatCurrency(pageStats.totalExpense)})
+															(-{formatCurrency(pageStats.totalExpense)})
 														</span>
 													</div>
 													<div className="flex justify-between gap-4">
@@ -308,7 +308,7 @@ export function TransactionsPage() {
 													</div>
 													<div className="flex items-start gap-2">
 														<span className="font-semibold text-rose-600">
-															(50,000 UP)
+															(-50,000 UP)
 														</span>
 														<span className="text-muted-foreground">
 															= Chi tiêu

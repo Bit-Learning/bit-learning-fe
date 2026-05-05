@@ -96,12 +96,16 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 		header: "Số tiền",
 		cell: ({ row }) => {
 			const { type, status, amount } = row.original;
-			const { color, isNegative } = getAmountStyle(type, status);
+			const { color, sign } = getAmountStyle(type, status);
 			const formattedAmount = formatCurrency(amount);
 
 			return (
 				<div className={`font-medium ${color}`}>
-					{isNegative ? `(${formattedAmount})` : formattedAmount}
+					{sign === "negative"
+						? `(-${formattedAmount})`
+						: sign === "positive"
+							? `+${formattedAmount}`
+							: formattedAmount}
 				</div>
 			);
 		},
@@ -152,24 +156,24 @@ function getStatusClassName(status: AdminTransaction["status"]) {
 function getAmountStyle(
 	type: AdminTransaction["type"],
 	status: AdminTransaction["status"],
-) {
-	// Chờ xử lý -> màu cam
+): { color: string; sign: "positive" | "negative" | "neutral" } {
+	// Chờ xử lý -> màu cam, không dấu
 	if (status === "PENDING") {
-		return { color: "text-amber-600", isNegative: false };
+		return { color: "text-amber-600", sign: "neutral" };
 	}
 
 	// Hoàn tất
 	if (status === "COMPLETED") {
-		// Nạp tiền + Hoàn tất -> Xanh lá
 		if (type === "DEPOSIT" || type === "CONTEST_PRIZE") {
-			return { color: "text-emerald-600", isNegative: false };
+			// Nạp tiền / Thưởng cuộc thi -> Xanh, dấu +
+			return { color: "text-emerald-600", sign: "positive" };
 		}
-		// AI Request / Mua hàng + Hoàn tất -> Đỏ, hiển thị dạng (số tiền)
 		if (type === "AI_REQUEST" || type === "PURCHASE") {
-			return { color: "text-rose-600", isNegative: true };
+			// AI Request / Mua hàng -> Đỏ, dấu - dạng (số tiền)
+			return { color: "text-rose-600", sign: "negative" };
 		}
 	}
 
-	// Mặc định
-	return { color: "", isNegative: false };
+	// Thất bại / mặc định -> không dấu, không màu đặc biệt
+	return { color: "text-muted-foreground", sign: "neutral" };
 }
