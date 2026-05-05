@@ -25,8 +25,8 @@ importers:
         specifier: ^4.20.6
         version: 4.21.0
       turbo:
-        specifier: ^2.9.8
-        version: 2.9.8
+        specifier: ^2.9.9
+        version: 2.9.9
       typescript:
         specifier: ^5.9.2
         version: 5.9.3
@@ -202,8 +202,8 @@ importers:
         specifier: ^4.3.5
         version: 4.3.6
       zustand:
-        specifier: ^5.0.12
-        version: 5.0.12(@types/react@19.2.14)(immer@11.1.3)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))
+        specifier: ^5.0.13
+        version: 5.0.13(@types/react@19.2.14)(immer@11.1.3)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5))
     devDependencies:
       '@biomejs/biome':
         specifier: ^2.4.14
@@ -218,8 +218,8 @@ importers:
         specifier: ^1.166.13
         version: 1.166.13(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@tanstack/router-core@1.169.1)(csstype@3.2.3)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@tanstack/router-plugin':
-        specifier: ^1.167.32
-        version: 1.167.32(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
+        specifier: ^1.167.33
+        version: 1.167.33(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
       '@types/js-cookie':
         specifier: ^3.0.6
         version: 3.0.6
@@ -278,8 +278,8 @@ importers:
         specifier: ^1.166.13
         version: 1.166.13(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(@tanstack/router-core@1.169.1)(csstype@3.2.3)(react-dom@19.2.5(react@19.2.5))(react@19.2.5)
       '@tanstack/router-plugin':
-        specifier: ^1.167.32
-        version: 1.167.32(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
+        specifier: ^1.167.33
+        version: 1.167.33(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))
       '@types/prismjs':
         specifier: ^1.26.6
         version: 1.26.6
@@ -679,8 +679,8 @@ importers:
         specifier: ^0.5.16
         version: 0.5.19(tailwindcss@4.2.4)
       '@turbo/gen':
-        specifier: ^2.9.8
-        version: 2.9.8(@types/node@20.19.39)
+        specifier: ^2.9.9
+        version: 2.9.9(@types/node@20.19.39)
       '@types/lodash':
         specifier: ^4.17.24
         version: 4.17.24
@@ -4014,14 +4014,13 @@ packages:
       csstype:
         optional: true
 
-  '@tanstack/router-generator@1.166.39':
-    resolution: {integrity: sha512-j2OW/UvpjM/DT9tHVmuhWW1k6UOezTRrPqBPZFFmIth0fY7iTPqK+Erqpo8r5yGTRGCbMvOS4sL3H2MldnIZew==}
+  '@tanstack/router-generator@1.166.40':
+    resolution: {integrity: sha512-78WYpSUBeNFkxJZ76nltzccKdGKNZSqfwCts424nVOyM6nF5CSXPS5Lfbyu28u3Gi7Pu/mGR3e4Rkc9WDKNP1Q==}
     engines: {node: '>=20.19'}
 
-  '@tanstack/router-plugin@1.167.32':
-    resolution: {integrity: sha512-i9BA6GzUCoM20UYZ77orXzHwD5zM0OQTtLuPNbqTTSG38CvR6viRFP/d+QFo2aRNyCvun8PR7zSa49bslSggEQ==}
+  '@tanstack/router-plugin@1.167.33':
+    resolution: {integrity: sha512-oopYVBUpLeT28EPpXmnKOtqfeEtY4IYp4YOYLx3OuRMQcOUsssU7lug4KhEhVGUxLx+S9jcBhcMb3bCyTUVlwA==}
     engines: {node: '>=20.19'}
-    hasBin: true
     peerDependencies:
       '@rsbuild/core': '>=1.0.2 || ^2.0.0'
       '@tanstack/react-router': ^1.169.1
@@ -4040,8 +4039,8 @@ packages:
       webpack:
         optional: true
 
-  '@tanstack/router-utils@1.161.7':
-    resolution: {integrity: sha512-VkY0u7ax/GD0qU6ZLLnfPC+UMxVzxRbvZp4yV4iUSXjgJZ/siAT5/QlLm9FEDJ9QDoC0VD9W7f00tKKreUI7Ng==}
+  '@tanstack/router-utils@1.161.8':
+    resolution: {integrity: sha512-xyiLWEKjfBAVhauDSSjXxyf7s8elU6SM+V050sbkofvGmIIvkwPFtDsX7Gvwh14kBd6iCwAT+RiPvXTxAptY0Q==}
     engines: {node: '>=20.19'}
 
   '@tanstack/store@0.9.3':
@@ -4089,37 +4088,37 @@ packages:
     resolution: {integrity: sha512-L7z9BgrNEcYyUYtF+HaEfiS5ebkh9jXqbszz7pC0hRBPaatV0XjSD3+eHrpqFemQfgwiFF0QPIarnIihIDn7OA==}
     engines: {node: '>=10.13.0'}
 
-  '@turbo/darwin-64@2.9.8':
-    resolution: {integrity: sha512-zU1P95ygDpsQ+2QHh7CVTqvYwi9UBlhKWzoIyUnP3vUoge7H9SQEzrd8dj+XcTrslAp9Db3vIBcXtMVoTEYDnA==}
+  '@turbo/darwin-64@2.9.9':
+    resolution: {integrity: sha512-hTEiNu2ABZZOO1qbjnKASI8eF3BdOOzU6iKv5w5uGOK65DDMc10cS40N1kqM99YT0uSAGUwNu6GdFctRPeEeVA==}
     cpu: [x64]
     os: [darwin]
 
-  '@turbo/darwin-arm64@2.9.8':
-    resolution: {integrity: sha512-nKRFI5ZhCGUi4eXNlrojzWcT/CehMj0raot1WE4lw5qf66ZxZHbRbBqcwNEy+ZLY7RkJJRY+TaU89fuj3BcgGg==}
+  '@turbo/darwin-arm64@2.9.9':
+    resolution: {integrity: sha512-MinO40EEcP5mJiTVpfjtEulsEBhVeryfq21QhYtJZ8hQJLHGgy459rcmDVAY8/JERe4dkVU4KW+zoLF22o01EA==}
     cpu: [arm64]
     os: [darwin]
 
-  '@turbo/gen@2.9.8':
-    resolution: {integrity: sha512-whc1xUXvYQ05etSNs6akwU4KpB1mn8q8GIVTz+nB0ruTqvN0tdS7gN/l+UZC0hvipoKUPW9IRrUIxljMq8AKWg==}
+  '@turbo/gen@2.9.9':
+    resolution: {integrity: sha512-76Qj2vjKtc2zgJG0tL2Fy13T0BzIp2bujkB+K6cls1hZIzLuLkxf3wjLnqNkYnlV6aku1ZxOlNGAGOt9F98J+w==}
     hasBin: true
 
-  '@turbo/linux-64@2.9.8':
-    resolution: {integrity: sha512-Wf/kQpVDCaWM3P5d6lKvJnqjYn/ofUBGbT4h4vRFrdC4N6B/nsun03S2kQNJJMXpXg39woeS4CI367RMU3/OAg==}
+  '@turbo/linux-64@2.9.9':
+    resolution: {integrity: sha512-7JNLw88Isk+gMlbsC8pulLDkrqe2B827ZsKFEHilb17AC6Xn/62pzH7afjY7fEU6Ayp4XP/vGhlRWOzqBvBvIQ==}
     cpu: [x64]
     os: [linux]
 
-  '@turbo/linux-arm64@2.9.8':
-    resolution: {integrity: sha512-v6S3HuKVoa9CEx16IxKj1i/+crxXx22A9O80zW1350zyUlcX0T/zLOxVf1k+ruK/7ssXnDJVg8uSYOxlYRedlA==}
+  '@turbo/linux-arm64@2.9.9':
+    resolution: {integrity: sha512-0pnXDwPw1rHii98JZPRg7SvsjIzy7jrhkwGU9Jy5fVYoMdYd3P2vbtLfII+OJ0Mm4Ar5yykdHDTz3RWiRI1o9g==}
     cpu: [arm64]
     os: [linux]
 
-  '@turbo/windows-64@2.9.8':
-    resolution: {integrity: sha512-JaefWOJNBazDylAn3f+lLB34XMNu8nEBbgPRP/Ewysg81cBubGfcyyyzpQOGVuMwfaqdNAE/kitG7w3AbJn9/g==}
+  '@turbo/windows-64@2.9.9':
+    resolution: {integrity: sha512-vjDQycz4gQVvIq4n2rPtiiIESwJlAc406qtkiZlqyL+fHZEd9SxYNlBIFYtc5cuMuwrk+sIKrhN7XvwjmvS9YQ==}
     cpu: [x64]
     os: [win32]
 
-  '@turbo/windows-arm64@2.9.8':
-    resolution: {integrity: sha512-Or6ljjB4TiiwCdVKDYWew0SokQ9kep5zruL8P3nbum9WdkH5XA41rQID4Ulc215Z+R3DrB+qXSHPsJjU3/n2ng==}
+  '@turbo/windows-arm64@2.9.9':
+    resolution: {integrity: sha512-V6NiH43oCctepbOdQFp7UjqLyK8p6Tt824QA+G4TE+B1BBHu80A0W8OCL+H7uBJ3XZjAj/hvPDw3k3l65DoDGw==}
     cpu: [arm64]
     os: [win32]
 
@@ -7839,8 +7838,8 @@ packages:
     resolution: {integrity: sha512-1h/Lnq9yajKY2PEbBadPXj3VxsDDu844OnaAo52UVmIzIvwwtBPIuNvkjuzBlTWpfJyUbG3ez0KSBibQkj4ojg==}
     engines: {node: '>=0.6.11 <=0.7.0 || >=0.7.3'}
 
-  turbo@2.9.8:
-    resolution: {integrity: sha512-REEB2rVTVDTf4hav1gJ5dIsGylWZrNonvjXFtk1dCi8gND3PhZtnYkyry1bra/Fo+iP6ctTEZbg6vWfdfHq/1A==}
+  turbo@2.9.9:
+    resolution: {integrity: sha512-3xfzXE/yTjhh0S5dIWlE+3E+J9A09REpLI1ZqVh2+HrNZoVzZn0pkvjiRgVK/Ev3PF9XnaTwCntTx+CADWXcyA==}
     hasBin: true
 
   tw-animate-css@1.4.0:
@@ -8243,8 +8242,8 @@ packages:
       react:
         optional: true
 
-  zustand@5.0.12:
-    resolution: {integrity: sha512-i77ae3aZq4dhMlRhJVCYgMLKuSiZAaUPAct2AksxQ+gOtimhGMdXljRT21P5BNpeT4kXlLIckvkPM029OljD7g==}
+  zustand@5.0.13:
+    resolution: {integrity: sha512-efI2tVaVQPqtOh114loML/Z80Y4NP3yc+Ff0fYiZJPauNeWZeIp/bRFD7I9bfmCOYBh/PHxlglQ9+wvlwnPikQ==}
     engines: {node: '>=12.20.0'}
     peerDependencies:
       '@types/react': '>=18.0.0'
@@ -11880,11 +11879,11 @@ snapshots:
     optionalDependencies:
       csstype: 3.2.3
 
-  '@tanstack/router-generator@1.166.39':
+  '@tanstack/router-generator@1.166.40':
     dependencies:
       '@babel/types': 7.29.0
       '@tanstack/router-core': 1.169.1
-      '@tanstack/router-utils': 1.161.7
+      '@tanstack/router-utils': 1.161.8
       '@tanstack/virtual-file-routes': 1.161.7
       jiti: 2.6.1
       magic-string: 0.30.21
@@ -11893,7 +11892,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tanstack/router-plugin@1.167.32(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))':
+  '@tanstack/router-plugin@1.167.33(@tanstack/react-router@1.169.1(react-dom@19.2.5(react@19.2.5))(react@19.2.5))(vite@7.3.2(@types/node@20.19.39)(jiti@2.6.1)(lightningcss@1.32.0)(tsx@4.21.0)(yaml@2.8.3))':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/plugin-syntax-jsx': 7.28.6(@babel/core@7.29.0)
@@ -11902,8 +11901,8 @@ snapshots:
       '@babel/traverse': 7.29.0
       '@babel/types': 7.29.0
       '@tanstack/router-core': 1.169.1
-      '@tanstack/router-generator': 1.166.39
-      '@tanstack/router-utils': 1.161.7
+      '@tanstack/router-generator': 1.166.40
+      '@tanstack/router-utils': 1.161.8
       '@tanstack/virtual-file-routes': 1.161.7
       chokidar: 3.6.0
       unplugin: 3.0.0
@@ -11914,7 +11913,7 @@ snapshots:
     transitivePeerDependencies:
       - supports-color
 
-  '@tanstack/router-utils@1.161.7':
+  '@tanstack/router-utils@1.161.8':
     dependencies:
       '@babel/core': 7.29.0
       '@babel/generator': 7.29.1
@@ -11970,29 +11969,29 @@ snapshots:
 
   '@trysound/sax@0.2.0': {}
 
-  '@turbo/darwin-64@2.9.8':
+  '@turbo/darwin-64@2.9.9':
     optional: true
 
-  '@turbo/darwin-arm64@2.9.8':
+  '@turbo/darwin-arm64@2.9.9':
     optional: true
 
-  '@turbo/gen@2.9.8(@types/node@20.19.39)':
+  '@turbo/gen@2.9.9(@types/node@20.19.39)':
     dependencies:
       '@inquirer/prompts': 7.10.1(@types/node@20.19.39)
       esbuild: 0.25.12
     transitivePeerDependencies:
       - '@types/node'
 
-  '@turbo/linux-64@2.9.8':
+  '@turbo/linux-64@2.9.9':
     optional: true
 
-  '@turbo/linux-arm64@2.9.8':
+  '@turbo/linux-arm64@2.9.9':
     optional: true
 
-  '@turbo/windows-64@2.9.8':
+  '@turbo/windows-64@2.9.9':
     optional: true
 
-  '@turbo/windows-arm64@2.9.8':
+  '@turbo/windows-arm64@2.9.9':
     optional: true
 
   '@tybys/wasm-util@0.10.1':
@@ -16255,14 +16254,14 @@ snapshots:
 
   tunnel@0.0.6: {}
 
-  turbo@2.9.8:
+  turbo@2.9.9:
     optionalDependencies:
-      '@turbo/darwin-64': 2.9.8
-      '@turbo/darwin-arm64': 2.9.8
-      '@turbo/linux-64': 2.9.8
-      '@turbo/linux-arm64': 2.9.8
-      '@turbo/windows-64': 2.9.8
-      '@turbo/windows-arm64': 2.9.8
+      '@turbo/darwin-64': 2.9.9
+      '@turbo/darwin-arm64': 2.9.9
+      '@turbo/linux-64': 2.9.9
+      '@turbo/linux-arm64': 2.9.9
+      '@turbo/windows-64': 2.9.9
+      '@turbo/windows-arm64': 2.9.9
 
   tw-animate-css@1.4.0: {}
 
@@ -16641,7 +16640,7 @@ snapshots:
       immer: 11.1.3
       react: 19.2.5
 
-  zustand@5.0.12(@types/react@19.2.14)(immer@11.1.3)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5)):
+  zustand@5.0.13(@types/react@19.2.14)(immer@11.1.3)(react@19.2.5)(use-sync-external-store@1.6.0(react@19.2.5)):
     optionalDependencies:
       '@types/react': 19.2.14
       immer: 11.1.3
