@@ -13,6 +13,20 @@ import {
 
 export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 	{
+		id: "index",
+		header: "STT",
+		cell: ({ row, table }) => {
+			const pageIndex = table.getState().pagination.pageIndex;
+			const pageSize = table.getState().pagination.pageSize;
+			const rowIndex = row.index;
+			return (
+				<div className="text-center text-sm font-medium">
+					{pageIndex * pageSize + rowIndex + 1}
+				</div>
+			);
+		},
+	},
+	{
 		accessorKey: "code",
 		header: "Mã giao dịch",
 		cell: ({ row }) => (
@@ -80,9 +94,17 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 	{
 		accessorKey: "amount",
 		header: "Số tiền",
-		cell: ({ row }) => (
-			<div className="font-medium">{formatCurrency(row.original.amount)}</div>
-		),
+		cell: ({ row }) => {
+			const { type, status, amount } = row.original;
+			const { color, isNegative } = getAmountStyle(type, status);
+			const formattedAmount = formatCurrency(amount);
+
+			return (
+				<div className={`font-medium ${color}`}>
+					{isNegative ? `(${formattedAmount})` : formattedAmount}
+				</div>
+			);
+		},
 	},
 	{
 		id: "order",
@@ -125,4 +147,29 @@ function getStatusClassName(status: AdminTransaction["status"]) {
 		default:
 			return "";
 	}
+}
+
+function getAmountStyle(
+	type: AdminTransaction["type"],
+	status: AdminTransaction["status"],
+) {
+	// Chờ xử lý -> màu cam
+	if (status === "PENDING") {
+		return { color: "text-amber-600", isNegative: false };
+	}
+
+	// Hoàn tất
+	if (status === "COMPLETED") {
+		// Nạp tiền + Hoàn tất -> Xanh lá
+		if (type === "DEPOSIT" || type === "CONTEST_PRIZE") {
+			return { color: "text-emerald-600", isNegative: false };
+		}
+		// AI Request / Mua hàng + Hoàn tất -> Đỏ, hiển thị dạng (số tiền)
+		if (type === "AI_REQUEST" || type === "PURCHASE") {
+			return { color: "text-rose-600", isNegative: true };
+		}
+	}
+
+	// Mặc định
+	return { color: "", isNegative: false };
 }
