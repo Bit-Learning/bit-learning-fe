@@ -3,7 +3,7 @@ import { useQuery } from "@tanstack/react-query";
 import { getRouteApi } from "@tanstack/react-router";
 import { type OnChangeFn, type PaginationState } from "@tanstack/react-table";
 import { format } from "date-fns";
-import { LoaderCircle, RotateCcw } from "lucide-react";
+import { Info, LoaderCircle, RotateCcw } from "lucide-react";
 import { Header } from "@/layout/header";
 import { getUserProfileById } from "@/features/users/api/UserService";
 import { DatePicker } from "@/components/date-picker";
@@ -11,6 +11,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { getAdminTransactions } from "../api/transaction.api";
 import { TransactionsMultiSelect } from "../components/TransactionsMultiSelect";
 import { TransactionsTable } from "../components/TransactionsTable";
@@ -129,6 +135,44 @@ export function TransactionsPage() {
 		[transactions],
 	);
 
+	const pageStats = useMemo(() => {
+		const stats = {
+			totalIncome: 0,
+			totalExpense: 0,
+			completed: 0,
+			pending: 0,
+			failed: 0,
+			deposit: 0,
+			purchase: 0,
+			aiRequest: 0,
+			contestPrize: 0,
+		};
+
+		transactions.forEach((t) => {
+			// Đếm theo trạng thái
+			if (t.status === "COMPLETED") stats.completed++;
+			else if (t.status === "PENDING") stats.pending++;
+			else if (t.status === "FAILED") stats.failed++;
+
+			// Đếm theo loại
+			if (t.type === "DEPOSIT") stats.deposit++;
+			else if (t.type === "PURCHASE") stats.purchase++;
+			else if (t.type === "AI_REQUEST") stats.aiRequest++;
+			else if (t.type === "CONTEST_PRIZE") stats.contestPrize++;
+
+			// Tính thu/chi (chỉ tính giao dịch hoàn tất)
+			if (t.status === "COMPLETED") {
+				if (t.type === "DEPOSIT" || t.type === "CONTEST_PRIZE") {
+					stats.totalIncome += t.amount;
+				} else if (t.type === "PURCHASE" || t.type === "AI_REQUEST") {
+					stats.totalExpense += t.amount;
+				}
+			}
+		});
+
+		return stats;
+	}, [transactions]);
+
 	const fromDate = parseSearchDate(search.fromDate);
 	const toDate = parseSearchDate(search.toDate);
 
@@ -181,24 +225,110 @@ export function TransactionsPage() {
 						</p>
 					</div>
 					<div className="flex flex-col items-end gap-1">
-						<div className="flex items-center gap-2 text-lg">
-							<span>
-								Tổng {pageInfo?.totalElements?.toLocaleString("vi-VN") ?? 0}{" "}
-								giao dịch
-							</span>
-							{transactionsQuery.isFetching ? (
-								<span className="inline-flex items-center gap-1 rounded-full border px-3 py-1">
-									<LoaderCircle className="size-3.5 animate-spin" />
-									Đang cập nhật
+						<div className="flex items-center gap-2">
+							<div className="flex items-center gap-2 text-lg">
+								<span>
+									Tổng {pageInfo?.totalElements?.toLocaleString("vi-VN") ?? 0}{" "}
+									giao dịch
 								</span>
-							) : null}
+								{transactionsQuery.isFetching ? (
+									<span className="inline-flex items-center gap-1 rounded-full border px-3 py-1">
+										<LoaderCircle className="size-3.5 animate-spin" />
+										Đang cập nhật
+									</span>
+								) : null}
+							</div>
+							<TooltipProvider>
+								<Tooltip>
+									<TooltipTrigger asChild>
+										<Button variant="ghost" size="icon" className="size-8">
+											<Info className="size-4 text-muted-foreground" />
+										</Button>
+									</TooltipTrigger>
+									<TooltipContent
+										side="left"
+										className="max-w-sm bg-white shadow-lg"
+									>
+										<div className="space-y-3">
+											<div>
+												<p className="mb-2 font-semibold text-black">
+													Thống kê trang này:
+												</p>
+												<div className="space-y-1.5 text-xs">
+													<div className="flex justify-between gap-4">
+														<span className="text-emerald-600">
+															Thu nhập (Hoàn tất):
+														</span>
+														<span className="font-semibold text-emerald-600">
+															{formatCurrency(pageStats.totalIncome)}
+														</span>
+													</div>
+													<div className="flex justify-between gap-4">
+														<span className="text-rose-600">
+															Chi tiêu (Hoàn tất):
+														</span>
+														<span className="font-semibold text-rose-600">
+															({formatCurrency(pageStats.totalExpense)})
+														</span>
+													</div>
+													<div className="flex justify-between gap-4">
+														<span className="text-black">Chênh lệch ròng:</span>
+														<span
+															className={`font-semibold ${
+																pageStats.totalIncome -
+																	pageStats.totalExpense >=
+																0
+																	? "text-emerald-600"
+																	: "text-rose-600"
+															}`}
+														>
+															{pageStats.totalIncome - pageStats.totalExpense >=
+															0
+																? formatCurrency(
+																		pageStats.totalIncome -
+																			pageStats.totalExpense,
+																	)
+																: `(${formatCurrency(pageStats.totalExpense - pageStats.totalIncome)})`}
+														</span>
+													</div>
+												</div>
+											</div>
+											<div className="border-t pt-2">
+												<p className="mb-2 font-semibold text-black">
+													Hướng dẫn ký hiệu:
+												</p>
+												<div className="space-y-1 text-xs">
+													<div className="flex items-start gap-2">
+														<span className="font-semibold text-emerald-600">
+															100,000 UP
+														</span>
+														<span className="text-muted-foreground">
+															= Thu nhập
+														</span>
+													</div>
+													<div className="flex items-start gap-2">
+														<span className="font-semibold text-rose-600">
+															(50,000 UP)
+														</span>
+														<span className="text-muted-foreground">
+															= Chi tiêu
+														</span>
+													</div>
+													<div className="flex items-start gap-2">
+														<span className="font-semibold text-amber-600">
+															30,000 UP
+														</span>
+														<span className="text-muted-foreground">
+															= Chờ xử lý
+														</span>
+													</div>
+												</div>
+											</div>
+										</div>
+									</TooltipContent>
+								</Tooltip>
+							</TooltipProvider>
 						</div>
-						<p className="text-muted-foreground text-sm">
-							Tổng tiền trang này:{" "}
-							<span className="text-foreground font-semibold">
-								{formatCurrency(pageTotal)}
-							</span>
-						</p>
 					</div>
 				</div>
 

@@ -106,18 +106,18 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 			);
 		},
 	},
-	{
-		id: "order",
-		header: "Đơn hàng",
-		cell: ({ row }) =>
-			row.original.order ? (
-				<LongText className="max-w-36 font-mono text-xs sm:text-sm">
-					{row.original.order.code}
-				</LongText>
-			) : (
-				<span className="text-muted-foreground text-sm">-</span>
-			),
-	},
+	// {
+	// 	id: "order",
+	// 	header: "Đơn hàng",
+	// 	cell: ({ row }) =>
+	// 		row.original.order ? (
+	// 			<LongText className="max-w-36 font-mono text-xs sm:text-sm">
+	// 				{row.original.order.code}
+	// 			</LongText>
+	// 		) : (
+	// 			<span className="text-muted-foreground text-sm">-</span>
+	// 		),
+	// },
 	{
 		accessorKey: "createdAt",
 		header: "Tạo lúc",
@@ -139,11 +139,11 @@ function getInitials(fullName: string | null, email: string) {
 function getStatusClassName(status: AdminTransaction["status"]) {
 	switch (status) {
 		case "COMPLETED":
-			return "border-emerald-200 bg-emerald-50 text-emerald-700";
+			return "border-emerald-500/30 bg-emerald-500/10 text-emerald-600";
 		case "FAILED":
-			return "border-rose-200 bg-rose-50 text-rose-700";
+			return "border-rose-500/30 bg-rose-500/10 text-rose-600";
 		case "PENDING":
-			return "border-amber-200 bg-amber-50 text-amber-700";
+			return "border-amber-500/30 bg-amber-500/10 text-amber-600";
 		default:
 			return "";
 	}
