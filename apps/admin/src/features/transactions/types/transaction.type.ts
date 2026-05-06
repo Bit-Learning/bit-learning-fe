@@ -65,7 +65,17 @@ export const transactionStatusOptions: Array<{
 	{ label: "Thất bại", value: "FAILED" },
 ];
 
-export function translateTransactionType(type: TransactionType): string {
+export function translateTransactionType(
+	type: TransactionType,
+	paymentMethod?: PaymentMethod,
+): string {
+	if (type === "PURCHASE") {
+		// Phân biệt mua hàng qua tiền thật (VNPay/PayOS) vs qua ví nội bộ
+		if (paymentMethod === "VNPAY" || paymentMethod === "PAYOS") {
+			return "Mua khóa học trực tiếp";
+		}
+		return "Thanh toán ví";
+	}
 	return (
 		transactionTypeOptions.find((option) => option.value === type)?.label ??
 		type
