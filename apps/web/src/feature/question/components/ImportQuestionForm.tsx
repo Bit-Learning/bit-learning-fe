@@ -45,8 +45,6 @@ interface EditState {
   canonicalAnswer: string | null;
 }
 
-const isSkipped = (q: PreviewQuestionResponse) => q.duplicated && !q.reused;
-
 const GuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
   if (!open) return null;
   return (
@@ -108,7 +106,7 @@ const GuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
               <p>
                 • Kích thước file tối đa: <span className="font-medium text-foreground">10MB</span>
               </p>
-              <p>• Câu hỏi trùng lặp sẽ bị bỏ qua tự động</p>
+              <p>• Câu hỏi trùng lặp sẽ tự động bị loại khỏi danh sách import</p>
             </div>
           </div>
 
@@ -176,11 +174,10 @@ const ImportQuestionForm: React.FC = () => {
   const [uploadedFile, setUploadedFile] = useState<File | null>(null);
   const [uploadProgress, setUploadProgress] = useState(0);
   const [importJobId, setImportJobId] = useState<number | null>(null);
-  const [previewData, setPreviewData] = useState<{
-    totalQuestions: number;
-    duplicatedCount: number;
-    questions: PreviewQuestionResponse[];
-  } | null>(null);
+
+  const [importableQuestions, setImportableQuestions] = useState<PreviewQuestionResponse[]>([]);
+  const [skippedCount, setSkippedCount] = useState(0);
+  const [totalQuestions, setTotalQuestions] = useState(0);
 
   const [editingQuestionId, setEditingQuestionId] = useState<number | null>(null);
   const [editState, setEditState] = useState<EditState>({ content: "", options: null, canonicalAnswer: null });
@@ -267,17 +264,34 @@ const ImportQuestionForm: React.FC = () => {
         return prev + 10;
       });
     }, 200);
+
     try {
       const response = await previewImport.mutateAsync({ file: uploadedFile, lessonId: selectedLessonId });
       clearInterval(interval);
       setUploadProgress(100);
-      setImportJobId(response.data.data?.importJobId!);
-      setPreviewData({
-        totalQuestions: response.data.data?.totalQuestions!,
-        duplicatedCount: response.data.data?.duplicatedCount!,
-        questions: response.data.data?.questions!,
-      });
+
+      const allQuestions: PreviewQuestionResponse[] = response.data.data?.questions ?? [];
+      const jobId = response.data.data?.importJobId!;
+
+      const duplicates = allQuestions.filter((q) => q.duplicated);
+      const importable = allQuestions.filter((q) => !q.duplicated);
+
+      if (duplicates.length > 0) {
+        await Promise.allSettled(duplicates.map((q) => deletePreviewQuestion.mutateAsync(q.id)));
+      }
+
+      setImportJobId(jobId);
+      setImportableQuestions(importable);
+      setSkippedCount(duplicates.length);
+      setTotalQuestions(response.data.data?.totalQuestions ?? allQuestions.length);
       setCurrentStep("preview");
+
+      if (duplicates.length > 0) {
+        toast.info({
+          title: "Đã lọc câu trùng",
+          description: `${duplicates.length} câu hỏi trùng lặp đã được loại khỏi danh sách import`,
+        });
+      }
     } catch {
       clearInterval(interval);
       setUploadProgress(0);
@@ -320,64 +334,46 @@ const ImportQuestionForm: React.FC = () => {
           ...(editState.canonicalAnswer !== null ? { canonicalAnswer: editState.canonicalAnswer } : {}),
         },
       });
-      setPreviewData((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          questions: prev.questions.map((q) =>
-            q.id === questionId
-              ? {
-                  ...q,
-                  editedContent: editState.content,
-                  status: "KEEP" as PreviewQuestionStatus,
-                  ...(editState.options ? { options: editState.options! } : {}),
-                  ...(editState.canonicalAnswer !== null ? { canonicalAnswer: editState.canonicalAnswer } : {}),
-                }
-              : q,
-          ),
-        };
-      });
+      setImportableQuestions((prev) =>
+        prev.map((q) =>
+          q.id === questionId
+            ? {
+                ...q,
+                editedContent: editState.content,
+                status: "KEEP" as PreviewQuestionStatus,
+                ...(editState.options ? { options: editState.options! } : {}),
+                ...(editState.canonicalAnswer !== null ? { canonicalAnswer: editState.canonicalAnswer } : {}),
+              }
+            : q,
+        ),
+      );
       closeEdit();
       toast.success({ title: "Đã lưu", description: "Câu hỏi đã được chỉnh sửa" });
     } catch {}
   };
 
   const handleToggleQuestionStatus = async (questionId: number, currentStatus: PreviewQuestionStatus) => {
-    const newStatus = currentStatus === "KEEP" ? "DELETE" : "KEEP";
+    const newStatus = (currentStatus === "KEEP" ? "DELETE" : "KEEP") as PreviewQuestionStatus;
     try {
-      await updatePreviewQuestion.mutateAsync({ questionId, data: { status: newStatus as PreviewQuestionStatus } });
-      setPreviewData((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          questions: prev.questions.map((q) =>
-            q.id === questionId ? { ...q, status: newStatus as PreviewQuestionStatus } : q,
-          ),
-        };
-      });
+      await updatePreviewQuestion.mutateAsync({ questionId, data: { status: newStatus } });
+      setImportableQuestions((prev) => prev.map((q) => (q.id === questionId ? { ...q, status: newStatus } : q)));
     } catch {}
   };
 
   const handleDeleteQuestion = async (questionId: number) => {
     try {
       await deletePreviewQuestion.mutateAsync(questionId);
-      setPreviewData((prev) => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          questions: prev.questions.map((q) =>
-            q.id === questionId ? { ...q, status: "DELETE" as PreviewQuestionStatus } : q,
-          ),
-        };
-      });
+      setImportableQuestions((prev) =>
+        prev.map((q) => (q.id === questionId ? { ...q, status: "DELETE" as PreviewQuestionStatus } : q)),
+      );
       toast.success({ title: "Đã xóa", description: "Câu hỏi sẽ không được import" });
     } catch {}
   };
 
   const handleConfirmImport = async () => {
     if (!importJobId) return;
-    const keepQuestions = previewData?.questions.filter((q) => q.status === "KEEP" && !isSkipped(q)) || [];
-    if (keepQuestions.length === 0) {
+    const keepCount = getKeepCount();
+    if (keepCount === 0) {
       toast.error({ title: "Không thể import", description: "Không có câu hỏi nào được chọn để import" });
       return;
     }
@@ -394,7 +390,9 @@ const ImportQuestionForm: React.FC = () => {
     setUploadedFile(null);
     setUploadProgress(0);
     setImportJobId(null);
-    setPreviewData(null);
+    setImportableQuestions([]);
+    setSkippedCount(0);
+    setTotalQuestions(0);
     setCurrentStep("upload");
     setSelectedCurriculumId(null);
     setSelectedSubjectId(null);
@@ -404,9 +402,9 @@ const ImportQuestionForm: React.FC = () => {
     if (fileInputRef.current) fileInputRef.current.value = "";
   };
 
-  const getKeepCount = () => previewData?.questions.filter((q) => q.status === "KEEP" && !isSkipped(q)).length || 0;
-  const getDeleteCount = () => previewData?.questions.filter((q) => q.status === "DELETE").length || 0;
-  const getSkippedCount = () => previewData?.questions.filter((q) => isSkipped(q)).length || 0;
+  const getKeepCount = () => importableQuestions.filter((q) => q.status === "KEEP").length;
+  const getDeleteCount = () => importableQuestions.filter((q) => q.status === "DELETE").length;
+  const getReusedCount = () => importableQuestions.filter((q) => q.reused).length;
 
   return (
     <div className="mx-auto p-6 min-h-screen bg-gray-50 dark:bg-slate-950">
@@ -441,9 +439,7 @@ const ImportQuestionForm: React.FC = () => {
           <Card className="bg-white dark:bg-slate-900 shadow-sm border-gray-200 dark:border-slate-700">
             <CardHeader className="">
               <div className="flex items-center justify-between">
-                <div>
-                  <h2 className="text-base font-semibold">Chọn bài học</h2>
-                </div>
+                <h2 className="text-base font-semibold">Chọn bài học</h2>
                 <div className="flex items-center gap-1">
                   {selectionSteps.map((s, i) => (
                     <div
@@ -470,13 +466,7 @@ const ImportQuestionForm: React.FC = () => {
                 step={1}
                 completedStep={!!selectedCurriculumId}
               />
-
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
-                <ChevronRight className="h-3 w-3" />
-                <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
-              </div>
-
+              <Divider />
               <SelectField
                 label="Môn học"
                 value={selectedSubjectId}
@@ -499,13 +489,7 @@ const ImportQuestionForm: React.FC = () => {
                 step={2}
                 completedStep={!!selectedSubjectId}
               />
-
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
-                <ChevronRight className="h-3 w-3" />
-                <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
-              </div>
-
+              <Divider />
               <SelectField
                 label="Chương"
                 value={selectedChapterId}
@@ -527,13 +511,7 @@ const ImportQuestionForm: React.FC = () => {
                 step={3}
                 completedStep={!!selectedChapterId}
               />
-
-              <div className="flex items-center gap-2 text-muted-foreground">
-                <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
-                <ChevronRight className="h-3 w-3" />
-                <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
-              </div>
-
+              <Divider />
               <SelectField
                 label="Bài học"
                 value={selectedLessonId}
@@ -584,7 +562,6 @@ const ImportQuestionForm: React.FC = () => {
                     className="hidden"
                     disabled={!selectionComplete}
                   />
-
                   {!uploadedFile ? (
                     <div className="text-center">
                       <div className="mx-auto w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center mb-4">
@@ -658,8 +635,8 @@ const ImportQuestionForm: React.FC = () => {
                     <h2 className="text-base font-semibold">Xem trước câu hỏi</h2>
                     <div className="flex items-center gap-4 mt-2 text-sm flex-wrap">
                       <div className="flex items-center gap-1.5">
-                        <span className="text-muted-foreground">Tổng:</span>
-                        <span className="font-semibold">{previewData?.totalQuestions}</span>
+                        <span className="text-muted-foreground">Tổng trong file:</span>
+                        <span className="font-semibold">{totalQuestions}</span>
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-green-500" />
@@ -671,18 +648,16 @@ const ImportQuestionForm: React.FC = () => {
                           <span className="font-semibold text-red-500">{getDeleteCount()} đã xóa</span>
                         </div>
                       )}
-                      {getSkippedCount() > 0 && (
+                      {skippedCount > 0 && (
                         <div className="flex items-center gap-1.5">
                           <div className="w-2 h-2 rounded-full bg-gray-400" />
-                          <span className="font-semibold text-gray-500">{getSkippedCount()} trùng (bỏ qua)</span>
+                          <span className="font-semibold text-gray-500">{skippedCount} trùng (đã loại)</span>
                         </div>
                       )}
-                      {(previewData?.questions.filter((q) => q.reused).length ?? 0) > 0 && (
+                      {getReusedCount() > 0 && (
                         <div className="flex items-center gap-1.5">
                           <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                          <span className="font-semibold text-yellow-600">
-                            {previewData?.questions.filter((q) => q.reused).length} tái sử dụng
-                          </span>
+                          <span className="font-semibold text-yellow-600">{getReusedCount()} tái sử dụng</span>
                         </div>
                       )}
                     </div>
@@ -692,245 +667,246 @@ const ImportQuestionForm: React.FC = () => {
                     Chọn file khác
                   </Button>
                 </div>
-
-                {getSkippedCount() > 0 && (
-                  <div className="mt-3 flex items-start gap-2.5 p-3 rounded-xl bg-gray-50 dark:bg-gray-800/60 border border-gray-200 dark:border-gray-700">
-                    <Ban className="h-4 w-4 text-gray-500 shrink-0 mt-0.5" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400">
-                      <span className="font-semibold">{getSkippedCount()} câu hỏi trùng lặp</span> đã tồn tại trong hệ
-                      thống và sẽ không được import lại.
-                    </p>
-                  </div>
-                )}
               </CardHeader>
 
               <CardContent>
-                <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 -mr-1">
-                  {previewData?.questions.map((question, index) => {
-                    const isEditing = editingQuestionId === question.id;
-                    const skipped = isSkipped(question);
+                {importableQuestions.length === 0 ? (
+                  <div className="py-12 text-center">
+                    <div className="mx-auto w-14 h-14 rounded-2xl bg-gray-100 dark:bg-gray-800 flex items-center justify-center mb-4">
+                      <Ban className="h-7 w-7 text-gray-400" />
+                    </div>
+                    <p className="font-semibold text-base mb-1 text-gray-700 dark:text-gray-300">
+                      Không có câu hỏi mới để import
+                    </p>
+                    <p className="text-sm text-muted-foreground">
+                      Tất cả {skippedCount} câu hỏi trong file đều đã tồn tại trong hệ thống.
+                    </p>
+                    <Button variant="outline" className="mt-5" onClick={handleReset}>
+                      <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+                      Chọn file khác
+                    </Button>
+                  </div>
+                ) : (
+                  <>
+                    <div className="space-y-3 max-h-[60vh] overflow-y-auto pr-1 -mr-1">
+                      {importableQuestions.map((question, index) => {
+                        const isEditing = editingQuestionId === question.id;
 
-                    return (
-                      <div
-                        key={question.id}
-                        className={`p-4 rounded-xl border transition-all ${
-                          skipped
-                            ? "bg-gray-50 dark:bg-gray-900/60 border-gray-200 dark:border-gray-700 opacity-55"
-                            : question.status === "DELETE"
-                              ? "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60"
-                              : question.reused
-                                ? "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-700"
-                                : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
-                        }`}
-                      >
-                        <div className="flex items-start justify-between mb-2.5">
-                          <div className="flex items-center gap-1.5 flex-wrap">
-                            <span className="text-xs font-medium text-muted-foreground">#{index + 1}</span>
-                            <span className="px-1.5 py-0.5 rounded text-xs font-medium">
-                              {getTypeBadge(question.questionType)}
-                            </span>
-                            <span className="px-1.5 py-0.5 rounded text-xs font-medium">
-                              {getDifficultyBadge(question.questionLevel)}
-                            </span>
-                            {question.reused && (
-                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
-                                Tái sử dụng
-                              </span>
-                            )}
-                            {skipped && (
-                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-gray-100 dark:bg-gray-800 text-gray-500 dark:text-gray-400 flex items-center gap-1">
-                                <Ban className="h-3 w-3" />
-                                Trùng — bỏ qua
-                              </span>
-                            )}
-                            {question.status === "DELETE" && !skipped && (
-                              <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400">
-                                Đã xóa
-                              </span>
-                            )}
-                          </div>
-
-                          {!skipped && (
-                            <div className="flex items-center gap-1 shrink-0">
-                              {!isEditing && question.status !== "DELETE" && (
-                                <>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 w-7 p-0"
-                                    onClick={() => openEdit(question)}
-                                  >
-                                    <Edit2 className="h-3.5 w-3.5" />
-                                  </Button>
-                                  <Button
-                                    size="sm"
-                                    variant="ghost"
-                                    className="h-7 w-7 p-0"
-                                    onClick={() => handleDeleteQuestion(question.id)}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5 text-red-500" />
-                                  </Button>
-                                </>
-                              )}
-                              {question.status === "DELETE" && (
-                                <Button
-                                  size="sm"
-                                  variant="ghost"
-                                  className="h-7 w-7 p-0"
-                                  onClick={() => handleToggleQuestionStatus(question.id, question.status)}
-                                >
-                                  <RefreshCw className="h-3.5 w-3.5 text-green-600" />
-                                </Button>
-                              )}
-                            </div>
-                          )}
-                        </div>
-
-                        {isEditing && !skipped ? (
-                          <div className="space-y-4">
-                            <div className="space-y-1.5">
-                              <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                Nội dung câu hỏi
-                              </label>
-                              <textarea
-                                value={editState.content}
-                                onChange={(e) => setEditState((s) => ({ ...s, content: e.target.value }))}
-                                className="w-full p-3 border rounded-xl min-h-20 bg-white dark:bg-gray-800 text-sm font-mono"
-                                placeholder="Nội dung câu hỏi..."
-                              />
-                            </div>
-
-                            {editState.canonicalAnswer !== null && (
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                  Đáp án
-                                </label>
-                                <textarea
-                                  value={editState.canonicalAnswer}
-                                  onChange={(e) => setEditState((s) => ({ ...s, canonicalAnswer: e.target.value }))}
-                                  className="w-full p-3 border rounded-xl min-h-20 bg-white dark:bg-gray-800 text-sm font-mono"
-                                  placeholder="Nội dung đáp án..."
-                                />
+                        return (
+                          <div
+                            key={question.id}
+                            className={`p-4 rounded-xl border transition-all ${
+                              question.status === "DELETE"
+                                ? "bg-gray-50 dark:bg-gray-900 border-gray-200 dark:border-gray-700 opacity-60"
+                                : question.reused
+                                  ? "bg-yellow-50 dark:bg-yellow-950/30 border-yellow-200 dark:border-yellow-700"
+                                  : "bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700"
+                            }`}
+                          >
+                            <div className="flex items-start justify-between mb-2.5">
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-xs font-medium text-muted-foreground">#{index + 1}</span>
+                                <span className="px-1.5 py-0.5 rounded text-xs font-medium">
+                                  {getTypeBadge(question.questionType)}
+                                </span>
+                                <span className="px-1.5 py-0.5 rounded text-xs font-medium">
+                                  {getDifficultyBadge(question.questionLevel)}
+                                </span>
+                                {question.reused && (
+                                  <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
+                                    Tái sử dụng
+                                  </span>
+                                )}
+                                {question.status === "DELETE" && (
+                                  <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400">
+                                    Đã xóa
+                                  </span>
+                                )}
                               </div>
-                            )}
 
-                            {editState.options && (
-                              <div className="space-y-1.5">
-                                <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
-                                  Đáp án — click để chọn đáp án đúng
-                                </label>
-                                <div className="space-y-2">
-                                  {editState.options.map((opt) => (
-                                    <div
-                                      key={opt.orderNo}
-                                      onClick={() => handleSetCorrectOption(opt.orderNo)}
-                                      className={`flex items-center gap-3 p-2.5 rounded-lg border-2 cursor-pointer transition-all select-none ${
-                                        opt.correct
-                                          ? "border-green-500 bg-green-50 dark:bg-green-900/30"
-                                          : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300"
-                                      }`}
+                              <div className="flex items-center gap-1 shrink-0">
+                                {!isEditing && question.status !== "DELETE" && (
+                                  <>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 p-0"
+                                      onClick={() => openEdit(question)}
                                     >
-                                      <div
-                                        className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${opt.correct ? "border-green-500 bg-green-500" : "border-gray-400"}`}
-                                      >
-                                        {opt.correct && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
-                                      </div>
-                                      <span className="font-semibold text-sm shrink-0 w-5">{opt.label}.</span>
-                                      <input
-                                        type="text"
-                                        value={opt.content}
-                                        onClick={(e) => e.stopPropagation()}
-                                        onChange={(e) => {
-                                          const val = e.target.value;
-                                          setEditState((s) => ({
-                                            ...s,
-                                            options:
-                                              s.options?.map((o) =>
-                                                o.orderNo === opt.orderNo ? { ...o, content: val } : o,
-                                              ) ?? null,
-                                          }));
-                                        }}
-                                        className="flex-1 bg-transparent outline-none text-sm"
-                                        placeholder={`Nội dung đáp án ${opt.label}`}
-                                      />
-                                      {opt.correct && <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />}
+                                      <Edit2 className="h-3.5 w-3.5" />
+                                    </Button>
+                                    <Button
+                                      size="sm"
+                                      variant="ghost"
+                                      className="h-7 w-7 p-0"
+                                      onClick={() => handleDeleteQuestion(question.id)}
+                                    >
+                                      <Trash2 className="h-3.5 w-3.5 text-red-500" />
+                                    </Button>
+                                  </>
+                                )}
+                                {question.status === "DELETE" && (
+                                  <Button
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 w-7 p-0"
+                                    onClick={() => handleToggleQuestionStatus(question.id, question.status)}
+                                  >
+                                    <RefreshCw className="h-3.5 w-3.5 text-green-600" />
+                                  </Button>
+                                )}
+                              </div>
+                            </div>
+
+                            {isEditing ? (
+                              <div className="space-y-4">
+                                <div className="space-y-1.5">
+                                  <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                    Nội dung câu hỏi
+                                  </label>
+                                  <textarea
+                                    value={editState.content}
+                                    onChange={(e) => setEditState((s) => ({ ...s, content: e.target.value }))}
+                                    className="w-full p-3 border rounded-xl min-h-20 bg-white dark:bg-gray-800 text-sm font-mono"
+                                    placeholder="Nội dung câu hỏi..."
+                                  />
+                                </div>
+
+                                {editState.canonicalAnswer !== null && (
+                                  <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                      Đáp án
+                                    </label>
+                                    <textarea
+                                      value={editState.canonicalAnswer}
+                                      onChange={(e) => setEditState((s) => ({ ...s, canonicalAnswer: e.target.value }))}
+                                      className="w-full p-3 border rounded-xl min-h-20 bg-white dark:bg-gray-800 text-sm font-mono"
+                                      placeholder="Nội dung đáp án..."
+                                    />
+                                  </div>
+                                )}
+
+                                {editState.options && (
+                                  <div className="space-y-1.5">
+                                    <label className="text-xs font-semibold text-gray-500 uppercase tracking-wider">
+                                      Đáp án — click để chọn đáp án đúng
+                                    </label>
+                                    <div className="space-y-2">
+                                      {editState.options.map((opt) => (
+                                        <div
+                                          key={opt.orderNo}
+                                          onClick={() => handleSetCorrectOption(opt.orderNo)}
+                                          className={`flex items-center gap-3 p-2.5 rounded-lg border-2 cursor-pointer transition-all select-none ${
+                                            opt.correct
+                                              ? "border-green-500 bg-green-50 dark:bg-green-900/30"
+                                              : "border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 hover:border-gray-300"
+                                          }`}
+                                        >
+                                          <div
+                                            className={`w-4 h-4 rounded-full border-2 shrink-0 flex items-center justify-center ${opt.correct ? "border-green-500 bg-green-500" : "border-gray-400"}`}
+                                          >
+                                            {opt.correct && <div className="w-1.5 h-1.5 rounded-full bg-white" />}
+                                          </div>
+                                          <span className="font-semibold text-sm shrink-0 w-5">{opt.label}.</span>
+                                          <input
+                                            type="text"
+                                            value={opt.content}
+                                            onClick={(e) => e.stopPropagation()}
+                                            onChange={(e) => {
+                                              const val = e.target.value;
+                                              setEditState((s) => ({
+                                                ...s,
+                                                options:
+                                                  s.options?.map((o) =>
+                                                    o.orderNo === opt.orderNo ? { ...o, content: val } : o,
+                                                  ) ?? null,
+                                              }));
+                                            }}
+                                            className="flex-1 bg-transparent outline-none text-sm"
+                                            placeholder={`Nội dung đáp án ${opt.label}`}
+                                          />
+                                          {opt.correct && <CheckCircle className="h-4 w-4 text-green-600 shrink-0" />}
+                                        </div>
+                                      ))}
                                     </div>
-                                  ))}
+                                  </div>
+                                )}
+
+                                <div className="flex gap-2">
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleSaveEdit(question.id)}
+                                    isDisabled={updatePreviewQuestion.isPending}
+                                    className="gap-1"
+                                  >
+                                    <Save className="h-3 w-3" />
+                                    {updatePreviewQuestion.isPending ? "Đang lưu..." : "Lưu"}
+                                  </Button>
+                                  <Button size="sm" variant="outline" onClick={closeEdit} className="gap-1">
+                                    <X className="h-3 w-3" />
+                                    Hủy
+                                  </Button>
                                 </div>
                               </div>
-                            )}
-
-                            <div className="flex gap-2">
-                              <Button
-                                size="sm"
-                                onClick={() => handleSaveEdit(question.id)}
-                                isDisabled={updatePreviewQuestion.isPending}
-                                className="gap-1"
-                              >
-                                <Save className="h-3 w-3" />
-                                {updatePreviewQuestion.isPending ? "Đang lưu..." : "Lưu"}
-                              </Button>
-                              <Button size="sm" variant="outline" onClick={closeEdit} className="gap-1">
-                                <X className="h-3 w-3" />
-                                Hủy
-                              </Button>
-                            </div>
-                          </div>
-                        ) : (
-                          <>
-                            <p className="text-sm text-black dark:text-white mb-2.5">
-                              {question.editedContent || question.originalContent}
-                            </p>
-                            {question.questionType === "MCQ" && question.options && question.options.length > 0 && (
-                              <div className="space-y-1.5">
-                                {question.options.map((option, idx) => (
-                                  <div
-                                    key={idx}
-                                    className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
-                                      option.correct
-                                        ? "bg-green-100 dark:bg-green-900/50 border-2 border-green-500 dark:border-green-600 font-medium"
-                                        : "bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
-                                    }`}
-                                  >
-                                    <span className="font-semibold shrink-0">
-                                      {option.label || String.fromCharCode(65 + idx)}.
-                                    </span>
-                                    <span className="flex-1">{option.content}</span>
-                                    {option.correct && (
-                                      <CheckCircle className="h-3.5 w-3.5 text-green-600 dark:text-green-400 shrink-0" />
-                                    )}
-                                  </div>
-                                ))}
-                              </div>
-                            )}
-                            {question.questionType === "ESSAY" && question.canonicalAnswer && (
-                              <div className="mt-2.5 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
-                                <p className="text-xs font-semibold text-blue-900 dark:text-blue-100 mb-1">Đáp án:</p>
-                                <p className="text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap">
-                                  {question.canonicalAnswer}
+                            ) : (
+                              <>
+                                <p className="text-sm text-black dark:text-white mb-2.5">
+                                  {question.editedContent || question.originalContent}
                                 </p>
-                              </div>
+                                {question.questionType === "MCQ" && question.options && question.options.length > 0 && (
+                                  <div className="space-y-1.5">
+                                    {question.options.map((option, idx) => (
+                                      <div
+                                        key={idx}
+                                        className={`flex items-center gap-2 p-2 rounded-lg text-sm ${
+                                          option.correct
+                                            ? "bg-green-100 dark:bg-green-900/50 border-2 border-green-500 dark:border-green-600 font-medium"
+                                            : "bg-white dark:bg-gray-800/50 border border-gray-200 dark:border-gray-700"
+                                        }`}
+                                      >
+                                        <span className="font-semibold shrink-0">
+                                          {option.label || String.fromCharCode(65 + idx)}.
+                                        </span>
+                                        <span className="flex-1">{option.content}</span>
+                                        {option.correct && (
+                                          <CheckCircle className="h-3.5 w-3.5 text-green-600 dark:text-green-400 shrink-0" />
+                                        )}
+                                      </div>
+                                    ))}
+                                  </div>
+                                )}
+                                {question.questionType === "ESSAY" && question.canonicalAnswer && (
+                                  <div className="mt-2.5 p-3 rounded-lg bg-blue-50 dark:bg-blue-950/30 border border-blue-200 dark:border-blue-800">
+                                    <p className="text-xs font-semibold text-blue-900 dark:text-blue-100 mb-1">
+                                      Đáp án:
+                                    </p>
+                                    <p className="text-sm text-blue-800 dark:text-blue-200 whitespace-pre-wrap">
+                                      {question.canonicalAnswer}
+                                    </p>
+                                  </div>
+                                )}
+                              </>
                             )}
-                          </>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
+                          </div>
+                        );
+                      })}
+                    </div>
 
-                <div className="flex gap-2 mt-5 pt-4 border-t dark:border-slate-700">
-                  <Button
-                    onClick={handleConfirmImport}
-                    isDisabled={confirmImport.isPending || getKeepCount() === 0}
-                    className="gap-2 flex-1 py-5 text-sm"
-                  >
-                    <Upload className="h-4 w-4" />
-                    {confirmImport.isPending ? "Đang xác nhận..." : `Xác nhận import (${getKeepCount()} câu hỏi)`}
-                  </Button>
-                  <Button variant="outline" className="py-5 text-sm" onClick={handleReset}>
-                    Hủy
-                  </Button>
-                </div>
+                    <div className="flex gap-2 mt-5 pt-4 border-t dark:border-slate-700">
+                      <Button
+                        onClick={handleConfirmImport}
+                        isDisabled={confirmImport.isPending || getKeepCount() === 0}
+                        className="gap-2 flex-1 py-5 text-sm"
+                      >
+                        <Upload className="h-4 w-4" />
+                        {confirmImport.isPending ? "Đang xác nhận..." : `Xác nhận import (${getKeepCount()} câu hỏi)`}
+                      </Button>
+                      <Button variant="outline" className="py-5 text-sm" onClick={handleReset}>
+                        Hủy
+                      </Button>
+                    </div>
+                  </>
+                )}
               </CardContent>
             </Card>
           )}
@@ -986,5 +962,13 @@ const ImportQuestionForm: React.FC = () => {
     </div>
   );
 };
+
+const Divider = () => (
+  <div className="flex items-center gap-2 text-muted-foreground">
+    <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
+    <ChevronRight className="h-3 w-3" />
+    <div className="h-px flex-1 bg-gray-100 dark:bg-slate-800" />
+  </div>
+);
 
 export default ImportQuestionForm;
