@@ -1,3 +1,5 @@
+import { PaymentMethod } from "./order.type";
+
 export enum TransactionStatus {
   PENDING = "PENDING",
   COMPLETED = "COMPLETED",
@@ -12,6 +14,10 @@ export enum TransactionType {
   CONTEST_PRIZE = "CONTEST_PRIZE",
 }
 
+export interface AddBalanceToWalletRequest {
+  amount: number;
+  paymentMethod: PaymentMethod.VNPAY | PaymentMethod.PAYOS;
+}
 export interface DepositHistoryParams {
   page?: number;
   size?: number;
