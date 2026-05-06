@@ -7,6 +7,7 @@ import {
 	School,
 	Settings,
 	ShoppingBag,
+	Upload,
 	Users,
 } from "lucide-react";
 import type { NavGroup } from "../types";
@@ -87,6 +88,7 @@ export const navGroups: NavGroup[] = [
 				icon: Settings,
 				items: [
 					{ title: "Trợ lý AI", url: "/system-prompt" },
+					{ title: "Upload tài liệu RAG", url: "/rag-upload" },
 					{ title: "Danh mục Tags", url: "/tags" },
 					{ title: "Cài đặt hệ thống", url: "/metrics" },
 				],
