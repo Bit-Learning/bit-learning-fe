@@ -5,7 +5,6 @@ import {
   Upload,
   FileText,
   CheckCircle,
-  AlertCircle,
   FileSpreadsheet,
   HelpCircle,
   Eye,
@@ -593,20 +592,6 @@ const ImportQuestionForm: React.FC = () => {
                   </div>
                 )}
 
-                {previewImport.isError && (
-                  <div className="flex items-start gap-3 p-4 rounded-xl bg-red-50 dark:bg-red-950/30 border border-red-200 dark:border-red-900">
-                    <AlertCircle className="h-5 w-5 text-red-600 dark:text-red-400 shrink-0 mt-0.5" />
-                    <div>
-                      <p className="text-sm font-semibold text-red-800 dark:text-red-200">
-                        Có lỗi xảy ra khi xử lý file
-                      </p>
-                      <p className="text-sm text-red-700 dark:text-red-300 mt-0.5">
-                        Vui lòng kiểm tra định dạng file và thử lại
-                      </p>
-                    </div>
-                  </div>
-                )}
-
                 <div className="flex gap-2 pt-1">
                   <Button
                     onClick={handleUploadAndPreview}
@@ -655,8 +640,8 @@ const ImportQuestionForm: React.FC = () => {
                       )}
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={handleReset}>
-                    <ArrowLeft className="h-3.5 w-3.5 mr-1.5" />
+                  <Button variant="outline" size="lg" onClick={handleReset}>
+                    <ArrowLeft className="h-4 w-4 mr-1.5" />
                     Chọn file khác
                   </Button>
                 </div>
@@ -705,11 +690,6 @@ const ImportQuestionForm: React.FC = () => {
                                 <span className="px-1.5 py-0.5 rounded text-xs font-medium">
                                   {getDifficultyBadge(question.questionLevel)}
                                 </span>
-                                {question.reused && (
-                                  <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200">
-                                    Tái sử dụng
-                                  </span>
-                                )}
                                 {question.status === "DELETE" && (
                                   <span className="px-1.5 py-0.5 rounded text-xs font-medium bg-red-100 dark:bg-red-900/40 text-red-600 dark:text-red-400">
                                     Đã xóa
@@ -926,8 +906,8 @@ const ImportQuestionForm: React.FC = () => {
                     <CheckCircle className="h-5 w-5 text-green-600 dark:text-green-400" />
                   </div>
                   <div className="flex-1">
-                    <h3 className="font-semibold text-green-900 dark:text-green-100 mb-1">Import thành công!</h3>
-                    <p className="text-sm text-green-800 dark:text-green-200 mb-3">
+                    <h3 className="font-semibold text-green-700 dark:text-green-100 mb-1">Import thành công!</h3>
+                    <p className="text-md text-green-700 dark:text-green-200 mb-3">
                       {jobStatus
                         ? `Đã import thành công ${jobStatus.importedQuestions}/${jobStatus.totalQuestions} câu hỏi vào hệ thống.`
                         : "Ngân hàng câu hỏi đã được nhập vào hệ thống."}
@@ -938,10 +918,10 @@ const ImportQuestionForm: React.FC = () => {
                       </p>
                     )}
                     <div className="flex gap-2">
-                      <Button className="py-4 text-sm" onClick={() => navigate({ to: "/mentor/question/my" })}>
+                      <Button className="p-5 text-md" onClick={() => navigate({ to: "/mentor/question/my" })}>
                         Xem danh sách câu hỏi
                       </Button>
-                      <Button className="py-4 text-sm" variant="outline" onClick={handleReset}>
+                      <Button className="p-5 text-md" variant="outline" onClick={handleReset}>
                         Import thêm file
                       </Button>
                     </div>
