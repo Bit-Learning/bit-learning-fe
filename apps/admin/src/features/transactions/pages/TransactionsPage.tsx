@@ -160,11 +160,14 @@ export function TransactionsPage() {
 			else if (t.type === "AI_REQUEST") stats.aiRequest++;
 			else if (t.type === "CONTEST_PRIZE") stats.contestPrize++;
 
-			// Tính thu/chi (chỉ tính giao dịch hoàn tất)
+			// Tính doanh thu thực (chỉ tính giao dịch hoàn tất bằng tiền thật từ bên ngoài)
+			// Bao gồm: Nạp tiền (DEPOSIT) và Mua hàng trực tiếp (PURCHASE) qua VNPay/PayOS
 			if (t.status === "COMPLETED") {
-				if (t.type === "DEPOSIT") {
+				const isRealMoney =
+					t.paymentMethod === "VNPAY" || t.paymentMethod === "PAYOS";
+				if (isRealMoney) {
 					stats.totalIncome += t.amount;
-				} else if (t.type === "PURCHASE" || t.type === "AI_REQUEST") {
+				} else if (t.type === "AI_REQUEST") {
 					stats.totalExpense += t.amount;
 				}
 			}
@@ -257,15 +260,15 @@ export function TransactionsPage() {
 												<div className="space-y-1.5 text-xs">
 													<div className="flex justify-between gap-4">
 														<span className="text-emerald-600">
-															Doanh thu (Nạp tiền):
+															Doanh thu (VNPay/PayOS):
 														</span>
 														<span className="font-semibold text-emerald-600">
-															{formatCurrency(pageStats.totalIncome)}
+															+{formatCurrency(pageStats.totalIncome)}
 														</span>
 													</div>
 													<div className="flex justify-between gap-4">
 														<span className="text-rose-600">
-															Chi tiêu (Hoàn tất):
+															Chi tiêu AI (Hoàn tất):
 														</span>
 														<span className="font-semibold text-rose-600">
 															(-{formatCurrency(pageStats.totalExpense)})
@@ -284,11 +287,11 @@ export function TransactionsPage() {
 														>
 															{pageStats.totalIncome - pageStats.totalExpense >=
 															0
-																? formatCurrency(
+																? `+${formatCurrency(
 																		pageStats.totalIncome -
 																			pageStats.totalExpense,
-																	)
-																: `(${formatCurrency(pageStats.totalExpense - pageStats.totalIncome)})`}
+																	)}`
+																: `(-${formatCurrency(pageStats.totalExpense - pageStats.totalIncome)})`}
 														</span>
 													</div>
 												</div>
@@ -300,10 +303,10 @@ export function TransactionsPage() {
 												<div className="space-y-1 text-xs">
 													<div className="flex items-start gap-2">
 														<span className="font-semibold text-emerald-600">
-															100,000 UP
+															+100,000 UP
 														</span>
 														<span className="text-muted-foreground">
-															= Thu nhập
+															= Doanh thu (VNPay/PayOS)
 														</span>
 													</div>
 													<div className="flex items-start gap-2">
@@ -311,7 +314,7 @@ export function TransactionsPage() {
 															(-50,000 UP)
 														</span>
 														<span className="text-muted-foreground">
-															= Chi tiêu
+															= Chi tiêu (Mua hàng/AI qua Ví)
 														</span>
 													</div>
 													<div className="flex items-start gap-2">
