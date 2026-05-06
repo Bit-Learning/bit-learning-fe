@@ -17,6 +17,7 @@ import {
 	TooltipProvider,
 	TooltipTrigger,
 } from "@/components/ui/tooltip";
+import BitCoinIcon from "@workspace/ui/components/BitCoinIcon";
 import { getAdminTransactions } from "../api/transaction.api";
 import { TransactionsMultiSelect } from "../components/TransactionsMultiSelect";
 import { TransactionsTable } from "../components/TransactionsTable";
@@ -262,22 +263,24 @@ export function TransactionsPage() {
 														<span className="text-emerald-600">
 															Doanh thu (VNPay/PayOS):
 														</span>
-														<span className="font-semibold text-emerald-600">
+														<span className="flex items-center gap-1 font-semibold text-emerald-600">
 															+{formatCurrency(pageStats.totalIncome)}
+															<BitCoinIcon size={13} />
 														</span>
 													</div>
 													<div className="flex justify-between gap-4">
 														<span className="text-rose-600">
 															Chi tiêu AI (Hoàn tất):
 														</span>
-														<span className="font-semibold text-rose-600">
-															(-{formatCurrency(pageStats.totalExpense)})
+														<span className="flex items-center gap-1 font-semibold text-rose-600">
+															(-{formatCurrency(pageStats.totalExpense)}
+															<BitCoinIcon size={13} />)
 														</span>
 													</div>
 													<div className="flex justify-between gap-4">
 														<span className="text-black">Chênh lệch ròng:</span>
 														<span
-															className={`font-semibold ${
+															className={`flex items-center gap-1 font-semibold ${
 																pageStats.totalIncome -
 																	pageStats.totalExpense >=
 																0
@@ -286,12 +289,30 @@ export function TransactionsPage() {
 															}`}
 														>
 															{pageStats.totalIncome - pageStats.totalExpense >=
-															0
-																? `+${formatCurrency(
-																		pageStats.totalIncome -
-																			pageStats.totalExpense,
-																	)}`
-																: `(-${formatCurrency(pageStats.totalExpense - pageStats.totalIncome)})`}
+															0 ? (
+																<>
+																	<span>
+																		+
+																		{formatCurrency(
+																			pageStats.totalIncome -
+																				pageStats.totalExpense,
+																		)}
+																	</span>
+																	<BitCoinIcon size={13} />
+																</>
+															) : (
+																<>
+																	(
+																	<span>
+																		-
+																		{formatCurrency(
+																			pageStats.totalExpense -
+																				pageStats.totalIncome,
+																		)}
+																	</span>
+																	<BitCoinIcon size={13} />)
+																</>
+															)}
 														</span>
 													</div>
 												</div>
@@ -302,24 +323,24 @@ export function TransactionsPage() {
 												</p>
 												<div className="space-y-1 text-xs">
 													<div className="flex items-start gap-2">
-														<span className="font-semibold text-emerald-600">
-															+100,000 UP
+														<span className="flex items-center gap-0.5 font-semibold text-emerald-600">
+															+100,000 <BitCoinIcon size={13} />
 														</span>
 														<span className="text-muted-foreground">
 															= Doanh thu (VNPay/PayOS)
 														</span>
 													</div>
 													<div className="flex items-start gap-2">
-														<span className="font-semibold text-rose-600">
-															(-50,000 UP)
+														<span className="flex items-center gap-0.5 font-semibold text-rose-600">
+															(-50,000 <BitCoinIcon size={13} />)
 														</span>
 														<span className="text-muted-foreground">
 															= Chi tiêu (Mua hàng/AI qua Ví)
 														</span>
 													</div>
 													<div className="flex items-start gap-2">
-														<span className="font-semibold text-amber-600">
-															30,000 UP
+														<span className="flex items-center gap-0.5 font-semibold text-amber-600">
+															30,000 <BitCoinIcon size={13} />
 														</span>
 														<span className="text-muted-foreground">
 															= Chờ xử lý

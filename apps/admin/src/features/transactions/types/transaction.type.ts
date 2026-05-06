@@ -100,7 +100,7 @@ export function translatePaymentMethod(paymentMethod: PaymentMethod): string {
 }
 
 export function formatCurrency(amount: number): string {
-	return `${amount.toLocaleString("vi-VN")} UP`;
+	return amount.toLocaleString("vi-VN");
 }
 
 export function formatDateTime(value: string): string {

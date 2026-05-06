@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import BitCoinIcon from "@workspace/ui/components/BitCoinIcon";
 import type { AdminTransaction } from "../types/transaction.type";
 import {
 	formatCurrency,
@@ -111,12 +112,23 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 			const formattedAmount = formatCurrency(amount);
 
 			return (
-				<div className={`font-medium ${color}`}>
-					{sign === "negative"
-						? `(-${formattedAmount})`
-						: sign === "positive"
-							? `+${formattedAmount}`
-							: formattedAmount}
+				<div className={`flex items-center gap-1 font-medium ${color}`}>
+					{sign === "negative" ? (
+						<>
+							(<span>-{formattedAmount}</span>
+							<BitCoinIcon size={14} />)
+						</>
+					) : sign === "positive" ? (
+						<>
+							<span>+{formattedAmount}</span>
+							<BitCoinIcon size={14} />
+						</>
+					) : (
+						<>
+							<span>{formattedAmount}</span>
+							<BitCoinIcon size={14} />
+						</>
+					)}
 				</div>
 			);
 		},
