@@ -1,7 +1,6 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { LongText } from "@/components/long-text";
 import type { AdminTransaction } from "../types/transaction.type";
 import {
 	formatCurrency,
@@ -65,8 +64,17 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 		accessorKey: "type",
 		header: "Loại",
 		cell: ({ row }) => (
-			<Badge variant="outline" className="font-medium">
-				{translateTransactionType(row.original.type)}
+			<Badge
+				variant="outline"
+				className={getTypeClassName(
+					row.original.type,
+					row.original.paymentMethod,
+				)}
+			>
+				{translateTransactionType(
+					row.original.type,
+					row.original.paymentMethod,
+				)}
 			</Badge>
 		),
 	},
@@ -86,17 +94,20 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 		accessorKey: "paymentMethod",
 		header: "Thanh toán",
 		cell: ({ row }) => (
-			<span className="text-sm">
+			<Badge
+				variant="outline"
+				className={getPaymentMethodClassName(row.original.paymentMethod)}
+			>
 				{translatePaymentMethod(row.original.paymentMethod)}
-			</span>
+			</Badge>
 		),
 	},
 	{
 		accessorKey: "amount",
 		header: "Số tiền",
 		cell: ({ row }) => {
-			const { type, status, amount } = row.original;
-			const { color, sign } = getAmountStyle(type, status);
+			const { type, status, amount, paymentMethod } = row.original;
+			const { color, sign } = getAmountStyle(type, status, paymentMethod);
 			const formattedAmount = formatCurrency(amount);
 
 			return (
@@ -153,9 +164,52 @@ function getStatusClassName(status: AdminTransaction["status"]) {
 	}
 }
 
+function getTypeClassName(
+	type: AdminTransaction["type"],
+	paymentMethod: AdminTransaction["paymentMethod"],
+) {
+	if (type === "PURCHASE") {
+		// Mua trực tiếp qua VNPay/PayOS → xanh dương (doanh thu thực)
+		if (paymentMethod === "VNPAY" || paymentMethod === "PAYOS") {
+			return "border-blue-500/30 bg-blue-500/10 text-blue-600 font-medium";
+		}
+		// Thanh toán qua ví nội bộ → tím nhạt
+		return "border-violet-500/30 bg-violet-500/10 text-violet-600 font-medium";
+	}
+	if (type === "DEPOSIT") {
+		return "border-emerald-500/30 bg-emerald-500/10 text-emerald-600 font-medium";
+	}
+	if (type === "AI_REQUEST") {
+		return "border-orange-500/30 bg-orange-500/10 text-orange-600 font-medium";
+	}
+	if (type === "CONTEST_PRIZE") {
+		return "border-yellow-500/30 bg-yellow-500/10 text-yellow-600 font-medium";
+	}
+	return "font-medium";
+}
+
+function getPaymentMethodClassName(
+	paymentMethod: AdminTransaction["paymentMethod"],
+) {
+	switch (paymentMethod) {
+		case "VNPAY":
+			// Xanh dương — cổng thanh toán VNPay
+			return "border-blue-500/30 bg-blue-500/10 text-blue-700 font-medium";
+		case "PAYOS":
+			// Xanh lá — cổng thanh toán PayOS
+			return "border-emerald-500/30 bg-emerald-500/10 text-emerald-700 font-medium";
+		case "WALLET":
+			// Vàng/Cam — ví nội bộ
+			return "border-amber-500/30 bg-amber-500/10 text-amber-700 font-medium";
+		default:
+			return "text-muted-foreground font-medium";
+	}
+}
+
 function getAmountStyle(
 	type: AdminTransaction["type"],
 	status: AdminTransaction["status"],
+	paymentMethod: AdminTransaction["paymentMethod"],
 ): { color: string; sign: "positive" | "negative" | "neutral" } {
 	// Chờ xử lý -> màu cam, không dấu
 	if (status === "PENDING") {
@@ -168,8 +222,17 @@ function getAmountStyle(
 			// Nạp tiền / Thưởng cuộc thi -> Xanh, dấu +
 			return { color: "text-emerald-600", sign: "positive" };
 		}
-		if (type === "AI_REQUEST" || type === "PURCHASE") {
-			// AI Request / Mua hàng -> Đỏ, dấu - dạng (số tiền)
+		if (type === "PURCHASE") {
+			if (paymentMethod === "VNPAY" || paymentMethod === "PAYOS") {
+				// Mua trực tiếp qua cổng thanh toán → xanh dương, dấu +
+				// (tiền thật chảy vào hệ thống, admin nhìn đây là doanh thu)
+				return { color: "text-blue-600", sign: "positive" };
+			}
+			// Thanh toán qua ví nội bộ → đỏ, dấu - (tiền chuyển trong hệ thống)
+			return { color: "text-rose-600", sign: "negative" };
+		}
+		if (type === "AI_REQUEST") {
+			// AI Request -> Đỏ, dấu -
 			return { color: "text-rose-600", sign: "negative" };
 		}
 	}
