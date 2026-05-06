@@ -404,7 +404,6 @@ const ImportQuestionForm: React.FC = () => {
 
   const getKeepCount = () => importableQuestions.filter((q) => q.status === "KEEP").length;
   const getDeleteCount = () => importableQuestions.filter((q) => q.status === "DELETE").length;
-  const getReusedCount = () => importableQuestions.filter((q) => q.reused).length;
 
   return (
     <div className="mx-auto p-6 min-h-screen bg-gray-50 dark:bg-slate-950">
@@ -652,12 +651,6 @@ const ImportQuestionForm: React.FC = () => {
                         <div className="flex items-center gap-1.5">
                           <div className="w-2 h-2 rounded-full bg-gray-400" />
                           <span className="font-semibold text-gray-500">{skippedCount} trùng (đã loại)</span>
-                        </div>
-                      )}
-                      {getReusedCount() > 0 && (
-                        <div className="flex items-center gap-1.5">
-                          <div className="w-2 h-2 rounded-full bg-yellow-400" />
-                          <span className="font-semibold text-yellow-600">{getReusedCount()} tái sử dụng</span>
                         </div>
                       )}
                     </div>
