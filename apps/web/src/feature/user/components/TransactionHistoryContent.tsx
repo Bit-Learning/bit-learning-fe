@@ -18,6 +18,7 @@ import { Pagination } from "@/shared/components/Pagination";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { formatDateTime } from "@/shared/lib/date-time-utils";
 import BitCoinIcon from "@/shared/components/BitCoinIcon";
+import { cn } from "@workspace/ui/lib/utils";
 
 const PAGE_SIZE = 10;
 
@@ -130,14 +131,11 @@ export const TransactionHistoryContent: React.FC = () => {
                     <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm text-center">
                       Loại
                     </th>
-                    <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
+                    <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm text-center">
                       Số tiền
                     </th>
                     <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
-                      Phương thức
-                    </th>
-                    <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
-                      Ngày tạo
+                      Ngày giao dịch
                     </th>
                     <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
                       Trạng thái
@@ -152,9 +150,13 @@ export const TransactionHistoryContent: React.FC = () => {
                     const StatusIcon = status.icon;
                     const TypeIcon = typeConfig.icon;
                     const debit = isDebit(tx.type);
-                    const formattedAmount = debit
-                      ? `(- ${tx.amount.toLocaleString("vi-VN")})`
-                      : `+${tx.amount.toLocaleString("vi-VN")}`;
+                    const isFailed = tx.status === TransactionStatus.FAILED;
+
+                    const formattedAmount = isFailed
+                      ? `${tx.amount.toLocaleString("vi-VN")}`
+                      : debit
+                        ? `- ${tx.amount.toLocaleString("vi-VN")}`
+                        : `+${tx.amount.toLocaleString("vi-VN")}`;
 
                     return (
                       <tr key={tx.id} className="hover:bg-slate-50 transition-colors">
@@ -162,21 +164,25 @@ export const TransactionHistoryContent: React.FC = () => {
                           #{tx.code}
                         </td>
 
-                        <td className="px-4 py-4 border border-slate-200">
-                          <Badge className={`text-sm px-3 flex items-center gap-1.5 w-fit ${typeConfig.cls}`}>
-                            <TypeIcon className="w-3.5 h-3.5" />
-                            {typeConfig.text}
-                          </Badge>
+                        <td className="px-4 py-4 border border-slate-200 text-center">
+                          <div className="flex justify-center">
+                            <Badge className={`text-sm px-3 flex items-center gap-1.5 w-fit ${typeConfig.cls}`}>
+                              <TypeIcon className="w-3.5 h-3.5" />
+                              {typeConfig.text}
+                            </Badge>
+                          </div>
                         </td>
 
                         <td className="px-4 py-4 border border-slate-200">
-                          <span className={`font-bold text-[16px] flex items-center gap-1 ${typeConfig.amountCls}`}>
-                            {formattedAmount} <BitCoinIcon size={18} />
+                          <span
+                            className={cn(
+                              "font-bold text-[16px] flex items-center justify-center gap-1",
+                              isFailed ? "text-slate-900" : typeConfig.amountCls,
+                            )}
+                          >
+                            {formattedAmount}
+                            <BitCoinIcon size={20} />
                           </span>
-                        </td>
-
-                        <td className="px-4 py-4 border border-slate-200 text-slate-600 text-[13px] font-medium text-center">
-                          {tx.paymentMethod ?? "_"}
                         </td>
 
                         <td className="px-4 py-4 border border-slate-200 text-slate-500 text-[13px]">
