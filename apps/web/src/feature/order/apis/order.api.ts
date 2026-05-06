@@ -2,7 +2,7 @@ import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
 import type { OrderCreateRequest, OrderInfo } from "../types/order.type";
-import { DepositHistoryParams, TransactionInfo } from "../types/payment.type";
+import { DepositHistoryParams, TransactionHistoryParams, TransactionInfo } from "../types/payment.type";
 
 export const orderApi = {
   createOrder(request: OrderCreateRequest): Promise<AxiosResponse<ApiResponse<string | null>>> {
@@ -36,5 +36,13 @@ export const orderApi = {
 
   getMyDeposits(params?: DepositHistoryParams): Promise<AxiosResponse<ApiResponse<TransactionInfo[]>>> {
     return api.get("/transactions/deposit/me", { params });
+  },
+
+  getMyTotalDeposits(): Promise<AxiosResponse<ApiResponse<number>>> {
+    return api.get("/transactions/deposit/total/me");
+  },
+
+  getMyAllTransactions(params?: TransactionHistoryParams): Promise<AxiosResponse<ApiResponse<TransactionInfo[]>>> {
+    return api.get("/transactions/all/me", { params });
   },
 };

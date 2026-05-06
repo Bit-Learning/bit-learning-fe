@@ -3,7 +3,7 @@ import { toast } from "@/shared/components/Sonner";
 import { orderApi } from "../apis/order.api";
 import { OrderCreateRequest, PaymentMethod } from "../types/order.type";
 import { useNavigate } from "@tanstack/react-router";
-import { DepositHistoryParams } from "../types/payment.type";
+import { DepositHistoryParams, TransactionHistoryParams } from "../types/payment.type";
 
 export const useMyOrders = (params?: { page?: number; size?: number; sort?: string; direction?: "ASC" | "DESC" }) => {
   return useQuery({
@@ -90,6 +90,26 @@ export const useMyDepositHistory = (params?: DepositHistoryParams) => {
     queryKey: ["deposit-history", params],
     queryFn: async () => {
       const response = await orderApi.getMyDeposits(params);
+      return response.data;
+    },
+  });
+};
+
+export const useMyTotalDeposits = () => {
+  return useQuery({
+    queryKey: ["deposit-total"],
+    queryFn: async () => {
+      const response = await orderApi.getMyTotalDeposits();
+      return response.data;
+    },
+  });
+};
+
+export const useMyTransactionHistory = (params?: TransactionHistoryParams) => {
+  return useQuery({
+    queryKey: ["transaction-history", params],
+    queryFn: async () => {
+      const response = await orderApi.getMyAllTransactions(params);
       return response.data;
     },
   });
