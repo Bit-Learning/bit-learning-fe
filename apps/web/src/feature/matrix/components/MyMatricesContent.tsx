@@ -163,8 +163,8 @@ const MyMatricesContent: React.FC = () => {
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                       TÊN MA TRẬN
                     </th>
-                    <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-36">
-                      MÃ
+                    <th className="text-center p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-55">
+                      MÃ MA TRẬN
                     </th>
                     <th className="text-left p-4 font-semibold text-md text-gray-800 uppercase tracking-wider w-80">
                       MÔN HỌC
@@ -197,7 +197,7 @@ const MyMatricesContent: React.FC = () => {
                         )}
                       </td>
                       <td className="p-4">
-                        <span className="line-clamp-1 font-mono text-sm text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
+                        <span className="line-clamp-1 text-center font-mono text-sm text-blue-700 bg-blue-100 px-2 py-0.5 rounded">
                           {matrix.code}
                         </span>
                       </td>

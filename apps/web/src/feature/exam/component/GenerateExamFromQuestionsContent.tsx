@@ -11,6 +11,8 @@ import {
   CheckSquare,
   Square,
   CheckCircle2,
+  ListChecks,
+  X,
 } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Input } from "@workspace/ui/components/Input";
@@ -27,15 +29,19 @@ import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
 import { ApprovalStatus } from "@/feature/question/types/question.type";
 import type { ExamType } from "../types/exam.type";
 import { getDifficultyBadge, getTypeBadge } from "@/feature/question/utils/question.utils";
+import { DetailModal } from "@/feature/question/components/DetailModal";
 
 const DEFAULT_DURATION = 30;
 const DEFAULT_SCORE = 10;
 const PAGE_SIZE = 20;
 
+type QuestionTab = "user" | "system" | "selected";
+
 const GenerateExamFromQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
 
   const [questionSource, setQuestionSource] = useState<"system" | "user">("user");
+  const [activeTab, setActiveTab] = useState<QuestionTab>("user");
   const [examName, setExamName] = useState("");
   const [examCode, setExamCode] = useState("");
   const [durationInMinutes, setDurationInMinutes] = useState(DEFAULT_DURATION);
@@ -50,7 +56,10 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const [selectedChapterId, setSelectedChapterId] = useState<number | undefined>(undefined);
   const [selectedLessonId, setSelectedLessonId] = useState<number | undefined>(undefined);
   const [selectedQuestions, setSelectedQuestions] = useState<Set<number>>(new Set());
+  const [selectedQuestionObjects, setSelectedQuestionObjects] = useState<Map<number, any>>(new Map());
   const [currentPage, setCurrentPage] = useState(0);
+
+  const [detailQuestionId, setDetailQuestionId] = useState<number | null>(null);
 
   const { data: subjectsData } = useSubjectsList();
   const { data: chapters, isLoading: loadingChapters } = useChaptersBySubject(selectedSubjectId ?? undefined);
@@ -95,6 +104,14 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
 
   const isExamGenerated = !!generatedExamId && !!examData;
 
+  const selectedQuestionsList = useMemo(
+    () =>
+      Array.from(selectedQuestions)
+        .map((id) => selectedQuestionObjects.get(id))
+        .filter(Boolean),
+    [selectedQuestions, selectedQuestionObjects],
+  );
+
   const handleGenerate = () => {
     if (!examName.trim() || !examCode.trim()) {
       toast.error({ title: "Lỗi", description: "Vui lòng nhập tên và mã đề thi" });
@@ -135,12 +152,39 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     );
   };
 
-  const handleToggleQuestion = (questionId: number) => {
+  const handleToggleQuestion = (question: any) => {
+    if (isExamGenerated) return;
+    const id = question.id;
+    setSelectedQuestions((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.add(id);
+      }
+      return next;
+    });
+    setSelectedQuestionObjects((prev) => {
+      const next = new Map(prev);
+      if (next.has(id)) {
+        next.delete(id);
+      } else {
+        next.set(id, question);
+      }
+      return next;
+    });
+  };
+
+  const handleRemoveSelected = (id: number) => {
     if (isExamGenerated) return;
     setSelectedQuestions((prev) => {
       const next = new Set(prev);
-      if (next.has(questionId)) next.delete(questionId);
-      else next.add(questionId);
+      next.delete(id);
+      return next;
+    });
+    setSelectedQuestionObjects((prev) => {
+      const next = new Map(prev);
+      next.delete(id);
       return next;
     });
   };
@@ -148,12 +192,15 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
   const handleDeselectAll = () => {
     if (isExamGenerated) return;
     setSelectedQuestions(new Set());
+    setSelectedQuestionObjects(new Map());
   };
 
   const handleSourceChange = (source: "system" | "user") => {
     if (isExamGenerated) return;
     setQuestionSource(source);
+    setActiveTab(source);
     setSelectedQuestions(new Set());
+    setSelectedQuestionObjects(new Map());
     setCurrentPage(0);
     setSelectedSubjectId(undefined);
     setSelectedChapterId(undefined);
@@ -161,11 +208,20 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setSearchTerm("");
   };
 
+  const handleTabChange = (tab: QuestionTab) => {
+    if (isExamGenerated && tab !== "selected") return;
+    setActiveTab(tab);
+    if (tab === "user" || tab === "system") {
+      setQuestionSource(tab);
+    }
+  };
+
   const handleSubjectChange = (subjectId: number | undefined) => {
     setSelectedSubjectId(subjectId);
     setSelectedChapterId(undefined);
     setSelectedLessonId(undefined);
     setSelectedQuestions(new Set());
+    setSelectedQuestionObjects(new Map());
     setCurrentPage(0);
     setSearchTerm("");
   };
@@ -191,12 +247,16 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
     setExamType("EXAM");
     setEnrollKey("");
     setSelectedQuestions(new Set());
+    setSelectedQuestionObjects(new Map());
     setSearchTerm("");
     setSelectedSubjectId(undefined);
     setSelectedChapterId(undefined);
     setSelectedLessonId(undefined);
     setCurrentPage(0);
+    setActiveTab("user");
   };
+
+  const isSelectedTab = activeTab === "selected";
 
   return (
     <div className="mx-auto p-8 bg-slate-50 dark:bg-slate-950">
@@ -250,30 +310,50 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
               <div className="flex items-center justify-between flex-wrap gap-3">
                 <div className="flex gap-2">
                   <button
-                    onClick={() => handleSourceChange("user")}
+                    onClick={() => handleTabChange("user")}
                     disabled={isExamGenerated}
                     className={`cursor-pointer px-6 py-2.5 rounded-lg text-md font-medium transition-colors ${
-                      questionSource === "user"
+                      activeTab === "user"
                         ? "bg-primary text-white"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
-                    }`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     Câu hỏi của tôi
                   </button>
                   <button
-                    onClick={() => handleSourceChange("system")}
+                    onClick={() => handleTabChange("system")}
                     disabled={isExamGenerated}
                     className={`cursor-pointer px-6 py-2.5 rounded-lg text-md font-medium transition-colors ${
-                      questionSource === "system"
+                      activeTab === "system"
                         ? "bg-primary text-white"
                         : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
-                    }`}
+                    } disabled:opacity-50 disabled:cursor-not-allowed`}
                   >
                     Ngân hàng hệ thống
                   </button>
+                  <button
+                    onClick={() => handleTabChange("selected")}
+                    className={`cursor-pointer px-5 py-2.5 rounded-lg text-md font-medium transition-colors flex items-center gap-2 ${
+                      activeTab === "selected"
+                        ? "bg-blue-600 text-white"
+                        : "bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200"
+                    }`}
+                  >
+                    <ListChecks className="h-4 w-4" />
+                    Đã chọn
+                    {selectedQuestions.size > 0 && (
+                      <span
+                        className={`inline-flex items-center justify-center w-5 h-5 rounded-full text-xs font-bold ${
+                          activeTab === "selected" ? "bg-white text-blue-600" : "bg-blue-600 text-white"
+                        }`}
+                      >
+                        {selectedQuestions.size}
+                      </span>
+                    )}
+                  </button>
                 </div>
 
-                {!isExamGenerated && (
+                {!isExamGenerated && !isSelectedTab && (
                   <button
                     onClick={handleDeselectAll}
                     className="cursor-pointer flex items-center gap-1 text-sm text-slate-500 hover:underline"
@@ -282,9 +362,19 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                     Bỏ chọn ({selectedQuestions.size})
                   </button>
                 )}
+
+                {!isExamGenerated && isSelectedTab && selectedQuestions.size > 0 && (
+                  <button
+                    onClick={handleDeselectAll}
+                    className="cursor-pointer flex items-center gap-1 text-sm text-red-500 hover:underline"
+                  >
+                    <Square className="h-4 w-4" />
+                    Xóa tất cả
+                  </button>
+                )}
               </div>
 
-              {!isExamGenerated && (
+              {!isSelectedTab && !isExamGenerated && (
                 <div className="flex flex-col gap-2 mt-3 w-full min-w-0">
                   <div className="relative w-full">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
@@ -339,7 +429,63 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
             </CardHeader>
 
             <CardContent>
-              {!selectedSubjectId && !isExamGenerated ? (
+              {isSelectedTab ? (
+                selectedQuestionsList.length === 0 ? (
+                  <div className="text-center py-12 text-slate-400">
+                    <ListChecks className="h-12 w-12 mx-auto mb-3 opacity-50" />
+                    <p className="font-medium">Chưa có câu hỏi nào được chọn</p>
+                    <p className="text-sm mt-1">Chuyển sang tab câu hỏi để chọn</p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {selectedQuestionsList.map((question) => (
+                      <div
+                        key={question.id}
+                        className="p-4 rounded-lg border-2 border-primary bg-primary/5 transition-all"
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="mt-0.5 shrink-0">
+                            <CheckSquare className="h-5 w-5 text-primary" />
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-md font-medium text-slate-900 dark:text-white line-clamp-2">
+                              {question.content}
+                            </p>
+                            <div className="flex items-center gap-2 mt-2 flex-wrap">
+                              <span className="text-xs">{getTypeBadge(question.questionType)}</span>
+                              <span className="text-xs">{getDifficultyBadge(question.questionLevel)}</span>
+                            </div>
+                          </div>
+                          <div className="flex items-center gap-1 shrink-0">
+                            <button
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setDetailQuestionId(question.id);
+                              }}
+                              className="cursor-pointer p-1.5 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                              title="Xem chi tiết"
+                            >
+                              <Eye className="h-5 w-5" />
+                            </button>
+                            {!isExamGenerated && (
+                              <button
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleRemoveSelected(question.id);
+                                }}
+                                className="cursor-pointer p-1.5 rounded-md text-slate-400 hover:text-red-600 hover:bg-red-50 transition-colors"
+                                title="Bỏ chọn"
+                              >
+                                <X className="h-5 w-5" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
+              ) : !selectedSubjectId && !isExamGenerated ? (
                 <div className="text-center py-12 text-slate-400">
                   <FileText className="h-12 w-12 mx-auto mb-3 opacity-50" />
                   <p className="font-medium">Chưa chọn môn học</p>
@@ -363,7 +509,7 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                     return (
                       <div
                         key={question.id}
-                        onClick={() => handleToggleQuestion(question.id)}
+                        onClick={() => handleToggleQuestion(question)}
                         className={`p-4 rounded-lg border-2 transition-all ${
                           isExamGenerated ? "cursor-default opacity-60" : "cursor-pointer hover:border-primary/50"
                         } ${isSelected ? "border-primary bg-primary/5" : "border-slate-200 dark:border-slate-700"}`}
@@ -383,21 +529,18 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                             <div className="flex items-center gap-2 mt-2 flex-wrap">
                               <span className="text-xs">{getTypeBadge(question.questionType)}</span>
                               <span className="text-xs">{getDifficultyBadge(question.questionLevel)}</span>
-                              {question.chapter && (
-                                <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                  Chương {question.chapter.chapterNo}
-                                </span>
-                              )}
-                              {question.lesson && (
-                                <>
-                                  <span className="text-slate-400">●</span>
-                                  <span className="text-sm text-slate-500 dark:text-slate-400 truncate">
-                                    Bài {question.lesson.lessonNo}
-                                  </span>
-                                </>
-                              )}
                             </div>
                           </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDetailQuestionId(question.id);
+                            }}
+                            className="cursor-pointer shrink-0 p-1.5 rounded-md text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                            title="Xem chi tiết"
+                          >
+                            <Eye className="h-5 w-5" />
+                          </button>
                         </div>
                       </div>
                     );
@@ -405,22 +548,22 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
                 </div>
               )}
 
-              {totalPages > 1 && selectedSubjectId && (
+              {!isSelectedTab && totalPages > 1 && selectedSubjectId && (
                 <div className="flex items-center justify-center gap-4 mt-4">
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="lg"
                     onClick={() => setCurrentPage((p) => Math.max(0, p - 1))}
                     isDisabled={currentPage === 0 || isExamGenerated}
                   >
                     Trước
                   </Button>
-                  <span className="text-sm text-muted-foreground">
+                  <span className="text-md text-muted-foreground">
                     Trang {currentPage + 1} / {totalPages}
                   </span>
                   <Button
                     variant="outline"
-                    size="sm"
+                    size="lg"
                     onClick={() => setCurrentPage((p) => p + 1)}
                     isDisabled={currentPage >= totalPages - 1 || isExamGenerated}
                   >
@@ -661,6 +804,8 @@ const GenerateExamFromQuestionsContent: React.FC = () => {
           )}
         </div>
       </div>
+
+      {detailQuestionId && <DetailModal questionId={detailQuestionId} onClose={() => setDetailQuestionId(null)} />}
     </div>
   );
 };

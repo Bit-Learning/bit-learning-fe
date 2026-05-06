@@ -209,7 +209,9 @@ const MyExamsContent: React.FC = () => {
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">
                         Thông tin đề thi
                       </th>
-                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Mã đề</th>
+                      <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
+                        Mã đề
+                      </th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Loại</th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider">Thời gian</th>
                       <th className="p-4 font-semibold text-md text-gray-800 uppercase tracking-wider text-center">
@@ -241,7 +243,7 @@ const MyExamsContent: React.FC = () => {
                             </span>
                           </td>
                           <td className="px-4 py-3.5">
-                            <span className="line-clamp-1 px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-sm font-semibold font-mono">
+                            <span className="line-clamp-1 text-center px-2.5 py-1 bg-slate-100 dark:bg-slate-800 text-blue-600 dark:text-slate-300 rounded-md text-sm font-semibold font-mono">
                               {exam.code}
                             </span>
                           </td>
