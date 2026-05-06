@@ -1,6 +1,7 @@
 import type { ColumnDef } from "@tanstack/react-table";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
+import BitCoinIcon from "@workspace/ui/components/BitCoinIcon";
 import type { AdminOrder } from "../types/order.type";
 import {
 	formatCurrency,
@@ -113,8 +114,10 @@ export const orderColumns: ColumnDef<AdminOrder>[] = [
 						? "text-muted-foreground line-through"
 						: "text-amber-600";
 			return (
-				<div className={`font-medium ${color}`}>
-					{formatCurrency(totalAmount)}
+				<div className={`flex items-center gap-1 font-medium ${color}`}>
+					{status === "COMPLETED" && <span>+</span>}
+					<span>{formatCurrency(totalAmount)}</span>
+					<BitCoinIcon size={14} />
 				</div>
 			);
 		},
