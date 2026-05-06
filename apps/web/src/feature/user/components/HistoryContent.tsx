@@ -77,19 +77,19 @@ export const HistoryContent: React.FC = () => {
                 <table className="w-full text-left border border-slate-200 rounded-lg overflow-hidden">
                   <thead className="bg-slate-50">
                     <tr>
-                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-64">
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-72">
                         Mã đơn hàng
                       </th>
-                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-64">
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-80">
                         Khóa học
                       </th>
-                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-28">
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-36">
                         Tổng tiền
                       </th>
-                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-28">
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm w-36">
                         Trạng thái
                       </th>
-                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm">
+                      <th className="px-4 py-3 border border-slate-200 font-semibold uppercase text-slate-800 text-sm text-center">
                         Xem đơn
                       </th>
                     </tr>

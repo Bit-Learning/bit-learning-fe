@@ -1,19 +1,5 @@
 import React, { useState } from "react";
-import {
-  User,
-  Lock,
-  History,
-  Bell,
-  BookOpen,
-  Wallet,
-  Shield,
-  UserX,
-  Copy,
-  Check,
-  X,
-  CreditCard,
-  FileText,
-} from "lucide-react";
+import { User, Lock, History, Bell, BookOpen, Wallet, Shield, UserX, Copy, Check, X, CreditCard } from "lucide-react";
 import { Link, useMatchRoute } from "@tanstack/react-router";
 import { Card } from "@workspace/ui/components/Card";
 import { Badge } from "@workspace/ui/components/Badge";
@@ -71,13 +57,6 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ unreadCount = 0,
       to: "/profile/my-course",
     },
     {
-      id: "forum",
-      icon: FileText,
-      label: "Diễn đàn chia sẻ",
-      badge: null,
-      to: "/forum",
-    },
-    {
       id: "password",
       icon: Lock,
       label: "Đổi mật khẩu",
@@ -97,6 +76,13 @@ export const ProfileSidebar: React.FC<ProfileSidebarProps> = ({ unreadCount = 0,
       label: "Lịch sử nạp tiền",
       badge: null,
       to: "/profile/deposit",
+    },
+    {
+      id: "transaction",
+      icon: History,
+      label: "Lịch sử giao dịch",
+      badge: null,
+      to: "/profile/transaction",
     },
     {
       id: "notifications",

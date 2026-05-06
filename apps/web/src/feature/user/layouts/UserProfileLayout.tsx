@@ -29,7 +29,7 @@ const UserProfileLayout: React.FC<UserProfileLayoutProps> = ({ children }) => {
         .shadow-primary\\/20 { box-shadow: 0 10px 15px -3px rgba(29, 88, 255, 0.2); }
       `}</style>
 
-      <main className="max-w-7xl mx-auto w-full px-4 py-10">
+      <main className="max-w-360 mx-auto w-full px-4 py-10">
         <div className="flex flex-col lg:flex-row gap-8 items-start">
           <ProfileSidebar unreadCount={unreadData?.unreadCount || 0} userInfo={userProfile} />
 
