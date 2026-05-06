@@ -74,7 +74,7 @@ export function translateTransactionType(
 		if (paymentMethod === "VNPAY" || paymentMethod === "PAYOS") {
 			return "Mua khóa học trực tiếp";
 		}
-		return "Thanh toán khóa học";
+		return "Thanh toán ví";
 	}
 	return (
 		transactionTypeOptions.find((option) => option.value === type)?.label ??
