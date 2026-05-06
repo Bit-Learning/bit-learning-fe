@@ -1,21 +1,12 @@
 import type { AxiosResponse } from "axios";
 import api from "@/shared/api/api";
 import type { ApiResponse } from "@/shared/api/api.type";
-import type { QuestionResponse, ApproveRejectDTO, ApprovalStatus } from "../types/question.type";
-
-export interface QuestionApprovalParams {
-  status?: ApprovalStatus;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
-
-export interface QuestionSearchParams {
-  keyword?: string;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
+import type {
+  QuestionResponse,
+  ApproveRejectDTO,
+  QuestionApprovalParams,
+  QuestionSearchParams,
+} from "../types/question.type";
 
 export const questionApi = {
   getPendingApproval(params?: QuestionApprovalParams): Promise<AxiosResponse<ApiResponse<QuestionResponse[]>>> {

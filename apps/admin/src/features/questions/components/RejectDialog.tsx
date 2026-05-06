@@ -1,7 +1,6 @@
 import { useState } from "react";
 import {
   AlertDialog,
-  AlertDialogAction,
   AlertDialogCancel,
   AlertDialogContent,
   AlertDialogDescription,
@@ -9,8 +8,10 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
+import { Loader2, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
 interface RejectDialogProps {
@@ -18,9 +19,10 @@ interface RejectDialogProps {
   onOpenChange: (open: boolean) => void;
   onConfirm: (reason: string) => void;
   count: number;
+  isPending?: boolean;
 }
 
-export function RejectDialog({ open, onOpenChange, onConfirm, count }: RejectDialogProps) {
+export function RejectDialog({ open, onOpenChange, onConfirm, count, isPending = false }: RejectDialogProps) {
   const [reason, setReason] = useState("");
 
   const handleConfirm = () => {
@@ -32,11 +34,16 @@ export function RejectDialog({ open, onOpenChange, onConfirm, count }: RejectDia
       return;
     }
     onConfirm(reason);
-    setReason("");
+  };
+
+  const handleOpenChange = (o: boolean) => {
+    if (isPending) return;
+    if (!o) setReason("");
+    onOpenChange(o);
   };
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
+    <AlertDialog open={open} onOpenChange={handleOpenChange}>
       <AlertDialogContent>
         <AlertDialogHeader>
           <AlertDialogTitle>Từ chối câu hỏi</AlertDialogTitle>
@@ -54,12 +61,31 @@ export function RejectDialog({ open, onOpenChange, onConfirm, count }: RejectDia
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             rows={4}
+            disabled={isPending}
           />
         </div>
 
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={() => setReason("")}>Hủy</AlertDialogCancel>
-          <AlertDialogAction onClick={handleConfirm}>Xác nhận từ chối</AlertDialogAction>
+          <AlertDialogCancel onClick={() => setReason("")} disabled={isPending}>
+            Hủy
+          </AlertDialogCancel>
+          <Button
+            onClick={handleConfirm}
+            disabled={isPending}
+            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="h-4 w-4 animate-spin" />
+                Đang xử lý...
+              </>
+            ) : (
+              <>
+                <XCircle className="h-4 w-4" />
+                Xác nhận từ chối
+              </>
+            )}
+          </Button>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

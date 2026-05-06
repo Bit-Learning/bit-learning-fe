@@ -176,11 +176,7 @@ export function QuestionApprovalList() {
   };
 
   const handleSelectAll = () => {
-    if (allSelected) {
-      setSelectedQuestions([]);
-    } else {
-      setSelectedQuestions(allIds);
-    }
+    setSelectedQuestions(allSelected ? [] : allIds);
   };
 
   const handleApproveConfirm = () => {
@@ -219,13 +215,12 @@ export function QuestionApprovalList() {
     return <Badge variant={variant}>{label}</Badge>;
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString("vi-VN", {
+  const formatDate = (dateString: string) =>
+    new Date(dateString).toLocaleDateString("vi-VN", {
       day: "2-digit",
       month: "2-digit",
       year: "numeric",
     });
-  };
 
   if (isLoading && activeTab === "pending") {
     return (
@@ -262,7 +257,7 @@ export function QuestionApprovalList() {
           </div>
           {activeTab === "pending" && selectedQuestions.length > 0 && (
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => setApproveDialogOpen(true)} className="gap-2">
+              <Button variant="outline" onClick={() => handleApproveConfirm()} className="gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Phê duyệt ({selectedQuestions.length})
               </Button>
@@ -279,9 +274,11 @@ export function QuestionApprovalList() {
             <TabsTrigger value="pending" className="gap-2 px-6 py-3 text-base font-medium">
               <CheckCircle className="h-4 w-4" />
               Chờ phê duyệt
-              <Badge variant="secondary" className="ml-1">
-                {pagination?.totalElements}
-              </Badge>
+              {pagination?.totalElements != null && (
+                <Badge variant="secondary" className="ml-1">
+                  {pagination.totalElements}
+                </Badge>
+              )}
             </TabsTrigger>
             <TabsTrigger value="bank" className="gap-2 px-6 py-3 text-base font-medium">
               <Eye className="h-4 w-4" />
@@ -385,21 +382,23 @@ export function QuestionApprovalList() {
         <QuestionDetailDialog
           question={viewQuestion}
           open={!!viewQuestion}
-          onOpenChange={(open: any) => !open && setViewQuestion(null)}
+          onOpenChange={(open) => !open && setViewQuestion(null)}
+          showApprovalActions={activeTab === "pending"}
         />
 
         <RejectDialog
           open={rejectDialogOpen}
-          onOpenChange={setRejectDialogOpen}
+          onOpenChange={(o) => !rejectQuestions.isPending && setRejectDialogOpen(o)}
           onConfirm={handleReject}
           count={selectedQuestions.length}
+          isPending={rejectQuestions.isPending || isLoading}
         />
 
         <ApproveConfirmModal
           open={approveDialogOpen}
           count={selectedQuestions.length}
-          isPending={approveQuestions.isPending}
-          onClose={() => setApproveDialogOpen(false)}
+          isPending={approveQuestions.isPending || isLoading}
+          onClose={() => !approveQuestions.isPending && setApproveDialogOpen(false)}
           onConfirm={handleApproveConfirm}
         />
       </div>

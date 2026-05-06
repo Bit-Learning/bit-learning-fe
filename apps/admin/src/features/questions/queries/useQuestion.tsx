@@ -1,9 +1,9 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { toast } from "@/components/Sonner";
-import type { ApproveRejectDTO } from "../types/question.type";
+import type { ApproveRejectDTO, QuestionApprovalParams, QuestionSearchParams } from "../types/question.type";
 import type { ApiResponse } from "@/shared/api/api.type";
-import { questionApi, type QuestionSearchParams, type QuestionApprovalParams } from "../apis/question.api";
+import { questionApi } from "../apis/question.api";
 
 export const questionKeys = {
   all: ["questions"] as const,
@@ -74,7 +74,6 @@ export const useDeleteQuestion = () => {
     mutationFn: (id: number) => questionApi.deleteQuestion(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
       queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
       toast.success({
         title: "Thành công",
@@ -96,9 +95,8 @@ export const useApproveQuestions = () => {
   return useMutation({
     mutationFn: (data: ApproveRejectDTO) => questionApi.approveQuestions(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({
-        queryKey: questionKeys.all,
-      });
+      queryClient.invalidateQueries({ queryKey: [...questionKeys.all, "pending-approval"] });
+      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
       toast.success({
         title: "Thành công",
         description: "Phê duyệt câu hỏi thành công",
@@ -119,7 +117,7 @@ export const useRejectQuestions = () => {
   return useMutation({
     mutationFn: (data: ApproveRejectDTO) => questionApi.rejectQuestions(data),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.pendingApproval() });
+      queryClient.invalidateQueries({ queryKey: [...questionKeys.all, "pending-approval"] });
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
       toast.success({
         title: "Thành công",
