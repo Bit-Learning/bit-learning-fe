@@ -6,6 +6,7 @@ import {
 	MessageSquareText,
 	School,
 	Settings,
+	ShoppingBag,
 	Users,
 } from "lucide-react";
 import type { NavGroup } from "../types";
@@ -28,6 +29,11 @@ export const navGroups: NavGroup[] = [
 				title: "Giao dịch & Doanh thu",
 				url: "/transactions",
 				icon: CreditCard,
+			},
+			{
+				title: "Đơn hàng",
+				url: "/orders",
+				icon: ShoppingBag,
 			},
 		],
 	},
