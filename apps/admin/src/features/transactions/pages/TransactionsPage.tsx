@@ -273,7 +273,7 @@ export function TransactionsPage() {
 															Chi tiêu AI (Hoàn tất):
 														</span>
 														<span className="flex items-center gap-1 font-semibold text-rose-600">
-															(-{formatCurrency(pageStats.totalExpense)})
+															-{formatCurrency(pageStats.totalExpense)}
 															<BitCoinIcon size={13} />
 														</span>
 													</div>
