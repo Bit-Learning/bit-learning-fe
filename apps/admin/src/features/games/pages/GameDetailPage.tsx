@@ -35,9 +35,10 @@ import {
 	Loader2,
 	Save,
 	Send,
+	X,
 } from "lucide-react";
 import type React from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState, useCallback } from "react";
 import { toast } from "sonner";
 import type { AdminRecentAttemptItem } from "../api/admin-games.api";
 import { CurriculumLinkSection } from "../components/CurriculumLinkSection";
@@ -239,6 +240,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 				featuredLikeWeight: 5,
 				featuredManualBoost: 0,
 			});
+			setThumbnailPreview(null);
 			return;
 		}
 		if (!game) return;
@@ -262,13 +264,59 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		});
 	}, [game, isCreateMode]);
 
-	const onThumbnailChange = (file?: File | null) => {
-		setForm((prev) => ({ ...prev, thumbnail: file ?? undefined }));
-	};
+	const FILE_SIZE_LIMIT = 10 * 1024 * 1024; // 10MB
 
-	const onFileChange = (file?: File | null) => {
-		setForm((prev) => ({ ...prev, file: file ?? undefined }));
-	};
+	const [thumbnailPreview, setThumbnailPreview] = useState<string | null>(null);
+	const [thumbnailError, setThumbnailError] = useState<string | null>(null);
+	const [fileError, setFileError] = useState<string | null>(null);
+
+	const onThumbnailChange = useCallback(
+		(file?: File | null) => {
+			if (!file) {
+				setForm((prev) => ({ ...prev, thumbnail: undefined }));
+				setThumbnailPreview(null);
+				setThumbnailError(null);
+				return;
+			}
+			if (file.size > FILE_SIZE_LIMIT) {
+				setThumbnailError("Ảnh thumbnail vượt quá giới hạn 10MB");
+				setForm((prev) => ({ ...prev, thumbnail: undefined }));
+				setThumbnailPreview(null);
+				return;
+			}
+			setThumbnailError(null);
+			setForm((prev) => ({ ...prev, thumbnail: file }));
+			const url = URL.createObjectURL(file);
+			setThumbnailPreview(url);
+		},
+		[FILE_SIZE_LIMIT],
+	);
+
+	const onFileChange = useCallback(
+		(file?: File | null) => {
+			if (!file) {
+				setForm((prev) => ({ ...prev, file: undefined }));
+				setFileError(null);
+				return;
+			}
+			if (file.size > FILE_SIZE_LIMIT) {
+				setFileError("File game vượt quá giới hạn 10MB");
+				setForm((prev) => ({ ...prev, file: undefined }));
+				return;
+			}
+			setFileError(null);
+			setForm((prev) => ({ ...prev, file }));
+		},
+		[FILE_SIZE_LIMIT],
+	);
+
+	const hasUploadError = thumbnailError !== null || fileError !== null;
+
+	useEffect(() => {
+		return () => {
+			if (thumbnailPreview) URL.revokeObjectURL(thumbnailPreview);
+		};
+	}, [thumbnailPreview]);
 
 	const playUrl =
 		game?.minioObjectName !== undefined
@@ -1135,33 +1183,114 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 										<FileImage className="h-4 w-4 text-sky-600" />
 										Tải ảnh thumbnail
 									</div>
+									{/* Preview thumbnail */}
+									{(thumbnailPreview ?? form.thumbnailUrl) ? (
+										<div className="relative mb-3 overflow-hidden rounded-lg border bg-muted/30">
+											<img
+												src={thumbnailPreview ?? form.thumbnailUrl}
+												alt="Thumbnail preview"
+												className="h-36 w-full object-cover"
+											/>
+											{thumbnailPreview ? (
+												<button
+													type="button"
+													onClick={() => {
+														setThumbnailPreview(null);
+														setForm((prev) => ({
+															...prev,
+															thumbnail: undefined,
+														}));
+													}}
+													className="absolute right-2 top-2 rounded-full bg-black/50 p-1 text-white hover:bg-black/70"
+												>
+													<X className="h-3 w-3" />
+												</button>
+											) : null}
+											{thumbnailPreview ? (
+												<span className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-0.5 text-xs text-white">
+													Ảnh mới
+												</span>
+											) : (
+												<span className="absolute bottom-2 left-2 rounded bg-black/50 px-2 py-0.5 text-xs text-white">
+													Ảnh hiện tại
+												</span>
+											)}
+										</div>
+									) : null}
 									<Input
 										id="thumbnailFile"
 										type="file"
 										accept="image/*"
+										className={
+											thumbnailError
+												? "border-destructive focus-visible:ring-destructive"
+												: undefined
+										}
 										onChange={(e) =>
 											onThumbnailChange(e.target.files?.[0] ?? null)
 										}
 									/>
-									<p className="mt-2 text-xs text-muted-foreground">
-										Nên dùng ảnh ngang rõ nét để hiển thị tốt ở danh sách game
-										và khối featured.
-									</p>
+									{thumbnailError ? (
+										<p className="mt-1.5 text-xs font-medium text-destructive">
+											{thumbnailError}
+										</p>
+									) : (
+										<p className="mt-2 text-xs text-muted-foreground">
+											Nên dùng ảnh ngang rõ nét. Giới hạn{" "}
+											<span className="font-medium text-foreground">10MB</span>.
+										</p>
+									)}
 								</div>
 								<div className="rounded-xl border border-dashed p-4">
 									<div className="mb-3 flex items-center gap-2 text-sm font-medium">
 										<FileUp className="h-4 w-4 text-emerald-600" />
 										{isCreateMode ? "Tải tệp game" : "Thay tệp game"}
 									</div>
+									{/* Current game file info */}
+									{!isCreateMode && game?.minioObjectName && !form.file ? (
+										<div className="mb-3 flex items-center gap-2 rounded-lg border bg-muted/30 px-3 py-2 text-xs text-muted-foreground">
+											<FileUp className="h-3.5 w-3.5 shrink-0 text-emerald-600" />
+											<span className="truncate font-mono">
+												{game.minioObjectName}
+											</span>
+										</div>
+									) : null}
+									{form.file ? (
+										<div className="mb-3 flex items-center gap-2 rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-2 text-xs text-emerald-800">
+											<FileUp className="h-3.5 w-3.5 shrink-0" />
+											<span className="truncate font-mono">
+												{form.file.name}
+											</span>
+											<span className="ml-auto shrink-0">
+												{(form.file.size / 1024 / 1024).toFixed(1)}MB
+											</span>
+										</div>
+									) : null}
 									<Input
 										id="file"
 										type="file"
 										accept=".zip,.html"
+										className={
+											fileError
+												? "border-destructive focus-visible:ring-destructive"
+												: undefined
+										}
 										onChange={(e) => onFileChange(e.target.files?.[0] ?? null)}
 									/>
-									<p className="mt-2 text-xs text-muted-foreground">
-										Chấp nhận file `.zip` hoặc `.html`.
-									</p>
+									{fileError ? (
+										<p className="mt-1.5 text-xs font-medium text-destructive">
+											{fileError}
+										</p>
+									) : (
+										<p className="mt-2 text-xs text-muted-foreground">
+											Chấp nhận{" "}
+											<span className="font-medium text-foreground">.zip</span>{" "}
+											hoặc{" "}
+											<span className="font-medium text-foreground">.html</span>
+											. Giới hạn{" "}
+											<span className="font-medium text-foreground">10MB</span>.
+										</p>
+									)}
 								</div>
 							</div>
 						</CardContent>
@@ -1214,7 +1343,7 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 							<Button
 								className="w-full"
 								onClick={() => void handleSave()}
-								disabled={upsertGame.isPending}
+								disabled={upsertGame.isPending || hasUploadError}
 							>
 								<Save className="mr-2 h-4 w-4" />
 								{upsertGame.isPending
