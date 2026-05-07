@@ -16,6 +16,7 @@ import {
   Home,
   LayoutDashboard,
   LogOut,
+  Presentation,
   PresentationIcon,
   Puzzle,
 } from "lucide-react";
@@ -137,7 +138,7 @@ export function SidebarMentor({
       <aside
         className={cn(
           "fixed left-0 top-0 z-40 h-screen transition-all duration-300 ease-in-out",
-          isOpen ? "w-72" : "w-20",
+          isOpen ? "w-64" : "w-20",
           isMobileOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
         )}
       >
@@ -152,8 +153,8 @@ export function SidebarMentor({
                 />
               </Link>
             ) : (
-              <div className="bg-linear-to-br mx-auto flex h-10 w-10 items-center justify-center rounded-xl from-blue-600 to-indigo-600 shadow-lg">
-                <Award className="h-6 w-6 text-white" />
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-xl bg-blue-600 shadow-lg">
+                <Presentation className="h-6 w-6 text-white" />
               </div>
             )}
           </div>

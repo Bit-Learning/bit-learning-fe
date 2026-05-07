@@ -6,7 +6,7 @@ import { useProblems, useToggleFavorite } from "../queries/useCoding";
 import Loader from "@workspace/ui/components/loader/TerminalLoader";
 import { Pagination } from "@/shared/components/Pagination";
 import { toast } from "@/shared/components/Sonner";
-import type { ProblemBriefResponse, Difficulty } from "../types/coding.type";
+import { type ProblemBriefResponse, type Difficulty, ApprovalStatus } from "../types/coding.type";
 import { ProblemStatsCard } from "./ProblemStatsCard";
 
 const DIFF_LABEL: Record<string, string> = {
@@ -72,6 +72,7 @@ const StudentProblemListContent: React.FC = () => {
     difficulty: difficulty !== "all" ? difficulty : undefined,
     classLevel: classLevel !== "all" ? classLevel : undefined,
     createdById: createdById !== "all" ? createdById : undefined,
+    approvalStatus: ApprovalStatus.APPROVED,
   });
 
   const toggleFavorite = useToggleFavorite();

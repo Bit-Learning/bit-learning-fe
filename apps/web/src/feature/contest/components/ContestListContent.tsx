@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate, useRouterState } from "@tanstack/react-router";
-import { Trophy, Star, ChevronLeft, ChevronRight, LayoutDashboard, Search } from "lucide-react";
+import { Star, LayoutDashboard, Search } from "lucide-react";
 import { cn } from "@workspace/ui/lib/utils";
 import { ContestListDTO, ContestStatus } from "../types/contest.type";
 import { ContestCard } from "./ContestCard";

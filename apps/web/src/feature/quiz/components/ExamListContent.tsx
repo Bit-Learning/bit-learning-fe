@@ -43,6 +43,7 @@ const ExamListContent: React.FC = () => {
     subjectId: selectedSubject !== "all" ? selectedSubject : undefined,
     grade: selectedGrade !== "all" ? selectedGrade : undefined,
     createdById: selectedCreatedBy !== "all" ? selectedCreatedBy : undefined,
+    approvalStatus: "APPROVED",
   });
 
   const { data: subjects = [] } = useSubjectsList();

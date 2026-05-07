@@ -45,7 +45,7 @@ export default function MentorLayout({ children }: MentorLayoutProps) {
           onLogout={handleLogout}
         />
 
-        <div className={cn("transition-all duration-300", sidebarOpen ? "lg:ml-72" : "lg:ml-20")}>
+        <div className={cn("transition-all duration-300", sidebarOpen ? "lg:ml-64" : "lg:ml-20")}>
           <div className="sticky top-0 z-20 bg-white/80 backdrop-blur-sm lg:hidden">
             <div className="px-6 py-4">
               <Button variant="ghost" size="icon" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>

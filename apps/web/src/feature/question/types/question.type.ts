@@ -1,3 +1,4 @@
+import { UserSummary } from "@/feature/exam/types/exam.type";
 import { TChapterBriefResponse } from "@/feature/matrix/types/chapter.type";
 import { TLessonBriefResponse } from "@/feature/matrix/types/lesson.type";
 import { TSubjectBriefResponse } from "@/feature/matrix/types/subject.type";
@@ -81,6 +82,7 @@ export interface QuestionResponse {
   chapter?: TChapterBriefResponse;
   lesson?: TLessonBriefResponse;
   tags?: TagResponse[];
+  requestedBy: UserSummary;
   options?: OptionResponse[];
   rejectReason?: string;
   isActive: boolean;
@@ -99,6 +101,7 @@ export interface QuestionBriefResponse {
   questionLevel: QuestionLevel;
   rejectReason?: string;
   lesson?: TLessonBriefResponse;
+  requestedBy: UserSummary;
 }
 
 export interface RequestPublishDTO {

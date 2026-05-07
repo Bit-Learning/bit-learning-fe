@@ -123,7 +123,7 @@ export interface ExamSearchParams {
   sort?: string;
   search?: string;
   subjectId?: number;
-  status?: ApprovalStatus;
+  approvalStatus?: ApprovalStatus;
   createdById?: number;
   grade?: number;
 }

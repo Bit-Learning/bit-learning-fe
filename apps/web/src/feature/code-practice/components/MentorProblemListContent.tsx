@@ -31,7 +31,7 @@ const difficultyConfig: Record<Difficulty, { label: string; className: string }>
 
 const approvalConfig: Record<ApprovalStatus, { label: string; className: string }> = {
   [ApprovalStatus.NONE]: {
-    label: "Chưa gửi",
+    label: "Nháp",
     className:
       "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
   },
@@ -157,7 +157,7 @@ const MentorProblemListContent: React.FC<MentorProblemListProps> = ({ initialPag
                 className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
               >
                 <option value="all">Trạng thái: Tất cả</option>
-                <option value={ApprovalStatus.NONE}>Chưa gửi</option>
+                <option value={ApprovalStatus.NONE}>Nháp</option>
                 <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
                 <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
                 <option value={ApprovalStatus.REJECTED}>Bị từ chối</option>

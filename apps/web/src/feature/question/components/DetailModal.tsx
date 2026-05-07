@@ -14,7 +14,6 @@ interface DetailModalProps {
   question?: QuestionResponse;
   questionId?: number;
   onClose: () => void;
-  onDeleted?: () => void;
   formatDate?: (d: string) => string;
 }
 
@@ -25,28 +24,12 @@ export function DetailModal({
   question: questionProp,
   questionId,
   onClose,
-  onDeleted,
   formatDate = defaultFormatDate,
 }: DetailModalProps) {
-  const navigate = useNavigate();
   const resolvedId = questionId ?? questionProp?.id;
 
   const { data: fetchedQuestion, isLoading } = useQuestion(resolvedId!, { enabled: !!resolvedId });
   const question = fetchedQuestion ?? questionProp;
-
-  const deleteQuestion = useDeleteQuestion();
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-
-  const handleConfirmDelete = () => {
-    if (!resolvedId) return;
-    deleteQuestion.mutate(resolvedId, {
-      onSuccess: () => {
-        setShowDeleteModal(false);
-        onDeleted?.();
-        onClose();
-      },
-    });
-  };
 
   return (
     <>
@@ -64,34 +47,15 @@ export function DetailModal({
                     {getDifficultyBadge(question.questionLevel)}
                     {getTypeBadge(question.questionType)}
                     {getStatusBadge(question.approvalStatus)}
+                    {question.requestedBy && (
+                      <span className="px-2 py-1 rounded text-sm font-medium bg-blue-100  text-slate-900">
+                        Giảng viên: {question.requestedBy.firstName + " " + question.requestedBy.lastName}
+                      </span>
+                    )}
                   </div>
                 )}
               </div>
               <div className="flex items-center gap-1.5 shrink-0">
-                {(question?.approvalStatus == ApprovalStatus.NONE ||
-                  question?.approvalStatus == ApprovalStatus.REJECTED) && (
-                  <>
-                    <Button
-                      variant="default"
-                      size="sm"
-                      onClick={() => navigate({ to: `/mentor/question/${resolvedId}/edit` })}
-                      className="gap-1.5 text-md cursor-pointer p-4"
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                      Chỉnh sửa
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => setShowDeleteModal(true)}
-                      className="gap-1.5 text-md text-red-600 border-red-300 hover:bg-red-50 cursor-pointer  p-4"
-                      isDisabled={deleteQuestion.isPending}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                      Xóa
-                    </Button>
-                  </>
-                )}
                 <button
                   className="cursor-pointer p-2 text-slate-500 hover:text-red-600 transition-colors rounded-md"
                   onClick={onClose}
@@ -251,17 +215,6 @@ export function DetailModal({
           </CardContent>
         </Card>
       </div>
-
-      {question && (
-        <DeleteConfirmModal
-          open={showDeleteModal}
-          onClose={() => setShowDeleteModal(false)}
-          onConfirm={handleConfirmDelete}
-          isPending={deleteQuestion.isPending}
-          title="Xóa câu hỏi"
-          itemName={question.content.length > 60 ? `${question.content.substring(0, 60)}...` : question.content}
-        />
-      )}
     </>
   );
 }

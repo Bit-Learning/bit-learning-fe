@@ -37,7 +37,7 @@ export const statusConfig: Record<
   { label: string; color: string; bgColor: string; className: string }
 > = {
   [ApprovalStatus.NONE]: {
-    label: "Chưa gửi",
+    label: "Nháp",
     color: "text-slate-700",
     bgColor: "bg-slate-100",
     className: "bg-slate-100 text-slate-700",

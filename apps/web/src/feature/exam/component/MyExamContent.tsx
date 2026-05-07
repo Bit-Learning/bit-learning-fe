@@ -26,7 +26,7 @@ const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
 
 const APPROVAL_CONFIG: Record<ApprovalStatus, { label: string; className: string }> = {
   NONE: {
-    label: "Chưa gửi",
+    label: "Nháp",
     className:
       "bg-slate-100 text-slate-600 border border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700",
   },
@@ -76,7 +76,7 @@ const MyExamsContent: React.FC = () => {
     size: 20,
     search: debouncedSearch || undefined,
     subjectId: filterSubjectId,
-    status: filterApproval || undefined,
+    approvalStatus: filterApproval || undefined,
   };
 
   const { data: examsData, isLoading } = useMyExams(params);
@@ -153,8 +153,8 @@ const MyExamsContent: React.FC = () => {
                 }}
                 className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
               >
-                <option value="">Duyệt: Tất cả</option>
-                <option value="NONE">Chưa gửi</option>
+                <option value="">Trạng thái: Tất cả</option>
+                <option value="NONE">Nháp</option>
                 <option value="PENDING">Chờ duyệt</option>
                 <option value="APPROVED">Đã duyệt</option>
                 <option value="REJECTED">Bị từ chối</option>

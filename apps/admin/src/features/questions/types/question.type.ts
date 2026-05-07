@@ -1,3 +1,5 @@
+import { UserSummary } from "@/features/problems/types/problem.type";
+
 export enum QuestionType {
   MCQ = "MCQ",
   ESSAY = "ESSAY",
@@ -59,6 +61,7 @@ export interface QuestionResponse {
   lesson?: LessonBriefResponse;
   tags?: TagResponse[];
   options?: OptionResponse[];
+  requestedBy: UserSummary;
   isActive: boolean;
   isPublic: boolean;
   approvalStatus: ApprovalStatus;
