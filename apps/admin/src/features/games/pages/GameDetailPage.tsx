@@ -322,6 +322,15 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 		game?.minioObjectName !== undefined
 			? `${MINIO_GAME_URL}/${game.minioObjectName}`
 			: undefined;
+
+	// Build full URL cho thumbnail hiện tại: nếu là path tương đối thì ghép base MinIO
+	const currentThumbnailDisplayUrl = (() => {
+		const raw = form.thumbnailUrl;
+		if (!raw) return null;
+		if (raw.startsWith("http://") || raw.startsWith("https://")) return raw;
+		// Thumbnail được lưu trong cùng bucket scratch-games với game files
+		return `${MINIO_GAME_URL}/${raw}`;
+	})();
 	const previewBaseScoreMax = form.baseScoreMax ?? 100;
 	const previewDifficultyMultiplier = form.difficultyMultiplier ?? 1.2;
 	const previewPassingThreshold = form.passingThreshold ?? 60;
@@ -1184,10 +1193,14 @@ export const StandardGameEditorPage: React.FC<StandardGameEditorPageProps> = ({
 										Tải ảnh thumbnail
 									</div>
 									{/* Preview thumbnail */}
-									{(thumbnailPreview ?? form.thumbnailUrl) ? (
+									{(thumbnailPreview ?? currentThumbnailDisplayUrl) ? (
 										<div className="relative mb-3 overflow-hidden rounded-lg border bg-muted/30">
 											<img
-												src={thumbnailPreview ?? form.thumbnailUrl}
+												src={
+													thumbnailPreview ??
+													currentThumbnailDisplayUrl ??
+													undefined
+												}
 												alt="Thumbnail preview"
 												className="h-36 w-full object-cover"
 											/>

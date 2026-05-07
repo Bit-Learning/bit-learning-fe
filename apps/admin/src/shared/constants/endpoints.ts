@@ -12,6 +12,10 @@ export const MINIO_GAME_URL =
 	import.meta.env.VITE_MINIO_GAME_URL ??
 	"https://bit-learning-minio.lch.id.vn/scratch-games";
 
+export const MINIO_THUMBNAIL_URL =
+	import.meta.env.VITE_MINIO_THUMBNAIL_URL ??
+	"https://bit-learning-minio.lch.id.vn/game-thumbnails";
+
 const LOCAL_PUBLIC_SITE_URL = "http://localhost:5173";
 const PRODUCTION_PUBLIC_SITE_URL = "https://bit-learning.lch.id.vn";
 
