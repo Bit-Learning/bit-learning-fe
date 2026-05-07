@@ -69,7 +69,7 @@ export const useImportJobStatus = (jobId: number | null, options?: { enabled?: b
     enabled: options?.enabled !== false && !!jobId,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      const terminalStatuses = ["DONE", "FAILED", "PREVIEW"];
+      const terminalStatuses = ["DONE", "FAILED"];
       if (!status || terminalStatuses.includes(status)) return false;
       return 2000;
     },
