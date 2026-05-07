@@ -9,7 +9,6 @@ import { useNavigate } from "@tanstack/react-router";
 export const MyContestPage: React.FC = () => {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(0);
-  const [status, setStatus] = useState<"ALL" | ContestStatus>("ALL");
   const [search, setSearch] = useState("");
 
   const {
@@ -17,7 +16,6 @@ export const MyContestPage: React.FC = () => {
     isLoading,
     error,
   } = useMyContests({
-    status: status === "ALL" ? undefined : status,
     search: search || undefined,
     page: currentPage,
     size: 6,
@@ -28,20 +26,13 @@ export const MyContestPage: React.FC = () => {
     setCurrentPage(0);
   };
 
-  const handleStatus = (value: "ALL" | ContestStatus) => {
-    setStatus(value);
-    setCurrentPage(0);
-  };
-
   const contests = useMemo(() => {
     if (!contestsData?.data) return [];
-
     return contestsData.data.map((contest) => {
       const now = new Date();
       const startTime = new Date(contest.startTime);
       const endTime = new Date(contest.endTime);
       const durationMinutes = Math.floor((endTime.getTime() - startTime.getTime()) / 60000);
-
       let progress: number | undefined;
       let timeLeft: string | undefined;
       let countdown: { d?: number; h?: number; m?: number; s?: number } | undefined;
@@ -50,7 +41,6 @@ export const MyContestPage: React.FC = () => {
         const totalDuration = endTime.getTime() - startTime.getTime();
         const elapsed = now.getTime() - startTime.getTime();
         progress = Math.floor((elapsed / totalDuration) * 100);
-
         const remaining = Math.floor((endTime.getTime() - now.getTime()) / 1000);
         const hours = Math.floor(remaining / 3600);
         const minutes = Math.floor((remaining % 3600) / 60);
@@ -63,22 +53,10 @@ export const MyContestPage: React.FC = () => {
         const hours = Math.floor((remaining % 86400) / 3600);
         const minutes = Math.floor((remaining % 3600) / 60);
         const seconds = remaining % 60;
-
-        countdown = {
-          d: days > 0 ? days : undefined,
-          h: hours,
-          m: minutes,
-          s: seconds,
-        };
+        countdown = { d: days > 0 ? days : undefined, h: hours, m: minutes, s: seconds };
       }
 
-      return {
-        ...contest,
-        durationMinutes,
-        progress,
-        timeLeft,
-        countdown,
-      };
+      return { ...contest, durationMinutes, progress, timeLeft, countdown };
     });
   }, [contestsData]);
 
@@ -136,8 +114,6 @@ export const MyContestPage: React.FC = () => {
         onPageChange={setCurrentPage}
         search={search}
         onSearchChange={handleSearch}
-        status={status}
-        onStatusChange={handleStatus}
       />
     </>
   );

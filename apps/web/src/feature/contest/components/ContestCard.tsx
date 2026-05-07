@@ -26,138 +26,137 @@ export const ContestCard: React.FC<ContestCardProps> = ({ contest }) => {
       minute: "2-digit",
       day: "2-digit",
       month: "2-digit",
+      year: "numeric",
     });
 
   const iconColor = isRunning ? "text-green-600" : isUpcoming ? "text-blue-600" : "text-slate-400";
 
   return (
     <Link to="/contests/$id/info" params={{ id: contest.contestId }}>
-      <div className="bg-white border rounded-md p-6 group transition-all shadow-sm hover:shadow-md hover:border-blue-200 flex flex-col gap-4 cursor-pointer h-full">
-        <div className="flex items-center gap-2">
-          <span
-            className={cn(
-              "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-sm font-semibold",
-              isRunning
-                ? "bg-green-100 text-green-700"
-                : isUpcoming
-                  ? "bg-blue-100 text-blue-700"
-                  : "bg-slate-100 text-slate-500",
-            )}
-          >
+      <div className="group bg-white border mb-4 border-slate-200 rounded-xl px-5 py-6 flex items-center gap-5 hover:border-blue-200 hover:shadow-sm transition-all cursor-pointer">
+        <div className="shrink-0">
+          <img
+            src="/logocontest.png"
+            alt={contest.title}
+            className={cn("w-20 h-20 rounded-lg object-cover", isEnded && "opacity-80 grayscale")}
+          />
+        </div>
+
+        <div className="flex-1 min-w-0 space-y-4">
+          <div className="flex items-center gap-2 flex-wrap">
             <span
               className={cn(
-                "w-1.5 h-1.5 rounded-full",
-                isRunning ? "bg-green-500 animate-pulse" : isUpcoming ? "bg-blue-500" : "bg-slate-400",
+                "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-sm font-semibold shrink-0",
+                isRunning
+                  ? "bg-green-100 text-green-700"
+                  : isUpcoming
+                    ? "bg-blue-100 text-blue-700"
+                    : "bg-slate-100 text-slate-500",
               )}
-            />
-            {isRunning ? "Đang diễn ra" : isUpcoming ? "Sắp diễn ra" : "Đã kết thúc"}
-          </span>
-        </div>
-
-        <h3
-          className={cn(
-            "text-xl font-bold leading-snug transition-colors",
-            isEnded ? "text-slate-500 group-hover:text-slate-700" : "text-slate-900 group-hover:text-blue-600",
-          )}
-        >
-          {contest.title}
-        </h3>
-
-        <div className="grid grid-cols-2 gap-x-6 gap-y-3">
-          {!!contest.problemCount && (isRunning || isEnded) && (
-            <div className="flex items-center gap-2 text-md text-slate-600">
-              <FileText className={cn("w-4 h-4 shrink-0", iconColor)} />
-              <span>
-                <span className="font-semibold text-slate-800">{contest.problemCount}</span> bài tập
-              </span>
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-md text-slate-600">
-            <Users className={cn("w-4 h-4 shrink-0", iconColor)} />
-            <span>
-              <span className="font-semibold text-slate-800">{contest.participantCount.toLocaleString()}</span> thí sinh
-            </span>
-          </div>
-          {!!contest.durationMinutes && (
-            <div className="flex items-center gap-2 text-md text-slate-600">
-              <Timer className={cn("w-4 h-4 shrink-0", iconColor)} />
-              <span>
-                <span className="font-semibold text-slate-800">{contest.durationMinutes}</span> phút
-              </span>
-            </div>
-          )}
-          <div className="flex items-center gap-2 text-md text-slate-600">
-            <Calendar className={cn("w-4 h-4 shrink-0", iconColor)} />
-            <span className="font-semibold text-slate-800">
-              {formatDate(isUpcoming ? contest.startTime : contest.endTime)}
-            </span>
-          </div>
-        </div>
-
-        {isRunning && contest.progress !== undefined && (
-          <div className="space-y-1.5">
-            <div className="flex justify-between text-xs font-semibold text-slate-500">
-              <span>Tiến trình</span>
-              <span className="text-green-600">Còn lại: {contest.timeLeft}</span>
-            </div>
-            <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                className="h-full bg-green-500 rounded-full transition-all"
-                style={{ width: `${contest.progress}%` }}
+            >
+              <span
+                className={cn(
+                  "w-1.5 h-1.5 rounded-full",
+                  isRunning ? "bg-green-500 animate-pulse" : isUpcoming ? "bg-blue-500" : "bg-slate-400",
+                )}
               />
-            </div>
-          </div>
-        )}
-
-        {isUpcoming && contest.countdown && contest.problemCount > 0 && (
-          <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg">
-            <p className="text-sm font-bold uppercase tracking-wider text-slate-400 mb-1">Bắt đầu sau</p>
-            <div className="flex items-baseline gap-2 text-blue-600 font-black text-xl">
-              {contest.countdown.d !== undefined && (
-                <>
-                  <span>{String(contest.countdown.d).padStart(2, "0")}d</span>
-                  <span className="text-slate-300 text-base">:</span>
-                </>
+              {isRunning ? "Đang diễn ra" : isUpcoming ? "Sắp diễn ra" : "Đã kết thúc"}
+            </span>
+            <h3
+              className={cn(
+                "text-lg font-semibold leading-snug transition-colors text-slate-900 group-hover:text-blue-600",
               )}
-              <span>{String(contest.countdown.h ?? 0).padStart(2, "0")}h</span>
-              <span className="text-slate-300 text-base">:</span>
-              <span>{String(contest.countdown.m ?? 0).padStart(2, "0")}m</span>
+            >
+              {contest.title}
+            </h3>
+          </div>
+
+          <div className="flex items-center gap-6 flex-wrap">
+            <div className="flex items-center gap-1.5 text-sm text-slate-500">
+              <Users className={cn("w-3.5 h-3.5 shrink-0", iconColor)} />
+              <span>
+                <span className="font-semibold text-slate-700">{contest.participantCount.toLocaleString()}</span> thí
+                sinh
+              </span>
+            </div>
+            {!!contest.durationMinutes && (
+              <div className="flex items-center gap-1.5 text-sm text-slate-500">
+                <Timer className={cn("w-3.5 h-3.5 shrink-0", iconColor)} />
+                <span>
+                  <span className="font-semibold text-slate-700">{contest.durationMinutes}</span> phút
+                </span>
+              </div>
+            )}
+            <div className="flex items-center gap-1.5 text-sm">
+              <Calendar className={cn("w-3.5 h-3.5 shrink-0", iconColor)} />
+              {isEnded ? (
+                <span className="text-slate-500">
+                  Kết thúc lúc: <span className="font-semibold text-slate-700">{formatDate(contest.endTime)}</span>
+                </span>
+              ) : (
+                <span className="text-slate-500">
+                  Bắt đầu lúc: <span className="font-semibold text-slate-700">{formatDate(contest.startTime)}</span>
+                </span>
+              )}
             </div>
           </div>
-        )}
+        </div>
 
-        {isEnded && contest.myScore && contest.myRank && (
-          <div className="flex gap-6">
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Điểm số</p>
-              <p className="text-2xl font-black text-blue-600">
-                {contest.myScore.current}
-                <span className="text-md text-slate-400">/{contest.myScore.total}</span>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          {isRunning && contest.progress !== undefined && (
+            <div className="w-32">
+              <div className="flex justify-between text-xs text-slate-400 mb-1">
+                <span>Tiến trình</span>
+                <span className="text-green-600 font-medium">{contest.timeLeft}</span>
+              </div>
+              <div className="w-full h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                <div className="h-full bg-green-500 rounded-full" style={{ width: `${contest.progress}%` }} />
+              </div>
+            </div>
+          )}
+
+          {isUpcoming && contest.countdown && contest.problemCount > 0 && (
+            <div className="bg-blue-50 border border-blue-100 rounded-lg px-3 py-1.5 text-right">
+              <p className="text-xs font-semibold uppercase tracking-wider text-blue-400 mb-0.5">Bắt đầu sau</p>
+              <p className="text-sm font-bold text-blue-600">
+                {contest.countdown.d !== undefined && <>{String(contest.countdown.d).padStart(2, "0")}d : </>}
+                {String(contest.countdown.h ?? 0).padStart(2, "0")}h :{" "}
+                {String(contest.countdown.m ?? 0).padStart(2, "0")}m
               </p>
             </div>
-            <div>
-              <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-0.5">Thứ hạng</p>
-              <p className="text-2xl font-black text-blue-600">
-                #{contest.myRank}
-                <span className="text-md text-slate-400">/{contest.participantCount.toLocaleString()}</span>
-              </p>
-            </div>
-          </div>
-        )}
+          )}
 
-        <div className="mt-auto pt-2">
+          {isEnded && contest.myScore && contest.myRank && (
+            <div className="flex gap-4 text-right">
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-0.5">Điểm số</p>
+                <p className="text-lg font-bold text-blue-600">
+                  {contest.myScore.current}
+                  <span className="text-xs text-slate-400">/{contest.myScore.total}</span>
+                </p>
+              </div>
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-0.5">Thứ hạng</p>
+                <p className="text-lg font-bold text-blue-600">
+                  #{contest.myRank}
+                  <span className="text-xs text-slate-400">/{contest.participantCount.toLocaleString()}</span>
+                </p>
+              </div>
+            </div>
+          )}
+
           <div
             className={cn(
-              "w-full py-2 rounded-xl font-bold text-sm flex items-center justify-center gap-2 transition-all",
+              "inline-flex items-center gap-1.5 px-4 py-2 rounded-lg text-sm font-semibold transition-colors",
               isRunning
-                ? "text-white bg-green-600 group-hover:bg-green-700"
+                ? "bg-green-600 text-white group-hover:bg-green-700"
                 : isUpcoming
-                  ? "text-white bg-blue-500 group-hover:bg-blue-600"
-                  : "text-blue-600 border-2 border-blue-600 group-hover:bg-blue-50",
+                  ? "bg-blue-600 text-white group-hover:bg-blue-700"
+                  : "text-blue-600 border border-blue-200 group-hover:bg-blue-50",
             )}
           >
             {isRunning ? "Xem cuộc thi" : isUpcoming ? "Xem chi tiết" : "Xem kết quả"}
-            <ArrowRight className="w-4 h-4" />
+            <ArrowRight className="w-3 h-3" />
           </div>
         </div>
       </div>
