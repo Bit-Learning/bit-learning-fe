@@ -72,7 +72,7 @@ export function RejectDialog({ open, onOpenChange, onConfirm, count, isPending =
           <Button
             onClick={handleConfirm}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90 gap-2"
+            className="bg-destructive hover:bg-destructive/90 gap-2 text-white"
           >
             {isPending ? (
               <>

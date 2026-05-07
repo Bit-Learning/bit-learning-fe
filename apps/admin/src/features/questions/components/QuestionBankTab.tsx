@@ -204,6 +204,10 @@ export function QuestionBankTab({
             />
           )}
         </div>
+
+        <div className="flex items-center gap-2 text-sm text-muted-foreground ml-auto">
+          Tổng: <span className="font-semibold text-foreground">{pagination?.totalElements ?? 0}</span> câu hỏi
+        </div>
       </div>
 
       {activeFilterCount > 0 && (
@@ -258,6 +262,7 @@ export function QuestionBankTab({
                 <TableHead>Nội dung câu hỏi</TableHead>
                 <TableHead>Mức độ</TableHead>
                 <TableHead>Loại</TableHead>
+                <TableHead>Giảng viên</TableHead>
                 <TableHead>
                   <button
                     className="flex items-center gap-1 hover:text-primary transition-colors uppercase"
@@ -278,12 +283,17 @@ export function QuestionBankTab({
               {questions.map((question: QuestionResponse, index: number) => (
                 <TableRow key={index}>
                   <TableCell>
-                    <p className="font-medium line-clamp-2">{question.content}</p>
+                    <p className="font-medium line-clamp-1">{question.content}</p>
                   </TableCell>
                   <TableCell>{getDifficultyBadge(question.questionLevel)}</TableCell>
                   <TableCell>
                     <span className="text-sm">
                       {question.questionType === QuestionType.MCQ ? "Trắc nghiệm" : "Tự luận"}
+                    </span>
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">
+                      {question.requestedBy.firstName + " " + question.requestedBy.lastName}
                     </span>
                   </TableCell>
                   <TableCell>

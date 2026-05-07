@@ -258,7 +258,7 @@ export function QuestionApprovalList() {
           </div>
           {activeTab === "pending" && selectedQuestions.length > 0 && (
             <div className="flex items-center gap-2">
-              <Button variant="outline" onClick={() => handleApproveConfirm()} className="gap-2">
+              <Button variant="outline" onClick={() => setApproveDialogOpen(true)} className="gap-2">
                 <CheckCircle className="h-4 w-4" />
                 Phê duyệt ({selectedQuestions.length})
               </Button>
@@ -314,6 +314,7 @@ export function QuestionApprovalList() {
                       <TableHead>Nội dung câu hỏi</TableHead>
                       <TableHead>Mức độ</TableHead>
                       <TableHead>Loại</TableHead>
+                      <TableHead>Giảng viên</TableHead>
                       <TableHead>
                         <button
                           className="flex items-center gap-1 hover:text-primary transition-colors uppercase"
@@ -326,7 +327,7 @@ export function QuestionApprovalList() {
                             <ArrowUpIcon className="h-4 w-4" />
                           )}
                         </button>
-                      </TableHead>
+                      </TableHead>{" "}
                       <TableHead className="text-right">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -351,6 +352,11 @@ export function QuestionApprovalList() {
                         <TableCell>
                           <span className="text-sm">
                             {question.questionType === QuestionType.MCQ ? "Trắc nghiệm" : "Tự luận"}
+                          </span>
+                        </TableCell>
+                        <TableCell>
+                          <span className="text-sm">
+                            {question.requestedBy.firstName + " " + question.requestedBy.lastName}
                           </span>
                         </TableCell>
                         <TableCell>
