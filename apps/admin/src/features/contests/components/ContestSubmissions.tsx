@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { ContestVerdict } from "../types/contest.type";
+import { ContestVerdict, SubmissionBriefDTO } from "../types/contest.type";
 import { cn } from "@/shared/lib/utils";
+import { SubmissionDetailModal } from "./SubmissionDetailModal";
 
 interface ContestSubmissionsProps {
   contestId: string;
@@ -17,6 +17,7 @@ export const ContestSubmissions: React.FC<ContestSubmissionsProps> = ({ contestI
   const [searchQuery, setSearchQuery] = useState("");
   const [verdictFilter, setVerdictFilter] = useState<string>("all");
   const [problemFilter, setProblemFilter] = useState<string>("all");
+  const [selectedSubmission, setSelectedSubmission] = useState<SubmissionBriefDTO | null>(null);
 
   const { data: problems, isLoading: isLoadingProblems } = useContestProblems(contestId);
   const { data: submissions, isLoading } = useContestSubmissions(contestId, {
@@ -124,7 +125,7 @@ export const ContestSubmissions: React.FC<ContestSubmissionsProps> = ({ contestI
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-400" />
           <Input
             type="text"
-            placeholder="Tìm kiếm user..."
+            placeholder="Tìm kiếm người dùng..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="pl-9"
@@ -132,7 +133,7 @@ export const ContestSubmissions: React.FC<ContestSubmissionsProps> = ({ contestI
         </div>
       </div>
 
-      <Card className="bg-white border-gray-200">
+      <Card className="bg-white border-gray-200 py-0">
         <CardContent className="p-0">
           {!filteredSubmissions || filteredSubmissions.length === 0 ? (
             <div className="text-center py-12">
@@ -163,12 +164,9 @@ export const ContestSubmissions: React.FC<ContestSubmissionsProps> = ({ contestI
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <Avatar className="w-8 h-8">
-                            <AvatarFallback className="text-xs bg-blue-100 text-blue-600">
-                              {submission.username.substring(0, 2).toUpperCase()}
-                            </AvatarFallback>
-                          </Avatar>
-                          <span className="text-sm font-semibold text-gray-900">{submission.username}</span>
+                          <span className="text-md font-semibold text-gray-900 line-clamp-1">
+                            {submission.username}
+                          </span>
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -197,8 +195,9 @@ export const ContestSubmissions: React.FC<ContestSubmissionsProps> = ({ contestI
                             <RefreshCw className="w-5 h-5" />
                           </button>
                           <button
+                            onClick={() => setSelectedSubmission(submission)}
                             className="p-2 text-gray-400 hover:text-gray-900 hover:bg-gray-100 rounded-lg transition-all"
-                            title="Xem code"
+                            title="Xem chi tiết"
                           >
                             <Code className="w-5 h-5" />
                           </button>
@@ -212,6 +211,13 @@ export const ContestSubmissions: React.FC<ContestSubmissionsProps> = ({ contestI
           )}
         </CardContent>
       </Card>
+      <SubmissionDetailModal
+        submission={selectedSubmission}
+        isOpen={!!selectedSubmission}
+        onClose={() => setSelectedSubmission(null)}
+        onRejudge={(id) => rejudge.mutate(id)}
+        isRejudging={rejudge.isPending}
+      />
 
       {filteredSubmissions && filteredSubmissions.length > 0 && (
         <div className="mt-6 flex items-center justify-between px-2">

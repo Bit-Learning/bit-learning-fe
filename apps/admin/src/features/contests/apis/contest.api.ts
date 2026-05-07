@@ -151,4 +151,7 @@ export const adminContestApi = {
   ): Promise<AxiosResponse<ApiResponse<ClarificationResponse>>> {
     return api.put(`/admin/contests/${contestId}/clarifications/${clarificationId}`, request);
   },
+  getSubmissionDetail(submissionId: string): Promise<AxiosResponse<ApiResponse<SubmissionDetailDTO>>> {
+    return api.get(`/contests/submissions/${submissionId}`);
+  },
 };

@@ -120,9 +120,6 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-600 w-16">Hạng</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-600">Thí sinh</th>
                 <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-600 text-center">
-                  Tổng điểm
-                </th>
-                <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-gray-600 text-center">
                   Penalty
                 </th>
                 {leaderboard[0]?.problemResults.map((_, idx) => (
@@ -151,13 +148,7 @@ export const ContestLeaderboard: React.FC<ContestLeaderboardProps> = ({ contestI
                     </div>
                   </td>
                   <td className="px-6 py-4 text-center">
-                    <span className="text-sm font-bold text-blue-600">{entry.solvedCount * 100}</span>
-                    <p className="text-[10px] text-gray-500">
-                      Solved: {entry.solvedCount}/{entry.problemResults.length}
-                    </p>
-                  </td>
-                  <td className="px-6 py-4 text-center">
-                    <span className="text-sm font-medium text-gray-600">{entry.totalPenaltyMinutes}m</span>
+                    <span className="text-sm font-medium text-gray-600">{entry.totalPenaltyMinutes}</span>
                   </td>
                   {entry.problemResults.map((result) => getProblemCell(result))}
                 </tr>

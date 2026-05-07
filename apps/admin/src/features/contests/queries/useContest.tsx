@@ -25,6 +25,7 @@ export const contestKeys = {
     [...contestKeys.detail(contestId), "my-submissions", params] as const,
   leaderboard: (contestId: string) => [...contestKeys.detail(contestId), "leaderboard"] as const,
   clarifications: (contestId: string) => [...contestKeys.detail(contestId), "clarifications"] as const,
+  submission: (submissionId: string) => ["submission", submissionId] as const,
 
   admin: {
     all: ["admin", "contests"] as const,
@@ -109,6 +110,17 @@ export const useContestSubmissions = (contestId: string, params?: ContestSubmiss
     },
     enabled: !!contestId,
   });
+
+export const useSubmissionDetail = (submissionId: string) => {
+  return useQuery({
+    queryKey: contestKeys.submission(submissionId),
+    queryFn: async () => {
+      const response = await contestApi.getSubmissionDetail(submissionId);
+      return response.data;
+    },
+    enabled: !!submissionId,
+  });
+};
 
 export const useAdminLeaderboard = (contestId: string) =>
   useQuery({
