@@ -11,7 +11,18 @@ export const transactionStatuses = ["PENDING", "COMPLETED", "FAILED"] as const;
 
 export type TransactionStatus = (typeof transactionStatuses)[number];
 
-export type PaymentMethod = "WALLET" | "PAYOS" | "VNPAY" | null;
+export const paymentMethods = ["WALLET", "PAYOS", "VNPAY"] as const;
+
+export type PaymentMethod = (typeof paymentMethods)[number] | null;
+
+export const paymentMethodOptions: Array<{
+	label: string;
+	value: (typeof paymentMethods)[number];
+}> = [
+	{ label: "Ví", value: "WALLET" },
+	{ label: "PayOS", value: "PAYOS" },
+	{ label: "VNPay", value: "VNPAY" },
+];
 
 export type AdminTransactionUser = {
 	id: number;

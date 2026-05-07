@@ -2,6 +2,7 @@ import { createFileRoute } from "@tanstack/react-router";
 import z from "zod";
 import { TransactionsPage } from "@/features/transactions/pages/TransactionsPage";
 import {
+	paymentMethods,
 	transactionStatuses,
 	transactionTypes,
 } from "@/features/transactions/types/transaction.type";
@@ -12,6 +13,7 @@ const transactionsSearchSchema = z.object({
 	userId: z.coerce.number().optional().catch(undefined),
 	type: z.array(z.enum(transactionTypes)).optional().catch([]),
 	status: z.array(z.enum(transactionStatuses)).optional().catch([]),
+	paymentMethod: z.array(z.enum(paymentMethods)).optional().catch([]),
 	code: z.string().optional().catch(""),
 	fromDate: z.string().optional().catch(""),
 	toDate: z.string().optional().catch(""),

@@ -6,6 +6,7 @@ import type {
 	TransactionStatus,
 	TransactionType,
 } from "../types/transaction.type";
+import { type paymentMethods } from "../types/transaction.type";
 
 export type AdminTransactionSearchParams = {
 	page?: number;
@@ -13,6 +14,7 @@ export type AdminTransactionSearchParams = {
 	userId?: number;
 	type?: TransactionType[];
 	status?: TransactionStatus[];
+	paymentMethod?: (typeof paymentMethods)[number][];
 	code?: string;
 	fromDate?: string;
 	toDate?: string;
@@ -36,6 +38,10 @@ export async function getAdminTransactions(
 
 	for (const status of params.status ?? []) {
 		queryParams.append("status", status);
+	}
+
+	for (const pm of params.paymentMethod ?? []) {
+		queryParams.append("paymentMethod", pm);
 	}
 
 	if (params.code?.trim()) {

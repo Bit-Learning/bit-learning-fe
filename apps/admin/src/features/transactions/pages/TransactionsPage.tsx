@@ -23,6 +23,7 @@ import { TransactionsTable } from "../components/TransactionsTable";
 import { UserLookupCombobox } from "../components/UserLookupCombobox";
 import {
 	formatCurrency,
+	paymentMethodOptions,
 	transactionStatusOptions,
 	transactionTypeOptions,
 } from "../types/transaction.type";
@@ -71,6 +72,7 @@ export function TransactionsPage() {
 			search.userId,
 			search.type,
 			search.status,
+			search.paymentMethod,
 			currentCode,
 			search.fromDate,
 			search.toDate,
@@ -82,6 +84,7 @@ export function TransactionsPage() {
 				userId: search.userId,
 				type: search.type,
 				status: search.status,
+				paymentMethod: search.paymentMethod,
 				code: currentCode,
 				fromDate: search.fromDate || undefined,
 				toDate: search.toDate || undefined,
@@ -199,6 +202,7 @@ export function TransactionsPage() {
 			search.userId,
 			...(search.type ?? []),
 			...(search.status ?? []),
+			...(search.paymentMethod ?? []),
 			search.fromDate,
 			search.toDate,
 			currentCode.trim() ? "code" : undefined,
@@ -206,6 +210,7 @@ export function TransactionsPage() {
 	}, [
 		currentCode,
 		search.fromDate,
+		search.paymentMethod,
 		search.status,
 		search.toDate,
 		search.type,
@@ -357,6 +362,7 @@ export function TransactionsPage() {
 											userId: undefined,
 											type: undefined,
 											status: undefined,
+											paymentMethod: undefined,
 											code: undefined,
 											fromDate: undefined,
 											toDate: undefined,
@@ -371,7 +377,7 @@ export function TransactionsPage() {
 						</div>
 					</CardHeader>
 					<CardContent className="space-y-3">
-						<div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-4">
+						<div className="grid gap-3 lg:grid-cols-2 xl:grid-cols-5">
 							<UserLookupCombobox
 								value={selectedUser}
 								onChange={(user) => {
@@ -409,6 +415,21 @@ export function TransactionsPage() {
 										search: (prev) => ({
 											...prev,
 											status: values.length ? values : undefined,
+											page: undefined,
+										}),
+									});
+								}}
+							/>
+
+							<TransactionsMultiSelect
+								title="Phương thức"
+								options={paymentMethodOptions}
+								selectedValues={search.paymentMethod ?? []}
+								onChange={(values) => {
+									navigate({
+										search: (prev) => ({
+											...prev,
+											paymentMethod: values.length ? values : undefined,
 											page: undefined,
 										}),
 									});
