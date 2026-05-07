@@ -1,5 +1,5 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Search, CheckCircle, Eye, ChevronDown, CheckCircle2, Code2 } from "lucide-react";
+import React, { useEffect, useState } from "react";
+import { CheckCircle, Eye, CheckCircle2, Code2, ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { Difficulty, type ProblemBriefResponse } from "../types/problem.type";
@@ -26,23 +26,18 @@ const PENDING_PAGE_SIZE = 20;
 
 const AdminProblemApprovalPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState<"pending" | "bank">("pending");
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const [search, setSearch] = useState("");
-  const [difficultyFilter, setDifficultyFilter] = useState<string>("all");
   const [page, setPage] = useState(0);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [detailProblemId, setDetailProblemId] = useState<string | null>(null);
 
-  const selectAllRef = useRef<HTMLButtonElement>(null);
-
-  const [bankKeyword, setBankKeyword] = useState("");
-  const [bankDifficulty, setBankDifficulty] = useState("");
   const [bankPagination, setBankPagination] = useState({ pageIndex: 0, pageSize: 10 });
 
   const { data: response, isLoading } = useGetPendingProblems({
     page,
     size: PENDING_PAGE_SIZE,
-    sort: "createdAt,desc",
+    sort: `createdAt,${sortDirection}`,
   });
   const approveMutation = useApproveProblem();
   const rejectMutation = useRejectProblem();
@@ -51,20 +46,7 @@ const AdminProblemApprovalPage: React.FC = () => {
   const totalPages: number = response?.page?.totalPages || 0;
   const totalElements: number = response?.page?.totalElements || 0;
 
-  const filteredProblems = problems.filter((p) => {
-    const matchSearch =
-      p.title.toLowerCase().includes(search.toLowerCase()) || p.slug.toLowerCase().includes(search.toLowerCase());
-    const matchDifficulty = difficultyFilter === "all" || p.difficulty === difficultyFilter;
-    return matchSearch && matchDifficulty;
-  });
-
-  useEffect(() => {
-    const el = selectAllRef.current as any;
-    if (!el) return;
-    const allSelected = filteredProblems.length > 0 && selectedIds.length === filteredProblems.length;
-    const someSelected = selectedIds.length > 0 && !allSelected;
-    el.indeterminate = someSelected;
-  }, [selectedIds, filteredProblems]);
+  const filteredProblems = problems;
 
   useEffect(() => {
     setSelectedIds([]);
@@ -130,39 +112,10 @@ const AdminProblemApprovalPage: React.FC = () => {
           </TabsList>
 
           <TabsContent value="pending" className="space-y-4">
-            <div className="flex flex-col sm:flex-row gap-3">
-              <div className="relative flex-1">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                <input
-                  className="w-full pl-9 pr-4 py-2.5 bg-background border border-input rounded-lg focus:ring-2 focus:ring-ring outline-none text-sm transition-all"
-                  placeholder="Tìm kiếm theo tên, slug..."
-                  value={search}
-                  onChange={(e) => setSearch(e.target.value)}
-                />
-              </div>
-              <div className="relative">
-                <select
-                  value={difficultyFilter}
-                  onChange={(e) => setDifficultyFilter(e.target.value)}
-                  className="appearance-none pl-3 pr-8 py-2.5 bg-background border border-input rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-ring cursor-pointer"
-                >
-                  <option value="all">Độ khó: Tất cả</option>
-                  <option value={Difficulty.EASY}>Dễ</option>
-                  <option value={Difficulty.MEDIUM}>Trung bình</option>
-                  <option value={Difficulty.HARD}>Khó</option>
-                </select>
-                <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
-              </div>
-            </div>
-
             {filteredProblems.length === 0 ? (
               <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg">
                 <CheckCircle2 className="h-16 w-16 text-muted-foreground mb-4" />
-                <h3 className="text-lg font-semibold mb-2">
-                  {search || difficultyFilter !== "all"
-                    ? "Không tìm thấy bài tập phù hợp"
-                    : "Không có bài tập nào chờ phê duyệt"}
-                </h3>
+                <h3 className="text-lg font-semibold mb-2">"Không có bài tập nào chờ phê duyệt"</h3>
                 <p className="text-sm text-muted-foreground">Tất cả bài tập đã được xử lý</p>
               </div>
             ) : (
@@ -174,7 +127,19 @@ const AdminProblemApprovalPage: React.FC = () => {
                       <TableHead>Độ khó</TableHead>
                       <TableHead>Lớp</TableHead>
                       <TableHead>Giảng viên</TableHead>
-                      <TableHead>Ngày gửi</TableHead>
+                      <TableHead>
+                        <button
+                          className="flex items-center gap-1 hover:text-primary transition-colors uppercase"
+                          onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
+                        >
+                          Ngày tạo
+                          {sortDirection === "desc" ? (
+                            <ArrowDownIcon className="h-4 w-4" />
+                          ) : (
+                            <ArrowUpIcon className="h-4 w-4" />
+                          )}
+                        </button>
+                      </TableHead>{" "}
                       <TableHead className="text-right">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -190,9 +155,7 @@ const AdminProblemApprovalPage: React.FC = () => {
                             >
                               {problem.title}
                             </button>
-                            <p className="text-xs text-muted-foreground mt-0.5 font-mono">
-                              {problem.tags?.map((t: any) => t.name).join(", ") || problem.slug}
-                            </p>
+                            <p className="text-xs text-muted-foreground font-mono">{problem.slug}</p>
                           </TableCell>
                           <TableCell>
                             <Badge className={difficultyConfig[problem.difficulty].className}>
@@ -208,7 +171,7 @@ const AdminProblemApprovalPage: React.FC = () => {
                             </span>
                           </TableCell>
                           <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
-                            {format(new Date(problem.updatedAt), "dd/MM/yyyy HH:mm", { locale: vi })}
+                            {format(new Date(problem.createdAt), "dd/MM/yyyy HH:mm", { locale: vi })}
                           </TableCell>
                           <TableCell className="text-right">
                             <div className="flex items-center justify-end gap-1">
@@ -234,14 +197,7 @@ const AdminProblemApprovalPage: React.FC = () => {
           </TabsContent>
 
           <TabsContent value="bank">
-            <ProblemBankTab
-              keyword={bankKeyword}
-              difficulty={bankDifficulty}
-              pagination={bankPagination}
-              onPaginationChange={setBankPagination}
-              onKeywordChange={setBankKeyword}
-              onDifficultyChange={setBankDifficulty}
-            />
+            <ProblemBankTab pagination={bankPagination} onPaginationChange={setBankPagination} />
           </TabsContent>
         </Tabs>
       </div>

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { getCoreRowModel, type OnChangeFn, type PaginationState, useReactTable } from "@tanstack/react-table";
-import { Search as SearchIcon, ChevronDown, FileText, Clock } from "lucide-react";
+import { Search as SearchIcon, ChevronDown, FileText, ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { DataTablePagination } from "@/components/data-table";
@@ -14,6 +14,7 @@ import { useAllExams, usePublishExam } from "../queries/useExam";
 import type { ExamBriefResponse, ExamType } from "../types/exam.type";
 import { ExamDetailModal } from "./ExamDetailModal";
 import { TogglePublishConfirm } from "./TogglePublishConfirm";
+import { useSubjects } from "@/features/curriculum/queries/useSubject";
 
 const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
   EXAM: { label: "Đề thi", className: "bg-blue-100 text-blue-700" },
@@ -22,23 +23,21 @@ const TYPE_LABELS: Record<ExamType, { label: string; className: string }> = {
 
 type ExamBankTabProps = {
   keyword: string;
-  examType: string;
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
   onKeywordChange: (keyword: string) => void;
-  onExamTypeChange: (type: string) => void;
 };
 
 export function ExamBankTab({
   keyword,
-  examType,
   pagination: tablePagination,
   onPaginationChange,
   onKeywordChange,
-  onExamTypeChange,
 }: ExamBankTabProps) {
   const page = tablePagination.pageIndex;
   const pageSize = tablePagination.pageSize;
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
+  const [subjectId, setSubjectId] = useState<number | undefined>();
 
   const [searchValue, setSearchValue] = useState(keyword);
   const [viewExamId, setViewExamId] = useState<number | null>(null);
@@ -50,7 +49,14 @@ export function ExamBankTab({
     page,
     size: pageSize,
     search: keyword || undefined,
+    sort: `createdAt,${sortDirection}`,
+    subjectId,
+    approvalStatus: "APPROVED",
   });
+
+  const { data: subjectResponse } = useSubjects(0, 100);
+
+  const subjects = subjectResponse?.data || [];
 
   const exams: ExamBriefResponse[] = response?.data || [];
   const pagination = response?.page;
@@ -104,7 +110,6 @@ export function ExamBankTab({
 
   return (
     <div className="space-y-4">
-      {/* Filters */}
       <div className="flex flex-col sm:flex-row gap-3">
         <div className="relative flex-1">
           <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
@@ -118,14 +123,19 @@ export function ExamBankTab({
         </div>
         <div className="relative">
           <select
-            value={examType}
-            onChange={(e) => onExamTypeChange(e.target.value)}
-            className="appearance-none pl-3 pr-8 py-2 bg-background border border-input rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-ring cursor-pointer h-10"
+            value={subjectId ?? ""}
+            onChange={(e) => setSubjectId(e.target.value ? Number(e.target.value) : undefined)}
+            className="appearance-none pl-3 pr-8 py-2 bg-background border border-input rounded-lg text-sm h-10"
           >
-            <option value="">Loại: Tất cả</option>
-            <option value="EXAM">Đề thi</option>
-            <option value="PRACTICE">Luyện tập</option>
+            <option value="">Môn học: Tất cả</option>
+
+            {subjects.map((s: any) => (
+              <option key={s.id} value={s.id}>
+                {s.name}
+              </option>
+            ))}
           </select>
+
           <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
         </div>
         <Button onClick={handleSearch}>Tìm kiếm</Button>
@@ -134,12 +144,7 @@ export function ExamBankTab({
       {exams.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg">
           <FileText className="h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">
-            {keyword || examType ? "Không tìm thấy đề thi" : "Chưa có đề thi nào"}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {keyword || examType ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác" : "Chưa có đề thi nào được phê duyệt"}
-          </p>
+          <h3 className="text-lg font-semibold mb-2">{"Chưa có đề thi nào"}</h3>
         </div>
       ) : (
         <div className="rounded-md border">
@@ -148,10 +153,22 @@ export function ExamBankTab({
               <TableRow>
                 <TableHead>Đề thi</TableHead>
                 <TableHead>Mã đề</TableHead>
+                <TableHead>Loại</TableHead>
                 <TableHead>Môn học</TableHead>
-                <TableHead>Thời gian</TableHead>
                 <TableHead>Tác giả</TableHead>
-                <TableHead>Ngày tạo</TableHead>
+                <TableHead>
+                  <button
+                    className="flex items-center gap-1 hover:text-primary transition-colors uppercase"
+                    onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
+                  >
+                    Ngày tạo
+                    {sortDirection === "desc" ? (
+                      <ArrowDownIcon className="h-4 w-4" />
+                    ) : (
+                      <ArrowUpIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </TableHead>
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Thao tác</TableHead>
               </TableRow>
@@ -162,22 +179,24 @@ export function ExamBankTab({
                 return (
                   <TableRow key={exam.id}>
                     <TableCell>
-                      <p className="font-medium line-clamp-1">{exam.name}</p>
-                      <Badge className={`${typeConf.className} mt-1`}>{typeConf.label}</Badge>
+                      <button
+                        onClick={() => setViewExamId(exam.id)}
+                        className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left"
+                      >
+                        {exam.name}
+                      </button>{" "}
                     </TableCell>
+
                     <TableCell>
-                      <span className="px-2.5 py-1 bg-muted text-blue-600 dark:text-blue-400 rounded-md text-xs font-semibold font-mono">
+                      <span className="py-1 bg-muted text-blue-600 dark:text-blue-400 rounded-md text-sm font-semibold font-mono">
                         {exam.code}
                       </span>
                     </TableCell>
                     <TableCell>
-                      <span className="text-sm">{exam.subject?.name || "Tin học"}</span>
+                      <Badge className={`${typeConf.className} mt-1`}>{typeConf.label}</Badge>
                     </TableCell>
                     <TableCell>
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <Clock className="h-3 w-3" />
-                        {exam.durationInMinutes} phút
-                      </div>
+                      <span className="text-sm">{exam.subject?.name || "Tin học"}</span>
                     </TableCell>
                     <TableCell>
                       <span className="text-sm">

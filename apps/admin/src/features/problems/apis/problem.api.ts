@@ -140,7 +140,7 @@ export const problemApi = {
     return api.put("/problems/reject", data);
   },
 
-  getPendingProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse>>> {
+  getPendingProblems(filters?: ProblemFilters): Promise<AxiosResponse<ApiResponse<ProblemBriefResponse[]>>> {
     return api.get("/problems/pending-approval", { params: filters });
   },
 };

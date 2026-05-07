@@ -1,17 +1,16 @@
 import { useState } from "react";
 import { getCoreRowModel, type OnChangeFn, type PaginationState, useReactTable } from "@tanstack/react-table";
-import { Search as SearchIcon, ChevronDown, Code2 } from "lucide-react";
+import { Code2, ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { format } from "date-fns";
 import { vi } from "date-fns/locale";
 import { DataTablePagination } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input } from "@/components/ui/input";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { useProblems, usePublishProblem } from "../queries/useProblem";
-import { Difficulty, type ProblemBriefResponse } from "../types/problem.type";
+import { ApprovalStatus, Difficulty, type ProblemBriefResponse } from "../types/problem.type";
 import { DetailModal } from "./ProblemDetailModal";
 import { TogglePublishConfirm } from "./TogglePublishConfirm";
 
@@ -22,25 +21,14 @@ const difficultyConfig: Record<Difficulty, { label: string; className: string }>
 };
 
 type ProblemBankTabProps = {
-  keyword: string;
-  difficulty: string;
   pagination: PaginationState;
   onPaginationChange: OnChangeFn<PaginationState>;
-  onKeywordChange: (keyword: string) => void;
-  onDifficultyChange: (difficulty: string) => void;
 };
-export function ProblemBankTab({
-  keyword,
-  difficulty,
-  pagination: tablePagination,
-  onPaginationChange,
-  onKeywordChange,
-  onDifficultyChange,
-}: ProblemBankTabProps) {
+export function ProblemBankTab({ pagination: tablePagination, onPaginationChange }: ProblemBankTabProps) {
   const page = tablePagination.pageIndex;
   const pageSize = tablePagination.pageSize;
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
-  const [searchValue, setSearchValue] = useState(keyword);
   const [viewProblemId, setViewProblemId] = useState<string | null>(null);
   const [toggleProblem, setToggleProblem] = useState<ProblemBriefResponse | null>(null);
 
@@ -49,7 +37,8 @@ export function ProblemBankTab({
   const { data: response, isLoading } = useProblems({
     page,
     size: pageSize,
-    search: keyword || undefined,
+    sort: `createdAt,${sortDirection}`,
+    approvalStatus: ApprovalStatus.APPROVED,
   });
 
   const problems: ProblemBriefResponse[] = response?.data || [];
@@ -72,10 +61,6 @@ export function ProblemBankTab({
     manualPagination: true,
     pageCount: pagination?.totalPages ?? 0,
   });
-
-  const handleSearch = () => {
-    onKeywordChange(searchValue.trim());
-  };
 
   const handleTogglePublish = () => {
     if (!toggleProblem) return;
@@ -104,42 +89,10 @@ export function ProblemBankTab({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-col sm:flex-row gap-3">
-        <div className="relative flex-1">
-          <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm bài tập theo tên..."
-            value={searchValue}
-            onChange={(e) => setSearchValue(e.target.value)}
-            onKeyDown={(e) => e.key === "Enter" && handleSearch()}
-            className="pl-9"
-          />
-        </div>
-        <div className="relative">
-          <select
-            value={difficulty}
-            onChange={(e) => onDifficultyChange(e.target.value)}
-            className="appearance-none pl-3 pr-8 py-2 bg-background border border-input rounded-lg text-sm text-foreground outline-none focus:ring-2 focus:ring-ring cursor-pointer h-10"
-          >
-            <option value="">Độ khó: Tất cả</option>
-            <option value={Difficulty.EASY}>Dễ</option>
-            <option value={Difficulty.MEDIUM}>Trung bình</option>
-            <option value={Difficulty.HARD}>Khó</option>
-          </select>
-          <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
-        </div>
-        <Button onClick={handleSearch}>Tìm kiếm</Button>
-      </div>
-
       {problems.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-center border rounded-lg">
           <Code2 className="h-16 w-16 text-muted-foreground mb-4" />
-          <h3 className="text-lg font-semibold mb-2">
-            {keyword || difficulty ? "Không tìm thấy bài tập" : "Chưa có bài tập nào"}
-          </h3>
-          <p className="text-sm text-muted-foreground">
-            {keyword || difficulty ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác" : "Chưa có bài tập nào được phê duyệt"}
-          </p>
+          <h3 className="text-lg font-semibold mb-2">"Chưa có bài tập nào"</h3>
         </div>
       ) : (
         <div className="rounded-md border">
@@ -150,7 +103,19 @@ export function ProblemBankTab({
                 <TableHead>Độ khó</TableHead>
                 <TableHead>Lớp</TableHead>
                 <TableHead>Tác giả</TableHead>
-                <TableHead>Ngày tạo</TableHead>
+                <TableHead>
+                  <button
+                    className="flex items-center gap-1 hover:text-primary transition-colors uppercase"
+                    onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
+                  >
+                    Ngày tạo
+                    {sortDirection === "desc" ? (
+                      <ArrowDownIcon className="h-4 w-4" />
+                    ) : (
+                      <ArrowUpIcon className="h-4 w-4" />
+                    )}
+                  </button>
+                </TableHead>{" "}
                 <TableHead>Trạng thái</TableHead>
                 <TableHead>Thao tác</TableHead>
               </TableRow>
@@ -159,7 +124,12 @@ export function ProblemBankTab({
               {problems.map((problem) => (
                 <TableRow key={problem.id}>
                   <TableCell>
-                    <p className="font-medium line-clamp-1">{problem.title}</p>
+                    <button
+                      onClick={() => setViewProblemId(problem.id)}
+                      className="text-sm font-semibold text-blue-600 dark:text-blue-400 hover:underline text-left"
+                    >
+                      {problem.title}
+                    </button>{" "}
                     <p className="text-xs text-muted-foreground font-mono">{problem.slug}</p>
                   </TableCell>
                   <TableCell>

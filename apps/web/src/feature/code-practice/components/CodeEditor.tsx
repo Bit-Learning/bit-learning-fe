@@ -108,8 +108,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   ]);
   const [activeFileId, setActiveFileId] = useState("1");
   const [copied, setCopied] = useState(false);
-  const [formatErrors, setFormatErrors] = useState<any[]>([]);
-  const [isFormatting, setIsFormatting] = useState(false);
   const [formatMessage, setFormatMessage] = useState<string | null>(null);
   const [bottomTab, setBottomTab] = useState<BottomPanelTab>("submission");
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -276,11 +274,6 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, []);
 
   useEffect(() => {
-    if (activeFile?.language === Language.PYTHON) setFormatErrors(validatePythonIndentation(activeFile.content));
-    else setFormatErrors([]);
-  }, [activeFile?.content, activeFile?.language]);
-
-  useEffect(() => {
     if (submissionResult) setBottomTab("submission");
   }, [submissionResult]);
   useEffect(() => {
@@ -302,14 +295,12 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
   }, [activeFile?.content, activeFile?.language, language]);
 
   const handleFormat = useCallback(async () => {
-    setIsFormatting(true);
     setFormatMessage(null);
     try {
       const { formatted, syntaxError, message } = await formatCode(activeFile.content, activeFile.language);
       handleCodeChange(formatted);
       if (syntaxError && message) setFormatMessage(message);
     } finally {
-      setIsFormatting(false);
     }
   }, [activeFile?.content, activeFile?.language, handleCodeChange]);
 
@@ -516,26 +507,8 @@ export const CodeEditor: React.FC<CodeEditorProps> = ({
             <option value={Language.PYTHON}>Python</option>
             <option value={Language.JAVASCRIPT}>JavaScript</option>
           </select>
-          {/* {formatErrors.length > 0 && (
-            <div className="flex items-center gap-1.5 text-yellow-400 text-xs">
-              <AlertCircle className="w-4 h-4" />
-              <span>
-                {formatErrors.length} formatting issue
-                {formatErrors.length > 1 ? "s" : ""}
-              </span>
-            </div>
-          )} */}
         </div>
         <div className="flex items-center gap-4 text-gray-300">
-          <button
-            onClick={handleFormat}
-            disabled={isFormatting}
-            className="cursor-pointer hover:text-white transition-colors flex items-center gap-1.5 disabled:opacity-50"
-          >
-            {isFormatting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Wand2 className="w-5 h-5" />}
-            <span className="text-xs">{isFormatting ? "Formatting..." : "Format"}</span>
-          </button>
-          <div className="h-5 w-px bg-gray-600" />
           <button onClick={handleDownload} className="cursor-pointer hover:text-white transition-colors">
             <Download className="w-5 h-5" />
           </button>

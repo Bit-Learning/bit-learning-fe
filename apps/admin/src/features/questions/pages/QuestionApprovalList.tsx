@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { getRouteApi } from "@tanstack/react-router";
 import { getCoreRowModel, type OnChangeFn, type PaginationState, useReactTable } from "@tanstack/react-table";
-import { CheckCircle, XCircle, Eye, Calendar, X, Loader2 } from "lucide-react";
+import { CheckCircle, XCircle, Eye, Calendar, X, Loader2, ArrowDownIcon, ArrowUpIcon } from "lucide-react";
 import { DataTablePagination } from "@/components/data-table";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -99,6 +99,7 @@ export function QuestionApprovalList() {
   const [viewQuestion, setViewQuestion] = useState<QuestionResponse | null>(null);
   const [rejectDialogOpen, setRejectDialogOpen] = useState(false);
   const [approveDialogOpen, setApproveDialogOpen] = useState(false);
+  const [sortDirection, setSortDirection] = useState<"asc" | "desc">("desc");
 
   const { pagination: tablePagination, onPaginationChange } = useTableUrlState({
     search: searchParams,
@@ -111,7 +112,7 @@ export function QuestionApprovalList() {
   const PAGE_SIZE = tablePagination.pageSize;
 
   const { data: response, isLoading } = usePendingApproval(
-    { page, size: PAGE_SIZE },
+    { page, size: PAGE_SIZE, sort: `createdAt,${sortDirection}` },
     { enabled: activeTab === "pending" },
   );
 
@@ -313,7 +314,19 @@ export function QuestionApprovalList() {
                       <TableHead>Nội dung câu hỏi</TableHead>
                       <TableHead>Mức độ</TableHead>
                       <TableHead>Loại</TableHead>
-                      <TableHead>Ngày gửi</TableHead>
+                      <TableHead>
+                        <button
+                          className="flex items-center gap-1 hover:text-primary transition-colors uppercase"
+                          onClick={() => setSortDirection((prev) => (prev === "desc" ? "asc" : "desc"))}
+                        >
+                          Ngày tạo
+                          {sortDirection === "desc" ? (
+                            <ArrowDownIcon className="h-4 w-4" />
+                          ) : (
+                            <ArrowUpIcon className="h-4 w-4" />
+                          )}
+                        </button>
+                      </TableHead>
                       <TableHead className="text-right">Thao tác</TableHead>
                     </TableRow>
                   </TableHeader>

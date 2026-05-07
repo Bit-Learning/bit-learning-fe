@@ -51,7 +51,7 @@ const ScoringRulesModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
             <p className="text-xs font-medium uppercase tracking-wider text-gray-400 mb-1.5">Điểm phạt là gì?</p>
             <p className="text-sm text-gray-600 leading-relaxed mb-2">Mỗi bài đã AC được tính theo công thức:</p>
             <div className="font-mono text-sm bg-gray-50 rounded-lg px-3 py-2.5 text-center text-gray-900">
-              Điểm Phạt = (acTimeMs ÷ 60000) + số lần sai × 20
+              Điểm Phạt = thời gian(m) + số lần sai × 20m
             </div>
             <p className="text-sm text-gray-600 leading-relaxed mt-2">
               Trong đó <strong className="text-gray-900 font-medium">acTimeMs</strong> là số mili giây từ lúc cuộc thi
