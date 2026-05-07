@@ -104,7 +104,7 @@ export const orderColumns: ColumnDef<AdminOrder>[] = [
 	},
 	{
 		accessorKey: "totalAmount",
-		header: "Tổng tiền",
+		header: () => <div className="text-center">Tổng tiền</div>,
 		cell: ({ row }) => {
 			const { status, totalAmount } = row.original;
 			const color =
@@ -114,7 +114,9 @@ export const orderColumns: ColumnDef<AdminOrder>[] = [
 						? "text-muted-foreground line-through"
 						: "text-amber-600";
 			return (
-				<div className={`flex items-center gap-1 font-medium ${color}`}>
+				<div
+					className={`flex items-center justify-end gap-1 font-medium ${color}`}
+				>
 					{status === "COMPLETED" && <span>+</span>}
 					<span>{formatCurrency(totalAmount)}</span>
 					<BitCoinIcon size={14} />

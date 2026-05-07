@@ -117,12 +117,12 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 				>
 					{sign === "negative" ? (
 						<>
-							<span>-{formattedAmount}</span>
+							<span>- {formattedAmount}</span>
 							<BitCoinIcon size={14} />
 						</>
 					) : sign === "positive" ? (
 						<>
-							<span>+{formattedAmount}</span>
+							<span>+ {formattedAmount}</span>
 							<BitCoinIcon size={14} />
 						</>
 					) : (
