@@ -69,10 +69,9 @@ export const useImportJobStatus = (jobId: number | null, options?: { enabled?: b
     enabled: options?.enabled !== false && !!jobId,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      if (status === "PROCESSING" || status === "CONFIRMED") {
-        return 2000;
-      }
-      return false;
+      const terminalStatuses = ["DONE", "FAILED", "PREVIEW"];
+      if (!status || terminalStatuses.includes(status)) return false;
+      return 2000;
     },
   });
 };
