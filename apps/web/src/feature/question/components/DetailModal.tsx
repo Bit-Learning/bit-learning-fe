@@ -147,12 +147,22 @@ export function DetailModal({
                 </div>
 
                 {question.mediaUrl && (
-                  <MediaUploadPanel
-                    questionId={question.id}
-                    currentMediaUrl={question.mediaUrl}
-                    currentMediaType={question.mediaType ?? null}
-                    readonly
-                  />
+                  <div>
+                    <h3 className="font-semibold mb-2">Media đính kèm</h3>
+                    {question.mediaType === "IMAGE" ? (
+                      <img
+                        src={question.mediaUrl}
+                        alt="Question media"
+                        className="w-full max-h-80 object-contain rounded-lg border border-slate-200"
+                      />
+                    ) : (
+                      <video
+                        src={question.mediaUrl}
+                        controls
+                        className="w-full max-h-80 rounded-lg border border-slate-200"
+                      />
+                    )}
+                  </div>
                 )}
 
                 {question.options && question.options.length > 0 && (

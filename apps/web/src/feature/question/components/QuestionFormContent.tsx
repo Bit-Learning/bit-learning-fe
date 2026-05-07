@@ -8,17 +8,17 @@ import { Button } from "@workspace/ui/components/Button";
 import { Card, CardContent, CardHeader } from "@workspace/ui/components/Card";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
 import { toast } from "@/shared/components/Sonner";
-import { useCreateQuestion, useUpdateQuestion, useQuestion } from "../queries/useQuestion";
+import { useCreateQuestion, useUpdateQuestion, useQuestion, useUploadQuestionMedia } from "../queries/useQuestion";
 import { QuestionRequest, QuestionType, QuestionLevel } from "../types/question.type";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { useChaptersBySubject, useChapterDetail } from "@/feature/matrix/queries/useChapter";
-import { useLessonsByChapter } from "@/feature/matrix/queries/useLesson";
-import { useLessonDetail } from "@/feature/matrix/queries/useLesson";
+import { useLessonsByChapter, useLessonDetail } from "@/feature/matrix/queries/useLesson";
 import MediaUploadPanel from "./MediaUploadPanel";
+import { questionApi } from "../api/question.api";
 
 const optionSchema = z.object({
   label: z.string(),
-  content: z.string().min(1, "Vui lòng nhập nội dung đáp án"),
+  content: z.string(),
   isCorrect: z.boolean(),
   orderNo: z.number(),
 });
@@ -36,6 +36,16 @@ const formSchema = z
   })
   .superRefine((data, ctx) => {
     if (data.questionType === "MCQ") {
+      data.options?.forEach((opt, i) => {
+        if (!opt.content || opt.content.trim() === "") {
+          ctx.addIssue({
+            code: z.ZodIssueCode.custom,
+            path: ["options", i, "content"],
+            message: "Vui lòng nhập nội dung đáp án",
+          });
+        }
+      });
+
       const hasCorrect = data.options?.some((o) => o.isCorrect);
       if (!hasCorrect) {
         ctx.addIssue({ code: z.ZodIssueCode.custom, path: ["options"], message: "Phải chọn ít nhất 1 đáp án đúng" });
@@ -70,7 +80,7 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   const questionId = mode === "edit" && (params as any).id ? Number((params as any).id) : undefined;
 
   const [chapterId, setChapterId] = useState<number | undefined>(undefined);
-  const [createdQuestionId, setCreatedQuestionId] = useState<number | null>(null);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const originalSubjectIdRef = useRef<number | undefined>(undefined);
   const isInitialized = useRef(false);
 
@@ -83,7 +93,6 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   const { data: subjects } = useSubjectsList();
 
   const { data: existingLessonDetail } = useLessonDetail(mode === "edit" ? existingQuestion?.lesson?.id : undefined);
-
   const { data: chapterDetail } = useChapterDetail(mode === "edit" ? existingLessonDetail?.chapterId : undefined);
 
   const form = useForm<FormValues>({
@@ -108,17 +117,13 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
   const subjectId = form.watch("subjectId");
 
   const { data: chapters } = useChaptersBySubject(subjectId);
-
   const { data: lessonsByChapter } = useLessonsByChapter(chapterId);
-
   const lessons = lessonsByChapter ?? chapterDetail?.lessons ?? [];
 
   useEffect(() => {
     if (mode !== "edit" || !existingQuestion || isInitialized.current) return;
-
     originalSubjectIdRef.current = existingQuestion.subject?.id;
     isInitialized.current = true;
-
     form.reset({
       content: existingQuestion.content,
       canonicalAnswer: existingQuestion.canonicalAnswer || "",
@@ -193,62 +198,38 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
       ...data,
       options: data.questionType === "MCQ" ? data.options : undefined,
     };
+
     if (mode === "edit" && questionId) {
       updateQuestion.mutate(
         { id: questionId, data: requestData },
-        { onSuccess: () => navigate({ to: `/mentor/question/my` }) },
+        { onSuccess: () => navigate({ to: "/mentor/question/my" }) },
       );
     } else {
       createQuestion.mutate(requestData, {
-        onSuccess: (response) => {
-          const newId = response.data.data?.id;
-          if (newId) setCreatedQuestionId(newId);
-          else navigate({ to: "/mentor/question/my" });
+        onSuccess: async (response) => {
+          const newId = response?.data?.data?.id ?? response?.data?.data?.id ?? (response as any)?.id;
+
+          if (newId && pendingFile) {
+            try {
+              await questionApi.uploadQuestionMedia(newId, pendingFile);
+              toast.success({ title: "Thành công", description: "Tạo câu hỏi và upload media thành công" });
+            } catch {
+              toast.error({
+                title: "Lỗi",
+                description: "Tạo câu hỏi thành công nhưng upload media thất bại",
+              });
+            }
+          } else {
+            toast.success({ title: "Thành công", description: "Tạo câu hỏi thành công" });
+          }
+          navigate({ to: "/mentor/question/my" });
         },
       });
     }
   });
 
   const backTo = "/mentor/question/my";
-  const isSubmitting = mode === "edit" ? updateQuestion.isPending : createQuestion.isPending;
-
-  if (createdQuestionId !== null) {
-    return (
-      <div className="container mx-auto p-6 max-w-6xl">
-        <div className="mb-8">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="flex items-center justify-center w-8 h-8 rounded-full bg-green-100 dark:bg-green-900">
-              <Check className="h-5 w-5 text-green-600 dark:text-green-400" />
-            </div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-white">Câu hỏi đã được tạo!</h1>
-          </div>
-          <p className="text-slate-500 dark:text-slate-400 text-base">
-            Bạn có thể đính kèm ảnh hoặc video minh họa cho câu hỏi, hoặc bỏ qua để hoàn thành.
-          </p>
-        </div>
-        <MediaUploadPanel questionId={createdQuestionId} currentMediaUrl={null} currentMediaType={null} />
-        <div className="flex justify-end gap-3 pt-6">
-          <Button
-            type="button"
-            size="lg"
-            variant="outline"
-            onClick={() => navigate({ to: "/mentor/question/my" })}
-            className="px-6 border-slate-400"
-          >
-            Bỏ qua
-          </Button>
-          <Button
-            type="button"
-            size="lg"
-            className="px-8 gap-2 bg-blue-600 hover:bg-blue-700 text-white"
-            onClick={() => navigate({ to: `/mentor/question/${createdQuestionId}` })}
-          >
-            Xem câu hỏi
-          </Button>
-        </div>
-      </div>
-    );
-  }
+  const isSubmitting = createQuestion.isPending || updateQuestion.isPending;
 
   if (mode === "edit" && loadingQuestion) {
     return (
@@ -266,7 +247,6 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
     );
   }
 
-  const subjectChanged = isInitialized.current && subjectId !== originalSubjectIdRef.current;
   const chapterDisabled = !subjectId;
   const lessonDisabled = !subjectId || !chapterId;
 
@@ -417,6 +397,13 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
           </CardContent>
         </Card>
 
+        <MediaUploadPanel
+          questionId={mode === "edit" ? questionId : undefined}
+          currentMediaUrl={mode === "edit" ? (existingQuestion?.mediaUrl ?? null) : null}
+          currentMediaType={mode === "edit" ? (existingQuestion?.mediaType ?? null) : null}
+          onFileSelect={mode === "create" ? (file) => setPendingFile(file) : undefined}
+        />
+
         <Card className="border-2 border-slate-300 rounded-md">
           <CardHeader className="pb-2 border-b border-slate-100 dark:border-slate-800">
             <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Nội dung câu hỏi</h2>
@@ -529,14 +516,6 @@ const QuestionFormContent: React.FC<Props> = ({ mode = "create" }) => {
               </div>
             </CardContent>
           </Card>
-        )}
-
-        {mode === "edit" && questionId && existingQuestion && (
-          <MediaUploadPanel
-            questionId={questionId}
-            currentMediaUrl={existingQuestion.mediaUrl ?? null}
-            currentMediaType={existingQuestion.mediaType ?? null}
-          />
         )}
 
         <div className="flex justify-end gap-3 pt-2 pb-8">

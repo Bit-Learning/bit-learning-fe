@@ -11,10 +11,11 @@ const ACCEPTED_VIDEO_TYPES = ["video/mp4", "video/quicktime", "video/x-m4v"];
 const ACCEPTED_TYPES = [...ACCEPTED_IMAGE_TYPES, ...ACCEPTED_VIDEO_TYPES];
 
 interface MediaUploadPanelProps {
-  questionId: number;
+  questionId?: number;
   currentMediaUrl: string | null;
   currentMediaType: QuestionMediaType | null;
   onDeleteConfirm?: () => boolean;
+  onFileSelect?: (file: File | null) => void;
   variant?: "form" | "inline";
   readonly?: boolean;
 }
@@ -24,6 +25,7 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
   currentMediaUrl,
   currentMediaType,
   onDeleteConfirm,
+  onFileSelect,
   variant = "form",
   readonly = false,
 }) => {
@@ -33,10 +35,12 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
   const uploadMedia = useUploadQuestionMedia();
   const deleteMedia = useDeleteQuestionMedia();
 
+  const isCreateMode = !questionId;
+
   const displayUrl = localPreview?.url ?? currentMediaUrl;
   const displayType = localPreview?.type ?? currentMediaType;
   const hasMedia = !!displayUrl;
-  const isBusy = uploadMedia.isPending || deleteMedia.isPending;
+  const isBusy = !isCreateMode && (uploadMedia.isPending || deleteMedia.isPending);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -54,22 +58,31 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
     const isImage = ACCEPTED_IMAGE_TYPES.includes(file.type);
     setLocalPreview({ url: objectUrl, type: isImage ? "IMAGE" : "VIDEO" });
 
-    uploadMedia.mutate(
-      { id: questionId, file },
-      {
-        onError: () => {
-          setLocalPreview(null);
-          URL.revokeObjectURL(objectUrl);
+    if (isCreateMode) {
+      onFileSelect?.(file);
+    } else {
+      uploadMedia.mutate(
+        { id: questionId!, file },
+        {
+          onError: () => {
+            setLocalPreview(null);
+            URL.revokeObjectURL(objectUrl);
+          },
         },
-      },
-    );
+      );
+    }
 
     e.target.value = "";
   };
 
   const handleDelete = () => {
+    if (isCreateMode) {
+      setLocalPreview(null);
+      onFileSelect?.(null);
+      return;
+    }
     if (onDeleteConfirm && !onDeleteConfirm()) return;
-    deleteMedia.mutate(questionId, {
+    deleteMedia.mutate(questionId!, {
       onSuccess: () => setLocalPreview(null),
     });
   };
@@ -84,7 +97,6 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
     />
   );
 
-  // ── Readonly: chỉ hiển thị ảnh/video, không có action gì ──
   if (readonly) {
     if (!currentMediaUrl) return null;
     return currentMediaType === "IMAGE" ? (
@@ -94,7 +106,6 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
     );
   }
 
-  // ── Inline variant: chỉ ảnh/video + hover actions, không Card ──
   if (variant === "inline") {
     if (isBusy) {
       return (
@@ -131,7 +142,6 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
           ) : (
             <video src={displayUrl} controls className="w-full max-h-96 rounded-xl" />
           )}
-          {/* Hover overlay với actions */}
           <div className="absolute inset-0 bg-black/0 group-hover:bg-black/30 transition-all rounded-xl flex items-center justify-center gap-3 opacity-0 group-hover:opacity-100">
             <button
               type="button"
@@ -150,7 +160,6 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
               Xóa
             </button>
           </div>
-          {/* Type badge */}
           <span className="absolute top-2 left-2 flex items-center gap-1 text-xs font-medium px-2 py-1 rounded-full bg-black/50 text-white">
             {displayType === "IMAGE" ? <ImageIcon className="h-3 w-3" /> : <Video className="h-3 w-3" />}
             {displayType === "IMAGE" ? "Ảnh" : "Video"}
@@ -161,14 +170,13 @@ const MediaUploadPanel: React.FC<MediaUploadPanelProps> = ({
     );
   }
 
-  // ── Form variant: Card với header + full controls ──
   return (
     <Card className="border-2 border-slate-300 rounded-md">
       <CardHeader className="border-b border-slate-100 dark:border-slate-800">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-          {displayType === "IMAGE" ? "Hình ảnh" : displayType === "VIDEO" ? "Video" : "Media đính kèm"}
+          {displayType === "IMAGE" ? "Hình ảnh" : displayType === "VIDEO" ? "Video" : "Media đính kèm (tùy chọn)"}
         </h2>
-        <p className="text-sm text-slate-500 mt-0.5">Đính kèm ảnh hoặc video minh họa (tùy chọn)</p>
+        <p className="text-sm text-slate-500 mt-0.5">Đính kèm ảnh hoặc video minh họa</p>
       </CardHeader>
       <CardContent className="space-y-4">
         {isBusy && (

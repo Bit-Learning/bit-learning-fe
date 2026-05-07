@@ -65,10 +65,16 @@ export interface QuestionResponse {
   isActive: boolean;
   isPublic: boolean;
   approvalStatus: ApprovalStatus;
+  mediaUrl: string | null;
+  mediaType: QuestionMediaType | null;
   createdAt: string;
   updatedAt: string;
 }
 
+export enum QuestionMediaType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+}
 export interface ApproveRejectDTO {
   questionIds: number[];
   rejectReason?: string;

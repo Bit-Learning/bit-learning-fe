@@ -68,7 +68,7 @@ export function QuestionDetailDialog({
   return (
     <>
       <Dialog open={open} onOpenChange={(o) => !isProcessing && onOpenChange(o)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="max-w-3xl! max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Chi tiết câu hỏi</DialogTitle>
             <DialogDescription>Xem chi tiết nội dung và thông tin câu hỏi</DialogDescription>
@@ -90,6 +90,25 @@ export function QuestionDetailDialog({
               <p className="text-sm leading-relaxed">{question.content}</p>
             </div>
 
+            {question.mediaUrl && (
+              <div>
+                <h3 className="font-semibold mb-2">Media đính kèm</h3>
+                {question.mediaType === "IMAGE" ? (
+                  <img
+                    src={question.mediaUrl}
+                    alt="Question media"
+                    className="w-full max-h-120 object-contain rounded-lg border border-slate-200"
+                  />
+                ) : (
+                  <video
+                    src={question.mediaUrl}
+                    controls
+                    className="w-full max-h-80 rounded-lg border border-slate-200"
+                  />
+                )}
+              </div>
+            )}
+
             {question.canonicalAnswer && (
               <div>
                 <h3 className="font-semibold mb-2">Đáp án mẫu</h3>
@@ -109,9 +128,9 @@ export function QuestionDetailDialog({
                         option.isCorrect ? "bg-green-50 border-green-200" : "bg-muted/50",
                       )}
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-center gap-3">
                         <span className="font-semibold min-w-6">{option.label}</span>
-                        <div className="flex-1">
+                        <div className="flex-1 flex items-center justify-between">
                           <p className="text-sm">{option.content}</p>
                           {option.isCorrect && (
                             <Badge variant="outline" className="mt-2">

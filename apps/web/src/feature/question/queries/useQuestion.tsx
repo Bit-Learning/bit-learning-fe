@@ -157,10 +157,6 @@ export const useCreateQuestion = () => {
       queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
       queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
       queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
-      toast.success({
-        title: "Thành công",
-        description: "Tạo câu hỏi thành công",
-      });
     },
     onError: (error: AxiosError<ApiResponse<null>>) => {
       toast.error({
