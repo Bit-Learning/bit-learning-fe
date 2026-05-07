@@ -21,7 +21,10 @@ export interface JvmStats {
 export interface DbPoolStats {
 	poolName?: string | null;
 	activeConnections?: number | null;
+	idleConnections?: number | null;
+	totalConnections?: number | null;
 	maxConnections?: number | null;
+	threadsAwaitingConnection?: number | null;
 }
 
 export interface MetricsSummary {
