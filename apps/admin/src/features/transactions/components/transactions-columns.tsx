@@ -115,7 +115,9 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 				<div
 					className={`flex items-center justify-end gap-1 font-medium ${color}`}
 				>
-					{sign === "negative" ? (
+					{amount === 0 ? (
+						<span className="text-muted-foreground italic">Lượt miễn phí</span>
+					) : sign === "negative" ? (
 						<>
 							<span>- {formattedAmount}</span>
 							<BitCoinIcon size={14} />
