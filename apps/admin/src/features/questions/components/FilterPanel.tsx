@@ -61,8 +61,15 @@ export function FilterPanel({
     });
   };
 
-  const activeCount = Object.values(local).filter(Boolean).length;
+  const backendFilterCount = [
+    local.subjectId,
+    local.chapterId,
+    local.lessonId,
+    local.questionType,
+    local.questionLevel,
+  ].filter(Boolean).length;
 
+  const canApply = backendFilterCount > 0;
   return (
     <div
       className="absolute right-0 top-full mt-2 z-50 w-120 bg-background border rounded-xl shadow-xl p-4 space-y-4"
@@ -204,14 +211,16 @@ export function FilterPanel({
         <Button
           size="sm"
           className="flex-1"
+          disabled={!canApply}
           onClick={() => {
+            if (!canApply) return;
             onChange(local);
             onClose();
           }}
         >
           Áp dụng
-          {activeCount > 0 && (
-            <Badge className="ml-1.5 h-4 px-1 text-[10px] bg-white text-primary">{activeCount}</Badge>
+          {backendFilterCount > 0 && (
+            <Badge className="ml-1.5 h-4 px-1 text-[10px] bg-white text-primary">{backendFilterCount}</Badge>
           )}
         </Button>
       </div>
