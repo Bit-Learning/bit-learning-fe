@@ -22,7 +22,7 @@ export async function getBusinessDashboardOverview(
 	filter: BusinessDashboardFilterParams,
 ): Promise<BusinessDashboardOverview> {
 	const response = await api.get<ApiResponse<BusinessDashboardOverview>>(
-		"/v1/admin/business-dashboard/overview",
+		"/admin/business-dashboard/overview",
 		{
 			params: buildDashboardParams(filter),
 		},
@@ -38,7 +38,7 @@ export async function getRevenueDetailRows(
 }> {
 	const response = await api.get<
 		ApiResponse<BusinessDashboardRevenueDetailRow[]>
-	>("/v1/admin/business-dashboard/revenue/details", {
+	>("/admin/business-dashboard/revenue/details", {
 		params: {
 			...buildDashboardParams(filter),
 			page: filter.page,
@@ -87,7 +87,7 @@ export async function exportBusinessRevenueXlsx(
 	filter: BusinessDashboardFilterParams,
 ): Promise<Blob> {
 	const response = await api.get<Blob>(
-		"/v1/admin/business-dashboard/revenue/export.xlsx",
+		"/admin/business-dashboard/revenue/export.xlsx",
 		{
 			params: buildDashboardParams(filter),
 			responseType: "blob",

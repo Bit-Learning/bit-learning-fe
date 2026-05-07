@@ -13,21 +13,21 @@ interface ApiResponse<T> {
 
 export async function getSystemMetricsSummary(): Promise<MetricsSummary> {
 	const response = await api.get<ApiResponse<MetricsSummary>>(
-		"/v1/admin/dashboard/summary",
+		"/admin/dashboard/summary",
 	);
 	return response.data.data;
 }
 
 export async function getSystemMetricsHealth(): Promise<MetricsHealth> {
 	const response = await api.get<ApiResponse<MetricsHealth>>(
-		"/v1/admin/dashboard/health",
+		"/admin/dashboard/health",
 	);
 	return response.data.data;
 }
 
 export async function getSystemMetricsTrends(): Promise<MetricsTrends> {
 	const response = await api.get<ApiResponse<MetricsTrends>>(
-		"/v1/admin/dashboard/trends",
+		"/admin/dashboard/trends",
 	);
 	return response.data.data;
 }

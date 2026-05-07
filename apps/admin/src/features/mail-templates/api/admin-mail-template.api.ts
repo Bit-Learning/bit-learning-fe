@@ -12,7 +12,7 @@ export async function listAdminMailTemplates(): Promise<
 	AdminMailTemplateSummary[]
 > {
 	const response = await api.get<ApiResponse<AdminMailTemplateSummary[]>>(
-		"/v1/admin/mail-templates",
+		"/admin/mail-templates",
 	);
 	return response.data.data ?? [];
 }
@@ -21,7 +21,7 @@ export async function getAdminMailTemplate(
 	key: string,
 ): Promise<AdminMailTemplateDetail> {
 	const response = await api.get<ApiResponse<AdminMailTemplateDetail>>(
-		`/v1/admin/mail-templates/${key}`,
+		`/admin/mail-templates/${key}`,
 	);
 	return response.data.data as AdminMailTemplateDetail;
 }
@@ -30,7 +30,7 @@ export async function getAdminMailTemplateContent(
 	key: string,
 ): Promise<AdminMailTemplateContent> {
 	const response = await api.get<ApiResponse<AdminMailTemplateContent>>(
-		`/v1/admin/mail-templates/${key}/content`,
+		`/admin/mail-templates/${key}/content`,
 	);
 	return response.data.data as AdminMailTemplateContent;
 }
@@ -40,7 +40,7 @@ export async function upsertAdminMailTemplateDraft(
 	payload: AdminMailTemplateDraftUpsertRequest,
 ): Promise<AdminMailTemplateDetail> {
 	const response = await api.put<ApiResponse<AdminMailTemplateDetail>>(
-		`/v1/admin/mail-templates/${key}/draft`,
+		`/admin/mail-templates/${key}/draft`,
 		payload,
 	);
 	return response.data.data as AdminMailTemplateDetail;
@@ -50,7 +50,7 @@ export async function publishAdminMailTemplate(
 	key: string,
 ): Promise<AdminMailTemplateDetail> {
 	const response = await api.post<ApiResponse<AdminMailTemplateDetail>>(
-		`/v1/admin/mail-templates/${key}/publish`,
+		`/admin/mail-templates/${key}/publish`,
 	);
 	return response.data.data as AdminMailTemplateDetail;
 }
@@ -59,7 +59,7 @@ export async function migrateAdminMailTemplateFromClasspath(
 	key: string,
 ): Promise<AdminMailTemplateDetail> {
 	const response = await api.post<ApiResponse<AdminMailTemplateDetail>>(
-		`/v1/admin/mail-templates/${key}/migrate-from-classpath`,
+		`/admin/mail-templates/${key}/migrate-from-classpath`,
 	);
 	return response.data.data as AdminMailTemplateDetail;
 }
@@ -69,7 +69,7 @@ export async function previewAdminMailTemplate(
 	payload: AdminMailTemplatePreviewRequest,
 ): Promise<string> {
 	const response = await api.post<string>(
-		`/v1/admin/mail-templates/${key}/preview`,
+		`/admin/mail-templates/${key}/preview`,
 		payload,
 		{
 			responseType: "text",
