@@ -105,18 +105,20 @@ export const transactionColumns: ColumnDef<AdminTransaction>[] = [
 	},
 	{
 		accessorKey: "amount",
-		header: "Số tiền",
+		header: () => <div className="text-center">Số tiền</div>,
 		cell: ({ row }) => {
 			const { type, status, amount, paymentMethod } = row.original;
 			const { color, sign } = getAmountStyle(type, status, paymentMethod);
 			const formattedAmount = formatCurrency(amount);
 
 			return (
-				<div className={`flex items-center gap-1 font-medium ${color}`}>
+				<div
+					className={`flex items-center justify-end gap-1 font-medium ${color}`}
+				>
 					{sign === "negative" ? (
 						<>
-							(<span>-{formattedAmount}</span>
-							<BitCoinIcon size={14} />)
+							<span>-{formattedAmount}</span>
+							<BitCoinIcon size={14} />
 						</>
 					) : sign === "positive" ? (
 						<>

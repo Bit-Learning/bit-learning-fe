@@ -273,8 +273,8 @@ export function TransactionsPage() {
 															Chi tiêu AI (Hoàn tất):
 														</span>
 														<span className="flex items-center gap-1 font-semibold text-rose-600">
-															(-{formatCurrency(pageStats.totalExpense)}
-															<BitCoinIcon size={13} />)
+															(-{formatCurrency(pageStats.totalExpense)})
+															<BitCoinIcon size={13} />
 														</span>
 													</div>
 													<div className="flex justify-between gap-4">
@@ -302,15 +302,14 @@ export function TransactionsPage() {
 																</>
 															) : (
 																<>
-																	(
+																	(-
 																	<span>
-																		-
 																		{formatCurrency(
 																			pageStats.totalExpense -
 																				pageStats.totalIncome,
 																		)}
 																	</span>
-																	<BitCoinIcon size={13} />)
+																	) <BitCoinIcon size={13} />
 																</>
 															)}
 														</span>
@@ -332,7 +331,7 @@ export function TransactionsPage() {
 													</div>
 													<div className="flex items-start gap-2">
 														<span className="flex items-center gap-0.5 font-semibold text-rose-600">
-															(-50,000 <BitCoinIcon size={13} />)
+															(-50,000) <BitCoinIcon size={13} />
 														</span>
 														<span className="text-muted-foreground">
 															= Chi tiêu (Mua hàng/AI qua Ví)
