@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Search, Send, Eye, Edit, Trash2, FileText, Plus, Upload, ChevronDown } from "lucide-react";
 import { Button } from "@workspace/ui/components/Button";
 import { Skeleton } from "@workspace/ui/components/Skeleton";
@@ -21,12 +21,20 @@ import { useNavigate } from "@tanstack/react-router";
 import { getDifficultyBadge, getStatusBadge, getTypeBadge } from "../utils/question.utils";
 import DeleteConfirmModal from "@/shared/components/DeleteConfirmModal";
 import { DetailModal } from "./DetailModal";
-import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
+import { FilterPopup, FilterValues } from "./FilterPopup";
 
 const PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 
 const selectCls =
   "appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer";
+
+const EMPTY_FILTERS: FilterValues = {
+  subjectId: undefined,
+  chapterId: undefined,
+  lessonId: undefined,
+  typeFilter: "",
+  levelFilter: "",
+};
 
 const MyQuestionsContent: React.FC = () => {
   const navigate = useNavigate();
@@ -34,26 +42,25 @@ const MyQuestionsContent: React.FC = () => {
   const [page, setPage] = useState(0);
   const [pageSize, setPageSize] = useState(20);
   const [selectedQuestions, setSelectedQuestions] = useState<number[]>([]);
-  const [typeFilter, setTypeFilter] = useState<QuestionType | "">("");
   const [statusFilter, setStatusFilter] = useState<ApprovalStatus | "">("");
-  const [subjectId, setSubjectId] = useState<number | undefined>(undefined);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [deletingQuestion, setDeletingQuestion] = useState<QuestionResponse | null>(null);
   const [viewingQuestion, setViewingQuestion] = useState<QuestionResponse | null>(null);
-
-  const { data: subjectsData } = useSubjectsList();
-  const subjects = subjectsData || [];
+  const [filters, setFilters] = useState<FilterValues>(EMPTY_FILTERS);
 
   const params: QuestionSearchParams = {
     page,
     size: pageSize,
     keyword: search || undefined,
-    questionType: typeFilter || undefined,
+    questionType: filters.typeFilter || undefined,
+    questionLevel: filters.levelFilter || undefined,
     approvalStatus: statusFilter || undefined,
-    subjectId: subjectId,
+    subjectId: filters.subjectId,
+    chapterId: filters.chapterId,
+    lessonId: filters.lessonId,
   };
 
-  const { data, isLoading, refetch } = useMyQuestions(params);
+  const { data, isLoading } = useMyQuestions(params);
 
   const allQuestions = data?.data ?? [];
   const totalPages = data?.page?.totalPages ?? 0;
@@ -120,6 +127,16 @@ const MyQuestionsContent: React.FC = () => {
     });
   };
 
+  const handleFilterChange = (values: FilterValues) => {
+    setFilters(values);
+    resetPage();
+  };
+
+  const handleFilterClear = () => {
+    setFilters(EMPTY_FILTERS);
+    resetPage();
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <div className="mx-auto p-8">
@@ -173,22 +190,6 @@ const MyQuestionsContent: React.FC = () => {
 
           <div className="relative">
             <select
-              value={typeFilter}
-              onChange={(e) => {
-                setTypeFilter(e.target.value as QuestionType | "");
-                resetPage();
-              }}
-              className={selectCls}
-            >
-              <option value="">Loại: Tất cả</option>
-              <option value={QuestionType.MCQ}>Trắc nghiệm</option>
-              <option value={QuestionType.ESSAY}>Tự luận</option>
-            </select>
-            <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-          </div>
-
-          <div className="relative">
-            <select
               value={statusFilter}
               onChange={(e) => {
                 setStatusFilter(e.target.value as ApprovalStatus | "");
@@ -197,34 +198,13 @@ const MyQuestionsContent: React.FC = () => {
               className={selectCls}
             >
               <option value="">Trạng thái: Tất cả</option>
-              <option value={ApprovalStatus.NONE}>Chưa gửi</option>
+              <option value={ApprovalStatus.NONE}>Nháp</option>
               <option value={ApprovalStatus.PENDING}>Chờ duyệt</option>
               <option value={ApprovalStatus.APPROVED}>Đã duyệt</option>
               <option value={ApprovalStatus.REJECTED}>Từ chối</option>
             </select>
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
-
-          {subjects.length > 0 && (
-            <div className="relative">
-              <select
-                value={subjectId ?? ""}
-                onChange={(e) => {
-                  setSubjectId(e.target.value ? Number(e.target.value) : undefined);
-                  resetPage();
-                }}
-                className={selectCls}
-              >
-                <option value="">Môn học: Tất cả</option>
-                {subjects.map((s: any) => (
-                  <option key={s.id} value={s.id}>
-                    {s.name}
-                  </option>
-                ))}
-              </select>
-              <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
-            </div>
-          )}
 
           <div className="relative">
             <select
@@ -240,6 +220,8 @@ const MyQuestionsContent: React.FC = () => {
             </select>
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
+
+          <FilterPopup value={filters} onChange={handleFilterChange} onClear={handleFilterClear} />
         </div>
 
         {isLoading ? (
@@ -254,7 +236,7 @@ const MyQuestionsContent: React.FC = () => {
               <Send className="h-16 w-16 text-gray-400 mb-4" />
               <h3 className="text-xl font-semibold mb-2 text-gray-900">Không tìm thấy câu hỏi</h3>
               <p className="text-gray-600 mb-6">
-                {search || subjectId || typeFilter || statusFilter
+                {search || filters.subjectId || filters.typeFilter || statusFilter
                   ? "Thử tìm kiếm với từ khóa hoặc bộ lọc khác"
                   : "Bạn chưa có câu hỏi nào"}
               </p>
@@ -285,26 +267,25 @@ const MyQuestionsContent: React.FC = () => {
                   {selectedQuestions.length > 0 && (
                     <AlertDialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
                       <AlertDialogTrigger asChild>
-                        <Button className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-2 flex items-center gap-2">
+                        <Button className="cursor-pointer bg-blue-600 hover:bg-blue-700 text-white text-sm px-4 py-5 flex items-center gap-2">
                           <Send className="w-4 h-4" />
                           {requestPublish.isPending ? "Đang gửi..." : `Gửi yêu cầu duyệt (${selectedQuestions.length})`}
                         </Button>
                       </AlertDialogTrigger>
                       <AlertDialogContent>
                         <AlertDialogHeader>
-                          <AlertDialogTitle>Xác nhận gửi yêu cầu phê duyệt</AlertDialogTitle>
-                          <AlertDialogDescription>
+                          <AlertDialogTitle className="text-xl">Xác nhận gửi yêu cầu phê duyệt</AlertDialogTitle>
+                          <AlertDialogDescription className="text-md">
                             Bạn đang gửi <span className="font-semibold text-gray-900">{selectedQuestions.length}</span>{" "}
                             câu hỏi để phê duyệt. Sau khi gửi, các câu hỏi sẽ được xem xét bởi quản trị viên trước khi
-                            được đưa vào Question Bank.
-                            <br />
-                            <br />
-                            Bạn có chắc chắn muốn tiếp tục?
+                            được đưa vào Ngân hàng câu hỏi.
                           </AlertDialogDescription>
                         </AlertDialogHeader>
                         <AlertDialogFooter>
-                          <AlertDialogCancel>Hủy</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleRequestPublish}>Gửi yêu cầu</AlertDialogAction>
+                          <AlertDialogCancel className="p-5 text-md">Hủy</AlertDialogCancel>
+                          <AlertDialogAction className="p-5 text-md" onClick={handleRequestPublish}>
+                            Gửi yêu cầu
+                          </AlertDialogAction>
                         </AlertDialogFooter>
                       </AlertDialogContent>
                     </AlertDialog>
@@ -325,20 +306,23 @@ const MyQuestionsContent: React.FC = () => {
                           ref={(el) => {
                             if (el) el.indeterminate = someSelected && !allSelected;
                           }}
+                          title="Chọn tất cả"
                           onChange={handleSelectAll}
                           className="peer sr-only"
                         />
-                        <div className="w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400">
-                          <svg
-                            className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
-                            viewBox="0 0 24 24"
-                            fill="none"
-                            stroke="currentColor"
-                            strokeWidth={3}
-                          >
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                          </svg>
-                          <div className="absolute w-3 h-0.5 bg-white opacity-0 peer-indeterminate:opacity-100" />
+                        <div className="relative w-5 h-5 rounded-xl border-2 border-gray-300 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-indeterminate:bg-blue-400 peer-indeterminate:border-blue-400">
+                          {allSelected && (
+                            <svg
+                              className="w-3 h-3 text-white"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              stroke="currentColor"
+                              strokeWidth={3}
+                            >
+                              <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                            </svg>
+                          )}
+                          {someSelected && !allSelected && <div className="absolute w-3 h-0.5 bg-white" />}
                         </div>
                       </label>
                     </th>
@@ -381,16 +365,18 @@ const MyQuestionsContent: React.FC = () => {
                               onClick={(e) => e.stopPropagation()}
                               className="peer sr-only"
                             />
-                            <div className="w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
-                              <svg
-                                className="w-3 h-3 text-white opacity-0 peer-checked:opacity-100"
-                                fill="none"
-                                viewBox="0 0 24 24"
-                                stroke="currentColor"
-                                strokeWidth={3}
-                              >
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                              </svg>
+                            <div className="relative w-5 h-5 rounded-xl border-2 border-gray-400 flex items-center justify-center transition-all duration-200 peer-checked:bg-blue-600 peer-checked:border-blue-600 peer-disabled:opacity-40 peer-disabled:cursor-not-allowed">
+                              {selectedQuestions.includes(question.id) && (
+                                <svg
+                                  className="w-3 h-3 text-white"
+                                  fill="none"
+                                  viewBox="0 0 24 24"
+                                  stroke="currentColor"
+                                  strokeWidth={3}
+                                >
+                                  <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+                                </svg>
+                              )}
                             </div>
                           </label>
                         )}
@@ -421,7 +407,6 @@ const MyQuestionsContent: React.FC = () => {
                           <button
                             className="cursor-pointer p-2 text-slate-600 hover:text-primary transition-colors"
                             title="Chỉnh sửa"
-                            disabled={question.approvalStatus === ApprovalStatus.PENDING}
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate({ to: `/mentor/question/${question.id}/edit` });
@@ -432,7 +417,6 @@ const MyQuestionsContent: React.FC = () => {
                           <button
                             className="cursor-pointer p-2 text-slate-600 hover:text-red-600 transition-colors"
                             title="Xóa"
-                            disabled={question.approvalStatus === ApprovalStatus.PENDING}
                             onClick={(e) => {
                               e.stopPropagation();
                               setDeletingQuestion(question);
@@ -462,9 +446,7 @@ const MyQuestionsContent: React.FC = () => {
         )}
       </div>
 
-      {viewingQuestion && (
-        <DetailModal question={viewingQuestion} onClose={() => setViewingQuestion(null)} onDeleted={() => refetch()} />
-      )}
+      {viewingQuestion && <DetailModal question={viewingQuestion} onClose={() => setViewingQuestion(null)} />}
 
       <DeleteConfirmModal
         open={!!deletingQuestion}
