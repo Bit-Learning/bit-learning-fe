@@ -82,7 +82,7 @@ export interface QuestionResponse {
   chapter?: TChapterBriefResponse;
   lesson?: TLessonBriefResponse;
   tags?: TagResponse[];
-  requestedBy: UserSummary;
+  requestedBy?: UserSummary;
   options?: OptionResponse[];
   rejectReason?: string;
   isActive: boolean;
@@ -101,7 +101,7 @@ export interface QuestionBriefResponse {
   questionLevel: QuestionLevel;
   rejectReason?: string;
   lesson?: TLessonBriefResponse;
-  requestedBy: UserSummary;
+  requestedBy?: UserSummary;
 }
 
 export interface RequestPublishDTO {
