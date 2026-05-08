@@ -250,7 +250,7 @@ export const PublicProfileContent = ({
 
 			{/* Stats Row */}
 			<div className="grid grid-cols-2 gap-4 xl:grid-cols-5">
-				<StatCard
+				{/* <StatCard
 					icon={Trophy}
 					value={gameProfile?.totalScore ?? 0}
 					label="Tổng điểm leaderboard"
@@ -270,7 +270,7 @@ export const PublicProfileContent = ({
 					label="Lượt chơi"
 					tooltip="Tổng số lượt chơi đã ghi nhận trong lịch sử. Con số này có thể lớn hơn số game có điểm vì một game có thể được chơi nhiều lần."
 					iconClassName="text-indigo-500"
-				/>
+				/> */}
 				<StatCard
 					icon={BookA}
 					value={myPosts.length}
