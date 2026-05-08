@@ -34,21 +34,41 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
     return extensions[lang] || "txt";
   };
 
-  const getVerdictIcon = (verdict: string) => {
+  const getVerdictInfo = (verdict: string) => {
     switch (verdict) {
       case "AC":
-        return <CheckCircle className="w-5 h-5 text-green-500" />;
+        return {
+          icon: <CheckCircle className="w-5 h-5 text-green-500" />,
+          label: "Accepted",
+        };
       case "WA":
-        return <XCircle className="w-5 h-5 text-red-500" />;
+        return {
+          icon: <XCircle className="w-5 h-5 text-red-500" />,
+          label: "Wrong Answer",
+        };
       case "TLE":
-        return <Clock className="w-5 h-5 text-orange-500" />;
+        return {
+          icon: <Clock className="w-5 h-5 text-orange-500" />,
+          label: "Time Limit Exceeded",
+        };
       case "CE":
+        return {
+          icon: <AlertCircle className="w-5 h-5 text-blue-500" />,
+          label: "Compile Error",
+        };
       case "RE":
-        return <AlertCircle className="w-5 h-5 text-red-500" />;
+        return {
+          icon: <AlertCircle className="w-5 h-5 text-purple-500" />,
+          label: "Runtime Error",
+        };
       default:
-        return null;
+        return {
+          icon: null,
+          label: verdict,
+        };
     }
   };
+  const verdictInfo = getVerdictInfo(submission?.verdict ?? "");
 
   const getVerdictBadge = (verdict: string) => {
     const classes = {
@@ -104,10 +124,13 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
             </div>
             <div className="space-y-1">
               <p className="text-sm font-semibold text-gray-500">Trạng thái</p>
+
               <div className="flex items-center gap-2">
-                {getVerdictIcon(submission.verdict ?? "")}
-                <Badge className={`${getVerdictBadge(submission.verdict ?? "")} px-2 py-1 text-sm font-semibold`}>
-                  {submission.verdict}
+                {verdictInfo.icon}
+                <Badge
+                  className={`${getVerdictBadge(submission.verdict ?? "")} px-2 py-1 text-sm font-semibold uppercase`}
+                >
+                  {verdictInfo.label}
                 </Badge>
               </div>
             </div>
@@ -153,46 +176,49 @@ export const SubmissionDetailModal: React.FC<SubmissionDetailModalProps> = ({ su
           <div className="space-y-3">
             <h4 className="font-bold text-gray-900">Test Cases</h4>
             <div className="space-y-3">
-              {submission.testcaseResults.map((testcase) => (
-                <div key={testcase.orderIndex} className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-3">
-                      {getVerdictIcon(testcase.verdict)}
-                      <span className="font-semibold text-gray-900">
-                        Test Case {testcase.orderIndex}
-                        {testcase.isSample && (
-                          <Badge className="ml-2 bg-blue-100 text-blue-700 text-sm px-2 py-0.5">Sample</Badge>
-                        )}
-                      </span>
-                    </div>
-                    <div className="flex items-center gap-4 text-md">
-                      <span className="text-gray-600">{testcase.executionTimeMs}ms</span>
-                      <span className="text-gray-600">{testcase.memoryUsageMb} MB</span>
-                    </div>
-                  </div>
+              {submission.testcaseResults.map((testcase) => {
+                const testcaseVerdict = getVerdictInfo(testcase.verdict);
 
-                  {testcase.isSample && (
-                    <div className="grid grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <p className="text-gray-500 font-semibold mb-1">Input</p>
-                        <pre className="bg-white p-2 rounded border border-gray-200 font-mono">{testcase.input}</pre>
+                return (
+                  <div key={testcase.orderIndex} className="bg-gray-50 rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        {testcaseVerdict.icon}
+
+                        <span className="font-semibold text-gray-900">{testcaseVerdict.label}</span>
                       </div>
-                      <div>
-                        <p className="text-gray-500 font-semibold mb-1">Expected</p>
-                        <pre className="bg-white p-2 rounded border border-gray-200 font-mono">
-                          {testcase.expectedOutput}
-                        </pre>
-                      </div>
-                      <div>
-                        <p className="text-gray-500 font-semibold mb-1">Output</p>
-                        <pre className="bg-white p-2 rounded border border-gray-200 font-mono text-green-600">
-                          {testcase.actualOutput}
-                        </pre>
+
+                      <div className="flex items-center gap-4 text-md">
+                        <span className="text-gray-600">{testcase.executionTimeMs}ms</span>
+                        <span className="text-gray-600">{testcase.memoryUsageMb} MB</span>
                       </div>
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {testcase.isSample && (
+                      <div className="grid grid-cols-3 gap-4 text-sm">
+                        <div>
+                          <p className="text-gray-500 font-semibold mb-1">Đầu vào</p>
+                          <pre className="bg-white p-2 rounded border border-gray-200 font-mono">{testcase.input}</pre>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-500 font-semibold mb-1">Kết quả</p>
+                          <pre className="bg-white p-2 rounded border border-gray-200 font-mono">
+                            {testcase.expectedOutput}
+                          </pre>
+                        </div>
+
+                        <div>
+                          <p className="text-gray-500 font-semibold mb-1">Đầu ra</p>
+                          <pre className="bg-white p-2 rounded border border-gray-200 font-mono text-green-600">
+                            {testcase.actualOutput}
+                          </pre>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           </div>
         </div>

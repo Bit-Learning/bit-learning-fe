@@ -31,7 +31,6 @@ const ContestProblemsContent: React.FC = () => {
 
   const isUpcoming = contest?.status === "UPCOMING";
   const isEnded = contest?.status === "ENDED";
-  const canViewProblems = !isUpcoming;
   const canSubmit = !isUpcoming && !isEnded;
 
   const sampleTestCases = problemDetail?.sampleTestcases || [];
@@ -235,7 +234,7 @@ const ContestProblemsContent: React.FC = () => {
                       </span>
                       <div className="h-1 w-1 rounded-full bg-slate-300" />
                       <span className="text-sm font-medium">
-                        {selectedProblem.timeLimitMs / 1000}s, {selectedProblem.memoryLimitMb}MB
+                        {selectedProblem.timeLimitMs}ms, {selectedProblem.memoryLimitMb}MB
                       </span>
                     </div>
 
@@ -260,7 +259,7 @@ const ContestProblemsContent: React.FC = () => {
                       )}
                       {selectedProblem.myAttempts > 0 && (
                         <Badge className="px-2 py-0.5 rounded text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-400">
-                          {selectedProblem.myAttempts} lần thử
+                          {selectedProblem.myAttempts} lần
                         </Badge>
                       )}
                     </div>
@@ -283,7 +282,7 @@ const ContestProblemsContent: React.FC = () => {
                           <div key={index} className="grid grid-cols-2 gap-6">
                             <div className="space-y-3">
                               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                                Input {index + 1}
+                                Đầu vào {index + 1}
                               </h4>
                               <pre className="bg-slate-100 text-black dark:bg-slate-800 p-4 rounded-lg font-mono text-sm border border-slate-200 dark:border-slate-700 whitespace-pre-wrap wrap-break-word">
                                 {testCase.input}
@@ -292,7 +291,7 @@ const ContestProblemsContent: React.FC = () => {
 
                             <div className="space-y-3">
                               <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500">
-                                Output {index + 1}
+                                Đầu ra {index + 1}
                               </h4>
                               <pre className="bg-slate-100 text-black dark:bg-slate-800 p-4 rounded-lg font-mono text-sm border border-slate-200 dark:border-slate-700 whitespace-pre-wrap wrap-break-word">
                                 {testCase.expectedOutput}
