@@ -142,7 +142,7 @@ const QuizPlayer: React.FC<QuizPlayerProps> = ({ lectureId, hasAccess = false, o
                     {isPassed ? "Chúc mừng! Bạn đã vượt qua bài quiz" : "Chưa đạt yêu cầu"}
                   </h3>
                   <p className={`text-sm ${isPassed ? "text-green-700" : "text-red-700"}`}>
-                    Điểm của bạn: <strong>{Math.floor(score)}%</strong> / {quizData.passPercent * 100}%
+                    Điểm của bạn: <strong>{Math.floor(score)}%</strong>
                   </p>
                 </div>
                 {!isPassed && (
