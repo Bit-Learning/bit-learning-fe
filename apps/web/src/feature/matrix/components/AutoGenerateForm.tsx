@@ -199,8 +199,8 @@ const AutoGenerateForm: React.FC<Props> = ({ matrixId, subjectId, onClose }) => 
       difficultyEasy: 0.4,
       difficultyMedium: 0.4,
       difficultyHard: 0.2,
-      typeMCQ: 0.9,
-      typeEssay: 0.1,
+      typeMCQ: 0.8,
+      typeEssay: 0.2,
       scoringMode: "UNIFORM",
     },
   });
