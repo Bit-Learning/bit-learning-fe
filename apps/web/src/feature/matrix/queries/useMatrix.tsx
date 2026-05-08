@@ -230,7 +230,7 @@ export const useDeleteVersion = () => {
       qc.invalidateQueries({ queryKey: versionKeys.all });
       toast.success({ title: "Thành công", description: "Xóa phiên bản thành công" });
     },
-    onError: (e: any) => {
+    onError: () => {
       toast.error({ title: "Lỗi", description: "Phiên bản đang có đề thi không xóa được" });
     },
   });
