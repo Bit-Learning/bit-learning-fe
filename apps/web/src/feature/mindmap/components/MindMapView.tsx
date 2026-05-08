@@ -4,7 +4,6 @@ import {
 	BackgroundVariant,
 	Controls,
 	MiniMap,
-	getNodesBounds,
 	getViewportForBounds,
 	useNodesState,
 	useEdgesState,
@@ -109,6 +108,39 @@ function getExportNodeSize(node: Node): { width: number; height: number } {
 	if (node.type === "mindMapRoot") return { width: 220, height: 80 };
 	if (node.type === "mindMapBranch") return { width: 190, height: 70 };
 	return { width: 170, height: 60 };
+}
+
+function getExportNodeTypography(node: Node) {
+	if (node.type === "mindMapRoot") {
+		return {
+			labelFont: "800 15px Inter, ui-sans-serif, system-ui",
+			descriptionFont: "400 11px Inter, ui-sans-serif, system-ui",
+			lineHeight: 18,
+			descriptionLineHeight: 13,
+			horizontalPadding: 28,
+			verticalPadding: 22,
+		};
+	}
+
+	if (node.type === "mindMapBranch") {
+		return {
+			labelFont: "700 13px Inter, ui-sans-serif, system-ui",
+			descriptionFont: "400 11px Inter, ui-sans-serif, system-ui",
+			lineHeight: 15,
+			descriptionLineHeight: 13,
+			horizontalPadding: 28,
+			verticalPadding: 18,
+		};
+	}
+
+	return {
+		labelFont: "600 12px Inter, ui-sans-serif, system-ui",
+		descriptionFont: "400 11px Inter, ui-sans-serif, system-ui",
+		lineHeight: 15,
+		descriptionLineHeight: 13,
+		horizontalPadding: 24,
+		verticalPadding: 16,
+	};
 }
 
 function getStringStyleValue(value: unknown, fallback: string) {
@@ -222,6 +254,45 @@ function wrapCanvasText(
 			lines[maxLines - 1] = `${last.replace(/\s+\S+$/, "") || last}...`;
 		}
 	}
+	return lines;
+}
+
+function wrapCanvasTextFully(
+	ctx: CanvasRenderingContext2D,
+	text: string,
+	maxWidth: number,
+) {
+	const words = text.split(/\s+/).filter(Boolean);
+	const lines: string[] = [];
+	let currentLine = "";
+
+	for (const word of words) {
+		const candidate = currentLine ? `${currentLine} ${word}` : word;
+		if (ctx.measureText(candidate).width <= maxWidth) {
+			currentLine = candidate;
+			continue;
+		}
+
+		if (currentLine) {
+			lines.push(currentLine);
+			currentLine = word;
+			continue;
+		}
+
+		let chunk = "";
+		for (const char of word) {
+			const nextChunk = `${chunk}${char}`;
+			if (ctx.measureText(nextChunk).width <= maxWidth) {
+				chunk = nextChunk;
+				continue;
+			}
+			if (chunk) lines.push(chunk);
+			chunk = char;
+		}
+		currentLine = chunk;
+	}
+
+	if (currentLine) lines.push(currentLine);
 	return lines;
 }
 
@@ -802,16 +873,6 @@ export default function MindMapView() {
 				topic.trim() ||
 				`Sơ đồ tư duy bài ${lessonId ?? ""}`.trim() ||
 				"Sơ đồ tư duy";
-			const nodesBounds = getNodesBounds(nodes);
-			const viewport = getViewportForBounds(
-				nodesBounds,
-				imageWidth,
-				mapHeight,
-				0.2,
-				2,
-				0.15,
-			);
-
 			const canvas = document.createElement("canvas");
 			canvas.width = imageWidth * pixelRatio;
 			canvas.height = imageHeight * pixelRatio;
@@ -850,9 +911,81 @@ export default function MindMapView() {
 				70,
 			);
 
+			const exportNodeLayouts = new Map(
+				nodes.map((node) => {
+					const baseSize = getExportNodeSize(node);
+					const data = node.data as {
+						label?: string;
+						description?: string;
+						nodeShape?: NodeShape;
+					};
+					const typography = getExportNodeTypography(node);
+					const textWidth = baseSize.width - typography.horizontalPadding;
+
+					ctx.font = typography.labelFont;
+					const labelLines = wrapCanvasTextFully(
+						ctx,
+						data.label?.trim() ?? "",
+						textWidth,
+					);
+
+					const description = data.description?.trim();
+					ctx.font = typography.descriptionFont;
+					const descriptionLines = description
+						? wrapCanvasTextFully(ctx, description, textWidth)
+						: [];
+
+					const textGap = descriptionLines.length > 0 ? 3 : 0;
+					const textHeight =
+						labelLines.length * typography.lineHeight +
+						descriptionLines.length * typography.descriptionLineHeight +
+						textGap;
+					let width = baseSize.width;
+					let height = Math.max(
+						baseSize.height,
+						textHeight + typography.verticalPadding,
+					);
+
+					if (data.nodeShape === "circle" || data.nodeShape === "diamond") {
+						const side = Math.max(width, height);
+						width = side;
+						height = side;
+					}
+
+					return [
+						node.id,
+						{ width, height, labelLines, descriptionLines, typography },
+					] as const;
+				}),
+			);
+			const exportBounds = (() => {
+				const boxes = nodes.map((node) => {
+					const size = exportNodeLayouts.get(node.id) ?? getExportNodeSize(node);
+					return {
+						x: node.position.x,
+						y: node.position.y,
+						width: size.width,
+						height: size.height,
+					};
+				});
+				const minX = Math.min(...boxes.map((box) => box.x));
+				const minY = Math.min(...boxes.map((box) => box.y));
+				const maxX = Math.max(...boxes.map((box) => box.x + box.width));
+				const maxY = Math.max(...boxes.map((box) => box.y + box.height));
+				return { x: minX, y: minY, width: maxX - minX, height: maxY - minY };
+			})();
+			const viewport = getViewportForBounds(
+				exportBounds,
+				imageWidth,
+				mapHeight,
+				0.2,
+				2,
+				0.15,
+			);
+
 			const nodesById = new Map(nodes.map((node) => [node.id, node]));
 			const getCanvasNodeBox = (node: Node) => {
-				const size = getExportNodeSize(node);
+				const size = exportNodeLayouts.get(node.id) ?? getExportNodeSize(node);
 				return {
 					x: node.position.x * viewport.zoom + viewport.x,
 					y: node.position.y * viewport.zoom + viewport.y + titleHeight,
@@ -924,6 +1057,7 @@ export default function MindMapView() {
 					handleColor?: string;
 					nodeShape?: NodeShape;
 				};
+				const layout = exportNodeLayouts.get(node.id);
 				const style = data.nodeStyle ?? {};
 				const handleColor = data.handleColor ?? "#94a3b8";
 				const radius =
@@ -969,42 +1103,30 @@ export default function MindMapView() {
 				ctx.fillStyle = getStringStyleValue(style.color, "#0f172a");
 				ctx.textAlign = "center";
 				ctx.textBaseline = "middle";
-				ctx.font =
-					node.type === "mindMapRoot"
-						? "800 15px Inter, ui-sans-serif, system-ui"
-						: node.type === "mindMapBranch"
-							? "700 13px Inter, ui-sans-serif, system-ui"
-							: "600 12px Inter, ui-sans-serif, system-ui";
-
-				const labelLines = wrapCanvasText(
-					ctx,
-					data.label ?? "",
-					box.width - 28,
-					data.description ? 2 : 3,
-				);
-				const description = data.description?.trim();
-				const descriptionLines = description
-					? wrapCanvasText(ctx, description, box.width - 30, 2)
-					: [];
-				const lineHeight = node.type === "mindMapRoot" ? 18 : 15;
-				const descLineHeight = 13;
+				const typography = layout?.typography ?? getExportNodeTypography(node);
+				const labelLines = layout?.labelLines ?? [];
+				const descriptionLines = layout?.descriptionLines ?? [];
+				const textGap = descriptionLines.length > 0 ? 3 : 0;
 				const textHeight =
-					labelLines.length * lineHeight +
-					descriptionLines.length * descLineHeight;
-				let textY = box.y + box.height / 2 - textHeight / 2 + lineHeight / 2;
+					labelLines.length * typography.lineHeight +
+					descriptionLines.length * typography.descriptionLineHeight +
+					textGap;
+				let textY =
+					box.y + box.height / 2 - textHeight / 2 + typography.lineHeight / 2;
 
+				ctx.font = typography.labelFont;
 				for (const line of labelLines) {
 					ctx.fillText(line, box.x + box.width / 2, textY);
-					textY += lineHeight;
+					textY += typography.lineHeight;
 				}
 
 				if (descriptionLines.length > 0) {
 					ctx.globalAlpha = 0.72;
-					ctx.font = "400 11px Inter, ui-sans-serif, system-ui";
-					textY += 3;
+					ctx.font = typography.descriptionFont;
+					textY += textGap;
 					for (const line of descriptionLines) {
 						ctx.fillText(line, box.x + box.width / 2, textY);
-						textY += descLineHeight;
+						textY += typography.descriptionLineHeight;
 					}
 					ctx.globalAlpha = 1;
 				}
