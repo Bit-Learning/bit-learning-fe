@@ -167,7 +167,7 @@ export function PaymentStatsTab({ data, isLoading }: PaymentStatsTabProps) {
 								color="bg-blue-500"
 							/>
 							<TransactionTypeBar
-								label="AI Request"
+								label="Yêu cầu AI"
 								value={data.aiRequestTransactions}
 								total={data.totalTransactions}
 								color="bg-purple-500"
@@ -299,7 +299,7 @@ function formatCurrency(amount: number): string {
 function translateType(type: string): string {
 	const typeMap: Record<string, string> = {
 		DEPOSIT: "Nạp tiền",
-		AI_REQUEST: "AI Request",
+		AI_REQUEST: "Yêu cầu AI",
 		PURCHASE: "Mua hàng",
 		CONTEST_PRIZE: "Thưởng cuộc thi",
 	};
