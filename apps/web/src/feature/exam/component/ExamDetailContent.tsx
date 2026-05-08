@@ -63,8 +63,6 @@ const ExamDetailContent: React.FC = () => {
   const downloadExam = useDownloadExam();
   const downloadExamAnswerKey = useDownloadExamAnswerKey();
 
-  const { mutate: publishExam, isPending: isPublishing } = usePublishExam();
-
   const { data: attempts, isLoading: isLoadingAttempts } = useQuizAttemptsByExam(
     examId!,
     activeTab === "stats" ? { page: attemptsPage, size: ATTEMPTS_PER_PAGE } : undefined,
@@ -92,11 +90,6 @@ const ExamDetailContent: React.FC = () => {
   const handleDownloadWithAnswer = (format: "pdf" | "docx") => {
     if (!exam) return;
     downloadExamAnswerKey.mutate({ id: exam.id, format, name: exam.name });
-  };
-
-  const handleTogglePublish = () => {
-    if (!exam) return;
-    publishExam({ id: exam.id, isPublished: !exam.isPublished });
   };
 
   const totalQuestions = exam?.examQuestions.length ?? 0;
