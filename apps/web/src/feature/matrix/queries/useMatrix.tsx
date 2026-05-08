@@ -128,7 +128,7 @@ export const useDeleteMatrix = () => {
       toast.success({ title: "Thành công", description: "Xóa ma trận thành công" });
     },
     onError: () => {
-      toast.error({ title: "Lỗi", description: "Xóa ma trận thất bại" });
+      toast.error({ title: "Lỗi", description: "Xóa ma trận thất bại do đã có phiên bản và đề thi" });
     },
   });
 };
@@ -231,7 +231,7 @@ export const useDeleteVersion = () => {
       toast.success({ title: "Thành công", description: "Xóa phiên bản thành công" });
     },
     onError: (e: any) => {
-      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Xóa phiên bản thất bại" });
+      toast.error({ title: "Lỗi", description: "Phiên bản đang có đề thi không xóa được" });
     },
   });
 };
