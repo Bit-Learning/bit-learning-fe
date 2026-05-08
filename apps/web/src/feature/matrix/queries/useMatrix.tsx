@@ -127,8 +127,8 @@ export const useDeleteMatrix = () => {
       qc.invalidateQueries({ queryKey: matrixKeys.all });
       toast.success({ title: "Thành công", description: "Xóa ma trận thành công" });
     },
-    onError: (e: any) => {
-      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Xóa ma trận thất bại" });
+    onError: () => {
+      toast.error({ title: "Lỗi", description: "Xóa ma trận thất bại" });
     },
   });
 };
