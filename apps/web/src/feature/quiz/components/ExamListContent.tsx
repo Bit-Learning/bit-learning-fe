@@ -7,6 +7,7 @@ import { useAllExams } from "@/feature/exam/queries/useExam";
 import { useSubjectsList } from "@/feature/matrix/queries/useSubject";
 import { Pagination } from "@/shared/components/Pagination";
 import useDebounce from "@/shared/hooks/use-debounce";
+import { useInstructors } from "@/feature/user/queries/useUser";
 
 type TabType = "ALL" | "EXAM" | "PRACTICE";
 
@@ -57,9 +58,8 @@ const ExamListContent: React.FC = () => {
       activeTab === "ALL" ? true : activeTab === "EXAM" ? !exam.type || exam.type === "EXAM" : exam.type === "PRACTICE",
     );
 
-  const uniqueCreators = Array.from(
-    new Map(exams.filter((e) => e.createdBy).map((e) => [e.createdBy!.id, e.createdBy!])).values(),
-  );
+  const { data: instructorsData } = useInstructors(0, 100);
+  const instructors = instructorsData?.content ?? [];
 
   const grades = Array.from(new Set(subjects.map((s) => s.classLevel))).sort((a, b) => a - b);
   const filteredSubjects = selectedGrade === "all" ? subjects : subjects.filter((s) => s.classLevel === selectedGrade);
@@ -189,9 +189,9 @@ const ExamListContent: React.FC = () => {
               className="px-3 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm min-w-35"
             >
               <option value="all">Tất cả giảng viên</option>
-              {uniqueCreators.map((c) => (
-                <option key={c.id} value={c.id}>
-                  {c.firstName} {c.lastName}
+              {instructors.map((instructor: any) => (
+                <option key={instructor.id} value={instructor.id}>
+                  {`${instructor.firstName} ${instructor.lastName}`.trim()}
                 </option>
               ))}
             </select>

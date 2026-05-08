@@ -8,6 +8,8 @@ import { Pagination } from "@/shared/components/Pagination";
 import { toast } from "@/shared/components/Sonner";
 import { type ProblemBriefResponse, type Difficulty, ApprovalStatus } from "../types/coding.type";
 import { ProblemStatsCard } from "./ProblemStatsCard";
+import { useInstructors } from "@/feature/user/queries/useUser";
+import { TInstructor } from "@/feature/user/types/user.type";
 
 const DIFF_LABEL: Record<string, string> = {
   EASY: "Dễ",
@@ -82,15 +84,8 @@ const StudentProblemListContent: React.FC = () => {
   const totalPages = pageInfo?.totalPages || 0;
   const totalElements = pageInfo?.totalElements || 0;
 
-  const creators = useMemo(() => {
-    const map = new Map<number, string>();
-    problems.forEach((p) => {
-      if (p.createdBy) {
-        map.set(p.createdBy.id, `${p.createdBy.firstName} ${p.createdBy.lastName}`.trim());
-      }
-    });
-    return Array.from(map.entries()).map(([id, name]) => ({ id, name }));
-  }, [problems]);
+  const { data: instructorsData } = useInstructors(0, 100);
+  const instructors: TInstructor[] = instructorsData?.content ?? [];
 
   const tagMap = useMemo(() => {
     const map: Record<string, number> = {};
@@ -229,7 +224,7 @@ const StudentProblemListContent: React.FC = () => {
             <ChevronDown className="absolute right-2.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
           </div>
 
-          {creators.length > 0 && (
+          {instructors.length > 0 && (
             <div className="relative">
               <select
                 value={createdById}
@@ -240,9 +235,9 @@ const StudentProblemListContent: React.FC = () => {
                 className="appearance-none pl-3 pr-8 py-3 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md text-sm text-slate-700 dark:text-slate-300 outline-none focus:ring-2 focus:ring-primary shadow-sm cursor-pointer"
               >
                 <option value="all">Giảng viên: Tất cả</option>
-                {creators.map(({ id, name }) => (
-                  <option key={id} value={id}>
-                    {name}
+                {instructors.map((instructor: any) => (
+                  <option key={instructor.id} value={instructor.id}>
+                    {`${instructor.firstName} ${instructor.lastName}`.trim()}
                   </option>
                 ))}
               </select>
