@@ -59,7 +59,7 @@ const GuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
         <div className="flex items-center justify-between px-6 py-4 border-b dark:border-slate-700">
           <div className="flex items-center gap-2">
             <BookOpen className="h-5 w-5 text-primary" />
-            <h2 className="text-lg font-semibold">Hướng dẫn import</h2>
+            <h2 className="text-lg font-semibold">Hướng dẫn thêm câu hỏi từ file</h2>
           </div>
           <button
             onClick={onClose}
@@ -76,7 +76,7 @@ const GuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
               "Chọn bộ sách, môn học, chương và bài học ở cột bên trái",
               "Upload file Word (.docx) và nhấn 'Xem trước'",
               "Xem lại danh sách câu hỏi, chỉnh sửa nội dung hoặc đáp án đúng nếu cần",
-              "Xác nhận import — hệ thống sẽ tự động lưu dữ liệu",
+              "Xác nhận thêm vào — hệ thống sẽ tự động lưu dữ liệu",
             ].map((step, i) => (
               <div key={i} className="flex items-start gap-3">
                 <div className="w-6 h-6 rounded-full bg-primary flex items-center justify-center shrink-0 mt-0.5">
@@ -105,7 +105,7 @@ const GuideModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, on
               <p>
                 • Kích thước file tối đa: <span className="font-medium text-foreground">10MB</span>
               </p>
-              <p>• Câu hỏi trùng lặp sẽ tự động bị loại khỏi danh sách import</p>
+              <p>• Câu hỏi trùng lặp sẽ tự động bị loại khỏi danh sách câu hỏi thêm vào</p>
             </div>
           </div>
 
@@ -210,13 +210,13 @@ const ImportQuestionForm: React.FC = () => {
         setCurrentStep("completed");
         toast.success({
           title: "Hoàn thành",
-          description: `Đã import thành công ${jobStatus.importedQuestions}/${jobStatus.totalQuestions} câu hỏi`,
+          description: `Đã thêm thành công ${jobStatus.importedQuestions}/${jobStatus.totalQuestions} câu hỏi`,
         });
       } else if (jobStatus.status === "FAILED") {
         setCurrentStep("preview");
         toast.error({
           title: "Lỗi",
-          description: jobStatus.errorMessage || "Import thất bại",
+          description: jobStatus.errorMessage || "Thêm câu hỏi thất bại",
         });
       }
     }
@@ -365,7 +365,7 @@ const ImportQuestionForm: React.FC = () => {
       setImportableQuestions((prev) =>
         prev.map((q) => (q.id === questionId ? { ...q, status: "DELETE" as PreviewQuestionStatus } : q)),
       );
-      toast.success({ title: "Đã xóa", description: "Câu hỏi sẽ không được import" });
+      toast.success({ title: "Đã xóa", description: "Câu hỏi sẽ không được thêm vào" });
     } catch {}
   };
 
@@ -373,13 +373,13 @@ const ImportQuestionForm: React.FC = () => {
     if (!importJobId) return;
     const keepCount = getKeepCount();
     if (keepCount === 0) {
-      toast.error({ title: "Không thể import", description: "Không có câu hỏi nào được chọn để import" });
+      toast.error({ title: "Không thể thêm câu hỏi", description: "Không có câu hỏi nào được chọn để thêm vào" });
       return;
     }
     try {
       setCurrentStep("processing");
       await confirmImport.mutateAsync({ importJobId });
-      toast.info({ title: "Đang xử lý", description: "Hệ thống đang import câu hỏi..." });
+      toast.info({ title: "Đang xử lý", description: "Hệ thống đang thêm câu hỏi..." });
     } catch {
       setCurrentStep("preview");
     }
@@ -419,7 +419,7 @@ const ImportQuestionForm: React.FC = () => {
             <ArrowLeft className="mr-1 h-4 w-4" />
             Quay lại
           </Button>
-          <h1 className="text-3xl font-bold">Import ngân hàng câu hỏi</h1>
+          <h1 className="text-3xl font-bold">Thêm vào danh sách câu hỏi</h1>
           <p className="text-muted-foreground mt-1">Nhập câu hỏi từ file Word (.docx) với định dạng chuẩn</p>
         </div>
         <Button
@@ -577,7 +577,7 @@ const ImportQuestionForm: React.FC = () => {
                       </div>
                       <p className="font-semibold text-base mb-1">{uploadedFile.name}</p>
                       <p className="text-sm text-muted-foreground">{(uploadedFile.size / 1024).toFixed(2)} KB</p>
-                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">Click để chọn file khác</p>
+                      <p className="text-xs text-blue-600 dark:text-blue-400 mt-2">Chọn file khác</p>
                     </div>
                   )}
                 </div>
@@ -624,7 +624,7 @@ const ImportQuestionForm: React.FC = () => {
                       </div>
                       <div className="flex items-center gap-1.5">
                         <div className="w-2 h-2 rounded-full bg-green-500" />
-                        <span className="font-semibold text-green-600">{getKeepCount()} sẽ import</span>
+                        <span className="font-semibold text-green-600">{getKeepCount()} sẽ được thêm vào</span>
                       </div>
                       {getDeleteCount() > 0 && (
                         <div className="flex items-center gap-1.5">
@@ -654,7 +654,7 @@ const ImportQuestionForm: React.FC = () => {
                       <Ban className="h-7 w-7 text-gray-400" />
                     </div>
                     <p className="font-semibold text-base mb-1 text-gray-700 dark:text-gray-300">
-                      Không có câu hỏi mới để import
+                      Không có câu hỏi mới để thêm vào
                     </p>
                     <p className="text-sm text-muted-foreground">
                       Tất cả {skippedCount} câu hỏi trong file đều đã tồn tại trong hệ thống.
@@ -872,7 +872,7 @@ const ImportQuestionForm: React.FC = () => {
                         className="gap-2 flex-1 py-5 text-sm"
                       >
                         <Upload className="h-4 w-4" />
-                        {confirmImport.isPending ? "Đang xác nhận..." : `Xác nhận import (${getKeepCount()} câu hỏi)`}
+                        {confirmImport.isPending ? "Đang xác nhận..." : `Xác nhận thêm (${getKeepCount()} câu hỏi)`}
                       </Button>
                       <Button variant="outline" className="py-5 text-sm" onClick={handleReset}>
                         Hủy
@@ -891,8 +891,8 @@ const ImportQuestionForm: React.FC = () => {
                   <div className="mx-auto w-16 h-16 rounded-2xl bg-blue-100 dark:bg-blue-900 flex items-center justify-center mb-5 animate-pulse">
                     <Upload className="h-8 w-8 text-blue-600 dark:text-blue-400" />
                   </div>
-                  <h3 className="text-lg font-semibold mb-2">Đang xử lý import...</h3>
-                  <p className="text-sm text-muted-foreground">Hệ thống đang import câu hỏi. Vui lòng đợi...</p>
+                  <h3 className="text-lg font-semibold mb-2">Đang xử lý...</h3>
+                  <p className="text-sm text-muted-foreground">Hệ thống đang thêm câu hỏi. Vui lòng đợi...</p>
                 </div>
               </CardContent>
             </Card>
@@ -909,12 +909,12 @@ const ImportQuestionForm: React.FC = () => {
                     <h3 className="font-semibold text-green-700 dark:text-green-100 mb-1">Import thành công!</h3>
                     <p className="text-md text-green-700 dark:text-green-200 mb-3">
                       {jobStatus
-                        ? `Đã import thành công ${jobStatus.importedQuestions}/${jobStatus.totalQuestions} câu hỏi vào hệ thống.`
+                        ? `Đã thêm thành công ${jobStatus.importedQuestions}/${jobStatus.totalQuestions} câu hỏi vào hệ thống.`
                         : "Ngân hàng câu hỏi đã được nhập vào hệ thống."}
                     </p>
                     {jobStatus && jobStatus.failedQuestions > 0 && (
                       <p className="text-sm text-red-600 dark:text-red-400 mb-3">
-                        Có {jobStatus.failedQuestions} câu hỏi import thất bại.
+                        Có {jobStatus.failedQuestions} câu hỏi thêm vào thất bại.
                       </p>
                     )}
                     <div className="flex gap-2">
@@ -922,7 +922,7 @@ const ImportQuestionForm: React.FC = () => {
                         Xem danh sách câu hỏi
                       </Button>
                       <Button className="p-5 text-md" variant="outline" onClick={handleReset}>
-                        Import thêm file
+                        Thêm file khác
                       </Button>
                     </div>
                   </div>

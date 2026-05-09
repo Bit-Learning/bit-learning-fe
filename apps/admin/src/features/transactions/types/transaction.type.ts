@@ -52,7 +52,7 @@ export const transactionTypeOptions: Array<{
 }> = [
 	{ label: "Mua hàng", value: "PURCHASE" },
 	{ label: "Nạp tiền", value: "DEPOSIT" },
-	{ label: "AI Request", value: "AI_REQUEST" },
+	{ label: "Yêu cầu AI", value: "AI_REQUEST" },
 	{ label: "Thưởng cuộc thi", value: "CONTEST_PRIZE" },
 ];
 

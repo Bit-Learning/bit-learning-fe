@@ -63,8 +63,6 @@ const ExamDetailContent: React.FC = () => {
   const downloadExam = useDownloadExam();
   const downloadExamAnswerKey = useDownloadExamAnswerKey();
 
-  const { mutate: publishExam, isPending: isPublishing } = usePublishExam();
-
   const { data: attempts, isLoading: isLoadingAttempts } = useQuizAttemptsByExam(
     examId!,
     activeTab === "stats" ? { page: attemptsPage, size: ATTEMPTS_PER_PAGE } : undefined,
@@ -92,11 +90,6 @@ const ExamDetailContent: React.FC = () => {
   const handleDownloadWithAnswer = (format: "pdf" | "docx") => {
     if (!exam) return;
     downloadExamAnswerKey.mutate({ id: exam.id, format, name: exam.name });
-  };
-
-  const handleTogglePublish = () => {
-    if (!exam) return;
-    publishExam({ id: exam.id, isPublished: !exam.isPublished });
   };
 
   const totalQuestions = exam?.examQuestions.length ?? 0;
@@ -613,10 +606,6 @@ const ExamDetailContent: React.FC = () => {
                                 }}
                               />
                             </div>
-                            <button className="flex items-center gap-2 px-4 py-2 bg-green-50 text-green-700 border border-green-200 rounded-lg text-sm font-bold hover:bg-green-100 transition-colors">
-                              <FileText className="h-4 w-4" />
-                              Xuất báo cáo (Excel)
-                            </button>
                           </div>
                         </div>
 

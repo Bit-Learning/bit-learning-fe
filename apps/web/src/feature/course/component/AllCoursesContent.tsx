@@ -1,5 +1,4 @@
-import Loader from "@workspace/ui/components/loader/TerminalLoader";
-import { BookOpen, LayoutGrid, Sparkles, SlidersHorizontal, BookMarked } from "lucide-react";
+import { LayoutGrid, Sparkles, BookMarked } from "lucide-react";
 import type React from "react";
 import { useMemo, useState } from "react";
 import { useSelector } from "react-redux";
@@ -10,6 +9,10 @@ import type { CourseLevel, SearchCourseRequest } from "../types/course.type";
 import { AllCoursesView, SCHOOL_LEVELS, type SchoolLevelKey } from "./AllCoursesView";
 import { PersonalisedView } from "./PersonalisedView";
 import FavoriteCategoriesModal from "./FavoriteCategoriesModal";
+
+const ALL_GRADES = SCHOOL_LEVELS.flatMap((sl) =>
+  Array.from({ length: sl.maxGrade - sl.minGrade + 1 }, (_, i) => sl.minGrade + i),
+);
 
 const AllCoursesContent: React.FC = () => {
   const navigate = useNavigate();
@@ -34,22 +37,50 @@ const AllCoursesContent: React.FC = () => {
     return null;
   });
 
+  const [selectedGrade, setSelectedGrade] = useState<number | null>(null);
+
   const isPersonalised = isLoggedIn && !!studentGrade && !showAll;
+
+  const gradeOptions = useMemo<number[]>(() => {
+    if (selectedSchoolLevel) {
+      const found = SCHOOL_LEVELS.find((s) => s.label === selectedSchoolLevel);
+      if (found) {
+        return Array.from({ length: found.maxGrade - found.minGrade + 1 }, (_, i) => found.minGrade + i);
+      }
+    }
+    return ALL_GRADES;
+  }, [selectedSchoolLevel]);
+
+  const handleSchoolLevelChange = (level: SchoolLevelKey) => {
+    setSelectedSchoolLevel(level);
+    if (level && selectedGrade !== null) {
+      const found = SCHOOL_LEVELS.find((s) => s.label === level);
+      if (found && (selectedGrade < found.minGrade || selectedGrade > found.maxGrade)) {
+        setSelectedGrade(null);
+      }
+    }
+  };
 
   const searchRequest = useMemo<SearchCourseRequest>(() => {
     const req: SearchCourseRequest = {};
     if (selectedLevel) req.level = selectedLevel;
-    if (selectedSchoolLevel) {
+
+    if (selectedGrade !== null) {
+      req.minGrade = selectedGrade;
+      req.maxGrade = selectedGrade;
+    } else if (selectedSchoolLevel) {
       const found = SCHOOL_LEVELS.find((s) => s.label === selectedSchoolLevel);
       if (found) {
         req.minGrade = found.minGrade;
         req.maxGrade = found.maxGrade;
       }
     }
-    return req;
-  }, [selectedLevel, selectedSchoolLevel]);
 
-  const hasActiveFilter = selectedLevel !== null || sortBy !== "default" || selectedSchoolLevel !== null;
+    return req;
+  }, [selectedLevel, selectedSchoolLevel, selectedGrade]);
+
+  const hasActiveFilter =
+    selectedLevel !== null || sortBy !== "default" || selectedSchoolLevel !== null || selectedGrade !== null;
 
   const handleCourseClick = (id: number) => {
     navigate({ to: "/courses/$id", params: { id: String(id) } });
@@ -58,6 +89,7 @@ const AllCoursesContent: React.FC = () => {
   const handleResetFilters = () => {
     resetFilters();
     setSelectedSchoolLevel(null);
+    setSelectedGrade(null);
   };
 
   return (
@@ -132,18 +164,34 @@ const AllCoursesContent: React.FC = () => {
           )}
 
           {!isPersonalised && (
-            <select
-              value={selectedSchoolLevel ?? ""}
-              onChange={(e) => setSelectedSchoolLevel((e.target.value as SchoolLevelKey) || null)}
-              className="text-md px-3.5 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
-            >
-              <option value="">Tất cả cấp học</option>
-              {SCHOOL_LEVELS.map((sl) => (
-                <option key={sl.label} value={sl.label}>
-                  {sl.label}
-                </option>
-              ))}
-            </select>
+            <>
+              {/* School level filter */}
+              <select
+                value={selectedSchoolLevel ?? ""}
+                onChange={(e) => handleSchoolLevelChange((e.target.value as SchoolLevelKey) || null)}
+                className="text-md px-3.5 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="">Tất cả cấp học</option>
+                {SCHOOL_LEVELS.map((sl) => (
+                  <option key={sl.label} value={sl.label}>
+                    {sl.label}
+                  </option>
+                ))}
+              </select>
+
+              <select
+                value={selectedGrade ?? ""}
+                onChange={(e) => setSelectedGrade(e.target.value !== "" ? Number(e.target.value) : null)}
+                className="text-md px-3.5 py-1.5 rounded-md border border-slate-300 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 focus:outline-none focus:ring-1 focus:ring-blue-500 cursor-pointer"
+              >
+                <option value="">Tất cả lớp</option>
+                {gradeOptions.map((g) => (
+                  <option key={g} value={g}>
+                    Lớp {g}
+                  </option>
+                ))}
+              </select>
+            </>
           )}
 
           <select

@@ -49,18 +49,7 @@ const MentorProblemDetailContent: React.FC = () => {
 
   const requestPublish = useRequestPublish();
 
-  const handleSubmitApproval = () => {
-    if (!problemId) return;
-    requestPublish.mutate([problemId], {
-      onSuccess: () => {
-        setTimeout(() => {
-          setShowApprovalModal(false);
-        }, 1000);
-      },
-    });
-  };
-
-  const { data: problem, isLoading } = useProblemDetail(problemId || "", selectedLanguage);
+  const { data: problem, isLoading, refetch: refetchProblem } = useProblemDetail(problemId || "", selectedLanguage);
   const { data: statistics } = useProblemStatistics(problemId || "");
   const { data: allTestCases, isLoading: isLoadingTestCases } = useAllTestCases(problemId || "", {
     enabled: activeTab === "testcases",
@@ -68,6 +57,18 @@ const MentorProblemDetailContent: React.FC = () => {
   const createTestCase = useCreateTestCase();
   const updateTestCase = useUpdateTestCase();
   const deleteTestCase = useDeleteTestCase();
+
+  const handleSubmitApproval = () => {
+    if (!problemId) return;
+    requestPublish.mutate([problemId], {
+      onSuccess: async () => {
+        await refetchProblem();
+        setTimeout(() => {
+          setShowApprovalModal(false);
+        }, 1000);
+      },
+    });
+  };
 
   const handleAddTestCase = async (data: { input: string; expectedOutput: string; isSample: boolean }) => {
     try {
@@ -118,10 +119,6 @@ const MentorProblemDetailContent: React.FC = () => {
     };
     return configs[difficulty];
   };
-
-  const acceptanceRate = statistics
-    ? ((statistics.acceptedSubmissions / statistics.totalSubmissions) * 100).toFixed(1)
-    : 0;
 
   return (
     <div className="min-h-screen bg-white dark:bg-slate-950">

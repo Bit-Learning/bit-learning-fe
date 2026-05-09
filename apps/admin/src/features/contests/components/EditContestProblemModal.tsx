@@ -132,6 +132,7 @@ const EditContestProblemModal: React.FC<EditContestProblemModalProps> = ({
 
   const onSaveInfo = async (data: ProblemFormData) => {
     await updateProblem.mutateAsync({ contestId, contestProblemId, request: data });
+    onClose();
   };
 
   const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {

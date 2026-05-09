@@ -54,8 +54,8 @@ const ScoringRulesModal: React.FC<{ open: boolean; onClose: () => void }> = ({ o
               Điểm Phạt = thời gian(m) + số lần sai × 20m
             </div>
             <p className="text-sm text-gray-600 leading-relaxed mt-2">
-              Trong đó <strong className="text-gray-900 font-medium">acTimeMs</strong> là số mili giây từ lúc cuộc thi
-              bắt đầu đến khi nộp AC lần đầu, chia 60.000 để ra phút (làm tròn lên). Bài{" "}
+              Trong đó <strong className="text-gray-900 font-medium">thời gian</strong> là thời gian từ lúc cuộc thi bắt
+              đầu đến khi nộp AC lần đầu. Bài{" "}
               <strong className="text-gray-900 font-medium">chưa AC thì không bị tính</strong> điểm phạt — cứ mạnh dạn
               thử nộp.
             </p>

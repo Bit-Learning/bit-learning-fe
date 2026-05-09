@@ -29,7 +29,7 @@
 		"@workspace/lib": "workspace:*",
 		"@workspace/ui": "workspace:*",
 		"@xyflow/react": "^12.10.2",
-		"axios": "^1.15.2",
+		"axios": "^1.16.0",
 		"blockly": "^12.5.1",
 		"clsx": "^2.1.1",
 		"date-fns": "^4.1.0",

@@ -127,8 +127,8 @@ export const useDeleteMatrix = () => {
       qc.invalidateQueries({ queryKey: matrixKeys.all });
       toast.success({ title: "Thành công", description: "Xóa ma trận thành công" });
     },
-    onError: (e: any) => {
-      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Xóa ma trận thất bại" });
+    onError: () => {
+      toast.error({ title: "Lỗi", description: "Xóa ma trận thất bại do đã có phiên bản và đề thi" });
     },
   });
 };
@@ -230,8 +230,8 @@ export const useDeleteVersion = () => {
       qc.invalidateQueries({ queryKey: versionKeys.all });
       toast.success({ title: "Thành công", description: "Xóa phiên bản thành công" });
     },
-    onError: (e: any) => {
-      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Xóa phiên bản thất bại" });
+    onError: () => {
+      toast.error({ title: "Lỗi", description: "Phiên bản đang có đề thi không xóa được" });
     },
   });
 };
