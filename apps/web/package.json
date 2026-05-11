@@ -75,14 +75,14 @@
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.14",
+		"@biomejs/biome": "^2.4.15",
 		"@codecov/vite-plugin": "^1.9.1",
 		"@tailwindcss/postcss": "^4.2.4",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.0",
 		"@testing-library/user-event": "^14.6.1",
 		"@types/js-cookie": "^3.0.6",
-		"@types/node": "^20.19.39",
+		"@types/node": "^20.19.40",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.1.7",
 		"@types/sockjs-client": "^1.5.4",
@@ -94,7 +94,7 @@
 		"jsdom": "^27.2.0",
 		"playwright": "^1.59.1",
 		"typescript": "^5.9.2",
-		"vite": "^7.3.2",
+		"vite": "^7.3.3",
 		"vite-plugin-imagemin": "^0.6.1",
 		"vitest": "^4.1.5"
 	}
