@@ -113,9 +113,9 @@ const HeroSection: FC = () => {
 					</p>
 				</div>
 			</div>
-			{/* <div className="relative z-10">
-        <CodeProfile />
-      </div> */}
+			<div className="relative z-10">
+				<CodeProfile />
+			</div>
 		</section>
 	);
 };
