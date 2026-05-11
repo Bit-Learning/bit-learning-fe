@@ -2,7 +2,7 @@ name: Build, Push & Deploy – PROD
 
 on:
     push:
-        branches: [main,develop]
+        branches: [main]
         paths:
           - "apps/web/**"
           - "apps/admin/**"
