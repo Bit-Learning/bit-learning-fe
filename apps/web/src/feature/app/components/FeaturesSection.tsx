@@ -5,8 +5,8 @@ import { HOME_FEATURES } from "../config/home-features";
 
 const FeaturesSection: FC = () => {
 	return (
-		<section id="tour-features" className="py-16">
-			<div className="text-center mb-12">
+		<section id="tour-features" className="py-6">
+			<div className="text-center mb-6">
 				<AuroraView />
 				<p className="text-slate-600 max-w-2xl mx-auto mt-3">
 					Nền tảng tích hợp đầy đủ công cụ giúp học sinh từ lớp 1 đến lớp 12
