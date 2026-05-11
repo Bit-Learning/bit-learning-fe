@@ -74,6 +74,7 @@ class WebSocketService {
 				},
 				debug: (str: string) => {
 					if (import.meta.env.DEV) {
+						console.log("[WebSocket Debug]", str);
 					}
 				},
 				// Disable STOMP built-in reconnect. We manage reconnect manually to avoid
@@ -93,7 +94,7 @@ class WebSocketService {
 					rejectOnce(new Error(frame.headers.message || "Connection failed"));
 				},
 
-				onWebSocketClose: (event) => {
+				onWebSocketClose: () => {
 					this.connectPromise = null;
 
 					if (!settled) {
