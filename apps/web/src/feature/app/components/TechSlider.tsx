@@ -271,11 +271,11 @@ const platforms: TechItem[] = [
 ];
 
 const TechChip: React.FC<TechItem> = ({ name, logo }) => (
-	<div className="flex items-center gap-2 rounded-full border border-slate-200 bg-white/95 px-4 py-2 text-sm font-semibold text-slate-700 shadow-sm backdrop-blur-sm">
+	<div className="flex items-center gap-2 rounded-full border border-slate-200 dark:border-slate-700 bg-white/95 dark:bg-slate-800/90 px-4 py-2 text-sm font-semibold text-slate-700 dark:text-slate-200 shadow-sm backdrop-blur-sm">
 		<img
 			src={logo}
 			alt={name}
-			className="h-5 w-5 object-contain"
+			className="h-5 w-5 object-contain dark:brightness-90"
 			loading="lazy"
 		/>
 		<span>{name}</span>

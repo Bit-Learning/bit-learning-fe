@@ -4,7 +4,6 @@ import { Link } from "@tanstack/react-router";
 import { Badge } from "@workspace/ui/components/Badge";
 import CodeProfile from "@workspace/ui/components/custom/codeprofile";
 import NumberTicker from "@workspace/ui/components/custom/ticker";
-import DarkVeil from "@workspace/ui/components/reactbits/DarkVeil";
 
 import BlueButton from "../../../shared/components/button/BlueButton";
 import {
@@ -48,19 +47,8 @@ const HeroSection: FC = () => {
 	return (
 		<section
 			id="tour-hero"
-			className="relative overflow-hidden py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center"
+			className="relative py-12 lg:py-20 grid lg:grid-cols-2 gap-12 items-center"
 		>
-			<div className="absolute inset-0 z-0 w-full h-full">
-				<DarkVeil
-					hueShift={10}
-					noiseIntensity={0}
-					scanlineIntensity={0}
-					speed={0.5}
-					scanlineFrequency={0}
-					warpAmount={0}
-					resolutionScale={1}
-				/>
-			</div>
 			<div className="relative z-10 space-y-6">
 				<Badge className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-primary/10 text-primary text-md font-bold uppercase tracking-wider border-0">
 					<span className="relative flex h-2 w-2">

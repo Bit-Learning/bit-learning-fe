@@ -188,3 +188,36 @@
   }
 
 }
+
+/* ── Snap Hero Sections ─────────────────────────────────────── */
+.snap-section {
+  opacity: 0;
+  transform: translateY(32px);
+  transition:
+    opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.snap-section--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* ── Scroll reveal (normal sections below snap zone) ────────── */
+.scroll-reveal {
+  opacity: 0;
+  transform: translateY(40px);
+  transition:
+    opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+    transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+.scroll-reveal--visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Stagger children inside a reveal container */
+.scroll-reveal--visible > * {
+  animation: none; /* children inherit parent transition */
+}
