@@ -27,12 +27,10 @@ class WebSocketService {
 	 */
 	connect(): Promise<void> {
 		if (this.client?.connected) {
-			console.log("[WebSocket] Already connected");
 			return Promise.resolve();
 		}
 
 		if (this.connectPromise) {
-			console.log("[WebSocket] Connection already in progress");
 			return this.connectPromise;
 		}
 
@@ -48,12 +46,6 @@ class WebSocketService {
 
 		this.clearReconnectTimeout();
 		this.isManualDisconnect = false;
-
-		console.log("[WebSocket] Connecting to:", wsUrl);
-		console.log(
-			"[WebSocket] Using token:",
-			accessToken.substring(0, 20) + "...",
-		);
 
 		this.connectPromise = new Promise((resolve, reject) => {
 			let settled = false;
@@ -82,7 +74,6 @@ class WebSocketService {
 				},
 				debug: (str: string) => {
 					if (import.meta.env.DEV) {
-						console.log("[WebSocket Debug]", str);
 					}
 				},
 				// Disable STOMP built-in reconnect. We manage reconnect manually to avoid
@@ -92,7 +83,6 @@ class WebSocketService {
 				heartbeatOutgoing: 4000,
 
 				onConnect: () => {
-					console.log("[WebSocket] Connected successfully");
 					this.reconnectAttempts = 0;
 					this.isManualDisconnect = false;
 					resolveOnce();
@@ -104,7 +94,6 @@ class WebSocketService {
 				},
 
 				onWebSocketClose: (event) => {
-					console.log("[WebSocket] Connection closed:", event);
 					this.connectPromise = null;
 
 					if (!settled) {
@@ -137,7 +126,6 @@ class WebSocketService {
 		}
 
 		if (!getAccessToken()) {
-			console.log("[WebSocket] No access token available. Skipping reconnect.");
 			this.disconnect();
 			return;
 		}
@@ -151,10 +139,6 @@ class WebSocketService {
 
 		this.reconnectAttempts++;
 		const delay = this.reconnectDelay * this.reconnectAttempts;
-
-		console.log(
-			`[WebSocket] Attempting to reconnect (${this.reconnectAttempts}/${this.maxReconnectAttempts}) in ${delay}ms`,
-		);
 
 		this.reconnectTimeout = setTimeout(() => {
 			this.reconnectTimeout = null;
@@ -184,16 +168,11 @@ class WebSocketService {
 			throw new Error("WebSocket not connected");
 		}
 
-		console.log("[WebSocket] Subscribing to:", destination);
-
 		const subscription = this.client.subscribe(
 			destination,
 			(message: IMessage) => {
-				console.log("[WebSocket] ✉️ Message received on", destination);
-				console.log("[WebSocket] Raw message body:", message.body);
 				try {
 					const parsedMessage = JSON.parse(message.body);
-					console.log("[WebSocket] Parsed message:", parsedMessage);
 					callback(parsedMessage);
 				} catch (error) {
 					console.error("[WebSocket] Error parsing message:", error);
@@ -203,8 +182,6 @@ class WebSocketService {
 				}
 			},
 		);
-
-		console.log("[WebSocket] ✅ Subscribed successfully to:", destination);
 
 		this.subscriptions.set(destination, subscription);
 		return subscription;
@@ -218,7 +195,6 @@ class WebSocketService {
 		if (subscription) {
 			subscription.unsubscribe();
 			this.subscriptions.delete(destination);
-			console.log("[WebSocket] Unsubscribed from:", destination);
 		}
 	}
 
@@ -243,8 +219,6 @@ class WebSocketService {
 			body: JSON.stringify(body),
 			headers,
 		});
-
-		console.log("[WebSocket] Message sent to:", destination);
 	}
 
 	/**
@@ -262,7 +236,6 @@ class WebSocketService {
 
 		if (client) {
 			void client.deactivate();
-			console.log("[WebSocket] Disconnected");
 		}
 	}
 

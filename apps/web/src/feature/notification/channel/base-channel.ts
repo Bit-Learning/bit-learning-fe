@@ -47,50 +47,23 @@ export abstract class BaseChannel<TMessage = any> {
 
 		// Subscribe to WebSocket if not already subscribed
 		if (!this.subscriptions.has(destination)) {
-			console.log(
-				`[${this.constructor.name}] 📡 Setting up channel subscription to:`,
-				destination,
-			);
 			const subscription = wsService.subscribe(
 				destination,
 				(rawMessage) => {
-					console.log(
-						`[${this.constructor.name}] 📨 Received message:`,
-						rawMessage,
-					);
 					try {
 						// Validate message
 						const isValid = this.validateMessage(rawMessage);
-						console.log(
-							`[${this.constructor.name}] ✔️ Message validation:`,
-							isValid,
-						);
 						if (!isValid) {
-							console.warn(
-								`[${this.constructor.name}] ❌ Invalid message received:`,
-								rawMessage,
-							);
 							return;
 						}
 
 						// Transform message
 						const transformedMessage = this.transformMessage(rawMessage);
-						console.log(
-							`[${this.constructor.name}] 🔄 Transformed message:`,
-							transformedMessage,
-						);
 
 						// Call all registered handlers
 						const handlers = this.messageHandlers.get(destination);
-						console.log(
-							`[${this.constructor.name}] 👥 Number of handlers:`,
-							handlers?.size || 0,
-						);
 						if (handlers) {
 							handlers.forEach((handler) => {
-								console.log(
-									`[${this.constructor.name}] 🔔 Calling handler with message`,
-								);
 								handler(transformedMessage);
 							});
 						}
@@ -112,9 +85,6 @@ export abstract class BaseChannel<TMessage = any> {
 			);
 
 			this.subscriptions.set(destination, subscription);
-			console.log(
-				`[${this.constructor.name}] ✅ Channel subscription complete`,
-			);
 		}
 
 		return destination;
