@@ -29,7 +29,7 @@ const HomePage: React.FC = () => {
 				jsonLd={[createOrganizationJsonLd(), createWebsiteJsonLd()]}
 			/>
 			{/* <OnboardingTour /> */}
-			<main className="max-w-7xl mx-auto px-6 lg:px-20 ">
+			<main className="container mx-auto px-6 lg:px-20 ">
 				<HeroSection />
 				<TechSlider />
 				<FeaturesSection />

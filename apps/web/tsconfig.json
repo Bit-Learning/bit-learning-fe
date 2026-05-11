@@ -1,21 +1,21 @@
 {
-  "extends": "@workspace/typescript-config/react-library.json",
-  "compilerOptions": {
-    "noEmit": true,
+	"extends": "@workspace/typescript-config/react-library.json",
+	"compilerOptions": {
+		"noEmit": true,
+		"allowJs": true,
+		"jsx": "react-jsx",
 
-    "jsx": "react-jsx",
-
-    "baseUrl": ".",
-    "paths": {
-      "@/*": ["./src/*"],
-      "@workspace/ui/*": ["../../packages/ui/src/*"],
-      "@workspace/lib/*": ["../../packages/lib/*"]
-    }
-  },
-  "include": [
-    "**/*.ts",
-    "**/*.tsx",
-    "../../packages/ui/src/components/icons.tsx"
-  ],
-  "exclude": ["node_modules"]
+		"baseUrl": ".",
+		"paths": {
+			"@/*": ["./src/*"],
+			"@workspace/ui/*": ["../../packages/ui/src/*"],
+			"@workspace/lib/*": ["../../packages/lib/*"]
+		}
+	},
+	"include": [
+		"**/*.ts",
+		"**/*.tsx",
+		"../../packages/ui/src/components/icons.tsx"
+	],
+	"exclude": ["node_modules"]
 }
