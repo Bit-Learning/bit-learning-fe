@@ -3,125 +3,67 @@ import type { AxiosResponse } from "axios";
 import type { TChangePasswordRequest } from "@/feature/user/types/user.type";
 import api from "@/shared/api/api";
 import { endpoints } from "@/shared/constants/endpoints";
-import type {
-	TLoginRequest,
-	TRegisterRequest,
-	TResetPasswordRequest,
-} from "../types/auth.type";
+import type { TLoginRequest, TLoginRoleRequest, TRegisterRequest, TResetPasswordRequest } from "../types/auth.type";
 
-export function Login(
-	requestBody: TLoginRequest,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/login`, requestBody);
-}
+export const authApi = {
+  login: (requestBody: TLoginRequest): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/login`, requestBody),
 
-export function Register(
-	requestBody: TRegisterRequest,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/register`, requestBody);
-}
+  loginUser: (requestBody: TLoginRoleRequest): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/login-user`, requestBody),
 
-export function ActivateAccount(
-	key: string,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.get(`${endpoints.AUTH}/activate?key=${encodeURIComponent(key)}`);
-}
+  register: (requestBody: TRegisterRequest): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/register`, requestBody),
 
-export function GetUserProfile(): Promise<
-	AxiosResponse<ApiResponse<any>, any>
-> {
-	return api.get(`${endpoints.ACCOUNT}/profile`);
-}
+  activateAccount: (key: string): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.get(`${endpoints.AUTH}/activate?key=${encodeURIComponent(key)}`),
 
-export function RequestPasswordReset(
-	email: string,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(
-		`${endpoints.AUTH}/reset-password/init?email=${encodeURIComponent(email)}`,
-	);
-}
+  getUserProfile: (): Promise<AxiosResponse<ApiResponse<any>, any>> => api.get(`${endpoints.ACCOUNT}/profile`),
 
-export function VerifyResetKey(
-	key: string,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.get(
-		`${endpoints.AUTH}/reset-password/verify?key=${encodeURIComponent(key)}`,
-	);
-}
+  requestPasswordReset: (email: string): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/reset-password/init?email=${encodeURIComponent(email)}`),
 
-export function FinishPasswordReset(
-	requestBody: TResetPasswordRequest,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/reset-password/finish`, requestBody);
-}
+  verifyResetKey: (key: string): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.get(`${endpoints.AUTH}/reset-password/verify?key=${encodeURIComponent(key)}`),
 
-export function ChangePassword(
-	requestBody: TChangePasswordRequest,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.ACCOUNT}/change-password`, requestBody);
-}
+  finishPasswordReset: (requestBody: TResetPasswordRequest): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/reset-password/finish`, requestBody),
 
-export function Logout(): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/logout`);
-}
+  changePassword: (requestBody: TChangePasswordRequest): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.ACCOUNT}/change-password`, requestBody),
 
-export function GoogleOAuth2Login(
-	code: string,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/oauth2/google`, { code });
-}
+  logout: (): Promise<AxiosResponse<ApiResponse<any>, any>> => api.post(`${endpoints.AUTH}/logout`),
 
-export function GetGoogleOAuth2Config(): Promise<
-	AxiosResponse<ApiResponse<any>, any>
-> {
-	return api.get(`${endpoints.AUTH}/oauth2/google/config`);
-}
+  googleOAuth2Login: (code: string): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/oauth2/google`, { code }),
 
-export function GitHubOAuth2Login(
-	code: string,
-): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/oauth2/github`, { code });
-}
+  getGoogleOAuth2Config: (): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.get(`${endpoints.AUTH}/oauth2/google/config`),
 
-export function GetGitHubOAuth2Config(): Promise<
-	AxiosResponse<ApiResponse<any>, any>
-> {
-	return api.get(`${endpoints.AUTH}/oauth2/github/config`);
-}
+  gitHubOAuth2Login: (code: string): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/oauth2/github`, { code }),
 
-// MFA API Functions
-export function Enable2FA(): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/2fa/enable`);
-}
+  getGitHubOAuth2Config: (): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.get(`${endpoints.AUTH}/oauth2/github/config`),
 
-export function Verify2FA(requestBody: {
-	totpCode: string;
-}): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/2fa/verify`, requestBody);
-}
+  // MFA
+  enable2FA: (): Promise<AxiosResponse<ApiResponse<any>, any>> => api.post(`${endpoints.AUTH}/2fa/enable`),
 
-export function Disable2FA(): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.delete(`${endpoints.AUTH}/2fa/disable`);
-}
+  verify2FA: (requestBody: { totpCode: string }): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/2fa/verify`, requestBody),
 
-export function LoginWith2FA(requestBody: {
-	email: string;
-	password: string;
-	totpCode: string;
-}): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/login/2fa`, requestBody);
-}
+  disable2FA: (): Promise<AxiosResponse<ApiResponse<any>, any>> => api.delete(`${endpoints.AUTH}/2fa/disable`),
 
-export function Complete2FA(requestBody: {
-	email: string;
-	totpCode: string;
-}): Promise<AxiosResponse<ApiResponse<any>, any>> {
-	return api.post(`${endpoints.AUTH}/2fa/complete`, requestBody);
-}
+  loginWith2FA: (requestBody: {
+    email: string;
+    password: string;
+    totpCode: string;
+  }): Promise<AxiosResponse<ApiResponse<any>, any>> => api.post(`${endpoints.AUTH}/login/2fa`, requestBody),
 
-// QR Code Login API Functions
-export function GenerateQRToken(): Promise<
-	AxiosResponse<ApiResponse<{ qrToken: string }>, any>
-> {
-	return api.get(`${endpoints.AUTH}/qr/generate`);
-}
+  complete2FA: (requestBody: { email: string; totpCode: string }): Promise<AxiosResponse<ApiResponse<any>, any>> =>
+    api.post(`${endpoints.AUTH}/2fa/complete`, requestBody),
+
+  // QR Code Login
+  generateQRToken: (): Promise<AxiosResponse<ApiResponse<{ qrToken: string }>, any>> =>
+    api.get(`${endpoints.AUTH}/qr/generate`),
+};

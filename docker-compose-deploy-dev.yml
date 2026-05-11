@@ -1,7 +1,7 @@
 ---
 services:
   bitlearning-web-deploy-dev:
-    image: lcaohoanq/bitlearning-web:dev-latest
+    image: hoangclw/bitlearning-web:dev-latest
     expose:
       - "5173"
     mem_limit: 1024m
@@ -11,7 +11,7 @@ services:
       - app-network
 
   bitlearning-admin-deploy-dev:
-    image: lcaohoanq/bitlearning-admin:dev-latest
+    image: hoangclw/bitlearning-admin:dev-latest
     expose:
       - "8386"
     mem_limit: 1024m

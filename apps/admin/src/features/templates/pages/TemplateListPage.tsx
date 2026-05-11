@@ -1,228 +1,212 @@
 import React, { useState } from "react";
 import { useNavigate } from "@tanstack/react-router";
-import { Search, Plus, Filter, Folder, Star, Download, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+	SearchIcon,
+	Plus,
+	Filter,
+	ChevronLeft,
+	ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
+import { Skeleton } from "@/components/ui/skeleton";
 import { TemplateCard } from "../components/TemplateCard";
 import { TemplateListParams } from "../types/template.type";
 import { useTemplates, useDeleteTemplate } from "../queries/useTemplate";
-import { sampleTemplates } from "../data/templates";
+import DeleteConfirmModal from "@/components/DeleteConfirmModal";
+import { Main } from "@/layout/main";
+import { ProfileDropdown } from "@/components/profile-dropdown";
+import { Search } from "@/components/search";
+import { ThemeSwitch } from "@/components/theme-switch";
+import { ConfigDrawer } from "@/components/config-drawer";
+import { Header } from "@/layout/header";
 
 export const TemplateListPage: React.FC = () => {
-  const navigate = useNavigate();
-  const [searchQuery, setSearchQuery] = useState("");
-  const [params, setParams] = useState<TemplateListParams>({
-    page: 1,
-    size: 6,
-    sortBy: "createdAt",
-    sortDir: "desc",
-  });
+	const navigate = useNavigate();
+	const [searchQuery, setSearchQuery] = useState("");
+	const [params, setParams] = useState<TemplateListParams>({
+		page: 1,
+		size: 6,
+		sortBy: "createdAt",
+		sortDir: "desc",
+	});
+	const [deleteTarget, setDeleteTarget] = useState<
+		{ id: number; name: string } | undefined
+	>();
 
-  // const { data: templatesData, isLoading, isError } = useTemplates(params);
+	const { data: templatesData, isLoading } = useTemplates();
+	const deleteTemplate = useDeleteTemplate();
 
-  const deleteTemplate = useDeleteTemplate();
+	const templates = templatesData?.data ?? [];
+	const totalCount = templatesData?.page?.totalElements ?? 0;
+	const totalPages = templatesData?.page?.totalPages ?? 1;
 
-  const templates = sampleTemplates;
-  const totalCount = sampleTemplates.length;
-  const isLoading = false;
+	const handleViewDetail = (id: number) => {
+		navigate({ to: "/templates/$id", params: { id: id.toString() } });
+	};
 
-  const handleViewDetail = (id: number) => {
-    navigate({ to: "/templates/$id", params: { id: id.toString() } });
-  };
+	const handleEdit = (id: number) => {
+		navigate({ to: "/templates/$id/edit", params: { id: id.toString() } });
+	};
 
-  const handleCreateNew = () => {
-    navigate({ to: "/templates/create" });
-  };
+	const handleDownload = (url: string) => {
+		window.open(url, "_blank");
+	};
 
-  const handleEdit = (id: number) => {
-    navigate({ to: "/templates/$id/edit", params: { id: id.toString() } });
-  };
+	const handleDelete = () => {
+		if (!deleteTarget) return;
+		deleteTemplate.mutate(deleteTarget.id, {
+			onSuccess: () => setDeleteTarget(undefined),
+		});
+	};
 
-  const handleDownload = (url: string) => {
-    window.open(url, "_blank");
-  };
+	return (
+		<>
+			<Header />
 
-  const handleDelete = (id: number) => {
-    if (window.confirm("Bạn có chắc chắn muốn xóa mẫu slide này?")) {
-      deleteTemplate.mutate(id, {
-        onSuccess: () => {},
-      });
-    }
-  };
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
+				<div className="flex items-center justify-between mb-8">
+					<div>
+						<h2 className="text-2xl font-bold text-slate-900">
+							Quản lý Mẫu Slide
+						</h2>
+						<p className="text-slate-500 text-sm mt-1">
+							Quản lý và cập nhật kho tài liệu slide thuyết trình của hệ thống.
+						</p>
+					</div>
+					<Button
+						onClick={() => navigate({ to: "/templates/create" })}
+						className="bg-primary hover:bg-blue-700 shadow-sm"
+					>
+						<Plus className="w-4 h-4 mr-2" />
+						Tạo mẫu mới
+					</Button>
+				</div>
 
-  const totalPages = Math.ceil(totalCount / (params.size || 6));
-  const startIndex = ((params.page || 1) - 1) * (params.size || 6);
-  const endIndex = startIndex + (params.size || 6);
-  const currentTemplates = templates.slice(startIndex, endIndex);
+				<div className="flex flex-col sm:flex-row gap-4 mb-6">
+					<div className="relative flex-1">
+						<SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
+						<Input
+							value={searchQuery}
+							onChange={(e) => setSearchQuery(e.target.value)}
+							className="pl-10 border-slate-200 focus-visible:ring-blue-500/20 focus-visible:border-blue-600"
+							placeholder="Tìm kiếm mẫu slide..."
+						/>
+					</div>
+					<Button variant="outline" className="border-slate-200">
+						<Filter className="w-4 h-4 mr-2" />
+						Lọc
+					</Button>
+				</div>
 
-  if (isLoading) {
-    return (
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-slate-600">Đang tải dữ liệu...</p>
-        </div>
-      </div>
-    );
-  }
+				{isLoading ? (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+						{Array.from({ length: 6 }).map((_, i) => (
+							<Skeleton key={i} className="h-72 rounded-xl" />
+						))}
+					</div>
+				) : templates.length === 0 ? (
+					<div className="text-center py-12">
+						<p className="text-slate-500">Không có mẫu slide nào</p>
+						<Button
+							onClick={() => navigate({ to: "/templates/create" })}
+							className="mt-4"
+						>
+							Tạo mẫu mới
+						</Button>
+					</div>
+				) : (
+					<div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+						{templates.map((template) => (
+							<TemplateCard
+								key={template.id}
+								template={template}
+								onClick={() => handleViewDetail(template.id)}
+								onEdit={() => handleEdit(template.id)}
+								onDownload={() => handleDownload(template.url)}
+								onDelete={() =>
+									setDeleteTarget({ id: template.id, name: template.name })
+								}
+							/>
+						))}
+					</div>
+				)}
 
-  // if (isError) {
-  //   return (
-  //     <div className="flex items-center justify-center min-h-screen">
-  //       <div className="text-center">
-  //         <p className="text-red-600 mb-4">Có lỗi xảy ra khi tải dữ liệu</p>
-  //         <Button onClick={() => window.location.reload()}>Thử lại</Button>
-  //       </div>
-  //     </div>
-  //   );
-  // }
+				<div className="mt-12 flex items-center justify-between border-t border-slate-200 pt-6">
+					<p className="text-sm text-slate-500">
+						Trang {params.page} / {totalPages} — {totalCount} mẫu
+					</p>
+					<div className="flex items-center gap-2">
+						<Button
+							variant="outline"
+							size="icon"
+							disabled={params.page === 1}
+							onClick={() =>
+								setParams({ ...params, page: (params.page || 1) - 1 })
+							}
+							className="border-slate-200"
+						>
+							<ChevronLeft className="w-4 h-4" />
+						</Button>
 
-  return (
-    <main className="flex-1 mx-auto p-8 overflow-y-auto">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h2 className="text-2xl font-bold text-slate-900">Quản lý Mẫu Slide</h2>
-          <p className="text-slate-500 text-sm mt-1">
-            Quản lý và cập nhật kho tài liệu slide thuyết trình của hệ thống.
-          </p>
-        </div>
-        <Button onClick={handleCreateNew} className="bg-blue-600 hover:bg-blue-700 shadow-sm">
-          <Plus className="w-4 h-4 mr-2" />
-          Tạo mẫu mới
-        </Button>
-      </div>
+						{[...Array(totalPages)].map((_, i) => {
+							const pageNum = i + 1;
+							if (
+								pageNum === 1 ||
+								pageNum === totalPages ||
+								(pageNum >= (params.page || 1) - 1 &&
+									pageNum <= (params.page || 1) + 1)
+							) {
+								return (
+									<Button
+										key={i}
+										size="icon"
+										variant={params.page === pageNum ? "default" : "outline"}
+										className={
+											params.page === pageNum
+												? "bg-primary text-white hover:bg-blue-700"
+												: "border-slate-200"
+										}
+										onClick={() => setParams({ ...params, page: pageNum })}
+									>
+										{pageNum}
+									</Button>
+								);
+							} else if (
+								pageNum === (params.page || 1) - 2 ||
+								pageNum === (params.page || 1) + 2
+							) {
+								return (
+									<span key={i} className="text-slate-400 px-2">
+										...
+									</span>
+								);
+							}
+							return null;
+						})}
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
-        <Card className="border-slate-200">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600">
-              <Folder className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Tổng số mẫu</p>
-              <p className="text-2xl font-bold text-slate-900">{totalCount}</p>
-            </div>
-          </CardContent>
-        </Card>
+						<Button
+							variant="outline"
+							size="icon"
+							disabled={params.page === totalPages}
+							onClick={() =>
+								setParams({ ...params, page: (params.page || 1) + 1 })
+							}
+							className="border-slate-200"
+						>
+							<ChevronRight className="w-4 h-4" />
+						</Button>
+					</div>
+				</div>
 
-        <Card className="border-slate-200">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600">
-              <Star className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Mẫu phổ biến nhất</p>
-              <p className="text-lg font-bold text-slate-900 truncate max-w-37.5">{templates[0]?.name}</p>
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="border-slate-200">
-          <CardContent className="p-6 flex items-center gap-4">
-            <div className="w-12 h-12 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600">
-              <Download className="w-6 h-6" />
-            </div>
-            <div>
-              <p className="text-sm text-slate-500">Tổng lượt tải</p>
-              <p className="text-2xl font-bold text-slate-900">8,294</p>
-            </div>
-          </CardContent>
-        </Card>
-      </div>
-
-      <div className="flex flex-col sm:flex-row gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 w-4 h-4" />
-          <Input
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            className="pl-10 border-slate-200 focus-visible:ring-blue-500/20 focus-visible:border-blue-600"
-            placeholder="Tìm kiếm mẫu slide..."
-          />
-        </div>
-        <Button variant="outline" className="border-slate-200">
-          <Filter className="w-4 h-4 mr-2" />
-          Lọc
-        </Button>
-      </div>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-        {currentTemplates.map((template) => (
-          <TemplateCard
-            key={template.id}
-            template={template}
-            onClick={() => handleViewDetail(template.id)}
-            onEdit={() => handleEdit(template.id)}
-            onDownload={() => handleDownload(template.url)}
-            onDelete={() => handleDelete(template.id)}
-          />
-        ))}
-      </div>
-
-      {currentTemplates.length === 0 && (
-        <div className="text-center py-12">
-          <p className="text-slate-500">Không có mẫu slide nào</p>
-          <Button onClick={handleCreateNew} className="mt-4">
-            Tạo mẫu mới
-          </Button>
-        </div>
-      )}
-
-      <div className="mt-12 flex items-center justify-between border-t border-slate-200 pt-6">
-        <p className="text-sm text-slate-500">
-          Đang hiển thị {startIndex + 1}-{Math.min(endIndex, totalCount)} trong tổng số {totalCount} mẫu
-        </p>
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={params.page === 1}
-            onClick={() => setParams({ ...params, page: (params.page || 1) - 1 })}
-            className="border-slate-200"
-          >
-            <ChevronLeft className="w-4 h-4" />
-          </Button>
-
-          {[...Array(totalPages)].map((_, i) => {
-            const pageNum = i + 1;
-            if (
-              pageNum === 1 ||
-              pageNum === totalPages ||
-              (pageNum >= (params.page || 1) - 1 && pageNum <= (params.page || 1) + 1)
-            ) {
-              return (
-                <Button
-                  key={i}
-                  size="icon"
-                  variant={params.page === pageNum ? "default" : "outline"}
-                  className={params.page === pageNum ? "bg-blue-600 text-white hover:bg-blue-700" : "border-slate-200"}
-                  onClick={() => setParams({ ...params, page: pageNum })}
-                >
-                  {pageNum}
-                </Button>
-              );
-            } else if (pageNum === (params.page || 1) - 2 || pageNum === (params.page || 1) + 2) {
-              return (
-                <span key={i} className="text-slate-400 px-2">
-                  ...
-                </span>
-              );
-            }
-            return null;
-          })}
-
-          <Button
-            variant="outline"
-            size="icon"
-            disabled={params.page === totalPages}
-            onClick={() => setParams({ ...params, page: (params.page || 1) + 1 })}
-            className="border-slate-200"
-          >
-            <ChevronRight className="w-4 h-4" />
-          </Button>
-        </div>
-      </div>
-    </main>
-  );
+				<DeleteConfirmModal
+					open={!!deleteTarget}
+					itemName={deleteTarget?.name}
+					isPending={deleteTemplate.isPending}
+					onConfirm={handleDelete}
+					onClose={() => setDeleteTarget(undefined)}
+				/>
+			</div>
+		</>
+	);
 };

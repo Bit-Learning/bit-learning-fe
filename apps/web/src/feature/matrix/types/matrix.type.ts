@@ -1,3 +1,4 @@
+import { TChapterBriefResponse } from "./chapter.type";
 import { TLessonBriefResponse } from "./lesson.type";
 import { TSubjectBriefResponse } from "./subject.type";
 
@@ -76,6 +77,7 @@ export type TMatrixDetailResponse = {
   id: number;
   matrixVersionId: number;
   lesson: TLessonBriefResponse;
+  chaper: TChapterBriefResponse;
   easyMCQ: number;
   mediumMCQ: number;
   hardMCQ: number;
@@ -90,4 +92,59 @@ export type TMatrixDetailResponse = {
   hardEssayScore: number;
   createdAt: string;
   updatedAt: string;
+};
+
+export type TLessonWeight = {
+  lessonId: number;
+  weight: number;
+};
+
+export type TDistribution = {
+  difficulty: {
+    EASY: number;
+    MEDIUM: number;
+    HARD: number;
+  };
+  type: {
+    MCQ: number;
+    ESSAY: number;
+  };
+};
+
+export type TScoring = {
+  mode: "UNIFORM" | "WEIGHTED";
+  weights?: {
+    EASY: number;
+    MEDIUM: number;
+    HARD: number;
+  };
+};
+
+export type TGenerateRequest = {
+  matrixId: number;
+  name?: string;
+  notes?: string;
+  totalQuestionCount: number;
+  lessons: TLessonWeight[];
+  distribution: TDistribution;
+  scoring?: TScoring;
+};
+
+export type TBucketRequirement = {
+  type: string;
+  difficulty: string;
+  required: number;
+  available: number;
+};
+
+export type TLessonRequirement = {
+  lessonId: number;
+  lessonName: string;
+  isValid: boolean;
+  requirements: TBucketRequirement[];
+};
+
+export type TCheckRequirementsResponse = {
+  allValid: boolean;
+  lessons: TLessonRequirement[];
 };

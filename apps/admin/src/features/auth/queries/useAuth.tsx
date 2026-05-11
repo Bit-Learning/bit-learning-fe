@@ -1,10 +1,11 @@
-import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
-import { setAuthTokens } from "@/shared/lib/cookies";
+import { wsService } from "@/features/notification/services/websocket.service";
+import { setAccessToken } from "@/shared/lib/cookies";
 import { useAuthStore } from "@/shared/stores/auth-store";
-import { AdminLogin } from "../api/auth.api";
-import { TAdminLoginRequest, TUserRole } from "../types/auth.types";
+import { authApi } from "../api/auth.api";
+import type { TAdminLoginRequest } from "../types/auth.types";
 
 export const authQueryKeys = {
 	all: ["auth"] as const,
@@ -21,36 +22,33 @@ export function useLogin(options: UseLoginOptions = {}) {
 	const { redirectTo = "/", on2FARequired } = options;
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { auth } = useAuthStore();
-
-	const allowedAdminRoles: TUserRole[] = ["ADMIN", "MANAGER"];
+	const setAccessTokenStore = useAuthStore((s) => s.auth.setAccessToken);
+	const setUser = useAuthStore((s) => s.auth.setUser);
 
 	return useMutation({
 		mutationFn: (data: TAdminLoginRequest) =>
-			AdminLogin(data).then((res) => res.data.data),
+			authApi.adminLogin(data).then((res) => res.data.data),
 		onSuccess: (data: any) => {
 			if (data.requires2FA) {
 				on2FARequired?.(data.email);
 				return;
 			}
 
-			const { accessToken, refreshToken, user } = data;
+			const { accessToken, user } = data;
 
-			// Chỉ cho phép ADMIN hoặc MANAGER truy cập trang admin
-			if (!allowedAdminRoles.includes(user.role as TUserRole)) {
+			if (user.role !== "ADMIN" && user.role !== "MANAGER") {
 				toast.error(
-					"Tài khoản của bạn không có quyền truy cập trang quản trị.",
+					"Truy cập bị từ chối. Chỉ quản trị viên và nhà quản lý mới có quyền truy cập.",
 				);
 				return;
 			}
 
-			setAuthTokens(accessToken, refreshToken);
-			auth.setAccessToken(accessToken);
-			auth.setRefreshToken(refreshToken);
-			auth.setUser({
+			setAccessToken(accessToken);
+			setAccessTokenStore(accessToken);
+			setUser({
 				accountNo: user.id.toString(),
 				email: user.email,
-				role: [user.role], // Will be ["ADMIN"] or ["MANAGER"]
+				role: [user.role],
 				exp: Date.now() + 24 * 60 * 60 * 1000,
 				firstName: user.firstName,
 				lastName: user.lastName,
@@ -59,7 +57,6 @@ export function useLogin(options: UseLoginOptions = {}) {
 
 			queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() });
 
-			// ✅ FIX: More friendly welcome message
 			const roleText = user.role === "ADMIN" ? "Quản trị viên" : "Nhà quản lý";
 			toast.success(`Chào mừng ${roleText} ${user.firstName}!`);
 
@@ -92,49 +89,34 @@ export function useLogin(options: UseLoginOptions = {}) {
 export function useLogout() {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const { auth } = useAuthStore();
+	const reset = useAuthStore((s) => s.auth.reset);
 
-	const logout = () => {
-		auth.reset();
-		queryClient.clear();
-		toast.success("Đăng xuất thành công");
-		navigate({ to: "/sign-in", replace: true });
+	const logout = async () => {
+		try {
+			await authApi.logout();
+		} catch {
+		} finally {
+			wsService.disconnect();
+			reset();
+			queryClient.clear();
+			toast.success("Đăng xuất thành công");
+			navigate({ to: "/sign-in", replace: true });
+		}
 	};
 
 	return { logout };
 }
 
-interface UseBypassLoginOptions {
-	redirectTo?: string;
-	role?: "ADMIN" | "MANAGER"; // ✅ Allow choosing role for bypass
-}
+export const useAdminProfile = () => {
+	const accessToken = useAuthStore((s) => s.auth.accessToken);
 
-export function useBypassLogin(options: UseBypassLoginOptions = {}) {
-	const { redirectTo = "/", role = "ADMIN" } = options;
-	const navigate = useNavigate();
-	const { auth } = useAuthStore();
-
-	const bypassLogin = () => {
-		const fakeAccessToken = `fake-access-token-${Date.now()}`;
-		const fakeRefreshToken = `fake-refresh-token-${Date.now()}`;
-
-		setAuthTokens(fakeAccessToken, fakeRefreshToken);
-		auth.setAccessToken(fakeAccessToken);
-		auth.setRefreshToken(fakeRefreshToken);
-		auth.setUser({
-			accountNo: "1",
-			email: role === "ADMIN" ? "admin@example.com" : "manager@example.com",
-			role: [role],
-			exp: Date.now() + 24 * 60 * 60 * 1000,
-			firstName: role === "ADMIN" ? "Admin" : "Manager",
-			lastName: "User",
-			avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${role}`,
-		});
-
-		const roleText = role === "ADMIN" ? "Quản trị viên" : "Nhà quản lý";
-		toast.success(`🚀 Bypass thành công - Chào ${roleText}!`);
-		navigate({ to: redirectTo, replace: true });
-	};
-
-	return { bypassLogin };
-}
+	return useQuery({
+		queryKey: authQueryKeys.profile(),
+		queryFn: async () => {
+			const res = await authApi.getAdminProfile();
+			return res.data.data;
+		},
+		enabled: !!accessToken,
+		retry: false,
+	});
+};

@@ -1,4 +1,4 @@
-import { LectureDetail } from "./course.type";
+import { LectureDetail } from "./lecture.type";
 
 export interface CreateSectionRequest {
   courseId: number;
@@ -25,4 +25,5 @@ export interface SectionDetail {
   totalDuration: number;
   isDeleted: boolean;
   lectures: LectureDetail[];
+  progressPercentage: number;
 }

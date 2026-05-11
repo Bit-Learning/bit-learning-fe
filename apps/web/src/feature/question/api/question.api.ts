@@ -7,30 +7,18 @@ import type {
   RequestPublishDTO,
   ApproveRejectDTO,
   ApprovalStatus,
+  QuestionType,
+  QuestionLevel,
+  QuestionSearchParams,
+  QuestionApprovalParams,
 } from "../types/question.type";
-
-export interface QuestionSearchParams {
-  keyword?: string;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
-
-export interface QuestionApprovalParams {
-  status?: ApprovalStatus;
-  page?: number;
-  size?: number;
-  sort?: string;
-}
 
 export const questionApi = {
   importQuestions(file: File): Promise<AxiosResponse<ApiResponse<void>>> {
     const formData = new FormData();
     formData.append("file", file);
     return api.post("/questions/import", formData, {
-      headers: {
-        "Content-Type": "multipart/form-data",
-      },
+      headers: { "Content-Type": "multipart/form-data" },
     });
   },
 
@@ -78,5 +66,17 @@ export const questionApi = {
 
   rejectQuestions(data: ApproveRejectDTO): Promise<AxiosResponse<ApiResponse<void>>> {
     return api.put("/questions/reject", data);
+  },
+
+  uploadQuestionMedia(id: number, file: File): Promise<AxiosResponse<ApiResponse<QuestionResponse>>> {
+    const formData = new FormData();
+    formData.append("file", file);
+    return api.post(`/questions/${id}/media`, formData, {
+      headers: { "Content-Type": "multipart/form-data" },
+    });
+  },
+
+  deleteQuestionMedia(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+    return api.delete(`/questions/${id}/media`);
   },
 };

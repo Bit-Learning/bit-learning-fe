@@ -1,12 +1,13 @@
-import { Button } from "@workspace/ui/components/Button";
-import { Award, CheckCircle, Download, Loader2, MessageCircle, Play, ShoppingCart, Video, Zap } from "lucide-react";
+import { Award, BookOpen, Infinity, Loader2, Play } from "lucide-react";
 import type React from "react";
+import BitCoinIcon from "@/shared/components/BitCoinIcon";
 
 interface CoursePricingCardProps {
   price: number;
   hasAccess?: boolean;
   isPending: boolean;
   firstLectureId?: number;
+  totalLectures?: number;
   onEnroll: () => void;
   onAddToCart: () => void;
   onBuyNow: () => void;
@@ -18,120 +19,96 @@ export const CoursePricingCard: React.FC<CoursePricingCardProps> = ({
   hasAccess,
   isPending,
   firstLectureId,
+  totalLectures,
   onEnroll,
   onAddToCart,
   onBuyNow,
   onStartLearning,
 }) => {
+  const infoItems = [
+    totalLectures && {
+      icon: <BookOpen className="h-4 w-4" />,
+      label: `${totalLectures} bài học`,
+    },
+    { icon: <Infinity className="h-4 w-4" />, label: "Truy cập trọn đời" },
+    {
+      icon: <Award className="h-4 w-4" />,
+      label: "Chứng chỉ khi hoàn thành khóa học",
+    },
+  ].filter(Boolean) as { icon: React.ReactNode; label: string }[];
+
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl p-8  border-2 border-blue-200 dark:border-slate-800">
-      <div className="flex items-center gap-2 mb-6">
-        <Award className="w-5 h-5 text-blue-600" />
-        <h3 className="font-bold text-slate-800 dark:text-white">Đăng ký khóa học</h3>
-      </div>
-
-      <div className="text-center mb-8">
-        <p className="text-xs text-slate-500 uppercase tracking-widest mb-1 font-bold">Giá khóa học</p>
-        <p className="text-4xl font-bold text-blue-600">{price === 0 ? "Miễn phí" : `${price.toLocaleString()}đ`}</p>
-      </div>
-
-      <ul className="space-y-4 mb-8">
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-            <Video className="w-4 h-4" />
-          </div>
-          <span>Học trực tuyến mọi lúc, mọi nơi</span>
-        </li>
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/30 flex items-center justify-center text-green-600">
-            <Download className="w-4 h-4" />
-          </div>
-          <span>Tài liệu học tập đầy đủ</span>
-        </li>
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-orange-50 dark:bg-orange-900/30 flex items-center justify-center text-orange-600">
-            <MessageCircle className="w-4 h-4" />
-          </div>
-          <span>Hỗ trợ 24/7 từ giảng viên</span>
-        </li>
-        <li className="flex items-center gap-4 text-sm text-slate-600 dark:text-slate-400">
-          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/30 flex items-center justify-center text-blue-600">
-            <Award className="w-4 h-4" />
-          </div>
-          <span>Chứng chỉ được công nhận</span>
-        </li>
-      </ul>
-
-      {firstLectureId && hasAccess && (
-        <Button
-          onClick={onStartLearning}
-          size="lg"
-          className="w-full mb-3 bg-green-500 text-white py-5 rounded-xl font-bold shadow-lg hover:bg-green-600 transition-colors flex items-center justify-center gap-2"
-        >
-          <Play className="w-5 h-5" />
-          Vào học ngay
-        </Button>
-      )}
-
-      {hasAccess ? (
-        <Button
-          isDisabled
-          size="lg"
-          className="w-full bg-green-500 text-white py-5 rounded-xl font-bold flex items-center justify-center gap-2 opacity-50"
-        >
-          <CheckCircle className="w-5 h-5" />
-          Đã đăng ký
-        </Button>
-      ) : price === 0 ? (
-        <Button
-          onClick={onEnroll}
-          size="lg"
-          isDisabled={isPending}
-          className="w-full bg-blue-600 text-white py-5 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="w-5 h-5 animate-spin" />
-              Đang xử lý...
-            </>
-          ) : (
-            <>
-              <Zap className="w-5 h-5" />
-              Đăng ký miễn phí
-            </>
-          )}
-        </Button>
-      ) : (
-        <div className="space-y-3">
-          <Button
-            onClick={onBuyNow}
-            size="lg"
-            isDisabled={isPending}
-            className="w-full bg-blue-600 text-white py-5 rounded-xl font-bold shadow-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            {isPending ? (
-              <>
-                <Loader2 className="w-5 h-5 animate-spin" />
-                Đang xử lý...
-              </>
-            ) : (
-              <>
-                <Zap className="w-5 h-5" />
-                Mua ngay
-              </>
-            )}
-          </Button>
-          <Button
-            onClick={onAddToCart}
-            size="lg"
-            isDisabled={isPending}
-            className="w-full bg-transparent border-2 border-blue-600 text-blue-600 py-5 rounded-xl font-bold hover:bg-blue-50 dark:hover:bg-blue-900/10 transition-colors flex items-center justify-center gap-2 disabled:opacity-50"
-          >
-            <ShoppingCart className="w-5" />
-            Thêm vào giỏ hàng
-          </Button>
+    <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="border-b border-slate-100 px-6 py-6">
+        <div className="flex items-baseline gap-3">
+          <span className="text-3xl font-bold tracking-tight text-slate-900">
+            {price === 0 ? "Miễn phí" : `${price.toLocaleString("vi-VN")} đ`}
+          </span>
         </div>
-      )}
+
+        {price > 0 && (
+          <div className="mt-2 flex items-center gap-1.5 text-sm text-amber-600">
+            <span className="font-medium">~ {price.toLocaleString("vi-VN")}</span>
+            <BitCoinIcon size={18} />
+          </div>
+        )}
+      </div>
+
+      <div className="border-b border-slate-100 px-6 py-5">
+        <h4 className="mb-3 text-sm font-semibold text-slate-900">Thông tin khóa học</h4>
+        <ul className="space-y-3">
+          {infoItems.map((item, i) => (
+            <li key={i} className="flex items-center gap-2.5 text-sm text-slate-600">
+              <span className="text-slate-400">{item.icon}</span>
+              <span>{item.label}</span>
+            </li>
+          ))}
+        </ul>
+      </div>
+
+      <div className="space-y-3 px-6 py-5">
+        {hasAccess ? (
+          <>
+            {firstLectureId && (
+              <button
+                onClick={onStartLearning}
+                className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              >
+                <Play className="h-4 w-4" />
+                Vào học ngay
+              </button>
+            )}
+          </>
+        ) : price === 0 ? (
+          <button
+            onClick={onEnroll}
+            disabled={isPending}
+            className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+          >
+            {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+            {isPending ? "Đang xử lý..." : "Đăng ký miễn phí"}
+          </button>
+        ) : (
+          <>
+            <button
+              onClick={onBuyNow}
+              disabled={isPending}
+              className="cursor-pointer flex w-full items-center justify-center gap-2 rounded-xl bg-slate-900 py-3 text-sm font-semibold text-white transition hover:bg-slate-800 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              {isPending && <Loader2 className="h-4 w-4 animate-spin" />}
+              {isPending ? "Đang xử lý..." : "Mua ngay"}
+            </button>
+
+            <button
+              onClick={onAddToCart}
+              disabled={isPending}
+              className="cursor-pointer flex w-full items-center justify-center rounded-xl border border-slate-400 bg-white py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-60"
+            >
+              Thêm vào giỏ hàng
+            </button>
+          </>
+        )}
+      </div>
     </div>
   );
 };

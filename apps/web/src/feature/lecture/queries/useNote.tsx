@@ -16,6 +16,10 @@ export const useLectureNotes = (lectureId: number) => {
       return response.data.data || [];
     },
     enabled: !!lectureId,
+    staleTime: 30 * 1000,
+    gcTime: 60 * 1000,
+    refetchOnMount: true,
+    refetchOnWindowFocus: true,
   });
 };
 
@@ -31,6 +35,10 @@ export const useCreateNote = () => {
       toast.success({ title: "Đã lưu ghi chú" });
 
       queryClient.invalidateQueries({
+        queryKey: noteKeys.lecture(variables.lectureId),
+      });
+
+      queryClient.refetchQueries({
         queryKey: noteKeys.lecture(variables.lectureId),
       });
     },
@@ -57,6 +65,10 @@ export const useUpdateNote = () => {
       queryClient.invalidateQueries({
         queryKey: noteKeys.all,
       });
+
+      queryClient.refetchQueries({
+        queryKey: noteKeys.all,
+      });
     },
     onError: (error: any) => {
       toast.error({
@@ -78,6 +90,10 @@ export const useDeleteNote = () => {
       toast.success({ title: "Đã xóa ghi chú" });
 
       queryClient.invalidateQueries({
+        queryKey: noteKeys.all,
+      });
+
+      queryClient.refetchQueries({
         queryKey: noteKeys.all,
       });
     },

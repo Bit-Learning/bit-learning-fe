@@ -1,4 +1,4 @@
-import { useAudio } from "./AudioProvider";
+import { useAudio } from "../contexts/AudioProvider";
 
 export function AudioToggle({ className = "" }: { className?: string }) {
 	const { enabled, toggleEnabled } = useAudio();

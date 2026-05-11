@@ -1,21 +1,8 @@
-import { createFileRoute, useRouter } from "@tanstack/react-router";
-import { GeneralError } from "@/feature/errors/general-error";
-import StudentProfileView from "@/feature/game/components/StudentProfile";
+import { createFileRoute, Navigate } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/games/students/$userId")({
-	component: function StudentProfileRoute() {
+	component: function RedirectToProfile() {
 		const { userId } = Route.useParams();
-		const router = useRouter();
-		const idNum = Number(userId);
-
-		if (Number.isNaN(idNum)) {
-			return <GeneralError />;
-		}
-
-		return (
-			<StudentProfileView userId={idNum} onBack={() => router.history.back()} />
-		);
+		return <Navigate to="/profile/$username" params={{ username: userId }} />;
 	},
-	// Fallback for unexpected errors
-	errorComponent: () => <GeneralError />,
 });

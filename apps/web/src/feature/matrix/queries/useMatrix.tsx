@@ -1,7 +1,13 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
-import { matrixApi, matrixVersionApi, matrixDetailApi } from "../api/matrix.api";
-import type { TMatrixRequest, TMatrixVersionRequest, TMatrixDetailRequest } from "../types/matrix.type";
+import { matrixApi, matrixVersionApi, matrixDetailApi } from "../apis/matrix.api";
+import type {
+  TMatrixRequest,
+  TMatrixVersionRequest,
+  TMatrixDetailRequest,
+  TGenerateRequest,
+  TCheckRequirementsResponse,
+} from "../types/matrix.type";
 
 export const matrixKeys = {
   all: ["matrices"] as const,
@@ -17,6 +23,7 @@ export const versionKeys = {
   detail: (id: number) => ["matrix-versions", "detail", id] as const,
   byMatrix: (matrixId: number) => ["matrix-versions", "matrix", matrixId] as const,
   latest: (matrixId: number) => ["matrix-versions", "latest", matrixId] as const,
+  checkRequirements: (versionId: number) => ["matrix-versions", "check-requirements", versionId] as const,
 };
 
 export const detailKeys = {
@@ -120,8 +127,8 @@ export const useDeleteMatrix = () => {
       qc.invalidateQueries({ queryKey: matrixKeys.all });
       toast.success({ title: "Thành công", description: "Xóa ma trận thành công" });
     },
-    onError: (e: any) => {
-      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Xóa ma trận thất bại" });
+    onError: () => {
+      toast.error({ title: "Lỗi", description: "Xóa ma trận thất bại do đã có phiên bản và đề thi" });
     },
   });
 };
@@ -183,6 +190,8 @@ export const useVersionDetail = (versionId?: number) => {
   });
 };
 
+export const useMatrixVersionDetail = useVersionDetail;
+
 export const useCreateVersion = () => {
   const qc = useQueryClient();
   return useMutation({
@@ -190,10 +199,25 @@ export const useCreateVersion = () => {
     onSuccess: (_, v) => {
       qc.invalidateQueries({ queryKey: versionKeys.byMatrix(v.matrixId) });
       qc.invalidateQueries({ queryKey: matrixKeys.detail(v.matrixId) });
-      toast.success({ title: "Thành công", description: "Tạo version thành công" });
+      toast.success({ title: "Thành công", description: "Tạo phiên bản thành công" });
     },
     onError: (e: any) => {
-      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Tạo version thất bại" });
+      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Tạo phiên bản thất bại" });
+    },
+  });
+};
+
+export const useGenerateVersion = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: (data: TGenerateRequest) => matrixVersionApi.generate(data),
+    onSuccess: (_, v) => {
+      qc.invalidateQueries({ queryKey: versionKeys.byMatrix(v.matrixId) });
+      qc.invalidateQueries({ queryKey: matrixKeys.detail(v.matrixId) });
+      toast.success({ title: "Thành công", description: "Tạo phiên bản tự động thành công" });
+    },
+    onError: (e: any) => {
+      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Tạo phiên bản tự động thất bại" });
     },
   });
 };
@@ -204,10 +228,10 @@ export const useDeleteVersion = () => {
     mutationFn: (versionId: number) => matrixVersionApi.delete(versionId),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: versionKeys.all });
-      toast.success({ title: "Thành công", description: "Xóa version thành công" });
+      toast.success({ title: "Thành công", description: "Xóa phiên bản thành công" });
     },
-    onError: (e: any) => {
-      toast.error({ title: "Lỗi", description: e?.response?.data?.message || "Xóa version thất bại" });
+    onError: () => {
+      toast.error({ title: "Lỗi", description: "Phiên bản đang có đề thi không xóa được" });
     },
   });
 };
@@ -225,12 +249,26 @@ export const useMatrixDetails = (versionId?: number) => {
   });
 };
 
+export const useCheckRequirements = (versionId?: number) => {
+  return useQuery({
+    queryKey: versionKeys.checkRequirements(versionId ?? 0),
+    queryFn: async () => {
+      if (!versionId) return null;
+      const res = await matrixVersionApi.checkRequirements(versionId);
+      return res.data.data;
+    },
+    enabled: !!versionId,
+    staleTime: 60 * 1000,
+  });
+};
+
 export const useUpdateMatrixDetail = () => {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ id, data }: { id: number; data: TMatrixDetailRequest }) => matrixDetailApi.update(id, data),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["matrix-details"] });
+      qc.invalidateQueries({ queryKey: versionKeys.all });
       toast.success({ title: "Thành công", description: "Cập nhật chi tiết thành công" });
     },
     onError: (e: any) => {
@@ -245,6 +283,7 @@ export const useDeleteMatrixDetail = () => {
     mutationFn: (id: number) => matrixDetailApi.delete(id),
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["matrix-details"] });
+      qc.invalidateQueries({ queryKey: versionKeys.all });
       toast.success({ title: "Thành công", description: "Xóa chi tiết thành công" });
     },
     onError: (e: any) => {

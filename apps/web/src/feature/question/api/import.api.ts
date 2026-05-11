@@ -10,9 +10,10 @@ import type {
 } from "../types/import.type";
 
 export const importJobApi = {
-  previewWord(file: File): Promise<AxiosResponse<ApiResponse<PreviewResponse>>> {
+  previewWord(file: File, lessonId: number): Promise<AxiosResponse<ApiResponse<PreviewResponse>>> {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("lessonId", String(lessonId));
     return api.post("/import-jobs/word/preview", formData, {
       headers: {
         "Content-Type": "multipart/form-data",

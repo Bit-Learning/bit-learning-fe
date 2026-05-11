@@ -1,3 +1,5 @@
+import type { Language as LangType, SubmissionStatus } from "@/feature/code-practice/types/coding.type";
+
 export enum ContestStatus {
   UPCOMING = "UPCOMING",
   RUNNING = "RUNNING",
@@ -19,12 +21,9 @@ export enum ContestVerdict {
   CE = "CE",
 }
 
-export enum Language {
-  JAVA = "JAVA",
-  PYTHON = "PYTHON",
-  CPP = "CPP",
-  C = "C",
-  JAVASCRIPT = "JAVASCRIPT",
+export interface CodeFile {
+  name: string;
+  content: string;
 }
 
 export interface ContestListDTO {
@@ -37,6 +36,8 @@ export interface ContestListDTO {
   problemCount: number;
   participantCount: number;
   isRegistered: boolean;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
 }
 
 export interface ContestDetailDTO {
@@ -52,6 +53,9 @@ export interface ContestDetailDTO {
   participantCount: number;
   isRegistered: boolean;
   myRank: number | null;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
+  prizesDistributed?: boolean;
   createdAt: string;
 }
 
@@ -75,15 +79,93 @@ export interface RegisterResponse {
   registeredAt: string;
 }
 
-export interface SubmitRequest {
-  contestProblemId: string;
-  language: Language;
-  sourceCode: string;
-}
+export type SubmitRequest =
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode: string;
+      files?: never;
+      entryFile?: never;
+    }
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode?: never;
+      files: CodeFile[];
+      entryFile: string;
+    };
 
 export interface SubmitResponse {
   submissionId: string;
   status: ContestSubmissionStatus;
+}
+
+export type ContestRunRequest =
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode: string;
+      files?: never;
+      entryFile?: never;
+    }
+  | {
+      contestProblemId: string;
+      language: LangType;
+      sourceCode?: never;
+      files: CodeFile[];
+      entryFile: string;
+    };
+
+export interface ContestRunTestCaseResult {
+  orderIndex: number;
+  status: ContestVerdict;
+  input: string | null;
+  expectedOutput: string | null;
+  actualOutput: string | null;
+  executionTimeMs: number | null;
+  memoryUsageMb: number | null;
+  errorMessage: string | null;
+}
+
+export interface ContestRunResponse {
+  overallStatus: ContestVerdict | "COMPILE_ERROR";
+  language: LangType;
+  compileError: string | null;
+  testCaseResults: ContestRunTestCaseResult[];
+}
+
+export type ContestDebugRequest =
+  | {
+      contestProblemId: string;
+      language: LangType;
+      lines: number[];
+      input?: string;
+      code: string;
+      files?: never;
+      entryFile?: never;
+    }
+  | {
+      contestProblemId: string;
+      language: LangType;
+      lines: number[];
+      input?: string;
+      code?: never;
+      files: CodeFile[];
+      entryFile: string;
+    };
+
+export interface ContestDebugStep {
+  line: number;
+  iteration: number;
+  file: string;
+  variables: Record<string, string>;
+}
+
+export interface ContestDebugResponse {
+  status: SubmissionStatus;
+  steps: ContestDebugStep[];
+  output: string;
+  error: string | null;
 }
 
 export interface SubmissionBriefDTO {
@@ -92,7 +174,7 @@ export interface SubmissionBriefDTO {
   problemTitle: string;
   userId: number;
   username: string;
-  language: Language;
+  language: LangType;
   status: ContestSubmissionStatus;
   verdict: ContestVerdict | null;
   passedTestcases: number;
@@ -120,7 +202,7 @@ export interface SubmissionDetailDTO {
   contestProblemId: string;
   problemLabel: string;
   problemTitle: string;
-  language: Language;
+  language: LangType;
   sourceCode: string;
   status: ContestSubmissionStatus;
   verdict: ContestVerdict | null;
@@ -162,6 +244,8 @@ export interface LeaderboardResponse {
   lastUpdatedAt: string;
   rankings: RankingEntry[];
   myRank: number | null;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
 }
 
 export interface CreateClarificationRequest {

@@ -1,133 +1,187 @@
-import { Button } from "@workspace/ui/components/Button";
-import { Award, CheckCircle, Star, Users } from "lucide-react";
+import { CheckCircle } from "lucide-react";
 import type React from "react";
+import { useEffect, useRef, useState } from "react";
 import CourseCurriculum from "./CourseCurriculum";
 import CourseReviews from "./CourseReviews";
+import { CourseCertificate } from "./CourseCertificate";
+import { CourseDetail } from "../types/course.type";
 
 interface CourseTabsProps {
-  course: {
-    id: number;
-    description: string;
-    outcome: string;
-    requirement: string;
-    audience: string;
-    instructorName: string;
-    instructorId: number;
-  };
-  activeTab: string;
-  onTabChange: (value: string) => void;
+  course: CourseDetail;
   hasAccess?: boolean;
-  onEnroll: () => void;
-  enrollPending: boolean;
 }
 
-export const CourseTabs: React.FC<CourseTabsProps> = ({
-  course,
-  activeTab,
-  onTabChange,
-  hasAccess,
-  onEnroll,
-  enrollPending,
-}) => {
-  const tabs = [
-    { id: "overview", label: "Tổng quan" },
-    { id: "curriculum", label: "Nội dung" },
-    { id: "reviews", label: "Đánh giá", icon: Star },
-  ];
+const SECTIONS = [
+  { key: "intro", label: "Giới thiệu" },
+  { key: "curriculum", label: "Giáo trình" },
+  { key: "reviews", label: "Đánh giá" },
+  { key: "certificate", label: "Chứng chỉ" },
+];
+
+const SectionCard: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+  <div className="bg-white dark:bg-slate-900 rounded-md border border-gray-200 dark:border-slate-700 shadow-sm p-6">
+    {children}
+  </div>
+);
+
+export const CourseTabs: React.FC<CourseTabsProps> = ({ course, hasAccess }) => {
+  const [activeSection, setActiveSection] = useState("intro");
+  const sectionRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const navRef = useRef<HTMLDivElement>(null);
+  const observing = useRef(true);
+
+  useEffect(() => {
+    const observers: IntersectionObserver[] = [];
+    SECTIONS.forEach(({ key }) => {
+      const el = sectionRefs.current[key];
+      if (!el) return;
+      const obs = new IntersectionObserver(
+        ([entry]) => {
+          if (observing.current && entry?.isIntersecting) setActiveSection(key);
+        },
+        { rootMargin: "-30% 0px -60% 0px", threshold: 0 },
+      );
+      obs.observe(el);
+      observers.push(obs);
+    });
+    return () => observers.forEach((o) => o.disconnect());
+  }, []);
+
+  const scrollToSection = (key: string) => {
+    const el = sectionRefs.current[key];
+    if (!el) return;
+    observing.current = false;
+    setActiveSection(key);
+    const navH = navRef.current?.offsetHeight ?? 56;
+    const top = el.getBoundingClientRect().top + window.scrollY - navH - 12;
+    window.scrollTo({ top, behavior: "smooth" });
+    setTimeout(() => {
+      observing.current = true;
+    }, 800);
+  };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-xl  border-2 border-blue-200 dark:border-slate-800">
-      <div className="flex border-b border-slate-100 dark:border-slate-800 px-4">
-        {tabs.map((tab) => (
-          <button
-            key={tab.id}
-            onClick={() => onTabChange(tab.id)}
-            className={`cursor-pointer px-6 py-4 text-sm font-bold transition-colors relative ${
-              activeTab === tab.id
-                ? "text-blue-600 border-b-2 border-blue-600"
-                : "text-slate-400 hover:text-slate-600 dark:hover:text-slate-200"
-            }`}
-          >
-            <span className="flex items-center gap-1">
-              {tab.icon && <tab.icon className="w-4 h-4" />}
-              {tab.label}
-            </span>
-          </button>
-        ))}
+    <div>
+      <div
+        ref={navRef}
+        className="sticky top-0 z-30 bg-white dark:bg-slate-900 border shadow-sm border-gray-200 dark:border-slate-700"
+      >
+        <div className="flex overflow-x-auto">
+          {SECTIONS.map((s) => (
+            <button
+              key={s.key}
+              onClick={() => scrollToSection(s.key)}
+              className={`cursor-pointer shrink-0 px-5 py-3.5 text-sm font-medium transition-colors border-b-2 ${
+                activeSection === s.key
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-500 hover:text-gray-800 dark:hover:text-slate-200"
+              }`}
+            >
+              {s.label}
+            </button>
+          ))}
+        </div>
       </div>
 
-      <div className="p-8 space-y-8">
-        {activeTab === "overview" && (
-          <>
-            <section>
-              <h2 className="text-2xl font-bold mb-4 text-slate-900 dark:text-white">Mô tả khóa học</h2>
-              <p className="text-slate-600 dark:text-slate-400 leading-relaxed">{course.description}</p>
-            </section>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-                <h3 className="flex items-center gap-2 text-blue-800 dark:text-blue-300 font-bold mb-4">
-                  <CheckCircle className="w-5 h-5 text-blue-600" />
-                  Bạn sẽ học được gì?
-                </h3>
-                <ul className="space-y-3">
-                  {course.outcome.split("\n").map((item, index) => (
-                    <li key={index} className="flex items-start gap-3 text-sm text-blue-700 dark:text-blue-400/80">
-                      <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+      <div className="space-y-4 pt-4">
+        <div
+          ref={(el) => {
+            sectionRefs.current["intro"] = el;
+          }}
+        >
+          <SectionCard>
+            <div className="space-y-6">
+              <div className="">
+                <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-3">Mô tả khóa học</h2>
+                <div
+                  className="text-gray-600 dark:text-slate-300 text-sm leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: course.description.replace(/\n/g, "<br/>") }}
+                />
               </div>
 
-              <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-                <h3 className="flex items-center gap-2 text-blue-800 dark:text-blue-300 font-bold mb-4">
-                  <Award className="w-5 h-5 text-blue-600" />
-                  Yêu cầu
-                </h3>
-                <ul className="space-y-3">
-                  {course.requirement.split("\n").map((item, index) => (
-                    <li key={index} className="flex items-start gap-3 text-sm text-blue-700 dark:text-blue-400/80">
-                      <CheckCircle className="w-4 h-4 mt-0.5 shrink-0" />
-                      <span>{item}</span>
-                    </li>
-                  ))}
-                </ul>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
+                  <h4 className="flex items-center gap-2 font-bold text-blue-800 mb-3">Bạn sẽ học được gì?</h4>
+                  <ul className="space-y-2">
+                    {course.outcome
+                      .split("\n")
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-blue-700">
+                          <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+
+                <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
+                  <h4 className="flex items-center gap-2 font-bold text-blue-800 mb-3">Yêu cầu</h4>
+                  <ul className="space-y-2">
+                    {course.requirement
+                      .split("\n")
+                      .filter(Boolean)
+                      .map((item, i) => (
+                        <li key={i} className="flex items-start gap-2 text-sm text-blue-700">
+                          <CheckCircle className="mt-0.5 h-3.5 w-3.5 shrink-0 text-blue-500" />
+                          <span>{item}</span>
+                        </li>
+                      ))}
+                  </ul>
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-blue-100 bg-blue-50 p-5">
+                <h4 className="font-bold text-blue-800 mb-2">Khóa học này dành cho ai?</h4>
+                <p className="text-sm text-blue-700">{course.audience}</p>
               </div>
             </div>
+          </SectionCard>
+        </div>
 
-            <div className="p-6 bg-blue-50 dark:bg-blue-900/10 rounded-2xl border border-blue-100 dark:border-blue-900/20">
-              <h3 className="text-blue-800 dark:text-blue-300 font-bold mb-2">Khóa học này dành cho ai?</h3>
-              <p className="text-sm text-blue-700 dark:text-blue-400/80">{course.audience}</p>
-            </div>
-          </>
-        )}
-
-        {activeTab === "curriculum" && (
-          <div className="text-center py-8 text-slate-500">
+        <div
+          ref={(el) => {
+            sectionRefs.current["curriculum"] = el;
+          }}
+        >
+          <SectionCard>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Giáo trình</h2>
             <CourseCurriculum courseId={course.id} />
-          </div>
-        )}
+          </SectionCard>
+        </div>
 
-        {activeTab === "reviews" &&
-          (hasAccess ? (
-            <div className="py-6 text-slate-500">
-              <CourseReviews courseId={course.id} />
-            </div>
-          ) : (
-            <div className="rounded-2xl bg-linear-to-br from-gray-50 to-blue-50 dark:from-slate-800 dark:to-slate-700 p-12 text-center">
-              <Star className="mx-auto mb-4 h-16 w-16 text-gray-400" />
-              <h3 className="mb-2 text-xl font-semibold text-gray-900 dark:text-white">Đăng ký để đánh giá</h3>
-              <p className="mb-6 text-gray-600 dark:text-gray-400">Bạn cần đăng ký khóa học để xem và viết đánh giá</p>
-              <Button
-                onClick={onEnroll}
-                isDisabled={enrollPending}
-                className="bg-linear-to-r from-blue-600 to-indigo-600 px-8 py-3 text-white rounded-xl font-bold shadow-lg hover:from-blue-700 hover:to-indigo-700"
-              >
-                Đăng ký ngay
-              </Button>
-            </div>
-          ))}
+        <div
+          ref={(el) => {
+            sectionRefs.current["reviews"] = el;
+          }}
+        >
+          <SectionCard>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-4">Đánh giá</h2>
+            <CourseReviews courseId={course.id} hasAccess={hasAccess} />
+          </SectionCard>
+        </div>
+
+        <div
+          ref={(el) => {
+            sectionRefs.current["certificate"] = el;
+          }}
+        >
+          <SectionCard>
+            <h2 className="text-xl font-bold text-gray-900 dark:text-white mb-5">Chứng chỉ</h2>
+
+            {hasAccess ? (
+              <CourseCertificate
+                courseId={course.id}
+                courseName={course.title}
+                progressPercentage={course.progressPercentage ?? 0}
+              />
+            ) : (
+              <p className="text-sm text-gray-500 dark:text-slate-400 text-center py-4">
+                Đăng ký khóa học để nhận chứng chỉ
+              </p>
+            )}
+          </SectionCard>
+        </div>
       </div>
     </div>
   );

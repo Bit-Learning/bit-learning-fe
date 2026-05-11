@@ -58,6 +58,7 @@ export const useCreateLesson = () => {
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: lessonKeys.all });
       queryClient.invalidateQueries({ queryKey: lessonKeys.byChapter(variables.chapterId) });
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
       toast.success("Tạo bài học thành công");
     },
     onError: (error: any) => {
@@ -90,6 +91,7 @@ export const useDeleteLesson = () => {
     mutationFn: (id: number) => lessonApi.delete(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: lessonKeys.all });
+      queryClient.invalidateQueries({ queryKey: ["chapters"] });
       toast.success("Xóa bài học thành công");
     },
     onError: (error: any) => {

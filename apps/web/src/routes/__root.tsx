@@ -1,7 +1,9 @@
 import { NotFoundErrorPage } from "@/feature/app/pages/NotFound";
-import { AudioProvider } from "@/feature/game/components/AudioProvider";
-import { ThemeProvider } from "@/feature/game/components/ThemeProvider";
+import { AudioProvider } from "@/feature/game/contexts/AudioProvider";
+import { ThemeProvider } from "@/feature/game/contexts/ThemeProvider";
+import { ErrorBoundary } from "@/feature/errors/ErrorBoundary";
 import { Providers } from "@/shared/components/Providers";
+import DefaultSeo from "@/shared/components/seo/default-seo";
 import { ReactQueryDevtools } from "@tanstack/react-query-devtools";
 import { createRootRoute, Outlet, useRouter } from "@tanstack/react-router";
 import { TanStackRouterDevtools } from "@tanstack/react-router-devtools";
@@ -14,21 +16,21 @@ function RootComponent() {
 	const content = <Outlet />;
 
 	return (
-		<AudioProvider>
-			{isMatchingRoute ? (
-				<ThemeProvider>{content}</ThemeProvider>
-			) : (
-				<Providers>
-					{content}
-					{/* {import.meta.env.MODE === "development" && (
-            <>
-              <ReactQueryDevtools position="bottom" buttonPosition="bottom-left" theme="system" initialIsOpen={false} />
-              <TanStackRouterDevtools position="bottom-left" />
-            </>
-          )} */}
-				</Providers>
-			)}
-		</AudioProvider>
+		<ErrorBoundary>
+			<AudioProvider>
+				{isMatchingRoute ? (
+					<Providers>
+						<DefaultSeo />
+						<ThemeProvider>{content}</ThemeProvider>
+					</Providers>
+				) : (
+					<Providers>
+						<DefaultSeo />
+						{content}
+					</Providers>
+				)}
+			</AudioProvider>
+		</ErrorBoundary>
 	);
 }
 

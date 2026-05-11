@@ -1,13 +1,15 @@
 import React from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
+import { cn } from "@workspace/ui/lib/utils";
 
 interface PaginationProps {
   currentPage: number;
   totalPages: number;
   onPageChange: (page: number) => void;
+  darkMode?: boolean;
 }
 
-export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange }) => {
+export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages, onPageChange, darkMode = false }) => {
   const getPageNumbers = () => {
     const pages: (number | string)[] = [];
     const maxVisible = 5;
@@ -34,48 +36,58 @@ export const Pagination: React.FC<PaginationProps> = ({ currentPage, totalPages,
   const pageNumbers = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-center gap-2 py-8">
+    <div className="flex items-center gap-1.5">
       <button
-        onClick={() => onPageChange(currentPage - 1)}
+        onClick={() => onPageChange(Math.max(0, currentPage - 1))}
         disabled={currentPage === 0}
-        className="w-10 h-10 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+        className={cn(
+          "cursor-pointer w-9 h-9 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30",
+          darkMode ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100",
+        )}
       >
-        <ChevronLeft className="w-5 h-5" />
+        <ChevronLeft className="w-4 h-4" />
       </button>
 
-      {pageNumbers.map((page, index) => {
-        if (page === "...") {
-          return (
-            <span key={`ellipsis-${index}`} className="w-10 h-10 flex items-center justify-center text-gray-400">
-              ...
-            </span>
-          );
-        }
-
-        const pageNum = page as number;
-        const isActive = pageNum === currentPage;
-
-        return (
-          <button
-            key={pageNum}
-            onClick={() => onPageChange(pageNum)}
-            className={`w-10 h-10 font-bold rounded-lg transition-all ${
-              isActive
-                ? "bg-blue-700 text-white shadow-sm"
-                : "border border-gray-200 text-gray-600 font-medium hover:border-blue-700 hover:text-blue-700"
-            }`}
+      {pageNumbers.map((p, i) =>
+        p === "..." ? (
+          <span
+            key={`ellipsis-${i}`}
+            className={cn(
+              "w-9 h-9 flex items-center justify-center text-sm",
+              darkMode ? "text-gray-500" : "text-gray-400",
+            )}
           >
-            {pageNum + 1}
+            ...
+          </span>
+        ) : (
+          <button
+            key={p}
+            onClick={() => onPageChange(p as number)}
+            className={cn(
+              "cursor-pointer w-9 h-9 rounded-lg flex items-center justify-center text-sm font-bold transition-colors",
+              currentPage === p
+                ? darkMode
+                  ? "bg-blue-500 text-white shadow"
+                  : "bg-blue-600 text-white shadow"
+                : darkMode
+                  ? "text-gray-300 hover:bg-white/10"
+                  : "text-gray-600 hover:bg-gray-100",
+            )}
+          >
+            {(p as number) + 1}
           </button>
-        );
-      })}
+        ),
+      )}
 
       <button
-        onClick={() => onPageChange(currentPage + 1)}
-        disabled={currentPage >= totalPages - 1}
-        className="w-10 h-10 border border-gray-200 rounded-lg text-gray-400 hover:bg-gray-50 transition-all flex items-center justify-center disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+        onClick={() => onPageChange(Math.min(totalPages - 1, currentPage + 1))}
+        disabled={currentPage === totalPages - 1}
+        className={cn(
+          "cursor-pointer w-9 h-9 rounded-lg flex items-center justify-center transition-colors disabled:opacity-30",
+          darkMode ? "text-gray-400 hover:bg-white/10" : "text-gray-500 hover:bg-gray-100",
+        )}
       >
-        <ChevronRight className="w-5 h-5" />
+        <ChevronRight className="w-4 h-4" />
       </button>
     </div>
   );

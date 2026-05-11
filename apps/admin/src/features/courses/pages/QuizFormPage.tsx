@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import { useNavigate, useSearch } from "@tanstack/react-router";
 import { ArrowLeft, Plus } from "lucide-react";
-import { useFieldArray, useForm, type Resolver } from "react-hook-form";
+import { Controller, useFieldArray, useForm, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { Button } from "@/components/ui/button";
@@ -9,9 +9,9 @@ import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { useCreateLectureQuiz, useLectureQuiz, useUpdateLecture, useUpdateLectureQuiz } from "../queries/useLecture";
-import { CreateLectureQuizRequest, QuizUpdateRequest } from "../types/lecture.type";
 import { cn } from "@/shared/lib/utils";
 import { QuestionCard } from "../components/QuestionCard";
+import DurationPicker from "@/components/DurationPicker";
 
 const answerSchema = z.object({
   id: z.coerce.number().optional(),
@@ -32,6 +32,7 @@ const quizSchema = z.object({
   description: z.string().optional(),
   passPercent: z.coerce.number().min(0, "Tối thiểu 0").max(1, "Tối đa 1"),
   maxAttempts: z.coerce.number().min(1, "Tối thiểu 1 lần"),
+  duration: z.number().min(1, "Thời lượng phải lớn hơn 0"),
   questions: z.array(questionSchema).min(1, "Cần ít nhất 1 câu hỏi"),
 });
 
@@ -48,12 +49,10 @@ interface QuizSearchParams {
 export const QuizFormPage: React.FC = () => {
   const navigate = useNavigate();
   const searchParams = useSearch({ strict: false }) as QuizSearchParams;
-
   const { mode = "create", sectionId, courseId, lectureId, orderIndex } = searchParams;
   const isEditMode = mode === "edit" && !!lectureId;
 
   const { data: quizData, isLoading: quizLoading } = useLectureQuiz(isEditMode ? lectureId! : 0);
-
   const createQuizMutation = useCreateLectureQuiz();
   const updateLectureMutation = useUpdateLecture();
   const updateQuizMutation = useUpdateLectureQuiz();
@@ -63,6 +62,7 @@ export const QuizFormPage: React.FC = () => {
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors },
   } = useForm<QuizFormValues>({
     resolver: zodResolver(quizSchema) as Resolver<QuizFormValues>,
@@ -70,7 +70,8 @@ export const QuizFormPage: React.FC = () => {
       title: "",
       description: "",
       passPercent: 0.8,
-      maxAttempts: 3,
+      maxAttempts: 999,
+      duration: 600,
       questions: [
         {
           questionText: "",
@@ -97,6 +98,7 @@ export const QuizFormPage: React.FC = () => {
         description: quizData.lecture?.description || "",
         passPercent: quizData.passPercent,
         maxAttempts: quizData.maxAttempts,
+        duration: 600,
         questions:
           quizData.quizzes?.map((q) => ({
             id: q.id,
@@ -127,6 +129,7 @@ export const QuizFormPage: React.FC = () => {
     try {
       if (isEditMode && lectureId) {
         await updateLectureMutation.mutateAsync({
+          courseId: courseId!,
           id: lectureId,
           data: {
             sectionId,
@@ -136,43 +139,53 @@ export const QuizFormPage: React.FC = () => {
             orderIndex: orderIndex || 1,
           },
         });
-        const quizzes: QuizUpdateRequest[] = data.questions.map((q) => ({
-          id: q.id,
-          questionText: q.questionText,
-          orderIndex: q.orderIndex,
-          answers: q.answers.map((a) => ({
-            id: a.id,
-            answerText: a.answerText,
-            isCorrect: a.isCorrect,
-            orderIndex: a.orderIndex,
-          })),
-        }));
-        await updateQuizMutation.mutateAsync({ id: lectureId, quizzes });
-      } else {
-        const payload: CreateLectureQuizRequest = {
-          lecture: {
-            sectionId,
-            title: data.title,
-            description: data.description,
-            isPreviewable: false,
-            orderIndex: orderIndex || 1,
+        await updateQuizMutation.mutateAsync({
+          courseId: courseId!,
+          id: lectureId,
+          data: {
+            passPercent: data.passPercent,
+            maxAttempts: data.maxAttempts,
+            duration: data.duration,
+            quizzes: data.questions.map((q) => ({
+              id: q.id,
+              questionText: q.questionText,
+              orderIndex: q.orderIndex,
+              answers: q.answers.map((a) => ({
+                id: a.id,
+                answerText: a.answerText,
+                isCorrect: a.isCorrect,
+                orderIndex: a.orderIndex,
+              })),
+            })),
           },
-          quizzes: data.questions.map((q) => ({
-            questionText: q.questionText,
-            orderIndex: q.orderIndex,
-            answers: q.answers,
-          })),
-          passPercent: data.passPercent,
-          maxAttempts: data.maxAttempts,
-        };
-        await createQuizMutation.mutateAsync(payload);
+        });
+      } else {
+        await createQuizMutation.mutateAsync({
+          courseId: courseId!,
+          data: {
+            lecture: {
+              sectionId,
+              title: data.title,
+              description: data.description,
+              isPreviewable: false,
+              orderIndex: orderIndex || 1,
+            },
+            quizzes: data.questions.map((q) => ({
+              questionText: q.questionText,
+              orderIndex: q.orderIndex,
+              answers: q.answers,
+            })),
+            passPercent: data.passPercent,
+            maxAttempts: data.maxAttempts,
+            duration: data.duration,
+          },
+        });
       }
       navigate({ to: "/courses/$id", params: { id: String(courseId) } });
     } catch (error) {
       console.error("Failed to save quiz:", error);
     }
   };
-
   if (!sectionId) return null;
 
   if (isEditMode && quizLoading) {
@@ -229,7 +242,7 @@ export const QuizFormPage: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <Label htmlFor="passPercent">Điểm đạt (%) *</Label>
+                  <Label htmlFor="passPercent">Điểm đạt (0–1) *</Label>
                   <Input
                     id="passPercent"
                     type="number"
@@ -243,16 +256,18 @@ export const QuizFormPage: React.FC = () => {
                   {errors.passPercent && <p className="text-sm text-red-500">{errors.passPercent.message}</p>}
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="maxAttempts">Số lần làm tối đa *</Label>
-                  <Input
-                    id="maxAttempts"
-                    type="number"
-                    min="1"
-                    {...register("maxAttempts")}
-                    placeholder="3"
-                    className={cn("h-11 w-full text-base", errors.maxAttempts && "border-red-500")}
+                  <Controller
+                    control={control}
+                    name="duration"
+                    render={({ field }) => (
+                      <DurationPicker
+                        value={field.value}
+                        onChange={field.onChange}
+                        label="Thời lượng làm bài *"
+                        error={(errors as any).duration?.message}
+                      />
+                    )}
                   />
-                  {errors.maxAttempts && <p className="text-sm text-red-500">{errors.maxAttempts.message}</p>}
                 </div>
               </div>
             </div>
@@ -263,6 +278,7 @@ export const QuizFormPage: React.FC = () => {
               <h3 className="text-lg font-semibold">Câu hỏi ({questionFields.length})</h3>
               <Button
                 type="button"
+                size="lg"
                 onClick={() =>
                   appendQuestion({
                     questionText: "",
@@ -273,7 +289,6 @@ export const QuizFormPage: React.FC = () => {
                     ],
                   })
                 }
-                size="lg"
               >
                 <Plus className="mr-2 h-4 w-4" />
                 Thêm câu hỏi
@@ -287,6 +302,7 @@ export const QuizFormPage: React.FC = () => {
                 control={control}
                 register={register}
                 errors={errors}
+                setValue={setValue}
                 onRemove={() => removeQuestion(questionIndex)}
                 canRemove={questionFields.length > 1}
               />

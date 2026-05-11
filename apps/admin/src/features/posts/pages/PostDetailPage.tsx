@@ -1,270 +1,453 @@
-import React, { useState } from "react";
-import { useParams, useNavigate } from "@tanstack/react-router";
-import { useGetPostDetail, useGetComments, useBanPost } from "../queries/usePost";
+import {
+	AlertDialog,
+	AlertDialogAction,
+	AlertDialogCancel,
+	AlertDialogContent,
+	AlertDialogDescription,
+	AlertDialogFooter,
+	AlertDialogHeader,
+	AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
-import { ArrowLeft, Ban, Shield, ThumbsUp, ThumbsDown, MessageSquare, Tag, User, Clock, File } from "lucide-react";
-import { CommentItem } from "../components/CommentItem";
 import { Skeleton } from "@/components/ui/skeleton";
+import { Textarea } from "@/components/ui/textarea";
+import { Header } from "@/layout/header";
+import { useNavigate, useParams } from "@tanstack/react-router";
+import { ArrowLeft, CalendarClock, Eye, File, Tag } from "lucide-react";
+import type React from "react";
+import { useState } from "react";
+import { CommentItem } from "../components/CommentItem";
+import {
+	getAuthorInitials,
+	getAuthorName,
+	getPostExcerpt,
+	getPostTags,
+	getTotalAttachments,
+} from "../post.utils";
+import {
+	useBanPost,
+	useFeaturePost,
+	useGetComments,
+	useGetPostDetail,
+} from "../queries/usePost";
 import { AttachmentType } from "../types/post.type";
 
 export const PostDetailPage: React.FC = () => {
-  const { id } = useParams({ strict: false });
-  const navigate = useNavigate();
-  const postId = parseInt(id || "0");
+	const { id } = useParams({ strict: false });
+	const navigate = useNavigate();
+	const postId = Number.parseInt(id || "0", 10);
+	const commentSkeletonKeys = [
+		"comment-skeleton-1",
+		"comment-skeleton-2",
+		"comment-skeleton-3",
+	];
 
-  const [confirmDialog, setConfirmDialog] = useState<{
-    open: boolean;
-    action: "ban" | "unban" | null;
-  }>({ open: false, action: null });
+	const [confirmDialog, setConfirmDialog] = useState<{
+		open: boolean;
+		action: "ban" | "unban" | null;
+	}>({ open: false, action: null });
+	const [blockReason, setBlockReason] = useState("");
+	const [blockReasonError, setBlockReasonError] = useState("");
 
-  const { data: post, isLoading: postLoading } = useGetPostDetail(postId);
-  const { data: comments, isLoading: commentsLoading } = useGetComments(postId);
-  const { mutate: banPost, isPending: banPending } = useBanPost();
+	const { data: post, isLoading: postLoading } = useGetPostDetail(postId);
+	const { data: comments, isLoading: commentsLoading } = useGetComments(
+		postId,
+		Math.max(post?.commentsCount ?? 0, 10),
+		!!post,
+	);
+	const { mutate: banPost, isPending: banPending } = useBanPost();
+	const { mutate: featurePost, isPending: featurePending } = useFeaturePost();
 
-  const handleOpenConfirm = (action: "ban" | "unban") => {
-    setConfirmDialog({ open: true, action });
-  };
+	const tags = post ? getPostTags(post) : [];
 
-  const handleConfirm = () => {
-    if (confirmDialog.action === "ban" || confirmDialog.action === "unban") {
-      banPost({ id: postId, isBanned: post?.isBanned || false });
-    }
-    setConfirmDialog({ open: false, action: null });
-  };
+	const handleOpenConfirm = (action: "ban" | "unban") => {
+		if (action === "ban") {
+			setBlockReason(post?.banReason || "");
+		} else {
+			setBlockReason("");
+		}
+		setBlockReasonError("");
+		setConfirmDialog({ open: true, action });
+	};
 
-  const handleCancel = () => {
-    setConfirmDialog({ open: false, action: null });
-  };
+	const handleConfirm = () => {
+		if (confirmDialog.action === "ban" && !blockReason.trim()) {
+			setBlockReasonError("Vui lòng nhập lý do khóa bài viết");
+			return;
+		}
 
-  if (postLoading) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <Skeleton className="h-8 w-48 mb-6" />
-        <Skeleton className="h-96 w-full" />
-      </div>
-    );
-  }
+		if (confirmDialog.action === "ban" || confirmDialog.action === "unban") {
+			banPost({
+				id: postId,
+				isBanned: post?.isBanned || false,
+				reason: confirmDialog.action === "ban" ? blockReason.trim() : undefined,
+			});
+		}
+		setBlockReason("");
+		setBlockReasonError("");
+		setConfirmDialog({ open: false, action: null });
+	};
 
-  if (!post) {
-    return (
-      <div className="container mx-auto px-4 py-8">
-        <p className="text-destructive">Không tìm thấy bài viết</p>
-      </div>
-    );
-  }
+	const handleCancel = () => {
+		setBlockReason("");
+		setBlockReasonError("");
+		setConfirmDialog({ open: false, action: null });
+	};
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <Button variant="ghost" className="mb-6" onClick={() => navigate({ to: "/posts" })}>
-        <ArrowLeft className="w-4 h-4 mr-2" />
-        Quay lại danh sách
-      </Button>
+	const handleFeatureToggle = () => {
+		if (!post) return;
+		featurePost({ id: postId, isFeatured: post.isFeatured });
+	};
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 space-y-6">
-          <Card>
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <p className="text-sm text-muted-foreground font-mono mb-2">{post.code}</p>
-                  <CardTitle className="text-3xl mb-2">{post.title}</CardTitle>
-                  <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <User className="w-4 h-4" />
-                      <span>
-                        {post.author.firstName} {post.author.lastName}
-                      </span>
-                    </div>
-                    <span>•</span>
-                    <div className="flex items-center gap-1">
-                      <Clock className="w-4 h-4" />
-                      <span>{new Date(post.createdAt).toLocaleString("vi-VN")}</span>
-                    </div>
-                  </div>
-                </div>
-                <div className="flex gap-2">
-                  {post.isBanned && <Badge variant="destructive">Bị khóa</Badge>}
-                  {post.isEdited && <Badge variant="secondary">Đã chỉnh sửa</Badge>}
-                </div>
-              </div>
-            </CardHeader>
+	if (postLoading) {
+		return (
+			<div className="container mx-auto px-4 py-8">
+				<Skeleton className="mb-6 h-8 w-48" />
+				<Skeleton className="h-96 w-full" />
+			</div>
+		);
+	}
 
-            <CardContent className="space-y-4">
-              <p className="text-foreground whitespace-pre-wrap">{post.content}</p>
+	if (!post) {
+		return (
+			<div className="container mx-auto px-4 py-8">
+				<p className="text-destructive">Không tìm thấy bài viết</p>
+			</div>
+		);
+	}
 
-              {post.attachments && post.attachments.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3">Tệp đính kèm</h3>
-                    <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-                      {post.attachments.map((attachment) => (
-                        <div
-                          key={attachment.id}
-                          className="border rounded-lg overflow-hidden hover:shadow-md transition-shadow"
-                        >
-                          {attachment.type === AttachmentType.IMAGE ? (
-                            <img src={attachment.url} alt="Attachment" className="w-full h-32 object-cover" />
-                          ) : (
-                            <div className="w-full h-32 bg-slate-100 flex items-center justify-center">
-                              <File className="w-12 h-12 text-slate-400" />
-                            </div>
-                          )}
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
+	return (
+		<>
+			<Header />
 
-              {post.hashtags && post.hashtags.length > 0 && (
-                <>
-                  <Separator />
-                  <div>
-                    <h3 className="font-semibold text-lg mb-3">Hashtags</h3>
-                    <div className="flex flex-wrap gap-2">
-                      {post.hashtags.map((tag) => (
-                        <Badge key={tag.id} variant="outline">
-                          <Tag className="w-3 h-3 mr-1" />
-                          {tag.name}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                </>
-              )}
+			<div className="flex flex-1 flex-col gap-2 sm:gap-6 p-6">
+				<Button
+					variant="link"
+					className="justify-start"
+					onClick={() => navigate({ to: "/posts" })}
+				>
+					<ArrowLeft className="mr-2 h-4 w-4" />
+					Quay lại danh sách
+				</Button>
 
-              <Separator />
+				<div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+					<div className="space-y-6 lg:col-span-2">
+						<Card>
+							<CardHeader>
+								<div className="flex items-start justify-between">
+									<div className="flex-1">
+										<div className="mb-3 flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
+											<span className="font-mono">#{post.id}</span>
+											{/* <span className="font-mono">{post.slug}</span> */}
+											{post.category && (
+												<Badge variant="outline">{post.category.name}</Badge>
+											)}
+											{post.isFeatured && (
+												<Badge variant="secondary">Nổi bật</Badge>
+											)}
+											{post.isTrending && (
+												<Badge variant="outline">Trending</Badge>
+											)}
+										</div>
+										<CardTitle className="mb-2 text-3xl">
+											{post.title}
+										</CardTitle>
+										<p className="mb-4 text-sm text-muted-foreground">
+											{getPostExcerpt(post)}
+										</p>
+										<div className="flex flex-wrap items-center gap-3 text-sm text-muted-foreground">
+											<div className="flex items-center gap-2">
+												<Avatar className="h-7 w-7">
+													<AvatarImage
+														src={post.author.avatar}
+														alt={getAuthorName(post.author)}
+													/>
+													<AvatarFallback>
+														{getAuthorInitials(post.author)}
+													</AvatarFallback>
+												</Avatar>
+												<span>{getAuthorName(post.author)}</span>
+											</div>
+											<span>•</span>
+											<div className="flex items-center gap-1">
+												<CalendarClock className="h-4 w-4" />
+												<span>
+													{new Date(post.createdAt).toLocaleString("vi-VN")}
+												</span>
+											</div>
+											<span>•</span>
+											<div className="flex items-center gap-1">
+												<Eye className="h-4 w-4" />
+												<span>
+													{post.viewsCount.toLocaleString("vi-VN")} lượt xem
+												</span>
+											</div>
+										</div>
+									</div>
+									<div className="flex gap-2">
+										{post.isBanned && (
+											<Badge variant="destructive">Bị khóa</Badge>
+										)}
+										{post.isEdited && (
+											<Badge variant="secondary">Đã chỉnh sửa</Badge>
+										)}
+									</div>
+								</div>
+							</CardHeader>
 
-              <div className="flex items-center gap-4">
-                <Button variant="outline" size="sm">
-                  <ThumbsUp className="w-4 h-4 mr-2" />
-                  {post.likes}
-                </Button>
-                <Button variant="outline" size="sm">
-                  <ThumbsDown className="w-4 h-4 mr-2" />
-                  {post.dislikes}
-                </Button>
-                <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                  <MessageSquare className="w-4 h-4" />
-                  <span>{comments?.length || 0} bình luận</span>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+							<CardContent className="space-y-4">
+								<div className="rounded-xl border bg-background p-6">
+									<p className="text-sm leading-[1.8] whitespace-pre-wrap text-foreground">
+										{post.content || "Không có nội dung"}
+									</p>
+								</div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Bình luận ({comments?.length || 0})</CardTitle>
-            </CardHeader>
-            <CardContent>
-              {commentsLoading ? (
-                <div className="space-y-4">
-                  {[...Array(3)].map((_, i) => (
-                    <Skeleton key={i} className="h-24 w-full" />
-                  ))}
-                </div>
-              ) : comments && comments.length > 0 ? (
-                <div className="space-y-4">
-                  {comments.map((comment) => (
-                    <CommentItem key={comment.id} comment={comment} postId={postId} />
-                  ))}
-                </div>
-              ) : (
-                <p className="text-center text-muted-foreground py-8">Chưa có bình luận nào</p>
-              )}
-            </CardContent>
-          </Card>
-        </div>
+								{post.attachments.length > 0 && (
+									<>
+										<Separator />
+										<div>
+											<h3 className="mb-3 text-lg font-semibold">
+												Tệp đính kèm
+											</h3>
+											<div className="grid grid-cols-2 gap-4 md:grid-cols-3">
+												{post.attachments.map((attachment) => (
+													<a
+														key={attachment.id}
+														href={attachment.url}
+														target="_blank"
+														rel="noreferrer"
+														className="overflow-hidden rounded-lg border transition-shadow hover:shadow-md"
+													>
+														{attachment.type === AttachmentType.IMAGE ? (
+															<img
+																src={attachment.url}
+																alt={`Attachment ${attachment.id}`}
+																className="h-32 w-full object-cover"
+															/>
+														) : (
+															<div className="flex h-32 w-full items-center justify-center bg-slate-100">
+																<File className="h-12 w-12 text-slate-400" />
+															</div>
+														)}
+													</a>
+												))}
+											</div>
+										</div>
+									</>
+								)}
 
-        <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Thông tin</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Mã bài viết</span>
-                <span className="font-mono font-semibold">{post.code}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Lượt thích</span>
-                <span className="font-semibold">{post.likes}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Lượt không thích</span>
-                <span className="font-semibold">{post.dislikes}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Tệp đính kèm</span>
-                <span className="font-semibold">{post.attachments?.length || 0}</span>
-              </div>
-              <div className="flex justify-between">
-                <span className="text-muted-foreground">Hashtags</span>
-                <span className="font-semibold">{post.hashtags?.length || 0}</span>
-              </div>
-            </CardContent>
-          </Card>
+								{tags.length > 0 && (
+									<>
+										<Separator />
+										<div>
+											<h3 className="mb-3 text-lg font-semibold">Hashtags</h3>
+											<div className="flex flex-wrap gap-2">
+												{tags.map((tag) => (
+													<Badge key={tag.id} variant="outline">
+														<Tag className="mr-1 h-3 w-3" />
+														{tag.name}
+													</Badge>
+												))}
+											</div>
+										</div>
+									</>
+								)}
+							</CardContent>
+						</Card>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Hành động</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-3">
-              {!post.isBanned ? (
-                <Button
-                  className="w-full"
-                  variant="destructive"
-                  onClick={() => handleOpenConfirm("ban")}
-                  disabled={banPending}
-                >
-                  <Ban className="w-4 h-4 mr-2" />
-                  Khóa bài viết
-                </Button>
-              ) : (
-                <Button className="w-full" onClick={() => handleOpenConfirm("unban")} disabled={banPending}>
-                  <Shield className="w-4 h-4 mr-2" />
-                  Mở khóa bài viết
-                </Button>
-              )}
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+						<Card>
+							<CardHeader>
+								<CardTitle>Bình luận ({post.commentsCount})</CardTitle>
+							</CardHeader>
+							<CardContent>
+								{commentsLoading ? (
+									<div className="space-y-4">
+										{commentSkeletonKeys.map((skeletonKey) => (
+											<Skeleton key={skeletonKey} className="h-24 w-full" />
+										))}
+									</div>
+								) : comments && comments.length > 0 ? (
+									<div className="space-y-4">
+										{comments.map((comment) => (
+											<CommentItem
+												key={comment.id}
+												comment={comment}
+												postId={postId}
+											/>
+										))}
+									</div>
+								) : (
+									<p className="py-8 text-center text-muted-foreground">
+										Chưa có bình luận nào
+									</p>
+								)}
+							</CardContent>
+						</Card>
+					</div>
 
-      <AlertDialog open={confirmDialog.open} onOpenChange={(open) => !open && handleCancel()}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {confirmDialog.action === "ban" && "Xác nhận khóa bài viết"}
-              {confirmDialog.action === "unban" && "Xác nhận mở khóa bài viết"}
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {confirmDialog.action === "ban" &&
-                "Bạn có chắc chắn muốn khóa bài viết này? Bài viết sẽ không còn hiển thị công khai."}
-              {confirmDialog.action === "unban" &&
-                "Bạn có chắc chắn muốn mở khóa bài viết này? Bài viết sẽ hiển thị công khai trở lại."}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={handleCancel}>Hủy bỏ</AlertDialogCancel>
-            <AlertDialogAction onClick={handleConfirm}>Xác nhận</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-    </div>
-  );
+					<div className="space-y-6">
+						<Card>
+							<CardHeader>
+								<CardTitle>Thông tin</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-4">
+								{/* <div className="flex justify-between">
+									<span className="text-muted-foreground">Slug</span>
+									<span className="font-mono font-semibold">{post.slug}</span>
+								</div> */}
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Danh mục</span>
+									<span className="font-semibold">
+										{post.category?.name || "Chưa phân loại"}
+									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Lượt xem</span>
+									<span className="font-semibold">
+										{post.viewsCount.toLocaleString("vi-VN")}
+									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Bình luận</span>
+									<span className="font-semibold">{post.commentsCount}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Tổng reaction</span>
+									<span className="font-semibold">{post.totalReactions}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Lượt thích</span>
+									<span className="font-semibold">{post.likes}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">
+										Lượt không thích
+									</span>
+									<span className="font-semibold">{post.dislikes}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">Tệp đính kèm</span>
+									<span className="font-semibold">
+										{getTotalAttachments(post)}
+									</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">
+										Số lượng hashtag
+									</span>
+									<span className="font-semibold">{tags.length}</span>
+								</div>
+								<div className="flex justify-between">
+									<span className="text-muted-foreground">
+										Cho phép chỉnh sửa
+									</span>
+									<span className="font-semibold">
+										{post.isEditAllowed ? "Có" : "Không"}
+									</span>
+								</div>
+								{post.isBanned && post.banReason ? (
+									<div className="space-y-2 rounded-lg border border-red-200 bg-red-50 p-4">
+										<span className="text-sm font-semibold text-red-700">
+											Lý do khóa
+										</span>
+										<p className="text-sm leading-6 text-red-900">
+											{post.banReason}
+										</p>
+									</div>
+								) : null}
+							</CardContent>
+						</Card>
+
+						<Card>
+							<CardHeader>
+								<CardTitle>Hành động</CardTitle>
+							</CardHeader>
+							<CardContent className="space-y-3">
+								<Button
+									size="lg"
+									className="w-full"
+									variant={post.isFeatured ? "outline" : "default"}
+									onClick={handleFeatureToggle}
+									disabled={featurePending || banPending}
+								>
+									{post.isFeatured ? "Bỏ nổi bật" : "Đánh dấu nổi bật"}
+								</Button>
+								{!post.isBanned ? (
+									<Button
+										size="lg"
+										className="w-full"
+										variant="destructive"
+										onClick={() => handleOpenConfirm("ban")}
+										disabled={banPending || featurePending}
+									>
+										Khóa bài viết
+									</Button>
+								) : (
+									<Button
+										size="lg"
+										className="w-full"
+										onClick={() => handleOpenConfirm("unban")}
+										disabled={banPending || featurePending}
+									>
+										Mở khóa bài viết
+									</Button>
+								)}
+							</CardContent>
+						</Card>
+					</div>
+				</div>
+
+				<AlertDialog
+					open={confirmDialog.open}
+					onOpenChange={(open) => !open && handleCancel()}
+				>
+					<AlertDialogContent>
+						<AlertDialogHeader>
+							<AlertDialogTitle>
+								{confirmDialog.action === "ban" && "Xác nhận khóa bài viết"}
+								{confirmDialog.action === "unban" &&
+									"Xác nhận mở khóa bài viết"}
+							</AlertDialogTitle>
+							<AlertDialogDescription>
+								{confirmDialog.action === "ban" &&
+									"Bạn có chắc chắn muốn khóa bài viết này? Bài viết sẽ không còn hiển thị công khai."}
+								{confirmDialog.action === "unban" &&
+									"Bạn có chắc chắn muốn mở khóa bài viết này? Bài viết sẽ hiển thị công khai trở lại."}
+							</AlertDialogDescription>
+						</AlertDialogHeader>
+						{confirmDialog.action === "ban" ? (
+							<div className="space-y-2">
+								<Textarea
+									value={blockReason}
+									onChange={(event) => {
+										setBlockReason(event.target.value);
+										if (blockReasonError) {
+											setBlockReasonError("");
+										}
+									}}
+									placeholder="Nhập lý do khóa bài viết để gửi email cho tác giả"
+									className="min-h-28"
+								/>
+								{blockReasonError ? (
+									<p className="text-sm text-red-600">{blockReasonError}</p>
+								) : null}
+							</div>
+						) : null}
+						<AlertDialogFooter>
+							<AlertDialogCancel onClick={handleCancel}>
+								Hủy bỏ
+							</AlertDialogCancel>
+							<AlertDialogAction onClick={handleConfirm}>
+								Xác nhận
+							</AlertDialogAction>
+						</AlertDialogFooter>
+					</AlertDialogContent>
+				</AlertDialog>
+			</div>
+		</>
+	);
 };

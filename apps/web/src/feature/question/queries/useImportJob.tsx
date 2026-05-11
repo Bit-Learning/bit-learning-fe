@@ -12,7 +12,7 @@ export const importJobKeys = {
 
 export const usePreviewImport = () => {
   return useMutation({
-    mutationFn: (file: File) => importJobApi.previewWord(file),
+    mutationFn: ({ file, lessonId }: { file: File; lessonId: number }) => importJobApi.previewWord(file, lessonId),
     onError: (error: AxiosError<ApiResponse<null>>) => {
       toast.error({
         title: "Lỗi",
@@ -69,10 +69,9 @@ export const useImportJobStatus = (jobId: number | null, options?: { enabled?: b
     enabled: options?.enabled !== false && !!jobId,
     refetchInterval: (query) => {
       const status = query.state.data?.status;
-      if (status === "PROCESSING" || status === "CONFIRMED") {
-        return 2000;
-      }
-      return false;
+      const terminalStatuses = ["DONE", "FAILED"];
+      if (!status || terminalStatuses.includes(status)) return false;
+      return 2000;
     },
   });
 };

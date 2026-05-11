@@ -1,184 +1,653 @@
-import React, { useState, useRef } from "react";
-import { Plus, Send, Flame, Sparkles, TrendingUp } from "lucide-react";
-import { useSelector } from "react-redux";
-import { useForumPosts, useLikeForumPost, useDislikeForumPost } from "../queries/useForum";
-import { selectForumPosts } from "../stores/forum.store";
-import { PostCard } from "./PostCard";
-import { AuthorAvatar } from "./AuthorAvatar";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
-import { useNavigate } from "@tanstack/react-router";
-import { Pagination } from "@/shared/components/Pagination";
+import { toast } from "@/shared/components/Sonner";
+import { getAccessToken } from "@/shared/lib/cookies";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { Badge } from "@workspace/ui/components/Badge";
+import { Input } from "@workspace/ui/components/Input";
+import {
+	BookOpen,
+	Clock3,
+	Compass,
+	Eye,
+	Flame,
+	PenSquare,
+	Search,
+	ShieldQuestion,
+	Sparkles,
+	Tag,
+	TrendingUp,
+} from "lucide-react";
+import type React from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import {
+	useFeaturedForumPosts,
+	useForumCategories,
+	useForumHashtags,
+	useInfiniteForumPosts,
+	useLatestForumList,
+	useMostViewedForumPosts,
+	useRecommendedForumPosts,
+	useSubscribeToForumPosts,
+	useTrendingForumPosts,
+} from "../queries/useForum";
+import type { ForumCategory, Tag as ForumTag, Post } from "../types/forum.type";
+import {
+	formatCompactNumber,
+	getErrorMessage,
+	getSkeletonKeys,
+	updateSearchState,
+} from "../utils/forum.utils";
+import { ForumSubscribeCard } from "./card/ForumSubscribeCard";
+import { InlineStateCard } from "./card/InlineStateCard";
+import { ContentPostCard } from "./ContentPostCard";
+import { FeaturedHero } from "./FeaturedHero";
+import { SidebarList } from "./SidebarList";
+import { CategoryCardSkeleton } from "./skeleton/CategoryCardSkeleton";
+import { FeaturedHeroSkeleton } from "./skeleton/FeaturedHeroSkeleton";
+import { FilterChipSkeleton } from "./skeleton/FilterChipSkeleton";
+import { PostCardSkeleton } from "./skeleton/PostCardSkeleton";
+import { SidebarListSkeleton } from "./skeleton/SidebarListSkeleton";
+
+export const CATEGORY_ICONS: Record<string, React.ReactNode> = {
+	"layout-grid": <Compass className="h-4 w-4" />,
+	server: <ShieldQuestion className="h-4 w-4" />,
+	monitor: <Sparkles className="h-4 w-4" />,
+	rocket: <TrendingUp className="h-4 w-4" />,
+	sparkles: <Flame className="h-4 w-4" />,
+	briefcase: <BookOpen className="h-4 w-4" />,
+};
 
 const ForumContent: React.FC = () => {
-  const navigate = useNavigate();
-  const [activeFilter, setActiveFilter] = useState<"newest" | "popular">("newest");
-  const [newPost, setNewPost] = useState("");
-  const [page, setPage] = useState(0);
-  const [isFocused, setIsFocused] = useState(false);
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
+	const navigate = useNavigate();
+	const { userInfo } = useSelector(selectAuthStateInfo);
+	const isAuthenticated = Boolean(getAccessToken());
+	const canLoadRecommended = isAuthenticated;
+	const search = useSearch({ strict: false }) as {
+		q?: string;
+		category?: string;
+		tag?: string;
+		sort?: "latest" | "trending" | "most_viewed" | "most_reacted";
+	};
+	const [searchInput, setSearchInput] = useState(search.q ?? "");
+	const [subscriptionEmail, setSubscriptionEmail] = useState(
+		userInfo?.email ?? "",
+	);
+	const loadMoreRef = useRef<HTMLDivElement | null>(null);
 
-  const posts = useSelector(selectForumPosts);
-  const { userInfo } = useSelector(selectAuthStateInfo);
-  const { data } = useForumPosts({ page, size: 10 });
-  const likeMutation = useLikeForumPost();
-  const dislikeMutation = useDislikeForumPost();
+	const selectedSort = search.sort ?? "latest";
+	const selectedCategory = search.category ?? "";
+	const selectedTag = search.tag ?? "";
 
-  const pagination = data?.page;
+	const featuredQuery = useFeaturedForumPosts(4);
+	const trendingQuery = useTrendingForumPosts(8);
+	const recommendedQuery = useRecommendedForumPosts(6, canLoadRecommended);
+	const categoriesQuery = useForumCategories();
+	const allTagsQuery = useForumHashtags();
+	const sidebarMostViewedQuery = useMostViewedForumPosts(5);
+	const sidebarLatestQuery = useLatestForumList(5);
+	const subscribeMutation = useSubscribeToForumPosts();
 
-  const handlePageChange = (newPage: number) => {
-    setPage(newPage);
-    window.scrollTo({ top: 0, behavior: "smooth" });
-  };
+	const latestFeedQuery = useInfiniteForumPosts({
+		q: search.q,
+		category: search.category,
+		tag: search.tag,
+		sort: selectedSort,
+		size: 9,
+	});
 
-  return (
-    <div className="min-h-screen bg-[#f7f8fc]">
-      <div className="fixed top-20 left-0 right-0 h-12 bg-white/95 backdrop-blur-sm border-b border-gray-100 z-40 shadow-sm">
-        <div className="max-w-7xl mx-auto h-full px-6 flex items-center justify-between">
-          <div className="flex items-center gap-1 h-full">
-            <button className="cursor-pointer relative h-full px-4 text-sm font-semibold text-blue-600">
-              Tất cả bài viết
-              <span className="absolute bottom-0 left-0 right-0 h-0.5 bg-blue-600 rounded-t-full" />
-            </button>
-            <button
-              className=" cursor-pointer h-full px-4 text-sm font-medium text-gray-500 hover:text-blue-600 transition-colors"
-              onClick={() => navigate({ to: "/forum/my" })}
-            >
-              Bài viết của tôi
-            </button>
-          </div>
-          <button
-            className="cursor-pointer flex items-center gap-1.5 bg-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors shadow-sm"
-            onClick={() => navigate({ to: "/forum/create" })}
-          >
-            <Plus className="w-3.5 h-3.5" />
-            Tạo bài viết
-          </button>
-        </div>
-      </div>
+	const featuredPosts = featuredQuery.data?.data ?? [];
+	const trendingPosts = trendingQuery.data?.data ?? [];
+	const recommendedPosts = recommendedQuery.data?.data ?? [];
+	const categories = categoriesQuery.data?.data ?? [];
+	const allTags = allTagsQuery.data?.data ?? [];
+	const latestPosts = useMemo(
+		() => latestFeedQuery.data?.pages.flatMap((page) => page.data ?? []) ?? [],
+		[latestFeedQuery.data],
+	);
+	const mostViewedPosts = sidebarMostViewedQuery.data ?? [];
+	const latestCompactPosts = sidebarLatestQuery.data ?? [];
+	const isFeedBootstrapping =
+		latestFeedQuery.isLoading ||
+		(latestFeedQuery.isFetching &&
+			latestPosts.length === 0 &&
+			!latestFeedQuery.isFetchingNextPage);
+	const isRefreshingFeed =
+		latestFeedQuery.isFetching &&
+		latestPosts.length > 0 &&
+		!latestFeedQuery.isFetchingNextPage;
+	const activeFilterSummary = [
+		search.q ? `Search: ${search.q}` : null,
+		selectedCategory ? `Category: ${selectedCategory}` : null,
+		selectedTag ? `Tag: ${selectedTag}` : null,
+		selectedSort !== "latest" ? `Sort: ${selectedSort}` : null,
+	].filter(Boolean);
 
-      <div className="max-w-7xl mx-auto px-6 pt-15 pb-20">
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-end justify-between gap-4">
-          <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-2xl">🌐</span>
-              <h1 className="text-2xl font-bold text-gray-900 tracking-tight">Bảng tin cộng đồng</h1>
-            </div>
-            <p className="text-gray-500 text-sm">Khám phá các thảo luận mới nhất từ các học viên</p>
-          </div>
+	useEffect(() => {
+		setSearchInput(search.q ?? "");
+	}, [search.q]);
 
-          <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl p-1 shadow-sm">
-            <button
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                activeFilter === "newest" ? "bg-blue-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-800"
-              }`}
-              onClick={() => {
-                setActiveFilter("newest");
-                setPage(0);
-              }}
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              Mới nhất
-            </button>
-            <button
-              className={`flex items-center gap-1.5 px-4 py-1.5 rounded-lg text-sm font-semibold transition-all ${
-                activeFilter === "popular" ? "bg-blue-600 text-white shadow-sm" : "text-gray-500 hover:text-gray-800"
-              }`}
-              onClick={() => {
-                setActiveFilter("popular");
-                setPage(0);
-              }}
-            >
-              <Flame className="w-3.5 h-3.5" />
-              Phổ biến
-            </button>
-          </div>
-        </div>
+	useEffect(() => {
+		if (userInfo?.email && !subscriptionEmail) {
+			setSubscriptionEmail(userInfo.email);
+		}
+	}, [userInfo?.email, subscriptionEmail]);
 
-        <div
-          className={`bg-white rounded-2xl border transition-all mb-8 shadow-sm overflow-hidden ${
-            isFocused ? "border-blue-400 shadow-blue-100 shadow-md" : "border-gray-200"
-          }`}
-        >
-          <div className="p-4 flex gap-3">
-            {userInfo && <AuthorAvatar author={userInfo} size="sm" />}
-            <textarea
-              ref={textareaRef}
-              className="flex-1 bg-transparent border-none outline-none resize-none placeholder:text-gray-400 text-sm leading-relaxed"
-              placeholder="Bạn muốn chia sẻ điều gì với cộng đồng bit learning?"
-              rows={isFocused ? 3 : 1}
-              value={newPost}
-              onChange={(e) => setNewPost(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              onBlur={() => !newPost && setIsFocused(false)}
-            />
-          </div>
-          {isFocused && (
-            <div className="px-4 pb-3 pt-3 flex items-center justify-between border-t border-gray-100">
-              <p className="text-xs text-gray-400">Markdown được hỗ trợ</p>
-              <div className="flex gap-2">
-                <button
-                  className="text-xs text-gray-500 px-3 py-1.5 rounded-lg hover:bg-gray-100 font-medium transition-colors"
-                  onClick={() => {
-                    setNewPost("");
-                    setIsFocused(false);
-                  }}
-                >
-                  Hủy
-                </button>
-                <button
-                  className={`flex items-center gap-1.5 text-xs px-4 py-1.5 rounded-lg font-semibold transition-all ${
-                    newPost.trim()
-                      ? "bg-blue-600 text-white hover:bg-blue-700 shadow-sm"
-                      : "bg-gray-100 text-gray-400 cursor-not-allowed"
-                  }`}
-                  disabled={!newPost.trim()}
-                  onClick={() => navigate({ to: "/forum/create" })}
-                >
-                  <Send className="w-3 h-3" />
-                  Đăng bài
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
+	useEffect(() => {
+		const timer = window.setTimeout(() => {
+			const nextValue = searchInput.trim();
+			if ((search.q ?? "") === nextValue) return;
+			updateSearchState(navigate, {
+				q: nextValue,
+				category: selectedCategory,
+				tag: selectedTag,
+				sort: selectedSort,
+			});
+		}, 250);
 
-        {pagination && (
-          <div className="flex items-center gap-2 mb-5 text-xs text-gray-400">
-            <TrendingUp className="w-3.5 h-3.5" />
-            <span>
-              {pagination.totalElements ?? posts.length} bài viết · Trang {page + 1}/{pagination.totalPages}
-            </span>
-          </div>
-        )}
+		return () => window.clearTimeout(timer);
+	}, [
+		searchInput,
+		search.q,
+		navigate,
+		selectedCategory,
+		selectedTag,
+		selectedSort,
+	]);
 
-        <div className="space-y-5">
-          {posts.length === 0 ? (
-            <div className="text-center py-20 text-gray-400">
-              <div className="text-4xl mb-3">📭</div>
-              <p className="font-medium">Chưa có bài viết nào</p>
-              <p className="text-sm mt-1">Hãy là người đầu tiên chia sẻ!</p>
-            </div>
-          ) : (
-            posts.map((post) => (
-              <PostCard
-                key={post.id}
-                post={post}
-                onLike={(id) => likeMutation.mutate(id)}
-                onDislike={(id) => dislikeMutation.mutate(id)}
-                onViewDetails={(id) => navigate({ to: "/forum/post/$id", params: { id: String(id) } })}
-              />
-            ))
-          )}
-        </div>
+	useEffect(() => {
+		const node = loadMoreRef.current;
+		if (
+			!node ||
+			!latestFeedQuery.hasNextPage ||
+			latestFeedQuery.isFetchingNextPage
+		) {
+			return;
+		}
 
-        {pagination && pagination.totalPages > 1 && (
-          <div className="mt-10">
-            <Pagination currentPage={page} totalPages={pagination.totalPages} onPageChange={handlePageChange} />
-          </div>
-        )}
-      </div>
-    </div>
-  );
+		const observer = new IntersectionObserver(
+			(entries) => {
+				const firstEntry = entries[0];
+				if (firstEntry?.isIntersecting) {
+					latestFeedQuery.fetchNextPage();
+				}
+			},
+			{ rootMargin: "200px 0px" },
+		);
+
+		observer.observe(node);
+		return () => observer.disconnect();
+	}, [
+		latestFeedQuery.fetchNextPage,
+		latestFeedQuery.hasNextPage,
+		latestFeedQuery.isFetchingNextPage,
+	]);
+
+	const openPost = (post: Post) =>
+		navigate({ to: "/forum/post/$id", params: { id: String(post.id) } });
+
+	const setCategory = (category?: ForumCategory | string) => {
+		const categorySlug =
+			typeof category === "string" ? category : category?.slug;
+		updateSearchState(navigate, {
+			q: search.q,
+			category: categorySlug === selectedCategory ? undefined : categorySlug,
+			tag: undefined,
+			sort: selectedSort,
+		});
+	};
+
+	const setTag = (tag?: ForumTag | string) => {
+		const tagSlug = typeof tag === "string" ? tag : tag?.slug;
+		if (!tagSlug) return;
+		updateSearchState(navigate, {
+			q: search.q,
+			category: selectedCategory,
+			tag: tagSlug === selectedTag ? undefined : tagSlug,
+			sort: selectedSort,
+		});
+	};
+
+	const setSort = (
+		sort: "latest" | "trending" | "most_viewed" | "most_reacted",
+	) =>
+		updateSearchState(navigate, {
+			q: search.q,
+			category: selectedCategory,
+			tag: selectedTag,
+			sort,
+		});
+
+	const handleSubscribe = () => {
+		const email = subscriptionEmail.trim();
+		if (!email) {
+			toast.error({ title: "Please enter your email address" });
+			return;
+		}
+
+		if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+			toast.error({ title: "Please enter a valid email address" });
+			return;
+		}
+
+		const langKey =
+			typeof window !== "undefined"
+				? localStorage.getItem("i18nextLng") || "vi"
+				: "vi";
+
+		subscribeMutation.mutate({
+			email,
+			langKey,
+		});
+	};
+
+	return (
+		<div className="min-h-screen bg-[#f5f7fb]">
+			<div className="border-b border-slate-200 bg-white/90 backdrop-blur">
+				<div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 lg:px-8">
+					<div className="grid gap-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:items-end">
+						<div className="space-y-5">
+							<Badge className="rounded-full bg-slate-900 px-4 py-1 text-white">
+								Cộng đồng chia sẻ công nghệ
+							</Badge>
+							<div className="space-y-3">
+								<h1 className="max-w-3xl text-4xl font-black tracking-tight text-slate-950 sm:text-5xl">
+									Nơi chia sẻ kiến thức, học hỏi và kết nối với cộng đồng Bit
+									Learning
+								</h1>
+								<p className="max-w-3xl text-base leading-7 text-slate-600">
+									Khám phá các bài đăng cộng đồng thông qua các bài viết nổi
+									bật, thảo luận thịnh hành, bộ lọc nhanh và các thanh bên được
+									thiết kế chuyên dụng để học hỏi và chia sẻ.
+								</p>
+							</div>
+
+							<div className="flex flex-wrap items-center gap-3">
+								{isAuthenticated ? (
+									<button
+										type="button"
+										onClick={() => navigate({ to: "/forum/create" })}
+										className="inline-flex items-center gap-2 rounded-full bg-slate-950 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+									>
+										<PenSquare className="h-4 w-4" />
+										Tạo bài viết
+									</button>
+								) : null}
+							</div>
+
+							<div className="relative max-w-2xl">
+								<Search className="pointer-events-none absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-slate-400" />
+								<Input
+									value={searchInput}
+									onChange={(event) => setSearchInput(event.target.value)}
+									placeholder="Tìm kiếm bài viết, chủ đề..."
+									className="h-14 rounded-full border-slate-200 bg-white pl-12 pr-12 text-base shadow-sm"
+								/>
+							</div>
+
+							<div className="space-y-3">
+								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+									<Compass className="h-4 w-4" />
+									Chọn danh mục
+								</div>
+								<div className="flex gap-2 overflow-x-auto pb-1">
+									<button
+										type="button"
+										onClick={() => setCategory("")}
+										className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+											!selectedCategory
+												? "bg-slate-900 text-white"
+												: "bg-white text-slate-600 hover:bg-slate-100"
+										}`}
+									>
+										Tất cả danh mục
+									</button>
+									{categoriesQuery.isLoading
+										? getSkeletonKeys("category-chip", 5).map((key) => (
+												<FilterChipSkeleton key={key} />
+											))
+										: categories.map((category) => (
+												<button
+													key={category.id}
+													type="button"
+													onClick={() => setCategory(category)}
+													className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+														selectedCategory === category.slug
+															? "bg-slate-900 text-white"
+															: "bg-white text-slate-600 hover:bg-slate-100"
+													}`}
+												>
+													{category.name}
+												</button>
+											))}
+								</div>
+							</div>
+
+							<div className="space-y-3">
+								<div className="flex items-center gap-2 text-sm font-semibold text-slate-500">
+									<Tag className="h-4 w-4" />
+									Tất cả thẻ
+								</div>
+								<div className="flex flex-wrap gap-2">
+									{allTagsQuery.isLoading
+										? getSkeletonKeys("popular-tag-chip", 8).map((key) => (
+												<FilterChipSkeleton key={key} />
+											))
+										: allTags.map((tag) => (
+												<button
+													key={tag.id}
+													type="button"
+													onClick={() => setTag(tag)}
+													className={`rounded-full border px-3 py-1.5 text-sm font-medium whitespace-nowrap transition ${
+														selectedTag === tag.slug
+															? "border-blue-200 bg-blue-50 text-blue-700"
+															: "border-slate-200 bg-white text-slate-600 hover:border-slate-300"
+													}`}
+												>
+													#{tag.name}
+												</button>
+											))}
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+			<div className="mx-auto max-w-7xl space-y-8 px-4 py-8 sm:px-6 lg:px-8">
+				{featuredQuery.isLoading ? (
+					<FeaturedHeroSkeleton />
+				) : featuredQuery.isError ? (
+					<InlineStateCard
+						title="Featured posts are unavailable"
+						description={getErrorMessage(featuredQuery.error)}
+						actionLabel="Retry"
+						onAction={() => featuredQuery.refetch()}
+					/>
+				) : (
+					<FeaturedHero posts={featuredPosts} onOpenPost={openPost} />
+				)}
+
+				<div className="grid gap-8 xl:grid-cols-[minmax(0,1.75fr)_360px]">
+					<div className="space-y-8">
+						<ForumSubscribeCard
+							email={subscriptionEmail}
+							setEmail={setSubscriptionEmail}
+							onSubmit={handleSubscribe}
+							isPending={subscribeMutation.isPending}
+						/>
+
+						<section className="space-y-4">
+							<div className="flex items-center justify-between gap-4">
+								<div>
+									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
+										Bài viết thịnh hành
+									</p>
+									<h2 className="text-2xl font-black text-slate-950">
+										Cộng đồng đang quan tâm
+									</h2>
+								</div>
+							</div>
+
+							{trendingQuery.isLoading ? (
+								<div className="grid gap-4 md:grid-cols-2">
+									{getSkeletonKeys("trending-post", 4).map((key) => (
+										<PostCardSkeleton key={key} />
+									))}
+								</div>
+							) : trendingQuery.isError ? (
+								<InlineStateCard
+									title="Trending posts could not be loaded"
+									description={getErrorMessage(trendingQuery.error)}
+									actionLabel="Retry"
+									onAction={() => trendingQuery.refetch()}
+								/>
+							) : (
+								<div className="grid gap-4 md:grid-cols-2">
+									{trendingPosts.map((post) => (
+										<ContentPostCard
+											key={post.id}
+											post={post}
+											onOpenPost={openPost}
+										/>
+									))}
+								</div>
+							)}
+						</section>
+
+						<section className="space-y-4">
+							<div className="flex flex-wrap items-center justify-between gap-4">
+								<div>
+									<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
+										Bài viết mới nhất
+									</p>
+									<h2 className="text-2xl font-black text-slate-950">
+										Luôn cập nhật những chia sẻ mới nhất từ cộng đồng
+									</h2>
+								</div>
+
+								<div className="flex gap-2 overflow-x-auto">
+									{[
+										{ value: "latest", label: "Mới nhất" },
+										{ value: "most_reacted", label: "Tương tác cao" },
+										{ value: "most_viewed", label: "Lượt xem nhiều" },
+										{ value: "trending", label: "Thịnh hành" },
+									].map((option) => (
+										<button
+											key={option.value}
+											type="button"
+											onClick={() =>
+												setSort(
+													option.value as
+														| "latest"
+														| "trending"
+														| "most_viewed"
+														| "most_reacted",
+												)
+											}
+											className={`rounded-full px-4 py-2 text-sm font-semibold whitespace-nowrap transition ${
+												selectedSort === option.value
+													? "bg-slate-900 text-white"
+													: "bg-white text-slate-600 hover:bg-slate-100"
+											}`}
+										>
+											{option.label}
+										</button>
+									))}
+								</div>
+							</div>
+
+							{activeFilterSummary.length > 0 ? (
+								<div className="flex flex-wrap items-center gap-2 text-sm text-slate-500">
+									<span className="font-semibold text-slate-700">Active:</span>
+									{activeFilterSummary.map((item) => (
+										<span
+											key={item}
+											className="rounded-full bg-slate-100 px-3 py-1"
+										>
+											{item}
+										</span>
+									))}
+									{isRefreshingFeed ? (
+										<span className="rounded-full bg-blue-50 px-3 py-1 text-blue-700">
+											Updating results...
+										</span>
+									) : null}
+								</div>
+							) : isRefreshingFeed ? (
+								<div className="text-sm font-medium text-blue-700">
+									Updating results...
+								</div>
+							) : null}
+
+							{isFeedBootstrapping ? (
+								<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2">
+									{getSkeletonKeys("feed-post", 6).map((key) => (
+										<PostCardSkeleton key={key} />
+									))}
+								</div>
+							) : latestFeedQuery.isError ? (
+								<InlineStateCard
+									title="Filtered posts could not be loaded"
+									description={getErrorMessage(latestFeedQuery.error)}
+									actionLabel="Retry"
+									onAction={() => latestFeedQuery.refetch()}
+								/>
+							) : latestPosts.length === 0 ? (
+								<InlineStateCard
+									title="No posts matched the current filters"
+									description="Try another keyword, category, or sort option. The current filter set returned zero posts."
+								/>
+							) : (
+								<>
+									<div className="grid gap-4 md:grid-cols-2 xl:grid-cols-2 items-stretch">
+										{latestPosts.map((post) => (
+											<ContentPostCard
+												key={post.id}
+												post={post}
+												onOpenPost={openPost}
+											/>
+										))}
+									</div>
+									<div ref={loadMoreRef} className="flex justify-center py-2">
+										{latestFeedQuery.isFetchingNextPage ? (
+											<div className="grid w-full gap-4 md:grid-cols-2 xl:grid-cols-2">
+												{getSkeletonKeys("feed-next-page", 2).map((key) => (
+													<PostCardSkeleton key={key} />
+												))}
+											</div>
+										) : latestFeedQuery.hasNextPage ? (
+											<div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-500">
+												Kéo xuống để xem thêm bài viết
+											</div>
+										) : (
+											<div className="rounded-full bg-slate-100 px-4 py-2 text-sm text-slate-500">
+												Bạn đã xem hết bài viết rồi
+											</div>
+										)}
+									</div>
+								</>
+							)}
+						</section>
+
+						<section className="space-y-4">
+							<div>
+								<p className="text-sm font-black uppercase tracking-[0.25em] text-slate-400">
+									Các chủ đề phổ biến
+								</p>
+								<h2 className="text-2xl font-black text-slate-950">
+									Đọc theo chủ đề bạn quan tâm
+								</h2>
+							</div>
+							{categoriesQuery.isLoading ? (
+								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+									{getSkeletonKeys("category-card", 6).map((key) => (
+										<CategoryCardSkeleton key={key} />
+									))}
+								</div>
+							) : categoriesQuery.isError ? (
+								<InlineStateCard
+									title="Categories could not be loaded"
+									description={getErrorMessage(categoriesQuery.error)}
+									actionLabel="Retry"
+									onAction={() => categoriesQuery.refetch()}
+								/>
+							) : (
+								<div className="grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
+									{categories.map((category) => (
+										<button
+											key={category.id}
+											type="button"
+											onClick={() => setCategory(category)}
+											className={`rounded-[1.5rem] border p-5 text-left shadow-sm transition ${
+												selectedCategory === category.slug
+													? "border-blue-200 bg-blue-50"
+													: "border-slate-200 bg-white hover:-translate-y-1 hover:shadow-lg"
+											}`}
+										>
+											<div className="mb-4 flex h-10 w-10 items-center justify-center rounded-2xl bg-slate-900 text-white">
+												{CATEGORY_ICONS[category.iconKey] ?? (
+													<Compass className="h-4 w-4" />
+												)}
+											</div>
+											<h3 className="text-lg font-bold text-slate-950">
+												{category.name}
+											</h3>
+											<p className="mt-2 text-sm text-slate-500">
+												{formatCompactNumber(category.postsCount ?? 0)} bài viết
+											</p>
+										</button>
+									))}
+								</div>
+							)}
+						</section>
+					</div>
+
+					<aside className="space-y-5 xl:sticky xl:top-6 xl:self-start">
+						{featuredQuery.isLoading ? (
+							<SidebarListSkeleton />
+						) : (
+							<SidebarList
+								title="Bài viết nổi bật"
+								icon={<Sparkles className="h-4 w-4 text-amber-500" />}
+								posts={featuredPosts}
+								onOpenPost={openPost}
+							/>
+						)}
+						{sidebarMostViewedQuery.isLoading ? (
+							<SidebarListSkeleton />
+						) : (
+							<SidebarList
+								title="Được xem nhiều"
+								icon={<Eye className="h-4 w-4 text-blue-500" />}
+								posts={mostViewedPosts}
+								onOpenPost={openPost}
+							/>
+						)}
+						{sidebarLatestQuery.isLoading ? (
+							<SidebarListSkeleton />
+						) : (
+							<SidebarList
+								title="Mới cập nhật"
+								icon={<Clock3 className="h-4 w-4 text-emerald-500" />}
+								posts={latestCompactPosts}
+								onOpenPost={openPost}
+							/>
+						)}
+
+						<section className="rounded-[1.5rem] border border-slate-200 bg-white p-5 shadow-sm">
+							<div className="mb-4 flex items-center gap-2 text-slate-900">
+								<Tag className="h-4 w-4 text-rose-500" />
+								<h3 className="text-sm font-black uppercase tracking-[0.2em]">
+									Tất cả tag
+								</h3>
+							</div>
+							<div className="flex flex-wrap gap-2">
+								{allTagsQuery.isLoading
+									? getSkeletonKeys("sidebar-tag-chip", 10).map((key) => (
+											<FilterChipSkeleton key={key} />
+										))
+									: allTags.map((tag) => (
+											<button
+												key={tag.id}
+												type="button"
+												onClick={() => setTag(tag)}
+												className={`rounded-full border px-3 py-1.5 text-sm transition ${
+													selectedTag === tag.slug
+														? "border-blue-200 bg-blue-50 text-blue-700"
+														: "border-slate-200 bg-slate-50 text-slate-600 hover:border-slate-300"
+												}`}
+											>
+												#{tag.name}
+											</button>
+										))}
+							</div>
+						</section>
+					</aside>
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default ForumContent;

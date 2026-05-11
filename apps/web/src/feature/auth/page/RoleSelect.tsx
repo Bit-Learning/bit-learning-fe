@@ -21,16 +21,72 @@ const GLOBAL_STYLES = `
   @keyframes role-dotPulse   { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.75)} }
   @keyframes role-ripple     { to { transform:scale(1); opacity:0; } }
 
-  .role-card-student:hover { box-shadow: 0 0 0 2px #3b82f6, 0 20px 48px -12px rgba(59,130,246,.22) !important; border-color: transparent !important; }
-  .role-card-mentor:hover  { box-shadow: 0 0 0 2px #8b5cf6, 0 20px 48px -12px rgba(139,92,246,.22) !important; border-color: transparent !important; }
-  .role-card-student:hover .role-card-title { color: #2563eb !important; }
-  .role-card-mentor:hover  .role-card-title { color: #7c3aed !important; }
-  .role-card-student:hover .role-card-blob { transform: scale(1.6) !important; opacity: .12 !important; }
-  .role-card-mentor:hover  .role-card-blob { transform: scale(1.6) !important; opacity: .12 !important; }
-  .role-card-student:hover .role-card-cta { background: #2563eb !important; color: #fff !important; border-color: #2563eb !important; gap: 10px !important; }
-  .role-card-mentor:hover  .role-card-cta { background: #7c3aed !important; color: #fff !important; border-color: #7c3aed !important; gap: 10px !important; }
-  .role-card:hover .role-cta-arrow { transform: translateX(2px) !important; }
-  .role-card:hover::after { transform: translateX(100%) !important; }
+  .role-card-student:hover {
+  box-shadow:
+    0 0 0 2px var(--primary),
+    0 20px 48px -12px color-mix(in srgb, var(--primary) 22%, transparent);
+  border-color: transparent !important;
+}
+
+.role-card-mentor:hover {
+  box-shadow:
+    0 0 0 2px var(--primary-orange),
+    0 20px 48px -12px color-mix(in srgb, var(--primary-orange) 22%, transparent);
+  border-color: transparent !important;
+}
+
+/* Title */
+.role-card-student:hover .role-card-title {
+  color: var(--primary) !important;
+}
+
+.role-card-mentor:hover .role-card-title {
+  color: var(--primary-orange) !important;
+}
+
+/* CTA */
+.role-card-student:hover .role-card-cta {
+  background: var(--primary) !important;
+  border-color: var(--primary) !important;
+  color: #fff !important;
+  gap: 10px !important;
+}
+
+.role-card-mentor:hover .role-card-cta {
+  background: var(--primary-orange) !important;
+  border-color: var(--primary-orange) !important;
+  color: #fff !important;
+  gap: 10px !important;
+}
+
+	/* Mobile tweaks */
+	@media (max-width: 640px) {
+		.role-select-wrapper {
+			padding-left: 1.25rem;
+			padding-right: 1.25rem;
+			padding-top: 1rem;
+			padding-bottom: 1rem;
+		}
+
+		.role-select-title {
+			font-size: 22px !important;
+		}
+
+		.role-select-subtitle {
+			font-size: 14px !important;
+		}
+
+		.role-card {
+			padding: 24px 20px 22px !important;
+		}
+
+		.role-card-blob {
+			width: 96px;
+			height: 96px;
+			top: -28px;
+			right: -28px;
+		}
+	}
 `;
 
 // ─── Mouse-tracking hook ───────────────────────────────────────────────────────
@@ -259,18 +315,20 @@ const RoleSelectPage: React.FC = () => {
 				description="Chọn vai trò của bạn để tiếp tục đăng nhập vào Bit Learning"
 			/>
 			<AuthLayout showBackGround={false}>
-				<div className="flex h-full w-full items-center justify-center px-6">
+				<div className="flex h-full w-full items-center justify-center px-4 sm:px-6">
 					<div className="w-full max-w-3xl">
 						{/* Header */}
 						<div
+							className="role-select-wrapper"
 							style={{
 								textAlign: "center",
-								marginBottom: "52px",
+								marginBottom: "40px",
 								animation:
 									"role-fadeDown .5s .08s cubic-bezier(.22,1,.36,1) both",
 							}}
 						>
 							<h1
+								className="role-select-title"
 								style={{
 									fontSize: "28px",
 									fontWeight: 800,
@@ -282,6 +340,7 @@ const RoleSelectPage: React.FC = () => {
 								Bạn muốn bắt đầu với vai trò nào?
 							</h1>
 							<p
+								className="role-select-subtitle"
 								style={{ fontSize: "15px", color: "#64748b", fontWeight: 500 }}
 							>
 								Tôi là...
@@ -289,14 +348,7 @@ const RoleSelectPage: React.FC = () => {
 						</div>
 
 						{/* Cards */}
-						<div
-							style={{
-								display: "grid",
-								gridTemplateColumns: "1fr 1fr",
-								gap: "24px",
-							}}
-							className="grid-cols-1 md:grid-cols-2"
-						>
+						<div className="grid grid-cols-1 gap-6 md:grid-cols-2">
 							<RoleCard
 								variant="student"
 								title="Học viên"

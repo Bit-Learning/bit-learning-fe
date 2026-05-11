@@ -19,6 +19,7 @@ export interface LectureDetail {
 export interface LectureTextDetail {
   lecture: LectureDetail;
   content: string;
+  problemId: string;
 }
 
 export interface AnswerDetail {

@@ -1,3 +1,5 @@
+import { SectionDetail } from "./section.type";
+
 export interface CreateCourseRequest {
   title: string;
   subtitle: string;
@@ -9,6 +11,7 @@ export interface CreateCourseRequest {
   audience: string;
   level: CourseLevel;
   grade: number;
+  categories?: string[];
 }
 
 export interface UpdateCourseRequest {
@@ -22,11 +25,14 @@ export interface UpdateCourseRequest {
   audience: string;
   level: CourseLevel;
   grade: number;
+  categories?: string[];
 }
+
 export interface CoursePreview {
   id: number;
   code: string;
   title: string;
+  description: string;
   thumbnailUrl: string;
   instructorId: number;
   instructorName: string;
@@ -36,8 +42,8 @@ export interface CoursePreview {
   grade: number;
   price: number;
   isDeleted: boolean;
-  isPublished?: boolean;
   status: CourseStatus;
+  categories?: string[];
 }
 
 export interface CourseDetail {
@@ -61,36 +67,34 @@ export interface CourseDetail {
   totalDuration: number;
   grade: number;
   price: number;
-  isPublished?: boolean;
   sections: SectionDetail[];
+  isDeleted: boolean;
   status: CourseStatus;
+  progressPercentage: number;
+  categories?: string[];
 }
 
-export interface SectionDetail {
+export interface MyCourse {
   id: number;
+  code: string;
   title: string;
   description: string;
-  isPublished: boolean;
-  orderIndex: number;
-  totalLectures: number;
-  totalDuration: number;
+  thumbnailUrl: string;
+  instructorId: number;
+  instructorName: string;
+  ratingStar: number;
+  ratingCount: number;
+  level: CourseLevel;
+  grade: number;
+  price: number;
   isDeleted: boolean;
-  lectures: LectureDetail[];
-}
-
-export interface LectureDetail {
-  id: number;
-  sectionId: number;
-  title: string;
-  description: string;
-  type: LectureType;
-  isPreviewable: boolean;
-  orderIndex: number;
-  isDeleted: boolean;
+  status: CourseStatus;
+  progressPercentage: number;
+  categories?: string[];
 }
 
 export enum CourseLevel {
-  BEGINNER = "BEGINNER",
+  BEGINNING = "BEGINNING",
   INTERMEDIATE = "INTERMEDIATE",
   ADVANCED = "ADVANCED",
 }

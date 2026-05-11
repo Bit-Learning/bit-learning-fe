@@ -23,7 +23,6 @@ export enum Language {
   JAVA = "JAVA",
   PYTHON = "PYTHON",
   CPP = "CPP",
-  C = "C",
   JAVASCRIPT = "JAVASCRIPT",
 }
 
@@ -32,6 +31,8 @@ export interface ContestUpsertDTO {
   description?: string;
   startTime: string;
   endTime: string;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
 }
 
 export interface AddProblemRequest {
@@ -62,6 +63,8 @@ export interface ContestResponse {
   status: ContestStatus;
   startTime: string;
   endTime: string;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
   createdAt: string;
 }
 
@@ -75,6 +78,8 @@ export interface ContestListDTO {
   problemCount: number;
   participantCount: number;
   isRegistered: boolean;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
 }
 
 export interface ContestDetailDTO {
@@ -90,6 +95,9 @@ export interface ContestDetailDTO {
   participantCount: number;
   isRegistered: boolean;
   myRank?: number;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
+  prizesDistributed?: boolean;
   createdAt: string;
 }
 
@@ -215,6 +223,8 @@ export interface LeaderboardResponse {
   lastUpdatedAt: string;
   rankings: RankingEntry[];
   myRank?: number;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
 }
 
 export interface SubmissionSummary {
@@ -260,4 +270,33 @@ export interface ContestSubmissionParams {
   verdict?: ContestVerdict;
   page?: number;
   size?: number;
+}
+
+export interface ContestRegistrationDTO {
+  registrationId: string;
+  userId: number;
+  username: string;
+  fullName: string;
+  email: string;
+  avatar: string;
+  registeredAt: string;
+}
+
+export interface PageableParams {
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface PageInfo {
+  totalElements: number;
+  totalPages: number;
+  size: number;
+  number: number;
+}
+
+export interface PagedResponse<T> {
+  data: T[];
+  page: PageInfo;
+  message?: string;
 }

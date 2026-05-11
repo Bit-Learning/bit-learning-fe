@@ -34,6 +34,18 @@ export const useSubjectsList = () => {
   });
 };
 
+export const useSubjectsWithChapters = () => {
+  return useQuery({
+    queryKey: [...subjectKeys.listAll(), "withChapters"],
+    queryFn: async () => {
+      const response = await subjectApi.getAllList();
+      return response.data.data ?? [];
+    },
+    staleTime: 5 * 60 * 1000,
+    gcTime: 10 * 60 * 1000,
+  });
+};
+
 export const useSubjectDetail = (id?: number) => {
   return useQuery({
     queryKey: subjectKeys.detail(id ?? 0),
@@ -70,7 +82,9 @@ export const useUpdateSubject = () => {
     mutationFn: ({ id, data }: { id: number; data: TSubjectRequest }) => subjectApi.update(id, data),
     onSuccess: (_, variables) => {
       queryClient.invalidateQueries({ queryKey: subjectKeys.all });
-      queryClient.invalidateQueries({ queryKey: subjectKeys.detail(variables.id) });
+      queryClient.invalidateQueries({
+        queryKey: subjectKeys.detail(variables.id),
+      });
       toast.success("Cập nhật môn học thành công");
     },
     onError: (error: any) => {
@@ -92,4 +106,12 @@ export const useDeleteSubject = () => {
       toast.error(error?.response?.data?.message || "Xóa môn học thất bại");
     },
   });
+};
+
+export const useSubjectsByCurriculum = (curriculumId?: number) => {
+  const query = useSubjectsList();
+  return {
+    ...query,
+    data: curriculumId ? query.data?.filter((s) => s.curriculum?.id === curriculumId) : query.data,
+  };
 };

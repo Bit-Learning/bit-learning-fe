@@ -1,114 +1,209 @@
-import React, { useState } from "react";
+import type React from "react";
+import { useState } from "react";
+import { useNavigate, useSearch } from "@tanstack/react-router";
+import { FileText, Info, ShieldOff, Star, TrendingUp } from "lucide-react";
+import { Header } from "@/layout/header";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+	Tooltip,
+	TooltipContent,
+	TooltipProvider,
+	TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { PostsTable } from "../components/posts-table";
+import { TrendingConfigDialog } from "../components/TrendingConfigDialog";
 import { useGetPosts } from "../queries/usePost";
-import { PostCard } from "../components/PostCard";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Search, Filter } from "lucide-react";
-import { Skeleton } from "@/components/ui/skeleton";
-import { Card, CardContent } from "@/components/ui/card";
+import { useGetTrendingConfig } from "../queries/useTrendingConfig";
+import type { ColumnFiltersState } from "@tanstack/react-table";
+import { TopNav } from "@/layout/top-nav";
 
 export const PostListPage: React.FC = () => {
-  const [page, setPage] = useState(0);
-  const [size] = useState(9);
-  const [searchTerm, setSearchTerm] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("all");
+	const [page, setPage] = useState(0);
+	const [size, setSize] = useState(10);
 
-  const { data, isLoading, isError } = useGetPosts(page, size);
+	const navigate = useNavigate();
+	const search = useSearch({ from: "/_authenticated/posts/" });
 
-  const filteredPosts = data?.content.filter((post) => {
-    const matchesSearch =
-      post.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      post.content.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus =
-      statusFilter === "all" ||
-      (statusFilter === "banned" && post.isBanned) ||
-      (statusFilter === "active" && !post.isBanned);
-    return matchesSearch && matchesStatus;
-  });
+	const { data, isLoading, isError } = useGetPosts(page, size);
+	const { data: trendingConfig } = useGetTrendingConfig();
 
-  if (isError) {
-    return (
-      <div className="flex items-center justify-center h-96">
-        <p className="text-destructive">Đã xảy ra lỗi khi tải danh sách bài viết</p>
-      </div>
-    );
-  }
+	const posts = data?.content ?? [];
 
-  return (
-    <div className="container mx-auto px-4 py-8">
-      <div className="mb-8 flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Quản lý bài viết</h1>
-          <p className="text-muted-foreground">Xem xét và kiểm duyệt các bài viết trong hệ thống</p>
-        </div>
-      </div>
+	const totalPosts = data?.page?.totalElements ?? posts.length;
+	const bannedCount = posts.filter((p) => p.isBanned).length;
+	const featuredCount = posts.filter((p) => p.isFeatured).length;
+	const trendingCount = posts.filter((p) => p.isTrending).length;
 
-      <div className="flex gap-4 mb-6">
-        <div className="relative flex-1">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-          <Input
-            placeholder="Tìm kiếm bài viết..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="pl-9"
-          />
-        </div>
+	const initialColumnFilters: ColumnFiltersState = [
+		...(search.status ? [{ id: "isBanned", value: [search.status] }] : []),
+		...(search.featured
+			? [{ id: "isFeatured", value: [search.featured] }]
+			: []),
+	];
 
-        <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-48">
-            <Filter className="w-4 h-4 mr-2" />
-            <SelectValue placeholder="Lọc theo trạng thái" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="all">Tất cả</SelectItem>
-            <SelectItem value="active">Đang hoạt động</SelectItem>
-            <SelectItem value="banned">Bị khóa</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
+	const commentWeight = trendingConfig?.commentWeight ?? 4;
+	const reactionWeight = trendingConfig?.reactionWeight ?? 3;
+	const viewWeight = trendingConfig?.viewWeight ?? 0.1;
 
-      {isLoading ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {[...Array(6)].map((_, i) => (
-            <Card key={i}>
-              <Skeleton className="h-48 w-full" />
-              <CardContent className="p-4">
-                <Skeleton className="h-4 w-3/4 mb-2" />
-                <Skeleton className="h-4 w-1/2" />
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      ) : (
-        <>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {filteredPosts?.map((post) => (
-              <PostCard key={post.id} post={post} />
-            ))}
-          </div>
+	const exampleScore =
+		1 * commentWeight + 2 * reactionWeight + 100 * viewWeight;
 
-          {filteredPosts?.length === 0 && (
-            <div className="text-center py-12">
-              <p className="text-muted-foreground">Không tìm thấy bài viết nào</p>
-            </div>
-          )}
+	const handleColumnFiltersChange = (filters: ColumnFiltersState) => {
+		const statusFilter = filters.find((f) => f.id === "isBanned");
+		const featuredFilter = filters.find((f) => f.id === "isFeatured");
+		navigate({
+			to: "/posts",
+			search: {
+				status: (statusFilter?.value as string[] | undefined)?.[0],
+				featured: (featuredFilter?.value as string[] | undefined)?.[0],
+			},
+			replace: true,
+		});
+	};
 
-          {data && data.page && data.page.totalPages > 1 && (
-            <div className="flex justify-center gap-2">
-              <Button variant="outline" disabled={data.page.first} onClick={() => setPage(page - 1)}>
-                Trang trước
-              </Button>
-              <span className="flex items-center px-4">
-                Trang {data.page.page + 1} / {data.page.totalPages}
-              </span>
-              <Button variant="outline" disabled={data.page.last} onClick={() => setPage(page + 1)}>
-                Trang sau
-              </Button>
-            </div>
-          )}
-        </>
-      )}
-    </div>
-  );
+	if (isError) {
+		return (
+			<div className="flex h-96 items-center justify-center">
+				<p className="text-destructive">
+					Đã xảy ra lỗi khi tải danh sách bài viết
+				</p>
+			</div>
+		);
+	}
+
+	return (
+		<>
+			<Header />
+			<div className="border-b px-6 py-2">
+				<TopNav
+					links={[
+						{
+							title: "Trang chủ",
+							href: "/posts",
+							isActive: true,
+						},
+						{
+							title: "Quản lý khiếu nại",
+							href: "/post-appeals",
+							isActive: false,
+						},
+					]}
+				/>
+			</div>
+			<div className="flex flex-1 flex-col gap-6 p-6">
+				<div className="flex items-center justify-between">
+					<h1 className="text-2xl font-bold">Quản lý bài viết</h1>
+					<TrendingConfigDialog />
+				</div>
+
+				<div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+					<Card>
+						<CardHeader className="flex flex-row items-center justify-between pb-2">
+							<CardTitle className="text-sm font-medium text-muted-foreground">
+								Tổng bài viết
+							</CardTitle>
+							<FileText className="h-4 w-4 text-muted-foreground" />
+						</CardHeader>
+						<CardContent>
+							<div className="text-2xl font-bold">
+								{totalPosts.toLocaleString("vi-VN")}
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader className="flex flex-row items-center justify-between pb-2">
+							<CardTitle className="text-sm font-medium text-muted-foreground">
+								Bị khóa
+							</CardTitle>
+							<ShieldOff className="h-4 w-4 text-destructive" />
+						</CardHeader>
+						<CardContent>
+							<div className="text-2xl font-bold text-destructive">
+								{bannedCount.toLocaleString("vi-VN")}
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader className="flex flex-row items-center justify-between pb-2">
+							<CardTitle className="text-sm font-medium text-muted-foreground">
+								Nổi bật
+							</CardTitle>
+							<Star className="h-4 w-4 text-yellow-500" />
+						</CardHeader>
+						<CardContent>
+							<div className="text-2xl font-bold text-yellow-600">
+								{featuredCount.toLocaleString("vi-VN")}
+							</div>
+						</CardContent>
+					</Card>
+
+					<Card>
+						<CardHeader className="flex flex-row items-center justify-between pb-2">
+							<CardTitle className="text-sm font-medium text-muted-foreground">
+								Trending
+							</CardTitle>
+							<div className="flex items-center gap-1.5">
+								<TrendingUp className="h-4 w-4 text-amber-500" />
+								<TooltipProvider>
+									<Tooltip>
+										<TooltipTrigger asChild>
+											<Info className="h-3.5 w-3.5 cursor-help text-muted-foreground/60 hover:text-muted-foreground" />
+										</TooltipTrigger>
+										<TooltipContent
+											side="left"
+											className="max-w-64 space-y-2 p-3"
+										>
+											<p className="font-semibold">Cách tính Trending</p>
+											<p className="text-xs leading-relaxed">
+												Bài viết được đánh dấu trending nếu được tạo trong{" "}
+												<span className="font-semibold">
+													{trendingConfig?.lookbackDays ?? 14} ngày gần nhất
+												</span>{" "}
+												và đạt điểm tối thiểu{" "}
+												<span className="font-semibold">
+													{trendingConfig?.minScore ?? 5}
+												</span>
+												.
+											</p>
+											<div className="rounded-md bg-muted/60 px-2.5 py-2 font-mono text-xs">
+												score = bình luận × {trendingConfig?.commentWeight ?? 4}{" "}
+												+ reaction × {trendingConfig?.reactionWeight ?? 3} +
+												lượt xem × {trendingConfig?.viewWeight ?? 0.1}
+											</div>
+											<p className="text-xs text-white/80">
+												Ví dụ: 1 bình luận ({commentWeight}đ) + 2 reaction (
+												{reactionWeight * 2}đ) + 100 lượt xem (
+												{viewWeight * 100}đ) = {exampleScore} điểm.
+											</p>
+										</TooltipContent>
+									</Tooltip>
+								</TooltipProvider>
+							</div>
+						</CardHeader>
+						<CardContent>
+							<div className="text-2xl font-bold text-amber-600">
+								{trendingCount.toLocaleString("vi-VN")}
+							</div>
+						</CardContent>
+					</Card>
+				</div>
+
+				<PostsTable
+					data={posts}
+					isLoading={isLoading}
+					totalPages={data?.page?.totalPages ?? 0}
+					pageIndex={page}
+					pageSize={size}
+					initialColumnFilters={initialColumnFilters}
+					onPaginationChange={(pagination) => {
+						setPage(pagination.pageIndex);
+						setSize(pagination.pageSize);
+					}}
+					onColumnFiltersChange={handleColumnFiltersChange}
+				/>
+			</div>
+		</>
+	);
 };

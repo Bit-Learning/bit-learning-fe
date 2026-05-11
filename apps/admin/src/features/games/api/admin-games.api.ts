@@ -4,15 +4,29 @@ import type { ApiResponse } from "@/shared/api/api.type";
 
 const ADMIN_GAMES_ENDPOINT = "/admin/games";
 
+export type AdminGameType = "QUIZ" | "TYPING" | "MATCHING" | "OTHER";
+export type AdminScoringModel = "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE";
+
 // This mirrors the backend Game entity JSON we actually use in admin.
 export interface AdminGameDto {
 	id: number;
 	title: string;
 	description?: string;
+	gameType?: AdminGameType;
+	scoringModel?: AdminScoringModel;
+	isScored?: boolean;
+	trackingConfig?: string | null;
 	minioObjectName?: string;
 	thumbnailUrl?: string;
-	status?: string;
+	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
 	difficulty?: string;
+	scoringBaseScoreMax?: number;
+	scoringDifficultyMultiplier?: number;
+	scoringPassingThreshold?: number;
+	featuredViewWeight?: number;
+	featuredLikeWeight?: number;
+	featuredManualBoost?: number;
+	trendScore?: number;
 	categoryId?: number | null;
 	views?: number;
 	likes?: number;
@@ -22,7 +36,17 @@ export interface CreateGamePayload {
 	file: File;
 	title: string;
 	desc: string;
+	gameType?: AdminGameType;
+	scoringModel?: AdminScoringModel;
+	isScored?: boolean;
+	trackingConfig?: string;
 	difficulty?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
+	featuredViewWeight?: number;
+	featuredLikeWeight?: number;
+	featuredManualBoost?: number;
 	categoryId?: number;
 	thumbnailUrl?: string;
 	thumbnail?: File;
@@ -32,15 +56,153 @@ export interface UpdateGamePayload {
 	file?: File;
 	title: string;
 	desc: string;
+	gameType?: AdminGameType;
+	scoringModel?: AdminScoringModel;
+	isScored?: boolean;
+	trackingConfig?: string;
 	difficulty?: string;
+	baseScoreMax?: number;
+	difficultyMultiplier?: number;
+	passingThreshold?: number;
+	featuredViewWeight?: number;
+	featuredLikeWeight?: number;
+	featuredManualBoost?: number;
 	categoryId?: number;
 	thumbnailUrl?: string;
 	thumbnail?: File;
 }
 
+export interface AdminGameAnalyticsOverview {
+	rangeDays: number;
+	totalAttempts: number;
+	completedAttempts: number;
+	partialAttempts: number;
+	scoredAttempts: number;
+	distinctGames: number;
+	distinctTopics: number;
+	completionRate: number;
+	partialRate: number;
+	scoredAttemptRate: number;
+	averageAccuracy: number;
+	averageRawScore: number;
+	averageDurationSeconds: number;
+	timeoutRate: number;
+}
+
+export interface AdminGameDailyPlayPoint {
+	date: string;
+	plays: number;
+	completed: number;
+	partial: number;
+}
+
+export interface AdminGamePerformanceItem {
+	gameId: number;
+	gameTitle: string;
+	gameType?: string | null;
+	scoringModel?: AdminScoringModel | null;
+	isScored?: boolean | null;
+	categoryName?: string | null;
+	attempts: number;
+	completedAttempts: number;
+	partialAttempts: number;
+	completionRate: number;
+	partialRate: number;
+	scoredAttemptRate: number;
+	averageAccuracy: number;
+	averageRawScore: number;
+	bestRawScore: number;
+	averageDurationSeconds: number;
+	timeoutRate: number;
+	averageNormalizedScore: number;
+	averageLeaderboardPoints: number;
+	bestLeaderboardPoints: number;
+	totalQuestions: number;
+	totalCorrect: number;
+	totalWrong: number;
+	totalTimeout: number;
+	lastPlayedAt?: string | null;
+}
+
+export interface AdminTopicPerformanceItem {
+	key: string;
+	label: string;
+	bookCode?: string | null;
+	bookTitle?: string | null;
+	grade?: number | null;
+	topicLetter?: string | null;
+	topicName?: string | null;
+	attempts: number;
+	completionRate: number;
+	averageAccuracy: number;
+	averageDurationSeconds: number;
+	timeoutRate: number;
+	totalQuestions: number;
+	totalCorrect: number;
+	totalWrong: number;
+	totalTimeout: number;
+	lastPlayedAt?: string | null;
+}
+
+export interface AdminGameBreakdownItem {
+	key: string;
+	label: string;
+	count: number;
+	rate: number;
+}
+
+export interface AdminRecentAttemptItem {
+	id: number;
+	playedAt: string;
+	completed: boolean;
+	attemptState?: string | null;
+	scoringModel?: AdminScoringModel | null;
+	isScored?: boolean | null;
+	accuracy: number;
+	rawScore?: number | null;
+	duration?: number | null;
+	correctCount: number;
+	wrongCount: number;
+	timeoutCount: number;
+}
+
+export interface AdminGameAnalyticsDashboardDto {
+	overview: AdminGameAnalyticsOverview;
+	playsByDay: AdminGameDailyPlayPoint[];
+	gamePerformance: AdminGamePerformanceItem[];
+	topicPerformance: AdminTopicPerformanceItem[];
+	timeoutLeaders: AdminGamePerformanceItem[];
+}
+
+export interface AdminGameDetailAnalyticsDto {
+	summary: AdminGamePerformanceItem;
+	playsByDay: AdminGameDailyPlayPoint[];
+	attemptStates: AdminGameBreakdownItem[];
+	exitReasons: AdminGameBreakdownItem[];
+	questionOutcomes: AdminGameBreakdownItem[];
+	recentAttempts: AdminRecentAttemptItem[];
+}
+
 export const adminGamesApi = {
 	listGames: (): Promise<AxiosResponse<ApiResponse<AdminGameDto[]>>> => {
 		return api.get(ADMIN_GAMES_ENDPOINT);
+	},
+
+	getAnalytics: (
+		days = 30,
+	): Promise<AxiosResponse<ApiResponse<AdminGameAnalyticsDashboardDto>>> => {
+		return api.get(`${ADMIN_GAMES_ENDPOINT}/analytics`, {
+			params: { days },
+		});
+	},
+
+	getGameAnalytics: (
+		id: number,
+		days = 30,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDetailAnalyticsDto>>> => {
+		return api.get(`${ADMIN_GAMES_ENDPOINT}/${id}/analytics`, {
+			params: { days },
+		});
 	},
 
 	createGame: (
@@ -50,8 +212,44 @@ export const adminGamesApi = {
 		formData.append("file", payload.file);
 		formData.append("title", payload.title);
 		formData.append("desc", payload.desc);
+		if (payload.gameType) {
+			formData.append("gameType", payload.gameType);
+		}
+		if (payload.scoringModel) {
+			formData.append("scoringModel", payload.scoringModel);
+		}
+		if (payload.isScored !== undefined) {
+			formData.append("isScored", String(payload.isScored));
+		}
+		if (payload.trackingConfig) {
+			formData.append("trackingConfig", payload.trackingConfig);
+		}
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.baseScoreMax !== undefined) {
+			formData.append("baseScoreMax", String(payload.baseScoreMax));
+		}
+		if (payload.difficultyMultiplier !== undefined) {
+			formData.append(
+				"difficultyMultiplier",
+				String(payload.difficultyMultiplier),
+			);
+		}
+		if (payload.passingThreshold !== undefined) {
+			formData.append("passingThreshold", String(payload.passingThreshold));
+		}
+		if (payload.featuredViewWeight !== undefined) {
+			formData.append("featuredViewWeight", String(payload.featuredViewWeight));
+		}
+		if (payload.featuredLikeWeight !== undefined) {
+			formData.append("featuredLikeWeight", String(payload.featuredLikeWeight));
+		}
+		if (payload.featuredManualBoost !== undefined) {
+			formData.append(
+				"featuredManualBoost",
+				String(payload.featuredManualBoost),
+			);
 		}
 		if (payload.categoryId !== undefined) {
 			formData.append("categoryId", String(payload.categoryId));
@@ -78,8 +276,44 @@ export const adminGamesApi = {
 		}
 		formData.append("title", payload.title);
 		formData.append("desc", payload.desc);
+		if (payload.gameType) {
+			formData.append("gameType", payload.gameType);
+		}
+		if (payload.scoringModel) {
+			formData.append("scoringModel", payload.scoringModel);
+		}
+		if (payload.isScored !== undefined) {
+			formData.append("isScored", String(payload.isScored));
+		}
+		if (payload.trackingConfig !== undefined) {
+			formData.append("trackingConfig", payload.trackingConfig);
+		}
 		if (payload.difficulty) {
 			formData.append("difficulty", payload.difficulty);
+		}
+		if (payload.baseScoreMax !== undefined) {
+			formData.append("baseScoreMax", String(payload.baseScoreMax));
+		}
+		if (payload.difficultyMultiplier !== undefined) {
+			formData.append(
+				"difficultyMultiplier",
+				String(payload.difficultyMultiplier),
+			);
+		}
+		if (payload.passingThreshold !== undefined) {
+			formData.append("passingThreshold", String(payload.passingThreshold));
+		}
+		if (payload.featuredViewWeight !== undefined) {
+			formData.append("featuredViewWeight", String(payload.featuredViewWeight));
+		}
+		if (payload.featuredLikeWeight !== undefined) {
+			formData.append("featuredLikeWeight", String(payload.featuredLikeWeight));
+		}
+		if (payload.featuredManualBoost !== undefined) {
+			formData.append(
+				"featuredManualBoost",
+				String(payload.featuredManualBoost),
+			);
 		}
 		if (payload.categoryId !== undefined) {
 			formData.append("categoryId", String(payload.categoryId));
@@ -98,5 +332,24 @@ export const adminGamesApi = {
 
 	deleteGame: (id: number): Promise<AxiosResponse<ApiResponse<void>>> => {
 		return api.delete(`${ADMIN_GAMES_ENDPOINT}/${id}`);
+	},
+
+	approveGame: (
+		id: number,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto>>> => {
+		return api.post(`${ADMIN_GAMES_ENDPOINT}/${id}/approve`);
+	},
+
+	rejectGame: (
+		id: number,
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto>>> => {
+		return api.post(`${ADMIN_GAMES_ENDPOINT}/${id}/reject`);
+	},
+
+	bulkUpdateStatus: (
+		ids: number[],
+		status: "PUBLISHED" | "DRAFT",
+	): Promise<AxiosResponse<ApiResponse<AdminGameDto[]>>> => {
+		return api.post(`${ADMIN_GAMES_ENDPOINT}/bulk-status`, { ids, status });
 	},
 };

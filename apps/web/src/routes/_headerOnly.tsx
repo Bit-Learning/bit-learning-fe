@@ -1,36 +1,13 @@
-import { createFileRoute, Outlet, useMatches } from "@tanstack/react-router";
-import { motion } from "framer-motion";
-import GameHeader from "@/layouts/game-header";
 import Header from "@/layouts/header";
 import ScrollToTop from "@/layouts/scroll-to-top";
-import TransparentHeader from "@/layouts/transparent-header";
+// import { requireStudentOrMentorRole } from "@/shared/lib/auth-utils";
+import { createFileRoute, Outlet } from "@tanstack/react-router";
+import { motion } from "framer-motion";
 
 function HeaderOnlyLayoutComponent() {
-	const matches = useMatches();
-	// Get the last match (current active route) to extract staticData
-	const currentMatch = matches.at(-1);
-	const headerStyle = currentMatch?.staticData?.headerStyle || "default";
-
-	// Conditionally render header component based on style
-	const renderHeader = () => {
-		switch (headerStyle) {
-			case "transparent":
-				return <TransparentHeader />;
-			case "game":
-				return <GameHeader />;
-			default:
-				return <Header />;
-		}
-	};
-
 	return (
-		<motion.div
-			className="flex min-h-screen flex-col"
-			initial={{ opacity: 0, y: 30 }}
-			animate={{ opacity: 1, y: 0 }}
-			transition={{ duration: 0.8, ease: "easeOut" }}
-		>
-			{renderHeader()}
+		<>
+			<Header />
 			<main className="flex-1 bg-[#FFFFFF]">
 				<motion.div
 					initial={{ opacity: 0, y: 40 }}
@@ -41,10 +18,13 @@ function HeaderOnlyLayoutComponent() {
 				</motion.div>
 			</main>
 			<ScrollToTop />
-		</motion.div>
+		</>
 	);
 }
 
 export const Route = createFileRoute("/_headerOnly")({
+	// beforeLoad: ({ location }) => {
+	// 	requireStudentOrMentorRole(location);
+	// },
 	component: HeaderOnlyLayoutComponent,
 });

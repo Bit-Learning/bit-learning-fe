@@ -3,7 +3,6 @@ import tailwindcss from "@tailwindcss/vite";
 import { tanstackRouter } from "@tanstack/router-plugin/vite";
 import react from "@vitejs/plugin-react-swc";
 import { defineConfig } from "vite";
-import ViteImagemin from "vite-plugin-imagemin";
 
 // https://vite.dev/config/
 export default defineConfig({
@@ -14,7 +13,6 @@ export default defineConfig({
 		}),
 		react(),
 		tailwindcss(),
-		ViteImagemin(),
 	],
 	server: {
 		port: 8386,
@@ -22,7 +20,11 @@ export default defineConfig({
 	resolve: {
 		alias: {
 			"@": path.resolve(__dirname, "./src"),
+			"@workspace/ui": path.resolve(__dirname, "../../packages/ui/src"),
 		},
+	},
+	define: {
+		global: "globalThis",
 	},
 	build: {
 		sourcemap: false,

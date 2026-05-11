@@ -1,23 +1,9 @@
 import React, { useState, useEffect } from "react";
-import {
-  Calendar,
-  Timer,
-  Eye,
-  Bold,
-  Italic,
-  List,
-  Link2,
-  Image,
-  Plus,
-  Shield,
-  TrendingUp,
-  Users,
-  ChevronLeft,
-} from "lucide-react";
+import { Calendar, Timer, Plus, Loader2, Pencil, ArrowLeft, Trophy } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent } from "@/components/ui/card";
-import { Link } from "@tanstack/react-router";
-import { useCreateContest, useUpdateContest } from "../queries/useContest";
+import { useParams } from "@tanstack/react-router";
+import { useContestDetail, useCreateContest, useUpdateContest } from "../queries/useContest";
 import { useNavigate } from "@tanstack/react-router";
 
 interface ContestUpsertDTO {
@@ -25,15 +11,14 @@ interface ContestUpsertDTO {
   description?: string;
   startTime: string;
   endTime: string;
+  prizeTopCount?: number | null;
+  prizeCoinsPerRank?: number[] | null;
 }
 
-interface CreateContestPageProps {
-  contestId?: string;
-  initialData?: ContestUpsertDTO;
-}
-
-export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId, initialData }) => {
+export const CreateContestPage: React.FC = () => {
+  const { id: contestId } = useParams({ strict: false });
   const navigate = useNavigate();
+  const { data: contest, isLoading } = useContestDetail(contestId!);
   const createMutation = useCreateContest();
   const updateMutation = useUpdateContest();
 
@@ -44,29 +29,50 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
     description: "",
     startTime: "",
     endTime: "",
+    prizeTopCount: null,
+    prizeCoinsPerRank: null,
   });
 
-  const [isPreview, setIsPreview] = useState(false);
+  const [prizeEnabled, setPrizeEnabled] = useState(false);
+  const [prizeCount, setPrizeCount] = useState(3);
+  const [prizeCoins, setPrizeCoins] = useState<number[]>([500, 300, 100]);
+
   const [errors, setErrors] = useState<Record<string, string>>({});
 
+  const toLocalInputValue = (isoString: string) => {
+    const d = new Date(isoString);
+    const offset = d.getTimezoneOffset() * 60000;
+    return new Date(d.getTime() - offset).toISOString().slice(0, 16);
+  };
+
   useEffect(() => {
-    if (initialData) {
-      setFormData(initialData);
-    } else {
+    if (contest) {
+      setFormData({
+        title: contest.title ?? "",
+        description: contest.description ?? "",
+        startTime: contest.startTime ? toLocalInputValue(contest.startTime) : "",
+        endTime: contest.endTime ? toLocalInputValue(contest.endTime) : "",
+        prizeTopCount: contest.prizeTopCount ?? null,
+        prizeCoinsPerRank: contest.prizeCoinsPerRank ?? null,
+      });
+      if (contest.prizeTopCount && contest.prizeTopCount > 0 && contest.prizeCoinsPerRank?.length) {
+        setPrizeEnabled(true);
+        setPrizeCount(contest.prizeTopCount);
+        setPrizeCoins([...contest.prizeCoinsPerRank]);
+      }
+    } else if (!isEditMode) {
       const tomorrow = new Date();
       tomorrow.setDate(tomorrow.getDate() + 1);
       tomorrow.setHours(9, 0, 0, 0);
-
       const endTime = new Date(tomorrow);
       endTime.setHours(12, 0, 0, 0);
-
       setFormData((prev) => ({
         ...prev,
         startTime: tomorrow.toISOString().slice(0, 16),
         endTime: endTime.toISOString().slice(0, 16),
       }));
     }
-  }, [initialData]);
+  }, [contest]);
 
   const calculateDuration = () => {
     if (!formData.startTime || !formData.endTime) return "0 giờ 0 phút";
@@ -92,6 +98,7 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
 
   const validate = (): boolean => {
     const newErrors: Record<string, string> = {};
+    const now = new Date();
 
     if (!formData.title.trim()) {
       newErrors.title = "Tên cuộc thi không được để trống";
@@ -99,18 +106,37 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
 
     if (!formData.startTime) {
       newErrors.startTime = "Vui lòng chọn thời gian bắt đầu";
+    } else {
+      const start = new Date(formData.startTime);
+      if (start < now) {
+        newErrors.startTime = "Thời gian bắt đầu không được ở quá khứ";
+      }
     }
 
     if (!formData.endTime) {
       newErrors.endTime = "Vui lòng chọn thời gian kết thúc";
-    }
-
-    if (formData.startTime && formData.endTime) {
-      const start = new Date(formData.startTime);
+    } else {
       const end = new Date(formData.endTime);
 
-      if (end <= start) {
-        newErrors.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
+      if (formData.startTime) {
+        const start = new Date(formData.startTime);
+
+        if (end <= start) {
+          newErrors.endTime = "Thời gian kết thúc phải sau thời gian bắt đầu";
+        }
+      }
+
+      if (end < now) {
+        newErrors.endTime = "Thời gian kết thúc không được ở quá khứ";
+      }
+    }
+
+    if (prizeEnabled) {
+      for (let i = 0; i < prizeCount; i++) {
+        const coin = prizeCoins[i];
+        if (!coin || coin <= 0) {
+          newErrors[`prize_${i}`] = `Xu thưởng Top ${i + 1} phải lớn hơn 0`;
+        }
       }
     }
 
@@ -124,49 +150,72 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
     }
     if (createMutation.isPending || updateMutation.isPending) return;
 
+    const payload: ContestUpsertDTO = {
+      ...formData,
+      prizeTopCount: prizeEnabled ? prizeCount : null,
+      prizeCoinsPerRank: prizeEnabled ? prizeCoins.slice(0, prizeCount) : null,
+    };
+
     try {
       if (isEditMode && contestId) {
-        await updateMutation.mutateAsync({ contestId, data: formData });
-        console.log("Update contest:", contestId, formData);
+        await updateMutation.mutateAsync({ contestId, data: payload });
         navigate({ to: "/contests/$id", params: { id: contestId } });
       } else {
-        await createMutation.mutateAsync(formData);
-        console.log("Create contest:", formData);
-        navigate({ to: "/contests" });
+        const response = await createMutation.mutateAsync(payload);
+        navigate({ to: `/contests/${response.data.data?.contestId}/manage-problems` });
       }
     } catch (error) {
       console.error("Error:", error);
     }
   };
 
-  // Handle cancel
   const handleCancel = () => {
-    // navigate({ to: "/contests" });
-    console.log("Cancel");
+    navigate({ to: "/contests" });
   };
+
+  const handleBack = () => {
+    navigate({
+      to: isEditMode ? `/contests/${contestId}` : "/contests",
+    });
+  };
+  const getNowLocal = () => {
+    const now = new Date();
+
+    const pad = (n: number) => String(n).padStart(2, "0");
+
+    return `${now.getFullYear()}-${pad(now.getMonth() + 1)}-${pad(now.getDate())}T${pad(
+      now.getHours(),
+    )}:${pad(now.getMinutes())}`;
+  };
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Đang tải cuộc thi...</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-6xl mx-auto p-8">
       <div className="mb-8">
-        <nav className="flex items-center text-sm font-medium text-slate-500 dark:text-slate-400 mb-2">
-          <Link to="/contests" className="flex items-center gap-1 hover:text-blue-600 transition-colors">
-            <ChevronLeft className="w-4 h-4" />
-            Quản lý cuộc thi
-          </Link>
-          <span className="mx-2 text-slate-300 dark:text-slate-700">/</span>
-          <span className="text-slate-900 dark:text-white">
-            {isEditMode ? "Chỉnh sửa cuộc thi" : "Tạo cuộc thi mới"}
-          </span>
-        </nav>
+        <div className="mb-4">
+          <Button variant="link" onClick={handleBack} className="gap-2 border-gray-300">
+            <ArrowLeft className="w-4 h-4" />
+            Quay lại danh sách
+          </Button>
+        </div>
         <h2 className="text-3xl font-bold text-slate-900 dark:text-white">
           {isEditMode ? "Chỉnh sửa cuộc thi" : "Tạo cuộc thi mới"}
         </h2>
       </div>
 
-      <Card className="border-slate-200 dark:border-slate-800 rounded-2xl shadow-sm overflow-hidden">
-        <CardContent className="p-8 space-y-8">
+      <Card className="border-slate-200 dark:border-slate-800 rounded-md shadow-sm overflow-hidden p-0">
+        <CardContent className="p-8 space-y-4">
           <div className="space-y-2">
-            <label htmlFor="contest_name" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+            <label htmlFor="contest_name" className="block text-md font-semibold text-slate-700 dark:text-slate-300">
               Tên cuộc thi <span className="text-red-500">*</span>
             </label>
             <input
@@ -185,79 +234,21 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
           </div>
 
           <div className="space-y-2">
-            <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">Mô tả cuộc thi</label>
-            <div className="border border-slate-200 dark:border-slate-700 rounded-xl overflow-hidden bg-white dark:bg-slate-800">
-              <div className="flex items-center gap-1 p-2 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-                <button
-                  type="button"
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400 transition-colors"
-                  title="Bold"
-                >
-                  <Bold className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400 transition-colors"
-                  title="Italic"
-                >
-                  <Italic className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400 transition-colors"
-                  title="List"
-                >
-                  <List className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400 transition-colors"
-                  title="Link"
-                >
-                  <Link2 className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  className="p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded text-slate-600 dark:text-slate-400 transition-colors"
-                  title="Image"
-                >
-                  <Image className="w-4 h-4" />
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setIsPreview(!isPreview)}
-                  className={`p-2 hover:bg-slate-200 dark:hover:bg-slate-700 rounded transition-colors ml-auto ${
-                    isPreview ? "text-blue-600" : "text-slate-600 dark:text-slate-400"
-                  }`}
-                  title="Preview"
-                >
-                  <Eye className="w-4 h-4" />
-                </button>
-              </div>
-
-              {!isPreview ? (
-                <textarea
-                  value={formData.description}
-                  onChange={(e) => handleChange("description", e.target.value)}
-                  placeholder="Viết mô tả bằng Markdown ở đây..."
-                  rows={8}
-                  className="w-full px-4 py-3 border-none focus:ring-0 bg-transparent text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none outline-none"
-                />
-              ) : (
-                <div className="px-4 py-3 min-h-50 prose prose-slate dark:prose-invert max-w-none">
-                  {formData.description ? (
-                    <div className="whitespace-pre-wrap">{formData.description}</div>
-                  ) : (
-                    <p className="text-slate-400 italic">Chưa có nội dung...</p>
-                  )}
-                </div>
-              )}
+            <label className="block text-md font-semibold text-slate-700 dark:text-slate-300">Mô tả cuộc thi</label>
+            <div className="border border-slate-200 dark:border-slate-700 rounded-md overflow-hidden bg-white dark:bg-slate-800">
+              <textarea
+                value={formData.description}
+                onChange={(e) => handleChange("description", e.target.value)}
+                placeholder="Mô tả cuộc thi...."
+                rows={8}
+                className="w-full px-4 py-3 border-none focus:ring-0 bg-transparent text-slate-900 dark:text-white placeholder-slate-400 dark:placeholder-slate-500 resize-none outline-none"
+              />
             </div>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
-              <label htmlFor="start_time" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="start_time" className="block text-md font-semibold text-slate-700 dark:text-slate-300">
                 Thời gian bắt đầu <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -265,6 +256,7 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
                 <input
                   id="start_time"
                   type="datetime-local"
+                  min={getNowLocal()}
                   value={formData.startTime}
                   onChange={(e) => handleChange("startTime", e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl border ${
@@ -278,7 +270,7 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
             </div>
 
             <div className="space-y-2">
-              <label htmlFor="end_time" className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+              <label htmlFor="end_time" className="block text-md font-semibold text-slate-700 dark:text-slate-300">
                 Thời gian kết thúc <span className="text-red-500">*</span>
               </label>
               <div className="relative">
@@ -286,6 +278,7 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
                 <input
                   id="end_time"
                   type="datetime-local"
+                  min={getNowLocal()}
                   value={formData.endTime}
                   onChange={(e) => handleChange("endTime", e.target.value)}
                   className={`w-full pl-10 pr-4 py-3 rounded-xl border ${
@@ -315,16 +308,133 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
               </span>
             </div>
           </div>
+
+          <div className="space-y-4 border border-slate-200 dark:border-slate-700 rounded-xl p-6">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 bg-amber-100 dark:bg-amber-800/30 rounded-lg flex items-center justify-center">
+                  <Trophy className="w-5 h-5 text-amber-600" />
+                </div>
+                <div>
+                  <h3 className="text-md font-semibold text-slate-700 dark:text-slate-300">Cấu hình giải thưởng</h3>
+                  <p className="text-xs text-slate-500">Thưởng xu cho người dẫn đầu khi cuộc thi kết thúc</p>
+                </div>
+              </div>
+              <button
+                type="button"
+                onClick={() => {
+                  setPrizeEnabled(!prizeEnabled);
+                  if (!prizeEnabled && prizeCoins.length === 0) {
+                    setPrizeCoins([500, 300, 100]);
+                    setPrizeCount(3);
+                  }
+                }}
+                className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors ${
+                  prizeEnabled ? "bg-amber-500" : "bg-slate-300 dark:bg-slate-600"
+                }`}
+              >
+                <span
+                  className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${
+                    prizeEnabled ? "translate-x-6" : "translate-x-1"
+                  }`}
+                />
+              </button>
+            </div>
+
+            {prizeEnabled && (
+              <div className="space-y-4 pt-2">
+                <div className="space-y-2">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Số lượng top nhận thưởng
+                  </label>
+                  <select
+                    value={prizeCount}
+                    onChange={(e) => {
+                      const newCount = Number(e.target.value);
+                      setPrizeCount(newCount);
+                      setPrizeCoins((prev) => {
+                        const updated = [...prev];
+                        while (updated.length < newCount) updated.push(100);
+                        return updated.slice(0, newCount);
+                      });
+                    }}
+                    className="w-full px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all"
+                  >
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                      <option key={n} value={n}>
+                        Top {n}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+
+                <div className="space-y-3">
+                  <label className="block text-sm font-semibold text-slate-700 dark:text-slate-300">
+                    Xu thưởng theo hạng
+                  </label>
+                  {Array.from({ length: prizeCount }, (_, i) => {
+                    const medal = i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : "🏆";
+                    return (
+                      <div key={i} className="flex items-center gap-3">
+                        <span className="text-lg w-8 text-center">{medal}</span>
+                        <span className="text-sm font-medium text-slate-600 dark:text-slate-400 w-16">Top {i + 1}</span>
+                        <div className="relative flex-1">
+                          <input
+                            type="number"
+                            min={1}
+                            value={prizeCoins[i] ?? ""}
+                            onChange={(e) => {
+                              const val = Number(e.target.value);
+                              setPrizeCoins((prev) => {
+                                const updated = [...prev];
+                                updated[i] = val;
+                                return updated;
+                              });
+                              if (errors[`prize_${i}`]) {
+                                setErrors((prev) => ({
+                                  ...prev,
+                                  [`prize_${i}`]: "",
+                                }));
+                              }
+                            }}
+                            placeholder="Số xu"
+                            className={`w-full px-4 py-2.5 rounded-xl border ${
+                              errors[`prize_${i}`]
+                                ? "border-red-300 dark:border-red-700"
+                                : "border-slate-200 dark:border-slate-700"
+                            } bg-white dark:bg-slate-800 text-slate-900 dark:text-white focus:ring-2 focus:ring-amber-500/20 focus:border-amber-500 transition-all`}
+                          />
+                          <span className="absolute right-4 top-1/2 -translate-y-1/2 text-sm text-slate-400 pointer-events-none">
+                            xu
+                          </span>
+                        </div>
+                        {errors[`prize_${i}`] && (
+                          <p className="text-xs text-red-500 min-w-30">{errors[`prize_${i}`]}</p>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+
+                <div className="bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-800/50 rounded-lg p-3">
+                  <p className="text-xs text-amber-700 dark:text-amber-400">
+                    Nếu 2 người cùng hạng (ICPC), cả 2 sẽ nhận thưởng cùng mức. Chỉ người giải được ≥ 1 bài mới nhận
+                    thưởng.
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
         </CardContent>
 
-        <div className="bg-slate-50 dark:bg-slate-800/50 px-8 py-6 flex items-center justify-end gap-4 border-t border-slate-200 dark:border-slate-800">
+        <div className="bg-slate-50 dark:bg-slate-800/50 px-6 py-4 flex items-center justify-end gap-4 border-t border-slate-200 dark:border-slate-800">
           <Button type="button" variant="ghost" onClick={handleCancel} className="px-6">
             Hủy
           </Button>
-          <Button type="button" onClick={handleSubmit} className="px-8 gap-2 shadow-lg">
+          <Button type="button" onClick={handleSubmit} className="px-8 py-5 gap-2 shadow-lg">
             {isEditMode ? (
               <>
-                <Eye className="w-4 h-4" />
+                <Pencil className="w-4 h-4" />
                 Cập nhật cuộc thi
               </>
             ) : (
@@ -336,22 +446,6 @@ export const CreateContestPage: React.FC<CreateContestPageProps> = ({ contestId,
           </Button>
         </div>
       </Card>
-
-      {/* Feature Cards */}
-      <div className="mt-8 grid grid-cols-1 md:grid-cols-3 gap-6 opacity-60">
-        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-3">
-          <Shield className="w-5 h-5 text-slate-400" />
-          <p className="text-xs text-slate-500 dark:text-slate-400">An toàn & Bảo mật tuyệt đối</p>
-        </div>
-        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-3">
-          <TrendingUp className="w-5 h-5 text-slate-400" />
-          <p className="text-xs text-slate-500 dark:text-slate-400">Báo cáo kết quả thời gian thực</p>
-        </div>
-        <div className="p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 flex items-center gap-3">
-          <Users className="w-5 h-5 text-slate-400" />
-          <p className="text-xs text-slate-500 dark:text-slate-400">Không giới hạn thí sinh</p>
-        </div>
-      </div>
     </div>
   );
 };

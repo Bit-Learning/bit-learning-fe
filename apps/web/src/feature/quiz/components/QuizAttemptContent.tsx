@@ -10,7 +10,6 @@ import {
   selectAnswersMap,
   selectCurrentQuestionIndex,
   selectTimeRemaining,
-  selectQuestionStats,
   nextQuestionAction,
   previousQuestionAction,
   goToQuestionAction,
@@ -22,21 +21,40 @@ import { useQuizAttempt, useSaveQuizAnswer, useSubmitQuizAttempt } from "../quer
 import { useExam } from "@/feature/exam/queries/useExam";
 import { useExamTimer } from "../queries/useExamTimer";
 import { QuestionNavigationState } from "../types/quiz.type";
+import { useTabLock } from "../queries/useTabLock";
 
 const QuizAttemptContent: React.FC = () => {
   const navigate = useNavigate();
-  const { attemptId } = useParams({ from: "/_layout/quiz-attempts/$attemptId/" });
+  const { attemptId } = useParams({
+    from: "/_layout/quiz-attempts/$attemptId/",
+  });
+  const numericAttemptId = Number(attemptId);
+
+  const { status: lockStatus, releaseLock } = useTabLock(numericAttemptId);
 
   const dispatch = useDispatch();
   const answersMap = useSelector(selectAnswersMap);
   const currentIndex = useSelector(selectCurrentQuestionIndex);
   const timeRemaining = useSelector(selectTimeRemaining);
-  const stats = useSelector(selectQuestionStats);
 
-  const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(Number(attemptId));
+  const storedDeviceToken = React.useMemo(() => {
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith("quiz_device_token_")) {
+        return localStorage.getItem(key) ?? undefined;
+      }
+    }
+    return undefined;
+  }, []);
+
+  const { data: attemptData, isLoading: attemptLoading } = useQuizAttempt(numericAttemptId, {
+    deviceToken: storedDeviceToken,
+  });
   const { data: examData, isLoading: examLoading } = useExam(attemptData?.exam?.id || 0, {
     enabled: !!attemptData?.exam?.id,
   });
+
+  const deviceToken = attemptData?.deviceToken ?? "";
 
   const saveMutation = useSaveQuizAnswer();
   const submitMutation = useSubmitQuizAttempt();
@@ -52,18 +70,28 @@ const QuizAttemptContent: React.FC = () => {
   const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
   const lastSaveTimeRef = useRef(lastSaveTime);
   const answersMapRef = useRef(answersMap);
+  const deviceTokenRef = useRef(deviceToken);
 
   useEffect(() => {
     hasUnsavedChangesRef.current = hasUnsavedChanges;
   }, [hasUnsavedChanges]);
-
   useEffect(() => {
     lastSaveTimeRef.current = lastSaveTime;
   }, [lastSaveTime]);
-
   useEffect(() => {
     answersMapRef.current = answersMap;
   }, [answersMap]);
+  useEffect(() => {
+    deviceTokenRef.current = deviceToken;
+  }, [deviceToken]);
+
+  useEffect(() => {
+    if (lockStatus === "denied") {
+      timer.stop();
+      dispatch(stopTimerAction());
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [lockStatus, dispatch]);
 
   useEffect(() => {
     if (attemptData && !isStoreInitialized) {
@@ -73,6 +101,9 @@ const QuizAttemptContent: React.FC = () => {
   }, [attemptData, isStoreInitialized, dispatch]);
 
   const handleSaveAll = useCallback(async () => {
+    const token = deviceTokenRef.current;
+    if (!token) return;
+
     const currentAnswersMap = answersMapRef.current;
     const answeredQuestions = Object.values(currentAnswersMap).filter((answer) => {
       const type = answer.question.questionType?.toUpperCase();
@@ -83,21 +114,23 @@ const QuizAttemptContent: React.FC = () => {
     if (answeredQuestions.length === 0) return;
 
     setIsSavingAll(true);
-    const savePromises = answeredQuestions.map((answer) => {
-      return saveMutation.mutateAsync({
-        attemptId: Number(attemptId),
+
+    const savePromises = answeredQuestions.map((answer) =>
+      saveMutation.mutateAsync({
+        attemptId: numericAttemptId,
+        deviceToken: token,
         data: {
           questionId: answer.question.id,
           answerText: answer.answerText,
           selectedOptionIds: answer.selectedOptionIds,
           questionNo: answer.questionNo,
           navigationState:
-            answer.answerText?.trim() || answer.selectedOptionIds?.length
+            answer.answerText?.trim() || (answer.selectedOptionIds?.length ?? 0) > 0
               ? QuestionNavigationState.ANSWERED
               : QuestionNavigationState.UNANSWERED,
         },
-      });
-    });
+      }),
+    );
 
     try {
       await Promise.all(savePromises);
@@ -108,25 +141,35 @@ const QuizAttemptContent: React.FC = () => {
     } finally {
       setIsSavingAll(false);
     }
-  }, [saveMutation, attemptId]);
+  }, [saveMutation, numericAttemptId]);
 
   const handleAutoSubmit = useCallback(async () => {
-    console.log("⏰ Hết giờ - tự động lưu và nộp bài...");
-
-    await handleSaveAll();
+    const token = deviceTokenRef.current;
+    console.log("Hết giờ - tự động lưu và nộp bài...");
+    releaseLock();
 
     try {
-      await submitMutation.mutateAsync({
-        attemptId: Number(attemptId),
-        data: {
-          answers: Object.values(answersMapRef.current).map((answer) => ({
-            questionId: answer.question.id,
-            selectedOptionIds: answer.selectedOptionIds,
-            answerText: answer.answerText ?? undefined,
-            navigationState: QuestionNavigationState.ANSWERED,
-          })),
-        },
-      });
+      if (hasUnsavedChangesRef.current) {
+        await handleSaveAll();
+      }
+
+      if (token) {
+        await submitMutation.mutateAsync({
+          attemptId: numericAttemptId,
+          deviceToken: token,
+          data: {
+            answers: Object.values(answersMapRef.current).map((answer) => ({
+              questionId: answer.question.id,
+              selectedOptionIds: answer.selectedOptionIds,
+              answerText: answer.answerText ?? undefined,
+              questionNo: answer.questionNo,
+              navigationState:
+                "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
+            })),
+          },
+        });
+        localStorage.removeItem(`quiz_device_token_${attemptData?.exam.id}`);
+      }
     } catch (error) {
       console.error("Auto-submit failed:", error);
     } finally {
@@ -135,10 +178,10 @@ const QuizAttemptContent: React.FC = () => {
         params: { attemptId: String(attemptId) },
       });
     }
-  }, [handleSaveAll, submitMutation, attemptId, navigate]);
+  }, [handleSaveAll, submitMutation, numericAttemptId, navigate, releaseLock]);
 
   const timer = useExamTimer({
-    attemptId: Number(attemptId),
+    attemptId: numericAttemptId,
     onTick: (seconds: number) => {
       if (seconds === 300) {
         setShowTimeWarning(true);
@@ -159,11 +202,11 @@ const QuizAttemptContent: React.FC = () => {
   useEffect(() => {
     const autoSaveInterval = setInterval(() => {
       const now = Date.now();
-      if (hasUnsavedChangesRef.current && now - lastSaveTimeRef.current >= 120000) {
-        console.log("🔄 Auto-save triggered (2 minutes elapsed)");
+      if (hasUnsavedChangesRef.current && now - lastSaveTimeRef.current >= 120_000) {
+        console.log("Auto-save triggered (2 minutes elapsed)");
         handleSaveAll();
       }
-    }, 10000);
+    }, 10_000);
 
     return () => {
       clearInterval(autoSaveInterval);
@@ -270,53 +313,84 @@ const QuizAttemptContent: React.FC = () => {
   };
 
   const handleSubmitExam = async () => {
+    const token = deviceTokenRef.current;
+    if (!token) return;
+
     timer.stop();
-    await handleSaveAll();
+    releaseLock();
 
     try {
+      await handleSaveAll();
+
+      const buildAnswers = () =>
+        Object.values(answersMap).map((answer) => ({
+          questionId: answer.question.id,
+          selectedOptionIds: answer.selectedOptionIds,
+          answerText: answer.answerText ?? undefined,
+          questionNo: answer.questionNo,
+          navigationState:
+            "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
+        }));
+
       await submitMutation.mutateAsync({
-        attemptId: Number(attemptId),
-        data: {
-          answers: Object.values(answersMap).map((answer) => ({
-            questionId: answer.question.id,
-            selectedOptionIds: answer.selectedOptionIds,
-            answerText: answer.answerText ?? undefined,
-            navigationState:
-              "navigationState" in answer ? (answer as any).navigationState : QuestionNavigationState.ANSWERED,
-          })),
-        },
+        attemptId: numericAttemptId,
+        deviceToken: token,
+        data: { confirmSubmit: true, answers: buildAnswers() },
       });
+
+      localStorage.removeItem(`quiz_device_token_${attemptData?.exam.id}`);
 
       navigate({
         to: "/quiz-attempts/$attemptId/result",
         params: { attemptId: String(attemptId) },
       });
-    } catch (error: any) {
-      if (error.response?.data?.message?.includes("unanswered")) {
-        const confirmSubmit = window.confirm(
-          `Bạn còn ${stats.unanswered} câu chưa trả lời. Bạn có chắc chắn muốn nộp bài không?`,
-        );
-        if (confirmSubmit) {
-          await handleSubmitExam();
-        } else {
-          timer.start();
-        }
-      } else {
-        timer.start();
-      }
+    } catch {
+      timer.start();
     }
 
     setShowSubmitConfirm(false);
   };
 
   const getOptionLabel = (index: number) => String.fromCharCode(65 + index);
-
   const isEssay = (type: string) => type?.toUpperCase() === "ESSAY";
   const isMCQ = (type: string) => type?.toUpperCase() === "MCQ";
 
+  if (lockStatus === "acquiring") {
+    return (
+      <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-10 h-10 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-3" />
+          <p className="text-slate-500">Đang khởi tạo...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (lockStatus === "denied") {
+    return (
+      <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center p-4">
+        <Card className="max-w-md shadow-xl border-2 border-amber-200 dark:border-amber-800">
+          <CardContent className="p-10 text-center">
+            <div className="w-16 h-16 bg-amber-100 dark:bg-amber-900/30 rounded-full flex items-center justify-center mx-auto mb-4">
+              <AlertCircle className="w-8 h-8 text-amber-600 dark:text-amber-400" />
+            </div>
+            <h3 className="text-xl font-bold mb-2 text-slate-900 dark:text-slate-100">Bài thi đang mở ở tab khác</h3>
+            <p className="text-slate-500 dark:text-slate-400 mb-6 text-sm leading-relaxed">
+              Bạn chỉ được làm bài thi trên một tab hoặc trình duyệt tại một thời điểm. Vui lòng đóng tab này và quay
+              lại tab đang làm bài.
+            </p>
+            <Button variant="outline" onClick={() => window.close()} className="border-slate-200 dark:border-slate-700">
+              Đóng tab này
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   if (attemptLoading || examLoading) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <p className="text-slate-600 dark:text-slate-400 font-medium">Đang tải đề thi...</p>
@@ -327,7 +401,7 @@ const QuizAttemptContent: React.FC = () => {
 
   if (!questions.length) {
     return (
-      <div className="min-h-screen bg-slate-50 dark:bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-white dark:bg-slate-900 flex items-center justify-center">
         <Card className="max-w-md shadow-xl">
           <CardContent className="p-12 text-center">
             <AlertCircle className="w-16 h-16 text-slate-400 mx-auto mb-4" />
@@ -349,7 +423,6 @@ const QuizAttemptContent: React.FC = () => {
           </div>
           <div>
             <h1 className="text-2xl font-bold text-slate-900 dark:text-slate-100">{attemptData?.exam.name}</h1>
-            <p className="text-sm text-slate-500 dark:text-slate-400">Chế độ Thi</p>
           </div>
         </div>
 
@@ -358,40 +431,18 @@ const QuizAttemptContent: React.FC = () => {
             <div className="flex items-center gap-3">
               <AlertCircle className="w-6 h-6 text-amber-600 dark:text-amber-400" />
               <p className="text-sm font-bold text-amber-900 dark:text-amber-300">
-                ⚠️ Còn 5 phút! Vui lòng kiểm tra lại đáp án.
+                Còn 5 phút! Vui lòng kiểm tra lại đáp án.
               </p>
-            </div>
-          </div>
-        )}
-
-        {hasUnsavedChanges && (
-          <div className="mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800 rounded-xl">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                <p className="text-sm font-semibold text-blue-900 dark:text-blue-300">
-                  Có thay đổi chưa được lưu. Hệ thống sẽ tự động lưu sau 2 phút.
-                </p>
-              </div>
-              <Button
-                size="sm"
-                onClick={handleSaveAll}
-                isDisabled={isSavingAll}
-                className="gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600"
-              >
-                <Save className="w-4 h-4" />
-                {isSavingAll ? "Đang lưu..." : "Lưu ngay"}
-              </Button>
             </div>
           </div>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           <div className="lg:col-span-2">
-            <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-lg">
+            <Card className="border-2 border-slate-200 dark:border-blue-800 rounded-md">
               <CardContent className="p-8">
                 <div className="mb-6">
-                  <Badge className="mb-4 bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-blue-200 dark:border-blue-800 font-bold">
+                  <Badge className="mb-4 text-md bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-400 border-slate-200 dark:border-blue-800 font-bold">
                     CÂU HỎI {currentIndex + 1} / {questions.length}
                   </Badge>
                   <h2 className="text-2xl font-bold leading-snug whitespace-pre-wrap text-slate-900 dark:text-slate-100">
@@ -441,23 +492,11 @@ const QuizAttemptContent: React.FC = () => {
 
                 {currentQuestion && isEssay(currentQuestion.questionType) && (
                   <div className="space-y-4 mb-8">
-                    <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-4">
-                      <div className="flex items-start gap-3">
-                        <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
-                        <div>
-                          <p className="text-sm font-semibold text-blue-900 dark:text-blue-300 mb-1">Câu hỏi tự luận</p>
-                          <p className="text-xs text-blue-700 dark:text-blue-400">
-                            Nhập câu trả lời. Hệ thống tự động lưu mỗi 2 phút hoặc nhấn "Lưu tất cả".
-                          </p>
-                        </div>
-                      </div>
-                    </div>
-
                     <textarea
                       value={answersMap[currentQuestion.id]?.answerText || ""}
                       onChange={(e) => handleEssayAnswer(e.target.value)}
                       placeholder="Nhập câu trả lời của bạn..."
-                      className="w-full min-h-50 p-4 rounded-xl border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none resize-y transition-colors"
+                      className="w-full min-h-50 p-4 rounded-md border-2 border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none resize-y transition-colors"
                     />
 
                     <div className="flex items-center justify-between text-sm">
@@ -474,7 +513,7 @@ const QuizAttemptContent: React.FC = () => {
                     size="lg"
                     onClick={handlePreviousQuestion}
                     isDisabled={currentIndex === 0}
-                    className="w-full sm:w-auto gap-2 border-slate-200 dark:border-slate-700"
+                    className="cursor-pointer text-md py-5 w-full sm:w-auto gap-2 text-blue-600 border-blue-600 dark:border-slate-700"
                   >
                     <ArrowLeft className="w-5 h-5" />
                     Câu trước
@@ -483,7 +522,7 @@ const QuizAttemptContent: React.FC = () => {
                   <Button
                     size="lg"
                     onClick={handleNextQuestion}
-                    className="w-full sm:w-auto gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-lg"
+                    className="cursor-pointer w-full text-md py-5 sm:w-auto gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-lg"
                   >
                     {currentIndex === questions.length - 1 ? "Hoàn thành" : "Câu tiếp theo"}
                     <ArrowRight className="w-5 h-5" />
@@ -494,8 +533,8 @@ const QuizAttemptContent: React.FC = () => {
           </div>
 
           <aside className="lg:col-span-1 space-y-4">
-            <Card className="border-2 border-blue-200 dark:border-blue-800 shadow-lg sticky top-6">
-              <CardContent className="p-6 space-y-4">
+            <Card className="border-2 border-slate-200 dark:border-blue-800 top-6 rounded-md">
+              <CardContent className="px-6 space-y-4">
                 <div className="flex items-center justify-between p-4 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700">
                   <div className="flex items-center gap-3">
                     <Timer
@@ -507,7 +546,7 @@ const QuizAttemptContent: React.FC = () => {
                       )}
                     />
                     <div className="flex flex-col">
-                      <span className="text-[10px] text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
+                      <span className="text-sm text-slate-500 dark:text-slate-400 font-bold uppercase tracking-wider">
                         Thời gian còn lại
                       </span>
                       <span className={cn("text-2xl font-black", getTimerColor())}>{timer.formatTime()}</span>
@@ -515,27 +554,8 @@ const QuizAttemptContent: React.FC = () => {
                   </div>
                 </div>
 
-                <Button
-                  size="lg"
-                  className="w-full gap-2 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 shadow-lg"
-                  onClick={handleSaveAll}
-                  isDisabled={isSavingAll || answeredCount === 0}
-                >
-                  <Save className="w-5 h-5" />
-                  {isSavingAll ? "Đang lưu..." : `Lưu tất cả (${answeredCount})`}
-                </Button>
-
-                <Button
-                  size="lg"
-                  className="w-full gap-2 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-lg"
-                  onClick={() => setShowSubmitConfirm(true)}
-                >
-                  <Send className="w-5 h-5" />
-                  Nộp bài thi
-                </Button>
-
-                <div className="pt-4 border-t border-slate-200 dark:border-slate-700">
-                  <h3 className="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3">Danh sách câu hỏi</h3>
+                <div className="pt-4 border-t-3 border-slate-200 dark:border-slate-700">
+                  <h3 className="text-md font-bold text-slate-900 dark:text-slate-100 mb-3">Danh sách câu hỏi</h3>
 
                   <div className="grid grid-cols-5 gap-2 mb-4">
                     {questions.map((_, index) => {
@@ -545,7 +565,7 @@ const QuizAttemptContent: React.FC = () => {
                           key={index}
                           onClick={() => handleGoToQuestion(index)}
                           className={cn(
-                            "aspect-square flex items-center justify-center rounded-lg font-bold text-sm shadow-sm hover:scale-105 transition-transform",
+                            "cursor-pointer aspect-square flex items-center justify-center rounded-lg font-bold text-sm shadow-sm hover:scale-105 transition-transform",
                             status === "current" &&
                               "border-2 border-blue-600 bg-blue-100 dark:bg-blue-900/30 text-blue-600 dark:text-blue-400",
                             status === "answered" && "bg-emerald-500 text-white",
@@ -559,7 +579,7 @@ const QuizAttemptContent: React.FC = () => {
                     })}
                   </div>
 
-                  <div className="space-y-3">
+                  <div className="space-y-3 mb-4">
                     <div className="flex items-center justify-between text-sm">
                       <span className="text-slate-500 dark:text-slate-400">Đã trả lời:</span>
                       <span className="font-bold text-slate-900 dark:text-slate-100">
@@ -572,22 +592,38 @@ const QuizAttemptContent: React.FC = () => {
                         style={{ width: `${progress}%` }}
                       />
                     </div>
-                    <div className="flex items-center justify-between text-sm">
-                      <span className="text-slate-500 dark:text-slate-400">Tiến độ:</span>
-                      <span className="text-slate-900 dark:text-slate-100 font-semibold">{progress}%</span>
-                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-3 py-4 border-t-3 border-slate-200">
+                    <Button
+                      size="lg"
+                      className="w-full gap-2 text-md py-5 bg-emerald-600 hover:bg-emerald-700 dark:bg-emerald-700 dark:hover:bg-emerald-600 shadow-lg"
+                      onClick={handleSaveAll}
+                      isDisabled={isSavingAll || answeredCount === 0}
+                    >
+                      <Save className="w-5 h-5" />
+                      {isSavingAll ? "Đang lưu..." : `Lưu tất cả`}
+                    </Button>
+
+                    <Button
+                      size="lg"
+                      className="w-full gap-2 text-md py-5 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 shadow-lg"
+                      onClick={() => setShowSubmitConfirm(true)}
+                    >
+                      <Send className="w-5 h-5" />
+                      Nộp bài thi
+                    </Button>
                   </div>
                 </div>
               </CardContent>
             </Card>
 
-            <Card className="bg-blue-50 dark:bg-blue-900/20 border-2 border-blue-200 dark:border-blue-800">
-              <CardContent className="p-5">
+            <Card className=" dark:bg-blue-900/20 border-2 border-slate-200 dark:border-blue-800 rounded-md">
+              <CardContent className="px-5">
                 <div className="flex gap-3">
-                  <AlertCircle className="w-5 h-5 text-blue-600 dark:text-blue-400 shrink-0 mt-0.5" />
                   <div>
-                    <h4 className="text-sm font-bold text-blue-900 dark:text-blue-300 mb-1">Lưu ý quan trọng</h4>
-                    <ul className="text-xs text-blue-700 dark:text-blue-400 leading-relaxed space-y-1">
+                    <h4 className="text-lg font-bold text-blue-900 dark:text-blue-300 mb-1">Lưu ý quan trọng</h4>
+                    <ul className="text-sm font-medium text-blue-700 dark:text-blue-400 leading-relaxed space-y-1">
                       <li>• Tự động lưu mỗi 2 phút</li>
                       <li>• Nhấn "Lưu tất cả" để lưu ngay</li>
                       <li>• Tự động nộp bài khi hết giờ</li>
@@ -614,16 +650,6 @@ const QuizAttemptContent: React.FC = () => {
                   Bạn đã trả lời <span className="font-bold text-emerald-600">{answeredCount}</span>/
                   <span className="font-bold">{questions.length}</span> câu hỏi.
                 </p>
-                {answeredCount < questions.length && (
-                  <p className="text-amber-600 dark:text-amber-400 text-sm mt-2 font-medium">
-                    ⚠️ Bạn còn {questions.length - answeredCount} câu chưa trả lời
-                  </p>
-                )}
-                {hasUnsavedChanges && (
-                  <p className="text-blue-600 dark:text-blue-400 text-sm mt-2 font-medium">
-                    💾 Hệ thống sẽ tự động lưu trước khi nộp
-                  </p>
-                )}
               </div>
 
               <div className="flex flex-col gap-3">
@@ -633,8 +659,7 @@ const QuizAttemptContent: React.FC = () => {
                   onClick={handleSubmitExam}
                   isDisabled={submitMutation.isPending}
                 >
-                  <Send className="w-5 h-5" />
-                  {submitMutation.isPending ? "Đang nộp bài..." : "Xác nhận nộp bài"}
+                  {submitMutation.isPending || isSavingAll ? "Đang nộp bài..." : "Xác nhận nộp bài"}
                 </Button>
                 <Button
                   variant="outline"

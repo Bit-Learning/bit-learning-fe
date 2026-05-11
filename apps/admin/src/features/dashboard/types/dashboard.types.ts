@@ -1,61 +1,89 @@
-/**
- * Dashboard statistics types
- */
-
-/**
- * Order dashboard statistics
- */
-export interface OrderDashboardStats {
-	totalOrders: number;
-	totalRevenue: number;
-	revenueThisMonth: number;
-	statusBreakdown: Record<string, number>;
-}
-
-/**
- * User dashboard statistics
- */
 export interface UserDashboardStats {
-	totalUsers: number;
-	newUsersToday: number;
-	newUsersThisWeek: number;
-	newUsersThisMonth: number;
-	activeUsers: number;
+  totalUsers: number;
+  newUsersToday: number;
+  newUsersThisWeek: number;
+  newUsersThisMonth: number;
+  activeUsers: number;
+  roleBreakdown: Record<string, number>;
 }
 
-/**
- * Monthly revenue data point
- */
+export interface OrderDashboardStats {
+  totalOrders: number;
+  totalRevenue: number;
+  revenueThisMonth: number;
+  statusBreakdown: Record<string, number>;
+}
+
 export interface MonthlyRevenue {
-	month: number; // 1-12 (Jan-Dec)
-	monthName?: string; // "January", "February", etc. (optional)
-	revenue: number; // Revenue for that month
+  month: number;
+  revenue: number;
 }
 
-/**
- * Payment dashboard statistics
- */
 export interface PaymentDashboardStats {
-	totalTransactions: number;
-	totalRevenue: number;
-	revenueThisMonth: number;
-	successfulTransactions: number;
-	failedTransactions: number;
-	statusBreakdown: Record<string, number>;
-	// Transaction type breakdown
-	depositTransactions: number; // Nạp tiền vào hệ thống (doanh thu)
-	aiRequestTransactions: number; // Số lượng request cho AI
-	purchaseTransactions: number; // Đơn mua hàng
-	typeBreakdown: Record<string, number>;
-	// Monthly revenue for chart (all months in current year)
-	monthlyRevenue: MonthlyRevenue[];
+  totalTransactions: number;
+  totalRevenue: number;
+  revenueThisMonth: number;
+  successfulTransactions: number;
+  failedTransactions: number;
+  statusBreakdown: Record<string, number>;
+  depositTransactions: number;
+  aiRequestTransactions: number;
+  purchaseTransactions: number;
+  typeBreakdown: Record<string, number>;
+  monthlyRevenue: MonthlyRevenue[];
 }
 
-/**
- * Combined dashboard stats
- */
 export interface DashboardStats {
-	orders: OrderDashboardStats;
-	users: UserDashboardStats;
-	payments: PaymentDashboardStats;
+  orders: OrderDashboardStats;
+  users: UserDashboardStats;
+  payments: PaymentDashboardStats;
+  refreshedAt?: string;
+}
+
+export interface CourseStats {
+  totalCourses: number;
+  newCoursesThisMonth: number;
+  activeCourses: number;
+  monthlyNewCourses: MonthlyCount[];
+}
+
+export interface MonthlyCount {
+  month: number;
+  count: number;
+}
+
+export interface PostStats {
+  totalPosts: number;
+  activePosts: number;
+  bannedPosts: number;
+}
+
+export interface QuestionStats {
+  totalQuestions: number;
+  byGrade: GradeCount[];
+}
+
+export interface GradeCount {
+  grade: number;
+  count: number;
+}
+
+export interface ContestStats {
+  totalContests: number;
+  ongoingContests: number;
+  upcomingContests: number;
+  endedContests: number;
+}
+
+export interface GameStats {
+  totalGames: number;
+  totalPlays: number;
+}
+
+export interface ManagerDashboardStats {
+  courses: CourseStats;
+  posts: PostStats;
+  questions: QuestionStats;
+  contests: ContestStats;
+  games: GameStats;
 }

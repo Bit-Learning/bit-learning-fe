@@ -25,9 +25,8 @@ export const useCreateSection = () => {
   return useMutation({
     mutationFn: (data: CreateSectionRequest) => msectionApi.createSection(data),
     onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: sectionKeys.all });
       queryClient.invalidateQueries({ queryKey: sectionKeys.byCourse(variables.courseId) });
-      queryClient.invalidateQueries({ queryKey: ["courses"] }); // Invalidate course data
+      queryClient.invalidateQueries({ queryKey: ["courses"] });
       toast.success({
         title: "Tạo chương thành công",
         description: response.data.message,
@@ -46,9 +45,10 @@ export const useUpdateSection = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: UpdateSectionRequest }) => msectionApi.updateSection(id, data),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: sectionKeys.all });
+    mutationFn: ({ id, data }: { id: number; courseId: number; data: UpdateSectionRequest }) =>
+      msectionApi.updateSection(id, data),
+    onSuccess: (response, variables) => {
+      queryClient.invalidateQueries({ queryKey: sectionKeys.byCourse(variables.courseId) });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
       toast.success({
         title: "Cập nhật chương thành công",
@@ -91,13 +91,12 @@ export const useHideOrShowSection = () => {
 
   return useMutation({
     mutationFn: ({ id, isHidden }: { id: number; isHidden: boolean }) => msectionApi.hideOrShowSection(id, isHidden),
-    onSuccess: (response, variables) => {
+    onSuccess: (response) => {
       queryClient.invalidateQueries({ queryKey: sectionKeys.all });
       queryClient.invalidateQueries({ queryKey: ["courses"] });
 
-      const action = variables.isHidden ? "ẩn" : "hiện";
       toast.success({
-        title: `Đã ${action} chương`,
+        title: `Đã xóa chương`,
         description: response.data.message,
       });
     },

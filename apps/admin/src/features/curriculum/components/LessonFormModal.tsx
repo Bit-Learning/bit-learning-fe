@@ -32,7 +32,7 @@ const LessonFormModal: React.FC<Props> = ({ open, onClose, data, chapterId, next
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
-    defaultValues: { name: "", description: "", lessonNo: 1 },
+    defaultValues: { name: "", description: "", lessonNo: nextLessonNo },
   });
 
   const { mutate: create, isPending: creating } = useCreateLesson();

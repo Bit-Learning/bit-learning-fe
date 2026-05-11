@@ -1,5 +1,9 @@
 export const navItems = [
   {
+    title: "Trang chủ",
+    to: "/",
+  },
+  {
     title: "Khóa học Online",
     to: "/courses",
   },
@@ -7,7 +11,12 @@ export const navItems = [
     title: "Học tập",
     items: [
       {
-        title: "Bài tập thực hành",
+        title: "Lập trình khối",
+        to: "/kids-blockly",
+        description: "Học lập trình kéo thả trực quan bằng Blockly.",
+      },
+      {
+        title: "Lập trình nâng cao",
         to: "/problem",
         description: "Luyện tập và giải các bài tập theo từng chủ đề.",
       },
@@ -32,9 +41,9 @@ export const navItems = [
         description: "Trao đổi kiến thức và hỏi đáp cùng cộng đồng.",
       },
       {
-        title: "Danh sách giảng viên",
+        title: "Đội ngũ hướng dẫn",
         to: "/instructors",
-        description: "Tìm hiểu đội ngũ giảng viên và mentor của hệ thống.",
+        description: "Gặp gỡ và học hỏi từ các chuyên gia trong ngành.",
       },
     ],
   },

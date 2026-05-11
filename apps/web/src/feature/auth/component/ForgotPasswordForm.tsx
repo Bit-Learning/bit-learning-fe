@@ -120,7 +120,7 @@ const ForgotPasswordForm: React.FC = () => {
 												</FormLabel>
 												<FormControl>
 													<Input
-														placeholder="stuwme@gmail.com"
+														placeholder="youremail@gmail.com"
 														{...field}
 														className="focus-visible:border-primary focus-visible:ring-primary h-11 border focus-visible:ring-1 dark:bg-white/5 dark:text-white/90"
 													/>

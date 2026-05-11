@@ -1,28 +1,33 @@
 import { useNavigate } from "@tanstack/react-router";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import { useRef } from "react";
-import type { Game } from "../services/gameService";
-import { useAudio } from "./AudioProvider";
+import type { GamePreview } from "../services/gameService";
+import { useAudio } from "../contexts/AudioProvider";
+import type { MatchingGameLinkTarget } from "../services/matchingGameService";
 import GameCard from "./GameRow";
 import styles from "./GameRow.module.css";
 
 interface CategoryRowProps {
-	categoryName: string;
+	categoryKey: string;
+	categoryLabel: string;
 	categoryDescription: string;
-	games: Game[];
+	games: GamePreview[];
+	matchingTargetsByGameId?: ReadonlyMap<number, MatchingGameLinkTarget>;
 }
 
 export default function CategoryRow({
-	categoryName,
+	categoryKey,
+	categoryLabel,
 	categoryDescription,
 	games,
+	matchingTargetsByGameId,
 }: CategoryRowProps) {
 	const navigate = useNavigate();
 	const scrollContainerRef = useRef<HTMLDivElement>(null);
 	const { playSound } = useAudio();
 
 	const handleViewMore = () => {
-		switch (categoryName) {
+		switch (categoryKey) {
 			case "MATCHING":
 				// Start background music on explicit user action
 				playSound("game-background-music", { loop: true });
@@ -53,20 +58,24 @@ export default function CategoryRow({
 				<h2 className="text-xl font-bold text-white px-8 flex flex-col items-start gap-2">
 					<div className="flex items-center gap-2">
 						<span className={styles.accent} />
-						{categoryName}
+						{categoryLabel}
 					</div>
 					<span className="text-gray-300 text-sm">{categoryDescription}</span>
 				</h2>
-				<button className={styles.viewAll} onClick={() => handleViewMore()}>
+				<button
+					type="button"
+					className={styles.viewAll}
+					onClick={() => handleViewMore()}
+				>
 					{" "}
-					Xem tất cả{" "}
+					Xem thêm{" "}
 				</button>
 			</div>
 			{games.length === 0 ? (
 				<div className="px-8">
 					<div className="bg-gray-800/30 rounded-lg p-8 text-center border border-gray-700/50">
 						<p className="text-gray-400 text-sm">
-							No games in this category yet
+							Hiện chưa có trò chơi nào trong danh mục này.
 						</p>
 					</div>
 				</div>
@@ -92,12 +101,18 @@ export default function CategoryRow({
 						}}
 					>
 						{games.map((game) => (
-							<GameCard game={game} categoryName={categoryName} key={game.id} />
+							<GameCard
+								game={game}
+								categoryKey={categoryKey}
+								matchingTarget={matchingTargetsByGameId?.get(game.id)}
+								key={game.id}
+							/>
 						))}
 					</div>
 
 					{/* Right scroll button */}
 					<button
+						type="button"
 						onClick={() => scroll("right")}
 						className="absolute right-0 top-0 bottom-0 z-10 w-12 bg-gradient-to-l from-black/80 to-transparent opacity-0 group-hover/row:opacity-100 transition-opacity flex items-center justify-center hover:from-black/90"
 						aria-label="Scroll right"

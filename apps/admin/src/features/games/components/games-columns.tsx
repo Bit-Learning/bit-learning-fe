@@ -1,0 +1,300 @@
+import type { ColumnDef } from "@tanstack/react-table";
+import { Link } from "@tanstack/react-router";
+import { Gamepad2, LayoutGrid, Trash2 } from "lucide-react";
+import { DataTableColumnHeader } from "@/components/data-table";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+
+export type GameRow = {
+	id: string;
+	rowType: "standard" | "matching";
+	displayId: string;
+	title: string;
+	status?: "PUBLISHED" | "DRAFT" | "ARCHIVED";
+	categoryOrTopic: string;
+	difficultyOrGrade: string;
+	description?: string;
+	scoringModel?: "FINITE_SCORE" | "HIGH_SCORE" | "NO_SCORE" | null;
+	isScored?: boolean | null;
+	likes?: number;
+	views?: number;
+	attempts?: number;
+	completionRate?: number;
+	averageAccuracy?: number;
+	averageRawScore?: number;
+	timeoutRate?: number;
+	standardId?: number;
+	matchingGameId?: number;
+	matchingGrade?: number;
+	matchingTopicCode?: string;
+};
+
+type CreateGamesColumnsOptions = {
+	onDeleteStandard: (id: number) => void;
+	onDeleteMatching: (gameId: number) => void;
+	isDeletingStandard?: boolean;
+	isDeletingMatching?: boolean;
+};
+
+const getStatusLabel = (status?: string) => {
+	switch (status) {
+		case "PUBLISHED":
+			return "Đã xuất bản";
+		case "DRAFT":
+			return "Nháp";
+		case "ARCHIVED":
+			return "Đã lưu trữ";
+		default:
+			return "Không rõ";
+	}
+};
+
+const getStatusVariant = (
+	status?: string,
+): "default" | "secondary" | "destructive" | "outline" => {
+	switch (status) {
+		case "PUBLISHED":
+			return "default";
+		case "DRAFT":
+			return "secondary";
+		case "ARCHIVED":
+			return "destructive";
+		default:
+			return "outline";
+	}
+};
+
+export const createGamesColumns = ({
+	onDeleteStandard,
+	onDeleteMatching,
+	isDeletingMatching = false,
+	isDeletingStandard = false,
+}: CreateGamesColumnsOptions): ColumnDef<GameRow>[] => [
+	{
+		id: "select",
+		header: ({ table }) => (
+			<Checkbox
+				checked={
+					table.getIsAllPageRowsSelected() ||
+					(table.getIsSomePageRowsSelected() && "indeterminate")
+				}
+				onCheckedChange={(value) => table.toggleAllPageRowsSelected(!!value)}
+				aria-label="Chọn tất cả"
+				className="ms-3"
+			/>
+		),
+		cell: ({ row }) => (
+			<Checkbox
+				checked={row.getIsSelected()}
+				onCheckedChange={(value) => row.toggleSelected(!!value)}
+				aria-label="Chọn hàng"
+				className="ms-3"
+			/>
+		),
+		enableSorting: false,
+		enableHiding: false,
+	},
+	{
+		accessorKey: "displayId",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Định danh" />
+		),
+		cell: ({ row }) => (
+			<div className="min-w-28 ps-3 font-medium">{row.original.displayId}</div>
+		),
+		enableHiding: false,
+	},
+	{
+		accessorKey: "rowType",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Loại" />
+		),
+		cell: ({ row }) => {
+			const isMatching = row.original.rowType === "matching";
+			return (
+				<Badge
+					variant="outline"
+					className={`gap-1.5 ${
+						isMatching
+							? "border-orange-500 text-orange-500"
+							: "border-blue-500 text-blue-500"
+					}`}
+				>
+					{isMatching ? "Nối" : "Thường"}
+				</Badge>
+			);
+		},
+		filterFn: (row, id, value) => {
+			const rowType = row.getValue(id) as string | undefined;
+			if (!Array.isArray(value) || value.length === 0) return true;
+			return value.includes(rowType);
+		},
+	},
+	{
+		accessorKey: "title",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Tiêu đề" />
+		),
+		cell: ({ row }) => (
+			<div className="space-y-1">
+				<div
+					className="max-w-72 truncate font-medium"
+					title={row.original.title}
+				>
+					{row.original.title}
+				</div>
+				{row.original.description ? (
+					<div
+						className="max-w-80 truncate text-xs text-muted-foreground"
+						title={row.original.description}
+					>
+						{row.original.description}
+					</div>
+				) : null}
+			</div>
+		),
+	},
+	{
+		accessorKey: "status",
+		header: ({ column }) => (
+			<DataTableColumnHeader column={column} title="Trạng thái" />
+		),
+		cell: ({ row }) => {
+			const status = row.original.status;
+			if (!status) {
+				return <span className="text-sm text-muted-foreground">N/A</span>;
+			}
+			return (
+				<Badge variant={getStatusVariant(status)}>
+					{getStatusLabel(status)}
+				</Badge>
+			);
+		},
+		filterFn: (row, id, value) => {
+			const status = row.getValue(id) as string | undefined;
+			if (!Array.isArray(value) || value.length === 0) return true;
+			return status ? value.includes(status) : false;
+		},
+	},
+	// {
+	// 	accessorKey: "categoryOrTopic",
+	// 	header: ({ column }) => (
+	// 		<DataTableColumnHeader column={column} title="Phân loại" />
+	// 	),
+	// 	cell: ({ row }) => (
+	// 		<span className="text-sm text-muted-foreground">
+	// 			{row.original.categoryOrTopic}
+	// 		</span>
+	// 	),
+	// },
+	// {
+	// 	accessorKey: "difficultyOrGrade",
+	// 	header: ({ column }) => (
+	// 		<DataTableColumnHeader column={column} title="Thông tin" />
+	// 	),
+	// 	cell: ({ row }) => (
+	// 		<span className="text-sm text-muted-foreground">
+	// 			{row.original.difficultyOrGrade}
+	// 		</span>
+	// 	),
+	// },
+	// {
+	// 	accessorKey: "attempts",
+	// 	header: ({ column }) => (
+	// 		<DataTableColumnHeader column={column} title="Theo dõi" />
+	// 	),
+	// 	cell: ({ row }) => (
+	// 		<div className="space-y-1 text-sm">
+	// 			<div className="font-medium text-foreground">
+	// 				{row.original.attempts ?? 0} lượt chơi
+	// 			</div>
+	// 			<div className="text-xs text-muted-foreground">
+	// 				Hoàn thành {row.original.completionRate ?? 0}% •{" "}
+	// 				{row.original.scoringModel === "HIGH_SCORE"
+	// 					? `Điểm TB ${row.original.averageRawScore ?? 0}`
+	// 					: row.original.scoringModel === "NO_SCORE"
+	// 						? `${row.original.isScored === false ? "Không điểm" : "Đã theo dõi"}`
+	// 						: `Độ chính xác ${row.original.averageAccuracy ?? 0}%`}
+	// 			</div>
+	// 			<div className="text-xs text-muted-foreground">
+	// 				{row.original.scoringModel === "FINITE_SCORE"
+	// 					? `Hết giờ ${row.original.timeoutRate ?? 0}%`
+	// 					: (row.original.scoringModel ?? "FINITE_SCORE")}
+	// 			</div>
+	// 		</div>
+	// 	),
+	// },
+	{
+		id: "actions",
+		header: () => (
+			<div className="w-44 text-right text-xs font-medium uppercase text-muted-foreground">
+				Thao tác
+			</div>
+		),
+		cell: ({ row }) => {
+			const game = row.original;
+			const isMatching = game.rowType === "matching";
+
+			return (
+				<div className="space-y-2 text-right">
+					<div className="text-xs text-muted-foreground">
+						{isMatching
+							? `${game.difficultyOrGrade} · ${game.categoryOrTopic}`
+							: `${game.views ?? 0} lượt xem · ${game.likes ?? 0} lượt thích`}
+					</div>
+					<div className="flex justify-end gap-2">
+						{isMatching ? (
+							<Button asChild size="sm" variant="outline">
+								<Link
+									to="/apps/games/matching"
+									search={{
+										gameId: game.matchingGameId,
+										grade: game.matchingGrade,
+										topic: game.matchingTopicCode,
+									}}
+								>
+									Xem chi tiết
+								</Link>
+							</Button>
+						) : (
+							<Button asChild size="sm" variant="outline">
+								<Link
+									to="/apps/games/$id"
+									params={{ id: String(game.standardId) }}
+								>
+									Xem chi tiết
+								</Link>
+							</Button>
+						)}
+						<Button
+							size="icon"
+							variant="outline"
+							className="text-destructive hover:bg-destructive/10"
+							disabled={
+								isMatching
+									? isDeletingMatching
+									: isDeletingStandard || game.status === "ARCHIVED"
+							}
+							onClick={() => {
+								if (isMatching) {
+									if (game.matchingGameId !== undefined) {
+										onDeleteMatching(game.matchingGameId);
+									}
+									return;
+								}
+								if (game.standardId !== undefined) {
+									onDeleteStandard(game.standardId);
+								}
+							}}
+						>
+							<Trash2 className="h-4 w-4" />
+						</Button>
+					</div>
+				</div>
+			);
+		},
+		enableSorting: false,
+		enableHiding: false,
+	},
+];

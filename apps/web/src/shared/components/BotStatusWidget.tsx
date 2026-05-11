@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { Bot, Send, X, Minus, MessageCircle, ChevronRight } from "lucide-react";
 import { useSelector } from "react-redux";
+import { useNavigate } from "@tanstack/react-router";
 import { useAppDispatch } from "@/shared/redux/store";
 import {
 	addMessageAction,
@@ -31,7 +32,7 @@ function MiniChatPanel({
 	const messages = useSelector(selectMessages);
 
 	const createConversation = useCreateConversation();
-	const sendMessage = useSendMessage(currentConversation?.id || "");
+	const sendMessage = useSendMessage();
 
 	const isLoading = sendMessage.isPending || createConversation.isPending;
 
@@ -48,7 +49,6 @@ function MiniChatPanel({
 	};
 
 	const displayMessages = messages.length === 0 ? [welcomeMessage] : messages;
-
 	const quickQuestions = ["HTML là gì?", "CSS Flexbox?", "JavaScript cơ bản"];
 
 	useEffect(() => {
@@ -87,7 +87,10 @@ function MiniChatPanel({
 
 		if (conversationId) {
 			try {
-				await sendMessage.mutateAsync({ question: text });
+				await sendMessage.mutateAsync({
+					conversationId,
+					request: { question: text },
+				});
 			} catch (err) {
 				console.error("Failed to send message:", err);
 			}
@@ -111,7 +114,7 @@ function MiniChatPanel({
 			style={{
 				position: "fixed",
 				bottom: "80px",
-				left: "16px",
+				right: "16px",
 				width: "340px",
 				maxHeight: "500px",
 				background: "white",
@@ -448,21 +451,28 @@ export default function BotStatusWidget({
 	onNavigateToFull,
 }: BotStatusWidgetProps) {
 	const dispatch = useAppDispatch();
+	const navigate = useNavigate();
 	const messages = useSelector(selectMessages);
+	const currentConversation = useSelector(selectCurrentConversation);
 
 	const [panelOpen, setPanelOpen] = useState(false);
 	const [minimized, setMinimized] = useState(false);
+	const [widgetClosed, setWidgetClosed] = useState(false);
 	const [unreadCount, setUnreadCount] = useState(1);
-	const [interacted, setInteracted] = useState(false);
 	const [showTooltip, setShowTooltip] = useState(false);
 
-	// Tooltip tự hiện sau 2s nếu user chưa click
+	// Khôi phục trạng thái ẩn widget từ localStorage
 	useEffect(() => {
-		const t = setTimeout(() => {
-			if (!interacted) setShowTooltip(true);
-		}, 2000);
-		return () => clearTimeout(t);
-	}, [interacted]);
+		if (typeof window === "undefined") return;
+		try {
+			const stored = window.localStorage.getItem("botWidgetClosed");
+			if (stored === "1") {
+				setWidgetClosed(true);
+			}
+		} catch {
+			// ignore
+		}
+	}, []);
 
 	// Badge tăng khi bot reply trong khi panel đóng/minimized
 	const prevMsgCount = useRef(messages.length);
@@ -476,8 +486,19 @@ export default function BotStatusWidget({
 		prevMsgCount.current = messages.length;
 	}, [messages, panelOpen, minimized]);
 
+	if (widgetClosed) {
+		return null;
+	}
+
+	const handleMouseEnter = () => {
+		if (!panelOpen) setShowTooltip(true);
+	};
+
+	const handleMouseLeave = () => {
+		setShowTooltip(false);
+	};
+
 	const handleWidgetClick = () => {
-		setInteracted(true);
 		setShowTooltip(false);
 		setUnreadCount(0);
 		if (minimized) {
@@ -497,7 +518,28 @@ export default function BotStatusWidget({
 	const handleNavigateToFull = () => {
 		setPanelOpen(false);
 		onNavigateToFull();
-		// Không clear để ChatAIContent kế thừa conversation đang chat
+		if (currentConversation?.id) {
+			navigate({
+				to: "/chat-ai/$conversationId",
+				params: { conversationId: currentConversation.id },
+			});
+		} else {
+			navigate({ to: "/chat-ai" });
+		}
+	};
+
+	const handleHideWidget = () => {
+		setPanelOpen(false);
+		setMinimized(false);
+		setShowTooltip(false);
+		setWidgetClosed(true);
+		if (typeof window !== "undefined") {
+			try {
+				window.localStorage.setItem("botWidgetClosed", "1");
+			} catch {
+				// ignore
+			}
+		}
 	};
 
 	return (
@@ -534,18 +576,18 @@ export default function BotStatusWidget({
           animation-play-state:paused;
         }
         .bot-widget-btn:active { transform:scale(0.94) !important; }
-        .bot-inner {
+		.bot-inner {
           display:flex; align-items:center; gap:12px;
-          padding:10px 16px 10px 10px; border-radius:18px;
+          padding:10px 10px 10px 10px; border-radius:18px;
           border:1px solid rgba(19,127,236,0.12); background:white;
         }
-        .bot-icon-wrap {
-          width:46px; height:46px;
-          background:linear-gradient(135deg,#dbeafe,#bfdbfe);
-          border-radius:13px;
-          display:flex; align-items:center; justify-content:center;
-          flex-shrink:0; position:relative; transition:background 0.2s;
-        }
+		.bot-icon-wrap {
+		  width:46px; height:46px;
+		  background:linear-gradient(135deg,#dbeafe,#bfdbfe);
+		  border-radius:13px;
+		  display:flex; align-items:center; justify-content:center;
+		  flex-shrink:0; position:relative; transition:background 0.2s;
+		}
         .bot-widget-btn:hover .bot-icon-wrap {
           background:linear-gradient(135deg,#137fec,#0a5cbf);
         }
@@ -581,12 +623,12 @@ export default function BotStatusWidget({
           transform:translateY(-50%);
           border:6px solid transparent; border-right-color:#1e293b;
         }
-        /* Mobile: chỉ hiện icon */
-        @media (max-width:480px) {
-          .bot-text-block { display:none !important; }
-          .bot-inner { padding:8px; border-radius:14px; }
-          .bot-icon-wrap { width:40px; height:40px; border-radius:11px; }
-        }
+		/* Mobile: chỉ hiện icon */
+		@media (max-width:480px) {
+		  .bot-text-block { display:none !important; }
+		  .bot-inner { padding:8px; border-radius:14px; }
+		  .bot-icon-wrap { width:40px; height:40px; border-radius:11px; }
+		}
       `}</style>
 
 			{/* Mini Chat Panel */}
@@ -599,8 +641,13 @@ export default function BotStatusWidget({
 			)}
 
 			{/* Widget Button */}
-			<div style={{ position: "fixed", bottom: 16, left: 16, zIndex: 9998 }}>
-				<button className="bot-widget-btn" onClick={handleWidgetClick}>
+			<div style={{ position: "fixed", bottom: 30, right: 16, zIndex: 9998 }}>
+				<button
+					className="bot-widget-btn"
+					onClick={handleWidgetClick}
+					onMouseEnter={handleMouseEnter}
+					onMouseLeave={handleMouseLeave}
+				>
 					<div className="bot-inner">
 						<div className="bot-icon-wrap">
 							{!panelOpen && <div className="pulse-ring" />}
@@ -623,51 +670,38 @@ export default function BotStatusWidget({
 								<div className="notif-badge">{unreadCount}</div>
 							)}
 						</div>
-
-						<div className="bot-text-block">
-							<p
-								style={{
-									margin: "0 0 2px",
-									fontSize: 10,
-									textTransform: "uppercase",
-									letterSpacing: "0.06em",
-									fontWeight: 700,
-									color: "#94a3b8",
-									fontFamily: "'DM Sans',system-ui,sans-serif",
-								}}
-							>
-								Trạng thái Bot
-							</p>
-							<p
-								style={{
-									margin: 0,
-									fontSize: 14,
-									fontWeight: 700,
-									color: "#1e293b",
-									fontFamily: "'DM Sans',system-ui,sans-serif",
-									display: "flex",
-									alignItems: "center",
-								}}
-							>
-								<span
-									style={{
-										display: "inline-block",
-										width: 7,
-										height: 7,
-										background: "#22c55e",
-										borderRadius: "50%",
-										marginRight: 5,
-									}}
-								/>
-								{panelOpen && !minimized ? "Đang chat..." : "Sẵn sàng hỗ trợ!"}
-							</p>
-						</div>
 					</div>
 
 					{showTooltip && !panelOpen && (
 						<div className="tooltip-bubble">💡 Hỏi mình về Tin học nhé!</div>
 					)}
 				</button>
+
+				{/* Close widget button (persists closed state) */}
+				{(!panelOpen || minimized) && (
+					<button
+						onClick={handleHideWidget}
+						style={{
+							position: "absolute",
+							top: -10,
+							right: -10,
+							width: 22,
+							height: 22,
+							borderRadius: "999px",
+							border: "none",
+							background: "#e2e8f0",
+							boxShadow: "0 2px 6px rgba(15,23,42,0.25)",
+							cursor: "pointer",
+							display: "flex",
+							alignItems: "center",
+							justifyContent: "center",
+							zIndex: 1,
+						}}
+						aria-label="Ẩn trợ lý Tin học"
+					>
+						<X size={12} color="#0f172a" />
+					</button>
+				)}
 
 				{/* Minimized label */}
 				{minimized && (

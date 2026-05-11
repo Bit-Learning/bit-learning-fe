@@ -10,7 +10,7 @@ import {
 import { cn } from "@workspace/ui/lib/utils";
 import { toast } from "@/shared/components/Sonner";
 import { Bell } from "lucide-react";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useNavigate } from "@tanstack/react-router";
 
 export function NotificationBell() {
@@ -121,20 +121,37 @@ export function NotificationBell() {
 		}
 	};
 
+	const containerRef = useRef<HTMLDivElement>(null);
+
+	// Close dropdown when clicking outside
+	const handleClickOutside = useCallback((e: MouseEvent) => {
+		if (
+			containerRef.current &&
+			!containerRef.current.contains(e.target as Node)
+		) {
+			setIsOpen(false);
+		}
+	}, []);
+
+	useEffect(() => {
+		if (isOpen) {
+			document.addEventListener("mousedown", handleClickOutside);
+		}
+		return () => {
+			document.removeEventListener("mousedown", handleClickOutside);
+		};
+	}, [isOpen, handleClickOutside]);
+
 	return (
-		<div className="relative">
+		<div className="relative" ref={containerRef}>
 			<button
 				type="button"
 				onClick={() => setIsOpen(!isOpen)}
-				className={cn(
-					"relative rounded-xl p-2 transition-all duration-200",
-					"hover:bg-white/50 dark:hover:bg-white/10 backdrop-blur-sm",
-					isOpen && "bg-white/50 dark:bg-white/10",
-				)}
+				className="relative rounded-xl p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer"
 			>
-				<Bell className="h-5 w-5 text-gray-600 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all duration-200 group cursor-pointer" />
+				<Bell className="h-7 w-7 text-gray-600 dark:text-gray-300 group-hover:text-primary dark:group-hover:text-blue-400 transition-colors" />
 				{localUnreadCount > 0 && (
-					<span className="absolute -right-1 -top-1 flex h-5 w-5 items-center justify-center rounded-full bg-red-500 text-xs font-medium text-white">
+					<span className="absolute -right-1 -top-1 flex h-6 w-6 items-center justify-center rounded-full bg-red-500 text-xs font-inter text-white">
 						{localUnreadCount > 99 ? "99+" : localUnreadCount}
 					</span>
 				)}
@@ -142,14 +159,8 @@ export function NotificationBell() {
 
 			{isOpen && (
 				<>
-					{/* Backdrop */}
-					<div
-						className="fixed inset-0 z-40"
-						onClick={() => setIsOpen(false)}
-					/>
-
 					{/* Dropdown */}
-					<div className="absolute right-0 top-full mt-2 z-50 w-96 max-h-96 overflow-hidden rounded-2xl border border-white/40 dark:border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
+					<div className="absolute right-0 top-full mt-2 z-50 w-96 flex flex-col rounded-2xl border border-white/40 dark:border-white/20 bg-white/95 dark:bg-gray-800/95 backdrop-blur-2xl shadow-[0_8px_32px_0_rgba(0,0,0,0.12)] dark:shadow-[0_8px_32px_0_rgba(0,0,0,0.5)]">
 						{/* Header */}
 						<div className="flex items-center justify-between border-b border-gray-200/50 dark:border-gray-700/50 p-4">
 							<h3 className="font-semibold text-gray-900 dark:text-gray-100">
@@ -159,7 +170,7 @@ export function NotificationBell() {
 								<button
 									onClick={handleMarkAllRead}
 									disabled={markAllAsReadMutation.isPending}
-									className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50"
+									className="text-sm text-primary hover:text-blue-600 dark:text-blue-400 dark:hover:text-blue-300 disabled:opacity-50 hover:cursor-pointer"
 								>
 									Đánh dấu đã đọc
 								</button>
@@ -247,7 +258,7 @@ export function NotificationBell() {
 													<p className="text-xs text-gray-400 dark:text-gray-500">
 														{new Date(notif.createdAt).toLocaleString("vi-VN")}
 													</p>
-													<span
+													{/* <span
 														className={cn(
 															"text-xs px-2 py-0.5 rounded-full font-medium",
 															notif.type === "INTERACTION"
@@ -260,7 +271,7 @@ export function NotificationBell() {
 														)}
 													>
 														{notif.type}
-													</span>
+													</span> */}
 												</div>
 											</div>
 										</div>

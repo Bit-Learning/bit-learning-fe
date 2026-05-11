@@ -1,533 +1,514 @@
-import React, { useState, useEffect } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import React, { useState, useEffect, useMemo } from "react";
+import { useForm, useFieldArray, type Resolver } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { z } from "zod";
-import {
-  Save,
-  Plus,
-  Trash2,
-  Clock,
-  HardDrive,
-  Loader2,
-  Info,
-  FileText,
-  Tag,
-  Eye,
-  CheckCircle2,
-  Code2,
-  GripVertical,
-  ArrowLeft,
-} from "lucide-react";
+import * as z from "zod";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { Textarea } from "@workspace/ui/components/Textarea";
-import { Badge } from "@workspace/ui/components/Badge";
-import { Card, CardContent } from "@workspace/ui/components/Card";
 import { Label } from "@workspace/ui/components/label";
+import { ArrowLeft, ChevronDown, Plus, Trash2 } from "lucide-react";
+import { useNavigate } from "@tanstack/react-router";
 import { cn } from "@workspace/ui/lib/utils";
-import { Difficulty, Language } from "../types/coding.type";
+import { Difficulty, ParamType, ParamTypeInfo } from "../types/coding.type";
 import {
   useCreateProblem,
-  useUpdateProblem,
-  useCreateTestCase,
-  useCreateCodeTemplate,
+  useGenerateCodeTemplates,
+  useBulkCreateTestCases,
   useProblemDetail,
+  useUpdateProblem,
 } from "../queries/useCoding";
-import { useNavigate, useParams } from "@tanstack/react-router";
+import { useGetAllTags } from "../queries/useTag";
+import TagMultiSelect from "../components/TagMultiSelect";
+import TestCaseInput, {
+  defaultTestCaseInputState,
+  resolveTestCases,
+  type TestCaseInputState,
+} from "../components/TestCaseInput";
+import { removeVietnameseTones } from "@/shared/lib/string-utils";
 
-const formSchema = z.object({
-  title: z.string().min(3, "Tiêu đề ít nhất 3 ký tự").max(200),
+const problemSchema = z.object({
+  title: z.string().min(1, "Tiêu đề không được để trống"),
   slug: z
     .string()
-    .min(3)
-    .max(100)
-    .regex(/^[a-z0-9-]+$/, "Chỉ chứa chữ thường, số và dấu -"),
-  description: z.string().min(50, "Mô tả ít nhất 50 ký tự"),
+    .min(1, "Slug không được để trống")
+    .regex(/^[a-z0-9-]+$/, "Slug chỉ chứa chữ thường, số và dấu gạch ngang"),
+  description: z.string().min(1, "Mô tả không được để trống"),
+  constraints: z.string().optional(),
   difficulty: z.nativeEnum(Difficulty),
-  timeLimitMs: z.number().min(100).max(30000),
-  memoryLimitMb: z.number().min(16).max(1024),
-  isPublic: z.boolean(),
-  tags: z.array(z.string()),
-  codeTemplates: z.array(
-    z.object({
-      language: z.nativeEnum(Language),
-      templateCode: z.string().min(1),
-    }),
-  ),
+  timeLimitMs: z.number().min(100, "Thời gian tối thiểu 100ms").max(30000, "Thời gian tối đa 30000ms"),
+  memoryLimitMb: z.number().min(8, "Bộ nhớ tối thiểu 8MB").max(512, "Bộ nhớ tối đa 512MB"),
+  classLevel: z.number().min(6, "Lớp tối thiểu là 6").max(12, "Lớp tối đa là 12"),
+  isPublic: z.boolean().default(false),
+  tags: z.array(z.string()).min(1, "Vui lòng chọn ít nhất 1 thẻ"),
 });
 
-type FormValues = z.infer<typeof formSchema>;
-
-const defaultTemplates: Record<Language, string> = {
-  [Language.CPP]: `#include <bits/stdc++.h>
-using namespace std;
-
-int main() {
-    ios_base::sync_with_stdio(false);
-    cin.tie(NULL);
-
-    // Your code here
-
-    return 0;
-}`,
-  [Language.JAVA]: `import java.util.*;
-
-public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        // Your code here
-    }
-}`,
-  [Language.PYTHON]: `# Your code here
-`,
-  [Language.JAVASCRIPT]: `const readline = require('readline');
-const rl = readline.createInterface({
-    input: process.stdin,
-    output: process.stdout
+const generateTemplateSchema = z.object({
+  functionName: z
+    .string()
+    .min(1, "Tên hàm không được để trống")
+    .regex(/^[a-zA-Z_][a-zA-Z0-9_]*$/, "Tên hàm không hợp lệ"),
+  returnType: z.nativeEnum(ParamType),
+  parameters: z
+    .array(
+      z.object({
+        name: z.string().min(1, "Tên tham số không được để trống"),
+        type: z.nativeEnum(ParamType),
+      }),
+    )
+    .min(1, "Cần ít nhất 1 tham số"),
 });
 
-// Your code here
-`,
-};
+const editSchema = problemSchema;
 
-const languageOptions = [
-  { value: Language.CPP, label: "C++", icon: "⚡" },
-  { value: Language.JAVA, label: "Java", icon: "☕" },
-  { value: Language.PYTHON, label: "Python", icon: "🐍" },
-  { value: Language.JAVASCRIPT, label: "JavaScript", icon: "🟨" },
-];
+const combinedSchema = problemSchema.merge(generateTemplateSchema);
 
-const CreateProblemContent: React.FC = () => {
+type ProblemFormData = z.infer<typeof problemSchema>;
+type GenerateTemplateFormData = z.infer<typeof generateTemplateSchema>;
+type CombinedFormData = z.infer<typeof combinedSchema>;
+
+const SectionCard: React.FC<{
+  title: string;
+  subtitle: string;
+  children: React.ReactNode;
+}> = ({ title, subtitle, children }) => (
+  <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+    <div className="flex items-start gap-4 mb-6">
+      <div>
+        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{title}</h2>
+        <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">{subtitle}</p>
+      </div>
+    </div>
+    {children}
+  </div>
+);
+
+const FieldError: React.FC<{ message?: string }> = ({ message }) =>
+  message ? <p className="text-sm text-red-500 mt-1.5">{message}</p> : null;
+
+const inputCls =
+  "h-11 text-sm w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all placeholder:text-slate-400";
+
+const selectCls =
+  "h-11 text-sm block w-full rounded-lg border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 px-3.5 py-2.5 text-slate-900 dark:text-slate-100 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 outline-none transition-all appearance-none cursor-pointer";
+
+interface CreateProblemContentProps {
+  mode?: "create" | "edit";
+  problemId?: string;
+}
+
+const CreateProblemContent: React.FC<CreateProblemContentProps> = ({ mode = "create", problemId }) => {
+  const [tcState, setTcState] = useState<TestCaseInputState>(defaultTestCaseInputState);
+  const [tcError, setTcError] = useState<string | null>(null);
+  const [jsonError, setJsonError] = useState<string | null>(null);
+
   const navigate = useNavigate();
-  const params = useParams({ strict: false });
-  const problemId = params?.id;
-  const isEditMode = !!problemId;
+  const isEditMode = mode === "edit" && !!problemId;
 
-  const [currentTag, setCurrentTag] = useState("");
+  const createProblemMutation = useCreateProblem();
+  const updateProblemMutation = useUpdateProblem();
+  const generateTemplatesMutation = useGenerateCodeTemplates();
+  const bulkCreateTestCasesMutation = useBulkCreateTestCases();
 
-  const createProblem = useCreateProblem();
-  const updateProblem = useUpdateProblem();
-  const createTestCase = useCreateTestCase();
-  const createCodeTemplate = useCreateCodeTemplate();
-
-  const { data: existingProblem, isLoading: isLoadingProblem } = useProblemDetail(problemId || "", Language.PYTHON, {
+  const { data: allTags = [] } = useGetAllTags();
+  const { data: problemData, isLoading: isProblemLoading } = useProblemDetail(problemId ?? "", undefined, {
     enabled: isEditMode,
   });
 
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const resolver = useMemo(
+    () => zodResolver(isEditMode ? editSchema : combinedSchema) as unknown as Resolver<CombinedFormData>,
+    [],
+  );
+
+  const form = useForm<CombinedFormData>({
+    resolver,
     defaultValues: {
       title: "",
       slug: "",
       description: "",
+      constraints: "",
       difficulty: Difficulty.EASY,
-      timeLimitMs: 1000,
+      timeLimitMs: 2000,
       memoryLimitMb: 256,
+      classLevel: 10,
       isPublic: false,
       tags: [],
-      codeTemplates: [{ language: Language.PYTHON, templateCode: defaultTemplates[Language.PYTHON] }],
+      functionName: "",
+      returnType: ParamType.INT,
+      parameters: [{ name: "", type: ParamType.INT }],
     },
   });
 
-  const {
-    fields: templateFields,
-    append: appendTemplate,
-    remove: removeTemplate,
-  } = useFieldArray({
-    control: form.control,
-    name: "codeTemplates",
-  });
+  const { fields, append, remove } = useFieldArray({ control: form.control, name: "parameters" });
 
   useEffect(() => {
-    if (isEditMode && existingProblem) {
-      form.reset({
-        title: existingProblem.title,
-        slug: existingProblem.slug,
-        description: existingProblem.description,
-        difficulty: existingProblem.difficulty,
-        timeLimitMs: existingProblem.timeLimitMs,
-        memoryLimitMb: existingProblem.memoryLimitMb,
-        isPublic: existingProblem.isPublic,
-        tags: existingProblem.tags || [],
-        codeTemplates: [{ language: Language.PYTHON, templateCode: existingProblem.codeTemplate }],
-      });
-    }
-  }, [existingProblem, isEditMode, form]);
-
-  const watchTitle = form.watch("title");
-  const watchTags = form.watch("tags");
-
-  const generateSlug = () => {
-    const slug = watchTitle
-      .toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim();
-    form.setValue("slug", slug);
-  };
-
-  const addTag = () => {
-    if (currentTag && !watchTags.includes(currentTag)) {
-      form.setValue("tags", [...watchTags, currentTag]);
-      setCurrentTag("");
-    }
-  };
-
-  const removeTag = (tag: string) => {
+    if (!isEditMode || !problemData || isProblemLoading) return;
+    form.setValue("title", problemData.title);
+    form.setValue("slug", problemData.slug);
+    form.setValue("description", problemData.description);
+    form.setValue("difficulty", problemData.difficulty);
+    form.setValue("timeLimitMs", problemData.timeLimitMs);
+    form.setValue("memoryLimitMb", problemData.memoryLimitMb);
+    form.setValue("classLevel", problemData.classLevel ?? 10);
+    form.setValue("isPublic", problemData.isPublic);
+    form.setValue("constraints", problemData.constraints ?? "");
     form.setValue(
       "tags",
-      watchTags.filter((t) => t !== tag),
+      (problemData.tags ?? []).map((t: any) => {
+        const name = typeof t === "string" ? t : t.name;
+        return allTags.find((tag) => tag.name === name)?.id ?? name;
+      }),
     );
-  };
+  }, [isEditMode, problemData, isProblemLoading, form, allTags]);
 
-  const addLanguageTemplate = (lang: Language) => {
-    const exists = templateFields.some((f) => f.language === lang);
-    if (!exists) {
-      appendTemplate({ language: lang, templateCode: defaultTemplates[lang] });
+  const handleTitleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const title = e.target.value;
+    form.setValue("title", title);
+
+    if (!isEditMode) {
+      const noAccent = removeVietnameseTones(title);
+
+      form.setValue(
+        "slug",
+        noAccent
+          .toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, "")
+          .replace(/\s+/g, "-")
+          .replace(/-+/g, "-")
+          .trim(),
+      );
     }
   };
 
-  const onSubmit = async (values: FormValues) => {
+  const onSubmit = async (data: CombinedFormData) => {
+    setTcError(null);
+
+    const problemPayload: ProblemFormData = {
+      title: data.title,
+      slug: data.slug,
+      description: data.description,
+      constraints: data.constraints || undefined,
+      difficulty: data.difficulty,
+      timeLimitMs: data.timeLimitMs,
+      memoryLimitMb: data.memoryLimitMb,
+      classLevel: data.classLevel,
+      isPublic: data.isPublic,
+      tags: data.tags,
+    };
+
+    const templatePayload: GenerateTemplateFormData = {
+      functionName: data.functionName,
+      returnType: data.returnType,
+      parameters: data.parameters,
+    };
+
+    if (isEditMode) {
+      try {
+        await updateProblemMutation.mutateAsync({ problemId: problemId!, data: problemPayload });
+        navigate({ to: "/mentor/problem" });
+      } catch (err) {
+        console.error(err);
+      }
+      return;
+    }
+
+    const { testCases, error } = resolveTestCases(tcState);
+    if (error) {
+      setTcError(error);
+      return;
+    }
+
     try {
-      let finalProblemId = problemId;
+      const response = await createProblemMutation.mutateAsync(problemPayload);
+      const newProblemId = response.data.data?.id;
+      if (!newProblemId) throw new Error("Không thể lấy ID bài toán");
 
-      if (isEditMode) {
-        await updateProblem.mutateAsync({
-          problemId: problemId!,
-          data: {
-            title: values.title,
-            slug: values.slug,
-            description: values.description,
-            difficulty: values.difficulty,
-            timeLimitMs: values.timeLimitMs,
-            memoryLimitMb: values.memoryLimitMb,
-            isPublic: values.isPublic,
-            tags: values.tags,
-          },
-        });
-      } else {
-        const res = await createProblem.mutateAsync({
-          title: values.title,
-          slug: values.slug,
-          description: values.description,
-          difficulty: values.difficulty,
-          timeLimitMs: values.timeLimitMs,
-          memoryLimitMb: values.memoryLimitMb,
-          isPublic: values.isPublic,
-          tags: values.tags,
-        });
-
-        if (!res.data?.data?.id) {
-          throw new Error("Failed to create problem: missing problem ID");
-        }
-
-        finalProblemId = res.data.data.id;
-      }
-
-      if (finalProblemId) {
-        await Promise.all(
-          values.codeTemplates.map((ct) => createCodeTemplate.mutateAsync({ problemId: finalProblemId!, data: ct })),
-        );
-      }
-
+      await generateTemplatesMutation.mutateAsync({ problemId: newProblemId, data: templatePayload });
+      await bulkCreateTestCasesMutation.mutateAsync({
+        problemId: newProblemId,
+        data: { testCases, replaceExisting: false },
+      });
       navigate({ to: "/mentor/problem" });
-    } catch (error) {
-      console.error(error);
+    } catch (err) {
+      console.error(err);
     }
   };
 
-  const isSubmitting =
-    createProblem.isPending || updateProblem.isPending || createTestCase.isPending || createCodeTemplate.isPending;
+  const isPending =
+    createProblemMutation.isPending ||
+    updateProblemMutation.isPending ||
+    generateTemplatesMutation.isPending ||
+    bulkCreateTestCasesMutation.isPending;
 
-  if (isEditMode && isLoadingProblem) {
-    return <div className="p-8">Đang tải...</div>;
+  if (isEditMode && isProblemLoading) {
+    return (
+      <div className="min-h-screen bg-white dark:bg-slate-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4" />
+          <p className="text-blue-600 dark:text-slate-200 font-medium">Đang tải dữ liệu...</p>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-slate-950 p-8">
-      <div className=" max-w-6xl mx-auto px-8">
+    <div className="min-h-screen bg-slate-50 dark:bg-slate-950">
+      <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Button
           variant="outline"
           size="lg"
-          className="gap-2 border-gray-300 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
-          onClick={() => navigate({ to: "/mentor/problem" })}
+          className="mb-3 gap-2 border-gray-400 bg-white shadow-sm transition-all hover:border-blue-400 hover:bg-blue-50 hover:text-blue-600 hover:shadow-md"
+          onClick={() => navigate({ to: isEditMode ? `/mentor/problem/${problemId}/` : "/mentor/problem" })}
         >
           <ArrowLeft className="mr-2 h-4 w-4" />
           Quay lại
         </Button>
-        <h1 className="mt-4 text-3xl font-bold">{isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}</h1>
-        <p className="mt-2 text-gray-600">{isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}</p>
-      </div>
-
-      <div className="max-w-6xl mx-auto px-8 py-10 space-y-8">
-        <Card className="overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-            <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-              <Info className="w-5 h-5 text-blue-600" />
-              Thông tin cơ bản
-            </h2>
+        <div className="flex items-center gap-4 mb-4">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-900 dark:text-white">
+              {isEditMode ? "Chỉnh sửa bài tập" : "Tạo bài tập mới"}
+            </h1>
+            <p className="text-sm text-slate-500 dark:text-slate-400 mt-0.5">
+              {isEditMode ? "Cập nhật thông tin và cấu hình bài tập" : "Điền thông tin để tạo thử thách lập trình mới"}
+            </p>
           </div>
-          <CardContent className="p-6 space-y-6">
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Tiêu đề bài tập</Label>
-                <Input {...form.register("title")} placeholder="VD: Two Sum" className="bg-white dark:bg-slate-800" />
-                {form.formState.errors.title && (
-                  <p className="text-sm text-red-500">{form.formState.errors.title.message}</p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Slug (URL)</Label>
-                  <Button type="button" variant="ghost" size="sm" onClick={generateSlug} className="text-xs h-6">
-                    Tạo tự động
-                  </Button>
+        </div>
+
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+          <SectionCard title="Thông tin cơ bản" subtitle="Tiêu đề, mô tả và các thông số của bài tập">
+            <div className="space-y-5">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    Tiêu đề <span className="text-red-500">*</span>
+                  </Label>
+                  <input
+                    {...form.register("title")}
+                    onChange={handleTitleChange}
+                    placeholder="Nhập tên bài tập..."
+                    className={inputCls}
+                  />
+                  <FieldError message={form.formState.errors.title?.message} />
                 </div>
-                <Input {...form.register("slug")} placeholder="two-sum" className="bg-slate-50 dark:bg-slate-800/50" />
-                {form.formState.errors.slug && (
-                  <p className="text-sm text-red-500">{form.formState.errors.slug.message}</p>
-                )}
+                <div>
+                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    Slug <span className="text-red-500">*</span>
+                  </Label>
+                  <input {...form.register("slug")} placeholder="" className={cn(inputCls, "font-mono text-xs")} />
+                  <FieldError message={form.formState.errors.slug?.message} />
+                </div>
               </div>
-            </div>
 
-            <div className="space-y-1.5">
-              <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Mức độ</Label>
-              <div className="flex gap-3">
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    {...form.register("difficulty")}
-                    type="radio"
-                    value={Difficulty.EASY}
-                    className="hidden peer"
-                  />
-                  <div className="text-center py-2.5 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-400 peer-checked:border-emerald-500 peer-checked:bg-emerald-50 peer-checked:text-emerald-600 dark:peer-checked:bg-emerald-500/10 dark:peer-checked:text-emerald-400 transition-all">
-                    Dễ
-                  </div>
-                </label>
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    {...form.register("difficulty")}
-                    type="radio"
-                    value={Difficulty.MEDIUM}
-                    className="hidden peer"
-                  />
-                  <div className="text-center py-2.5 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-400 peer-checked:border-amber-500 peer-checked:bg-amber-50 peer-checked:text-amber-600 dark:peer-checked:bg-amber-500/10 dark:peer-checked:text-amber-400 transition-all">
-                    Trung bình
-                  </div>
-                </label>
-                <label className="flex-1 cursor-pointer">
-                  <input
-                    {...form.register("difficulty")}
-                    type="radio"
-                    value={Difficulty.HARD}
-                    className="hidden peer"
-                  />
-                  <div className="text-center py-2.5 border-2 border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold text-slate-400 peer-checked:border-red-500 peer-checked:bg-red-50 peer-checked:text-red-600 dark:peer-checked:bg-red-500/10 dark:peer-checked:text-red-400 transition-all">
-                    Khó
-                  </div>
-                </label>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-1.5">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">
-                  Giới hạn thời gian (ms)
+              <div>
+                <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                  Mô tả bài toán <span className="text-red-500">*</span>
                 </Label>
-                <div className="relative">
-                  <Clock className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
+                <Textarea
+                  {...form.register("description")}
+                  placeholder="Mô tả đề bài, ví dụ, yêu cầu đầu vào/đầu ra..."
+                  className="min-h-35 text-sm rounded-lg border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                />
+                <FieldError message={form.formState.errors.description?.message} />
+              </div>
+
+              <div>
+                <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">Ràng buộc</Label>
+                <Textarea
+                  {...form.register("constraints")}
+                  placeholder="Ví dụ: 1 ≤ n ≤ 10^5"
+                  className="min-h-20 text-sm rounded-lg border-slate-200 dark:border-slate-700 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    Độ khó <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <select {...form.register("difficulty")} className={selectCls}>
+                      <option value={Difficulty.EASY}>Dễ</option>
+                      <option value={Difficulty.MEDIUM}>Trung bình</option>
+                      <option value={Difficulty.HARD}>Khó</option>
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    Khối lớp <span className="text-red-500">*</span>
+                  </Label>
+                  <div className="relative">
+                    <select {...form.register("classLevel", { valueAsNumber: true })} className={selectCls}>
+                      {[6, 7, 8, 9, 10, 11, 12].map((lvl) => (
+                        <option key={lvl} value={lvl}>
+                          Lớp {lvl}
+                        </option>
+                      ))}
+                    </select>
+                    <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                  </div>
+                  <FieldError message={form.formState.errors.classLevel?.message} />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    Thời gian (ms) <span className="text-red-500">*</span>
+                  </Label>
+                  <input
                     type="number"
                     {...form.register("timeLimitMs", { valueAsNumber: true })}
-                    className="pl-10 bg-white dark:bg-slate-800"
+                    className={inputCls}
                   />
+                  <FieldError message={form.formState.errors.timeLimitMs?.message} />
                 </div>
-                {form.formState.errors.timeLimitMs && (
-                  <p className="text-sm text-red-500">{form.formState.errors.timeLimitMs.message}</p>
-                )}
-              </div>
-              <div className="space-y-1.5">
-                <Label className="text-sm font-semibold text-slate-700 dark:text-slate-300">Giới hạn bộ nhớ (MB)</Label>
-                <div className="relative">
-                  <HardDrive className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
-                  <Input
+                <div>
+                  <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                    Bộ nhớ (MB) <span className="text-red-500">*</span>
+                  </Label>
+                  <input
                     type="number"
                     {...form.register("memoryLimitMb", { valueAsNumber: true })}
-                    className="pl-10 bg-white dark:bg-slate-800"
+                    className={inputCls}
                   />
+                  <FieldError message={form.formState.errors.memoryLimitMb?.message} />
                 </div>
-                {form.formState.errors.memoryLimitMb && (
-                  <p className="text-sm text-red-500">{form.formState.errors.memoryLimitMb.message}</p>
-                )}
               </div>
-            </div>
-          </CardContent>
-        </Card>
 
-        <Card className="overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-            <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-              <FileText className="w-5 h-5 text-blue-600" />
-              Nội dung đề bài
-            </h2>
-          </div>
-          <CardContent className="p-6">
-            <Textarea
-              {...form.register("description")}
-              rows={12}
-              className="font-mono text-sm bg-white dark:bg-slate-900 resize-none"
-              placeholder="Nhập mô tả chi tiết bài tập tại đây..."
-            />
-            <p className="mt-3 text-xs text-slate-400">
-              Bạn có thể sử dụng Markdown để trình bày đề bài chuyên nghiệp hơn.
-            </p>
-            {form.formState.errors.description && (
-              <p className="text-sm text-red-500 mt-2">{form.formState.errors.description.message}</p>
-            )}
-          </CardContent>
-        </Card>
-
-        <Card className="overflow-hidden">
-          <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-            <div className="flex items-center justify-between">
-              <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                <Code2 className="w-5 h-5 text-blue-600" />
-                Code Templates
-              </h2>
-              <select
-                onChange={(e) => {
-                  if (e.target.value) {
-                    addLanguageTemplate(e.target.value as Language);
-                    e.target.value = "";
-                  }
-                }}
-                className="text-sm border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 rounded-lg px-3 py-1.5"
-              >
-                <option value="">Thêm ngôn ngữ</option>
-                {languageOptions
-                  .filter((l) => !templateFields.some((f) => f.language === l.value))
-                  .map((lang) => (
-                    <option key={lang.value} value={lang.value}>
-                      {lang.icon} {lang.label}
-                    </option>
-                  ))}
-              </select>
-            </div>
-          </div>
-          <CardContent className="p-6 space-y-4">
-            {templateFields.map((field, index) => {
-              const langOpt = languageOptions.find((l) => l.value === field.language);
-              return (
-                <Card key={field.id} className="bg-slate-50 dark:bg-slate-900/50">
-                  <div className="px-4 py-3 border-b border-slate-200 dark:border-slate-800 flex items-center justify-between">
-                    <span className="text-sm font-semibold flex items-center gap-2">
-                      <span>{langOpt?.icon}</span>
-                      {langOpt?.label}
-                    </span>
-                    {templateFields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="lg"
-                        onClick={() => removeTemplate(index)}
-                        className="text-red-500 hover:text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                  <CardContent className="p-4">
-                    <Textarea
-                      {...form.register(`codeTemplates.${index}.templateCode`)}
-                      rows={12}
-                      className="font-mono text-sm bg-slate-900 text-slate-300"
-                    />
-                    {form.formState.errors.codeTemplates?.[index]?.templateCode && (
-                      <p className="text-sm text-red-500 mt-1">
-                        {form.formState.errors.codeTemplates[index]?.templateCode?.message}
-                      </p>
-                    )}
-                  </CardContent>
-                </Card>
-              );
-            })}
-          </CardContent>
-        </Card>
-
-        <div className="grid grid-cols-2 gap-8">
-          <Card className="overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-              <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                <Tag className="w-5 h-5 text-blue-600" />
-                Gắn thẻ
-              </h2>
-            </div>
-            <CardContent className="p-6 space-y-3">
-              <div className="flex gap-2">
-                <Input
-                  value={currentTag}
-                  onChange={(e) => setCurrentTag(e.target.value)}
-                  placeholder="array, dp..."
-                  onKeyDown={(e) => e.key === "Enter" && (e.preventDefault(), addTag())}
-                  className="bg-white dark:bg-slate-800"
-                />
-                <Button type="button" variant="outline" onClick={addTag}>
-                  <Plus className="w-4 h-4" />
-                </Button>
-              </div>
-              <div className="flex flex-wrap gap-2">
-                {watchTags.map((tag) => (
-                  <Badge key={tag} variant="secondary" className="gap-1 pr-1">
-                    {tag}
-                    <button type="button" onClick={() => removeTag(tag)} className="ml-1 hover:text-red-500">
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-              <p className="text-xs text-slate-400 italic">Thêm các tag để phân loại bài tập.</p>
-            </CardContent>
-          </Card>
-
-          <Card className="overflow-hidden">
-            <div className="px-6 py-4 border-b border-slate-200 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/50">
-              <h2 className="text-base font-bold flex items-center gap-2 text-slate-800 dark:text-white">
-                <Eye className="w-5 h-5 text-blue-600" />
-                Cài đặt hiển thị
-              </h2>
-            </div>
-            <CardContent className="p-6 flex items-center justify-between">
               <div>
-                <p className="text-sm font-semibold text-slate-700 dark:text-slate-300">Công khai bài tập</p>
-                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                  Mọi người đều có thể thấy bài tập này
-                </p>
+                <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">Thẻ</Label>
+                <TagMultiSelect
+                  value={form.watch("tags")}
+                  onChange={(tags) => form.setValue("tags", tags)}
+                  placeholder="Chọn thẻ..."
+                />
+                <FieldError message={form.formState.errors.tags?.message} />
               </div>
-              <label className="relative inline-flex items-center cursor-pointer">
-                <input type="checkbox" {...form.register("isPublic")} className="sr-only peer" />
-                <div className="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-0.5 after:left-0.5 after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-blue-600"></div>
-              </label>
-            </CardContent>
-          </Card>
-        </div>
+            </div>
+          </SectionCard>
 
-        <div className="flex items-center justify-end gap-4 pt-4 pb-12">
-          <Button variant="outline" size="lg" onClick={() => navigate({ to: "/mentor/problem" })} className="px-8 py-5">
-            Hủy
-          </Button>
-          <Button
-            onClick={form.handleSubmit(onSubmit)}
-            isDisabled={isSubmitting}
-            size="lg"
-            className="px-10 py-5 bg-blue-600 text-white rounded-xl font-bold hover:bg-blue-700 shadow-xl shadow-blue-500/30 gap-2"
-          >
-            {isSubmitting ? <Loader2 className="w-5 h-5 animate-spin" /> : <Save className="w-5 h-5" />}
-            {isEditMode ? "Cập nhật bài tập" : "Tạo bài tập"}
-          </Button>
-        </div>
+          {!isEditMode && (
+            <SectionCard
+              title="Tạo mẫu Code tự động"
+              subtitle="Hệ thống tự động tạo template cho Python, Java, C++, JavaScript"
+            >
+              <div className="space-y-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                      Tên hàm <span className="text-red-500">*</span>
+                    </Label>
+                    <input
+                      {...form.register("functionName")}
+                      placeholder="solution"
+                      className={cn(inputCls, "font-mono")}
+                    />
+                    <FieldError message={form.formState.errors.functionName?.message} />
+                  </div>
+                  <div>
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5 block">
+                      Kiểu trả về <span className="text-red-500">*</span>
+                    </Label>
+                    <div className="relative">
+                      <select {...form.register("returnType")} className={selectCls}>
+                        {Object.values(ParamType).map((type) => (
+                          <option key={type} value={type}>
+                            {ParamTypeInfo[type].displayName} ({ParamTypeInfo[type].javaType})
+                          </option>
+                        ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <Label className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                      Tham số đầu vào <span className="text-red-500">*</span>
+                    </Label>
+                    <button
+                      type="button"
+                      onClick={() => append({ name: "", type: ParamType.INT })}
+                      className="cursor-pointer flex items-center gap-1.5 px-3 py-2 text-sm font-medium text-slate-600 dark:text-slate-300 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors"
+                    >
+                      <Plus className="w-3.5 h-3.5" />
+                      Thêm tham số
+                    </button>
+                  </div>
+                  <div className="space-y-2.5">
+                    {fields.map((field, index) => (
+                      <div key={field.id} className="flex gap-2.5 items-start">
+                        <span className="w-7 h-11 flex items-center justify-center text-xs font-mono text-slate-400 shrink-0">
+                          {index + 1}.
+                        </span>
+                        <div className="flex-1">
+                          <input
+                            {...form.register(`parameters.${index}.name`)}
+                            placeholder="Tên tham số (vd: nums)"
+                            className={cn(inputCls, "font-mono")}
+                          />
+                          <FieldError message={form.formState.errors.parameters?.[index]?.name?.message} />
+                        </div>
+                        <div className="flex-1 relative">
+                          <select {...form.register(`parameters.${index}.type`)} className={selectCls}>
+                            {Object.values(ParamType).map((type) => (
+                              <option key={type} value={type}>
+                                {ParamTypeInfo[type].displayName}
+                              </option>
+                            ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => remove(index)}
+                          disabled={fields.length === 1}
+                          className="h-11 w-11 flex items-center justify-center text-slate-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 border border-slate-200 dark:border-slate-700 rounded-lg transition-colors disabled:opacity-40 disabled:cursor-not-allowed shrink-0"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  <FieldError message={form.formState.errors.parameters?.message} />
+                </div>
+              </div>
+            </SectionCard>
+          )}
+
+          {!isEditMode && (
+            <SectionCard title="Test Cases" subtitle="Thêm các trường hợp kiểm thử cho bài tập">
+              <TestCaseInput
+                state={tcState}
+                onChange={(s) => {
+                  setTcState(s);
+                  setTcError(null);
+                }}
+                error={tcError}
+                jsonError={jsonError}
+                onSetJsonError={setJsonError}
+              />
+            </SectionCard>
+          )}
+
+          <div className="flex gap-3 justify-end pb-8">
+            <Button
+              type="button"
+              onClick={() => navigate({ to: "/mentor/problem" })}
+              className="cursor-pointer px-6 py-5 text-sm font-medium text-slate-600 dark:text-slate-400 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors"
+            >
+              Hủy
+            </Button>
+            <Button
+              type="submit"
+              isDisabled={isPending}
+              className="cursor-pointer px-6 py-5 bg-blue-600 hover:bg-blue-700 text-white text-sm font-semibold rounded-lg"
+            >
+              {isPending ? "Đang xử lý..." : isEditMode ? "Cập nhật bài tập" : "Tạo bài tập"}
+            </Button>
+          </div>
+        </form>
       </div>
     </div>
   );

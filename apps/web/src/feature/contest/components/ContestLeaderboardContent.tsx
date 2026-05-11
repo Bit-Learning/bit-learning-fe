@@ -1,71 +1,151 @@
-import React from "react";
+import React, { useState } from "react";
 import { useParams } from "@tanstack/react-router";
-import { Users, RefreshCw, ChevronLeft, ChevronRight } from "lucide-react";
+import { Users, Trophy } from "lucide-react";
 import { Badge } from "@workspace/ui/components/Badge";
-import { Button } from "@workspace/ui/components/Button";
 import { Avatar, AvatarImage, AvatarFallback } from "@workspace/ui/components/Avatar";
 import { useLeaderboard } from "../queries/useContest";
+import Loader from "@workspace/ui/components/loader/TerminalLoader";
+import { useSelector } from "react-redux";
+import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
+import { Pagination } from "@/shared/components/Pagination";
+
+const PAGE_SIZE = 20;
+
+const ScoringRulesModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  if (!open) return null;
+  return (
+    <div
+      className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center px-4"
+      onClick={(e) => e.target === e.currentTarget && onClose()}
+    >
+      <div className="bg-white rounded-2xl w-full max-w-4xl shadow-xl overflow-hidden">
+        <div className="bg-blue-700 px-5 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-8 h-8 rounded-lg bg-white/20 flex items-center justify-center text-sm">📋</div>
+            <div>
+              <p className="text-white font-medium text-sm">Luật tính điểm</p>
+              <p className="text-white/65 text-xs">Chuẩn ICPC · BitLearning</p>
+            </div>
+          </div>
+          <button
+            onClick={onClose}
+            className="w-7 h-7 rounded-full bg-white/20 text-white text-sm flex items-center justify-center hover:bg-white/30"
+          >
+            ✕
+          </button>
+        </div>
+
+        <div className="px-5 py-5 space-y-4 max-h-[80vh] overflow-y-auto">
+          <section>
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400 mb-1.5">Xếp hạng</p>
+            <p className="text-sm text-gray-600 leading-relaxed">
+              Ai <strong className="text-gray-900 font-medium">giải được nhiều bài nhất</strong> thì xếp trên. Nếu bằng
+              nhau, ai có <strong className="text-gray-900 font-medium">tổng điểm phạt ít hơn</strong> thắng. Vẫn bằng
+              thì ai <strong className="text-gray-900 font-medium">AC bài cuối sớm hơn</strong> xếp trên.
+            </p>
+          </section>
+
+          <hr className="border-gray-100" />
+
+          <section>
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400 mb-1.5">Điểm phạt là gì?</p>
+            <p className="text-sm text-gray-600 leading-relaxed mb-2">Mỗi bài đã AC được tính theo công thức:</p>
+            <div className="font-mono text-sm bg-gray-50 rounded-lg px-3 py-2.5 text-center text-gray-900">
+              Điểm Phạt = thời gian(m) + số lần sai × 20m
+            </div>
+            <p className="text-sm text-gray-600 leading-relaxed mt-2">
+              Trong đó <strong className="text-gray-900 font-medium">thời gian</strong> là thời gian từ lúc cuộc thi bắt
+              đầu đến khi nộp AC lần đầu. Bài{" "}
+              <strong className="text-gray-900 font-medium">chưa AC thì không bị tính</strong> điểm phạt — cứ mạnh dạn
+              thử nộp.
+            </p>
+          </section>
+
+          <hr className="border-gray-100" />
+
+          <section>
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400 mb-2">Kết quả chấm bài</p>
+            <div className="divide-y divide-gray-50">
+              {[
+                { code: "AC", ten: "Chấp nhận — đúng toàn bộ", phat: null, style: "bg-green-100 text-green-800" },
+                { code: "WA", ten: "Sai kết quả", phat: "+20'", style: "bg-red-100 text-red-800" },
+                { code: "TLE", ten: "Chạy quá thời gian cho phép", phat: "+20'", style: "bg-red-100 text-red-800" },
+                { code: "MLE", ten: "Dùng quá bộ nhớ cho phép", phat: "+20'", style: "bg-red-100 text-red-800" },
+                { code: "RE", ten: "Chương trình bị lỗi khi chạy", phat: "+20'", style: "bg-red-100 text-red-800" },
+                { code: "CE", ten: "Lỗi biên dịch — không bị phạt", phat: null, style: "bg-gray-100 text-gray-600" },
+              ].map((v) => (
+                <div key={v.code} className="flex items-center gap-3 py-1.5">
+                  <span
+                    className={`font-mono text-xs font-medium px-1.5 py-0.5 rounded min-w-7.5 text-center ${v.style}`}
+                  >
+                    {v.code}
+                  </span>
+                  <span className="text-xs text-gray-700 flex-1">{v.ten}</span>
+                  {v.phat && <span className="text-xs text-red-600 font-medium">{v.phat}</span>}
+                </div>
+              ))}
+            </div>
+          </section>
+
+          <hr className="border-gray-100" />
+
+          <section>
+            <p className="text-xs font-medium uppercase tracking-wider text-gray-400 mb-1.5">Lời khuyên</p>
+            <ul className="text-sm text-gray-600 leading-relaxed space-y-1.5 list-disc list-outside pl-4">
+              <li>
+                <strong className="text-gray-900 font-medium">Chắc chắn trước khi nộp</strong> — mỗi lần WA/TLE/RE tốn
+                thêm 20 phút điểm phạt.
+              </li>
+              <li>
+                <strong className="text-gray-900 font-medium">Bài chưa AC không bị phạt</strong> — xấu nhất là không có
+                điểm, cứ thử nộp.
+              </li>
+              <li>
+                <strong className="text-gray-900 font-medium">Bắt đầu sớm</strong> — giờ AC tính từ lúc cuộc thi mở,
+                không phải lúc bạn vào.
+              </li>
+              <li>
+                <strong className="text-gray-900 font-medium">Ưu tiên bài dễ trước</strong> — giải nhiều bài là tiêu chí
+                quan trọng nhất.
+              </li>
+            </ul>
+          </section>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 const ContestLeaderboardContent: React.FC = () => {
   const { id } = useParams({ strict: false });
-  // const { data: leaderboard, isLoading } = useLeaderboard(id || "", 0, 50);
+  const { userInfo } = useSelector(selectAuthStateInfo);
+  const [page, setPage] = useState(0);
+  const [showScoring, setShowScoring] = useState(false);
+  const { data: leaderboardData, isLoading } = useLeaderboard(id || "", page, PAGE_SIZE);
 
-  const mockLeaderboard = {
-    contestId: id || "",
-    contestTitle: "Olympic Tin học Trẻ 2025",
-    totalParticipants: 250,
-    lastUpdatedAt: "2025-03-05T10:00:00",
-    myRank: 42,
-    rankings: [
-      {
-        rank: 1,
-        userId: 101,
-        username: "Le Quang Tu",
-        avatar: null,
-        solvedCount: 5,
-        totalPenaltyMinutes: 120,
-        problemResults: [
-          { label: "A", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 15, penaltyMinutes: 15 },
-          { label: "B", solved: true, attempts: 2, wrongAttempts: 1, acTimeMinutes: 25, penaltyMinutes: 45 },
-          { label: "C", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 40, penaltyMinutes: 40 },
-          { label: "D", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 60, penaltyMinutes: 60 },
-          { label: "E", solved: true, attempts: 3, wrongAttempts: 2, acTimeMinutes: 80, penaltyMinutes: 120 },
-        ],
-      },
-      {
-        rank: 42,
-        userId: 102,
-        username: "Minh Tran",
-        avatar: null,
-        solvedCount: 4,
-        totalPenaltyMinutes: 110,
-        problemResults: [
-          { label: "A", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 12, penaltyMinutes: 12 },
-          { label: "B", solved: true, attempts: 3, wrongAttempts: 2, acTimeMinutes: 35, penaltyMinutes: 75 },
-          { label: "C", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 55, penaltyMinutes: 55 },
-          { label: "D", solved: false, attempts: 3, wrongAttempts: 3, acTimeMinutes: null, penaltyMinutes: 0 },
-          { label: "E", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 90, penaltyMinutes: 90 },
-        ],
-      },
-      {
-        rank: 43,
-        userId: 103,
-        username: "Anh Nguyen",
-        avatar: null,
-        solvedCount: 3,
-        totalPenaltyMinutes: 80,
-        problemResults: [
-          { label: "A", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 15, penaltyMinutes: 15 },
-          { label: "B", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 30, penaltyMinutes: 30 },
-          { label: "C", solved: true, attempts: 1, wrongAttempts: 0, acTimeMinutes: 50, penaltyMinutes: 50 },
-          { label: "D", solved: false, attempts: 0, wrongAttempts: 0, acTimeMinutes: null, penaltyMinutes: 0 },
-          { label: "E", solved: false, attempts: 0, wrongAttempts: 0, acTimeMinutes: null, penaltyMinutes: 0 },
-        ],
-      },
-    ],
+  const leaderboard = leaderboardData?.data || {
+    rankings: [],
+    totalParticipants: 0,
+    myRank: null,
   };
 
-  const getInitials = (name: string) => {
+  const prizeTopCount = leaderboardData?.data?.prizeTopCount ?? 0;
+  const prizeCoinsPerRank = leaderboardData?.data?.prizeCoinsPerRank ?? [];
+  const hasPrize = prizeTopCount > 0 && prizeCoinsPerRank.length > 0;
+
+  const getMedal = (rank: number) => (rank === 1 ? "🥇" : rank === 2 ? "🥈" : rank === 3 ? "🥉" : "🏆");
+
+  const getPrizeForRank = (rank: number): number | null => {
+    if (!hasPrize || rank < 1 || rank > prizeTopCount) return null;
+    return prizeCoinsPerRank[rank - 1] ?? null;
+  };
+
+  const totalPages = Math.ceil(leaderboard.totalParticipants / PAGE_SIZE);
+  const displayFrom = page * PAGE_SIZE + 1;
+  const displayTo = Math.min(page * PAGE_SIZE + leaderboard.rankings.length, leaderboard.totalParticipants);
+
+  const getInitials = (name: string | null | undefined) => {
+    if (!name) return "?";
     return name
       .split(" ")
       .map((n) => n[0])
@@ -75,16 +155,10 @@ const ContestLeaderboardContent: React.FC = () => {
   };
 
   const getProblemBadgeClass = (result: any) => {
-    if (!result.solved && result.wrongAttempts === 0) {
-      return "bg-slate-100 dark:bg-slate-800 text-slate-400";
-    }
-    if (!result.solved && result.wrongAttempts > 0) {
-      return "bg-rose-500 text-white";
-    }
-    if (result.solved && result.wrongAttempts === 0) {
-      return "bg-emerald-500 text-white";
-    }
-    return "bg-amber-400 text-white";
+    if (!result.solved && result.wrongAttempts === 0) return "bg-gray-100 text-gray-400";
+    if (!result.solved && result.wrongAttempts > 0) return "bg-red-500 text-white";
+    if (result.solved && result.wrongAttempts === 0) return "bg-green-500 text-white";
+    return "bg-yellow-500 text-white";
   };
 
   const formatTime = (minutes: number | null) => {
@@ -92,114 +166,114 @@ const ContestLeaderboardContent: React.FC = () => {
     return `${minutes}m`;
   };
 
+  if (isLoading) return <Loader />;
+
   return (
-    <main className="flex-1 px-4 lg:px-20 py-8">
+    <main className="flex-1 px-6 lg:px-20 py-8">
       <div className="max-w-7xl mx-auto space-y-6">
         <div className="flex items-end justify-between">
           <div>
-            <h2 className="text-slate-900 dark:text-white text-2xl font-bold tracking-tight">Xếp hạng trực tuyến</h2>
-            <p className="text-slate-500 text-sm mt-1">Cập nhật kết quả thi đấu thời gian thực</p>
+            <h2 className="text-gray-900 text-2xl font-bold">Bảng xếp hạng</h2>
+            <p className="text-gray-500 text-md mt-1">Kết quả thi đấu </p>
           </div>
-          <div className="flex gap-4">
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-              <Users className="w-5 h-5 text-primary" />
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold text-slate-400 leading-none">Thí sinh</span>
-                <span className="font-bold text-slate-900 dark:text-white">{mockLeaderboard.totalParticipants}</span>
-              </div>
-            </div>
-            <div className="flex items-center gap-2 bg-white dark:bg-slate-900 px-4 py-2 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800">
-              <RefreshCw className="w-5 h-5 text-primary" />
-              <div className="flex flex-col">
-                <span className="text-[10px] uppercase font-bold text-slate-400 leading-none">Cập nhật</span>
-                <span className="font-bold text-slate-900 dark:text-white">10 giây trước</span>
-              </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => setShowScoring(true)}
+              className="cursor-pointer flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200 hover:bg-gray-50 transition-colors"
+            >
+              <span className="text-sm">📋</span>
+              <span className="text-sm font-medium text-gray-600">Luật tính điểm</span>
+            </button>
+            <div className="flex items-center gap-2 bg-white px-4 py-2 rounded-lg border border-gray-200">
+              <Users className="w-5 h-5 text-blue-600" />
+              <span className="text-md font-semibold text-gray-500">Thí sinh {leaderboard.totalParticipants}</span>
             </div>
           </div>
         </div>
 
-        <div className="bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 overflow-hidden">
+        <div className="bg-white rounded-lg border border-gray-200 overflow-hidden">
           <div className="overflow-x-auto">
             <table className="w-full text-left border-collapse min-w-250">
               <thead>
-                <tr className="bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-800">
-                  <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 w-16 text-center">Rank</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500">Thí sinh</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 text-center">Solved</th>
-                  <th className="px-6 py-4 text-xs font-bold uppercase text-slate-500 text-center">Penalty</th>
-                  {mockLeaderboard.rankings[0]?.problemResults.map((p) => (
+                <tr className="bg-gray-50 border-b border-gray-200">
+                  <th className="px-6 py-4 text-md uppercase font-semibold text-gray-600 w-16 text-center">Hạng</th>
+                  <th className="px-6 py-4 text-md uppercase font-semibold text-gray-600">Thí sinh</th>
+                  <th className="px-6 py-4 text-md uppercase font-semibold text-gray-600 text-center">Đã giải</th>
+                  <th className="px-6 py-4 text-md uppercase font-semibold text-gray-600 text-center">Điểm phạt</th>
+                  {hasPrize && (
+                    <th className="px-6 py-4 text-md uppercase font-semibold text-amber-600 text-center border-l border-gray-200">
+                      <div className="flex items-center justify-center gap-1">
+                        <Trophy className="w-3.5 h-3.5" />
+                        Thưởng
+                      </div>
+                    </th>
+                  )}
+                  {leaderboard.rankings[0]?.problemResults.map((p: any) => (
                     <th
                       key={p.label}
-                      className="px-4 py-4 text-xs font-bold uppercase text-slate-500 text-center w-24 border-l border-slate-200/50 dark:border-slate-700/50"
+                      className="px-4 py-4 text-md uppercase font-semibold text-gray-600 text-center w-24 border-l border-gray-200"
                     >
                       {p.label}
                     </th>
                   ))}
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100 dark:divide-slate-800">
-                {mockLeaderboard.rankings.map((ranking) => {
-                  const isCurrentUser = ranking.rank === mockLeaderboard.myRank;
+              <tbody className="divide-y divide-gray-100">
+                {leaderboard.rankings.map((ranking: any) => {
+                  const isCurrentUser = ranking.userId === userInfo?.id;
+                  const displayName = ranking.username ?? `Thí sinh #${ranking.rank}`;
                   return (
                     <tr
                       key={ranking.userId}
-                      className={`transition-colors ${
-                        isCurrentUser
-                          ? "bg-primary/5 dark:bg-primary/10 hover:bg-primary/10 dark:hover:bg-primary/20 border-y border-primary/20"
-                          : "hover:bg-slate-50 dark:hover:bg-slate-800/30"
-                      }`}
+                      className={`transition-colors ${isCurrentUser ? "bg-blue-50 border-y border-blue-200" : "hover:bg-gray-50"}`}
                     >
                       <td
-                        className={`px-6 py-4 text-center font-bold ${
-                          isCurrentUser ? "text-primary" : "text-slate-700 dark:text-slate-300"
-                        }`}
+                        className={`px-6 py-4 text-center font-bold ${isCurrentUser ? "text-blue-600" : "text-gray-700"}`}
                       >
                         {ranking.rank}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <Avatar className={`size-8 ${isCurrentUser ? "ring-2 ring-primary" : ""}`}>
+                          <Avatar className={`size-8 ${isCurrentUser ? "ring-2 ring-blue-600" : ""}`}>
                             <AvatarImage src={ranking.avatar || undefined} />
-                            <AvatarFallback className={isCurrentUser ? "bg-primary text-white" : ""}>
+                            <AvatarFallback className={isCurrentUser ? "bg-blue-600 text-white" : ""}>
                               {getInitials(ranking.username)}
                             </AvatarFallback>
                           </Avatar>
                           <div className="flex items-center gap-2">
-                            <span
-                              className={`font-${isCurrentUser ? "bold" : "medium"} text-slate-900 dark:text-white`}
-                            >
-                              {ranking.username}
-                            </span>
-                            {isCurrentUser && (
-                              <Badge className="bg-primary text-white text-[10px] font-bold px-1.5 py-0.5 uppercase">
-                                Bạn
-                              </Badge>
-                            )}
+                            <span className="font-medium text-gray-900">{displayName}</span>
+                            {isCurrentUser && <Badge className="bg-blue-600 text-white text-xs px-2">Bạn</Badge>}
                           </div>
                         </div>
                       </td>
                       <td className="px-6 py-4 text-center">
                         <Badge
-                          className={`${
-                            isCurrentUser ? "bg-primary text-white shadow-sm" : "bg-primary/10 text-primary"
-                          } px-3 py-1 rounded-full text-sm font-bold`}
+                          className={`${isCurrentUser ? "bg-blue-600 text-white" : "bg-blue-100 text-blue-700"} px-3 py-1 rounded-full text-md font-semibold`}
                         >
                           {ranking.solvedCount}
                         </Badge>
                       </td>
-                      <td
-                        className={`px-6 py-4 text-center text-sm font-${isCurrentUser ? "bold text-primary" : "medium text-slate-600 dark:text-slate-400"}`}
-                      >
+                      <td className="px-6 py-4 text-center text-md font-medium text-gray-600">
                         {ranking.totalPenaltyMinutes}
                       </td>
-                      {ranking.problemResults.map((result) => (
-                        <td
-                          key={result.label}
-                          className="px-4 py-4 text-center border-l border-slate-200/50 dark:border-slate-700/50"
-                        >
-                          <div
-                            className={`${getProblemBadgeClass(result)} rounded-lg py-1.5 text-xs font-bold shadow-sm`}
-                          >
+                      {hasPrize && (
+                        <td className="px-6 py-4 text-center border-l border-gray-200">
+                          {(() => {
+                            const prize = getPrizeForRank(ranking.rank);
+                            if (prize) {
+                              return (
+                                <span className="inline-flex items-center gap-1 bg-amber-50 text-amber-700 px-2.5 py-1 rounded-full text-xs font-bold">
+                                  {getMedal(ranking.rank)} {prize.toLocaleString()} xu
+                                </span>
+                              );
+                            }
+                            return <span className="text-gray-300">—</span>;
+                          })()}
+                        </td>
+                      )}
+                      {ranking.problemResults.map((result: any) => (
+                        <td key={result.label} className="px-4 py-4 text-center border-l border-gray-200">
+                          <div className={`${getProblemBadgeClass(result)} rounded-lg py-1.5 text-xs font-semibold`}>
                             {!result.solved && result.wrongAttempts === 0 ? (
                               "--"
                             ) : !result.solved ? (
@@ -222,49 +296,18 @@ const ContestLeaderboardContent: React.FC = () => {
         </div>
 
         <div className="flex flex-col md:flex-row items-center justify-between gap-6">
-          <div className="flex flex-wrap gap-4">
-            <div className="flex items-center gap-2 text-xs">
-              <div className="size-3 bg-emerald-500 rounded-sm shadow-sm" />
-              <span className="text-slate-600 dark:text-slate-400 font-medium">Accepted (Lần đầu)</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="size-3 bg-amber-400 rounded-sm shadow-sm" />
-              <span className="text-slate-600 dark:text-slate-400 font-medium">Accepted (Có sai sót)</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="size-3 bg-rose-500 rounded-sm shadow-sm" />
-              <span className="text-slate-600 dark:text-slate-400 font-medium">Lỗi nộp bài</span>
-            </div>
-            <div className="flex items-center gap-2 text-xs">
-              <div className="size-3 bg-slate-200 dark:bg-slate-700 rounded-sm" />
-              <span className="text-slate-600 dark:text-slate-400 font-medium">Chưa làm</span>
-            </div>
+          <div className="text-gray-500 text-sm">
+            <p>
+              Hiển thị {displayFrom}–{displayTo} / {leaderboard.totalParticipants}
+            </p>
           </div>
-
-          <div className="flex items-center gap-4 text-slate-500 text-sm">
-            <p>Hiển thị 1-10 trên {mockLeaderboard.totalParticipants} thí sinh</p>
-            <div className="flex items-center gap-2">
-              <Button variant="outline" size="sm" className="size-8 p-0">
-                <ChevronLeft className="w-4 h-4" />
-              </Button>
-              <Button className="bg-primary text-white size-8 p-0 font-bold shadow-sm">1</Button>
-              <Button variant="ghost" size="sm" className="size-8 p-0">
-                2
-              </Button>
-              <Button variant="ghost" size="sm" className="size-8 p-0">
-                3
-              </Button>
-              <span className="px-1 text-slate-300">...</span>
-              <Button variant="ghost" size="sm" className="size-8 p-0">
-                25
-              </Button>
-              <Button variant="outline" size="sm" className="size-8 p-0">
-                <ChevronRight className="w-4 h-4" />
-              </Button>
-            </div>
+          <div className="flex items-center text-gray-500 text-sm">
+            {totalPages > 1 && <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />}
           </div>
         </div>
       </div>
+
+      <ScoringRulesModal open={showScoring} onClose={() => setShowScoring(false)} />
     </main>
   );
 };

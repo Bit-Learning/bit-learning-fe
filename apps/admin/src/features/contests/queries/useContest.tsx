@@ -9,7 +9,9 @@ import type {
   SubmitRequest,
   CreateClarificationRequest,
   AnswerClarificationRequest,
+  PageableParams,
 } from "../types/contest.type";
+import { UpdateProblemRequest } from "@/features/problems/types/problem.type";
 
 export const contestKeys = {
   all: ["contests"] as const,
@@ -17,11 +19,13 @@ export const contestKeys = {
   list: (params?: ContestListParams) => [...contestKeys.lists(), params] as const,
   detail: (contestId: string) => [...contestKeys.all, "detail", contestId] as const,
   problems: (contestId: string) => [...contestKeys.detail(contestId), "problems"] as const,
-  submissions: (contestId: string, params?: any) => [...contestKeys.detail(contestId), "submissions", params] as const,
-  mySubmissions: (contestId: string, params?: any) =>
+  submissions: (contestId: string, params?: unknown) =>
+    [...contestKeys.detail(contestId), "submissions", params] as const,
+  mySubmissions: (contestId: string, params?: unknown) =>
     [...contestKeys.detail(contestId), "my-submissions", params] as const,
   leaderboard: (contestId: string) => [...contestKeys.detail(contestId), "leaderboard"] as const,
   clarifications: (contestId: string) => [...contestKeys.detail(contestId), "clarifications"] as const,
+  submission: (submissionId: string) => ["submission", submissionId] as const,
 
   admin: {
     all: ["admin", "contests"] as const,
@@ -30,322 +34,352 @@ export const contestKeys = {
     submissions: (contestId: string, params?: ContestSubmissionParams) =>
       [...contestKeys.admin.all, contestId, "submissions", params] as const,
     leaderboard: (contestId: string) => [...contestKeys.admin.all, contestId, "leaderboard"] as const,
+    registrations: (contestId: string, params?: PageableParams) =>
+      [...contestKeys.admin.all, contestId, "registrations", params] as const,
   },
 };
 
-export const useContestList = (params?: ContestListParams) => {
-  return useQuery({
+export const useContestList = (params?: ContestListParams) =>
+  useQuery({
     queryKey: contestKeys.list(params),
     queryFn: async () => {
-      const response = await contestApi.listContests(params);
-      return response.data;
+      const res = await contestApi.listContests(params);
+      return res.data;
     },
   });
-};
 
-export const useContestDetail = (contestId: string) => {
-  return useQuery({
+export const useContestDetail = (contestId: string) =>
+  useQuery({
     queryKey: contestKeys.detail(contestId),
     queryFn: async () => {
-      const response = await contestApi.getContestDetail(contestId);
-      return response.data.data;
+      const res = await contestApi.getContestDetail(contestId);
+      return res.data.data;
     },
     enabled: !!contestId,
   });
-};
 
-export const useContestProblems = (contestId: string) => {
-  return useQuery({
+export const useContestProblems = (contestId: string) =>
+  useQuery({
     queryKey: contestKeys.problems(contestId),
     queryFn: async () => {
-      const response = await contestApi.getContestProblems(contestId);
-      return response.data.data;
+      const res = await contestApi.getContestProblems(contestId);
+      return res.data.data;
     },
     enabled: !!contestId,
   });
-};
 
 export const useMySubmissions = (
   contestId: string,
   params?: { contestProblemId?: string; page?: number; size?: number },
-) => {
-  return useQuery({
+) =>
+  useQuery({
     queryKey: contestKeys.mySubmissions(contestId, params),
     queryFn: async () => {
-      const response = await contestApi.getMySubmissions(contestId, params);
-      return response.data.data;
+      const res = await contestApi.getMySubmissions(contestId, params);
+      return res.data.data;
     },
     enabled: !!contestId,
   });
-};
 
-export const useLeaderboard = (contestId: string) => {
-  return useQuery({
+export const useLeaderboard = (contestId: string) =>
+  useQuery({
     queryKey: contestKeys.leaderboard(contestId),
     queryFn: async () => {
-      const response = await contestApi.getLeaderboard(contestId);
-      return response.data.data;
+      const res = await contestApi.getLeaderboard(contestId);
+      return res.data.data;
     },
     enabled: !!contestId,
   });
-};
 
-export const useClarifications = (contestId: string) => {
-  return useQuery({
+export const useClarifications = (contestId: string) =>
+  useQuery({
     queryKey: contestKeys.clarifications(contestId),
     queryFn: async () => {
-      const response = await contestApi.listClarifications(contestId);
-      return response.data.data;
+      const res = await contestApi.listClarifications(contestId);
+      return res.data.data;
     },
     enabled: !!contestId,
   });
+
+export const useContestSubmissions = (contestId: string, params?: ContestSubmissionParams) =>
+  useQuery({
+    queryKey: contestKeys.admin.submissions(contestId, params),
+    queryFn: async () => {
+      const res = await adminContestApi.getContestSubmissions(contestId, params);
+      return res.data.data;
+    },
+    enabled: !!contestId,
+  });
+
+export const useSubmissionDetail = (submissionId: string) => {
+  return useQuery({
+    queryKey: contestKeys.submission(submissionId),
+    queryFn: async () => {
+      const response = await contestApi.getSubmissionDetail(submissionId);
+      return response.data;
+    },
+    enabled: !!submissionId,
+  });
 };
 
-export const useRegisterContest = () => {
-  const queryClient = useQueryClient();
+export const useAdminLeaderboard = (contestId: string) =>
+  useQuery({
+    queryKey: contestKeys.admin.leaderboard(contestId),
+    queryFn: async () => {
+      const res = await adminContestApi.getDetailedLeaderboard(contestId);
+      return res.data.data;
+    },
+    enabled: !!contestId,
+  });
 
+export const useAdminContestRegistrations = (contestId: string, params?: PageableParams) =>
+  useQuery({
+    queryKey: contestKeys.admin.registrations(contestId, params),
+    queryFn: async () => {
+      const res = await adminContestApi.getContestRegistrations(contestId, params);
+      return res.data;
+    },
+    enabled: !!contestId,
+  });
+
+export const useRegisterContest = () => {
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (contestId: string) => contestApi.registerForContest(contestId),
-    onSuccess: (response, contestId) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.detail(contestId) });
-      queryClient.invalidateQueries({ queryKey: contestKeys.lists() });
+    onSuccess: (res, contestId) => {
+      qc.invalidateQueries({ queryKey: contestKeys.detail(contestId) });
+      qc.invalidateQueries({ queryKey: contestKeys.lists() });
       toast.success("Đăng ký thành công!", {
-        description: response.data.message || "Bạn đã đăng ký tham gia cuộc thi.",
+        description: res.data.message || "Bạn đã đăng ký tham gia cuộc thi.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Đăng ký thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi đăng ký cuộc thi.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi khi đăng ký cuộc thi.",
       });
     },
   });
 };
 
 export const useSubmitSolution = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ contestId, request }: { contestId: string; request: SubmitRequest }) =>
       contestApi.submitSolution(contestId, request),
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.mySubmissions(variables.contestId) });
+    onSuccess: (res, vars) => {
+      qc.invalidateQueries({ queryKey: contestKeys.mySubmissions(vars.contestId) });
       toast.success("Nộp bài thành công!", {
-        description: response.data.message || "Bài làm của bạn đang được chấm.",
+        description: res.data.message || "Bài làm của bạn đang được chấm.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Nộp bài thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi nộp bài.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi khi nộp bài.",
       });
     },
   });
 };
 
 export const useCreateClarification = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ contestId, request }: { contestId: string; request: CreateClarificationRequest }) =>
       contestApi.createClarification(contestId, request),
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.clarifications(variables.contestId) });
+    onSuccess: (res, vars) => {
+      qc.invalidateQueries({ queryKey: contestKeys.clarifications(vars.contestId) });
       toast.success("Gửi câu hỏi thành công!", {
-        description: response.data.message || "Câu hỏi của bạn đã được gửi đến ban tổ chức.",
+        description: res.data.message || "Câu hỏi đã được gửi.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Gửi câu hỏi thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi gửi câu hỏi.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi khi gửi câu hỏi.",
       });
     },
   });
 };
 
 export const useCreateContest = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: ContestUpsertDTO) => adminContestApi.createContest(data),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.admin.lists() });
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: contestKeys.admin.lists() });
       toast.success("Tạo cuộc thi thành công!", {
-        description: response.data.message || "Cuộc thi đã được tạo và sẵn sàng sử dụng.",
+        description: res.data.message || "Cuộc thi đã được tạo.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Tạo cuộc thi thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi tạo cuộc thi.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi khi tạo cuộc thi.",
       });
     },
   });
 };
 
 export const useUpdateContest = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ contestId, data }: { contestId: string; data: ContestUpsertDTO }) =>
       adminContestApi.updateContest(contestId, data),
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.admin.lists() });
-      queryClient.invalidateQueries({ queryKey: contestKeys.detail(variables.contestId) });
+    onSuccess: (res, vars) => {
+      qc.invalidateQueries({ queryKey: contestKeys.admin.lists() });
+      qc.invalidateQueries({ queryKey: contestKeys.detail(vars.contestId) });
       toast.success("Cập nhật cuộc thi thành công!", {
-        description: response.data.message || "Thông tin cuộc thi đã được cập nhật.",
+        description: res.data.message || "Thông tin cuộc thi đã được cập nhật.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Cập nhật cuộc thi thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi cập nhật cuộc thi.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
   });
 };
 
 export const useDeleteContest = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (contestId: string) => adminContestApi.deleteContest(contestId),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.admin.lists() });
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: contestKeys.admin.lists() });
       toast.success("Xóa cuộc thi thành công!", {
-        description: response.data.message || "Cuộc thi đã được xóa khỏi hệ thống.",
+        description: res.data.message || "Cuộc thi đã được xóa.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Xóa cuộc thi thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi xóa cuộc thi.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
   });
 };
 
 export const useAddProblem = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ contestId, request }: { contestId: string; request: AddProblemRequest }) =>
       adminContestApi.addProblem(contestId, request),
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.detail(variables.contestId) });
-      queryClient.invalidateQueries({ queryKey: contestKeys.problems(variables.contestId) });
+    onSuccess: (res, vars) => {
+      qc.invalidateQueries({ queryKey: contestKeys.detail(vars.contestId) });
+      qc.invalidateQueries({ queryKey: contestKeys.problems(vars.contestId) });
       toast.success("Thêm bài tập thành công!", {
-        description: response.data.message || "Bài tập đã được thêm vào cuộc thi.",
+        description: res.data.message || "Bài tập đã được thêm vào cuộc thi.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Thêm bài tập thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi thêm bài tập.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
   });
 };
 
 export const useRemoveProblem = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({ contestId, contestProblemId }: { contestId: string; contestProblemId: string }) =>
       adminContestApi.removeProblem(contestId, contestProblemId),
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.detail(variables.contestId) });
-      queryClient.invalidateQueries({ queryKey: contestKeys.problems(variables.contestId) });
+    onSuccess: (res, vars) => {
+      qc.invalidateQueries({ queryKey: contestKeys.detail(vars.contestId) });
+      qc.invalidateQueries({ queryKey: contestKeys.problems(vars.contestId) });
       toast.success("Xóa bài tập thành công!", {
-        description: response.data.message || "Bài tập đã được xóa khỏi cuộc thi.",
+        description: res.data.message || "Bài tập đã được xóa khỏi cuộc thi.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Xóa bài tập thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi xóa bài tập.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
+      });
+    },
+  });
+};
+
+export const useUpdateContestProblem = () => {
+  const qc = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      contestId,
+      contestProblemId,
+      request,
+    }: {
+      contestId: string;
+      contestProblemId: string;
+      request: UpdateProblemRequest;
+    }) => adminContestApi.updateContestProblem(contestId, contestProblemId, request),
+    onSuccess: (res, vars) => {
+      qc.invalidateQueries({ queryKey: contestKeys.problems(vars.contestId) });
+      qc.invalidateQueries({ queryKey: contestKeys.detail(vars.contestId) });
+      toast.success("Cập nhật bài toán thành công!", {
+        description: res.data.message || "Thông tin bài toán đã được cập nhật.",
+      });
+    },
+    onError: (err: any) => {
+      toast.error("Cập nhật bài toán thất bại!", {
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
   });
 };
 
 export const useStartContest = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (contestId: string) => adminContestApi.startContest(contestId),
-    onSuccess: (response, contestId) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.admin.lists() });
-      queryClient.invalidateQueries({ queryKey: contestKeys.detail(contestId) });
+    onSuccess: (res, contestId) => {
+      qc.invalidateQueries({ queryKey: contestKeys.admin.lists() });
+      qc.invalidateQueries({ queryKey: contestKeys.detail(contestId) });
       toast.success("Bắt đầu cuộc thi thành công!", {
-        description: response.data.message || "Cuộc thi đã được kích hoạt.",
+        description: res.data.message || "Cuộc thi đã được kích hoạt.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Bắt đầu cuộc thi thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi bắt đầu cuộc thi.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
   });
 };
 
 export const useEndContest = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (contestId: string) => adminContestApi.endContest(contestId),
-    onSuccess: (response, contestId) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.admin.lists() });
-      queryClient.invalidateQueries({ queryKey: contestKeys.detail(contestId) });
+    onSuccess: (res, contestId) => {
+      qc.invalidateQueries({ queryKey: contestKeys.admin.lists() });
+      qc.invalidateQueries({ queryKey: contestKeys.detail(contestId) });
       toast.success("Kết thúc cuộc thi thành công!", {
-        description: response.data.message || "Cuộc thi đã được kết thúc.",
+        description: res.data.message || "Cuộc thi đã kết thúc.",
       });
     },
-    onError: (error: any) => {
+    onError: (err: any) => {
       toast.error("Kết thúc cuộc thi thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi kết thúc cuộc thi.",
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
   });
 };
 
 export const useRejudgeSubmission = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: (submissionId: string) => adminContestApi.rejudgeSubmission(submissionId),
-    onSuccess: (response) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.admin.all });
-      toast.success("Chấm lại bài nộp thành công!", {
-        description: response.data.message || "Bài nộp đang được chấm lại.",
+    onSuccess: (res) => {
+      qc.invalidateQueries({ queryKey: contestKeys.admin.all });
+      toast.success("Chấm lại thành công!", {
+        description: res.data.message || "Bài nộp đang được chấm lại.",
       });
     },
-    onError: (error: any) => {
-      toast.error("Chấm lại bài nộp thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi chấm lại bài nộp.",
+    onError: (err: any) => {
+      toast.error("Chấm lại thất bại!", {
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
-  });
-};
-
-export const useContestSubmissions = (contestId: string, params?: ContestSubmissionParams) => {
-  return useQuery({
-    queryKey: contestKeys.admin.submissions(contestId, params),
-    queryFn: async () => {
-      const response = await adminContestApi.getContestSubmissions(contestId, params);
-      return response.data.data;
-    },
-    enabled: !!contestId,
-  });
-};
-
-export const useAdminLeaderboard = (contestId: string) => {
-  return useQuery({
-    queryKey: contestKeys.admin.leaderboard(contestId),
-    queryFn: async () => {
-      const response = await adminContestApi.getDetailedLeaderboard(contestId);
-      return response.data.data;
-    },
-    enabled: !!contestId,
   });
 };
 
 export const useAnswerClarification = () => {
-  const queryClient = useQueryClient();
-
+  const qc = useQueryClient();
   return useMutation({
     mutationFn: ({
       contestId,
@@ -356,15 +390,15 @@ export const useAnswerClarification = () => {
       clarificationId: string;
       request: AnswerClarificationRequest;
     }) => adminContestApi.answerClarification(contestId, clarificationId, request),
-    onSuccess: (response, variables) => {
-      queryClient.invalidateQueries({ queryKey: contestKeys.clarifications(variables.contestId) });
-      toast.success("Trả lời câu hỏi thành công!", {
-        description: response.data.message || "Câu trả lời đã được gửi.",
+    onSuccess: (res, vars) => {
+      qc.invalidateQueries({ queryKey: contestKeys.clarifications(vars.contestId) });
+      toast.success("Trả lời thành công!", {
+        description: res.data.message || "Câu trả lời đã được gửi.",
       });
     },
-    onError: (error: any) => {
-      toast.error("Trả lời câu hỏi thất bại!", {
-        description: error?.response?.data?.message || "Đã xảy ra lỗi khi trả lời câu hỏi.",
+    onError: (err: any) => {
+      toast.error("Trả lời thất bại!", {
+        description: err?.response?.data?.message || "Đã xảy ra lỗi.",
       });
     },
   });

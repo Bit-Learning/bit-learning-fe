@@ -1,69 +1,84 @@
 import { Card } from "@workspace/ui/components/Card";
-import { BookOpen, DollarSign, Users } from "lucide-react";
-import { formatCurrency } from "@/shared/format";
-import type { DashboardStats } from "../types/dashboard.type";
+import type { MentorDashboardStats } from "../types/mentor.type";
 
 interface StatsCardsProps {
-	stats: DashboardStats;
+  stats: MentorDashboardStats;
 }
 
-const statsConfig = [
-	{
-		key: "totalCourses" as const,
-		label: "Tổng khóa học",
-		icon: BookOpen,
-		bgColor: "bg-blue-500/10",
-		iconBg: "bg-blue-100",
-		iconColor: "text-blue-600",
-		format: (val: number) => val.toString(),
-	},
-	{
-		key: "totalStudents" as const,
-		label: "Tổng học viên",
-		icon: Users,
-		bgColor: "bg-purple-500/10",
-		iconBg: "bg-purple-100",
-		iconColor: "text-purple-600",
-		format: (val: number) => val.toLocaleString(),
-	},
-	{
-		key: "totalEarnings" as const,
-		label: "Tổng doanh thu",
-		icon: DollarSign,
-		bgColor: "bg-green-500/10",
-		iconBg: "bg-green-100",
-		iconColor: "text-green-600",
-		format: (val: number) => `${formatCurrency(val)}₫`,
-	},
-];
+interface StatCardItem {
+  label: string;
+  value: string;
+  desc?: string;
+  bg: string;
+  border: string;
+  labelColor: string;
+  valueColor: string;
+  descColor: string;
+}
 
 export const StatsCards = ({ stats }: StatsCardsProps) => {
-	return (
-		<div className="grid grid-cols-1 gap-4 md:grid-cols-3 lg:grid-cols-3">
-			{statsConfig.map((config) => {
-				const Icon = config.icon;
-				const value = stats[config.key];
-				return (
-					<Card key={config.key} className="relative overflow-hidden p-6">
-						<div
-							className={`absolute -right-4 -top-4 h-24 w-24 rounded-full ${config.bgColor}`}
-						/>
-						<div className="flex items-center gap-4">
-							<div
-								className={`flex h-12 w-12 items-center justify-center rounded-xl ${config.iconBg}`}
-							>
-								<Icon className={`h-6 w-6 ${config.iconColor}`} />
-							</div>
-							<div>
-								<p className="text-sm text-gray-600">{config.label}</p>
-								<p className={`'text-gray-900 text-2xl font-bold`}>
-									{config.format(value)}
-								</p>
-							</div>
-						</div>
-					</Card>
-				);
-			})}
-		</div>
-	);
+  const cards: StatCardItem[] = [
+    {
+      label: "CÂU HỎI",
+      value: stats.totalQuestions.toLocaleString("vi-VN"),
+      desc: `${stats.pendingQuestions} chờ duyệt`,
+      bg: "bg-[#EEEDFE]",
+      border: "border-[#AFA9EC]",
+      labelColor: "text-[#534AB7]",
+      valueColor: "text-[#3C3489]",
+      descColor: "text-[#7F77DD]",
+    },
+    {
+      label: "ĐỀ THI",
+      value: stats.totalExams.toString(),
+      desc: `+${stats.newExamsThisMonth ?? 0} tháng này`,
+      bg: "bg-[#FAECE7]",
+      border: "border-[#F0997B]",
+      labelColor: "text-[#993C1D]",
+      valueColor: "text-[#712B13]",
+      descColor: "text-[#D85A30]",
+    },
+    {
+      label: "BÀI TẬP",
+      value: stats.totalPractices.toString(),
+      desc: ``,
+      bg: "bg-[#E1F5EE]",
+      border: "border-[#5DCAA5]",
+      labelColor: "text-[#0F6E56]",
+      valueColor: "text-[#085041]",
+      descColor: "text-[#1D9E75]",
+    },
+    {
+      label: "SLIDE",
+      value: stats.totalSlides.toString(),
+      desc: `+${stats.newSlidesThisMonth ?? 0} tháng này`,
+      bg: "bg-[#FBEAF0]",
+      border: "border-[#ED93B1]",
+      labelColor: "text-[#993556]",
+      valueColor: "text-[#72243E]",
+      descColor: "text-[#D4537E]",
+    },
+    {
+      label: "MIND MAP",
+      value: stats.totalMindMaps.toString(),
+      desc: `+${stats.newMindMapsThisMonth ?? 0} tháng này`,
+      bg: "bg-[#E6F1FB]",
+      border: "border-[#85B7EB]",
+      labelColor: "text-[#185FA5]",
+      valueColor: "text-[#0C447C]",
+      descColor: "text-[#378ADD]",
+    },
+  ];
+
+  return (
+    <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
+      {cards.map((c) => (
+        <Card key={c.label} className={`border ${c.bg} ${c.border} shadow-none gap-1 px-4 py-3`}>
+          <div className={`text-[10px] font-semibold tracking-widest ${c.labelColor}`}>{c.label}</div>
+          <div className={`text-2xl font-bold leading-tight ${c.valueColor}`}>{c.value}</div>
+          {c.desc && <div className={`mt-1 text-xs ${c.descColor}`}>{c.desc}</div>}
+        </Card>
+      ))}
+    </div>
+  );
 };

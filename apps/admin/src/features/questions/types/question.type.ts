@@ -1,3 +1,5 @@
+import { UserSummary } from "@/features/problems/types/problem.type";
+
 export enum QuestionType {
   MCQ = "MCQ",
   ESSAY = "ESSAY",
@@ -59,14 +61,42 @@ export interface QuestionResponse {
   lesson?: LessonBriefResponse;
   tags?: TagResponse[];
   options?: OptionResponse[];
+  requestedBy: UserSummary;
   isActive: boolean;
   isPublic: boolean;
   approvalStatus: ApprovalStatus;
+  mediaUrl: string | null;
+  mediaType: QuestionMediaType | null;
   createdAt: string;
   updatedAt: string;
 }
 
+export enum QuestionMediaType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+}
 export interface ApproveRejectDTO {
   questionIds: number[];
   rejectReason?: string;
+}
+
+export interface QuestionSearchParams {
+  keyword?: string;
+  subjectId?: number;
+  chapterId?: number;
+  lessonId?: number;
+  questionType?: QuestionType;
+  questionLevel?: QuestionLevel;
+  approvalStatus?: ApprovalStatus;
+  isActive?: boolean;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface QuestionApprovalParams {
+  status?: ApprovalStatus;
+  page?: number;
+  size?: number;
+  sort?: string;
 }

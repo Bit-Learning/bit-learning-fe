@@ -21,6 +21,7 @@ import {
 	User2Icon,
 	Mail,
 	User,
+	LogInIcon,
 } from "lucide-react";
 import React from "react";
 import { useForm } from "react-hook-form";
@@ -28,8 +29,10 @@ import { useSelector } from "react-redux";
 import { z } from "zod";
 import { selectAuthStateInfo } from "../store/auth.selectors";
 import { setErrorAction } from "../store";
-import { useLogin, useRegister } from "../queries/useAuth";
+import { useLoginUser, useRegister } from "../queries/useAuth";
 import TwoFactorVerificationForm from "./TwoFactorVerificationForm";
+import Logo from "./Logo";
+import { cn } from "@workspace/ui/lib/utils";
 
 const formSchema = z.object({
 	email: z
@@ -38,7 +41,7 @@ const formSchema = z.object({
 		.email({ message: "Email không hợp lệ" }),
 	password: z
 		.string()
-		.min(3, { message: "Mật khẩu phải có ít nhất 3 ký tự" })
+		.min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự" })
 		.max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" }),
 });
 
@@ -50,7 +53,7 @@ const mentorRegisterSchema = z
 			.email({ message: "Email không hợp lệ" }),
 		password: z
 			.string()
-			.min(3, { message: "Mật khẩu phải có ít nhất 3 ký tự" })
+			.min(6, { message: "Mật khẩu phải có ít nhất 6 ký tự" })
 			.max(50, { message: "Mật khẩu không được vượt quá 50 ký tự" })
 			.regex(/(?=.*[a-z])/, {
 				message: "Mật khẩu phải chứa ít nhất 1 chữ thường",
@@ -70,6 +73,57 @@ const mentorRegisterSchema = z
 		firstName: z.string().min(1, { message: "Họ không được để trống" }),
 		lastName: z.string().min(1, { message: "Tên không được để trống" }),
 		role: z.enum(["MENTOR"], { message: "Vai trò không hợp lệ" }),
+		specialties: z
+			.string()
+			.max(200, {
+				message: "Chuyên môn không được vượt quá 200 ký tự",
+			})
+			.optional()
+			.or(z.literal("")),
+		yearsOfExperience: z
+			.string()
+			.optional()
+			.refine(
+				(value) => {
+					if (!value) return true;
+					const num = Number(value);
+					return !Number.isNaN(num) && num >= 0 && num <= 50;
+				},
+				{
+					message: "Số năm kinh nghiệm phải là số từ 0 đến 50",
+				},
+			),
+		company: z
+			.string()
+			.max(100, { message: "Tên công ty không được vượt quá 100 ký tự" })
+			.optional()
+			.or(z.literal("")),
+		studentsCount: z
+			.string()
+			.optional()
+			.refine(
+				(value) => {
+					if (!value) return true;
+					const num = Number(value);
+					return !Number.isNaN(num) && num >= 0;
+				},
+				{
+					message: "Số lượng học viên phải là số không âm",
+				},
+			),
+		coursesCount: z
+			.string()
+			.optional()
+			.refine(
+				(value) => {
+					if (!value) return true;
+					const num = Number(value);
+					return !Number.isNaN(num) && num >= 0;
+				},
+				{
+					message: "Số lượng khoá học phải là số không âm",
+				},
+			),
 	})
 	.refine((data) => data.password === data.confirmPassword, {
 		message: "Mật khẩu và xác nhận mật khẩu không khớp",
@@ -97,6 +151,11 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 			firstName: "",
 			lastName: "",
 			role: "MENTOR",
+			specialties: "",
+			yearsOfExperience: "",
+			company: "",
+			studentsCount: "",
+			coursesCount: "",
 		},
 	});
 
@@ -110,22 +169,41 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 	}, [isSuccess, onBack]);
 
 	function onSubmit(values: TMentorRegisterFormValues) {
+		const specialties = values.specialties
+			?.split(",")
+			.map((item) => item.trim())
+			.filter(Boolean);
+
+		const yearsOfExperience = values.yearsOfExperience
+			? Number(values.yearsOfExperience)
+			: undefined;
+		const studentsCount = values.studentsCount
+			? Number(values.studentsCount)
+			: undefined;
+		const coursesCount = values.coursesCount
+			? Number(values.coursesCount)
+			: undefined;
+
 		register({
 			email: values.email,
 			password: values.password,
 			firstName: values.firstName,
 			lastName: values.lastName,
 			role: values.role,
+			specialties,
+			yearsOfExperience,
+			company: values.company || undefined,
+			studentsCount,
+			coursesCount,
 		});
 	}
 
 	return (
 		<>
-			<div className="mb-6 text-center">
-				<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-					<User2Icon className="h-6 w-6" />
-				</div>
-				<h1 className="mb-2 text-xl font-bold text-gray-900">Đăng ký Mentor</h1>
+			<div className="mb-6 text-left">
+				<h1 className="mb-2 text-xl font-bold text-gray-900">
+					Đăng ký tài khoản
+				</h1>
 				<p className="text-sm text-gray-600">
 					Tạo tài khoản Mentor để bắt đầu dạy học trên Bit Learning
 				</p>
@@ -192,7 +270,7 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 									<div className="relative">
 										<Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
 										<Input
-											placeholder="Nhập email Mentor của bạn"
+											placeholder="mentor@email.com"
 											{...field}
 											className="h-11 rounded-xl border-2 border-gray-200 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
 										/>
@@ -279,18 +357,135 @@ const MentorRegisterForm: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 						)}
 					/>
 
+					<div className="mt-2 border-t border-gray-100 pt-4">
+						<p className="mb-3 text-sm font-semibold text-gray-800">
+							Thông tin Mentor
+						</p>
+						<FormField
+							control={form.control}
+							name="specialties"
+							render={({ field }) => (
+								<FormItem>
+									<FormLabel className="text-sm font-semibold text-gray-700">
+										Lĩnh vực chuyên môn
+									</FormLabel>
+									<FormControl>
+										<Input
+											placeholder="Ví dụ: Frontend, Backend, DevOps"
+											{...field}
+											className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+										/>
+									</FormControl>
+									<p className="mt-1 text-xs text-gray-500">
+										Nhập các chuyên môn, cách nhau bởi dấu phẩy.
+									</p>
+									<FormMessage className="text-xs" />
+								</FormItem>
+							)}
+						/>
+
+						<div className="mt-3 grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="yearsOfExperience"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Số năm kinh nghiệm
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												max={50}
+												placeholder="Ví dụ: 5"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="company"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Công ty hiện tại (tuỳ chọn)
+										</FormLabel>
+										<FormControl>
+											<Input
+												placeholder="Ví dụ: Bit Learning, FPT Software"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+						</div>
+
+						<div className="mt-3 grid grid-cols-2 gap-4">
+							<FormField
+								control={form.control}
+								name="studentsCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Số lượng học viên (ước tính)
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="Ví dụ: 100"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+							<FormField
+								control={form.control}
+								name="coursesCount"
+								render={({ field }) => (
+									<FormItem>
+										<FormLabel className="text-sm font-semibold text-gray-700">
+											Số khoá học đã dạy (ước tính)
+										</FormLabel>
+										<FormControl>
+											<Input
+												type="number"
+												min={0}
+												placeholder="Ví dụ: 5"
+												{...field}
+												className="h-11 rounded-xl border-2 border-gray-200 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
+											/>
+										</FormControl>
+										<FormMessage className="text-xs" />
+									</FormItem>
+								)}
+							/>
+						</div>
+					</div>
+
 					<Button
-						className="bg-linear-to-r h-11 w-full rounded-xl from-blue-700 to-blue-800 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
+						className="bg-linear-to-r h-11 w-full rounded-xl bg-primary font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
 						type="submit"
 						isDisabled={isRegistering}
 					>
-						{isRegistering ? "Đang đăng ký..." : "Tạo tài khoản Mentor"}
+						{isRegistering ? "Đang đăng ký..." : "Tạo tài khoản"}
 					</Button>
 
 					<button
 						type="button"
 						onClick={onBack}
-						className="mt-3 w-full text-center text-xs font-medium text-blue-700 underline-offset-2 hover:underline"
+						className="mt-3 w-full text-center text-xs font-medium text-primary underline-offset-2 hover:underline"
 					>
 						Quay lại đăng nhập Mentor
 					</button>
@@ -310,7 +505,7 @@ const MentorSigninForm: React.FC = () => {
 	const [userEmail, setUserEmail] = React.useState("");
 	const navigate = useNavigate();
 
-	const { mutate: login, isPending: isLoading } = useLogin({
+	const { mutate: login, isPending: isLoading } = useLoginUser({
 		on2FARequired: (email: string) => {
 			setUserEmail(email);
 			setShow2FAForm(true);
@@ -346,6 +541,7 @@ const MentorSigninForm: React.FC = () => {
 		login({
 			email: values.email,
 			password: values.password,
+			role: "MENTOR",
 		});
 	}
 
@@ -372,15 +568,7 @@ const MentorSigninForm: React.FC = () => {
 
 			<div className="flex flex-1 items-center justify-center px-6 pb-6">
 				<div className="w-full max-w-md">
-					<div className="mb-8 flex items-center justify-center">
-						<div className="flex items-center space-x-2">
-							<img
-								src="/Logo.png"
-								alt="Bit Learning Logo"
-								className="h-10 w-36 object-contain"
-							/>
-						</div>
-					</div>
+					<Logo />
 
 					<div className="rounded-2xl border border-gray-100 bg-white p-8 shadow-xl">
 						{show2FAForm ? (
@@ -395,13 +583,14 @@ const MentorSigninForm: React.FC = () => {
 							<MentorRegisterForm onBack={() => setIsRegisterMode(false)} />
 						) : (
 							<>
-								<div className="mb-6 text-center">
-									<div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-2xl bg-blue-50 text-blue-600">
-										<User2Icon className="h-6 w-6" />
-									</div>
-									<h1 className="mb-2 text-xl font-bold text-gray-900">
-										Đăng nhập Mentor
+								<div className="mb-6 text-left">
+									<h1 className="text-[32px] font-bold tracking-[-0.03em] text-slate-900 dark:text-white">
+										Chào mừng bạn đến với <br /> Bit Learning!
 									</h1>
+									<p className="max-w-sm text-sm leading-6 text-slate-500 dark:text-slate-400">
+										Cùng nhau chia sẻ kiến thức và kinh nghiệm để phát triển
+										cộng đồng học tập trực tuyến tốt hơn.
+									</p>
 								</div>
 
 								{errorMsg && (
@@ -444,7 +633,7 @@ const MentorSigninForm: React.FC = () => {
 														<div className="relative">
 															<Mail className="absolute left-3 top-1/2 h-5 w-5 -translate-y-1/2 transform text-gray-400" />
 															<Input
-																placeholder="Nhập email Mentor của bạn"
+																placeholder="mentor@email.com"
 																{...field}
 																className="h-11 rounded-xl border-2 border-gray-200 pl-10 transition-all duration-200 focus:border-blue-600 focus:ring-2 focus:ring-blue-100"
 															/>
@@ -508,7 +697,7 @@ const MentorSigninForm: React.FC = () => {
 												</div>
 												<Link
 													to="/forgot-password"
-													className="text-sm font-medium text-blue-700 transition-colors hover:text-blue-800"
+													className="text-sm font-medium text-primary"
 												>
 													Quên mật khẩu?
 												</Link>
@@ -522,7 +711,7 @@ const MentorSigninForm: React.FC = () => {
 												></Checkbox>
 												<Label
 													htmlFor="mentor-register-toggle"
-													className="cursor-pointer text-xs text-gray-600"
+													className="cursor-pointer text-sm text-gray-600"
 												>
 													Tôi chưa có tài khoản, đăng ký Mentor mới
 												</Label>
@@ -530,7 +719,10 @@ const MentorSigninForm: React.FC = () => {
 										</div>
 
 										<Button
-											className="bg-linear-to-r h-11 w-full rounded-xl from-blue-700 to-blue-800 font-semibold text-white shadow-lg transition-all duration-200 hover:from-blue-800 hover:to-blue-900 hover:shadow-xl"
+											className={cn(
+												"h-13 w-full rounded-2xl text-sm font-semibold text-white bg-primary-orange shadow-[0_10px_24px_rgba(37,99,235,0.22)] transition-all duration-200",
+												"hover:translate-y-px active:translate-y-0",
+											)}
 											type="submit"
 											isDisabled={isLoading}
 										>

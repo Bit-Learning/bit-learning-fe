@@ -1,72 +1,107 @@
+import { useState } from "react";
 import type React from "react";
 import { cn } from "@/shared/lib/utils";
-import dashboardDark from "@/assets/dashboard-dark.png";
-import dashboardLight from "@/assets/dashboard-light.png";
+import dashboard from "@/shared/assets/dashboard.jpg";
+import managerBg from "@/shared/assets/dashboard2.jpg"; // ← swap with your actual asset
 import { UserAuthForm } from "../components/user-auth-form";
 
-const SignIn: React.FC = () => {
-	return (
-		<>
-			{" "}
-			<div className="relative container grid h-svh flex-col items-center justify-center lg:max-w-none lg:grid-cols-2 lg:px-0">
-				<div className="lg:p-8">
-					<div className="mx-auto flex w-full flex-col justify-center space-y-2 py-8 sm:w-120 sm:p-8">
-						<div className="mb-4 flex items-center justify-center">
-							<h1 className="text-xl font-medium">Bit Learning</h1>
-						</div>
-					</div>
-					<div className="mx-auto flex w-full max-w-sm flex-col justify-center space-y-2">
-						<div className="flex flex-col space-y-2 text-start">
-							<h2 className="text-lg font-semibold tracking-tight">Sign in</h2>
-							<p className="text-muted-foreground text-sm">
-								Enter your email and password below <br />
-								to log into your account
-							</p>
-						</div>
-						<UserAuthForm />
-						<p className="text-muted-foreground px-8 text-center text-sm">
-							By clicking sign in, you agree to our{" "}
-							<a
-								href="/terms"
-								className="hover:text-primary underline underline-offset-4"
-							>
-								Terms of Service
-							</a>{" "}
-							and{" "}
-							<a
-								href="/privacy"
-								className="hover:text-primary underline underline-offset-4"
-							>
-								Privacy Policy
-							</a>
-							.
-						</p>
-					</div>
-				</div>
+interface SignInProps {
+	adminBackgroundUrl?: string;
+	managerBackgroundUrl?: string;
+}
 
-				<div
-					className={cn(
-						"bg-muted relative h-full overflow-hidden max-lg:hidden",
-						"[&>img]:absolute [&>img]:top-[15%] [&>img]:left-20 [&>img]:h-full [&>img]:w-full [&>img]:object-cover [&>img]:object-top-left [&>img]:select-none",
-					)}
-				>
-					<img
-						src={dashboardLight}
-						className="dark:hidden"
-						width={1024}
-						height={1151}
-						alt="Shadcn-Admin"
-					/>
-					<img
-						src={dashboardDark}
-						className="hidden dark:block"
-						width={1024}
-						height={1138}
-						alt="Shadcn-Admin"
-					/>
+const SignIn: React.FC<SignInProps> = ({
+	adminBackgroundUrl = dashboard,
+	managerBackgroundUrl = managerBg,
+}) => {
+	const [role, setRole] = useState<"ADMIN" | "MANAGER">("ADMIN");
+	const isManager = role === "MANAGER";
+
+	return (
+		<div className="relative h-svh w-full overflow-hidden lg:flex">
+			{/* ── Form Panel ─────────────────────────────────────────────── */}
+			<div
+				className={cn(
+					"absolute inset-y-0 flex w-full flex-col items-center justify-center bg-white px-6 transition-all duration-500 ease-in-out lg:w-1/2 lg:px-8",
+					isManager ? "lg:translate-x-full" : "lg:translate-x-0",
+					"z-10",
+				)}
+				style={{ willChange: "transform" }}
+			>
+				<div className="mx-auto w-full max-w-sm space-y-8">
+					<div className="space-y-1 text-center">
+						<div className="flex items-center justify-center gap-2">
+							<img
+								src="/Logo.png"
+								alt="Bit Learning Logo"
+								className="h-10 w-full object-contain"
+							/>
+						</div>
+					</div>
+
+					<UserAuthForm onRoleChange={setRole} />
+
+					<p className="text-center text-xs text-slate-400">
+						Bằng cách đăng nhập, bạn đồng ý với{" "}
+						<a
+							href="/terms"
+							className="underline underline-offset-2 hover:text-blue-600"
+						>
+							Điều khoản dịch vụ
+						</a>{" "}
+						và{" "}
+						<a
+							href="/privacy"
+							className="underline underline-offset-2 hover:text-blue-600"
+						>
+							Chính sách bảo mật
+						</a>
+						.
+					</p>
 				</div>
 			</div>
-		</>
+
+			{/* ── Background Panel ───────────────────────────────────────── */}
+			<div
+				className={cn(
+					"absolute inset-y-0 hidden w-1/2 overflow-hidden transition-all duration-500 ease-in-out lg:block",
+					isManager ? "left-0" : "left-1/2",
+				)}
+				style={{ willChange: "transform" }}
+			>
+				{/* Color overlay */}
+				<div
+					className={cn(
+						"absolute inset-0 z-10 opacity-20",
+						isManager
+							? "bg-linear-to-r from-orange-900 to-transparent"
+							: "bg-linear-to-l from-blue-900 to-transparent",
+					)}
+				/>
+
+				{/* Admin background — visible by default, fades out on Manager */}
+				<img
+					src={adminBackgroundUrl}
+					alt="Admin Background"
+					className={cn(
+						"absolute inset-0 h-full w-full select-none object-cover object-top-left transition-opacity duration-500",
+						isManager ? "opacity-0" : "opacity-100",
+					)}
+					draggable={false}
+				/>
+
+				{/* Manager background — hidden by default, fades in on Manager */}
+				<img
+					src={managerBackgroundUrl}
+					alt="Manager Background"
+					className={cn(
+						"absolute inset-0 h-full w-full select-none object-cover object-top-left transition-opacity duration-500",
+						isManager ? "opacity-100" : "opacity-0",
+					)}
+					draggable={false}
+				/>
+			</div>
+		</div>
 	);
 };
 

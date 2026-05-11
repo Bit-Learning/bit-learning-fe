@@ -1,5 +1,17 @@
 import React, { useState } from "react";
-import { BookOpen, DollarSign, FileText, Globe, GraduationCap, Image, Loader2, Save, Target, X } from "lucide-react";
+import {
+  BookOpen,
+  DollarSign,
+  FileText,
+  Globe,
+  GraduationCap,
+  Image,
+  Loader2,
+  Save,
+  Tag,
+  Target,
+  X,
+} from "lucide-react";
 import { useForm, type Resolver } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
@@ -11,6 +23,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Textarea } from "@/components/ui/textarea";
 import { type CourseDetail, CourseLevel, Language, type UpdateCourseRequest } from "../types/course.type";
 import { useUpdateCourse, useUpdateCourseThumbnail } from "../queries/useCourse";
+import { CategoryInput } from "./CategoryInput";
 
 interface EditCourseModalProps {
   course: CourseDetail;
@@ -29,12 +42,13 @@ const updateCourseSchema = z.object({
   audience: z.string().optional(),
   level: z.nativeEnum(CourseLevel),
   grade: z.coerce.number().min(1).max(12),
+  categories: z.array(z.string()).optional(),
 });
 
 type UpdateCourseFormValues = z.infer<typeof updateCourseSchema>;
 
 const LEVELS = [
-  { value: CourseLevel.BEGINNER, label: "Cơ bản" },
+  { value: CourseLevel.BEGINNING, label: "Cơ bản" },
   { value: CourseLevel.INTERMEDIATE, label: "Trung cấp" },
   { value: CourseLevel.ADVANCED, label: "Nâng cao" },
 ];
@@ -42,7 +56,10 @@ const LANGUAGES = [
   { value: Language.VIETNAMESE, label: "🇻🇳 Tiếng Việt" },
   { value: Language.ENGLISH, label: "🇺🇸 Tiếng Anh" },
 ];
-const GRADES = Array.from({ length: 10 }, (_, i) => ({ value: i + 3, label: `Lớp ${i + 3}` }));
+const GRADES = Array.from({ length: 10 }, (_, i) => ({
+  value: i + 3,
+  label: `Lớp ${i + 3}`,
+}));
 
 export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClose, onSuccess }) => {
   const [thumbnailFile, setThumbnailFile] = useState<File | null>(null);
@@ -54,6 +71,8 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
   const {
     register,
     handleSubmit,
+    setValue,
+    watch,
     formState: { errors },
   } = useForm<UpdateCourseFormValues>({
     resolver: zodResolver(updateCourseSchema) as Resolver<UpdateCourseFormValues>,
@@ -68,8 +87,11 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
       audience: course.audience,
       level: course.level,
       grade: course.grade,
+      categories: course.categories || [],
     },
   });
+
+  const categories = watch("categories") || [];
 
   const handleThumbnailChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -83,9 +105,15 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
 
   const onSubmit = async (data: UpdateCourseFormValues) => {
     try {
-      await updateCourseMutation.mutateAsync({ id: course.id, data: data as UpdateCourseRequest });
+      await updateCourseMutation.mutateAsync({
+        id: course.id,
+        data: data as UpdateCourseRequest,
+      });
       if (thumbnailFile) {
-        await updateThumbnailMutation.mutateAsync({ id: course.id, thumbnail: thumbnailFile });
+        await updateThumbnailMutation.mutateAsync({
+          id: course.id,
+          thumbnail: thumbnailFile,
+        });
       }
       onSuccess?.();
       onClose();
@@ -101,8 +129,8 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-      <Card className="max-h-[95vh] w-full max-w-4xl overflow-hidden">
-        <div className="shrink-0 bg-linear-to-r from-blue-600 to-indigo-600 p-6 text-white">
+      <Card className="max-h-[95vh] w-full p-0 max-w-4xl overflow-hidden">
+        <div className="shrink-0 p-6 bg-primary text-white">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
               <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-white/20">
@@ -119,13 +147,16 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
           </div>
         </div>
 
-        {/* Form Content */}
         <form onSubmit={handleSubmit(onSubmit)} className="flex flex-1 flex-col overflow-hidden">
           <Tabs defaultValue="basic" className="flex flex-1 flex-col overflow-hidden">
-            <TabsList className="mx-6 mt-4 grid w-auto shrink-0 grid-cols-3">
+            <TabsList className="mx-6 mt-4 grid w-auto shrink-0 grid-cols-4">
               <TabsTrigger value="basic" className="gap-2">
                 <BookOpen className="h-4 w-4" />
                 Thông tin cơ bản
+              </TabsTrigger>
+              <TabsTrigger value="categories" className="gap-2">
+                <Tag className="h-4 w-4" />
+                Danh mục
               </TabsTrigger>
               <TabsTrigger value="detail" className="gap-2">
                 <FileText className="h-4 w-4" />
@@ -137,9 +168,7 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
               </TabsTrigger>
             </TabsList>
 
-            {/* Scrollable Content */}
             <div className="flex-1 overflow-y-auto px-6 py-4">
-              {/* Tab: Thông tin cơ bản */}
               <TabsContent value="basic" className="mt-0 space-y-6">
                 <div className="space-y-5">
                   <div className="space-y-1">
@@ -232,7 +261,23 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
                 </div>
               </TabsContent>
 
-              {/* Tab: Chi tiết */}
+              <TabsContent value="categories" className="mt-0 space-y-4">
+                <div className="space-y-2">
+                  <Label className="flex items-center gap-2 text-base font-semibold">
+                    <Tag className="h-4 w-4 text-blue-600" />
+                    Danh mục khóa học
+                  </Label>
+                  <p className="text-sm text-gray-500">
+                    Nhập tên danh mục và nhấn Enter để thêm. Nhấn Backspace để xóa danh mục cuối.
+                  </p>
+                  <CategoryInput
+                    value={categories}
+                    onChange={(val) => setValue("categories", val)}
+                    placeholder="Nhập danh mục..."
+                  />
+                </div>
+              </TabsContent>
+
               <TabsContent value="detail" className="mt-0 space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="outcome">Kết quả đạt được</Label>
@@ -261,7 +306,6 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
                 </div>
               </TabsContent>
 
-              {/* Tab: Ảnh bìa */}
               <TabsContent value="thumbnail" className="mt-0">
                 <div className="flex flex-col items-center space-y-6">
                   <div className="w-full max-w-2xl">
@@ -296,11 +340,7 @@ export const EditCourseModal: React.FC<EditCourseModalProps> = ({ course, onClos
                 <X className="mr-2 h-4 w-4" />
                 Hủy
               </Button>
-              <Button
-                type="submit"
-                disabled={isLoading}
-                className="bg-linear-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700"
-              >
+              <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-blue-700">
                 {isLoading ? (
                   <>
                     <Loader2 className="mr-2 h-4 w-4 animate-spin" />

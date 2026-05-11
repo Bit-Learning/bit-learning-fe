@@ -1,57 +1,52 @@
 import React, { useState } from "react";
 import { useNavigate, useParams } from "@tanstack/react-router";
-// import { useContestDetail } from "../queries/useContest";
+import { useContestDetail, useEndContest } from "../queries/useContest";
 import { ContestStatus } from "../types/contest.type";
-import { Calendar, Edit2, StopCircle } from "lucide-react";
+import { ArrowLeft, Calendar, Edit2, Loader2, StopCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 import { ContestOverview } from "../components/ContestOverview";
-import { ContestProblems } from "../components/ContestProblems";
 import { ContestParticipants } from "../components/ContestParticipants";
 import { ContestLeaderboard } from "../components/ContestLeaderboard";
 import { ContestSubmissions } from "../components/ContestSubmissions";
 import { ContestClarifications } from "../components/ContestClarifications";
-
-const MOCK_CONTEST = {
-  contestId: "1",
-  title: "Spring Code Challenge 2026",
-  slug: "spring-code-challenge-2026",
-  description: "Chào mừng bạn đến với Spring Code Challenge 2026...",
-  status: ContestStatus.RUNNING,
-  startTime: "2026-03-15T08:00:00",
-  endTime: "2026-03-15T11:00:00",
-  durationMinutes: 180,
-  problemCount: 5,
-  participantCount: 150,
-  isRegistered: true,
-  createdAt: "2026-03-01T00:00:00",
-};
+import ContestProblems from "../components/ContestProblems";
 
 const ContestDetailPage: React.FC = () => {
-  const { id } = useParams({ from: "/_authenticated/contests/$id" });
+  const { id } = useParams({ from: "/_authenticated/contests/$id/" });
   const navigate = useNavigate();
-  // const { data: contest, isLoading } = useContestDetail(contestId);
-  const contest = MOCK_CONTEST;
-  const isLoading = false;
+  const { data: contest, isLoading } = useContestDetail(id);
   const [activeTab, setActiveTab] = useState("overview");
+  const endContestMutation = useEndContest();
 
   const getStatusBadge = (status: ContestStatus) => {
     const config = {
       [ContestStatus.RUNNING]: {
         variant: "default" as const,
-        className: "bg-green-500",
+        className: "bg-green-500 text-white px-4 py-1",
         label: "Đang diễn ra",
         hasAnimation: true,
       },
       [ContestStatus.UPCOMING]: {
         variant: "secondary" as const,
-        className: "bg-amber-500",
+        className: "bg-orange-500 text-white px-4 py-1",
         label: "Sắp tới",
         hasAnimation: false,
       },
       [ContestStatus.ENDED]: {
         variant: "outline" as const,
-        className: "",
+        className: "bg-gray-500 text-white px-4 py-1",
         label: "Đã kết thúc",
         hasAnimation: false,
       },
@@ -68,7 +63,7 @@ const ContestDetailPage: React.FC = () => {
   };
 
   const calculateTimeRemaining = () => {
-    const end = new Date(contest.endTime);
+    const end = new Date(contest?.endTime!);
     const now = new Date();
     const diff = end.getTime() - now.getTime();
 
@@ -80,9 +75,13 @@ const ContestDetailPage: React.FC = () => {
     return `${hours}h ${minutes}m`;
   };
 
-  if (isLoading) {
-    return <div className="p-8">Loading...</div>;
-  }
+  const handleEndContest = (contestId: string) => {
+    endContestMutation.mutate(contestId);
+  };
+
+  const handleBack = () => {
+    navigate({ to: "/contests" });
+  };
 
   const handleEditContest = () => {
     navigate({
@@ -90,14 +89,43 @@ const ContestDetailPage: React.FC = () => {
       params: { id },
     });
   };
-
+  if (isLoading) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-12 h-12 animate-spin text-blue-600 mx-auto mb-4" />
+          <p className="text-gray-600">Đang tải cuộc thi...</p>
+        </div>
+      </div>
+    );
+  }
+  if (!contest) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <p className="text-gray-600">Không tìm thấy cuộc thi</p>
+          <Button onClick={handleBack} variant="link" className="mt-4">
+            Quay lại danh sách
+          </Button>
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="p-8">
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-8">
+    <div className="px-8 py-4">
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 mb-4">
         <div>
+          <div className="mb-4">
+            <Button variant="link" onClick={handleBack} className="gap-2 border-gray-300">
+              <ArrowLeft className="w-4 h-4" />
+              Quay lại danh sách
+            </Button>
+          </div>
           <div className="flex items-center gap-3 mb-2">
-            {getStatusBadge(contest.status)}
-            {contest.status === ContestStatus.RUNNING && (
+            <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">{contest?.title}</h2>
+
+            {getStatusBadge(contest?.status!)}
+            {contest?.status === ContestStatus.RUNNING && (
               <div className="flex items-center gap-1.5 text-slate-500 dark:text-slate-400">
                 <Calendar className="w-4 h-4" />
                 <span className="text-sm font-medium uppercase tracking-tight">
@@ -106,16 +134,39 @@ const ContestDetailPage: React.FC = () => {
               </div>
             )}
           </div>
-          <h2 className="text-3xl font-extrabold text-slate-900 dark:text-white">{contest.title}</h2>
+          <p className="text-sm text-gray-500">Mã cuộc thi: {contest?.slug}</p>
         </div>
         <div className="flex gap-3">
-          {contest.status === ContestStatus.RUNNING && (
-            <Button variant="outline">
-              <StopCircle className="w-4 h-4 mr-2" />
-              Kết thúc sớm
-            </Button>
+          {contest?.status === ContestStatus.RUNNING && (
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" disabled={endContestMutation.isPending} className="p-5 text-md">
+                  <StopCircle className="w-4 h-4 mr-2" />
+                  Kết thúc cuộc thi
+                </Button>
+              </AlertDialogTrigger>
+
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Kết thúc cuộc thi?</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Hành động này sẽ kết thúc cuộc thi ngay lập tức. Người tham gia sẽ không thể tiếp tục làm bài.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Hủy</AlertDialogCancel>
+                  <AlertDialogAction
+                    onClick={() => handleEndContest(contest.contestId)}
+                    disabled={endContestMutation.isPending}
+                  >
+                    Xác nhận
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
           )}
-          <Button onClick={handleEditContest}>
+          <Button onClick={handleEditContest} className="p-5 text-md">
             <Edit2 className="w-4 h-4 mr-2" />
             Chỉnh sửa
           </Button>
@@ -190,9 +241,9 @@ const ContestDetailPage: React.FC = () => {
         </button>
       </div>
       <div className="mt-6">
-        {activeTab === "overview" && <ContestOverview contest={contest} />}
+        {activeTab === "overview" && <ContestOverview contest={contest!} />}
 
-        {activeTab === "problems" && <ContestProblems contestId={id} />}
+        {activeTab === "problems" && <ContestProblems contestId={id} status={contest.status} />}
 
         {activeTab === "participants" && <ContestParticipants contestId={id} />}
 

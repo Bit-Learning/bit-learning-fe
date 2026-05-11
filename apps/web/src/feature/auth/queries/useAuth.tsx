@@ -1,18 +1,10 @@
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "@/shared/components/Sonner";
+import { wsService } from "@/feature/notification/services/websocket.service";
 import { clearAuthTokens, setAuthTokens } from "@/shared/lib/cookies";
 import { useAppDispatch } from "@/shared/redux/store";
-import {
-	ActivateAccount,
-	FinishPasswordReset,
-	GitHubOAuth2Login,
-	GoogleOAuth2Login,
-	Login,
-	Logout,
-	Register,
-	RequestPasswordReset,
-	VerifyResetKey,
-} from "../api/auth.api";
+import { setApiAuthorizationHeader } from "@/shared/api/api";
+import { authApi } from "../api/auth.api";
 import {
 	setErrorAction,
 	setIsAuthenticatedAction,
@@ -21,6 +13,7 @@ import {
 } from "../store";
 import type {
 	TLoginRequest,
+	TLoginRoleRequest,
 	TRegisterRequest,
 	TResetPasswordRequest,
 } from "../types/auth.type";
@@ -38,30 +31,32 @@ export function useLogin(options?: {
 
 	return useMutation({
 		mutationFn: async (credentials: TLoginRequest) => {
-			const response = await Login(credentials);
+			const response = await authApi.login(credentials);
 			return response.data.data as any;
 		},
 		onMutate: () => {
+			// Clear stale token before login to prevent old token being sent in race condition
+			clearAuthTokens();
 			dispatch(setIsLoadingAction(true));
 			dispatch(setErrorAction(null));
 		},
 		onSuccess: (data: any) => {
-			// Check if 2FA is required
 			if (data.requires2FA) {
-				// Call the callback to show 2FA form
 				options?.on2FARequired?.(data.email);
 				dispatch(setIsLoadingAction(false));
 				return;
 			}
 
-			// Normal login flow
 			setAuthTokens(data.accessToken, data.refreshToken);
+			// Set Authorization header immediately so subsequent requests use the new token
+			// without waiting for the cookie to be read by the interceptor
+			if (data.accessToken) {
+				setApiAuthorizationHeader(data.accessToken);
+			}
 			dispatch(setIsAuthenticatedAction(true));
 			dispatch(setUserInfoAction(data.user));
 			queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() });
-			toast.success({
-				title: "Đăng nhập thành công",
-			});
+			toast.success({ title: "Đăng nhập thành công" });
 		},
 		onError: (error: any) => {
 			const errorMessage =
@@ -106,12 +101,78 @@ export function useLogin(options?: {
 	});
 }
 
+export function useLoginUser(options?: {
+	on2FARequired?: (email: string) => void;
+}) {
+	const dispatch = useAppDispatch();
+	const queryClient = useQueryClient();
+
+	return useMutation({
+		mutationFn: async (credentials: TLoginRoleRequest) => {
+			const response = await authApi.loginUser(credentials);
+			return response.data.data as any;
+		},
+		onMutate: () => {
+			// Clear stale token before login to prevent old token being sent in race condition
+			clearAuthTokens();
+			dispatch(setIsLoadingAction(true));
+			dispatch(setErrorAction(null));
+		},
+		onSuccess: (data: any) => {
+			if (data.requires2FA) {
+				options?.on2FARequired?.(data.email);
+				dispatch(setIsLoadingAction(false));
+				return;
+			}
+
+			setAuthTokens(data.accessToken, data.refreshToken);
+			// Set Authorization header immediately so subsequent requests use the new token
+			if (data.accessToken) {
+				setApiAuthorizationHeader(data.accessToken);
+			}
+			dispatch(setIsAuthenticatedAction(true));
+			dispatch(setUserInfoAction(data.user));
+			queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() });
+			toast.success({ title: "Đăng nhập thành công" });
+		},
+		onError: (error: any) => {
+			const errorMessage =
+				error?.response?.data?.message ||
+				error?.response?.data?.error ||
+				"Đăng nhập không thành công";
+
+			dispatch(setErrorAction(errorMessage));
+
+			const statusCode = error?.response?.status;
+
+			if (statusCode === 401) {
+				toast.error({
+					title: "Email hoặc mật khẩu không đúng",
+				});
+			} else if (statusCode === 403) {
+				toast.error({
+					title: "Không có quyền truy cập",
+					description: "Bạn không có quyền đăng nhập với vai trò này.",
+				});
+			} else {
+				toast.error({
+					title: "Đăng nhập thất bại",
+					description: errorMessage,
+				});
+			}
+		},
+		onSettled: () => {
+			dispatch(setIsLoadingAction(false));
+		},
+	});
+}
+
 export function useRegister() {
 	const dispatch = useAppDispatch();
 
 	return useMutation({
 		mutationFn: async (data: TRegisterRequest) => {
-			const response = await Register(data);
+			const response = await authApi.register(data);
 			return response.data;
 		},
 		onMutate: () => {
@@ -123,7 +184,7 @@ export function useRegister() {
 				title: "Đăng ký thành công!",
 				description:
 					data.message ||
-					"Vui lòng kiểm tra email để kích hoạt tài khoản của bạn.",
+					"Vui lòng kiểm tra email để kích hoạt tài khoản của bạn. Nếu bạn đăng ký tài khoản Mentor, yêu cầu của bạn sẽ được quản trị viên xem xét và phê duyệt trước khi sử dụng đầy đủ tính năng Mentor.",
 			});
 		},
 		onError: (error: any) => {
@@ -134,11 +195,7 @@ export function useRegister() {
 				"Đăng ký thất bại";
 
 			dispatch(setErrorAction(errorMessage));
-
-			toast.error({
-				title: "Đăng ký thất bại",
-				description: errorMessage,
-			});
+			toast.error({ title: "Đăng ký thất bại", description: errorMessage });
 		},
 		onSettled: () => {
 			dispatch(setIsLoadingAction(false));
@@ -151,7 +208,7 @@ export function useActivateAccount() {
 
 	return useMutation({
 		mutationFn: async (key: string) => {
-			const response = await ActivateAccount(key);
+			const response = await authApi.activateAccount(key);
 			return response.data;
 		},
 		onMutate: () => {
@@ -170,11 +227,7 @@ export function useActivateAccount() {
 				"Kích hoạt tài khoản thất bại. Liên kết có thể đã hết hạn hoặc không hợp lệ.";
 
 			dispatch(setErrorAction(errorMessage));
-
-			toast.error({
-				title: "Kích hoạt thất bại",
-				description: errorMessage,
-			});
+			toast.error({ title: "Kích hoạt thất bại", description: errorMessage });
 		},
 		onSettled: () => {
 			dispatch(setIsLoadingAction(false));
@@ -187,7 +240,7 @@ export function useForgotPassword() {
 
 	return useMutation({
 		mutationFn: async (email: string) => {
-			const response = await RequestPasswordReset(email);
+			const response = await authApi.requestPasswordReset(email);
 			return response.data;
 		},
 		onMutate: () => {
@@ -206,10 +259,7 @@ export function useForgotPassword() {
 				error?.response?.data?.error ||
 				"Không thể gửi email đặt lại mật khẩu";
 
-			toast.error({
-				title: "Gửi email thất bại",
-				description: errorMessage,
-			});
+			toast.error({ title: "Gửi email thất bại", description: errorMessage });
 		},
 		onSettled: () => {
 			dispatch(setIsLoadingAction(false));
@@ -222,7 +272,7 @@ export function useVerifyResetKey() {
 
 	return useMutation({
 		mutationFn: async (key: string) => {
-			const response = await VerifyResetKey(key);
+			const response = await authApi.verifyResetKey(key);
 			return response.data;
 		},
 		onMutate: () => {
@@ -249,7 +299,7 @@ export function useResetPassword() {
 
 	return useMutation({
 		mutationFn: async (data: TResetPasswordRequest) => {
-			const response = await FinishPasswordReset(data);
+			const response = await authApi.finishPasswordReset(data);
 			return response.data;
 		},
 		onMutate: () => {
@@ -282,14 +332,14 @@ export function useLogout() {
 
 	return async () => {
 		try {
-			// Call backend to invalidate session and clear HttpOnly refresh token cookie
-			await Logout();
+			await authApi.logout();
 		} catch (error) {
 			console.error("Logout API error:", error);
-			// Continue with local cleanup even if API call fails
 		} finally {
-			// Always clear local auth state
+			wsService.disconnect();
 			clearAuthTokens();
+			// Clear Authorization header so no stale token is sent after logout
+			setApiAuthorizationHeader("");
 			dispatch(setIsAuthenticatedAction(false));
 			dispatch(setUserInfoAction(null));
 			dispatch(setErrorAction(null));
@@ -308,7 +358,7 @@ export function useGoogleLogin() {
 
 	return useMutation({
 		mutationFn: async (code: string) => {
-			const response = await GoogleOAuth2Login(code);
+			const response = await authApi.googleOAuth2Login(code);
 			return response.data.data;
 		},
 		onMutate: () => {
@@ -316,6 +366,9 @@ export function useGoogleLogin() {
 		},
 		onSuccess: (data: any) => {
 			setAuthTokens(data.accessToken, data.refreshToken);
+			if (data.accessToken) {
+				setApiAuthorizationHeader(data.accessToken);
+			}
 			dispatch(setIsAuthenticatedAction(true));
 			dispatch(setUserInfoAction(data.user));
 			queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() });
@@ -336,12 +389,9 @@ export function useGoogleLogin() {
 			const errorMessage =
 				error?.response?.data?.message ||
 				"Đăng nhập với Google không thành công";
-			dispatch(setErrorAction(errorMessage));
 
-			toast.error({
-				title: "Đăng nhập thất bại",
-				description: errorMessage,
-			});
+			dispatch(setErrorAction(errorMessage));
+			toast.error({ title: "Đăng nhập thất bại", description: errorMessage });
 		},
 		onSettled: () => {
 			dispatch(setIsLoadingAction(false));
@@ -355,7 +405,7 @@ export function useGitHubLogin() {
 
 	return useMutation({
 		mutationFn: async (code: string) => {
-			const response = await GitHubOAuth2Login(code);
+			const response = await authApi.gitHubOAuth2Login(code);
 			return response.data.data;
 		},
 		onMutate: () => {
@@ -363,6 +413,9 @@ export function useGitHubLogin() {
 		},
 		onSuccess: (data: any) => {
 			setAuthTokens(data.accessToken, data.refreshToken);
+			if (data.accessToken) {
+				setApiAuthorizationHeader(data.accessToken);
+			}
 			dispatch(setIsAuthenticatedAction(true));
 			dispatch(setUserInfoAction(data.user));
 			queryClient.invalidateQueries({ queryKey: authQueryKeys.profile() });
@@ -383,12 +436,9 @@ export function useGitHubLogin() {
 			const errorMessage =
 				error?.response?.data?.message ||
 				"Đăng nhập với GitHub không thành công";
-			dispatch(setErrorAction(errorMessage));
 
-			toast.error({
-				title: "Đăng nhập thất bại",
-				description: errorMessage,
-			});
+			dispatch(setErrorAction(errorMessage));
+			toast.error({ title: "Đăng nhập thất bại", description: errorMessage });
 		},
 		onSettled: () => {
 			dispatch(setIsLoadingAction(false));

@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
 
-# Sitemap
-
+Sitemap: https://bit-learning.lch.id.vn/sitemap.xml

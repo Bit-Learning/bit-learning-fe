@@ -1,3 +1,5 @@
+import type { SectionDetail } from "@/feature/lecture/types/section.type";
+
 export enum CourseLevel {
   BEGINNING = "BEGINNING",
   INTERMEDIATE = "INTERMEDIATE",
@@ -13,13 +15,6 @@ export enum CourseStatus {
 export enum Language {
   VIETNAMESE = "VIETNAMESE",
   ENGLISH = "ENGLISH",
-}
-
-export interface SectionDetail {
-  id: number;
-  title: string;
-  order: number;
-  lectures: any[];
 }
 
 export interface CoursePreview {
@@ -95,4 +90,35 @@ export interface MyCourse {
   isDeleted: boolean;
   status: CourseStatus;
   progressPercentage: number;
+}
+
+export interface VerifyCertificateResponse {
+  isValid: boolean;
+  studentName?: string;
+  courseName?: string;
+  completedAt?: string;
+}
+
+export interface SearchCourseRequest {
+  title?: string;
+  minPrice?: number;
+  maxPrice?: number;
+  level?: CourseLevel;
+  minGrade?: number;
+  maxGrade?: number;
+}
+
+export interface Page<T> {
+  content: T[];
+  totalElements: number;
+  totalPages: number;
+  number: number;
+  size: number;
+  first: boolean;
+  last: boolean;
+}
+
+export interface RecommendedCourse {
+  recommendedByGrade: Page<CoursePreview>;
+  recommendedByFavoriteCategories: Page<CoursePreview>;
 }

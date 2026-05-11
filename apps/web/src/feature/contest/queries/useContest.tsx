@@ -1,9 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { useSelector } from "react-redux";
 import { toast } from "@/shared/components/Sonner";
 import contestApi from "../apis/contest.api";
-import { selectSelectedStatus, selectSearchQuery, selectPagination } from "../stores/contest.store";
-import type { SubmitRequest, CreateClarificationRequest, MySubmissionsParams } from "../types/contest.type";
+import {
+  type SubmitRequest,
+  type ContestRunRequest,
+  type ContestDebugRequest,
+  type CreateClarificationRequest,
+  type MySubmissionsParams,
+  ContestSubmissionStatus,
+  ContestListParams,
+} from "../types/contest.type";
 
 export const contestKeys = {
   all: ["contests"] as const,
@@ -19,19 +25,16 @@ export const contestKeys = {
     [...contestKeys.detail(contestId), "leaderboard", page, size] as const,
   clarifications: (contestId: string, page?: number, size?: number) =>
     [...contestKeys.detail(contestId), "clarifications", page, size] as const,
+  myContests: (params?: ContestListParams) => [...contestKeys.all, "my-contests", params] as const,
 };
 
-export const useContestList = () => {
-  const status = useSelector(selectSelectedStatus);
-  const search = useSelector(selectSearchQuery);
-  const { page, size } = useSelector(selectPagination);
-
+export const useContestList = ({ status, search, page, size }: ContestListParams) => {
   return useQuery({
-    queryKey: contestKeys.list({ status: status ?? undefined, search: search ?? undefined, page, size }),
+    queryKey: ["contests", { status, search, page, size }],
     queryFn: async () => {
       const response = await contestApi.listContests({
-        status: status ?? undefined,
-        search: search ?? undefined,
+        status,
+        search,
         page,
         size,
       });
@@ -40,6 +43,20 @@ export const useContestList = () => {
   });
 };
 
+export const useMyContests = ({ status, search, page, size }: ContestListParams) => {
+  return useQuery({
+    queryKey: contestKeys.myContests({ status, search, page, size }),
+    queryFn: async () => {
+      const response = await contestApi.getMyContests({
+        status,
+        search,
+        page,
+        size,
+      });
+      return response.data;
+    },
+  });
+};
 export const useContestDetail = (contestId: string) => {
   return useQuery({
     queryKey: contestKeys.detail(contestId),
@@ -61,7 +78,7 @@ export const useRegisterContest = () => {
       queryClient.invalidateQueries({ queryKey: contestKeys.lists() });
       toast.success({
         title: "Đăng ký thành công!",
-        description: response.message || "Bạn đã đăng ký tham gia cuộc thi.",
+        description: response.data.message || "Bạn đã đăng ký tham gia cuộc thi.",
       });
     },
     onError: (error: any) => {
@@ -95,13 +112,39 @@ export const useSubmitSolution = () => {
       queryClient.invalidateQueries({ queryKey: contestKeys.problems(variables.contestId) });
       toast.success({
         title: "Nộp bài thành công!",
-        description: response.message || "Bài làm của bạn đang được chấm.",
+        description: response.data.message || "Bài làm của bạn đang được chấm.",
       });
     },
     onError: (error: any) => {
       toast.error({
         title: "Nộp bài thất bại!",
         description: error?.response?.data?.message || "Đã xảy ra lỗi khi nộp bài.",
+      });
+    },
+  });
+};
+
+export const useContestRunCode = () => {
+  return useMutation({
+    mutationFn: ({ contestId, request }: { contestId: string; request: ContestRunRequest }) =>
+      contestApi.runCode(contestId, request),
+    onError: (error: any) => {
+      toast.error({
+        title: "Chạy thử thất bại!",
+        description: error?.response?.data?.message || "Đã xảy ra lỗi khi chạy thử.",
+      });
+    },
+  });
+};
+
+export const useContestDebugCode = () => {
+  return useMutation({
+    mutationFn: ({ contestId, request }: { contestId: string; request: ContestDebugRequest }) =>
+      contestApi.debugCode(contestId, request),
+    onError: (error: any) => {
+      toast.error({
+        title: "Debug thất bại!",
+        description: error?.response?.data?.message || "Đã xảy ra lỗi khi debug.",
       });
     },
   });
@@ -134,18 +177,19 @@ export const useSubmissionPolling = (submissionId: string, enabled = true) => {
     queryKey: contestKeys.submission(submissionId),
     queryFn: async () => {
       const response = await contestApi.getSubmissionDetail(submissionId);
-      return response.data;
+      return response.data.data;
     },
     enabled: enabled && !!submissionId,
     refetchInterval: (query) => {
-      const data = query.state.data;
-      const status = data?.status;
-      return status === "PENDING" || status === "RUNNING" ? 2000 : false;
+      const submission = query.state.data;
+      const status = submission?.status;
+
+      return status === ContestSubmissionStatus.PENDING || status === ContestSubmissionStatus.RUNNING ? 2000 : false;
     },
   });
 };
 
-export const useLeaderboard = (contestId: string, page = 0, size = 50) => {
+export const useLeaderboard = (contestId: string, page = 0, size: number) => {
   return useQuery({
     queryKey: contestKeys.leaderboard(contestId, page, size),
     queryFn: async () => {
@@ -166,7 +210,7 @@ export const useCreateClarification = () => {
       queryClient.invalidateQueries({ queryKey: contestKeys.clarifications(variables.contestId) });
       toast.success({
         title: "Gửi câu hỏi thành công!",
-        description: response.message || "Câu hỏi của bạn đã được gửi đến ban tổ chức.",
+        description: response.data.message || "Câu hỏi của bạn đã được gửi đến ban tổ chức.",
       });
     },
     onError: (error: any) => {

@@ -1,16 +1,13 @@
 import React from "react";
-import { BookOpen, CheckCircle, Clock, Award } from "lucide-react";
-import type { DashboardStats as DashboardStatsType } from "../types/dashboard.type";
+import { Award, BookOpen, CheckCircle, Clock } from "lucide-react";
+import { useMyLearningStatistics } from "../../lecture/queries/useLearning";
 
-interface DashboardStatsProps {
-  stats: DashboardStatsType;
-}
-
-const formatMinutes = (minutes: number): string => {
-  if (minutes < 60) return `${minutes} phút`;
-  const hours = Math.floor(minutes / 60);
-  const mins = minutes % 60;
-  return mins > 0 ? `${hours}h ${mins}m` : `${hours} giờ`;
+const formatSeconds = (seconds: number): string => {
+  if (!seconds) return "0 phút";
+  const hours = Math.floor(seconds / 3600);
+  const mins = Math.floor((seconds % 3600) / 60);
+  if (hours > 0) return mins > 0 ? `${hours}h ${mins}m` : `${hours} giờ`;
+  return `${mins} phút`;
 };
 
 const StatCard: React.FC<{
@@ -18,47 +15,77 @@ const StatCard: React.FC<{
   label: string;
   value: string | number;
   subValue?: string;
-  color: string;
-}> = ({ icon, label, value, subValue, color }) => (
-  <div className="rounded-xl border border-gray-200 bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
+  bg: string;
+  borderColor: string;
+  iconColor: string;
+  labelColor: string;
+  valueColor: string;
+  loading?: boolean;
+}> = ({ icon, label, value, subValue, bg, borderColor, labelColor, valueColor, loading }) => (
+  <div className={`rounded-lg border ${borderColor} ${bg} p-5 shadow-sm transition-shadow hover:shadow-md`}>
     <div className="flex items-start justify-between">
-      <div>
-        <p className="text-sm font-medium text-gray-500">{label}</p>
-        <p className="mt-2 text-2xl font-bold text-gray-900">{value}</p>
-        {subValue && <p className="mt-1 text-xs text-gray-400">{subValue}</p>}
+      <div className="flex-1">
+        <p className={`text-sm font-semibold ${labelColor}`}>{label}</p>
+        {loading ? (
+          <div className="mt-2 h-8 w-16 animate-pulse rounded bg-gray-200" />
+        ) : (
+          <p className={`mt-2 text-2xl font-bold ${valueColor}`}>{value}</p>
+        )}
+        {subValue && <p className={`mt-1 text-xs font-medium ${labelColor} opacity-75`}>{subValue}</p>}
       </div>
-      <div className={`rounded-lg p-2.5 ${color}`}>{icon}</div>
+      <div className={`rounded-lg p-3`}>{icon}</div>
     </div>
   </div>
 );
 
-const DashboardStats: React.FC<DashboardStatsProps> = ({ stats }) => {
+const DashboardStats: React.FC = () => {
+  const { data: stats, isLoading } = useMyLearningStatistics();
+
   return (
-    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
       <StatCard
-        icon={<BookOpen className="h-5 w-5 text-blue-600" />}
+        icon={<BookOpen className="h-6 w-6" />}
         label="Khóa học đã đăng ký"
-        value={stats.totalCoursesEnrolled}
-        subValue={`${stats.totalCoursesCompleted} đã hoàn thành`}
-        color="bg-blue-100"
+        value={stats?.totalEnrolledCourses ?? 0}
+        bg="bg-blue-50"
+        borderColor="border-blue-500"
+        iconColor="text-white"
+        labelColor="text-blue-700"
+        valueColor="text-blue-900"
+        loading={isLoading}
       />
       <StatCard
-        icon={<CheckCircle className="h-5 w-5 text-green-600" />}
+        icon={<CheckCircle className="h-6 w-6" />}
         label="Bài học hoàn thành"
-        value={stats.totalLecturesCompleted}
-        color="bg-green-100"
+        value={stats?.totalCompletedLectures ?? 0}
+        bg="bg-green-50"
+        borderColor="border-green-500"
+        iconColor="text-white"
+        labelColor="text-green-700"
+        valueColor="text-green-900"
+        loading={isLoading}
       />
       <StatCard
-        icon={<Clock className="h-5 w-5 text-purple-600" />}
+        icon={<Clock className="h-6 w-6" />}
         label="Thời gian học"
-        value={formatMinutes(stats.totalMinutesLearned)}
-        color="bg-purple-100"
+        value={formatSeconds(stats?.totalDurations ?? 0)}
+        bg="bg-purple-50"
+        borderColor="border-purple-500"
+        iconColor="text-white"
+        labelColor="text-purple-700"
+        valueColor="text-purple-900"
+        loading={isLoading}
       />
       <StatCard
-        icon={<Award className="h-5 w-5 text-amber-600" />}
+        icon={<Award className="h-6 w-6" />}
         label="Chứng chỉ"
-        value={stats.certificatesEarned}
-        color="bg-amber-100"
+        value={stats?.totalCertificates ?? 0}
+        bg="bg-amber-50"
+        borderColor="border-amber-500"
+        iconColor="text-white"
+        labelColor="text-amber-700"
+        valueColor="text-amber-900"
+        loading={isLoading}
       />
     </div>
   );

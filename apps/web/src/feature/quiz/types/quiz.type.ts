@@ -1,8 +1,8 @@
 import { QuestionBriefResponse } from "@/feature/question/types/question.type";
 
-// Quiz Attempt Types
 export interface QuizAttemptRequest {
   examId: number;
+  enrollKey?: string;
 }
 
 export interface QuizAttemptAnswerRequest {
@@ -46,12 +46,14 @@ export interface QuizAttemptResponse {
   score?: number;
   timeRemaining?: number;
   answers: QuizAttemptAnswerResponse[];
+  deviceToken: string;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface QuizAttemptBriefResponse {
   id: number;
+  user: UserSummaryResponse;
   exam: ExamBriefResponse;
   status: QuizAttemptStatus;
   startTime: string;
@@ -99,8 +101,9 @@ export interface QuizSessionAnswerResponse {
   question: QuestionBriefResponse;
   answerText?: string;
   selectedOptionIds?: number[];
-  isMarked: boolean;
+  marked: boolean;
   questionNo: number;
+  correct: boolean;
 }
 
 export interface QuizSessionResponse {
@@ -164,9 +167,10 @@ export interface ExamBriefResponse {
 
 export interface UserSummaryResponse {
   id: number;
-  username: string;
-  email: string;
-  fullName?: string;
+  firstName: string;
+  lastName: string;
+  avatar?: string;
+  role: string;
 }
 
 export interface PaginationParams {

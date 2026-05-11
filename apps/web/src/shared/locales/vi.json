@@ -7,7 +7,7 @@
 		"pageTitle": "Tạo Mind Map - Mentor",
 		"pageDescription": "Tạo sơ đồ tư duy bằng AI",
 		"title": "Tạo Mind Map",
-		"subtitle": "Nhập chủ đề để AI tự động tạo sơ đồ tư duy",
+		"subtitle": "Nhập chủ đề để AI tự động tạo sơ đồ tư duy, giá cho mỗi lần tạo là 2000 BIT",
 		"topicPlaceholder": "Ví dụ: Tìm hiểu về HTML và CSS, Thuật toán sắp xếp...",
 		"layout": {
 			"radial": "Tỏa tròn",

@@ -18,6 +18,7 @@ interface Props {
   description?: string;
   itemName?: string;
   isPending?: boolean;
+  confirmLabel?: string;
 }
 
 const DeleteConfirmModal: React.FC<Props> = ({
@@ -28,6 +29,7 @@ const DeleteConfirmModal: React.FC<Props> = ({
   description,
   itemName,
   isPending = false,
+  confirmLabel = "Xóa",
 }) => {
   const defaultDescription = itemName
     ? `Bạn có chắc chắn muốn xóa "${itemName}"? Hành động này không thể hoàn tác.`
@@ -45,10 +47,10 @@ const DeleteConfirmModal: React.FC<Props> = ({
           <AlertDialogAction
             onClick={onConfirm}
             disabled={isPending}
-            className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            className="bg-destructive text-white hover:bg-destructive/90"
           >
-            {isPending && <Loader2 className="h-4 w-4 animate-spin mr-2" />}
-            Xóa
+            {isPending && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+            {confirmLabel}
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>

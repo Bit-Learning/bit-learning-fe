@@ -1,15 +1,11 @@
-// Admin-specific auth types
-
-export type TUserRole = "ADMIN" | "MANAGER" | "STUDENT" | "MENTOR";
-
 export type TAdminLoginRequest = {
 	email: string;
 	password: string;
+	role: "ADMIN" | "MANAGER";
 };
 
 export type TAdminLoginResponse = {
 	accessToken: string;
-	refreshToken: string;
 	user: TAdminUser;
 };
 
@@ -21,13 +17,11 @@ export type TAdminUser = {
 	avatar: string;
 	email: string;
 	activated: boolean;
-	role: TUserRole;
+	role: "ADMIN" | "MANAGER";
 	langKey: string;
 	lastLoginAttempt: string | null;
 	createdAt: string;
 	updatedAt: string;
 };
 
-export type TRefreshTokenRequest = {
-	refreshToken: string;
-};
+export type TRefreshTokenRequest = Record<string, never>;

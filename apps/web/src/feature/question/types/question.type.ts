@@ -1,3 +1,8 @@
+import { UserSummary } from "@/feature/exam/types/exam.type";
+import { TChapterBriefResponse } from "@/feature/matrix/types/chapter.type";
+import { TLessonBriefResponse } from "@/feature/matrix/types/lesson.type";
+import { TSubjectBriefResponse } from "@/feature/matrix/types/subject.type";
+
 export enum QuestionType {
   MCQ = "MCQ",
   ESSAY = "ESSAY",
@@ -15,6 +20,12 @@ export enum ApprovalStatus {
   APPROVED = "APPROVED",
   REJECTED = "REJECTED",
 }
+
+export enum QuestionMediaType {
+  IMAGE = "IMAGE",
+  VIDEO = "VIDEO",
+}
+
 export interface OptionRequest {
   label?: string;
   content: string;
@@ -28,24 +39,6 @@ export interface OptionResponse {
   content: string;
   isCorrect: boolean;
   orderNo: number;
-}
-
-export interface SubjectBriefResponse {
-  id: number;
-  name: string;
-  code: string;
-}
-
-export interface ChapterBriefResponse {
-  id: number;
-  name: string;
-  code: string;
-}
-
-export interface LessonBriefResponse {
-  id: number;
-  name: string;
-  code: string;
 }
 
 export interface TagResponse {
@@ -71,6 +64,7 @@ export interface QuestionImportRequest {
   curriculumCode: string;
   lessonCode: string;
   content: string;
+  lessonId: number;
   canonicalAnswer?: string;
   questionType: QuestionType;
   questionLevel: QuestionLevel;
@@ -84,14 +78,18 @@ export interface QuestionResponse {
   canonicalAnswer?: string;
   questionType: QuestionType;
   questionLevel: QuestionLevel;
-  subject?: SubjectBriefResponse;
-  chapter?: ChapterBriefResponse;
-  lesson?: LessonBriefResponse;
+  subject?: TSubjectBriefResponse;
+  chapter?: TChapterBriefResponse;
+  lesson?: TLessonBriefResponse;
   tags?: TagResponse[];
+  requestedBy?: UserSummary;
   options?: OptionResponse[];
+  rejectReason?: string;
   isActive: boolean;
   isPublic: boolean;
   approvalStatus: ApprovalStatus;
+  mediaUrl: string | null;
+  mediaType: QuestionMediaType | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -101,7 +99,9 @@ export interface QuestionBriefResponse {
   content: string;
   questionType: QuestionType;
   questionLevel: QuestionLevel;
-  lesson?: LessonBriefResponse;
+  rejectReason?: string;
+  lesson?: TLessonBriefResponse;
+  requestedBy?: UserSummary;
 }
 
 export interface RequestPublishDTO {
@@ -111,4 +111,25 @@ export interface RequestPublishDTO {
 export interface ApproveRejectDTO {
   questionIds: number[];
   rejectReason?: string;
+}
+
+export interface QuestionSearchParams {
+  keyword?: string;
+  subjectId?: number;
+  chapterId?: number;
+  lessonId?: number;
+  questionType?: QuestionType;
+  questionLevel?: QuestionLevel;
+  approvalStatus?: ApprovalStatus;
+  isActive?: boolean;
+  page?: number;
+  size?: number;
+  sort?: string;
+}
+
+export interface QuestionApprovalParams {
+  status?: ApprovalStatus;
+  page?: number;
+  size?: number;
+  sort?: string;
 }

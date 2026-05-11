@@ -5,22 +5,24 @@ import { useSendHeartbeat } from "../queries/useQuiz";
 
 interface UseTimerSyncOptions {
   attemptId: number;
+  deviceToken: string;
   enabled: boolean;
   intervalMs?: number;
 }
 
-export function useTimerSync({ attemptId, enabled, intervalMs = 30000 }: UseTimerSyncOptions) {
+export function useTimerSync({ attemptId, deviceToken, enabled, intervalMs = 30000 }: UseTimerSyncOptions) {
   const dispatch = useDispatch();
   const heartbeatMutation = useSendHeartbeat();
   const lastSyncRef = useRef<number>(Date.now());
 
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || !deviceToken) return;
 
     const syncWithServer = async () => {
       try {
         const response = await heartbeatMutation.mutateAsync({
           attemptId,
+          deviceToken,
           data: {
             currentTime: new Date().toISOString(),
           },
@@ -55,5 +57,6 @@ export function useTimerSync({ attemptId, enabled, intervalMs = 30000 }: UseTime
       clearInterval(intervalId);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
-  }, [enabled, attemptId, intervalMs, dispatch]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [enabled, attemptId, deviceToken, intervalMs, dispatch]);
 }

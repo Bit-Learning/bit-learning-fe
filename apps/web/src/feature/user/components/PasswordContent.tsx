@@ -1,16 +1,20 @@
 import React, { useState } from "react";
-import { Lock, Key, ShieldCheck, Save, Info } from "lucide-react";
+import { Lock, Key, ShieldCheck, Save, Eye, EyeOff } from "lucide-react";
 import { Card } from "@workspace/ui/components/Card";
 import { Button } from "@workspace/ui/components/Button";
-import { Input } from "@workspace/ui/components/Input";
 import { useChangePassword, useUserProfile } from "../queries/useUser";
 import { toast } from "@/shared/components/Sonner";
 
 export const PasswordContent: React.FC = () => {
 	const { data: userProfile } = useUserProfile();
+
 	const [currentPassword, setCurrentPassword] = useState("");
 	const [newPassword, setNewPassword] = useState("");
 	const [confirmNewPassword, setConfirmNewPassword] = useState("");
+
+	const [showCurrent, setShowCurrent] = useState(false);
+	const [showNew, setShowNew] = useState(false);
+	const [showConfirm, setShowConfirm] = useState(false);
 
 	const changePasswordMutation = useChangePassword();
 
@@ -50,89 +54,107 @@ export const PasswordContent: React.FC = () => {
 		);
 	};
 
+	const inputClass =
+		"w-full pl-12 pr-10 py-2 bg-white dark:bg-slate-900 border-2 border-gray-200 dark:border-slate-800 rounded-md focus:ring-2 focus:ring-primary focus:border-transparent outline-none transition-all shadow-sm";
+
 	return (
-		<div className="grow space-y-8">
-			<Card className="p-8 md:p-10">
+		<div className="grow space-y-4">
+			<Card className="px-6 py-8 min-h-screen">
 				<div className="flex items-center gap-3 mb-8">
-					<div className="size-12 rounded-xl bg-primary/10 flex items-center justify-center">
-						<Lock className="w-7 h-7 text-primary" />
-					</div>
 					<div>
 						<h2 className="text-2xl font-bold text-slate-900">Đổi mật khẩu</h2>
-						<p className="text-sm text-slate-500 mt-0.5">
+						<p className="text-md text-slate-500 mt-0.5">
 							Vui lòng nhập mật khẩu hiện tại và mật khẩu mới để cập nhật.
 						</p>
 					</div>
 				</div>
 
-				<div className="max-w-xl space-y-6">
-					<div className="space-y-2">
-						<label className="text-sm font-semibold text-slate-700">
+				<div className="max-w-2xl space-y-6 px-0">
+					<div>
+						<label className="block text-md font-semibold text-slate-700 mb-2">
 							Mật khẩu hiện tại
 						</label>
 						<div className="relative">
-							<Key className="absolute inset-y-0 left-0 flex items-center ml-4 mt-2 text-slate-400 w-5 h-5" />
-							<Input
-								className="pl-11"
-								type="password"
+							<Key className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+							<input
+								className={inputClass}
+								type={showCurrent ? "text" : "password"}
 								placeholder="Nhập mật khẩu hiện tại"
 								value={currentPassword}
 								onChange={(e) => setCurrentPassword(e.target.value)}
 							/>
+							<button
+								type="button"
+								onClick={() => setShowCurrent(!showCurrent)}
+								className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+							>
+								{showCurrent ? <EyeOff size={18} /> : <Eye size={18} />}
+							</button>
 						</div>
 					</div>
 
-					<div className="space-y-2">
-						<label className="text-sm font-semibold text-slate-700">
+					<div>
+						<label className="block text-md font-semibold text-slate-700 mb-2">
 							Mật khẩu mới
 						</label>
 						<div className="relative">
-							<Lock className="absolute inset-y-0 left-0 flex items-center ml-4 mt-2 text-slate-400 w-5 h-5" />
-							<Input
-								className="pl-11"
-								type="password"
+							<Lock className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+							<input
+								className={inputClass}
+								type={showNew ? "text" : "password"}
 								placeholder="Nhập mật khẩu mới"
 								value={newPassword}
 								onChange={(e) => setNewPassword(e.target.value)}
 							/>
+							<button
+								type="button"
+								onClick={() => setShowNew(!showNew)}
+								className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+							>
+								{showNew ? <EyeOff size={18} /> : <Eye size={18} />}
+							</button>
 						</div>
-						<p className="text-[12px] text-slate-400">
-							Mật khẩu phải bao gồm ít nhất 8 ký tự, bao gồm chữ cái và số.
-						</p>
 					</div>
 
-					<div className="space-y-2">
-						<label className="text-sm font-semibold text-slate-700">
+					<div>
+						<label className="block text-md font-semibold text-slate-700 mb-2">
 							Xác nhận mật khẩu mới
 						</label>
 						<div className="relative">
-							<ShieldCheck className="absolute inset-y-0 left-0 flex items-center ml-4 mt-2 text-slate-400 w-5 h-5" />
-							<Input
-								className="pl-11"
-								type="password"
+							<ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+							<input
+								className={inputClass}
+								type={showConfirm ? "text" : "password"}
 								placeholder="Xác nhận lại mật khẩu mới"
 								value={confirmNewPassword}
 								onChange={(e) => setConfirmNewPassword(e.target.value)}
 							/>
+							<button
+								type="button"
+								onClick={() => setShowConfirm(!showConfirm)}
+								className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600"
+							>
+								{showConfirm ? <EyeOff size={18} /> : <Eye size={18} />}
+							</button>
 						</div>
 					</div>
 
 					<div className="pt-6 flex flex-col sm:flex-row gap-4">
 						<Button
 							size="lg"
-							className="px-10"
+							className="px-8 py-5 text-md"
 							onClick={handleSubmit}
 							isDisabled={changePasswordMutation.isPending}
 						>
-							<Save className="w-5 h-5 mr-2" />
 							{changePasswordMutation.isPending
 								? "Đang cập nhật..."
 								: "Cập nhật mật khẩu"}
 						</Button>
+
 						<Button
 							variant="outline"
 							size="lg"
-							className="px-10"
+							className="px-8 py-5 text-md"
 							onClick={() => {
 								setCurrentPassword("");
 								setNewPassword("");
@@ -141,22 +163,6 @@ export const PasswordContent: React.FC = () => {
 						>
 							Hủy bỏ
 						</Button>
-					</div>
-				</div>
-
-				<div className="mt-12 p-6 rounded-2xl bg-amber-50 border border-amber-100">
-					<div className="flex gap-4">
-						<Info className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
-						<div>
-							<h4 className="text-sm font-bold text-amber-900">
-								Lưu ý bảo mật
-							</h4>
-							<p className="text-sm text-amber-800/80 mt-1 leading-relaxed">
-								Sau khi đổi mật khẩu thành công, bạn có thể phải đăng nhập lại
-								trên tất cả các thiết bị đang hoạt động để đảm bảo tính an toàn
-								cho tài khoản của mình.
-							</p>
-						</div>
 					</div>
 				</div>
 			</Card>
