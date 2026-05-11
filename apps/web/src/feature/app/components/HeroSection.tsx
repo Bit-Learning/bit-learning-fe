@@ -57,11 +57,11 @@ const HeroSection: FC = () => {
 					</span>
 					Nền tảng học lập trình số 1 cho K-12
 				</Badge>
-				<h2 className="text-4xl lg:text-5xl font-extrabold leading-[1.1] text-slate-900">
+				<h2 className="text-4xl lg:text-5xl font-extrabold leading-[1.1] text-slate-100 dark:text-slate-100">
 					Khám Phá Thế Giới{" "}
 					<span className="text-primary italic">Lập Trình</span>
 				</h2>
-				<p className="text-lg text-slate-600 leading-relaxed max-w-lg">
+				<p className="text-lg text-slate-600 leading-relaxed max-w-lg dark:text-slate-300">
 					Xây dựng kỹ năng tương lai cùng lộ trình học tập được cá nhân hóa, kết
 					hợp giữa tư duy logic, trò chơi và trí tuệ nhân tạo.
 				</p>
@@ -89,7 +89,7 @@ const HeroSection: FC = () => {
 							{isLoading ? "..." : `+${formatCompactNumber(studentCount)}`}
 						</div>
 					</div>
-					<p className="text-sm text-slate-500 font-medium flex items-center gap-1">
+					<p className="text-sm text-slate-400 font-medium flex items-center gap-1">
 						Hơn
 						<NumberTicker
 							value={studentCount}

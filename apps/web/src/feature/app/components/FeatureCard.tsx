@@ -38,6 +38,8 @@ const FeatureCard: FC<FeatureCardProps> = ({
       hover:-translate-y-1
       hover:shadow-xl
       cursor-pointer
+      dark:bg-slate-800
+      dark:border-slate-700
     "
 		>
 			<div className="relative w-full h-40 overflow-hidden">

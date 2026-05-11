@@ -101,9 +101,15 @@ const Header: React.FC = () => {
 	return (
 		<header
 			className={cn(
-				"sticky top-0 left-0 right-0 z-50 transition-all duration-300",
-				"bg-white/95 dark:bg-gray-900/95 backdrop-blur-xl border-b border-gray-200 dark:border-gray-800/50",
-				isScrolled && "shadow-lg",
+				"sticky top-0 left-0 right-0 z-50",
+				"transition-all duration-300",
+				"backdrop-blur-2xl",
+				"bg-white/70 dark:bg-[#020617]/70",
+				"border-b border-white/20 dark:border-white/10",
+				"supports-[backdrop-filter]:bg-white/60",
+				"dark:supports-[backdrop-filter]:bg-[#020617]/60",
+				isScrolled &&
+					"shadow-[0_8px_32px_rgba(0,0,0,0.08)] dark:shadow-[0_8px_32px_rgba(0,0,0,0.35)]",
 			)}
 		>
 			<div className="container mx-auto px-4">
