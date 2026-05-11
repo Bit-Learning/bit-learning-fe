@@ -11,28 +11,28 @@ const CodingPracticeSection: FC = () => {
 			className="py-16 grid lg:grid-cols-5 gap-12 items-center"
 		>
 			<div className="lg:col-span-2 space-y-6">
-				<h3 className="text-4xl font-extrabold text-slate-900">
+				<h3 className="text-4xl font-extrabold text-slate-900 dark:text-slate-100 leading-tight">
 					Môi trường luyện Code chuyên nghiệp
 				</h3>
-				<p className="text-slate-600 leading-relaxed">
+				<p className="text-slate-600 leading-relaxed max-w-lg dark:text-slate-300">
 					Trình soạn thảo trực quan, hỗ trợ nhiều ngôn ngữ lập trình như Python,
 					JavaScript, C++ và Scratch. Hệ thống chấm điểm tự động thông minh giúp
 					bạn nhận kết quả ngay lập tức.
 				</p>
 				<ul className="space-y-4">
-					<li className="flex items-center gap-3 font-semibold text-slate-700">
+					<li className="flex items-center gap-3 font-semibold text-slate-700 dark:text-slate-300">
 						<div className="bg-green-100 text-green-600 p-1 rounded-full">
 							<CheckCircle className="w-4 h-4" />
 						</div>
 						Gợi ý code thông minh
 					</li>
-					<li className="flex items-center gap-3 font-semibold text-slate-700">
+					<li className="flex items-center gap-3 font-semibold text-slate-700 dark:text-slate-300">
 						<div className="bg-green-100 text-green-600 p-1 rounded-full">
 							<CheckCircle className="w-4 h-4" />
 						</div>
 						Thư viện bài tập phong phú
 					</li>
-					<li className="flex items-center gap-3 font-semibold text-slate-700">
+					<li className="flex items-center gap-3 font-semibold text-slate-700 dark:text-slate-300">
 						<div className="bg-green-100 text-green-600 p-1 rounded-full">
 							<CheckCircle className="w-4 h-4" />
 						</div>

@@ -12,7 +12,7 @@ interface ForumPostCardProps {
 
 const ForumPostCard: React.FC<ForumPostCardProps> = ({ post }) => {
 	return (
-		<Card className="flex h-full flex-col rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg">
+		<Card className="flex h-full flex-col rounded-[1.75rem] border border-slate-200 bg-white p-5 shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:bg-slate-800 dark:border-slate-700">
 			<CardContent className="flex h-full flex-col p-0">
 				<Link
 					to="/forum/post/$id"
@@ -37,7 +37,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({ post }) => {
 				<Link
 					to="/forum/post/$id"
 					params={{ id: String(post.id) }}
-					className="line-clamp-2 text-xl font-black leading-snug text-slate-900 transition hover:text-blue-700"
+					className="line-clamp-2 text-xl font-black leading-snug text-slate-900 transition dark:text-slate-100"
 				>
 					{post.title}
 				</Link>
@@ -50,7 +50,7 @@ const ForumPostCard: React.FC<ForumPostCardProps> = ({ post }) => {
 					<div className="mb-4 flex items-center gap-3">
 						<AuthorAvatar author={post.author} size="sm" />
 						<div>
-							<p className="text-sm font-semibold text-slate-900">
+							<p className="text-sm font-semibold text-slate-900 dark:text-slate-200">
 								{post.author.name ??
 									`${post.author.firstName} ${post.author.lastName}`.trim()}
 							</p>

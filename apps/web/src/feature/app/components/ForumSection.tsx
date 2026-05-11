@@ -13,13 +13,10 @@ const ForumSection: React.FC = () => {
 	return (
 		<section id="tour-forum" className="py-16">
 			<div className="mb-12 flex flex-col gap-4 text-center">
-				<p className="text-sm font-black uppercase tracking-[0.3em] text-slate-400">
-					Trung tâm thảo luận
-				</p>
-				<h3 className="text-4xl font-black text-slate-900">
+				<h3 className="text-4xl font-black text-slate-900 dark:text-slate-100">
 					Bài đăng thực tế từ cộng đồng Bit Learning
 				</h3>
-				<p className="mx-auto max-w-3xl text-slate-600">
+				<p className="mx-auto max-w-3xl text-slate-600 dark:text-slate-400">
 					Các chủ đề thảo luận nổi bật, chia sẻ kinh nghiệm thực tiễn và câu hỏi
 					do người học đặt ra.
 				</p>

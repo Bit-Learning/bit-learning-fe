@@ -47,6 +47,12 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://bit-learning.lch.id.vn/kids-blockly</loc>
+  </url>
+  <url>
+    <loc>https://bit-learning.lch.id.vn/kids-blockly/leaderboard</loc>
+  </url>
+  <url>
     <loc>https://bit-learning.lch.id.vn/leaderboard</loc>
     <changefreq>daily</changefreq>
     <priority>0.5</priority>
