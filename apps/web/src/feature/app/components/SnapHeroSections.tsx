@@ -215,11 +215,11 @@ const SnapHeroSections: React.FC<SnapHeroSectionsProps> = ({
 	// ─────────────────────────────────────────────────────────────────────────
 
 	return (
-		<div className="relative">
+		<div className="relative bg-background">
 			{/* Section 0 — Hero */}
 			<div
 				ref={section0Ref}
-				className="snap-section relative w-full overflow-hidden"
+				className="snap-section relative w-full overflow-hidden bg-background"
 				style={{ height: "100dvh" }}
 			>
 				<div data-parallax-inner className="h-full will-change-transform">
@@ -230,7 +230,7 @@ const SnapHeroSections: React.FC<SnapHeroSectionsProps> = ({
 			{/* Section 1 — Features */}
 			<div
 				ref={section1Ref}
-				className="snap-section relative w-full"
+				className="snap-section relative w-full bg-background"
 				style={{ height: "100dvh", overflowY: "auto" }}
 			>
 				{children[1]}

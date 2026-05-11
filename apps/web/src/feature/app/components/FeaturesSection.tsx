@@ -8,7 +8,7 @@ const FeaturesSection: FC = () => {
 		<section id="tour-features" className="py-6">
 			<div className="text-center mb-6">
 				<AuroraView />
-				<p className="text-slate-600 max-w-2xl mx-auto mt-3">
+				<p className="text-slate-600 dark:text-slate-400 max-w-2xl mx-auto mt-3">
 					Nền tảng tích hợp đầy đủ công cụ giúp học sinh từ lớp 1 đến lớp 12
 					tiếp cận công nghệ một cách tự nhiên và vui vẻ nhất.
 				</p>

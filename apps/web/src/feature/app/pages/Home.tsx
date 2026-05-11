@@ -30,7 +30,7 @@ const HomePage: React.FC = () => {
 	}, []);
 
 	return (
-		<div className="text-slate-900 font-sans">
+		<div className="text-slate-900 dark:text-slate-100 font-sans bg-background min-h-screen">
 			<PageMeta
 				title="Bit Learning - Học lập trình và AI cho học sinh Việt Nam"
 				description="Khám phá khóa học lập trình, luyện đề, trò chơi học tập và diễn đàn công nghệ dành cho học sinh trên Bit Learning."
