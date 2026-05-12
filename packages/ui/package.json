@@ -62,7 +62,7 @@
 		"@tailwindcss/typography": "^0.5.16",
 		"@turbo/gen": "^2.9.12",
 		"@types/lodash": "^4.17.24",
-		"@types/node": "^20.19.40",
+		"@types/node": "^20.19.41",
 		"@types/nprogress": "^0.2.3",
 		"@types/react": "^19.2.14",
 		"@types/react-dom": "^19.1.7",
