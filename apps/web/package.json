@@ -14,13 +14,13 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
-		"@astral-sh/ruff-wasm-web": "^0.15.13",
+		"@astral-sh/ruff-wasm-web": "^0.15.14",
 		"@hookform/resolvers": "^5.2.2",
 		"@reduxjs/toolkit": "^2.9.1",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
 		"@tanstack/react-query": "^5.99.0",
-		"@tanstack/react-query-devtools": "^5.100.11",
+		"@tanstack/react-query-devtools": "^5.100.14",
 		"@tanstack/react-router": "^1.169.2",
 		"@tanstack/react-router-devtools": "^1.166.13",
 		"@tanstack/router-plugin": "^1.167.35",
@@ -88,7 +88,7 @@
 		"@types/sockjs-client": "^1.5.4",
 		"@vitejs/plugin-react": "^4.3.4",
 		"@vitest/browser-playwright": "4.0.16",
-		"@vitest/coverage-v8": "^4.1.6",
+		"@vitest/coverage-v8": "^4.1.7",
 		"@workspace/typescript-config": "workspace:*",
 		"fast-check": "^4.7.0",
 		"jsdom": "^27.2.0",
@@ -96,6 +96,6 @@
 		"typescript": "^5.9.2",
 		"vite": "^7.3.3",
 		"vite-plugin-imagemin": "^0.6.1",
-		"vitest": "^4.1.6"
+		"vitest": "^4.1.7"
 	}
 }

@@ -14,7 +14,7 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
-		"@clerk/clerk-react": "^5.51.0",
+		"@clerk/clerk-react": "^5.61.7",
 		"@dnd-kit/core": "^6.3.1",
 		"@dnd-kit/sortable": "^10.0.0",
 		"@dnd-kit/utilities": "^3.2.2",
@@ -75,7 +75,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.15",
 		"@faker-js/faker": "^10.4.0",
-		"@tanstack/react-query-devtools": "^5.100.11",
+		"@tanstack/react-query-devtools": "^5.100.14",
 		"@tanstack/react-router-devtools": "^1.166.13",
 		"@tanstack/router-plugin": "^1.167.35",
 		"@types/js-cookie": "^3.0.6",
