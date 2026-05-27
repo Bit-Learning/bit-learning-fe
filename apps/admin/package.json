@@ -75,7 +75,7 @@
 	"devDependencies": {
 		"@biomejs/biome": "^2.4.15",
 		"@faker-js/faker": "^10.4.0",
-		"@tanstack/react-query-devtools": "^5.100.11",
+		"@tanstack/react-query-devtools": "^5.100.14",
 		"@tanstack/react-router-devtools": "^1.166.13",
 		"@tanstack/router-plugin": "^1.167.35",
 		"@types/js-cookie": "^3.0.6",
