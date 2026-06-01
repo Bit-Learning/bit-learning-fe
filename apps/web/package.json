@@ -14,13 +14,13 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
-		"@astral-sh/ruff-wasm-web": "^0.15.13",
+		"@astral-sh/ruff-wasm-web": "^0.15.15",
 		"@hookform/resolvers": "^5.2.2",
 		"@reduxjs/toolkit": "^2.9.1",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
 		"@tanstack/react-query": "^5.99.0",
-		"@tanstack/react-query-devtools": "^5.100.11",
+		"@tanstack/react-query-devtools": "^5.100.14",
 		"@tanstack/react-router": "^1.169.2",
 		"@tanstack/react-router-devtools": "^1.166.13",
 		"@tanstack/router-plugin": "^1.167.35",
@@ -34,7 +34,7 @@
 		"clsx": "^2.1.1",
 		"date-fns": "^4.1.0",
 		"docx": "^9.6.1",
-		"dompurify": "^3.4.5",
+		"dompurify": "^3.4.7",
 		"driver.js": "^1.4.0",
 		"echarts": "^6.0.0",
 		"echarts-for-react": "^3.0.5",
@@ -45,7 +45,7 @@
 		"html-to-image": "^1.11.13",
 		"i18next": "^25.10.10",
 		"i18next-browser-languagedetector": "^8.2.1",
-		"js-cookie": "^3.0.7",
+		"js-cookie": "^3.0.8",
 		"lucide-react": "^0.577.0",
 		"monaco-editor": "^0.55.1",
 		"motion": "^12.38.0",
@@ -75,7 +75,7 @@
 		"zod": "^4.3.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.4.15",
+		"@biomejs/biome": "^2.4.16",
 		"@codecov/vite-plugin": "^1.9.1",
 		"@tailwindcss/postcss": "^4.2.4",
 		"@testing-library/jest-dom": "^6.9.1",
@@ -88,7 +88,7 @@
 		"@types/sockjs-client": "^1.5.4",
 		"@vitejs/plugin-react": "^4.3.4",
 		"@vitest/browser-playwright": "4.0.16",
-		"@vitest/coverage-v8": "^4.1.6",
+		"@vitest/coverage-v8": "^4.1.7",
 		"@workspace/typescript-config": "workspace:*",
 		"fast-check": "^4.7.0",
 		"jsdom": "^27.2.0",
@@ -96,6 +96,6 @@
 		"typescript": "^5.9.2",
 		"vite": "^7.3.3",
 		"vite-plugin-imagemin": "^0.6.1",
-		"vitest": "^4.1.6"
+		"vitest": "^4.1.7"
 	}
 }
