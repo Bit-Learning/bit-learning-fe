@@ -3,7 +3,7 @@ name: Deploy Dev via GitOps
 on:
     workflow_dispatch:
     push:
-        branches: [develop]
+        branches: [develop, codex/gitops-deploy]
         paths:
             - "apps/web/**"
             - "apps/admin/**"
