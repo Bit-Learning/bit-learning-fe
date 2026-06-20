@@ -72,15 +72,10 @@ bit-learning-fe/
 │   ├── ui/                     # Shared UI component library
 │   ├── lib/                    # Shared API SDK, types, validation
 │   └── typescript-config/      # Shared TypeScript configurations
-├── infra/                      # Ansible deployment playbooks
 ├── turbo.json                  # Turborepo pipeline config
 ├── pnpm-workspace.yaml         # pnpm workspace definition
 ├── biome.json                  # Linter & formatter (Biome)
-├── lefthook.yml                # Git hooks (pre-commit formatting)
-├── Makefile                    # Docker orchestration shortcuts
-├── Jenkinsfile                 # Jenkins CI/CD pipeline
-├── docker-compose-local-dev-latest.yml
-└── docker-compose-local-prod-latest.yml
+└── lefthook.yml                # Git hooks (pre-commit formatting)
 ```
 
 ## Applications
@@ -237,61 +232,16 @@ Copy `.env.example` to `.env.local` and configure:
 
 ## Docker
 
-### Local Development
+This repository keeps the Dockerfiles needed to build frontend images from the app source.
+Deployment, Kubernetes manifests, Compose files, Ansible playbooks, and legacy CI/CD deploy
+configuration live in the sibling GitOps repository: `../bit-learning-gitops`.
 
 ```bash
-# Start dev containers (hot-reload enabled)
-make up
-
-# Stop
-make down
+docker build -f apps/web/Dockerfile.prodV2 -t hoangclw/bitlearning-web:dev-latest .
+docker build -f apps/admin/Dockerfile.prodV2 -t hoangclw/bitlearning-admin:dev-latest .
 ```
 
-### Local Production Preview
-
-```bash
-# Start production-like containers (NGINX serving static builds)
-make up-prod
-
-# Stop
-make down-prod
-```
-
-### Useful Make Commands
-
-| Command | Description |
-|---|---|
-| `make up` / `make down` | Start/stop dev containers |
-| `make up-prod` / `make down-prod` | Start/stop prod containers |
-| `make rebuild-web` | Rebuild web dev container (no cache) |
-| `make rebuild-admin` | Rebuild admin dev container (no cache) |
-| `make logs-web` | Tail web container logs |
-| `make logs-admin` | Tail admin container logs |
-| `make ps` | Show running dev containers |
-| `make clean` | Prune Docker build cache |
-| `make hard-clean` | Full Docker system prune |
-
-### Container Architecture
-
-```
-┌─────────────────────────────────────────────┐
-│            bitlearning-network               │
-│                                              │
-│  ┌──────────────────┐  ┌──────────────────┐ │
-│  │  web (dev)       │  │  admin (dev)     │ │
-│  │  Node 24 Alpine  │  │  Node 24 Alpine  │ │
-│  │  :5173           │  │  :8386           │ │
-│  └──────────────────┘  └──────────────────┘ │
-│                                              │
-│  ┌──────────────────┐  ┌──────────────────┐ │
-│  │  web (prod)      │  │  admin (prod)    │ │
-│  │  NGINX Alpine    │  │  NGINX Alpine    │ │
-│  │  :5173           │  │  :8386           │ │
-│  └──────────────────┘  └──────────────────┘ │
-└─────────────────────────────────────────────┘
-```
-
-Production images use multi-stage builds: `Node 24 Alpine` (build) → `NGINX Alpine` (serve).
+Production images use multi-stage builds: `Node 24 Alpine` build stage to a static runtime image.
 
 ---
 
@@ -303,39 +253,26 @@ Production images use multi-stage builds: `Node 24 Alpine` (build) → `NGINX Al
 |---|---|---|
 | `build.yml` | PR to `main`/`develop` | Build validation, PR status comments |
 | `build-check-dependabot.yml` | Dependabot PRs to `develop` | Automated dependency update build checks |
-| `deploy.yml` | Push to `main`/`develop` | Build Docker images → Push to Docker Hub → Deploy via Ansible |
+| `deploy-dev-gitops.yml` | Push to `develop` / manual | Build dev images, push Docker Hub, update GitOps dev overlay |
 
-### Jenkins (Alternative Pipeline)
+Deployment workflows, Kubernetes manifests, legacy Ansible, Compose, and Jenkins files live in `../bit-learning-gitops`.
 
-The `Jenkinsfile` provides an alternative CI/CD path:
-- PR builds on `develop` branch
-- Docker image build & push on `main` branch
-- Discord webhook notifications for build/deploy status
-- Images pushed to Docker Hub: `hoangclw/bitlearning-web` and `hoangclw/bitlearning-admin`
+The dev GitOps deployment workflow expects these GitHub secrets:
 
-### Deployment Flow
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+- `GITOPS_DEPLOY_KEY`
+- `DEV_VITE_API_BASE_URL`
+- `DEV_VITE_WS_URL`
+- `DEV_VITE_CLERK_PUBLISHABLE_KEY`
 
-```
-Push to main/develop
-       │
-       ├── GitHub Actions
-       │   ├── Build web Docker image
-       │   ├── Build admin Docker image
-       │   ├── Push to Docker Hub
-       │   └── Deploy via Ansible to VPS
-       │
-       └── Jenkins (alternative)
-           ├── Build source
-           ├── Build & push Docker images
-           └── Notify Discord
-```
+Optional GitHub variables:
 
-### Infrastructure
-
-Ansible playbooks in `infra/` handle production deployment:
-- `app_deploy.yml` — Main deployment playbook
-- `vault.yml` — Encrypted secrets (Ansible Vault)
-- `inventory` — Target host definitions
+- `DEV_VITE_API_TIMEOUT`
+- `DEV_VITE_SITE_URL`
+- `DEV_VITE_MINIO_GAME_URL`
+- `DEV_VITE_MINIO_THUMBNAIL_URL`
+- `DEV_VITE_PUBLIC_SITE_URL`
 
 ---
 

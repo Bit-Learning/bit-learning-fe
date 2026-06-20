@@ -20,6 +20,15 @@ COPY packages/typescript-config/package.json ./packages/typescript-config/
 # Install ALL dependencies
 RUN pnpm install --frozen-lockfile
 
+ARG VITE_API_BASE_URL
+ARG VITE_API_TIMEOUT
+ARG VITE_SITE_URL
+ARG VITE_WS_URL
+ENV VITE_API_BASE_URL=$VITE_API_BASE_URL
+ENV VITE_API_TIMEOUT=$VITE_API_TIMEOUT
+ENV VITE_SITE_URL=$VITE_SITE_URL
+ENV VITE_WS_URL=$VITE_WS_URL
+
 # Copy source code
 COPY packages/lib ./packages/lib
 COPY packages/ui ./packages/ui
