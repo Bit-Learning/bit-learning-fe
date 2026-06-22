@@ -1,3 +1,5 @@
+import { getApiBaseUrl } from "@/shared/config/runtime-urls";
+
 export const endpoints = {
 	AUTH: "/auth",
 	ACCOUNT: "/users",
@@ -5,7 +7,7 @@ export const endpoints = {
 };
 
 export const API_PATH = {
-	BASE_URL: import.meta.env.VITE_API_BASE_URL ?? "/api",
+	BASE_URL: getApiBaseUrl(),
 };
 
 export const MINIO_GAME_URL =
