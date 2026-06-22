@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { getApiBaseUrl } from "@/shared/config/runtime-urls";
 
-const API_URL = "http://localhost:8080/api/minio";
+const API_URL = `${getApiBaseUrl().replace(/\/$/, "")}/minio`;
 
 interface Bucket {
 	name: string;

@@ -3,6 +3,7 @@ import type { Game } from "../services/gameService";
 import gameService from "../services/gameService";
 import { toast } from "@/shared/components/Sonner";
 import { getAccessToken } from "@/shared/lib/cookies";
+import { getApiBaseUrl } from "@/shared/config/runtime-urls";
 
 interface AttemptPayload {
 	rawScore?: number;
@@ -357,10 +358,7 @@ export default function TrackedGameFrame({
 				},
 			};
 
-			const apiBaseUrl = new URL(
-				import.meta.env.VITE_API_BASE_URL ?? "/api/",
-				window.location.href,
-			);
+			const apiBaseUrl = new URL(getApiBaseUrl(), window.location.href);
 			const url = new URL(`games/${game.id}/attempts`, apiBaseUrl).toString();
 			const body = JSON.stringify(payload);
 

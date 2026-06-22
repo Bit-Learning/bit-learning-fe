@@ -1,6 +1,7 @@
 import { Client, type IMessage, type StompSubscription } from "@stomp/stompjs";
 import SockJS from "sockjs-client";
 import { getAccessToken } from "@/shared/lib/cookies";
+import { getWebSocketUrl } from "@/shared/config/runtime-urls";
 
 type MessageHandler = (message: any) => void;
 type ErrorHandler = (error: any) => void;
@@ -36,7 +37,7 @@ class WebSocketService {
 			return this.connectPromise;
 		}
 
-		const wsUrl = import.meta.env.VITE_WS_URL ?? "http://localhost:8080/ws";
+		const wsUrl = getWebSocketUrl();
 		const accessToken = getAccessToken();
 
 		if (!accessToken) {
