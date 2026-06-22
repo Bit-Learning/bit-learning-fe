@@ -27,7 +27,7 @@ env:
     WEB_IMAGE: hoangclw/bitlearning-web
     ADMIN_IMAGE: hoangclw/bitlearning-admin
     GITOPS_REPOSITORY: lcaohoanq/bit-learning-gitops
-    GITOPS_OVERLAY: k8s/overlays/dev
+    GITOPS_OVERLAY: apps/frontend/overlays/dev
     IMAGE_TAG: ${{ github.sha }}
 
 jobs:
