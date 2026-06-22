@@ -17,10 +17,11 @@ import {
 } from "@/shared/lib/cookies";
 import { wsService } from "@/feature/notification/services/websocket.service";
 import store from "@/shared/redux/store";
+import { getApiBaseUrl } from "@/shared/config/runtime-urls";
 
 function createApiClient(): AxiosInstance {
 	return axios.create({
-		baseURL: import.meta.env.VITE_API_BASE_URL ?? "http://localhost:8080/api/",
+		baseURL: getApiBaseUrl(),
 		headers: {
 			"Content-Type": "application/json",
 			"Accept-Language": localStorage.getItem("i18nextLng") || "vi",
