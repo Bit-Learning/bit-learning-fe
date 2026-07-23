@@ -1,13 +1,20 @@
-export type DayOfWeek = "MONDAY" | "TUESDAY" | "WEDNESDAY" | "THURSDAY" | "FRIDAY" | "SATURDAY" | "SUNDAY";
+export type DayOfWeek =
+	| "MONDAY"
+	| "TUESDAY"
+	| "WEDNESDAY"
+	| "THURSDAY"
+	| "FRIDAY"
+	| "SATURDAY"
+	| "SUNDAY";
 
 export interface DailyLoginInfo {
-  date: string;
-  loggedIn: boolean;
-  dayOfWeek: DayOfWeek;
+	date: string;
+	loggedIn: boolean;
+	dayOfWeek: DayOfWeek;
 }
 
 export interface LoginStreakResponse {
-  currentStreak: number;
-  maxStreak: number;
-  weeklyLogins: DailyLoginInfo[];
+	currentStreak: number;
+	maxStreak: number;
+	weeklyLogins: DailyLoginInfo[];
 }

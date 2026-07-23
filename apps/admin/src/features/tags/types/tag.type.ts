@@ -1,14 +1,14 @@
 export interface CreateTagRequest {
-  name: string;
+	name: string;
 }
 
 export interface UpdateTagRequest {
-  name: string;
+	name: string;
 }
 
 export interface TagResponse {
-  id: string;
-  name: string;
-  createdAt: string;
-  updatedAt: string;
+	id: string;
+	name: string;
+	createdAt: string;
+	updatedAt: string;
 }

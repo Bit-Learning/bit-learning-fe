@@ -4,12 +4,15 @@ import UserProfileLayout from "../layouts/UserProfileLayout";
 import { HistoryContent } from "../components/HistoryContent";
 
 export const HistoryPage: React.FC = () => {
-  return (
-    <>
-      <PageMeta title="Lịch sử giao dịch - Bit Learning" description="Xem lại các đơn hàng của bạn" />
-      <UserProfileLayout>
-        <HistoryContent />
-      </UserProfileLayout>
-    </>
-  );
+	return (
+		<>
+			<PageMeta
+				title="Lịch sử giao dịch - Bit Learning"
+				description="Xem lại các đơn hàng của bạn"
+			/>
+			<UserProfileLayout>
+				<HistoryContent />
+			</UserProfileLayout>
+		</>
+	);
 };

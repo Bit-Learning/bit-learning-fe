@@ -5,32 +5,34 @@ import MyCourses from "../component/MyCourses";
 import LearningStreak from "../component/LearningStreak";
 
 const StudentDashboard: React.FC = () => {
-  return (
-    <div className="min-h-screen bg-gray-50">
-      <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-        <div className="mb-8">
-          <h1 className="text-2xl font-bold text-gray-900">Xin chào! 👋</h1>
-          <p className="mt-1 text-gray-500">Tiếp tục hành trình học tập của bạn</p>
-        </div>
+	return (
+		<div className="min-h-screen bg-gray-50">
+			<div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
+				<div className="mb-8">
+					<h1 className="text-2xl font-bold text-gray-900">Xin chào! 👋</h1>
+					<p className="mt-1 text-gray-500">
+						Tiếp tục hành trình học tập của bạn
+					</p>
+				</div>
 
-        <div className="mb-8">
-          <DashboardStats />
-        </div>
+				<div className="mb-8">
+					<DashboardStats />
+				</div>
 
-        <div className="grid gap-6 lg:grid-cols-3">
-          <div className="space-y-6 lg:col-span-2">
-            <ContinueLearning />
+				<div className="grid gap-6 lg:grid-cols-3">
+					<div className="space-y-6 lg:col-span-2">
+						<ContinueLearning />
 
-            <MyCourses />
-          </div>
+						<MyCourses />
+					</div>
 
-          <div className="space-y-6">
-            <LearningStreak />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
+					<div className="space-y-6">
+						<LearningStreak />
+					</div>
+				</div>
+			</div>
+		</div>
+	);
 };
 
 export default StudentDashboard;

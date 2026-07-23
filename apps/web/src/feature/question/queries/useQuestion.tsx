@@ -2,324 +2,365 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { AxiosError } from "axios";
 import { toast } from "@/shared/components/Sonner";
 import type {
-  QuestionRequest,
-  RequestPublishDTO,
-  ApproveRejectDTO,
-  QuestionApprovalParams,
-  QuestionSearchParams,
+	QuestionRequest,
+	RequestPublishDTO,
+	ApproveRejectDTO,
+	QuestionApprovalParams,
+	QuestionSearchParams,
 } from "../types/question.type";
 import type { ApiResponse } from "@/shared/api/api.type";
 import { questionApi } from "../api/question.api";
 
 export const questionKeys = {
-  all: ["questions"] as const,
-  lists: () => [...questionKeys.all, "list"] as const,
-  list: (params?: QuestionSearchParams) => [...questionKeys.lists(), params] as const,
-  details: () => [...questionKeys.all, "detail"] as const,
-  detail: (id: number) => [...questionKeys.details(), id] as const,
-  myQuestions: (params?: QuestionSearchParams) => [...questionKeys.all, "my-questions", params] as const,
-  myQuestionsAll: () => [...questionKeys.all, "my-questions-all"] as const,
-  myPublishRequests: (params?: QuestionApprovalParams) => [...questionKeys.all, "my-publish-requests", params] as const,
-  myPublishRequestsAll: () => [...questionKeys.all, "my-publish-requests-all"] as const,
-  pendingApproval: (params?: Omit<QuestionApprovalParams, "status">) =>
-    [...questionKeys.all, "pending-approval", params] as const,
-  pendingApprovalAll: () => [...questionKeys.all, "pending-approval-all"] as const,
+	all: ["questions"] as const,
+	lists: () => [...questionKeys.all, "list"] as const,
+	list: (params?: QuestionSearchParams) =>
+		[...questionKeys.lists(), params] as const,
+	details: () => [...questionKeys.all, "detail"] as const,
+	detail: (id: number) => [...questionKeys.details(), id] as const,
+	myQuestions: (params?: QuestionSearchParams) =>
+		[...questionKeys.all, "my-questions", params] as const,
+	myQuestionsAll: () => [...questionKeys.all, "my-questions-all"] as const,
+	myPublishRequests: (params?: QuestionApprovalParams) =>
+		[...questionKeys.all, "my-publish-requests", params] as const,
+	myPublishRequestsAll: () =>
+		[...questionKeys.all, "my-publish-requests-all"] as const,
+	pendingApproval: (params?: Omit<QuestionApprovalParams, "status">) =>
+		[...questionKeys.all, "pending-approval", params] as const,
+	pendingApprovalAll: () =>
+		[...questionKeys.all, "pending-approval-all"] as const,
 };
 
-export const useSearchQuestions = (params?: QuestionSearchParams, options?: { enabled?: boolean }) => {
-  return useQuery({
-    queryKey: questionKeys.list(params),
-    queryFn: async () => {
-      const response = await questionApi.searchQuestions(params);
-      return response.data;
-    },
-    enabled: options?.enabled,
-    staleTime: 5 * 60 * 1000,
-  });
+export const useSearchQuestions = (
+	params?: QuestionSearchParams,
+	options?: { enabled?: boolean },
+) => {
+	return useQuery({
+		queryKey: questionKeys.list(params),
+		queryFn: async () => {
+			const response = await questionApi.searchQuestions(params);
+			return response.data;
+		},
+		enabled: options?.enabled,
+		staleTime: 5 * 60 * 1000,
+	});
 };
 export const useSearchQuestionsAll = () => {
-  return useQuery({
-    queryKey: questionKeys.lists(),
-    queryFn: async () => {
-      const response = await questionApi.searchQuestions({ size: 99999 });
-      return response.data.data ?? [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+	return useQuery({
+		queryKey: questionKeys.lists(),
+		queryFn: async () => {
+			const response = await questionApi.searchQuestions({ size: 99999 });
+			return response.data.data ?? [];
+		},
+		staleTime: 5 * 60 * 1000,
+	});
 };
 export const useQuestion = (id: number, options?: { enabled?: boolean }) => {
-  return useQuery({
-    queryKey: questionKeys.detail(id),
-    queryFn: async () => {
-      const response = await questionApi.getQuestionById(id);
-      return response.data.data;
-    },
-    enabled: options?.enabled !== false && !!id,
-  });
+	return useQuery({
+		queryKey: questionKeys.detail(id),
+		queryFn: async () => {
+			const response = await questionApi.getQuestionById(id);
+			return response.data.data;
+		},
+		enabled: options?.enabled !== false && !!id,
+	});
 };
 
-export const useMyQuestions = (params?: QuestionSearchParams, options?: { enabled?: boolean }) => {
-  return useQuery({
-    queryKey: questionKeys.myQuestions(params),
-    queryFn: async () => {
-      const response = await questionApi.getMyQuestions(params);
-      return response.data;
-    },
-    enabled: options?.enabled,
-    staleTime: 5 * 60 * 1000,
-  });
+export const useMyQuestions = (
+	params?: QuestionSearchParams,
+	options?: { enabled?: boolean },
+) => {
+	return useQuery({
+		queryKey: questionKeys.myQuestions(params),
+		queryFn: async () => {
+			const response = await questionApi.getMyQuestions(params);
+			return response.data;
+		},
+		enabled: options?.enabled,
+		staleTime: 5 * 60 * 1000,
+	});
 };
 
 export const useMyQuestionsAll = () => {
-  return useQuery({
-    queryKey: questionKeys.myQuestionsAll(),
-    queryFn: async () => {
-      const response = await questionApi.getMyQuestions({ size: 99999 });
-      return response.data.data ?? [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+	return useQuery({
+		queryKey: questionKeys.myQuestionsAll(),
+		queryFn: async () => {
+			const response = await questionApi.getMyQuestions({ size: 99999 });
+			return response.data.data ?? [];
+		},
+		staleTime: 5 * 60 * 1000,
+	});
 };
 
-export const useMyPublishRequests = (params?: QuestionApprovalParams, options?: { enabled?: boolean }) => {
-  return useQuery({
-    queryKey: questionKeys.myPublishRequests(params),
-    queryFn: async () => {
-      const response = await questionApi.getMyPublishRequests(params);
-      return response.data;
-    },
-    enabled: options?.enabled,
-    staleTime: 5 * 60 * 1000,
-  });
+export const useMyPublishRequests = (
+	params?: QuestionApprovalParams,
+	options?: { enabled?: boolean },
+) => {
+	return useQuery({
+		queryKey: questionKeys.myPublishRequests(params),
+		queryFn: async () => {
+			const response = await questionApi.getMyPublishRequests(params);
+			return response.data;
+		},
+		enabled: options?.enabled,
+		staleTime: 5 * 60 * 1000,
+	});
 };
 
-export const usePendingApproval = (params?: QuestionApprovalParams, options?: { enabled?: boolean }) => {
-  return useQuery({
-    queryKey: questionKeys.pendingApproval(params),
-    queryFn: async () => {
-      const response = await questionApi.getPendingApproval(params);
-      return response.data;
-    },
-    enabled: options?.enabled,
-    staleTime: 5 * 60 * 1000,
-  });
+export const usePendingApproval = (
+	params?: QuestionApprovalParams,
+	options?: { enabled?: boolean },
+) => {
+	return useQuery({
+		queryKey: questionKeys.pendingApproval(params),
+		queryFn: async () => {
+			const response = await questionApi.getPendingApproval(params);
+			return response.data;
+		},
+		enabled: options?.enabled,
+		staleTime: 5 * 60 * 1000,
+	});
 };
 
 export const useMyPublishRequestsAll = () => {
-  return useQuery({
-    queryKey: questionKeys.myPublishRequestsAll(),
-    queryFn: async () => {
-      const response = await questionApi.getMyPublishRequests({ size: 9999 });
-      return response.data.data ?? [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+	return useQuery({
+		queryKey: questionKeys.myPublishRequestsAll(),
+		queryFn: async () => {
+			const response = await questionApi.getMyPublishRequests({ size: 9999 });
+			return response.data.data ?? [];
+		},
+		staleTime: 5 * 60 * 1000,
+	});
 };
 
 export const usePendingApprovalAll = () => {
-  return useQuery({
-    queryKey: questionKeys.pendingApprovalAll(),
-    queryFn: async () => {
-      const response = await questionApi.getPendingApproval({ size: 9999 });
-      return response.data.data ?? [];
-    },
-    staleTime: 5 * 60 * 1000,
-  });
+	return useQuery({
+		queryKey: questionKeys.pendingApprovalAll(),
+		queryFn: async () => {
+			const response = await questionApi.getPendingApproval({ size: 9999 });
+			return response.data.data ?? [];
+		},
+		staleTime: 5 * 60 * 1000,
+	});
 };
 
 export const useImportQuestions = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (file: File) => questionApi.importQuestions(file),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      toast.success({
-        title: "Thành công",
-        description: "Import câu hỏi thành công",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể import câu hỏi",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: (file: File) => questionApi.importQuestions(file),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+			toast.success({
+				title: "Thành công",
+				description: "Import câu hỏi thành công",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description:
+					error.response?.data?.message || "Không thể import câu hỏi",
+			});
+		},
+	});
 };
 
 export const useCreateQuestion = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: QuestionRequest) => questionApi.createQuestion(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể tạo câu hỏi",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: (data: QuestionRequest) => questionApi.createQuestion(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
+			queryClient.invalidateQueries({
+				queryKey: questionKeys.myQuestionsAll(),
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description: error.response?.data?.message || "Không thể tạo câu hỏi",
+			});
+		},
+	});
 };
 
 export const useUpdateQuestion = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, data }: { id: number; data: QuestionRequest }) => questionApi.updateQuestion(id, data),
-    onSuccess: (_, variables) => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.detail(variables.id) });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
-      toast.success({
-        title: "Thành công",
-        description: "Cập nhật câu hỏi thành công",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể cập nhật câu hỏi",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: ({ id, data }: { id: number; data: QuestionRequest }) =>
+			questionApi.updateQuestion(id, data),
+		onSuccess: (_, variables) => {
+			queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+			queryClient.invalidateQueries({
+				queryKey: questionKeys.detail(variables.id),
+			});
+			queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
+			queryClient.invalidateQueries({
+				queryKey: questionKeys.myQuestionsAll(),
+			});
+			toast.success({
+				title: "Thành công",
+				description: "Cập nhật câu hỏi thành công",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description:
+					error.response?.data?.message || "Không thể cập nhật câu hỏi",
+			});
+		},
+	});
 };
 
 export const useDeleteQuestion = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (id: number) => questionApi.deleteQuestion(id),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestionsAll() });
-      toast.success({
-        title: "Thành công",
-        description: "Xóa câu hỏi thành công",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể xóa câu hỏi",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: (id: number) => questionApi.deleteQuestion(id),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+			queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
+			queryClient.invalidateQueries({
+				queryKey: questionKeys.myQuestionsAll(),
+			});
+			toast.success({
+				title: "Thành công",
+				description: "Xóa câu hỏi thành công",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description: error.response?.data?.message || "Không thể xóa câu hỏi",
+			});
+		},
+	});
 };
 
 export const useUploadQuestionMedia = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, file }: { id: number; file: File }) => questionApi.uploadQuestionMedia(id, file),
-    onSuccess: (response, variables) => {
-      queryClient.setQueryData(questionKeys.detail(variables.id), response.data.data);
-      toast.success({
-        title: "Thành công",
-        description: "Upload media thành công",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể upload media",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: ({ id, file }: { id: number; file: File }) =>
+			questionApi.uploadQuestionMedia(id, file),
+		onSuccess: (response, variables) => {
+			queryClient.setQueryData(
+				questionKeys.detail(variables.id),
+				response.data.data,
+			);
+			toast.success({
+				title: "Thành công",
+				description: "Upload media thành công",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description: error.response?.data?.message || "Không thể upload media",
+			});
+		},
+	});
 };
 
 export const useDeleteQuestionMedia = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (id: number) => questionApi.deleteQuestionMedia(id),
-    onSuccess: (_, id) => {
-      queryClient.setQueryData(questionKeys.detail(id), (old: any) =>
-        old ? { ...old, mediaUrl: null, mediaType: null } : old,
-      );
-      toast.success({
-        title: "Thành công",
-        description: "Đã xóa media",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể xóa media",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: (id: number) => questionApi.deleteQuestionMedia(id),
+		onSuccess: (_, id) => {
+			queryClient.setQueryData(questionKeys.detail(id), (old: any) =>
+				old ? { ...old, mediaUrl: null, mediaType: null } : old,
+			);
+			toast.success({
+				title: "Thành công",
+				description: "Đã xóa media",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description: error.response?.data?.message || "Không thể xóa media",
+			});
+		},
+	});
 };
 
 export const useRequestPublish = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: RequestPublishDTO) => questionApi.requestPublish(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.myPublishRequests() });
-      toast.success({
-        title: "Thành công",
-        description: "Đã gửi yêu cầu đưa câu hỏi vào Question Bank",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể gửi yêu cầu publish",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: (data: RequestPublishDTO) => questionApi.requestPublish(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({ queryKey: questionKeys.myQuestions() });
+			queryClient.invalidateQueries({
+				queryKey: questionKeys.myPublishRequests(),
+			});
+			toast.success({
+				title: "Thành công",
+				description: "Đã gửi yêu cầu đưa câu hỏi vào Question Bank",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description:
+					error.response?.data?.message || "Không thể gửi yêu cầu publish",
+			});
+		},
+	});
 };
 
 export const useApproveQuestions = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: ApproveRejectDTO) => questionApi.approveQuestions(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.pendingApproval() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      toast.success({
-        title: "Thành công",
-        description: "Phê duyệt câu hỏi thành công",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể phê duyệt câu hỏi",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: (data: ApproveRejectDTO) => questionApi.approveQuestions(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: questionKeys.pendingApproval(),
+			});
+			queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+			toast.success({
+				title: "Thành công",
+				description: "Phê duyệt câu hỏi thành công",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description:
+					error.response?.data?.message || "Không thể phê duyệt câu hỏi",
+			});
+		},
+	});
 };
 
 export const useRejectQuestions = () => {
-  const queryClient = useQueryClient();
+	const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: (data: ApproveRejectDTO) => questionApi.rejectQuestions(data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: questionKeys.pendingApproval() });
-      queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
-      toast.success({
-        title: "Thành công",
-        description: "Từ chối câu hỏi thành công",
-      });
-    },
-    onError: (error: AxiosError<ApiResponse<null>>) => {
-      toast.error({
-        title: "Lỗi",
-        description: error.response?.data?.message || "Không thể từ chối câu hỏi",
-      });
-    },
-  });
+	return useMutation({
+		mutationFn: (data: ApproveRejectDTO) => questionApi.rejectQuestions(data),
+		onSuccess: () => {
+			queryClient.invalidateQueries({
+				queryKey: questionKeys.pendingApproval(),
+			});
+			queryClient.invalidateQueries({ queryKey: questionKeys.lists() });
+			toast.success({
+				title: "Thành công",
+				description: "Từ chối câu hỏi thành công",
+			});
+		},
+		onError: (error: AxiosError<ApiResponse<null>>) => {
+			toast.error({
+				title: "Lỗi",
+				description:
+					error.response?.data?.message || "Không thể từ chối câu hỏi",
+			});
+		},
+	});
 };

@@ -4,31 +4,38 @@ import type { ApiResponse } from "@/shared/api/api.type";
 import type { TChapterRequest, TChapterResponse } from "../types/chapter.type";
 
 export const chapterApi = {
-  create(data: TChapterRequest): Promise<AxiosResponse<ApiResponse<TChapterResponse>>> {
-    return api.post("/chapters", data);
-  },
+	create(
+		data: TChapterRequest,
+	): Promise<AxiosResponse<ApiResponse<TChapterResponse>>> {
+		return api.post("/chapters", data);
+	},
 
-  update(id: number, data: TChapterRequest): Promise<AxiosResponse<ApiResponse<TChapterResponse>>> {
-    return api.put(`/chapters/${id}`, data);
-  },
+	update(
+		id: number,
+		data: TChapterRequest,
+	): Promise<AxiosResponse<ApiResponse<TChapterResponse>>> {
+		return api.put(`/chapters/${id}`, data);
+	},
 
-  getById(id: number): Promise<AxiosResponse<ApiResponse<TChapterResponse>>> {
-    return api.get(`/chapters/${id}`);
-  },
+	getById(id: number): Promise<AxiosResponse<ApiResponse<TChapterResponse>>> {
+		return api.get(`/chapters/${id}`);
+	},
 
-  getBySubject(subjectId: number): Promise<AxiosResponse<ApiResponse<TChapterResponse[]>>> {
-    return api.get(`/chapters/subject/${subjectId}`);
-  },
+	getBySubject(
+		subjectId: number,
+	): Promise<AxiosResponse<ApiResponse<TChapterResponse[]>>> {
+		return api.get(`/chapters/subject/${subjectId}`);
+	},
 
-  getAll(params?: {
-    page?: number;
-    size?: number;
-    sort?: string;
-  }): Promise<AxiosResponse<ApiResponse<TChapterResponse[]>>> {
-    return api.get("/chapters", { params });
-  },
+	getAll(params?: {
+		page?: number;
+		size?: number;
+		sort?: string;
+	}): Promise<AxiosResponse<ApiResponse<TChapterResponse[]>>> {
+		return api.get("/chapters", { params });
+	},
 
-  delete(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
-    return api.delete(`/chapters/${id}`);
-  },
+	delete(id: number): Promise<AxiosResponse<ApiResponse<void>>> {
+		return api.delete(`/chapters/${id}`);
+	},
 };

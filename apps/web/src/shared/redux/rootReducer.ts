@@ -13,26 +13,26 @@ import quiz from "@/feature/quiz/stores/quiz.store";
 import chat from "@/feature/chat-ai/stores/chat.store";
 
 const combineReducer = combineReducers({
-  app: app,
-  auth: auth,
-  course: course,
-  section: section,
-  lecture: lecture,
-  learning: learning,
-  cart: cart,
-  forum: forum,
-  contest: contest,
-  quiz: quiz,
-  chat: chat,
+	app: app,
+	auth: auth,
+	course: course,
+	section: section,
+	lecture: lecture,
+	learning: learning,
+	cart: cart,
+	forum: forum,
+	contest: contest,
+	quiz: quiz,
+	chat: chat,
 });
 
 export type RootState = ReturnType<typeof combineReducer>;
 
 const rootReducer: Reducer<RootState, AnyAction> = (state, action) => {
-  if (action.type === "logOut") {
-    return combineReducer({} as RootState, action);
-  }
-  return combineReducer(state, action);
+	if (action.type === "logOut") {
+		return combineReducer({} as RootState, action);
+	}
+	return combineReducer(state, action);
 };
 
 export default rootReducer;

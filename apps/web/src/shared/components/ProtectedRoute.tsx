@@ -4,8 +4,8 @@ import { useSelector } from "react-redux";
 import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 
 interface ProtectedRouteProps {
-  children: React.ReactNode;
-  redirectTo?: string;
+	children: React.ReactNode;
+	redirectTo?: string;
 }
 
 /**
@@ -21,30 +21,33 @@ interface ProtectedRouteProps {
  * </ProtectedRoute>
  * ```
  */
-export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children, redirectTo = "/signin-role" }) => {
-  const { isAuthenticated, isLoading } = useSelector(selectAuthStateInfo);
-  const navigate = useNavigate();
+export const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
+	children,
+	redirectTo = "/signin-role",
+}) => {
+	const { isAuthenticated, isLoading } = useSelector(selectAuthStateInfo);
+	const navigate = useNavigate();
 
-  React.useEffect(() => {
-    if (!isLoading && !isAuthenticated) {
-      navigate({ to: redirectTo });
-    }
-  }, [isAuthenticated, isLoading, navigate, redirectTo]);
+	React.useEffect(() => {
+		if (!isLoading && !isAuthenticated) {
+			navigate({ to: redirectTo });
+		}
+	}, [isAuthenticated, isLoading, navigate, redirectTo]);
 
-  if (isLoading) {
-    return (
-      <div className="flex h-screen items-center justify-center">
-        <div className="text-center">
-          <div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
-          <p className="text-gray-600">Đang kiểm tra xác thực...</p>
-        </div>
-      </div>
-    );
-  }
+	if (isLoading) {
+		return (
+			<div className="flex h-screen items-center justify-center">
+				<div className="text-center">
+					<div className="mb-4 inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-blue-600 border-r-transparent" />
+					<p className="text-gray-600">Đang kiểm tra xác thực...</p>
+				</div>
+			</div>
+		);
+	}
 
-  if (!isAuthenticated) {
-    return null;
-  }
+	if (!isAuthenticated) {
+		return null;
+	}
 
-  return <>{children}</>;
+	return <>{children}</>;
 };

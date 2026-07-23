@@ -2,49 +2,55 @@ import React from "react";
 import styled from "styled-components";
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  label?: string;
-  currency?: string;
+	label?: string;
+	currency?: string;
 };
 
-const Card = ({ label = "Giao dịch mới", currency = "VNĐ", onClick, className, ...rest }: Props) => {
-  return (
-    <StyledWrapper onClick={onClick} className={className} {...rest}>
-      <div className="container">
-        <div className="left-side">
-          <div className="card">
-            <div className="card-line" />
-            <div className="buttons" />
-          </div>
-          <div className="post">
-            <div className="post-line" />
-            <div className="screen">
-              <div className="dollar">{currency}</div>
-            </div>
-            <div className="numbers" />
-            <div className="numbers-line2" />
-          </div>
-        </div>
-        <div className="right-side">
-          <div className="new">{label}</div>
-          <svg
-            viewBox="0 0 451.846 451.847"
-            height={512}
-            width={512}
-            xmlns="http://www.w3.org/2000/svg"
-            className="arrow"
-          >
-            <path
-              fill="#cfcfcf"
-              data-old_color="#000000"
-              className="active-path"
-              data-original="#000000"
-              d="M345.441 248.292L151.154 442.573c-12.359 12.365-32.397 12.365-44.75 0-12.354-12.354-12.354-32.391 0-44.744L278.318 225.92 106.409 54.017c-12.354-12.359-12.354-32.394 0-44.748 12.354-12.359 32.391-12.359 44.75 0l194.287 194.284c6.177 6.18 9.262 14.271 9.262 22.366 0 8.099-3.091 16.196-9.267 22.373z"
-            />
-          </svg>
-        </div>
-      </div>
-    </StyledWrapper>
-  );
+const Card = ({
+	label = "Giao dịch mới",
+	currency = "VNĐ",
+	onClick,
+	className,
+	...rest
+}: Props) => {
+	return (
+		<StyledWrapper onClick={onClick} className={className} {...rest}>
+			<div className="container">
+				<div className="left-side">
+					<div className="card">
+						<div className="card-line" />
+						<div className="buttons" />
+					</div>
+					<div className="post">
+						<div className="post-line" />
+						<div className="screen">
+							<div className="dollar">{currency}</div>
+						</div>
+						<div className="numbers" />
+						<div className="numbers-line2" />
+					</div>
+				</div>
+				<div className="right-side">
+					<div className="new">{label}</div>
+					<svg
+						viewBox="0 0 451.846 451.847"
+						height={512}
+						width={512}
+						xmlns="http://www.w3.org/2000/svg"
+						className="arrow"
+					>
+						<path
+							fill="#cfcfcf"
+							data-old_color="#000000"
+							className="active-path"
+							data-original="#000000"
+							d="M345.441 248.292L151.154 442.573c-12.359 12.365-32.397 12.365-44.75 0-12.354-12.354-12.354-32.391 0-44.744L278.318 225.92 106.409 54.017c-12.354-12.359-12.354-32.394 0-44.748 12.354-12.359 32.391-12.359 44.75 0l194.287 194.284c6.177 6.18 9.262 14.271 9.262 22.366 0 8.099-3.091 16.196-9.267 22.373z"
+						/>
+					</svg>
+				</div>
+			</div>
+		</StyledWrapper>
+	);
 };
 
 const StyledWrapper = styled.button`

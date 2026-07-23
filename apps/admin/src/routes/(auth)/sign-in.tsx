@@ -15,7 +15,7 @@ export const Route = createFileRoute("/(auth)/sign-in")({
 		if (accessToken) {
 			throw redirect({
 				to: "/",
-			})
+			});
 		}
 	},
 	component: SignIn,

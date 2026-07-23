@@ -2,39 +2,52 @@ import React from "react";
 import styled from "styled-components";
 
 type Props = React.ButtonHTMLAttributes<HTMLButtonElement> & {
-  label?: string;
-  width?: number | string;
-  height?: number | string;
+	label?: string;
+	width?: number | string;
+	height?: number | string;
 };
 
-const GradientButton = ({ label = "UNIVERSE", onClick, className = "", width, height, style, ...rest }: Props) => {
-  const mergedStyle: React.CSSProperties = {
-    ...(style || {}),
-    ...(width !== undefined ? { width } : {}),
-    ...(height !== undefined ? { height } : {}),
-  };
+const GradientButton = ({
+	label = "UNIVERSE",
+	onClick,
+	className = "",
+	width,
+	height,
+	style,
+	...rest
+}: Props) => {
+	const mergedStyle: React.CSSProperties = {
+		...(style || {}),
+		...(width !== undefined ? { width } : {}),
+		...(height !== undefined ? { height } : {}),
+	};
 
-  return (
-    <StyledWrapper>
-      <button className={"uiverse " + className} onClick={onClick} style={mergedStyle} {...rest}>
-        <div className="wrapper">
-          <span className="text-2xl">{label}</span>
-          <div className="circle circle-12" />
-          <div className="circle circle-11" />
-          <div className="circle circle-10" />
-          <div className="circle circle-9" />
-          <div className="circle circle-8" />
-          <div className="circle circle-7" />
-          <div className="circle circle-6" />
-          <div className="circle circle-5" />
-          <div className="circle circle-4" />
-          <div className="circle circle-3" />
-          <div className="circle circle-2" />
-          <div className="circle circle-1" />
-        </div>
-      </button>
-    </StyledWrapper>
-  );
+	return (
+		<StyledWrapper>
+			<button
+				className={"uiverse " + className}
+				onClick={onClick}
+				style={mergedStyle}
+				{...rest}
+			>
+				<div className="wrapper">
+					<span className="text-2xl">{label}</span>
+					<div className="circle circle-12" />
+					<div className="circle circle-11" />
+					<div className="circle circle-10" />
+					<div className="circle circle-9" />
+					<div className="circle circle-8" />
+					<div className="circle circle-7" />
+					<div className="circle circle-6" />
+					<div className="circle circle-5" />
+					<div className="circle circle-4" />
+					<div className="circle circle-3" />
+					<div className="circle circle-2" />
+					<div className="circle circle-1" />
+				</div>
+			</button>
+		</StyledWrapper>
+	);
 };
 
 const StyledWrapper = styled.div`

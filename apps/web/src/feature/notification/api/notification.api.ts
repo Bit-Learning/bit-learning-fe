@@ -13,7 +13,7 @@ export const notificationApi = {
 	 * Get list of notifications with pagination
 	 */
 	async getNotifications(
-		params: NotificationListParams = {}
+		params: NotificationListParams = {},
 	): Promise<NotificationListResponse> {
 		const { page = 0, size = 10, sort = "createdAt,DESC" } = params;
 
@@ -25,7 +25,7 @@ export const notificationApi = {
 					size,
 					sort,
 				},
-			}
+			},
 		);
 
 		// Backend returns: ApiResponse<NotificationMessage[]> with nested page info
@@ -49,7 +49,7 @@ export const notificationApi = {
 	 */
 	async getUnreadCount(): Promise<number> {
 		const response = await api.get<ApiResponse<number>>(
-			`${NOTIFICATION_BASE_URL}/unread-count`
+			`${NOTIFICATION_BASE_URL}/unread-count`,
 		);
 		return response.data.data || 0;
 	},
