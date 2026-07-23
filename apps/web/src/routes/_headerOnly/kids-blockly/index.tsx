@@ -3,8 +3,8 @@ import { requireAuth } from "@/shared/lib/auth-utils";
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_headerOnly/kids-blockly/")({
-  beforeLoad: async ({ location }) => {
-    requireAuth(location);
-  },
-  component: KidsBlocklyPage,
+	beforeLoad: async ({ location }) => {
+		requireAuth(location);
+	},
+	component: KidsBlocklyPage,
 });

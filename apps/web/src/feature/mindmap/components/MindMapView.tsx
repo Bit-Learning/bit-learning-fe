@@ -960,7 +960,8 @@ export default function MindMapView() {
 			);
 			const exportBounds = (() => {
 				const boxes = nodes.map((node) => {
-					const size = exportNodeLayouts.get(node.id) ?? getExportNodeSize(node);
+					const size =
+						exportNodeLayouts.get(node.id) ?? getExportNodeSize(node);
 					return {
 						x: node.position.x,
 						y: node.position.y,

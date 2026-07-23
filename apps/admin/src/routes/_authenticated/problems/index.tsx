@@ -2,5 +2,5 @@ import AdminProblemApprovalPage from "@/features/problems/pages/AdminProblemAppr
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/problems/")({
-  component: AdminProblemApprovalPage,
+	component: AdminProblemApprovalPage,
 });

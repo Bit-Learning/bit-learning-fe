@@ -43,8 +43,8 @@ export const MySlidesTabV2: React.FC<MySlidesTabV2Props> = ({
 		() =>
 			Array.isArray(slides)
 				? slides.filter((slide) =>
-					slide.topic.toLowerCase().includes(searchQuery.toLowerCase()),
-				)
+						slide.topic.toLowerCase().includes(searchQuery.toLowerCase()),
+					)
 				: [],
 		[slides, searchQuery],
 	);
@@ -122,7 +122,6 @@ export const MySlidesTabV2: React.FC<MySlidesTabV2Props> = ({
 									{filteredSlides.length}
 								</p>
 							</div>
-
 						</div>
 					</div>
 				</div>
@@ -278,10 +277,11 @@ export const MySlidesTabV2: React.FC<MySlidesTabV2Props> = ({
 						return (
 							<button
 								key={index}
-								className={`flex h-10 w-10 items-center justify-center rounded-xl font-medium transition-colors ${page === index
-									? "bg-primary text-white shadow-lg shadow-blue-500/30"
-									: "border border-slate-200 text-slate-600 hover:bg-slate-100"
-									}`}
+								className={`flex h-10 w-10 items-center justify-center rounded-xl font-medium transition-colors ${
+									page === index
+										? "bg-primary text-white shadow-lg shadow-blue-500/30"
+										: "border border-slate-200 text-slate-600 hover:bg-slate-100"
+								}`}
 								onClick={() => setPage(index)}
 							>
 								{index + 1}

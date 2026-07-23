@@ -41,7 +41,7 @@ interface UseChannelOptions<TMessage> {
 }
 
 export function useChannel<TMessage = any>(
-	options: UseChannelOptions<TMessage>
+	options: UseChannelOptions<TMessage>,
 ) {
 	const {
 		channel,
@@ -83,64 +83,80 @@ export function useChannel<TMessage = any>(
 	}, []);
 
 	// Subscribe to channel
-	const subscribe = useCallback((...args: any[]) => {
-		const argsToUse = args.length > 0 ? args : destinationArgs;
+	const subscribe = useCallback(
+		(...args: any[]) => {
+			const argsToUse = args.length > 0 ? args : destinationArgs;
 
-		try {
-			// Tạo handler và lưu vào ref
-			handlerRef.current = (message: TMessage) => {
-				console.log("[useChannel] Received message:", message);
-				setMessages((prev) => [...prev, message]);
-				callbackRef.current?.(message);
-			};
+			try {
+				// Tạo handler và lưu vào ref
+				handlerRef.current = (message: TMessage) => {
+					console.log("[useChannel] Received message:", message);
+					setMessages((prev) => [...prev, message]);
+					callbackRef.current?.(message);
+				};
 
-			console.log("[useChannel] Subscribing to channel with args:", argsToUse);
-			channel.subscribe(handlerRef.current, ...argsToUse);
-			setIsSubscribed(true);
-			setError(null);
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error("Subscription failed");
-			console.error("[useChannel] Subscribe error:", error);
-			setError(error);
-			setIsSubscribed(false);
-			errorCallbackRef.current?.(error);
-		}
-	}, [channel, destinationArgs]);
+				console.log(
+					"[useChannel] Subscribing to channel with args:",
+					argsToUse,
+				);
+				channel.subscribe(handlerRef.current, ...argsToUse);
+				setIsSubscribed(true);
+				setError(null);
+			} catch (err) {
+				const error =
+					err instanceof Error ? err : new Error("Subscription failed");
+				console.error("[useChannel] Subscribe error:", error);
+				setError(error);
+				setIsSubscribed(false);
+				errorCallbackRef.current?.(error);
+			}
+		},
+		[channel, destinationArgs],
+	);
 
 	// Unsubscribe from channel
-	const unsubscribe = useCallback((...args: any[]) => {
-		const argsToUse = args.length > 0 ? args : destinationArgs;
+	const unsubscribe = useCallback(
+		(...args: any[]) => {
+			const argsToUse = args.length > 0 ? args : destinationArgs;
 
-		try {
-			if (handlerRef.current) {
-				console.log("[useChannel] Unsubscribing from channel with args:", argsToUse);
-				channel.unsubscribe(handlerRef.current, ...argsToUse);
-				handlerRef.current = null;
+			try {
+				if (handlerRef.current) {
+					console.log(
+						"[useChannel] Unsubscribing from channel with args:",
+						argsToUse,
+					);
+					channel.unsubscribe(handlerRef.current, ...argsToUse);
+					handlerRef.current = null;
+				}
+				setIsSubscribed(false);
+			} catch (err) {
+				const error =
+					err instanceof Error ? err : new Error("Unsubscribe failed");
+				console.error("[useChannel] Unsubscribe error:", error);
+				setError(error);
+				errorCallbackRef.current?.(error);
 			}
-			setIsSubscribed(false);
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error("Unsubscribe failed");
-			console.error("[useChannel] Unsubscribe error:", error);
-			setError(error);
-			errorCallbackRef.current?.(error);
-		}
-	}, [channel, destinationArgs]);
-
+		},
+		[channel, destinationArgs],
+	);
 
 	// Send message through channel
-	const send = useCallback((body: any, ...args: any[]) => {
-		const argsToUse = args.length > 0 ? args : destinationArgs;
+	const send = useCallback(
+		(body: any, ...args: any[]) => {
+			const argsToUse = args.length > 0 ? args : destinationArgs;
 
-		try {
-			console.log("[useChannel] Sending message:", body, "to:", argsToUse);
-			channel.send(body, ...argsToUse);
-		} catch (err) {
-			const error = err instanceof Error ? err : new Error("Send failed");
-			console.error("[useChannel] Send error:", error);
-			setError(error);
-			errorCallbackRef.current?.(error);
-		}
-	}, [channel, destinationArgs]);
+			try {
+				console.log("[useChannel] Sending message:", body, "to:", argsToUse);
+				channel.send(body, ...argsToUse);
+			} catch (err) {
+				const error = err instanceof Error ? err : new Error("Send failed");
+				console.error("[useChannel] Send error:", error);
+				setError(error);
+				errorCallbackRef.current?.(error);
+			}
+		},
+		[channel, destinationArgs],
+	);
 
 	// Clear all messages
 	const clearMessages = useCallback(() => {
@@ -176,7 +192,6 @@ export function useChannel<TMessage = any>(
 			};
 		}
 	}, [autoSubscribe, isConnected, subscribe, unsubscribe, ...deps]);
-
 
 	return {
 		// Connection state

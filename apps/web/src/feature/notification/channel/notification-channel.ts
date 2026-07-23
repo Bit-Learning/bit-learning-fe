@@ -42,7 +42,7 @@ export interface SystemNotificationMessage {
 
 /**
  * Notification Channel
- * 
+ *
  * Handles user-specific notifications
  */
 export class NotificationChannel extends BaseChannel<NotificationMessage> {
@@ -77,7 +77,6 @@ export class NotificationChannel extends BaseChannel<NotificationMessage> {
 	protected getSendDestination(): string {
 		throw new Error("Cannot send notifications from client");
 	}
-
 }
 export class SystemNotificationChannel extends BaseChannel<SystemNotificationMessage> {
 	getDestination(): string {

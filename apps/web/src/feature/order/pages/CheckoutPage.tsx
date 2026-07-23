@@ -3,8 +3,8 @@ import type React from "react";
 import CheckoutContent from "../components/CheckoutContent";
 
 export const CheckoutPage: React.FC = () => (
-  <>
-    <PageMeta title="Thanh toán - BitHub" description="Thanh toán khóa học" />
-    <CheckoutContent />
-  </>
+	<>
+		<PageMeta title="Thanh toán - BitHub" description="Thanh toán khóa học" />
+		<CheckoutContent />
+	</>
 );

@@ -2,6 +2,5 @@ import { SystemPromptsPage } from "@/features/system-prompt/pages/SystemPromptsP
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/system-prompt/")({
-  component: SystemPromptsPage,
+	component: SystemPromptsPage,
 });
-

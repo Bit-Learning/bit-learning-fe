@@ -2,5 +2,5 @@ import { TemplateDetailPage } from "@/features/templates/pages/TemplateDetailPag
 import { createFileRoute } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/_authenticated/templates/$id/")({
-  component: TemplateDetailPage,
+	component: TemplateDetailPage,
 });

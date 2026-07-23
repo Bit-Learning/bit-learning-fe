@@ -4,13 +4,13 @@ import { selectAuthStateInfo } from "@/feature/auth/store/auth.selectors";
 import store from "@/shared/redux/store";
 
 export const Route = createFileRoute("/mentor/dashboard/")({
-  beforeLoad: () => {
-    const currentUser = selectAuthStateInfo(store.getState());
-    const role = currentUser?.userInfo?.role;
+	beforeLoad: () => {
+		const currentUser = selectAuthStateInfo(store.getState());
+		const role = currentUser?.userInfo?.role;
 
-    if (role === "STUDENT") {
-      throw redirect({ to: "/" });
-    }
-  },
-  component: DashboardPage,
+		if (role === "STUDENT") {
+			throw redirect({ to: "/" });
+		}
+	},
+	component: DashboardPage,
 });

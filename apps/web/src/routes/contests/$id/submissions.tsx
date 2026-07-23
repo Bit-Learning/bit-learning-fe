@@ -4,16 +4,16 @@ import store from "@/shared/redux/store";
 import { createFileRoute, redirect } from "@tanstack/react-router";
 
 export const Route = createFileRoute("/contests/$id/submissions")({
-  beforeLoad: () => {
-    const currentUser = selectAuthStateInfo(store.getState());
+	beforeLoad: () => {
+		const currentUser = selectAuthStateInfo(store.getState());
 
-    if (!currentUser.isAuthenticated) {
-      throw redirect({ to: "/signin-role" });
-    }
+		if (!currentUser.isAuthenticated) {
+			throw redirect({ to: "/signin-role" });
+		}
 
-    if (currentUser.userInfo?.role == "MENTOR") {
-      throw redirect({ to: "/" });
-    }
-  },
-  component: ContestSubmissionsPage,
+		if (currentUser.userInfo?.role == "MENTOR") {
+			throw redirect({ to: "/" });
+		}
+	},
+	component: ContestSubmissionsPage,
 });
