@@ -62,3 +62,4 @@ apps/web/src/routeTree.gen.ts
 
 .kiro
 .codex
+.codebase-memory
