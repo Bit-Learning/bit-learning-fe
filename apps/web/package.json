@@ -64,7 +64,7 @@
 		"react-markdown": "^10.1.0",
 		"react-qr-code": "^2.2.0",
 		"react-redux": "^9.3.0",
-		"recharts": "^3.10.0",
+		"recharts": "^3.10.1",
 		"redux-persist": "^6.0.0",
 		"remark-gfm": "^4.0.1",
 		"shiki": "^4.3.1",
