@@ -15,7 +15,7 @@
 	},
 	"dependencies": {
 		"@astral-sh/ruff-wasm-web": "^0.16.1",
-		"@hookform/resolvers": "^5.5.7",
+		"@hookform/resolvers": "^5.7.1",
 		"@reduxjs/toolkit": "^2.12.0",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
@@ -57,7 +57,7 @@
 		"react": "^19.2.8",
 		"react-dom": "^19.2.8",
 		"react-helmet-async": "^2.0.5",
-		"react-hook-form": "^7.83.0",
+		"react-hook-form": "^7.84.0",
 		"react-i18next": "^15.6.0",
 		"react-icons": "^5.7.0",
 		"react-joyride": "^3.2.0",
