@@ -67,7 +67,7 @@
 		"@types/react": "^19.2.18",
 		"@types/react-dom": "^19.2.4",
 		"@workspace/typescript-config": "workspace:*",
-		"daisyui": "^5.7.14",
+		"daisyui": "^5.7.15",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^5.9.2"
 	},
