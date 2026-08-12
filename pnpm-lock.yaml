@@ -187,8 +187,8 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       styled-components:
-        specifier: ^6.5.0
-        version: 6.5.0(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^6.5.1
+        version: 6.5.1(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -419,8 +419,8 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       styled-components:
-        specifier: ^6.5.0
-        version: 6.5.0(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^6.5.1
+        version: 6.5.1(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -651,8 +651,8 @@ importers:
         specifier: ^2.0.7
         version: 2.0.7(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       styled-components:
-        specifier: ^6.5.0
-        version: 6.5.0(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
+        specifier: ^6.5.1
+        version: 6.5.1(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8)
       tailwind-merge:
         specifier: ^3.6.0
         version: 3.6.0
@@ -6513,8 +6513,8 @@ packages:
   style-to-object@1.0.14:
     resolution: {integrity: sha512-LIN7rULI0jBscWQYaSswptyderlarFkjQ+t79nzty8tcIAceVomEVlLzH5VP4Cmsv6MtKhs7qaAiwlcp+Mgaxw==}
 
-  styled-components@6.5.0:
-    resolution: {integrity: sha512-WLnTRAIRJsmCQfPXoEDDd1YMML+ImxQ8YGVVg60FALxsn/rpWiQWSJCZDNfu/buAcBFnTUr8ev6CBR8rb7xLiQ==}
+  styled-components@6.5.1:
+    resolution: {integrity: sha512-6AsQEXcG7QhtdzjwJ4s5Amx5R9veYH9AP3+U6nF2BAMU0i1iM3cAXKJXuAKZCdv3Y2ntVMcL44cPx4cIDxgYFg==}
     engines: {node: '>= 16'}
     peerDependencies:
       css-to-react-native: '>= 3.2.0'
@@ -13094,7 +13094,7 @@ snapshots:
     dependencies:
       inline-style-parser: 0.2.7
 
-  styled-components@6.5.0(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
+  styled-components@6.5.1(css-to-react-native@3.2.0)(react-dom@19.2.8(react@19.2.8))(react@19.2.8):
     dependencies:
       '@emotion/is-prop-valid': 1.4.0
       csstype: 3.2.3
