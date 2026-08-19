@@ -21,7 +21,7 @@
 		"@stomp/stompjs": "^7.3.0",
 		"@tanstack/react-query": "^5.101.4",
 		"@tanstack/react-query-devtools": "^5.101.4",
-		"@tanstack/react-router": "^1.170.27",
+		"@tanstack/react-router": "^1.170.29",
 		"@tanstack/react-router-devtools": "^1.167.1",
 		"@tanstack/router-plugin": "^1.168.32",
 		"@types/prismjs": "^1.26.6",
@@ -70,7 +70,7 @@
 		"shiki": "^4.4.3",
 		"sockjs-client": "^1.6.1",
 		"sonner": "^2.0.8",
-		"styled-components": "^6.5.2",
+		"styled-components": "^6.5.3",
 		"tailwind-merge": "^3.6.0",
 		"zod": "^4.4.3"
 	},
