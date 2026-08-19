@@ -15,7 +15,7 @@
 	},
 	"dependencies": {
 		"@astral-sh/ruff-wasm-web": "^0.16.3",
-		"@hookform/resolvers": "^5.8.0",
+		"@hookform/resolvers": "^5.9.0",
 		"@reduxjs/toolkit": "^2.12.0",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
