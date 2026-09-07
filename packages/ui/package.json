@@ -10,7 +10,7 @@
 	},
 	"dependencies": {
 		"@hookform/resolvers": "^5.9.1",
-		"@internationalized/date": "^3.12.3",
+		"@internationalized/date": "^3.12.4",
 		"@radix-ui/react-alert-dialog": "^1.1.23",
 		"@radix-ui/react-aspect-ratio": "^1.1.15",
 		"@radix-ui/react-avatar": "^1.2.6",
@@ -57,17 +57,17 @@
 		"zod": "^4.4.3"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.9",
+		"@biomejs/biome": "^2.5.12",
 		"@tailwindcss/postcss": "^4.3.3",
 		"@tailwindcss/typography": "^0.5.20",
-		"@turbo/gen": "^2.10.10",
+		"@turbo/gen": "^2.10.12",
 		"@types/lodash": "^4.17.25",
 		"@types/node": "^20.19.43",
 		"@types/nprogress": "^0.2.3",
 		"@types/react": "^19.2.18",
-		"@types/react-dom": "^19.2.4",
+		"@types/react-dom": "^19.2.7",
 		"@workspace/typescript-config": "workspace:*",
-		"daisyui": "^5.7.17",
+		"daisyui": "^5.7.28",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^5.9.2"
 	},
