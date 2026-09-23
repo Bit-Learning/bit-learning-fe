@@ -60,7 +60,7 @@
 		"@biomejs/biome": "^2.5.13",
 		"@tailwindcss/postcss": "^4.3.3",
 		"@tailwindcss/typography": "^0.5.20",
-		"@turbo/gen": "^2.10.13",
+		"@turbo/gen": "^2.11.2",
 		"@types/lodash": "^4.17.25",
 		"@types/node": "^20.19.43",
 		"@types/nprogress": "^0.2.3",
