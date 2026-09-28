@@ -42,7 +42,7 @@
 		"@stomp/stompjs": "^7.3.0",
 		"@tailwindcss/vite": "^4.3.3",
 		"@tanstack/react-query": "^5.103.2",
-		"@tanstack/react-router": "^1.170.38",
+		"@tanstack/react-router": "^1.170.39",
 		"@tanstack/react-table": "^8.21.3",
 		"@workspace/ui": "workspace:*",
 		"axios": "^1.20.0",
