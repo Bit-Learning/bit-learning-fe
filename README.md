@@ -7,11 +7,11 @@
 ## System Architecture
 
 ```
-┌─────────────────────────────────────────────────────────────────────┐
-│                         Turborepo Pipeline                          │
-│                    (build · dev · lint · check-types)                │
-├─────────────────────────────────────────────────────────────────────┤
-│                                                                     │
+┌────────────────────────────────────────────────────────────────────┐
+│                         Turborepo Pipeline                         │
+│                    (build · dev · lint · check-types)              │
+├────────────────────────────────────────────────────────────────────┤
+│                                                                    │
 │   ┌──────────────────────┐       ┌──────────────────────┐          │
 │   │     apps/web         │       │     apps/admin       │          │
 │   │  (Student Platform)  │       │  (Admin Dashboard)   │          │
@@ -24,35 +24,35 @@
 │   │  i18next             │       │  Clerk Auth          │          │
 │   │  Vitest              │       │  Recharts            │          │
 │   └──────────┬───────────┘       └──────────┬───────────┘          │
-│              │                               │                      │
-│              └───────────┬───────────────────┘                      │
-│                          │                                          │
+│              │                              │                      │
+│              └───────────┬──────────────────┘                      │
+│                          │                                         │
 │   ┌──────────────────────┴──────────────────────┐                  │
-│   │              packages/ui                     │                  │
-│   │         (Shared Component Library)           │                  │
-│   │                                              │                  │
+│   │              packages/ui                    │                  │
+│   │         (Shared Component Library)          │                  │
+│   │                                             │                  │
 │   │  Radix UI · React Aria · DaisyUI            │                  │
 │   │  Tailwind CSS 4 · Embla Carousel            │                  │
-│   │  Lucide Icons · MapLibre GL                  │                  │
-│   │  60+ reusable components                     │                  │
+│   │  Lucide Icons · MapLibre GL                 │                  │
+│   │  60+ reusable components                    │                  │
 │   └──────────────────────┬──────────────────────┘                  │
-│                          │                                          │
+│                          │                                         │
 │   ┌──────────────────────┴──────────────────────┐                  │
-│   │              packages/lib                    │                  │
-│   │         (Shared Business Logic)              │                  │
-│   │                                              │                  │
-│   │  API SDK (Axios) · Zod Validation            │                  │
-│   │  Shared Constants · Utilities                │                  │
-│   │  Type-safe API clients per domain            │                  │
+│   │              packages/lib                   │                  │
+│   │         (Shared Business Logic)             │                  │
+│   │                                             │                  │
+│   │  API SDK (Axios) · Zod Validation           │                  │
+│   │  Shared Constants · Utilities               │                  │
+│   │  Type-safe API clients per domain           │                  │
 │   └─────────────────────────────────────────────┘                  │
-│                                                                     │
+│                                                                    │
 │   ┌─────────────────────────────────────────────┐                  │
-│   │        packages/typescript-config            │                  │
-│   │     (Shared TSConfig presets)                 │                  │
-│   │  base · react-library · nextjs               │                  │
+│   │        packages/typescript-config           │                  │
+│   │     (Shared TSConfig presets)               │                  │
+│   │  base · react-library · nextjs              │                  │
 │   └─────────────────────────────────────────────┘                  │
-│                                                                     │
-└─────────────────────────────────────────────────────────────────────┘
+│                                                                    │
+└────────────────────────────────────────────────────────────────────┘
                           │
                           ▼
               ┌───────────────────────┐
