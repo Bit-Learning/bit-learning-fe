@@ -1,0 +1,33 @@
+{
+	"expo": {
+		"name": "BIT Learning",
+		"slug": "bit-learning",
+		"scheme": "bitlearning",
+		"version": "1.0.0",
+		"orientation": "portrait",
+		"userInterfaceStyle": "light",
+		"android": {
+			"package": "com.app.bitlearning",
+			"intentFilters": [
+				{
+					"action": "VIEW",
+					"data": [
+						{
+							"scheme": "https",
+							"host": "bit-learning.lch.id.vn",
+							"pathPrefix": "/open-mobile"
+						}
+					],
+					"category": ["BROWSABLE", "DEFAULT"]
+				}
+			]
+		},
+		"ios": {
+			"bundleIdentifier": "com.app.bitlearning",
+			"associatedDomains": ["applinks:bit-learning.lch.id.vn"]
+		},
+		"plugins": ["expo-router", "expo-secure-store", "expo-video"],
+		"experiments": { "typedRoutes": true },
+		"extra": { "eas": { "projectId": "REPLACE_WITH_EAS_PROJECT_ID" } }
+	}
+}
