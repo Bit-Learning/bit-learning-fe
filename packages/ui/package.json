@@ -57,17 +57,17 @@
 		"zod": "^4.6.5"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.14",
+		"@biomejs/biome": "^2.5.15",
 		"@tailwindcss/postcss": "^4.3.3",
 		"@tailwindcss/typography": "^0.5.20",
-		"@turbo/gen": "^2.11.4",
+		"@turbo/gen": "^2.11.7",
 		"@types/lodash": "^4.17.25",
 		"@types/node": "^20.19.43",
 		"@types/nprogress": "^0.2.3",
 		"@types/react": "^19.3.0",
 		"@types/react-dom": "^19.3.0",
 		"@workspace/typescript-config": "workspace:*",
-		"daisyui": "^5.7.46",
+		"daisyui": "^5.7.47",
 		"tailwindcss": "^4.3.3",
 		"typescript": "^5.9.2"
 	},
