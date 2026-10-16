@@ -19,11 +19,11 @@
 		"@reduxjs/toolkit": "^2.13.0",
 		"@splidejs/react-splide": "^0.7.12",
 		"@stomp/stompjs": "^7.3.0",
-		"@tanstack/react-query": "^5.104.1",
-		"@tanstack/react-query-devtools": "^5.104.1",
-		"@tanstack/react-router": "^1.170.42",
+		"@tanstack/react-query": "^5.104.2",
+		"@tanstack/react-query-devtools": "^5.104.2",
+		"@tanstack/react-router": "^1.170.44",
 		"@tanstack/react-router-devtools": "^1.167.2",
-		"@tanstack/router-plugin": "^1.168.43",
+		"@tanstack/router-plugin": "^1.168.45",
 		"@types/prismjs": "^1.26.6",
 		"@types/qrcode": "^1.5.6",
 		"@workspace/lib": "workspace:*",
@@ -34,7 +34,7 @@
 		"clsx": "^2.1.1",
 		"date-fns": "^4.4.0",
 		"docx": "^9.10.0",
-		"dompurify": "^3.4.16",
+		"dompurify": "^3.4.17",
 		"driver.js": "^1.9.0",
 		"echarts": "^6.1.0",
 		"echarts-for-react": "^3.0.5",
@@ -72,7 +72,7 @@
 		"sonner": "^2.0.8",
 		"styled-components": "^6.5.3",
 		"tailwind-merge": "^3.7.0",
-		"zod": "^4.6.5"
+		"zod": "^4.6.7"
 	},
 	"devDependencies": {
 		"@biomejs/biome": "^2.5.15",
