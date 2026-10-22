@@ -9,7 +9,7 @@
 		"check": "biome check --write ."
 	},
 	"dependencies": {
-		"@tanstack/react-query": "^5.104.3",
+		"@tanstack/react-query": "^5.104.4",
 		"axios": "^1.20.0",
 		"react-dom": "^19.3.1",
 		"zod": "^4.6.7"
