@@ -378,8 +378,8 @@ importers:
         specifier: ^4.4.0
         version: 4.4.0
       docx:
-        specifier: ^9.11.0
-        version: 9.11.0
+        specifier: ^9.12.0
+        version: 9.12.0
       dompurify:
         specifier: ^3.4.17
         version: 3.4.17
@@ -5053,8 +5053,8 @@ packages:
     resolution: {integrity: sha512-WkrWp9GR4KXfKGYzOLmTuGVi1UWFfws377n9cc55/tb6DuqyF6pcQ5AbiHEshaDpY9v6oaSr2XCDidGmMwdzIA==}
     engines: {node: '>=8'}
 
-  docx@9.11.0:
-    resolution: {integrity: sha512-vQLEYi45vlN/auiMHgx4oC95wbP5qPaD7Vanfixcd3wtTl5gLUPWqUpwbw6yVN0/U6o3p3EX4P5puAeYPXvcSQ==}
+  docx@9.12.0:
+    resolution: {integrity: sha512-pRxdJP7cJpqhSxzfhlB01RToOFMAY7+QJ59zT2LowpXjS2q5fAnrvAuQIyGgkuBxTcXii0LFqM96GFjhQcTicQ==}
     engines: {node: '>=10'}
 
   dom-accessibility-api@0.5.16:
@@ -13877,7 +13877,7 @@ snapshots:
     dependencies:
       path-type: 4.0.0
 
-  docx@9.11.0:
+  docx@9.12.0:
     dependencies:
       '@types/node': 26.6.5
       hash.js: 1.1.7
