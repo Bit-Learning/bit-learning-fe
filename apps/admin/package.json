@@ -73,7 +73,7 @@
 		"zustand": "^5.0.15"
 	},
 	"devDependencies": {
-		"@biomejs/biome": "^2.5.15",
+		"@biomejs/biome": "^2.6.2",
 		"@faker-js/faker": "^10.6.0",
 		"@tanstack/react-query-devtools": "^5.104.4",
 		"@tanstack/react-router-devtools": "^1.167.2",
