@@ -384,8 +384,8 @@ importers:
         specifier: ^3.4.17
         version: 3.4.17
       driver.js:
-        specifier: ^1.12.1
-        version: 1.12.1
+        specifier: ^1.14.0
+        version: 1.14.0
       echarts:
         specifier: ^6.1.0
         version: 6.1.0
@@ -5161,8 +5161,8 @@ packages:
     resolution: {integrity: sha512-xqnBTVd/E+GxJVrX5/eUJiLYjCGPwMpdL+jGhGU57BvtcA7wwhtHVbXBeUk51kOpW3S7Jn3BQbN9Q1R1Km2qDQ==}
     engines: {node: '>=6'}
 
-  driver.js@1.12.1:
-    resolution: {integrity: sha512-upBRqQW+bz+yfH7ee1gjWBaq0ue7i2343f2U3WzIUc3bhs5hwb2jz86cuB8gArRh3nfNp77CLNgkUtArTYTKFA==}
+  driver.js@1.14.0:
+    resolution: {integrity: sha512-BnCFuNU8QO2rrYiDra43Ortx6D6chqMvEMF1q3fWQfsC3xNyCX4T1P1vZDTXTxGdtcXh2v5r11hxSpNLF3DJVw==}
 
   dunder-proto@1.0.1:
     resolution: {integrity: sha512-KIN/nDJBQRcXw0MLVhZE9iQHmG68qAVIBg9CqmUYjmQIhgij9U5MFvrqkUL5FbtyyzZuOeOt0zdeRe4UY7ct+A==}
@@ -14118,7 +14118,7 @@ snapshots:
       p-event: 2.3.1
       pify: 3.0.0
 
-  driver.js@1.12.1: {}
+  driver.js@1.14.0: {}
 
   dunder-proto@1.0.1:
     dependencies:
