@@ -14,7 +14,7 @@
 		"preinstall": "npx only-allow pnpm"
 	},
 	"dependencies": {
-		"@astral-sh/ruff-wasm-web": "^0.17.5",
+		"@astral-sh/ruff-wasm-web": "^0.17.6",
 		"@hookform/resolvers": "^5.9.2",
 		"@reduxjs/toolkit": "^2.14.0",
 		"@splidejs/react-splide": "^0.7.12",
@@ -22,7 +22,7 @@
 		"@tanstack/react-query": "^5.107.1",
 		"@tanstack/react-query-devtools": "^5.107.1",
 		"@tanstack/react-router": "^1.170.46",
-		"@tanstack/react-router-devtools": "^1.167.3",
+		"@tanstack/react-router-devtools": "^1.167.4",
 		"@tanstack/router-plugin": "^1.169.0",
 		"@types/prismjs": "^1.26.6",
 		"@types/qrcode": "^1.5.6",
@@ -71,7 +71,7 @@
 		"sockjs-client": "^1.6.1",
 		"sonner": "^2.0.8",
 		"styled-components": "^6.6.0",
-		"tailwind-merge": "^3.7.0",
+		"tailwind-merge": "^3.7.1",
 		"zod": "^4.6.7"
 	},
 	"devDependencies": {
@@ -80,7 +80,7 @@
 		"@tailwindcss/postcss": "^4.3.5",
 		"@testing-library/jest-dom": "^6.9.1",
 		"@testing-library/react": "^16.3.3",
-		"@testing-library/user-event": "^14.6.12",
+		"@testing-library/user-event": "^14.6.13",
 		"@types/js-cookie": "^3.0.6",
 		"@types/node": "^20.19.43",
 		"@types/react": "^19.3.0",
@@ -90,7 +90,7 @@
 		"@vitest/browser-playwright": "4.1.12",
 		"@vitest/coverage-v8": "^4.1.12",
 		"@workspace/typescript-config": "workspace:*",
-		"fast-check": "^4.10.2",
+		"fast-check": "^4.10.3",
 		"jsdom": "^27.2.0",
 		"playwright": "^1.65.1",
 		"typescript": "^5.9.2",
